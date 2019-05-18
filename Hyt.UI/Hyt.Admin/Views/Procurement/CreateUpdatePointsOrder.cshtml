@@ -1,0 +1,313 @@
+﻿@{
+    ViewBag.Title = "CreatePointsOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+@{
+    if ((ViewBag.Order as Hyt.Model.Procurement.CBPmPointsOrder).Po_Status > 0)
+    {
+         @Html.Raw(".htn_Control{ display:none; }")
+    }
+}
+</style>
+
+<div class="p10">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                <tbody>
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>采购单号:</td>
+                        <td colspan="3">
+                            <input type="text" id="Po_Number" name="Po_Number" maxlength="50" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmPointsOrder).Po_Number)" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>制单人:</td>
+                        <td>
+                            @ViewBag.CurrentName
+                        </td>
+                        <td width="107" class="nameright"><span class="v_star">*</span>制单时间:</td>
+                        <td>
+                            @ViewBag.CurrentTime
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>生产厂家:</td>
+                        <td colspan="3">
+                            <input type="text" id="Po_FactoryName" name="Po_FactoryName" maxlength="50" style="width:500px;" onclick="ShowManufacturertList()" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmPointsOrder).Po_FactoryName)" />
+
+                            <button class="btn btn_blue btn_ht26 htn_Control" onclick="CreateDialogForm()">
+                                <span class="icon icon_white icon_plus"></span>
+
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="p10">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                <tr>
+                    <td colspan="2">
+                        <h1>采购订单明细</h1>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <button id="btnAdd" class="btn btn_blue btn_ht30 m10_r htn_Control" type="button">
+                            <span class="icon_white icon_thumbs_up"></span>
+                            <span>添加商品</span>
+                        </button>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="boxs_detail m10_t">
+                            <div id="paging">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="table_ProList">
+                                    <thead>
+                                        <tr>
+                                            <th>商品编号</th>
+                                            <th>名称</th>
+                                            <th>商品名称</th>
+                                            <th>单位</th>
+                                            <th>规格</th>
+                                            <th>采购数量</th>
+                                            <th>普通批发价</th>
+                                            <th>加盟商价格</th>
+                                            <th>统一零售价</th>
+
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="protbody">
+                                        @{
+                                            foreach (var tempMod in (ViewBag.Order as Hyt.Model.Procurement.CBPmPointsOrder).listItems)
+                                            {
+
+                                                <tr id="@(tempMod.Poi_ProcurementItemSysNo)">
+                                                    <td>
+                                                        @(tempMod.Poi_ProSysNo)
+
+                                                    </td>
+                                                    <td>@(tempMod.Poi_ProName)</td>
+                                                    <td style="text-align:left;">@tempMod.Cb_ProName</td>
+                                                    <td>@tempMod.Cb_Unit</td>
+                                                    <td>@tempMod.Cb_Spec</td>
+                                                    <td>@(@tempMod.Poi_ProQuity)</td>
+                                                    <td>@(tempMod.Poi_TradePrice)</td>
+                                                    <td>@(tempMod.Poi_JoinPrice)</td>
+                                                    <td>@(tempMod.Poi_SalePrice)</td>
+
+                                                    <td align="center"><button class="btn btn_blue btn_ht26 agree m10_r htn_Control" onclick="DeleteItemRow(this)"><span class="m5_l">删除</span></button></td>
+                                                </tr>
+
+                                            }
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="p10" align="center">
+    <button class="btn btn_blue btn_ht26 agree m10_r htn_Control" onclick="SavePointsOrder()"><span class="m5_l">保存</span></button>
+    <button class="btn btn_blue btn_ht26 agree m10_r " onclick="window.location.href = document.referrer"><span class="m5_l">返回</span></button>
+</div>
+
+<script type="text/javascript">
+    var proList = [];
+    $("#btnAdd").live('click', function () {
+        OpenDialogViewList();
+    });
+    @foreach (var item in (ViewBag.Order as Hyt.Model.Procurement.CBPmPointsOrder).listItems)
+    {
+        @Html.Raw("proList.push(" + item.Poi_ProcurementItemSysNo + ");");
+    }
+
+    ///弹出商品选中框选择商品
+    ///弹出商品选中框
+    function OpenDialogViewList() {
+
+        var options = $.extend({
+            width: '920px',
+            height: '560px',
+            title: '选择商品',
+            init: function () {
+                this.button(
+                    {
+                        name: '确认',
+                        callback: function () {
+                            var $iframe = this.iframe.contentWindow;
+                            return $iframe.CallBack();
+                        },
+                        focus: true
+                    }, {
+                        name: '取消',
+                        callback: function () {
+
+                        }
+                    }
+                );
+            }
+        });
+        ///回调数据操作
+        window.top._ActiveSelectShopProductCallBack = function (data) {
+
+            var html = $.trim($("#protbody").html());
+            var strHtml = "";
+            for (var i = 0; i < data.length; i++) {
+                var b = false;
+                for (var j = 0; j < proList.length; j++) {
+                    if (data[i].SysNo == proList[j]) {
+                        b = true;
+                        break;
+                    }
+                }
+                if (!b) {
+                    proList.push(data[i].SysNo);
+                }
+                else {
+                    data.splice(data[i]);
+                    i--;
+                }
+            }
+            //alert(proList.length);
+            for (var i = 0 ; i < data.length ; i++) {
+                flag = true;
+                $("tbody#protbody tr").each(function () {
+                    if ($.trim($(this).attr('id')) == $.trim(data[i].SysNo)) {
+                        flag = false;
+                    }
+                });
+                if (flag) {
+                    strHtml += '<tr id="0"><td>' + data[i].Poi_ProSysNo + '</td>  <td>' + data[i].Cb_ProName + '</td><td  style=\"text-align:left;\">' +
+                        data[i].Cb_ProName + '</td><td>' +
+                        data[i].Cb_Unit + '</td><td>' +
+                        data[i].Cb_Spec + '</td><td>' +
+                        data[i].Poi_ProQuity + '</td><td>' +
+                        data[i].Poi_TradePrice + '</td><td>' +
+                        data[i].Poi_JoinPrice + '</td><td>' +
+                        data[i].Poi_SalePrice + '</td>';
+
+                    strHtml += '<td align="center"><button class="btn btn_blue btn_ht26 agree m10_r " onclick=\"DeleteItemRow(this)\"><span class="m5_l">删除</span></button></td>';
+                }
+            }
+            if (html == "") {
+                $("#protbody").html(strHtml);
+            } else {
+                $("#protbody").html(html + strHtml);
+            }
+        };
+
+        UI.DialogOpen('/Product/GetPdProductListByProcurementProduct?pId=@((ViewBag.Order as Hyt.Model.Procurement.CBPmPointsOrder).Po_ProcurementSysNo)', options, false);
+    }
+
+    //删除所选中的商品的数据
+    function DeleteItemRow(ele) {
+        var tab = $("#table_ProList")[0];
+        var row = ele.parentNode.parentNode;
+        var index = row.rowIndex;//rowIndex属性为tr的索引值，从0开始
+        tab.deleteRow(index);  //从table中删除
+
+        proList.splice($.inArray(parseInt($.trim($(row.children[0]).text())), proList), 1);
+    }
+    ///保存采购分配的订单
+    function SavePointsOrder() {
+        var Po_ProcurementSysNo = "@((ViewBag.Order as Hyt.Model.Procurement.PmPointsOrder).Po_ProcurementSysNo)";
+        var Po_Number = $("#Po_Number").val();
+        var Po_FactoryName = $("#Po_FactoryName").val();
+        var strProList = "";
+
+        if ($.trim($("#Po_FactoryName").val()) == "") {
+            UI.Alert({ content: "请填写生产厂家信息。" });
+            return;
+        }
+        for (var i = 0; i < proList.length; i++) {
+            if (strProList != "") {
+                strProList += ",";
+            }
+            strProList += proList[i];
+        }
+        if (strProList == "") {
+            UI.Alert({ content: "请选中向厂家订购的商品。" });
+        }
+        $.ajax({
+            url: '/Procurement/SavePointsOrderData',
+            type: 'post',
+            async: false,
+            data: {
+                SysNo: "@((ViewBag.Order as Hyt.Model.Procurement.PmPointsOrder).SysNo)",
+                Po_ProcurementSysNo:Po_ProcurementSysNo,
+                Po_Number: Po_Number,
+                Po_FactoryName: Po_FactoryName,
+                strProList: strProList
+            },
+            dataType: 'json',
+            success: function (json) {
+                if (json.Status) {
+                    window.location.href = "/Procurement/GetPointsOrderPager";
+                }
+                else {
+                    UI.Alert({ content: json.Msg });
+                }
+            }
+        });
+    }
+
+    var artDialog = null;
+    ///获取生产厂家列表
+    function ShowManufacturertList()
+    {
+        $.ajax({
+            url: '/Procurement/GetPmManufacturertList',
+            type: 'post',
+            async: false,
+            dataType: 'json',
+            success: function (json) {
+                var strList = "";
+                for(var i=0;i<json.length;i++)
+                {
+                    strList += "<div style=\"padding:10px; cursor: pointer;\" onclick=\"SelectManufacturert('" + json[i].FName + "')\" >";
+                    strList += json[i].FName;
+                    strList += "</div>";
+                    strList += "<hr/>";
+                }
+                artDialog=art.dialog({ content: "<div style=\"height:300px; width:200px;\" valign=\"top\">" + strList + "</div>", width: 200, height: 300, title: "生产厂家" });
+            }
+        });
+    }
+    ///将生产厂家填入厂家输入框
+    function SelectManufacturert(txt)
+    {
+        $("#Po_FactoryName").val(txt);
+        if (artDialog != null)
+        {
+            artDialog.close();
+        }
+    }
+    ///新增生产厂家
+    function CreateDialogForm()
+    {
+        var options = $.extend({
+            width: '520px',
+            height: '210px',
+            title: '新增生产厂家'
+        });
+        UI.DialogOpen('/Procurement/InnerOrUpdateManufacturer?type=Info', options, false);
+    }
+</script>

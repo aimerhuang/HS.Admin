@@ -1,0 +1,87 @@
+﻿@{
+    ViewBag.Title = "ThirdPartyUser";
+}
+
+@{
+    ViewBag.Title = "第三方用户管理";
+}
+@section HeadCss{
+    <link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+}
+
+@using ((Html.BeginForm("PurchaseCreate", "Purchase", FormMethod.Post, new { id = "advanced_search_form" })))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>@ViewBag.Title</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <span class="fl m10_l"></span>
+                        <div class="search_btn fl m10_l">
+                            <input name="SysNo" type="text" id="SysNo" class=" wd200 input_ht28" placeholder="用户编号,手机号,用户名,第三方编码..." title="用户编号,手机号,用户名,第三方编码..." />
+                            <button class="btn btn_ht28 btn_blue" id="search_btn" title="搜索" type="button"><span class="icon_search icon_white"></span></button>
+                        </div>
+                    </div>
+                    <div>
+                        <button class="btn btn_ht26 m10_r btn_blue WH1004201" type="button" id="createBtn" onclick="add()"><span class="icon icon_plus icon_white"></span><span class="m5_l">创建第三方关联用户</span></button>
+                    </div>
+                </div>
+                <!--/表格列表区-->
+                <div class="boxs_listtabel">
+                    <div id="paging" style="overflow:visible;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+<script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+<script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+<script type="text/javascript">
+        $(function () {
+            //开始查询
+            $("#search_btn").click(function () {
+               
+                doSearch();
+            });
+
+            doSearch();
+        });
+        function doSearch() {
+            var data = { "KeyWord": $("#SysNo").val() };
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            $.get('@Url.Action("ThirdPartyUser", "sys")', data,
+                function (ret) {
+                    $('#paging').html(ret);
+                });
+            mask.Remove();
+        }
+
+
+    function add(sysNo) {
+
+        UI.DialogOpen('/sys/AddThirdPartyUser?sysNo=' + sysNo, {
+            width: 500,
+            height: 245,
+            title: '创建第三方平台关联',
+            button: [{
+                name: '保存',
+                callback: function () {
+
+                },
+                focus: true
+            },
+                { name: '取消' }
+            ]
+        }, false);
+    }
+</script>

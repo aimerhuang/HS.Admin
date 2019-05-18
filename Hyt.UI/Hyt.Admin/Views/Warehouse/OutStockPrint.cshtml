@@ -1,0 +1,360 @@
+﻿@{
+    ViewBag.Title = "快递订单批量出库";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadJs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+}
+@section FooterJs
+{
+    <script language="javascript" type="text/javascript">
+        //保存
+        function btnSave(stockId, btn) {
+            var isEdit = false;
+            if ($(btn).attr("isEdit")) {
+                isEdit = $(btn).attr("isEdit") == "true";
+            }
+            if (!isEdit) {
+                $(btn).parents('tr').find('td > span').addClass('hide');
+                $(btn).parents('tr').find('td > input[name != sysNo]').removeClass('hide');
+                $(btn).children('span').eq(0).attr('class', 'icon_save').addClass("icon_white");
+                $(btn).children('span').eq(1).text('保存');
+                $(btn).attr("isEdit", true);
+                $(btn).next().show();
+            }
+            else {
+               
+               
+                //alert(InStockTime);
+                var Remarks = $.trim($("input[name='txtRemarks_" + stockId + "']").val());
+            
+                Ajax.post("/Warehouse/UpdateOutStockInfo/?r=" + Math.random(), "none", function (p) {
+                    p.setParams("SysNo", stockId);
+                    p.setParams("Remarks", Remarks);
+                }, function (data) {
+                    if (data.Status == true) {
+                        //doSearch();
+                        loaddata($("#status").val(), $("#warehouse").val());
+                        UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                    }
+                });
+            }
+        }
+        //取消
+        function cancel(stockId, obj) {
+            var btn = $(obj).prev();
+            var isEdit = false;
+            if (btn.attr("isEdit")) {
+                isEdit = btn.attr("isEdit") == "true";
+            }
+            if (isEdit) {
+                btn.attr("isEdit", false);
+                btn.parents('tr').find('td > span').removeClass('hide');
+                btn.parents('tr').find('td > input[name = txtRemarks_'+stockId+']').addClass('hide');
+                btn.children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+                btn.children('span').eq(1).text('修改');
+                $(obj).hide();
+                $(obj).next().show();
+            }
+        }
+        function loaddata(status,warehouseSysNo)
+        {
+            var orderSysNo = $("#sysno").val();      
+            $.get('@Url.Action("OutStockPrint")?r=' + Math.random() + "&status=" + status + "&warehouseSysNo=" + warehouseSysNo + "&orderSysNo=" + orderSysNo + "&sort=" + $("#sort").val() + "&sortBy=" + $("#sortBy").val(), function (result) {
+
+                $("#paging").html(result);
+            });
+        }
+        //按时间排序
+        function Asc()
+        {
+            var orderSysNo = $("#sysno").val();
+            $.get('@Url.Action("OutStockPrint")?r=' + Math.random() + "&status=" + $("#status").val() + "&warehouseSysNo=" + $("#warehouse").val() + "&orderSysNo=" + orderSysNo + "&sort=ASC&sortBy=createtime", function (result) {
+
+                $("#paging").html(result);
+            });
+        }
+        //按时间排序
+        function desc() {
+            var orderSysNo = $("#sysno").val();
+            $.get('@Url.Action("OutStockPrint")?r=' + Math.random() + "&status=" + $("#status").val() + "&warehouseSysNo=" + $("#warehouse").val() + "&orderSysNo=" + orderSysNo + "&sort=desc&sortBy=createtime", function (result) {
+
+                $("#paging").html(result);
+            });
+        }
+        function showinfo(sysno) {
+            var url = '/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno;
+            UI.DialogOpen(url, {
+                title: '出库单信息',
+                width: 830,
+                height: 600,
+                init: function () {
+                    this.button({ name: '关闭' });
+                }
+            }, false);
+        }
+
+        //提交数据
+        function postdata(type)
+        {
+            var dty = $("#selectlst").val();
+            //if ((dty==null||dty=="")&&type==2)
+
+            if ((dty == null || dty == "") && type == 2)
+            {
+                UI.Alert({
+                    content: "请先选择发货快递"
+
+                });
+                return;
+            }
+            var arrlst = new Array();//出库单编号
+            $("input[name='checkinfo']:checked").each(
+                    function () {
+                       
+                        arrlst.push($(this).val());
+                    }
+            );
+            if(arrlst<1)
+            {
+                UI.Alert({
+                    content: "请先选择出库单"
+                });
+                return;
+            }
+            //var deliveryTypeName = "";
+            //var tsysno = 0;
+            //if ($("#selectlst").val() != "") {
+            //    deliveryTypeName = $("#selectlst").find("option:selected").text();
+            //    tsysno = $("#selectlst").val();
+            //}
+            //var url = '/Print/PrintMultiOutStock?ids=' + arrlst.join(",") + '&type=' + type + '&tsysno=' + tsysno + '&deliveryType=' + deliveryTypeName;
+        
+       
+            var deliveryTypeName = "";
+            var tsysno = 0;
+            if ($("#selectlst").val() != "")
+            {
+                deliveryTypeName = $("#selectlst").find("option:selected").text();
+                tsysno = $("#selectlst").val();
+            }
+            var url = '/Print/PrintMultiOutStock?ids=' + arrlst.join(",") + '&type=' + type + '&tsysno=' + tsysno + '&deliveryType=' + deliveryTypeName;
+
+            if(type==1)
+            {
+                
+                UI.DialogOpen(url, {
+                    title: '打印拣货单',
+                    width: 1000,
+                    height: 700,
+
+                });
+            }
+            else if(type==2)
+            {
+                UI.DialogOpen(url, {
+                    title: '打印包裹单',
+                    width: 1000,
+                    height: 700,
+
+                });
+            }
+            else if(type==3)
+            {
+                var deliveryType = $("#selectlst").val();
+                if (deliveryType == null || deliveryType == "")
+                    deliveryType = -1;
+
+                UI.Confirm({
+                    content: "确认完成出库？",
+                    ok: function () {
+                        var json = JSON.stringify({ ids: arrlst, deliverytypeno: deliveryType });
+                        $.ajax({
+                            url: '@Url.Action("MultiStockOut")',
+                            type: 'POST',
+                            cache: false,
+                            data: json,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (ret) {
+                                if(ret.Status)
+                                {
+                                    loaddata($("#status").val(), $("#warehouse").val());
+                                    UI.Prompt.Success("操作成功");
+                                }
+                                else
+                                {
+                                    alert(ret.Message);
+                                }
+                            }
+                        });
+                      
+                    }
+                });
+            } else if (type == 4) {
+
+                var data = [];
+                $("input[name='checkinfo']:checked").each(
+
+                    function () {
+                        var $tds=$(this).parent().parent().children("td");
+                        data.push({ "NoteType":10,"NoteSysNo": $tds.eq(1).attr("data"), "WarehouseSysNo": $tds.eq(4).attr("data"), "DeliverTypeSysno": $tds.eq(6).attr("data"), "ExpressNo": $tds.eq(6).children("input").val()});
+                    }
+                );
+
+
+                UI.Confirm({
+                    content: "确认完成配送？",
+                    ok: function () {
+                        var json = JSON.stringify({models:data});
+                        $.ajax({
+                            url: '/Logistics/BatchCreateLgDelivery',
+                            type: 'POST',
+                            cache: false,
+                            data: json,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (ret) {
+                                if (ret.Status) {
+                                    loaddata($("#status").val(), $("#warehouse").val());
+                                    UI.Prompt.Success("操作成功");
+                                }
+                                else {
+                                    alert(ret.Message);
+                                }
+                            }
+                        });
+
+                    }
+                });
+            }
+        }
+        //订单详情
+        function OrderBrowse(orderSysNo) {
+            UI.DialogOpen('/Order/OrderView?id=' + orderSysNo + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+        }
+        $(document).ready(function () {
+            loaddata("10","");
+            UI.CheckAllbox(".boxs_listtabel", ".checkall");
+            $(".case").ajaxLoadingMask(true);
+
+            $("#warehouse").change(function () {
+                loaddata($("#status").val(), $(this).val());
+            });
+
+            $("#status").change(function () {
+                loaddata($(this).val(), $("#warehouse").val());
+            });
+
+            $("#search_btn").click(function () {
+                loaddata($("#status").val(), $("#warehouse").val());
+            });
+
+
+           
+        });
+
+
+      
+    </script>
+    <script type="text/javascript">
+
+        //导入excel回调方法
+        function importCallBack(res) {
+            if (res.indexOf('成功') !== -1) {
+                UI.tips.tip_alert("tips_success", res);
+                setTimeout(function () {
+                    loaddata("", "");
+                }, 1000);
+            } else {
+                UI.Alert({ content: res, icon: '', width: '600px' });
+            }
+        }
+        function maskStart() {
+            Utils.MaskStart($('.case'));
+        }
+
+        function maskStop() {
+            Utils.MaskStop();
+        }
+        $(function () {
+
+            $('#btnExpressImport').click(function () {
+                
+                if (window.frames["pifrmExpressImport"].chooseFile) {
+                    window.frames["pifrmExpressImport"].chooseFile();                   
+                }
+            });
+
+            $('#btnExpress').click(function () {
+                window.location = '@Url.Action("ImportExpressTemplate")';
+            });
+
+        });
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"></span>
+            <h3>快递订单批量出库</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="left_tool clearfix" >
+                    <span class="veralign_t fl">发货快递</span>
+                    <div class="fl m10_l">
+                        <select id="selectlst" class="select_ht28 fl wd150 m10_l m10_r">
+                            <option selected="selected" value="">请选择</option>
+                            @if(ViewBag.DeliveryTypeList!=null)
+                            { 
+                                foreach (var item in ViewBag.DeliveryTypeList)
+                                {
+                                    <option value="@item.SysNo">@item.DeliveryTypeName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl">仓库</span>
+                    <div class="fl m10_l">
+                        <select id="warehouse" class="wd100 select_ht28">
+                            <option value="">请选择</option>
+                            @foreach (Hyt.Model.WhWarehouse warehouse in ViewBag.WarehouseList)
+                            {
+                                <option value="@warehouse.SysNo">@warehouse.BackWarehouseName</option>
+                            }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">@Html.DropDownList("status")</div>
+                    <span class="veralign_t fl m10_l">订单号</span>
+                    <div class="search_btn fl m10_l">
+                        <input name="sysno" id="sysno" class="input_ht28" type="text">
+                        <button class="btn btn_ht28" id="search_btn" type="button" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                    <input name="sort" id="sort" value="@ViewBag.sort"  type="hidden">
+                    <input name="sortBy" id="sortBy" value="@ViewBag.sortBy " type="hidden">
+                    <button class="btn btn_ht26 m10_r m10_l WH1003601 " type="button" onclick="postdata(1)"><span class="icon_print m5_r "></span><span>打印拣货单</span></button>
+                    <button class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="postdata(2)"><span class="icon_print m5_r "></span><span>打印包裹单</span></button>
+                    <button class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="postdata(3)" style=""><span class="icon_ok_sign m5_r"></span><span>批量出库</span></button>
+                    <button class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="postdata(4)"><span class="icon_ok_sign m5_r "></span><span>批量创建配送单</span></button>
+
+                    <button type="button" id="btnExpressImport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon_importing icon_white m5_r"></span><span>快递单号导入</span></button>
+                    <iframe id="pifrmExpressImport" name="pifrmExpressImport" style="display:none;" src="@Url.Action("ImportExpress")" class="hid"></iframe>
+                    <button class="btn btn_ht26 m10_r" id="btnExpress" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载快递单号导入模板</span></button>
+
+                </div>
+                <!--功能按钮结束-->
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div id="paging" class="boxs_listtabel">
+
+            </div>
+        </div>
+    </div>
+</div>

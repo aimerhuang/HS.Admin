@@ -1,0 +1,145 @@
+﻿@{
+    Layout = "~/Views/Shared/_Print.cshtml";
+    ViewBag.Title = "门店自提小票打印";
+
+    var paytype = "";
+    if (ViewBag.PayType != null) {paytype = ViewBag.PayType.PaymentName;}
+    
+}
+@using Hyt.BLL.Product
+@using Hyt.BLL.Promotion
+@model Hyt.Model.WhStockOut
+<style type="text/css" id="style1">
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    table, td {
+        border: 1px;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tbbigbox {
+        text-align: left;
+        font-size: 14px;
+    }
+
+    .tablebox {
+        width: 100%;
+        border-collapse: collapse;
+        border:  1px;
+        text-align: left;
+        font-size: 14px;
+    }
+
+        .tablebox td {
+            /*font-size: 14px;*/
+            padding: 2px;
+        }
+        .tablebox th{/*font-size: 14px;*/padding: 2px;font-weight: normal;text-align: left;}
+</style>
+<div id="div1">
+    <table class="tbbigbox" style="border: 1px">
+        <tr>
+            <td><p style="font-weight:bold;height:50px;line-height:50px;text-align:center;font-size:16px;">订单-商城自提</p></td>
+        </tr>
+        <tr>
+            <td>门店：@ViewBag.WarehouseName</td>
+        </tr>
+        <tr>
+            <td>订单号：@ViewBag.OrderSysNo</td>
+        </tr>
+        @{
+            if (!string.IsNullOrWhiteSpace(ViewBag.mallOrderId))
+            {
+                <tr>
+                    <td>店铺名称：@ViewBag.mallShopName</td>
+                </tr>
+                <tr>
+                    <td>第三方订单号：@ViewBag.mallOrderId</td>
+                </tr>
+            }
+        }
+
+        <tr>
+            <td>收货人：@if (ViewBag.ReceiveAddress != null)
+                    {@ViewBag.ReceiveAddress.Name}</td>
+        </tr>
+        <tr>
+            <td>电话：@if (ViewBag.ReceiveAddress != null)
+                   {@ViewBag.ReceiveAddress.MobilePhoneNumber} </td>
+        </tr>
+        <tr>
+            <td>付款方式：@paytype</td>
+        </tr>
+        <tr>
+            <td>提货时间：@ViewBag.SignTime</td>
+        </tr>
+        <tr>
+            <td>
+                <table class="tablebox">
+                    <tr>
+                        <th>商品名称</th>
+                        <th width="60">单价</th>
+                        <th width="65">小计</th>
+                    </tr>
+                    @if (Model != null && Model.Items != null && Model.Items.Count > 0)
+                    {
+                        foreach (var item in Model.Items)
+                        {
+                            <tr>
+                                <td>(@item.ProductSysNo)@Hyt.Admin.Controllers.PrintController.GetProductSalesType(item.OrderItemSysNo,item.RealSalesAmount)@PdProductBo.Instance.GetProductEasName(item.ProductSysNo) </td>
+                                <td>@Hyt.Util.FormatUtil.FormatCurrency(@item.OriginalPrice, 2, "¥") (@item.ProductQuantity)</td>
+                                <td>@Hyt.Util.FormatUtil.FormatCurrency(@item.RealSalesAmount, 2, "¥")</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+        @if (!string.IsNullOrWhiteSpace(ViewBag.CouponDes))
+        {
+            <tr>
+                <td>优惠劵：@ViewBag.CouponDes</td>
+            </tr>
+        }
+        <tr>
+            <td> 
+               合计：@Hyt.Util.FormatUtil.FormatCurrency(ViewBag.Total, 2, "¥")
+                @{          
+                    string des = string.Empty;
+                    //if(ViewBag.CouponAmount!=null&&ViewBag.CouponAmount>0)
+                    //{
+                    //    des += "已使用优惠券：" + Hyt.Util.FormatUtil.FormatCurrency(ViewBag.CouponAmount, 2, "¥");
+                    //}
+                    if (ViewBag.DiscountAmount != null && ViewBag.DiscountAmount > 0)
+                    {
+                     
+                        if(!string.IsNullOrEmpty(des))
+                        {
+                            des += ",";
+                        }
+                        des += "已打折：" + Hyt.Util.FormatUtil.FormatCurrency(ViewBag.DiscountAmount, 2, "¥");      
+                    }
+                }
+                @if(!string.IsNullOrEmpty(des))
+                {
+                   <span style="font-size: 12px">(@Html.Raw(des))</span>
+                }
+            </td>
+        </tr>
+      
+        <tr>
+            <td>
+                <br />
+                签名：<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                 
+            </td>
+        </tr>
+
+
+    </table>
+</div>
+

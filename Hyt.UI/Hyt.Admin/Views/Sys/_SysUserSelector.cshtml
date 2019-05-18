@@ -1,0 +1,69 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBSyUser>
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="150">用户账号</th>
+                <th width="150">真实姓名</th>
+                <th width="70">用户组</th>
+                <th width="110">手机号</th>
+                <th>Email</th>
+                <th width="60">状态</th>
+                <th width="90">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var allGroup = Hyt.Admin.Controllers.SysController.GetAllSyUserGroup().Where(item=>item.Status == (int)Hyt.Model.WorkflowStatus.SystemStatus.用户组状态.启用);
+                var mode = Model.TData as List<Hyt.Model.Transfer.CBSyUser>;
+                if (mode != null && mode.Count > 0)
+                {
+                    foreach (var item in (List<Hyt.Model.Transfer.CBSyUser>)Model.TData)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }else{
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                        <td>@item.Account</td>
+                        <td>@item.UserName</td>
+                        <td>@if(item.GroupUsers != null)
+                            {
+                                foreach (var group in item.GroupUsers)
+                                {
+                                    var g = allGroup.Where(j => j.SysNo == group.GroupSysNo);
+                                    if (g.Count() > 0)
+                                    {
+                                        <center>@g.First().GroupName</center>
+                                    }
+                                }
+                            }
+                        </td>
+                        <td>@item.MobilePhoneNumber</td>
+                        <td>@item.EmailAddress</td>
+                        <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.系统用户状态), item.Status)</td>
+                        <td>
+                            <button class="btn btn_ht26" onclick="doSelect({sysNo:@item.SysNo, userName:'@item.UserName'});"><span class="icon_changeGoods"></span><span class="m5_l">选择</span></button>
+                        </td>
+                        @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+                
+            }
+        </tbody>
+    </table>
+</div>
+<!--表格列结束-->
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

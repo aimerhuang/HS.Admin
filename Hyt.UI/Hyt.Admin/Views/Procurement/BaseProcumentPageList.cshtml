@@ -1,0 +1,342 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss
+{
+ 
+    <style type="text/css">
+        .tabNav2 li {
+            color: #bbb !important;
+            background: #ebebeb !important;
+        }
+
+        .list2 {
+        }
+
+        .tabNav2 li.navstart {
+            color: #666 !important;
+            background: url(../Theme/images/boxbg.png) repeat-x !important;
+        }
+
+        .tabNav2 li.menuon {
+            color: #333 !important;
+            background: #f5f5f5 !important;
+        }
+
+        a.sb_add {
+            width: 100%;
+            height: 44px;
+            display: inline-block;
+            background: #ececec url(../Theme/images/btn_add.png) center center no-repeat;
+        }
+
+            a.sb_add:hover {
+                background-color: #ddd;
+            }
+
+        .pic_box ul {
+            overflow: hidden;
+        }
+
+        tr.selected {
+            background-color: #FFE6B0;
+        }
+
+        tr.nodatarow td {
+            padding: 10px;
+        }
+    </style>
+
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+    <script src="/Theme/Plugins/TableBind/TableBind.yui.js"></script>
+    <script type="text/javascript">
+
+        //选项卡
+        var prodctEditTab;
+        var currentIndex=-1
+        function _init() {
+            //初始化tab页卡
+            prodctEditTab = UI.Tab({
+                tabNavBox: '#tabboxs',
+                tabNavObj: '.tabNav2',
+                tabContentObj: ".boxs_con_p10",
+                tabContent: ".list2",
+                controlUnit: false,
+                controlClass: 'navstart',
+                onActiveTab: function (index, element) {
+                    if (prodctEditTab != null)
+                    {
+                        if (index != currentIndex)
+                        {
+                            currentIndex = index;
+                            prodctEditTab.Active(index);
+                           
+                        }
+                        
+                    }
+                    
+                }
+            });
+            setTimeout("BindTabData()", 100);
+        }
+
+        //设置当前窗口为编辑模式
+        $(document).ready(function() {
+            _init();
+           
+        });
+
+        function BindTabData()
+        {
+            prodctEditTab.Active(0);
+            prodctEditTab.Active(1);
+            prodctEditTab.Active(2);
+            prodctEditTab.Active(0);
+            currentIndex = 0;
+            //alert("aaa");
+        }
+    </script>
+
+}
+
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>基础</h3>
+        </div>
+        <div class="boxs_con_c1" style="padding-left:10px; padding-right:10px;padding-bottom:10px;">
+
+            <div class="boxs m10_t" id="tabboxs">
+                <div class="head_tab">
+                    <ul class="tabNav2">
+                        <li class="navstart menuon" index="0">集装箱列表</li>
+                        <li index="1">国际物流列表</li>
+                        <li index="2">生产厂家列表</li>
+                    </ul>
+                </div>
+                <div class="boxs_con_p10">
+                    
+                    <div class="list2 boxs_listtabel" style="display: block;">
+                        <div align="left" style=" padding-bottom:10px;">
+                            <button class="btn btn_blue btn_ht26 "  onclick="add()"><span class="icon icon_white icon_plus"></span><span class="m5_l">新增</span></button>
+                        </div>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="">
+                            <thead>
+                                <tr>
+                                    <th width="80" class="align_l p10_lr">编号</th>
+                                    <th>名称</th>
+                                    <th width="150">类型</th>
+                                    <th width="150">尺寸类型</th>
+                                    <th width="100">长</th>
+                                    <th width="100">宽</th>
+                                    <th width="100">高</th>
+                                    <th width="200">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if ((ViewBag.ContainerList as List<Hyt.Model.Procurement.PmContainer>).Count == 0)
+                                    {
+                                        <tr class="odd_color trhover">
+                                            <td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td>
+                                        </tr>
+                                        return;
+                                    }
+                                    int i = 0;
+                                    foreach (var item in ViewBag.ContainerList as List<Hyt.Model.Procurement.PmContainer>)
+                                    {
+                                        if (i % 2 == 0)
+                                        {
+                                            @Html.Raw("<tr  class='stag_color' >")
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw("<tr>")
+                                        }
+                                        i++;
+                                        @Html.Raw("<td>" + item.SysNo + "</td>")
+                                        @Html.Raw("<td>" + item.CName + "</td>")
+                                        @Html.Raw("<td>" + item.CType + "</td>")
+                                        @Html.Raw("<td>" + item.CubeType + "</td>")
+
+                                        @Html.Raw("<td>" + item.CSLong + "</td>")
+                                        @Html.Raw("<td>" + item.CSWidth + "</td>")
+                                        @Html.Raw("<td>" + item.CSHeight + "</td>")
+                                        @Html.Raw("<td>" +
+                                                            "<button class=\"btn btn_blue btn_ht26 \" onclick=\"add('"+item.SysNo+"')\" ><span class=\"m5_l\">修改</span></button>"
+                                        + "</td>")
+                                        
+                                        @Html.Raw("</tr>")
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="list2 boxs_listtabel">
+                        <div align="left" style=" padding-bottom:10px;">
+                            <button class="btn btn_blue btn_ht26 " onclick="addList()"><span class="icon icon_white icon_plus"></span><span class="m5_l">新增</span></button>
+                        </div>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="">
+                            <thead>
+                                <tr>
+                                    <th width="80">编号</th>
+                                    <th>名称</th>
+                                    <th width="150">类型</th>
+                                    <th width="150">备注</th>
+                                    <th width="200" class="borde_r_none">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if ((ViewBag.LogisticsCompanyList as List<Hyt.Model.Procurement.PmLogisticsCompany>).Count == 0)
+                                    {
+                                        <tr class="odd_color trhover">
+                                            <td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td>
+                                        </tr>
+                                        return;
+                                    }
+                                    i = 0;
+                                    foreach (var item in ViewBag.LogisticsCompanyList as List<Hyt.Model.Procurement.PmLogisticsCompany>)
+                                    {
+                                        if (i % 2 == 0)
+                                        {
+                                            @Html.Raw("<tr  class='stag_color' >")
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw("<tr>")
+                                        }
+                                        i++;
+                                        @Html.Raw("<td>" + item.SysNo + "</td>")
+                                        @Html.Raw("<td>" + item.LCName + "</td>")
+                                        @Html.Raw("<td>" + item.LCType + "</td>")
+                                        @Html.Raw("<td>" + item.LCDis + "</td>")
+                                        @Html.Raw("<td>" +
+                                                                 "<button class=\"btn btn_blue btn_ht26 \" onclick=\"addList('"+item.SysNo+"')\" ><span class=\"m5_l\">修改</span></button>"  
+                                        + "</td>")
+
+                                        @Html.Raw("</tr>")
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="list2 boxs_listtabel">
+                        <div align="left" style=" padding-bottom:10px;">
+                            <button class="btn btn_blue btn_ht26 " onclick="addListTo()"><span class="icon icon_white icon_plus"></span><span class="m5_l">新增</span></button>
+                        </div>
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="">
+                            <thead>
+                                <tr>
+                                    <th width="80">编号</th>
+                                    <th>名称</th>
+                                    <th width="150">备注</th>
+                                    <th width="200" class="borde_r_none">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    if ((ViewBag.ManufacturerList as List<Hyt.Model.Procurement.PmManufacturer>).Count == 0)
+                                    {
+                                        <tr class="odd_color trhover">
+                                            <td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td>
+                                        </tr>
+                                        return;
+                                    }
+                                    i = 0;
+                                    foreach (var item in ViewBag.ManufacturerList as List<Hyt.Model.Procurement.PmManufacturer>)
+                                    {
+                                        if (i % 2 == 0)
+                                        {
+                                            @Html.Raw("<tr  class='stag_color' >")
+                                        }
+                                        else
+                                        {
+                                            @Html.Raw("<tr>")
+                                        }
+                                        i++;
+                                        @Html.Raw("<td>" + item.SysNo + "</td>")
+                                        @Html.Raw("<td>" + item.FName + "</td>")
+                                        @Html.Raw("<td>" + item.FDisInfo + "</td>")
+                                         @Html.Raw("<td>" +
+                                                                    "<button class=\"btn btn_blue btn_ht26 \" onclick=\"addListTo('"+item.SysNo+"')\" ><span class=\"m5_l\">修改</span></button>"
+                                        + "</td>")
+
+                                        @Html.Raw("</tr>")
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+            </div>
+         </div>
+    </div>
+</div>
+
+
+<script>
+    function add(sysNo)
+    {
+        UI.DialogOpen('/Procurement/InsertOrUpdateContainer?sysNo=' + sysNo + '', {
+            width: 800,
+            height: 345,
+            title: '编辑集装箱',
+            button: [{
+                name: '保存',
+                callback: function () {
+
+                },
+                focus: true
+            },
+                { name: '取消' }
+            ]
+        }, false);
+    }
+
+
+    function addList(sysNo) {
+        UI.DialogOpen('/Procurement/InnerOrUpdateLogisticsCompany?sysNo='+sysNo+'', {
+            width: 700,
+            height: 245,
+            title: '编辑物流列表',
+            button: [{
+                name: '保存',
+                callback: function () {
+
+                },
+                focus: true
+            },
+                { name: '取消' }
+            ]
+        }, false);
+    }
+
+
+    function addListTo(sysNo)
+    {
+        UI.DialogOpen('/Procurement/InnerOrUpdateManufacturer?sysNo=' + sysNo + '', {
+            width: 900,
+            height: 525,
+            title: '编辑生产厂家列表',
+            button: [{
+                name: '保存',
+                callback: function () {
+
+                },
+                focus: true
+            },
+                { name: '取消' }
+            ]
+        }, false);
+    }
+</script>

@@ -1,0 +1,17 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+<script src="@Url.Content("~/Theme/scripts/Logistics.js")"></script>
+<script src="~/Theme/scripts/Logistics.js"></script>
+<div class="caseout">
+    <div style="border:1px solid #C9C9C9;">
+        <table width="100%" cellspacing="0" cellpadding="5">
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+    _logistics.LogisticsLocusHtml('@ViewBag.OrderSysNo',"#tbody");
+</script>

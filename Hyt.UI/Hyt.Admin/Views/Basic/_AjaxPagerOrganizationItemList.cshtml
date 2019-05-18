@@ -1,0 +1,156 @@
+﻿@using Hyt.BLL.Basic
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.BsOrganizationWarehouse>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.BS1004202, ".BS1004202");
+    @Html.PrivilegeControl(PrivilegeCode.BS1004402, ".BS1004402");
+}
+<div class="boxs_tool border_top m5_t">
+    @if (ViewBag.Status == (int)BasicStatus.组织机构状态.启用)
+    {
+        <button class="btn btn_ht26 btn_blue BS1004202" id="select_warehouse"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加关联仓库</span></button>
+    }
+    else
+    {
+        <button class="btn btn_ht26 disabled BS1004202" disabled="disabled"><span class="icon icon_plus"></span><span class="m5_l">添加关联仓库</span></button>
+    }
+    <input id="hid_sysno" type="hidden" value="@ViewBag.SysNo" />
+</div>
+<div class="boxs_detail border_lnone">
+    <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th class="border_lnone" width="70">仓库编号</th>
+                <th class="align_l p10_l">机构名称</th>
+                <th width="100">仓库ERP编号</th>
+                <th class="align_l p10_l">仓库名称</th>
+                <th class="align_l p10_l">仓库地址</th>
+                <th width="50">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null & Model.TData != null && Model.TData.Any())
+            {
+                foreach (var item in Model.TData)
+                {
+                    var warehouse = WhWarehouseBo.Instance.GetWarehouse(item.WarehouseSysNo);
+                    var organization = OrganizationBo.Instance.GetEntity(item.OrganizationSysNo);
+                <tr>
+                    <td class="border_lnone">@item.WarehouseSysNo</td>
+                    <td class="align_l p10_l">
+                        @if (organization != null)
+                        { 
+                            @organization.Name;
+                        }
+                    </td>
+                    @if (warehouse != null)
+                    {
+                        <td>@warehouse.ErpCode</td>
+                        <td class="align_l p10_l">@warehouse.WarehouseName</td>
+                        <td class="align_l p10_l">@warehouse.StreetAddress</td>
+                    }
+                    else
+                    {
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    }
+                    <td>
+                        @if (ViewBag.Status == (int)BasicStatus.组织机构状态.启用)
+                        {
+                            <button class="btn btn_ht26 btn_red BS1004402" title="删除" onclick="removeItem(@item.SysNo)"><span class="icon_trash icon_white"></span></button>
+                        }
+                        else
+                        {
+                            <button class="btn btn_ht26 disabled BS1004402" disabled="disabled" title="删除"><span class="icon_trash"></span></button>
+                        }
+                    </td>
+                </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6" class="border_lnone align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $("#select_warehouse").click(function () {
+            selectWhareHouse();
+        });
+    });
+
+    function removeItem(id) {
+        UI.Confirm({
+            content: '您确定要执行删除吗？',
+            ok: function () {
+                $.ajax({
+                    url: '@Url.Action("OrganizationItemRemove")',
+                    type: "POST",
+                    data: { id: id },
+                    success: function (data) {
+                        if (data && data.Status) {
+                            doSearch();
+                        }
+                    }
+                });
+            }, width: '200px'
+        });
+    }
+    function selectWhareHouse() {
+        DAO.SelectWhareHouseDialog({
+            chkStyle: 'checkbox',
+            isAllWh: true,
+            callBack: function (list) {
+                if (list) {
+                    var whlist = [];
+                    for (var i = 0; i < list.length; i++) {
+                        var data = list[i];
+                        if (data) {
+                            whlist.push(data.id);
+                        }
+                    }
+                    if (whlist.length > 0) {
+                        addWhareHouse(whlist);
+                    }
+                }
+            }
+        });
+    }
+
+    function addWhareHouse(whlist) {
+        var id = $("#hid_sysno").val();
+        if (id) {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            var model = { id: id, whlist: whlist };
+            $.ajax({
+                url: "@Url.Action("OrganizationItemAddRange", "Basic")",
+                data: JSON.stringify(model),
+                contentType: 'application/json',
+                type: "post",
+                success: function (ret) {
+                    mask.Remove();
+                    if (ret.StatusCode < 0) {
+                        UI.Alert({ content: ret.Message });
+                    } else {
+                        UI.Prompt.Success('组织机构添加成功！');
+                        doSearch();
+                    }
+                },
+                error: function () {
+                    mask.Remove();
+                }
+            });
+        }
+    }
+
+</script>
+
+<!--分页数据-->
+@{Html.RenderPartial("_UrlPaging", Model); }

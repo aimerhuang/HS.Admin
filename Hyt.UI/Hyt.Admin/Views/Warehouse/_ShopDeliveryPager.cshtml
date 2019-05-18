@@ -1,0 +1,74 @@
+﻿@using Hyt.Infrastructure.Pager;
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBOutStockOrder>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="80">出库单号</th>
+                <th width="80">销售单号</th>
+                <th width="">门店</th>
+                <th width="10%">收货人</th>
+                <th width="8%">收货人手机</th>
+                <th width="8%">会员号</th>
+                <th>应收金额</th>
+                <th width="120">下单时间</th>
+                <th width="65">提货状态</th>
+                <th width="300">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                if (Model.TData == null || Model.TData.Count == 0)
+                {
+                <tr>
+                    <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                foreach (var item in Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    }
+                    <td class="blue"><a href="javascript:browseStockOut(@item.StockOutSysNo)">@item.StockOutSysNo</a></td>
+                <td class="blue"><a href="javascript:OpenOrderView(@item.OrderSysNo)">@item.OrderSysNo</a></td>
+                <td>@item.WarehouseName</td>
+                <td>@item.ReceiverName</td>
+                <td>@item.ReceiverMobile</td>
+                    <td class="blue"><a href="javascript:browseUserInfo(@item.CustomerSysNo)">@item.CustomerAccount</a></td>
+                    <td align="right" class="red p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.Receivable, 2))</td>
+                <td >@item.OrderCreateDate.ToString("yyyy-MM-dd HH:mm")</td>     
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(WarehouseStatus.出库单自提状态), item.StockOutStatus)</td>
+                
+                <td>
+                    @if (item.StockOutStatus == (int)WarehouseStatus.出库单自提状态.待确认)
+                    { <button  title="查看" class="btn btn_ht26" type="button" onclick="UI.OpenCreatTab('出库单:' + @item.StockOutSysNo, '/Warehouse/ShopDeliveryDetail/' + @item.StockOutSysNo);"><span class="icon_ok"></span><span class="m5_l">查看</span></button><button  title="确认" class="btn btn_blue btn_ht26 m10_l" type="button" onclick=" UI.OpenCreatTab('出库单:' + @item.StockOutSysNo, '/Warehouse/ShopDeliveryConfirm/' + @item.StockOutSysNo); "><span class="icon_ok icon_white"></span><span class="m5_l">确认</span></button>if (ViewBag.QueryType != 1)
+                        {<button title="提货" class="btn btn_blue btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">提货</span></button>}<button title="打印小票" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">打印小票</span></button>}else if (item.StockOutStatus == (int)WarehouseStatus.出库单自提状态.待自提){<button  title="查看" class="btn btn_ht26" type="button" onclick="UI.OpenCreatTab('出库单:' + @item.StockOutSysNo, '/Warehouse/ShopDeliveryDetail/' + @item.StockOutSysNo);"><span class="icon_ok"></span><span class="m5_l">查看</span></button>if (ViewBag.QueryType != 2){<button title="确认" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">确认</span></button>}<button  title="提货" class="btn btn_blue btn_ht26 m10_l" type="button" onclick="UI.OpenCreatTab('出库单:' + @item.StockOutSysNo, '/Warehouse/ShopDelivery/' + @item.StockOutSysNo);"><span class="icon_ok icon_white"></span><span class="m5_l">提货</span></button><button title="打印小票" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">打印小票</span></button>}
+                    else if (item.StockOutStatus == (int)WarehouseStatus.出库单自提状态.已自提)
+                    {<button  title="查看" class="btn btn_ht26" type="button" onclick="UI.OpenCreatTab('出库单:' + @item.StockOutSysNo, '/Warehouse/ShopDeliveryDetail/' + @item.StockOutSysNo);"><span class="icon_ok"></span><span class="m5_l">查看</span></button><button title="确认" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">确认</span></button><button title="提货" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">提货</span></button><button  title="打印小票" class="btn btn_blue btn_ht26 m10_l" type="button" onclick="Print(@item.StockOutSysNo);"><span class="icon_ok icon_white"></span><span class="m5_l">打印小票</span></button>}
+                    else
+                    {<button  title="查看" class="btn btn_ht26" type="button" onclick="UI.OpenCreatTab('出库单:' + @item.StockOutSysNo, '/Warehouse/ShopDeliveryDetail/' + @item.StockOutSysNo);"><span class="icon_ok"></span><span class="m5_l">查看</span></button><button title="确认" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">确认</span></button><button title="提货" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">提货</span></button><button title="打印小票" class="btn btn_ht26 disabled m10_l" type="button"><span class="icon_ok icon_white"></span><span class="m5_l">打印小票</span></button>}
+                </td>
+                
+                
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@if (Model.TData != null && Model.TData.Count > 0)
+{
+    Html.RenderPartial("_UrlPaging", Model);
+}
+
+

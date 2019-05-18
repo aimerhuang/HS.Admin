@@ -1,0 +1,177 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "快递方式选择";
+}
+@model IList<Hyt.Model.Transfer.CBDsDealer>
+@section HeadJs
+{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+}
+
+<div class="caseout">
+
+    <div class="boxs" id="tabboxs">
+        <div class="head_tab">
+            <ul id="tabNav">
+                <li class="menuon_white">数据列表</li>
+                <li class="">已选择</li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1">
+
+            <div class="list">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+                    <!--搜索开始-->
+                    <div class="right_tool clearfix">
+                        <span class="veralign_t fl m10_l">分销商名称</span>
+                        <div class="search_btn m10_l fl">
+                            <input name="DealerName" type="text" id="DealerName" class="input_ht28" autocomplete="off" value="" maxlength="20" title="搜索分销商名称..." />
+                            <button class="btn btn_ht28 wd28" id="search_btn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <div class="line28">
+                        <span>商品名称：</span>
+                        <span>@ViewBag.ProductName</span>
+                    </div>
+                </div>
+
+                <div id="paging">
+                </div>
+            </div>
+
+            <div class="list">
+
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="batch_cancel"><span class="icon_trash"></span><span class="m5_l">批量取消</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+
+                </div>
+                <!--工具条结束-->
+
+                <div class="boxs_listtabel">
+                    <table id="selected_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="53">
+                                    <input name="" type="checkbox" value="" id="selected_select_all" class="checkall" /></th>
+                                <th>分销商名称</th>
+                                <th width="72">联系人</th>
+                                <th width="85">等级</th>
+                                <th width="46">状态</th>
+                                <th width="105">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (null != Model && Model.Count > 0)
+                            {
+                                foreach (Hyt.Model.Transfer.CBDsDealer item in Model)
+                                {
+                                <tr id="selected_tr_@item.SysNo">
+                                    <td>
+                                        <input name="sysno" type="checkbox" id="sel_checkbox_@item.SysNo" value="@(item.SysNo)" rtext="@(item.SysNo):@(item.DealerName)" /></td>
+                                    <td >@item.DealerName</td>
+                                    <td>@item.Contact</td>
+                                    <td>@item.LevelName</td>
+                                    <td>@((Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态)item.Status)</td>
+                                    <td>
+                                        <button class='btn btn_ht26' title='取消选择' type='button' onclick="removeItem(@item.SysNo)" ><span class='icon_trash'></span><span class='m5_l'>取消选择</span></button></td>
+                                </tr>    
+                                                                   
+                                }
+                                <tr class="odd_color" id="noitem" style="display: none;">
+                                    <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                                </tr> 
+                            }
+                            else
+                            {
+                                <tr class="odd_color" id="noitem">
+                                    <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                                </tr>
+                            }
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    //tab选项卡  
+    UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '#tabNav', currentClass: 'menuon_white', tabContentObj: ".boxs_con_c1", tabContent: ".list" });
+
+    //已选择checkbox
+    UI.CheckAllbox("#selected_list", "#selected_select_all");
+    $("#DealerName").keydown(function (e) {
+        if (13 == e.keyCode) {
+            doSearch();
+        }
+    });
+    //查询录入框点击事件
+    setDefaultValue();
+    //开始查询
+    $("#search_btn").click(function () {
+        doSearch();
+        //setDefaultValue();
+    });
+    //设置页面默认值
+    function setDefaultValue() {
+        $("#DealerName").defaultValue("搜索分销商名称...");
+    }
+    doSearch();
+
+
+    //列表数据显示
+    function doSearch() {
+        var condition = null;
+        var searchValue = $("#DealerName").val();
+        if (searchValue && searchValue != "搜索分销商名称...") {
+            condition = $("#DealerName").val();
+        }
+        $.get('@Html.Raw(Url.Action("SelectDsDealer", "Distribution", new { Status = ViewBag.Status, ProductSysNo = ViewBag.ProductSysNo }))',
+            { DealerName: condition },
+            function (data) {
+                $('#paging').html(data);
+                CheckboxSelect();
+            });
+    }
+
+    //调用页面进行回调
+    function CallBack() {
+        if ($.isFunction(parent._ActiveSelectDsDealerCallBack)) {
+            var result = new Array();
+            $("#selected_list input[name='sysno']").each(function () {
+                result.push($(this).attr("rtext"));
+            });
+
+            parent._ActiveSelectDsDealerCallBack(result);
+            UI.Dialog.close();
+        }
+    }
+
+    //分页完成事件 :
+    function AjaxOnComplete() {
+        AjaxStop();
+        CheckboxSelect();
+    }
+    //加载完成复选框打勾事件
+    function CheckboxSelect() {
+        var items = $("#selected_list input[name='sysno']");
+        items.each(function () {
+            var sysno = $(this).val();
+            $("#checkbox_" + sysno).attr("checked", "checked");
+        });
+    }
+
+
+
+</script>

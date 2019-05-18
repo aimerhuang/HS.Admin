@@ -1,0 +1,117 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="KisModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2008" Alias="Self" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <!--生成过程中发现错误:
+警告 6013: 表/视图“Kis.dbo.icstockbill_tem”未定义主键，并且无法推断有效的主键。已排除了此表/视图。若要使用实体，将需要检查您的架构、添加正确的键并取消对实体的注释。
+        <EntityType Name="icstockbill_tem">
+          <Property Name="FDate" Type="varchar" MaxLength="50" />
+          <Property Name="FTranType" Type="int" />
+          <Property Name="FBillerID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3BillerID" Type="int" />
+          <Property Name="FDeptID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3DeptID" Type="int" />
+          <Property Name="FEmpID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3EmpID" Type="int" />
+          <Property Name="FExplanation" Type="varchar" MaxLength="50" />
+          <Property Name="FFManagerID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3FManagerID" Type="int" />
+          <Property Name="FManagerID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3ManagerID" Type="int" />
+          <Property Name="FSManagerID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3SManagerID" Type="int" />
+          <Property Name="FSupplyID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3SupplyID" Type="int" />
+          <Property Name="Fuse" Type="varchar" MaxLength="50" />
+          <Property Name="FInBillNo" Type="varchar" MaxLength="250" />
+          <Property Name="FentryCount" Type="int" />
+          <Property Name="FUpdate" Type="int" />
+          <Property Name="FCurrencyID" Type="varchar" MaxLength="50" />
+          <Property Name="FInventoryType" Type="varchar" MaxLength="50" />
+          <Property Name="FK3InventoryType" Type="int" />
+          <Property Name="FBillTypeID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3BillTypeID" Type="int" />
+          <Property Name="FRefType" Type="varchar" MaxLength="50" />
+          <Property Name="FK3RefType" Type="int" />
+          <Property Name="FRob" Type="int" />
+          <Property Name="FK3CurrencyID" Type="int" />
+          <Property Name="FFetchDate" Type="varchar" MaxLength="50" />
+          <Property Name="FConsignee" Type="varchar" MaxLength="250" />
+          <Property Name="FDeliveryPlace" Type="varchar" MaxLength="250" />
+          <Property Name="FSettleDate" Type="varchar" MaxLength="50" />
+          <Property Name="FBillNo" Type="varchar" MaxLength="250" />
+        </EntityType>-->
+        <!--生成过程中发现错误:
+警告 6013: 表/视图“Kis.dbo.icstockbillentry_tem”未定义主键，并且无法推断有效的主键。已排除了此表/视图。若要使用实体，将需要检查您的架构、添加正确的键并取消对实体的注释。
+        <EntityType Name="icstockbillentry_tem">
+          <Property Name="Fauxqty" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FAuxQtyMust" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FQty" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FQtyMust" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="Famount" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FAmtRef" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="Fauxprice" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FTaxRate" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FAuxTaxPrice" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="FAllAmount" Type="decimal" Precision="18" Scale="4" />
+          <Property Name="Fnote" Type="varchar" MaxLength="50" />
+          <Property Name="FItemID" Type="varchar" MaxLength="50" />
+          <Property Name="FUnitID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3ItemID" Type="int" />
+          <Property Name="FSCStockID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3SCStockID" Type="int" />
+          <Property Name="FDCStockID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3DCStockID" Type="int" />
+          <Property Name="FK3UnitID" Type="int" />
+          <Property Name="FCurrencyID" Type="varchar" MaxLength="50" />
+          <Property Name="FK3CurrencyID" Type="int" />
+          <Property Name="FInBillNo" Type="varchar" MaxLength="250" />
+          <Property Name="FauxqtyActual" Type="numeric" Precision="18" Scale="4" />
+          <Property Name="FKFDate" Type="varchar" MaxLength="50" />
+          <Property Name="FKFPeriod" Type="int" />
+          <Property Name="FPeriodDate" Type="varchar" MaxLength="50" />
+          <Property Name="FOrderNo" Type="varchar" MaxLength="50" />
+          <Property Name="FFetchDate" Type="varchar" MaxLength="50" />
+          <Property Name="FConsignee" Type="varchar" MaxLength="250" />
+          <Property Name="FDeliveryPlace" Type="varchar" MaxLength="250" />
+          <Property Name="FSettleDate" Type="varchar" MaxLength="50" />
+        </EntityType>-->
+        <EntityContainer Name="KisModelStoreContainer" />
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="KisModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="KisEntities" annotation:LazyLoadingEnabled="true" />
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="KisModelStoreContainer" CdmEntityContainer="KisEntities" />
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="false" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="无" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

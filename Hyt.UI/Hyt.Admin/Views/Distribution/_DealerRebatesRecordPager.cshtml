@@ -1,0 +1,96 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBDsDealerRebatesRecord>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="90">系统编号</th>
+                <th width="90">所属分销商</th>
+                <th width="90">推荐人账号</th>
+                <th width="90">推荐人名称</th>
+                <th width="90">消费者账号</th>
+                <th width="90">消费者名称</th>
+                <th width="90">动作类型</th>
+                <th width="90">返利类型</th>
+                <th width="90">返利金额</th>              
+                <th width="90">来源编号</th>
+                <th width="50">状态</th>
+                <th width="90">返利时间</th>
+                <th width="60">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="11" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBDsDealerRebatesRecord>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>@item.SysNo</td>
+                <td>@item.RDealerName</td>
+                <td>@item.RecommendAccount</td>
+                <td>@item.RecommendName</td>                
+                <td>@item.ComplyAccount</td>
+                <td>@item.ComplyName</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(SellBusinessStatus.动作类型), int.Parse(item.Action))</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(SellBusinessStatus.返利类型), int.Parse(item.Genre))</td>
+                <td>@item.Rebates</td>
+                <td class="p10_lr"><a class="showProduct" href="javascript:OpenSource(@item.OrderSysNo);">@item.OrderSysNo</a></td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(SellBusinessStatus.状态类型), int.Parse(item.Status))</td> 
+                <td>@item.RebatesTime</td>                                                 
+                <td>
+                    @*<button class="btn btn_ht26 m10_l btn_red" onclick="Delete(@item.SysNo, this) "><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>*@              
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        var aValue1 = "", aValue2 = "", i = 0, color = "blue";
+        $("table tbody tr td.p10_lr").each(function () {
+            i += 1;
+            if (i==1) {
+                $(this).addClass(color);
+                aValue1 = $.trim($(this).find("a").html());
+                return;
+            } else {
+                aValue2 = $.trim($(this).find("a").html());
+                if (aValue1 == aValue2) {
+                    $(this).addClass(color);
+                }
+                else {
+                    if (color == "blue") {
+                        color = "red";
+                    } else {
+                        color = "blue";
+                    }
+                    $(this).addClass(color);
+                }
+            }
+            aValue1 = $.trim($(this).find("a").html());
+        });
+    });
+</script>

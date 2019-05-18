@@ -1,0 +1,139 @@
+﻿@model System.Collections.Generic.List<Hyt.Model.RptSalesRanking>
+
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+
+<div class="case">
+    
+
+        <div class="boxs">
+  
+            <div class="boxs_tit head_m">
+                <h3>销售排行统计报表</h3>
+            </div>
+    
+
+
+            <div class="boxs_con_c1">    
+    
+                <!--工具条开始-->
+                <div class="boxs_tool"> 
+      
+                    <form id="form1">
+                        <!--搜索开始-->
+                        <div class="right_tool clearfix">
+                            <span class="veralign_t fl">起止日期</span>
+                            <div class="fl m10_l">
+                                <span class="fl"><select name="DateRange" id="DateRange" queryPara="DateRange">
+                                                     <option value="">全部</option>
+                                                     @ViewBag.DateRange
+                                                 </select></span>
+                                <div class="date_btn120 fl m10_l">
+                                    <input type="text" value="" class="input_ht26" id="BeginDate" name="BeginDate"  queryPara="BeginDate" onfocus="this.blur()" onclick="UI.Date({ el: 'BeginDate' })">
+                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate'})" type="button" ><span class="icon_calendar"></span></button>
+                                </div>
+                                <span class="fl m10_l">-</span>
+                                <div class="date_btn120 fl m10_l">
+                                    <input type="text" value="" class="input_ht26" id="EndDate" name="EndDate"  queryPara="EndDate" onfocus="this.blur()" onclick="UI.Date({ el: 'EndDate' })">
+                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate'})"  type="button" ><span class="icon_calendar"></span></button>
+                                </div>
+                                
+                                <span class="fl m10_l m10_r">商品分类</span>
+                                <div class="search_btn fl wd270" id="JS_outbox">
+
+                                    <input id="listProductCategories" name="listProductCategories" type="text" value="" class="input_ht28 wd230" readonly="readonly" />
+                                    <input id="ProductCategories" name="ProductCategories" type="hidden" />
+                                    <button title="选择分类" class="btn btn_ht28" id="btn_selectCategory" type="button">
+                                        <span class="icon_th_list"></span>
+                                    </button>
+                                </div>
+                                <button class="btn btn_ht28 m10_l fl" title="查询" id="JS_gaoji1" type="button"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+              
+                            </div>
+            
+                        </div>
+                        <!--搜索结束-->
+                    </form>
+        
+                    <!--功能按钮开始-->
+                    <div class="left_tool"><button class="btn btn_ht26 m10_r" id="btnExport"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+        
+                </div>
+                <!--工具条结束-->
+      
+                <!--表格列开始-->
+                <div class="boxs_listtabel" id="paging">
+                    @{Html.RenderPartial("_SalesRanking", Model);}
+                </div>
+                <!--表格列结束-->
+        
+        
+            </div>
+@*        <div class="m5_t c9">
+            备注：仅显示排名前50位
+        </div>*@
+        </div>  
+    
+
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var options = {
+            onlyLeaftSelect: false,
+            margin: {
+                vertical: 0,
+                horizontal: 0
+            },
+            zIndex: 5
+        };
+        DAO.SelectProductCategory($("#JS_outbox"), $("#listProductCategories"), options);
+
+        $("#JS_gaoji1").click(function() {
+            doSearch();
+        });
+
+        $("#DateRange").change(function() {
+            if (this.value != "") {
+                $("#BeginDate").val("");
+                $("#EndDate").val("");
+            }
+            doSearch();
+        });
+        $("#BeginDate,#EndDate").blur(function () {
+            if (this.value != "") {
+                $("#DateRange").val("");
+            }
+        });
+    });
+
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Report/SalesRanking/?r=" + Math.random(), "queryPara", function (p) {
+            var categoryId = $("#listProductCategories").attr("pdcategory");
+            if (categoryId != '') {
+                p.setParams("ProductCategories", categoryId);
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    $('#btnExport').click(function () {
+        var categoryId = $("#listProductCategories").attr("pdcategory");
+        if (categoryId != undefined && categoryId != "") {
+            $("#ProductCategories").val(categoryId);
+        }
+        var form = $("#form1");
+        form.attr('action', '@Url.Action("ExportSalesRanking", "Report")');
+        form.attr('method', 'post');
+        form.submit();
+    });
+
+</script>
+        

@@ -1,0 +1,463 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "选择出库单";
+}
+@section headcss{
+    <style type="text/css">
+        .wrapper { height: 480px; padding-left: 1px; }
+        #allmap { height: 432px; }
+    </style>
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+    <script type="text/javascript">
+        var currnetPageIndex = 1, // 记录数据分页索引
+            totalPageCount = 0;   // 记录数据总页数
+
+        $(function () {
+            //tab选项卡
+            UI.Tab({
+                tabNavBox: '#tabboxs3',
+                tabContentObj: "#tabcon",
+                onActiveTab: function (index, obj) {
+                }
+            });
+
+            initMap();
+            getOutStockList();
+
+            //分页完成事件 :
+            $('body').ajaxSuccess(function () {
+                var items = $("#selected_list input[name='sysno']");
+                items.each(function () {
+                    var sysno = $(this).val();
+                    var checkbox = $("input[data-id='" + sysno + "']");
+                    checkbox.attr("checked", "checked");
+                });
+            });
+
+            $("#selected_all").click(function () {
+                if ($(this).attr("checked")) {
+                    $("#selected_list input[name='sysno']").each(function () {
+                        $(this).attr("checked", "checked");
+                    });
+                } else {
+                    $("#selected_list input[name='sysno']").each(function () {
+                        $(this).removeAttr("checked");
+                    });
+                }
+            });
+
+            //批量事件
+            $("#batch_cancel").click(function () {
+                var items = $("#selected_list input:checked");
+                if (items.length <= 0) {
+                    UI.Alert({
+                        content: '请选择需要取消的出库单!'
+                    });
+                } else {
+                    UI.Confirm({
+                        content: '是否确认取消选中的出库单？',
+                        ok: function () {
+                            items.each(function () {
+                                var sysno = $(this).val();
+                                if (sysno) {
+                                    $("#selected_tr_" + sysno).remove();
+                                    // 恢复地图上的点
+                                    if (overlayItems[sysno]) {
+                                        mp.addOverlay(overlayItems[sysno]);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+        });
+
+        // 加载更多的出库单
+        function loadOutStockList() {
+            if (currnetPageIndex >= 1 && currnetPageIndex < totalPageCount)
+                currnetPageIndex += 1;
+            getOutStockList();
+        }
+
+        // 初始化地图
+        var mp;
+        function initMap() {
+            mp = new BMap.Map("allmap");
+
+            /*//ip定位当前城市
+            var myCity = new BMap.LocalCity();
+            myCity.get(myFun);
+            function myFun(result) {
+                mp.centerAndZoom(result.name);
+                mp.enableScrollWheelZoom();
+            }*/
+            // 定位到已经选择仓库的城市
+            mp.centerAndZoom("@ViewBag.SelectedCity");
+            mp.enableScrollWheelZoom();
+
+            drawDeliveryUserLoction();
+            drawPisenLoc();
+        }
+
+        // 标记配送业务员当前位置
+        function drawDeliveryUserLoction() {
+            var loction = $("#hid_deliveryUser_loction").val();
+            if (loction == "0,0") return;
+            var loc = loction.split(",");
+            if (loc.length != 2) return;
+            var point = new BMap.Point(loc[0], loc[1]), title = $("#hid_deliveryUser_name").val();
+            
+            var icon = new BMap.Icon('@Url.Content("~/Theme/images/mapoverlay2.png")', new BMap.Size(18, 18));
+            var marker = new BMap.Marker(point, { icon: icon });
+
+            var infoWindow = new BMap.InfoWindow(title);  //创建消息框 
+            //绑定标注单击事件，设置显示的消息框  
+            marker.addEventListener("click", function () { this.openInfoWindow(infoWindow); });
+            marker.setTitle(title);
+            mp.addOverlay(marker);
+        }
+
+        // 标注当前城市的所有仓库和门店
+        function drawPisenLoc() {
+            var wareHouseLoc = '@ViewBag.WarehouseLoc',
+                storeLoc = '@ViewBag.StoreLoc';
+            wareHouseLoc = wareHouseLoc.replace(/&quot;/g, '"');
+            storeLoc = storeLoc.replace(/&quot;/g, '"');
+            wareHouseLoc = JSON.parse(wareHouseLoc);
+            storeLoc = JSON.parse(storeLoc);
+            if (wareHouseLoc && wareHouseLoc.length > 0) {
+                //for (var i = 0, len = wareHouseLoc.length; i < len; i++) {
+                    //var item = wareHouseLoc[i];
+                $.each(wareHouseLoc, function (idx, item) {
+                    var point = new BMap.Point(item["Longitude"] || 0, item["Latitude"]), title = item["Name"] || '';
+
+                    var icon = new BMap.Icon('@Url.Content("~/Theme/images/mapoverlay1.png")', new BMap.Size(22, 21));
+                    var marker = new BMap.Marker(point, { icon: icon });
+
+                    var infoWindow = new BMap.InfoWindow(title);  //创建消息框
+                    //绑定标注单击事件，设置显示的消息框  
+                    marker.addEventListener("click", function () { this.openInfoWindow(infoWindow); });
+                    marker.setTitle(title);
+                    mp.addOverlay(marker);
+                });
+            }
+            if (storeLoc && storeLoc.length > 0) {
+                //for (var i = 0, len = storeLoc.length; i < len; i++) {
+                    //var item = storeLoc[i];
+                $.each(storeLoc, function (idx, item) {
+                    var point = new BMap.Point(item["Longitude"] || 0, item["Latitude"]), title = item["Name"] || '';
+
+                    var icon = new BMap.Icon('@Url.Content("~/Theme/images/mapoverlay3.png")', new BMap.Size(22, 21));
+                    var marker = new BMap.Marker(point, { icon: icon });
+
+                    var infoWindow = new BMap.InfoWindow(title);  //创建消息框
+                    //绑定标注单击事件，设置显示的消息框  
+                    marker.addEventListener("click", function () { this.openInfoWindow(infoWindow); });
+                    marker.setTitle(title);
+                    mp.addOverlay(marker);
+                });
+            }
+        }
+
+        // 获取出库单列表
+        function getOutStockList() {
+            var data = {};
+            data.WarehouseSysNo = $("#hid_warehouse_sys_no").val() || "";
+            data.DeliveryTypeSysNo = $("#hid_delivery_type_sys_no").val();
+            data.SysNoFilter = $("#hid_sys_no_filter").val();
+            data.CurrentPage = currnetPageIndex;
+            data.r = Math.random();
+
+            $.get('@Url.Action("GetOutStockList", "Logistics")',
+                data,
+                function (ret) {
+                    if (ret) {
+                        totalPageCount = ret.TotalPageCount || 0;
+                        DrawPoint(ret.TData || []);
+                    }
+                });
+        }
+
+        //地图上标记
+        var overlayItems = {};
+        function DrawPoint(data) {
+            if (data != null && data.length > 0) {
+                //mp.clearOverlays(); //有数据先清除
+            }
+            else {
+                UI.Alert({ content: "没有订单位置信息" });
+
+                return false;
+            }
+
+            data = data.reverse();
+            $.each(data, function (idx, item) {
+                var txt = item.ReceiverName || "", mouseoverTxt = txt + " " + item["StreetAddress"] || "",
+                myGeo = new BMap.Geocoder();
+                // 将地址解析结果显示在地图上,并调整地图视野
+                myGeo.getPoint(item["StreetAddress"] || "", function (point) {
+                    if (point) {
+                        var myCompOverlay = new ComplexCustomOverlay(point, txt, mouseoverTxt, item, function (model) {
+                            if (overlayItems[model["SysNo"]]) {
+                                //delete overlayItems[sysNo];
+                                // 选择出库单 -> 移除地图上的点 增加已经选择的出库单
+                                addItem(model);
+                                mp.removeOverlay(overlayItems[model["SysNo"]]); // 移除地图选中的点
+                            }
+                        });
+                        mp.addOverlay(myCompOverlay);
+                        if (!overlayItems[item["SysNo"]]) {
+                            overlayItems[item["SysNo"]] = myCompOverlay;
+                        }
+                    }
+                }, item["District"] || "");
+            });
+        }
+
+        //添加已经选择新项
+        function addItem(model) {
+            var item = $("#selected_tr_" + model["SysNo"]);
+            if (item.length <= 0) {
+                var htmls = ["<tr id='selected_tr_"];
+                htmls.push(model["SysNo"], "'>");
+                htmls.push('<td style="width: 3%;"><input name="sysno" type="checkbox" data-id="', model["SysNo"], '" value="', model["SysNo"], '" /></td>');
+                htmls.push('<td>', model["SysNo"], '</td>');
+                htmls.push('<td>', model["OrderSysNO"], '</td>');
+                htmls.push('<td class="align_l p10_lr">', (model["District"] || "") + (model["StreetAddress"] || ""), '</td>');
+                htmls.push('<td>', model["ReceiverName"], '</td>');
+                htmls.push('<td class="red p10_r align_r">', formatMoney(model["Receivable"]), '</td>');
+                htmls.push('<td>', formatTime(model["SoCreateDate"]), '</td>');
+                htmls.push('<td>', model["InvoiceSysNo"] > 0 ? "是" : "否", '</td>');
+                htmls.push('<td>', getStatusDes(model["Status"]), '</td>');  // 状态的装换欠妥，可考虑动态从后端取
+                htmls.push("<td><button class='btn btn_ht26' title='作废' type='button' onclick=removeItem('", model["SysNo"], "') ><span class='icon_trash'></span><span class='m5_l'>删除</span></button></td></tr>");
+
+                $("#selected_list tbody").append(htmls.join(""));
+                $("#noitem").hide();
+            }
+        }
+
+        //移除已有项
+        function removeItem(sysno) {
+            UI.Confirm({
+                content: '是否确认取消选中的出库单？',
+                ok: function () {
+                    $("#selected_tr_" + sysno).remove();
+                    $("input[data-id='" + sysno + "']").removeAttr("checked");
+                    checkItems();
+                    // 恢复地图上的点
+                    if (overlayItems[sysno]) {
+                        mp.addOverlay(overlayItems[sysno]);
+                    }
+                }
+            });
+        }
+        function checkItems() {
+            if (!$("#selected_list input[name='sysno']").length) {
+                $("#noitem").show();
+                $("#selected_all").removeAttr("checked");
+            }
+        }
+
+        //调用页面进行回调
+        function CallBack() {
+            if ($.isFunction(parent._ActiveSelectOutStocksCallBack)) {
+                var result = new Array();
+                $("#selected_list input[name='sysno']").each(function () {
+                    result.push($(this).val());
+                });
+
+                parent._ActiveSelectOutStocksCallBack(result);
+                UI.Dialog.close();
+            }
+        }
+
+
+        // 复杂的自定义覆盖物
+        function ComplexCustomOverlay(point, text, mouseoverText, model, callBack) {
+            this._point = point;
+            this._text = text;
+            this._overText = mouseoverText;
+            this._callBack = callBack;
+            this._model = model;
+        }
+        ComplexCustomOverlay.prototype = new BMap.Overlay();
+        ComplexCustomOverlay.prototype.initialize = function (map) {
+            this._map = map;
+            var div = this._div = document.createElement("div");
+            div.style.position = "absolute";
+            div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+            div.style.backgroundColor = "#EE5D5B";
+            div.style.border = "1px solid #BC3B3A";
+            div.style.color = "white";
+            div.style.height = "18px";
+            div.style.padding = "2px";
+            div.style.lineHeight = "18px";
+            div.style.whiteSpace = "nowrap";
+            div.style.MozUserSelect = "none";
+            div.style.fontSize = "12px";
+            var span = this._span = document.createElement("span");
+            div.appendChild(span);
+            span.appendChild(document.createTextNode(this._text));
+            var that = this;
+
+            var arrow = this._arrow = document.createElement("div");
+            arrow.style.background = "url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat";
+            arrow.style.position = "absolute";
+            arrow.style.width = "11px";
+            arrow.style.height = "10px";
+            arrow.style.top = "22px";
+            arrow.style.left = "10px";
+            arrow.style.overflow = "hidden";
+            div.appendChild(arrow);
+
+            div.onmouseover = function () {
+                this.style.backgroundColor = "#6BADCA";
+                this.style.borderColor = "#0000ff";
+                this.getElementsByTagName("span")[0].innerHTML = that._overText;
+                arrow.style.backgroundPosition = "0px -20px";
+            };
+
+            div.onmouseout = function () {
+                this.style.backgroundColor = "#EE5D5B";
+                this.style.borderColor = "#BC3B3A";
+                this.getElementsByTagName("span")[0].innerHTML = that._text;
+                arrow.style.backgroundPosition = "0px 0px";
+            };
+
+            div.onclick = function () {
+                that._callBack && that._callBack(that._model);
+            }
+
+            mp.getPanes().labelPane.appendChild(div);
+
+            return div;
+        };
+        ComplexCustomOverlay.prototype.draw = function () {
+            var map = this._map;
+            var pixel = map.pointToOverlayPixel(this._point);
+            this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+            this._div.style.top = pixel.y - 30 + "px";
+        };
+
+        // 格式化时间
+        Date.prototype.format = function (format) {
+            var o = {
+                "M+": this.getMonth() + 1, //month
+                "d+": this.getDate(),    //day
+                "h+": this.getHours(),   //hour
+                "m+": this.getMinutes(), //minute
+                "s+": this.getSeconds(), //second
+                "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+                "S": this.getMilliseconds() //millisecond
+            }
+            if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+            (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o) if (new RegExp("(" + k + ")").test(format))
+                format = format.replace(RegExp.$1, RegExp.$1.length == 1 ? o[k] : ("00" + o[k]).substr(("" + o[k]).length));
+            return format;
+        }
+        function formatTime(val) {
+            var re = /-?\d+/;
+            var m = re.exec(val);
+            var d = new Date(parseInt(m[0]));
+            // 按【2012-02-13 09:09】的格式返回日期
+            return d.format("yyyy-MM-dd hh:mm");
+        }
+
+        // 格式化数字->货币
+        function formatMoney(num) {
+            num = (num || 0) + "";
+            return "¥" + num.split('').reverse().join('').replace(/(\d{3}(?=\d)(?!\d+\.|$))/g, '$1,').split('').reverse().join('');
+        }
+
+        // 出库单状态
+        function getStatusDes(status) {
+            var items = {
+                10: "待出库",
+                20: "待拣货",
+                30: "待打包",
+                40: "待配送",
+                50: "配送中",
+                60: "已签收",
+                70: "拒收",
+                80: "部分退货",
+                90: "全部退货",
+                0: "作废"   // 真实枚举值为-10
+            }
+            if (status == -10)
+                return items["0"];
+            else
+                return items[status] || "";
+        }
+    </script>
+}
+<div class="caseout">
+    <div class="boxs" id="tabboxs3">
+        <div class="head_tab">
+            <ul class="tabNav">
+                <li><a href="javascript:void(0);">地图信息</a></li>
+                <li class="menuon"><a href="javascript:void(0);">已选择数据</a></li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+                <div class="boxs_listtabel wrapper">
+                    <!--工具条-->
+                    <div class="boxs_tool border_bottom">
+                        <div class="right_tool clearfix">
+                            <div class="m10_l fl">
+                                <button class="btn btn_ht26 LG1009101" title="更多" onclick="loadOutStockList()"><span class="icon icon_plus"></span><span class="m5_l">更多</span></button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/百度地图区-->
+                    <div class="boxs" style="width: 100%; overflow: hidden;" id="allmap"></div>
+                </div>
+            </div>
+            <div class="list">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="batch_cancel"><span class="icon_minus_sign"></span><span class="m5_l">批量取消</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_listtabel">
+                    <table id="selected_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                        <thead>
+                            <tr>
+                                <th style="width: 3%;">
+                                    <input name="" type="checkbox" value="" id="selected_all" /></th>
+                                <th style="width: 5%">出库单号</th>
+                                <th style="width: 5%">订单编号</th>
+                                <th style="width: 7%">收件地址</th>
+                                <th style="width: 10%">收货人</th>
+                                <th style="width: 5%">金额</th>
+                                <th style="width: 7%">订购时间</th>
+                                <th style="width: 6%">是否开票</th>
+                                <th style="width: 6%">状态</th>
+                                <th style="width: 6%;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="odd_color" id="noitem">
+                                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="hid_warehouse_sys_no" type="hidden" value="@ViewBag.WarehouseSysNo" />
+<input id="hid_delivery_type_sys_no" type="hidden" value="@ViewBag.DeliveryTypeSysNo" />
+<input id="hid_sys_no_filter" type="hidden" value="@ViewBag.SysNoFilter" />
+<input id="hid_deliveryUser_loction" type="hidden" value="@ViewBag.DeliveryUserLoction" />
+<input id="hid_deliveryUser_name" type="hidden" value="@ViewBag.DeliveryUserName" />

@@ -1,0 +1,99 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+
+<#@ import namespace="System.Collections.Generic" #>
+<#@include file="MultiOutputHelper.ttinclude"  #>
+<#@include file="ModelHelper.ttinclude"  #>
+
+<#  var multiManager=Manager.Create(Host,GenerationEnvironment);//多文件分割器  
+	ModelHelper modelCreator=ModelHelper.CreateSqlserverHelper(); //注意创建的数据库类型
+	List<TableInfo> tableInfoList=modelCreator.GetTableInfoList(); //从数据库获取所有表
+	foreach(TableInfo tInfo in tableInfoList)
+    {	//块文件开始
+		multiManager.StartNewFile(tInfo.TableName+"BLL.cs");
+		string strTableName=tInfo.TableName;//表名
+		string strModelName=tInfo.TableName+"Info";//实体类名称
+#>
+/*******************************************************************************
+* 创建描述：由T4引擎自动创建于 <#=DateTime.Now.ToString()#>
+*******************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Text;
+using Model;//实体类类库
+using DAL;//数据访问类库
+
+namespace BLL
+{
+	///<summary>
+	///<#=strTableName#>  bll业务逻辑类
+	///</summary>
+	public class <#=strTableName #>BLL
+	{
+		<#=strTableName #>DAL dal=new <#=strTableName #>DAL();
+
+		///<summary>
+		///新增
+		///</summary>
+		/// <param name="model"></param>
+		public bool Add(<#=strModelName #> model) 
+		{
+			return dal.Add(model); 
+		}
+
+		///<summary>
+		///删除
+		///</summary>
+		/// <param name="strModelID"></param>
+		/// <returns></returns>
+		public bool Delete(string strModelID)
+		{
+			return dal.Delete(strModelID); 
+		}
+
+		///<summary>
+		///更新
+		///</summary>
+		/// <param name="model"></param>
+		/// <returns></returns>
+		public bool Update(<#=strModelName #> model)
+		{
+			return dal.Update(model);
+		}
+
+		///<summary>
+		///获取单个实体对象
+		///</summary>
+		/// <param name="strModelID"></param>
+		/// <returns></returns>
+		public <#=strModelName #> GetModelByID(string strModelID)
+		{
+			return dal.GetModelByID(strModelID);
+		}
+
+		///<summary>
+		///获取多个实体对象
+		///</summary>
+		/// <param name="strWhere"></param>
+		/// <returns></returns>
+		public List<<#=strModelName #>> GetModelList(string strWhere)
+		{
+			return dal.GetModelList(strWhere);
+		}
+		
+		///<summary>
+		///获取多个实体对象（分页）
+		///</summary>
+		/// <param name="strWhere">扩展条件查询语句</param>
+		/// <param name="pageIndex">页索引</param>
+		/// <param name="pageSize">单页行数</param>
+		/// <param name="itemCount">查询总行数</param>
+		/// <returns></returns>
+		public List<<#=strModelName #>> GetModelList(string strWhere,int pageIndex,int pageSize,out int itemCount)
+		{
+			return dal.GetModelList(strWhere,pageIndex,pageSize,out itemCount);
+		}
+	}
+}
+<# multiManager.EndBlock(); }#>//块结束标记
+<# multiManager.Process(true);#>//根据块标记分割生成多个文件 

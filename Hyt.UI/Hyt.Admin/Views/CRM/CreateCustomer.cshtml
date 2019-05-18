@@ -1,0 +1,333 @@
+﻿@model Hyt.Model.SoOrder
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "会员创建";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.CM1005924, ".CM1005924")
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/base.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all"/>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+}
+<style>
+    select,.input_xlarge,button{ font-size: 12px;}
+    .hzy_else label{ position: absolute;top: 441px;top: 443px\9;*top:458px;left: 272px;}
+</style>
+<body class="bodynone">
+<form method="POST" id="form1" name="form1" class="caseout">
+    <div class="boxs_detail_dispay">
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup hide"></span></div>
+            <h5>创建会员</h5>
+        </div>
+        <div style="display: block;" class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" id="tb_addCustomer">
+                <tbody>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone "><span class="m10_l"><span class="v_star">*</span>登录用户名</span></td>
+                        <td width="83%">
+                            <input type="text" class="input_xlarge m10_r" id="Account" name="Account" maxlength="20" onchange="fillMobile(this)"><span class="prompt" id="c_Account">填写手机号</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l">手机验证码</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="mobileValidation" id="mobileValidation" maxlength="20">
+                            <button class="btn btn_ht28 CM1005924 p10_lr" id="btnSendMobileValidation" type="button" onclick="sendMobileValidation()">发送验证码</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l">性别</span></td>
+                        <td width="83%" >
+                            <input type="radio" value="1" checked="checked" name="Gender" id="male"><label for="male"> 男</label><input type="radio" value="2" name="Gender" style="margin-left: 10px;" id="female"><label for="female"> 女</label></td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l"><span class="v_star">*</span>姓名</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="Name" id="Name" maxlength="50" onchange="fillName(this)"><span class="prompt" id="c_Name">填写中文姓名</span></td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l"><span class="v_star">*</span>手机</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="MobilePhoneNumber" id="MobilePhoneNumber"  maxlength="15" onchange="fillMobile(this)"><span class="prompt" id="c_MobilePhoneNumber">填写手机号</span></td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l">电子邮箱</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="EmailAddress" id="EmailAddress"maxlength="100"><span class="prompt" id="c_EmailAddress">填写电子邮箱</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tabledown"></span></div>
+            <h5>收货信息</h5>
+        </div>
+        <div class="tit_con" style="display:none">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="v_star">*</span><span>收货人</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="ReceiveName" id="ReceiveName" maxlength="20" onchange="fillName(this)"><span class="prompt" id="c_ReceiveName">填写收货人</span></td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="v_star">*</span><span>收货手机</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="MobilePhoneNumber1" id="MobilePhoneNumber1" maxlength="15" onchange="fillMobile(this)"><span class="prompt" id="c_MobilePhoneNumber1">填写收货人手机号</span></td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l">收货固定电话</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="PhoneNumber" maxlength="22"></td>
+                    </tr>
+                    <tr>
+                        <td width="12%" class="nameright border_rnone" rowspan="2"><span class="v_star">*</span><span>收货地区</span></td>
+                        <td width="83%" class="borde_right border_bnone">
+                            <select class="c3 m10_r wd120" id="dpdCountry"></select><span class="c6">国家</span>
+                            <select class="c3 m10_r wd120" id="dpdProvince"></select><span class="c6">省</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="83%" class="borde_right hzy_else" style=" padding-top:0px;">
+                         <select class="c3 m10_l m10_r wd120" id="dpdCity"></select><span class="c6">市/地区</span>
+                         <select class="c3 m10_r wd120" id="dpdArea" name="dpdArea"></select><span class="c6 m10_r">区</span><span class="prompt" id="c_dpdArea">选择收货地区</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="v_star">*</span><span>收货地址</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="StreetAddress" id="StreetAddress" maxlength="100"><span class="prompt" id="c_StreetAddress">选择收货地址</span>
+                            <input id="btnSubmit" type="submit" style="display: none" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="17%" class="nameright border_rnone"><span class="m10_l">收货邮编</span></td>
+                        <td width="83%" >
+                            <input type="text" class="input_xlarge m10_r" name="ZipCode" maxlength="6"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+</body>
+@section FooterJs{
+    <script type="text/javascript">
+        //填充手机号
+        function fillMobile(obj) {
+            var mobile = $(obj).val();
+            if ($('#Account').val() == '') $('#Account').val(mobile).blur();
+            if ($('#MobilePhoneNumber').val() == '') $('#MobilePhoneNumber').val(mobile).blur();
+            if ($('#MobilePhoneNumber1').val() == '') $('#MobilePhoneNumber1').val(mobile).blur();
+        }
+
+        //填充姓名
+        function fillName(obj) {
+            var name = $(obj).val();
+            if ($('#Name').val() == '') $('#Name').val(name).blur();
+            if ($('#ReceiveName').val() == '') $('#ReceiveName').val(name).blur();
+        }
+
+        //创建会员 
+        function AjaxCreate(from, fromNo) {
+            //var data = {};
+            var currecturl = '/ajax/CustomerCreate';
+            currecturl += "?from=" + from + "&fromNo=" + fromNo;
+         
+            $.ajax({
+                url: currecturl,
+                type: 'POST',
+                cache: false,
+                data: $('#form1').serialize(),
+                success: function(result) {
+                    if (result.error != '') {
+                        Utils.alert(result.error);
+                    } else {
+                        UI.Dialog.opener._ActiveCreateCustomerCallBack(result);
+                        art.dialog.close();
+                    }
+                }
+            });
+            return false;
+        }
+
+        $(document).ready(function (e) {
+            LoadRule();
+            $("#form1").ajaxLoadingMask(true);
+            //加载收货地区
+            Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), {
+                callback: function(type) {
+                }
+            });
+        });
+
+        
+        //加载验证规则
+        var setting;
+        function LoadRule() {
+            setting = $("#form1").validate({
+                onclick: false,
+                onkeyup: false,
+                rules: {
+                    Account: {  //用户名
+                        required: true,
+                        maxlength: 20,
+                        isMobile: true,
+                        remote: {
+                            type: "post",
+                            url: "/ajax/NotExistCustomer",
+                            data: {
+                                account: function() {
+                                    return $("#Account").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function(data, type) {
+                                if (data == 'true') {
+                                    $('#c_Account').text('填写手机号');
+                                } else {
+                                    $('#c_Account').text('用户名已注册');
+                                    //$('#c_Account').text('用户名已注册').delay(1000).show(function() {
+                                    //    $(this).text('填写手机号').css('display', 'inline');
+                                    //});
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    Name: { required: true },  //姓名
+                    MobilePhoneNumber: { required: true, isMobile: true },  //手机
+                    EmailAddress: { email: true },  //电子邮箱
+                    ZipCode: { isZipCode: true }  //邮编
+                },
+                errorPlacement: function(error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error');
+                },
+                success: function(label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success');
+                }
+            });
+        }
+        
+        //表格数据隐藏显示
+        var clickbox = $(".tit_dispay");
+        var btnup = clickbox.children(".more10r").children("span");
+        //收货地址显示隐藏
+        btnup.toggle(
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").show();
+                $(this).removeClass("btn_tabledown").addClass("btn_tableup");
+                $('#ReceiveName').rules('add', {
+                    required: true
+                });
+                $('#MobilePhoneNumber1').rules('add', {
+                    required: true,
+                    isMobile: true
+
+                });
+                $('#dpdArea').rules('add', {
+                    required: true,
+                    min: 1
+                });
+                $('#StreetAddress').rules('add', {
+                    required: true
+                });
+            },
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").hide();
+                $(this).removeClass("btn_tableup").addClass("btn_tabledown");
+                $('#ReceiveName').rules('remove');
+                $('#MobilePhoneNumber1').rules('remove');
+                $('#dpdArea').rules('remove');
+                $('#StreetAddress').rules('remove');
+            }
+        );
+
+        //确认事件，名称不可变
+        function CallBack(from,fromNo) {
+            if (!setting.form()) {
+                return false;
+            } else {
+                AjaxCreate(from, fromNo);
+            }
+        }
+
+        var canSubmit = true;
+        var canReg = true;
+        function sendMobileValidation() {
+            if (!canSubmit) {
+                return false;
+            }
+
+            var mobile = $("#Account").val();
+            if (mobile == "") {
+                Utils.alert("请填写手机号");
+                return false;
+            }
+
+            detectUser(mobile);
+            if (!canReg) {
+                Utils.alert("该用户名已被注册，请更换后再发送。");
+                return false;
+            }
+
+            $.ajax({
+                async: false,
+                type: "post",
+                url: "/Ajax/SendMobileValidation",
+                data: { mobile: mobile },
+                dataType: "json",
+                success: function(ret) {
+                    if (ret.Status || ret.StatusCode > -1) {
+                        updateTimeline(ret.StatusCode);
+                        $("#btnSendMobileValidation").addClass("btn btn_ht28 disabled");
+                    }
+                    Utils.alert(ret.Message);
+                }
+            });
+        }
+
+        var hander;
+
+        function updateTimeline(time) {
+            var btn = $("#btnSendMobileValidation");
+            //btn.fadeIn(1000);
+            btn.text(time <= 0 ? "重新发送验证码" : ("" + (time) + "秒后可重新发送"));
+            hander = setInterval(function() {
+                if (time <= 0) {
+                    canSubmit = true;
+                    clearInterval(hander);
+                    btn.text("重新发送验证码");
+                    btn.css({ "cursor": "hand" });
+                    $("#btnSendMobileValidation").removeClass("disabled");
+                } else {
+                    canSubmit = false;
+                    btn.text("" + (time--) + "秒后可重新发送");
+                }
+            }, 1000);
+        }
+
+        function detectUser(mobile) {
+            $.ajax({
+                async: false,
+                type: "post",
+                url: "/Ajax/NotExistCustomer",
+                data: { account: mobile },
+                dataType: "json",
+                success: function(ret) {
+                    canReg = ret;
+                }
+            });
+        }
+    </script>
+}
+
+

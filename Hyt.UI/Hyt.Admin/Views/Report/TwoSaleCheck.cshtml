@@ -1,0 +1,162 @@
+﻿@{
+    ViewBag.Title = "二次销售订单业务员对账报表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section FooterJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script language="javascript" type="text/javascript">
+        //设置控件显示仓库
+        function setControlShowWarehouse() {
+            var ids = getCheckedWarehouses().join();
+            var names = getCheckedWarehouseNames();
+            if (names.length > 2) {
+                $("#warehouseChoose").val("已选择" + names.length + "个仓库");
+            } else {
+                if (!names.length) {
+                    $("#warehouseChoose").val("请选择仓库");
+                } else {
+                    $("#warehouseChoose").val(names.join());
+                }
+            }
+            $("#WarehouseSysNo").val(ids);
+        }
+        $(document).ready(function () {
+            var offset = $("#warehouseChoose").offset();
+            //绑定选择仓库文本框
+            $("#warehouseChoose").click(function () {
+                $("#warehouseList").css({
+                    "top": (offset.top + $(this).height() + 5) + "px",
+                    "left": offset.left + "px"
+                }).show();
+            });
+            //绑定选择仓库按钮
+            $("#warehouseChooseBtn").click(function () {
+                $("#warehouseList").css({
+                    "top": (offset.top + $(this).height() + 5) + "px",
+                    "left": offset.left + "px"
+                }).show();
+            });
+            $("#btnOk").click(function () {
+                setControlShowWarehouse();
+                $("#warehouseList").hide();
+            });
+            $("#btnCancel").click(function () {
+                $("#warehouseList").hide();
+            });
+            $("#btnSearch").click(function () {
+                SearchData();
+            });
+            $("#btnExport").click(function () {
+                PostExportExcel();
+            });
+            SearchData();
+        });
+
+        //分页开始时执行的方法
+        function tableBegin() {
+            Utils.MaskStart($("#paging"));
+            $.ajax({
+                url: "@Url.Action("SetWhSelected")",
+                type: "post",
+                dataType: "text",
+                data: { "whSelected": $("#WarehouseSysNo").val() },
+                success: function() {
+                    Utils.MaskStop();
+                }
+        });
+        }
+        function SearchData() {
+            Utils.MaskStart($(".case"));
+            $.ajax({
+                url: "@Url.Action("SetWhSelected")",
+                type: "post",
+                dataType: "text",
+                data: { "whSelected": $("#WarehouseSysNo").val() },
+                success: function () {
+                        $.get("/Report/_TwoSaleCheck?r=" + Math.random(), { CreateTime: $("#txtCalDate").val() }, function (result) {
+                            $('#paging').empty();
+                            $('#paging').html(result);
+                        }
+                        );
+                       Utils.MaskStop();
+                }
+            });
+        }
+        //打开二次销售详情页面
+        function OpenDetail(createdt,uid,whsysno,username,whName)
+        {
+            UI.OpenCreatTab("二次销售详情:" + createdt + "|" + username+"|"+whName, "/Report/TwoSaleDetail?CreateTime=" + createdt + "&UserID=" + uid + "&SelectWarehouseSysNo=" + whsysno);
+        }
+        function PostExportExcel()
+        {
+            Utils.MaskStart($(".case"));
+            $.ajax({
+                url: "@Url.Action("SetWhSelected")",
+                type: "post",
+                dataType: "text",
+                data: { "whSelected": $("#WarehouseSysNo").val() },
+                success: function () {
+              
+                    Utils.MaskStop();
+                    $("#form1").submit();
+                }
+            });
+        }
+    </script>
+}
+<!--选择仓库弹出框-->
+<div id="warehouseList" style="width: 282px; vertical-align:top; position: absolute; display: none">
+    @{
+        Html.RenderAction("WarehouseTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>
+<div class="case" id="divP">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>二次销售订单业务员对账报表</h3>
+        </div>
+    <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="left_tool" style="float: left">
+                    <button class="btn btn_ht26 m10_r" id="btnExport" title="导出Excel" ><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">下单时间</span>
+                   
+                        <div class="fl m10_l">
+                            <div class="date_btn">
+                                <form id="form1" action="@Url.Action("ExportTwoSale")">
+                                    <input type="text" id="txtCalDate" name="CreateTime" class="input_ht26" value="@DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd")" />
+                                    <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtCalDate',dateFmt:'yyyy-MM-dd'})">
+                                        <span class="icon_calendar"></span>
+                                    </button>
+                                </form>
+                                  
+                            </div>
+                        </div>
+                 
+                    <span class="veralign_t fl m10_l">仓库</span>
+                    <div class="fl m10_l" style="margin-right: 10px;">
+                        <div class="date_btn">
+                            <input type="text" class="input_ht26" id="warehouseChoose" name="sysno" value="请选择仓库" readonly="readonly" />
+                            <button type="button" title="仓库" class="btn btn_ht26" id="warehouseChooseBtn">
+                                <span class="icon_th_list"></span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="WarehouseSysNo" name="WarehouseSysNo" />
+                    </div>
+                    <button type="button" id="btnSearch" class="btn btn_ht26 fl m10_l" title="查询"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                </div>
+            </div>
+        <!-- 查询结果 -->
+        <div id="paging" class="boxs_listtabel">
+        </div>
+</div>

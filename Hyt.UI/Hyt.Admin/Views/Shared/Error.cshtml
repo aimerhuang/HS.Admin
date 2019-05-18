@@ -1,0 +1,53 @@
+﻿@{
+    Layout = null;
+}
+@model Hyt.Model.Result<Exception>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width" />
+    <title>错误</title>
+    <style>
+        BODY { color: #000000; background-color: white; font-family: Verdana; margin-left: 0px; margin-top: 0px; } 
+        a{ color: green; text-decoration: underline; } 
+        .heading1 { background-color: #F9F1E9;line-height: 22px; border: #E5BD93 1px solid; color: #000; font-family: Tahoma; font-size: 14px; font-weight: normal;margin:15px; padding: 10px;}
+        .msg{ background: url('/theme/images/sorry.jpg') no-repeat;padding: 10px 0px 10px 120px;margin-top: 15px;}
+        .msg .info{font-size: 14px;margin-left: 15px;color: #666;}
+    </style>
+</head>
+    <body>
+        <div class="msg">
+            <span class="info">非常抱歉，程序出现异常，相关异常已经记录！</span>
+            <p class="heading1">
+                错误提示： @Model.Message
+            </p>
+            <p id="StackTrace" class="heading1">
+                堆栈信息： @Model.Data.StackTrace
+            </p>
+        </div>
+        <script>
+            (function(){
+                var o = document.getElementById("StackTrace");
+                var s = o.innerHTML;
+                var p = document.createElement("span");
+                var n = document.createElement("a");
+                p.innerHTML = s.substring(0, 120);
+                n.innerHTML = s.length > 120 ? "...查看详细" : "";
+                n.href = "javascript:;";
+                n.onclick = function() {
+                    if (n.innerHTML == "...查看详细") {
+                        n.innerHTML = "...收起详细";
+                        p.innerHTML = s;
+                    } else {
+                        n.innerHTML = "...查看详细";
+                        p.innerHTML = s.substring(0, 120);
+                    }
+                };
+                o.innerHTML = "";
+                o.appendChild(p);
+                o.appendChild(n);
+            })();
+        </script>
+    </body>
+</html>

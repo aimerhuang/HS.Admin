@@ -1,0 +1,98 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.SpPromotion>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone"  id="item_list">
+        <thead>
+                        	<tr>
+                                <th>系统编号</th>
+                            	<th>促销名称</th>
+                                <th width="90">促销代码</th>
+                                <th width="100">促销类型</th>
+                                <th width="220">起止时间</th>
+                                <th width="110">使用平台</th>
+                                <th width="80">使用次数</th>
+                                <th width="120">允许用户使用次数</th>
+                                <th width="59">优先级</th>
+                                <th width="70">主题地址</th>
+	                            <th width="50">状态</th>
+                                <th width="300">操作</th>
+                            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="11" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.SpPromotion>)Model.TData)
+                {
+                    <tr>
+                    <td>@item.SysNo</td>
+                    <td>@item.Name</td>
+                    <td>@item.PromotionCode</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销应用类型), item.PromotionType)</td>
+                    <td>@item.StartTime.ToString("yyyy-MM-dd HH:mm") ~ @item.EndTime.ToString("yyyy-MM-dd HH:mm")</td>    
+                    <td>@Hyt.Admin.Controllers.PromotionController.GetUserPlatText(new Dictionary<int,int>{{(int)PromotionStatus.促销使用平台.PC商城,item.WebPlatform},{(int)PromotionStatus.促销使用平台.门店,item.ShopPlatform},{(int)PromotionStatus.促销使用平台.手机商城,item.MallAppPlatform},{(int)PromotionStatus.促销使用平台.物流App,item.LogisticsAppPlatform}})</td>
+                    <td>@item.PromotionUsedQuantity</td>
+                    <td>@item.PromotionUseQuantity</td>
+                    <td>@item.Priority</td>
+                    <td class="blue"><a  title="查看" href="@item.SubjectUrl" target="_blank"><span class="m5_l">查看</span></a></td>
+
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销状态), item.Status)</td>
+                    <td>
+                        <button title="修改" class="btn btn_ht26 btn_blue" type="button" onclick="openTab(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                        @if (item.Status == (int)PromotionStatus.促销状态.待审)
+                        {
+                          <button class="btn btn_orange btn_ht26" onclick="audit(@item.SysNo);return false;"><span class="icon_white icon_thumbs_up"></span><span>审核</span></button>                          
+                        }
+                        @if (item.Status == (int)PromotionStatus.促销状态.已审)
+                        {
+                         <button class="btn btn_red btn_ht26" onclick="calcelaudit(@item.SysNo); return false;"><span class="icon_white icon_share_alt"></span><span>取消审核</span></button>                           
+                        }
+                    </td>
+                    </tr>
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+
+    //隔行子页TABLE样式
+    DAO.InterlineStyle();
+    //隔行parent样式
+    noItemDisplay();
+
+    //当没有选择数据时 默认tr的显示状态
+    function noItemDisplay() {
+        var item = $("#selected_list input[name='sysno']");
+        if (item.length <= 0) {
+            $("#selected_list #noitem").show();
+        }
+        else {
+            $("#selected_list #noitem").hide();
+        }
+        //隔行样式
+        DAO.InterlineStyle({ tableid: 'selected_list' });
+    }
+    
+    function Browse(url) {
+        if (url != "") {
+            open(url, "_new");
+        }
+    }
+</script>

@@ -1,0 +1,197 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "文件上传";
+}
+@model Hyt.Model.Common.FileConfigOption
+@section HeadJs{
+    <script type="text/javascript" src="~/Theme/Plugins/Upload/jquery.uploadify.min.js?0168"></script>
+}
+<input type="hidden" id="uploadqueueStstus" value="wait" />
+<div class="ke-box-block ke-dialog">
+    <div class="ke-dialog-content">
+        <div class="ke-dialog-body">
+            <div style="padding: 10px;">
+                <div class="swfupload">
+                    <div class="ke-swfupload">
+                        <div class="ke-swfupload-top">
+                            <div class="uploadify-queue-item ke-swfupload-button">
+                                <button class="btn btn_ht26" id="uploadify"></button>
+                            </div>
+                            <div class="uploadify-queue-item ke-swfupload-desc">允许同时上传 @Model.QueueLimit 个文件，单张文件大小不超过 @Model.MaxSize</div>
+                            <span class="ke-button-common ke-button-outer ke-swfupload-startupload">
+                                <button class="btn btn_ht26 btn_green" id="btn_upload"><span class="icon_upload icon_white"></span><span class="m5_l">开始上传</span></button>
+                            </span>
+                        </div>
+                        <!--上传队列-->
+                        <div id="file_upload_queue" class="uploadify-queue"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("#uploadify").uploadify({
+                'formData': {
+                    'config': '@Request.QueryString["config"]'
+                },
+                'swf': '@Url.Content("/Theme/Plugins/Upload/uploadify.swf")',
+                'uploader': '@Url.Content("/upload.ashx")',
+                'queueID': 'file_upload_queue',
+                'auto': false,
+                'wmode': 'transparent',
+                'buttonImage': '@Url.Content("/Theme/images/select_docs.png")',
+                'height': '26',
+                'width': '85',
+                'multi': @(Model.QueueLimit == 1 ? "false" : "true"), //多文件上传开个
+                'fileSizeLimit': '@Model.MaxSize', //单文件最大大小
+                'fileTypeExts': '@Model.Type',
+                'fileTypeDesc': '@Model.TypeDescript',
+                'uploadLimit': @Model.QueueLimit, //可以上传的文件总数量
+                'queueSizeLimit': @Model.QueueLimit, //队列最大的文件数量
+                'removeCompleted': false,
+                'itemTemplate': '<div id="${fileID}" class="uploadify-queue-item ke-item" status="wait">\
+                    <div class="uploadify-queue-item ke-photo">\
+                        <img src="http://www.kindsoft.net/ke4/plugins/multiimage/images/image.png" class="ke-img" data-status="-1" width="80" height="80">\
+					    <span class="ke-delete" onclick="javascript:$(\'#${instanceID}\').uploadify(\'cancel\', \'${fileID}\')"></span>\
+                        <div class="ke-status">\
+                            <div class="ke-progressbar" style="display:none;">\
+                      	        <div class="uploadify-progress">\
+                                    <div class="uploadify-progress-bar"><!--Progress Bar--></div>\
+                            </div>\
+                            <div class="ke-progressbar-percent data">0%</div>\
+                       </div>\
+                      <div class="ke-message">等待上传</div>\
+                    </div>\
+                    </div>\
+                    <div class="ke-name">${fileName}</div>\
+				</div>',
+                'onSelect': function(file) {
+                    SetQueueStatus("wait");
+                },
+                'onFallback': function() {
+
+                },
+                'onCancel': function() {
+
+                },
+                'onQueueComplete': function() {
+                    //队列中所有文件上传完毕后执行
+                    //$('#uploadify').uploadify('cancel', '*');//清除队列
+                    SetQueueStatus('complete');
+                    UI.Prompt.Success('文件上传完毕!');
+                },
+                'onUploadStart': function(file) {
+                    //开始上传时执行
+                    var queue = $('#' + file.id);
+                    queue.find('.ke-message').hide();
+                    queue.find('.ke-progressbar').show();
+                    queue.attr('status', 'runing');
+                },
+                'onUploadSuccess': function(file, data, response) {
+
+                    //上传成功后执行
+                    var queue = $('#' + file.id);
+                    queue.addClass('uploadify-success');
+                    queue.find('.ke-message').text('上传成功').show();
+                    queue.find('.ke-progressbar').hide();
+                    queue.attr('status', 'complete');
+                    queue.data('file', { url: data, name: file.name, size: file.size });
+
+                    //单文件上传时上传成功后禁用上传按钮
+                    if (@(Model.QueueLimit == 1 ? "true" : "false")) {
+                        $('#uploadify').uploadify('disable', true);
+                    }
+
+                },
+                'onUploadError': function(file, errorCode, errorMsg, errorString) {
+                    //上传错误时执行
+                    var queue = $('#' + file.id);
+                    queue.find('.ke-message').text('上传失败').show();
+                    queue.find('.ke-progressbar').hide();
+                    queue.attr('status', 'error');
+                }
+            });
+
+            //开始上传
+            $('#btn_upload').click(function() {
+                if (GetFilesNum() > 0) {
+                    switch (GetQueueStatus().toUpperCase()) {
+                    case 'RUNING':
+                        UI.Prompt.Error('文件上传中!');
+                        break;
+                    case 'COMPLETE':
+                        UI.Prompt.Error('文件已上传完毕!');
+                        break;
+                    default:
+                        $('#uploadify').uploadify('upload', '*');
+                        SetQueueStatus('runing');
+                        break;
+                    }
+                } else {
+                    UI.Prompt.Error('您还没有选择上传的文件!');
+                }
+            });
+        });
+
+        //获取上传队列的文件数量
+
+        function GetFilesNum() {
+            return $('#file_upload_queue > div.uploadify-queue-item').length;
+        }
+
+        //获取上传队列的状态
+
+        function GetQueueStatus() {
+            return $('#uploadqueueStstus').val();
+        }
+
+        //设置上传队列状态
+
+        function SetQueueStatus(status) {
+            $('#uploadqueueStstus').val(status);
+        }
+
+        //检测队列是否上传完成
+
+        function CheckQueueComplete() {
+            if ($('#file_upload_queue > div[status="wait"]').length > 0 || $('#file_upload_queue > div[status="runing"]').length > 0) {
+                return false;
+            }
+            return true;
+        }
+
+        function CallBack() {
+            //判断队列中是否含有等待上传的文件
+            if (!CheckQueueComplete()) {
+                SetQueueStatus("wait");
+            } else {
+                SetQueueStatus("complete");
+            }
+
+            var data = [];
+            var $queueItem = $('#file_upload_queue > div.uploadify-queue-item');
+            if (GetFilesNum() > 0) {
+                switch (GetQueueStatus().toUpperCase()) {
+                case 'RUNING':
+                    UI.Prompt.Error('文件上传中!');
+                    break;
+                case 'COMPLETE':
+                    $('#file_upload_queue > div[status="complete"]').each(function() {
+                        data.push($(this).data('file'));
+                    });
+                    UI.DialogOpener()._ActiveFileUploadCallBack(data);
+                    UI.CloseDialog();
+                    break;
+                default:
+                    UI.Prompt.Error('队列中有未上传的文件!');
+                    break;
+                }
+            } else {
+                UI.Prompt.Error('您还没有选择上传的文件!');
+            }
+        }
+    </script>
+}

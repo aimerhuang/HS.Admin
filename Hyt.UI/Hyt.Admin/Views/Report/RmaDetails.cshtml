@@ -1,0 +1,472 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.RP_退换货明细>
+@{
+    ViewBag.Title = "RmaDetails";
+}
+
+@section FooterJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript">
+        var paras;
+
+        function setWhData() {
+            var whSelected = getCheckedWarehouses().join();
+            $.ajax({
+                url: '@Url.Action("SetWhSelected")',
+                async: false,
+                type: 'post',
+                data: { whSelected: whSelected }
+            });
+            AjaxStart();
+        }
+
+        function ajaxAction(url, type, vals) {
+            Utils.MaskStart($('#divCase'));
+            $.ajax({
+                url: url,
+                type: 'GET',
+                //async: async === undefined ? true : async,
+                data: vals,
+                success: function(data) {
+                    //login time out handling
+                    /*CustomActionFilter
+                    */
+
+                    $('#divSearchResult').html(data);
+                    Utils.MaskStop();
+                    $('#divSearch').hide();
+                    $('#divSearchContent').hide();
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    //console.log(XMLHttpRequest);
+                    //console.log(textStatus);
+                    //console.log(errorThrown);
+                    Utils.MaskStop();
+                    //UI.tips.tip_alert("tips_wrong", XMLHttpRequest.status);
+                    //if (XMLHttpRequest.status == 400 || XMLHttpRequest.status == 404) {
+                    //    UI.tips.tip_alert("tips_wrong", "你选择的仓库过多!");
+                    //} else {
+                    //    UI.tips.tip_alert("tips_wrong", textStatus + XMLHttpRequest.status);
+                    //}
+                }
+            });
+
+        }
+
+
+        $(document).ready(function() {
+
+            $('#OrderSourceAll').click(function () {
+                $('input[type=checkbox][name=OrderSource]').prop('checked', $(this).prop('checked'));
+            });
+            $('#DelTypeAll').click(function () {
+                $('input[type=checkbox][name=DelType]').prop('checked', $(this).prop('checked'));
+            });
+            $('#PayTypeAll').click(function () {
+                $('input[type=checkbox][name=PayType]').prop('checked', $(this).prop('checked'));
+            });
+            $('#RMATypeAll').click(function () {
+                $('input[type=checkbox][name=RMAType]').prop('checked', $(this).prop('checked'));
+            });
+            $('#PickTypeAll').click(function () {
+                $('input[type=checkbox][name=PickType]').prop('checked', $(this).prop('checked'));
+            });
+            $('#SettlementStatusAll').click(function () {
+                $('input[type=checkbox][name=SettlementStatus]').prop('checked', $(this).prop('checked'));
+            });
+            //dec and set params
+            paras = {
+                BeginDate: $('#BeginDate').val(),
+                EndDate: $('#EndDate').val(),
+                //WareHouses: getCheckedWarehouses(),
+                DelType: $.map($('input[type=checkbox][name=DelType]:checked'), function (el, i) {
+                    return el.value;
+                }),
+                PickType: $.map($('input[type=checkbox][name=PickType]:checked'), function (el) {
+                    return el.value;
+                }),
+                PayType: $.map($('input[type=checkbox][name=PayType]:checked'), function (el) {
+                    return el.value;
+                }),
+                RMAType: $.map($('input[type=checkbox][name=RMAType]:checked'), function (el) {
+                    return el.value;
+                }),
+                OrderSource: $.map($('input[type=checkbox][name=OrderSource]:checked'), function (el) {
+                    return el.value;
+                }),
+                SettlementType: $.map($('input[type=checkbox][name=SettlementStatus]:checked'), function (el) {
+                    return el.value;
+                }),
+                ProNo: $('#ProNo').val(),
+                ProName: $('#ProName').val(),
+                CusId: $('#CusId').val(),
+                Phone: $('#Phone').val(),
+                SettlementStatus: $('#SettlementStatus').val(),
+                InvStatus: $('#InvStatus').children(':selected').text(),
+                OrderNo: $('#OrderNo').val(),
+                IsSelfSupport: $("#IsSelfSupport").val()
+                //OrderSource: $('#OrderSource').children(':selected').val()
+            };
+
+            $('#tableResult tbody tr:even').addClass('stag_color');
+
+            $('#divSearch').hide();
+            $('#divSearchContent').hide();
+            
+            //高级查找
+            $('#btnSearch').click(function() {
+                $('#divSearchContent').toggle();
+                $('#divSearch').toggle();
+            });
+
+            function setParms() {
+                var whSelected = getCheckedWarehouses().join();
+                $.ajax({
+                    url: '@Url.Action("SetWhSelected")',
+                    async: false,
+                    type: 'post',
+                    //cache:false,
+                    data: { whSelected: whSelected }
+                });
+                paras = {
+                    BeginDate: $('#BeginDate').val(),
+                    EndDate: $('#EndDate').val(),
+                    RBeginDate: $('#RBeginDate').val(),
+                    REndDate: $('#REndDate').val(),
+                    //WareHouses: getCheckedWarehouses(),
+                    DelType: $.map($('input[type=checkbox][name=DelType]:checked'), function(el, i) {
+                        return el.value;
+                    }),
+                    PickType: $.map($('input[type=checkbox][name=PickType]:checked'), function(el) {
+                        return el.value;
+                    }),
+                    PayType: $.map($('input[type=checkbox][name=PayType]:checked'), function(el) {
+                        return el.value;
+                    }),
+                    RMAType: $.map($('input[type=checkbox][name=RMAType]:checked'), function(el) {
+                        return el.value;
+                    }),
+                    OrderSource: $.map($('input[type=checkbox][name=OrderSource]:checked'), function(el) {
+                        return el.value;
+                    }),
+                    SettlementType: $.map($('input[type=checkbox][name=SettlementStatus]:checked'), function (el) {
+                        return el.value;
+                    }),
+                    ProNo: $('#ProNo').val(),
+                    ProName: $('#ProName').val(),
+                    CusId: $('#CusId').val(),
+                    Phone: $('#Phone').val(),
+                    SettlementStatus: $('#SettlementStatus').val(),
+                    InvStatus: $('#InvStatus').children(':selected').text(),
+                    OrderNo: $('#OrderNo').val(),
+                    IsSelfSupport: $("#IsSelfSupport").val()
+                    //OrderSource: $('#OrderSource').children(':selected').val()
+                };
+            }
+
+            $('#btnConfirm').click(function() {
+
+                setParms();
+
+                ajaxAction('@Url.Action("RmaDetails")', undefined, { cbReportSaleDetail: JSON.stringify(paras) });
+
+
+            });
+
+            $('#btnExport').click(function() {
+                if ($('#trNodata').length > 0) {
+                    UI.Alert({ content: '没有数据!' });
+                    return;
+                }
+                
+                var whSelected = getCheckedWarehouses().join();
+                $.ajax({
+                    url: '@Url.Action("SetWhSelected")',
+                    async: false,
+                    type: 'post',
+                    data: { whSelected: whSelected }
+                });
+
+                Utils.MaskStart($('#divCase'));
+                window.location = '@Url.Action("ExportRmaDetails")' + "?cbReportSaleDetail=" + JSON.stringify(paras);
+                Utils.MaskStop();
+
+            });
+
+            //#region 初始化--选择仓库--文本框事件
+            $("#WareHouse").click(function() {
+                var self = this;
+
+                var obj = DAO.SelectWhareHouse($("#WareHouse"), {
+                    chkStyle: 'radio',
+                    callback: function(data) {
+                        if (data) {
+                            //选择完成后，将选中的仓库添加到文本框中
+                            $(self).val(data[0].name).attr("sysno", data[0].id);
+                        }
+                        //移除弹出层
+                        obj.Remove();
+
+
+                    }
+                });
+            });
+            //#endregion
+
+            //更新数据
+            $("#btnUpdate").click(function () {
+                UI.Confirm({
+                    content: "您确定同步吗？",
+                    ok: function () {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Report/SynchronousRma",
+                            data: "",
+                            success: function (data) {
+                                if (data.Status) {
+                                    //doSearch(1);
+                                }
+                                UI.Alert({ content: data.Message });
+                            }
+                        });
+                    }
+                })
+            });
+        });
+
+    </script>
+}
+
+<div class="case" id="divCase">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>退换货明细</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!-- div Toolbar -->
+            <div class="boxs_tool">
+                <div class="left_tool" style="float: left">
+                    <button class="btn btn_ht26 m10_r " id="btnUpdate" title="更新数据"><span class="icon  icon_refresh"></span><span class="m5_l">更新数据</span></button>
+                    <button class="btn btn_ht26 m10_r" id="btnExport" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    <button id="btnSearch" class="btn btn_ht26 " title="高级搜索"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+
+            </div>
+            <!-- div Toolbar End-->
+
+            <!-- divSearch -->
+            <div id="divSearch">
+
+                <!-- divSearchContent -->
+                <div class="boxs_detail_dispay" id="divSearchContent">
+                    <div class="tit_con">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lnone border_rnone">
+                            <tr>
+                                <td width="282px" valign="top" class="p5_b">
+                                    @{
+                                        Html.RenderAction("WarehouseTree", "Basic");
+                                    }
+                                </td>
+                                <td valign="top">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_left border_right">
+                                        <tr>
+                                            <td class="nameright">申请日期</td>
+                                            <td colspan="2">
+                                                <span class="fl">开始日期</span>
+                                                <div class="date_btn fl m10_r m10_l">
+                                                    <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'BeginDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" id="BeginDate" name="">
+                                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'BeginDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" type="button"><span class="icon_calendar"></span></button>
+                                                </div>
+
+                                                <span class="fl">结束日期</span>
+                                                <div class="date_btn fl m10_r m10_l">
+                                                    <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" id="EndDate" name="">
+                                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" type="button"><span class="icon_calendar"></span></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="nameright">入库日期</td>
+                                            <td colspan="2">
+                                                <span class="fl" style="padding-top:3px">开始日期</span>
+                                                <div class="date_btn fl m10_r m10_l">
+                                                    <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'RBeginDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" id="RBeginDate" name="">
+                                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'RBeginDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" type="button"><span class="icon_calendar"></span></button>
+                                                </div>
+
+                                                <span class="fl" style="padding-top:3px">结束日期</span>
+                                                <div class="date_btn fl m10_r m10_l">
+                                                    <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'REndDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" id="REndDate" name="">
+                                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'REndDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" type="button"><span class="icon_calendar"></span></button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="nameright">配送方式</td>
+                                            <td>
+                                                <input type="checkbox" id="DelTypeAll" class="p5_r"><span class="p5_l p10_r">全部</span>
+                                                @{
+                                                
+                                                    foreach (var d in (IList<LgDeliveryType>)ViewBag.lstDelType)
+                                                    {
+                                                        <input type="checkbox" name="DelType" value="@d.SysNo" class="p5_r" /><span class="p5_l p10_r">@d.DeliveryTypeName</span>
+                                                    }
+                                                }
+
+                                            </td>
+                                            <td></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="nameright">售后方式</td>
+                                            <td colspan="2">
+                                                <input type="checkbox" id="PickTypeAll" class="p5_r"><span class="p5_l p10_r">全部</span>
+                                                @{
+                                                
+                                                    foreach (var p in (IList<LgPickupType>)ViewBag.lstPickType)
+                                                    {
+                                                        <input type="checkbox" name="PickType" value="@p.SysNo" class="p5_r" /><span class="p5_l p10_r">@p.PickupTypeName</span>
+                                                    }
+                                                }
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="nameright">支付方式</td>
+                                            <td>
+                                                @{
+                                                    <input type="checkbox" id="PayTypeAll" class="p5_r"><span class="p5_l p10_r">全部</span>
+                                                    foreach (var p in (IList<CBBsPaymentType>)ViewBag.lstPaymentType)
+                                                    {
+                                                        <input type="checkbox" name="PayType" value="@p.SysNo" class="p5_r" /><span class="p5_l p10_r">@p.PaymentName</span>
+                                                    }
+                                                }
+                                            </td>
+                                            <td></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="nameright">退款方式</td>
+                                            <td colspan="2">
+                                                @{
+                                                    <input type="checkbox" id="RMATypeAll" class="p5_r"><span class="p5_l p10_r">全部</span>
+                                                    foreach (var nm in Enum.GetNames(typeof(RmaStatus.退换货退款方式)))
+                                                    {
+                                                        <input type="checkbox" name="RMAType" value="@Enum.Parse(typeof(RmaStatus.退换货退款方式), nm).GetHashCode()" class="p5_r" /><span class="p5_l p10_r">@nm</span>
+                                                    }
+                                                }
+                                            </td>
+                                        </tr>
+                                        
+                                        <tr>
+                                            <td class="nameright">订单来源</td>
+                                            <td colspan="2">
+                                                @{
+                                                    <input type="checkbox" id="OrderSourceAll" class="p5_r"><span class="p5_l p10_r">全部</span>
+                                                    foreach (var nm in Enum.GetNames(typeof(OrderStatus.销售单来源)))
+                                                    {
+                                                        <input type="checkbox" name="OrderSource" value="@Enum.Parse(typeof(OrderStatus.销售单来源), nm).GetHashCode()" class="p5_r" /><span class="p5_l p10_r">@nm</span>
+                                                    }
+
+                                                }
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="nameright">结算状态</td>
+                                            <td class="border_right">
+                                                @*                                                @Html.DropDownList("SettlementStatus", ViewBag.lstStatus as IEnumerable<SelectListItem>, new { @style = "width:163px" })*@
+                                                <input type="checkbox" id="SettlementStatusAll" class="p5_r"><span class="p5_l p10_r">全部</span>
+                                                @{
+                                                    foreach (var status in Enum.GetValues(typeof(WarehouseStatus.退换货单状态)))
+                                                    {
+                                                        <input type="checkbox" name="SettlementStatus" value="@status.GetHashCode()" class="p5_r" /><span class="p5_l p10_r">@status</span>
+                                                    }
+                                                }
+                                            </td>
+                                            <td>
+                                                <span class="p10_lr">是否自营</span>
+                                                <select id="IsSelfSupport" name="IsSelfSupport">
+                                                    <option value="">全部</option>
+                                                    @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<WarehouseStatus.是否自营>(i => i.Text == WarehouseStatus.是否自营.是.ToString(), null).ToString())
+                                                </select>
+                                            </td>
+                                        </tr>
+
+
+                                        <tr>
+                                            <td width="15%" class="nameright">产品编号</td>
+                                            <td width="35%" class="border_right">
+                                                <input type="text" id="ProNo" />
+                                            </td>
+                                            <td><span class="p10_lr">产品名称</span><input type="text" id="ProName" /></td>
+                                        </tr>
+
+                                        <tr>
+                                            <td class="nameright">会员名</td>
+                                            <td class="border_right">
+                                                <input type="text" id="CusId" />
+                                            </td>
+                                            <td><span class="p10_lr">收货电话</span><input type="text" id="Phone" /></td>
+                                        </tr>
+
+
+
+                                        <tr>
+                                            <td class="nameright">订单号</td>
+                                            <td class="border_right">
+                                                <input type="text" id="OrderNo" />
+                                            </td>
+                                            <td>
+                                                <span class="p10_lr">开票状态</span>
+                                                @Html.DropDownList("InvStatus", ViewBag.lstInvStatus as IEnumerable<SelectListItem>, new { @style = "width:163px" })
+                                            </td>
+
+@*                                            <td>
+                                                <span class="p10_lr">订单来源</span>
+                                                @Html.DropDownList("OrderSource", ViewBag.lstOrderSource as IEnumerable<SelectListItem>, new { @style = "width:163px" })
+                                            </td>*@
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <!-- divSearchContent End-->
+
+
+                <!--btnConfirm-->
+                <div class="pagination clearfix align_c">
+                    <button id="btnConfirm" class="btn btn_ht26 " title="立即搜索"><span class="icon_search"></span><span class="m5_l">立即搜索</span></button>&nbsp;
+                    @*                    <button type="button" id="btnConfirm" class="btn btn_blue btn_ht32 bold f14">立即搜索</button>&nbsp;*@
+                </div>
+                <!-- btnConfirm End-->
+
+            </div>
+
+            <!-- 查询结果 -->
+            <div id="divSearchResult" class="boxs_listtabel">
+
+                @{Html.RenderPartial("pAjaxPager_RmaDetails", Model);}
+
+            </div>
+            <!-- end 查询结果 -->
+            
+
+        </div>
+
+    </div>
+</div>

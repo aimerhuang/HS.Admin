@@ -1,0 +1,216 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<CBCrBulkPurchase>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "大宗采购";
+    const int pending = (int)CustomerStatus.大宗采购状态.待处理;
+    const int processed = (int)CustomerStatus.大宗采购状态.已处理;
+    const int invalid = (int)CustomerStatus.大宗采购状态.作废;
+    @Html.PrivilegeControl(PrivilegeCode.CR1004082, "button.CR1004082")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入联系人...";
+        var searchCompanyTxt = "请输入公司名称...";
+        var pending = @pending;
+        var processed = @processed;
+        var invalid = @invalid;
+        $(function () {
+            $("#searchName").focus(function () {
+                if ($("#searchName").val() == searchNameTxt) {
+                    $("#searchName").val("");
+                }
+            });
+            $("#searchName").blur(function () {
+                if ($("#searchName").val() == "") {
+                    $("#searchName").val(searchNameTxt);
+                }
+            });
+            $("#searchCompany").focus(function () {
+                if ($("#searchCompany").val() == searchCompanyTxt) {
+                    $("#searchCompany").val("");
+                }
+            });
+            $("#searchCompany").blur(function () {
+                if ($("#searchCompany").val() == "") {
+                    $("#searchCompany").val(searchCompanyTxt);
+                }
+            });
+            
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        searchBulk();
+                        break;
+                }
+            });
+        });
+
+        function edit(sysNo,status) {
+            var y, z;
+            if (status != pending) {
+                y = true;
+                z = true;
+            } else {
+                y = false;
+                z = false;
+            }
+            UI.DialogOpen("/CRM/CrBulkPurchaseEdit/?sysNo=" + sysNo, {
+                title: "查看大宗采购信息",
+                width: '435px',
+                height: '325px',
+                init: function () {
+                    this.button(
+                    {
+                        name: '已处理',
+                        disabled:y,
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                        
+                            UI.Confirm({
+                                content: '确定已处理了吗?',
+                                ok: function () {
+                                    iframe.edit(processed);
+                                },
+                                cancel: true
+                            });
+                        
+                            return false;
+                        }
+                    },
+                {
+                    name: '作废',
+                    disabled:z,
+                    callback: function () {
+                        var iframe = this.iframe.contentWindow;
+                       
+                        if (!iframe.document.body) {
+                            UI.Alert({
+                                content: 'iframe还没加载完毕呢'
+                            });
+                            return false;
+                        }
+                        ;
+                        UI.Confirm({
+                            content: '确定要作废吗?',
+                            ok: function () {
+                                iframe.edit(invalid);
+                            },
+                            cancel: true
+                        });
+                        return false;
+                    }
+                },
+                         {
+                             name: '取消'
+                         }
+             );
+                }
+            });
+        }
+
+        function dialog() {
+            UI.tips.tip_alert('tips_success', '保存成功');
+        }
+        function dataLoad(id) {
+            $.get('/CRM/CrBulkPurchase/', { id: id }, function (data) {
+                $('#paging').html(data);
+            });
+        }
+
+        function searchBulk() {
+            AjaxStart();
+            var searchName = $("#searchName").val();
+            var searchCompany = $("#searchCompany").val();
+            var searchCommitDate = $("#searchCommitDate").val();
+            //var searchHandleDate = $("#searchHandleDate").val();
+            var searchStaus = $("#searchStaus").val();
+
+            var search = { id: 1, searchName: ($.trim(searchName) != "" && searchName != searchNameTxt) ? searchName : null, searchCompany: ($.trim(searchCompany) != "" && searchCompany != searchCompanyTxt)?searchCompany:null, commitDate: searchCommitDate, searchStaus: searchStaus };
+           
+            $.get('/CRM/CrBulkPurchase/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+
+@section headcss{
+
+    <style type="text/css">
+        .m3_t {
+        }
+    </style>
+}
+@using (Html.BeginForm("CrBulkPurchase", "CRM", FormMethod.Get, new { id = "form", aa = "" }))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>大宗采购</h3>
+            </div>
+
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+
+                        <span class="fl m3_t veralign_t">状态</span>
+
+                        <select class="fl m10_l m10_r" id="searchStaus" name="searchStaus" onchange="searchBulk()">
+                            <option value="0">全部</option>
+                            @{
+    foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+    {
+                                if (dict.Key == pending)
+                                    {
+                                      <option value="@dict.Key" selected="selected">@dict.Value</option>
+                                    }
+                                    else
+                                    {
+                                      <option value="@dict.Key">@dict.Value</option>
+                                    }
+    }
+                            }
+
+                        </select>
+                        <span class="fl m3_t veralign_t">联系人</span>
+                        <input type="text" name="searchName" class="wd130 m10_l fl m10_r" maxlength="20" id="searchName" value="请输入联系人..." />
+                        <span class="fl m3_t veralign_t">公司名称</span>
+                        <input name="searchCompany" id="searchCompany" type="text" maxlength="50" class="wd130 m10_l fl m10_r" value="请输入公司名称..." />
+
+                        <span class="fl m3_t veralign_t">提交时间</span>
+
+                        <div class="date_btn120 fl">
+                            <input name="searchCommitDate" id="searchCommitDate" type="text" class="m10_l fl" onfocus="UI.Date()" />
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'searchCommitDate'})" ><span class="icon_calendar"></span></button></div>
+
+                        <button type="button" class="btn btn_ht28 m10_l fl" title="搜索" onclick="searchBulk()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+
+                    </div>
+
+                </div>
+
+                @*   <div class="boxs_list">*@
+
+                <!--/表格列表区-->
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+                    @{Html.RenderPartial("_AjaxCrBulkPurchaseList", Model); }
+                </div>
+                @{Html.RenderPartial("_UrlPaging", Model); }
+                <!--/表格列表区-->
+                @*  </div>*@
+
+            </div>
+        </div>
+    </div>
+}

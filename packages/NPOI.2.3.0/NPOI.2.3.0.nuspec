@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <id>NPOI</id>
+    <version>2.3.0</version>
+    <title>NPOI</title>
+    <authors>Tony Qu, Rye Loken, Jsakamoto</authors>
+    <owners>Tony Qu, Rye Loken, Jsakamoto</owners>
+    <licenseUrl>http://npoi.codeplex.com/license</licenseUrl>
+    <projectUrl>http://npoi.codeplex.com/</projectUrl>
+    <iconUrl>http://download-codeplex.sec.s-msft.com/Download?ProjectName=npoi&amp;DownloadId=155905&amp;Build=20959</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Neuzilla is the studio behind NPOI. For detail, you can check http://www.neuzilla.com
+ 
+Neuzilla provides software customization and full-stack consulting service. For details, please contact support@neuzilla.com</description>
+    <summary>This project is the .NET version of POI from Apache Foundation. NPOI can read and write xls (Excel 97-2003), xlsx(Excel 2007+) and docx(Word 2007+)</summary>
+    <releaseNotes>2.3.0 (Mar, 2017）
+New Features
+- implement XSSF Streaming
+
+BUG Fixes
+- Fix GZIPSheetDataWriter
+- Hold file handler when OOXML zip package is closed
+- Fix test cases</releaseNotes>
+    <copyright>Neuzilla</copyright>
+    <tags>npoi xlsx xls Excel Word docx</tags>
+    <dependencies>
+      <dependency id="SharpZipLib" version="0.86.0" />
+    </dependencies>
+  </metadata>
+</package>

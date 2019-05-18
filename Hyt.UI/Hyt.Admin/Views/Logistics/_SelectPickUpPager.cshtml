@@ -1,0 +1,122 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBLgPickUp>
+
+<div class="boxs_listtabel">
+    
+    <!--/表格列表区-->
+    <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th style="width: 53px;">
+                    <input name="" type="checkbox" value="" id="select_all" /></th>
+                <th style="width: 72px;">取件单号</th>
+                <th >取件地址</th>
+                <th style="width: 120px">电话</th>
+                <th style="width: 46px">状态</th>
+                <th style="width: 120px">创建时间</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @if (Model.TData.Count > 0)
+            {
+                foreach (Hyt.Model.Transfer.CBLgPickUp item in Model.TData)
+                {
+                    <tr id="tr_@item.SysNo">
+                        <td>
+                            <input name="sysno" type="checkbox" id="checkbox_@item.SysNo" value="@item.SysNo" /></td>
+                        <td>@item.SysNo</td>
+                        <td>@item.StreetAddress</td>
+                        <td>@item.MobilePhoneNumber</td>
+                        <td>@((Hyt.Model.WorkflowStatus.LogisticsStatus.取件单状态)item.Status)</td>
+                        <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>                                                
+                }
+            }
+            else
+            {
+                <tr class="odd_color">
+                    <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="border_left border_right border_bottom">
+        @{Html.RenderPartial("_UrlPaging", Model); }
+    </div>
+</div>
+
+<script>
+
+    $(function () {
+  
+        //隔行样式
+        DAO.InterlineStyle();
+        //全选事件
+        $("#select_all").click(function () {
+            if ($(this).attr("checked")) {
+                $("#item_list input[name='sysno']").each(function () {
+                    $(this).attr("checked", "checked");
+                    var sysno = $(this).val();
+                    if (sysno) { addItem(sysno); }
+                });
+            } else {
+                $("#item_list input[name='sysno']").each(function () {
+                    $(this).removeAttr("checked");
+                    var sysno = $(this).val();
+                    if (sysno) { removeItem(sysno); }
+                });
+            }
+        });
+        //单项点事件
+        $("#item_list input[name='sysno']").bind("click", function () {
+            var sysno = $(this).val();
+            if (sysno) {
+                if ($(this).attr("checked") == "checked") {
+                    addItem(sysno);
+                } else {
+                    removeItem(sysno);
+                }
+            }
+        });
+        //批量事件
+        $("#batch_cancel").click(function () {
+            var items = $("#selected_list input:checked");
+            items.each(function () {
+                var sysno = $(this).val();
+                if (sysno) { removeItem(sysno); }
+            });
+        });
+
+    });
+    //添加新项
+    function addItem(sysno) {
+        var item = $("#selected_tr_" + sysno);
+        if (item.length <= 0) {
+            var tr = $("#tr_" + sysno);
+            var value = "<tr id='selected_tr_" + sysno + "'>" + tr.html().replace("checkbox_", "sel_checkbox_") + "<td><button class='btn btn_ht26' title='取消' type='button' onclick=removeItem('" + sysno + "') ><span class='icon_trash'></span><span class='m5_l'>取消选择</span></button></td></tr>";
+            $("#selected_list tbody").append(value);
+        }
+        noItemDisplay();
+    }
+    //移除已有项
+    function removeItem(sysno) {
+        $("#selected_tr_" + sysno).remove();
+        $("#checkbox_" + sysno).removeAttr("checked");
+        noItemDisplay();
+    }
+    //当没有选择数据时 默认tr的显示状态
+    function noItemDisplay() {
+        var item = $("#selected_list input[name='sysno']");
+        if (item.length <= 0) {
+            $("#selected_list #noitem").show();
+        }
+        else {
+            $("#selected_list #noitem").hide();
+            //隔行样式
+            DAO.InterlineStyle({ tableid: 'selected_list', row: 0 });
+        }
+    }
+
+</script>

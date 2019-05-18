@@ -1,0 +1,218 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "配送方式管理";
+    @Html.PrivilegeControl(PrivilegeCode.LG1001901, ".LG1001901")
+    @Html.PrivilegeControl(PrivilegeCode.LG1001201, ".LG1001201")
+    @Html.PrivilegeControl(PrivilegeCode.LG1001301, ".LG1001301")
+    @Html.PrivilegeControl(PrivilegeCode.LG1001401, ".LG1001401")
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            doSearch();
+            //快捷状态查询
+            $("#Status").change(function () {
+                doSearch();
+
+            });
+            $("#ParentSysNo").change(function () {
+                doSearch();
+
+            });
+            $("#IsOnlineVisible").change(function () {
+                doSearch();
+
+            });
+
+
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+
+            });
+
+            $("#DeliveryTypeName").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+
+        });
+
+        //查询列表
+        function doSearch() {
+
+            $.get('@Url.Action("DeliveryType", "Logistics")',
+                {
+                    Status: $("#Status").val(),
+                    IsOnlineVisible: $("#IsOnlineVisible").val(),
+                    ParentSysNo: $("#ParentSysNo").val(),
+                    DeliveryTypeName: $("#DeliveryTypeName").val()
+                },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl m10_l">一级配送方式</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="ParentSysNo" name="ParentSysNo">
+                            <option value="">全部</option>
+                            @foreach (var item in (IList<Hyt.Model.LgDeliveryType>)ViewBag.FirstType)
+                            {
+                                <option value="@item.SysNo">@item.DeliveryTypeName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">前台是否可见</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 wd100" id="IsOnlineVisible" name="IsOnlineVisible">
+                            <option value="">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式前台是否可见)))
+                                {
+                                <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+
+                    </div>
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 wd100" id="Status" name="Status">
+                            <option value="">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式状态)))
+                                {
+                                <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">配送方式名称</span>
+                    <div class="search_btn m10_l fl">
+                        <input name="deliveryTypeName" type="text" style="width: 125px;" id="DeliveryTypeName" class="input_ht28" autocomplete="off" value="" maxlength="20" placeholder="搜索配送方式名称..." />
+                        <button class="btn btn_ht28 wd28" id="search_btn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m10_r LG1001201" onclick="CreateDeliveryType()"><span class="icon icon_plus"></span><span class="m5_l">新建</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //新增弹出窗
+        function CreateDeliveryType() {
+            var url = '@Url.Action("DeliveryTypeAdd", "Logistics")';
+            UI.DialogOpen(url,
+                {
+                    title: '新建配送方式',
+                    width: 1050,
+                    height: 410,
+                    close: function () { },
+                    resize: false
+                },
+                false);
+        }
+
+        //查看弹出窗
+
+        function LookDeliveryType(sysno) {
+            var url = '@Url.Action("DeliveryTypeView", "Logistics")' + '?sysno=' + sysno;
+            UI.DialogOpen(url, { title: '查看配送方式', width: 783, height: 308 }, false);
+        }
+
+        //修改弹出窗
+
+        function UpdateDeliveryType(sysno) {
+            var url = '@Url.Action("DeliveryTypeUpdate", "Logistics")' + '?sysno=' + sysno;
+            UI.DialogOpen(url, {
+                title: '修改配送方式',
+                width: 1050,
+                height: 410,
+                close: function () {
+                },
+                resize: false
+            }, false);
+        }
+        //操作成功后执行的函数
+        function ExecSuccess(msg) {
+            UI.tips.tip_alert("tips_shrot tips_success", msg);
+            doSearch();
+        }
+
+        //删除配送方式
+        function DelDeliveryType(sysno) {
+            UI.Confirm({
+                content: "您确定删除吗？",
+                ok: function () {
+                    $.ajax({
+                        //无子级别配送方式和未使用时可删除
+                        type: "get",
+                        url: '@Url.Action("IsCanDelete", "Logistics")',
+                            data: "sysno=" + sysno,
+                            chche: false,
+                            success: function (data) {
+                                if (!data) {
+                                    UI.Alert({ content: "有子配送方式或此配送方式已使用" });
+                                } else {
+                                    $.post('@Url.Action("DeleteDeliveryType")', { sysno: sysno },
+                                        function (ret) {
+                                            if (ret) {
+                                                ExecSuccess('删除成功！');
+                                            }
+                                            else { UI.Alert({ content: "删除失败！" }); }
+                                        }
+                                    );
+                                }
+                            },
+                            error:
+                                function () {
+                                    UI.Alert({ content: "查询出错,请稍候再试" });
+                                },
+                        });
+                    },
+            }
+            );
+            }
+
+            //打印模板弹出窗
+            function PrintTemplateSet(sysno) {
+                var url = '@Url.Action("DeliveryPrintTemplate", "Print")' + '?deliveryTypeSysNo=' + sysno;
+            UI.OpenCreatTab('打印模板管理', url);
+        }
+    </script>
+}

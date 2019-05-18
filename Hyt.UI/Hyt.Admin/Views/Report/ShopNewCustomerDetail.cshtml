@@ -1,0 +1,119 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "ShopNewCustomerDetail";
+    Html.PrivilegeControl(PrivilegeCode.RP1005801, ".RP1005801");
+    var now = DateTime.Now;
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<div class="case">
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>门店新增会员明细月报表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <form id="form1">
+                <div class="right_tool clearfix">
+                    <div class="fl">
+                        
+                        <span class="veralign_t fl m10_l">门店</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn" >
+                                <select class="wd170" id="ShopNo" name="ShopNo" Search="ShopNo">
+                                    <option value="" selected="selected">全部</option>
+                                @foreach (var shop in ViewBag.Shops)
+                                {
+                                    <option value="@shop.SysNo">@shop.WarehouseName</option>
+                                }
+                                </select>
+                            </div>
+
+                        </div>
+
+                        <span class="veralign_t fl m10_l">统计月份</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn" >
+                                <input type="text" id="Reptdt" name="Reptdt" class="input_ht26" Search="Reptdt"  value="@DateTime.Now.ToString("yyyy-MM")"  onfocus="this.blur();UI.Date({ el: 'Reptdt', dateFmt: 'yyyy-MM' })"  />
+                                <button type="button" title="日历"  class="btn btn_ht26" onclick="UI.Date({el:'Reptdt',dateFmt:'yyyy-MM'})">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="searchBtn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+                    </div>
+
+                </div>
+                </form>
+                <!--搜索结束-->
+
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r RP1005801" id="btnExport"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div id="paging">
+            </div>
+            <!--表格列结束-->
+
+        </div>
+        <div class="m5_t c9">
+            备注：1、消费金额都是已结算金额，仅统计门店新会员当月消费
+        </div>
+
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if ('@ViewBag.reptdt' != "") {
+            $("#Reptdt").val('@ViewBag.reptdt');
+        }
+        if ('@ViewBag.shopId' != "") {
+            $("#ShopNo").val('@ViewBag.shopId');
+        }
+        doSearch();
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+            return false;
+        });
+        //查询列表
+        function doSearch() {
+            Ajax.get("/Report/DoShopNewCustomerDetailQuery", "Search", function () {
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+            });
+        }
+        //导出
+        $('#btnExport').click(function () {
+            var form = $("#form1");
+            form.attr('action', '@Url.Action("ExportShopNewCustomerDetail", "Report")');
+            form.attr('method', 'post');
+            form.submit();
+            return false;
+        });
+    });
+</script>
+
+
+

@@ -1,0 +1,56 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@model PagedList<CBFeArticle>
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">标题</th>
+            <th style="width: 85px">创建人</th>
+            <th style="width: 124px">创建时间</th>
+            <th style="width: 85px">最后更新人</th>
+            <th style="width: 124px">最后更新时间</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model != null && Model.TData != null && Model.TData.Any())
+            {
+                foreach (var item in Model.TData)
+                {
+            <tr>
+                <td class="align_l p10_lr blue"><a href="javascript:void();" onclick='UI.OpenCreatTab("查看公告", "/Main/Announcement/@item.SysNo");' name="detail" title="点击查看" data-id="@item.SysNo">@(item.Title.Length > 35 ? item.Title.Substring(35) + "..." : item.Title)</a></td>
+                <td>@item.CreatedByName</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.LastupdateByName</td>
+                <td>@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+                }
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="4">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+        @*        $("#item_list").delegate("a[name='detail']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = "@Url.Action("ArticleDetail")/" + id;
+            UI.DialogOpen(url, {
+                title: '查看公司公告',
+                width: 1217,
+                height: 610,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });*@
+    });
+</script>

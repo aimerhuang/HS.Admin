@@ -1,0 +1,92 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBEnterpriseUser>
+@Html.PrivilegeControl(PrivilegeCode.SY1008101, ".SY1008101")
+
+<script type="text/javascript">
+    function addUser(id,account, userName, emaillAddress, mobilePhoneNumber,status) {
+        Utils.MaskStart($("#paging"));
+        $.post('/Sys/AddEnterpriseUser', {id:id, account: account, userName: userName, emaillAddress: emaillAddress, mobilePhoneNumber: mobilePhoneNumber,status:status }, function (data) {
+            if (data != null) {
+                UI.DialogOpener().setUserInfo(data);
+                SuccessTip();
+                UI.Dialog.close();
+                Utils.MaskStop();
+            }
+            else {
+                UI.Alert({
+                    content: "此用户已存在！"
+                });
+                Utils.MaskStop();
+            }
+
+        });
+    }
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+    }
+</script>
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th class="p10_lr" style="display:none">用户ID</th>
+                <th class="align_l p10_lr">企业编号</th>
+                <th class="align_l p10_lr">企业名称</th>
+                <th class="align_c p10_lr">帐号</th>
+                <th class="align_l p10_lr">姓名</th>
+                <th class="align_l p10_lr">邮箱</th>
+                <th class="align_c p10_lr">手机</th>
+                <th class="align_c p10_lr">注册日期</th>
+                <th class="align_c p10_lr">状态</th>
+                <th width="96">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var list = Model.TData as List<CBEnterpriseUser>;
+                if (list == null || list.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                else
+                {
+                    var i = 1;
+                    foreach (var item in list)
+                    {
+                        <tr @if (i % 2 == 0) { @: class="stag_color"
+                                                                                    }>
+                            <td style="display:none">@item.ID</td>
+                            <td class="align_l p10_lr">@item.EnterpriseNO</td>
+                            <td class="align_l p10_lr">@item.CompanyName</td>
+                            <td class="align_c p10_lr">@item.Account</td>
+                            <td class="align_l p10_lr">@item.UserName</td>
+                            <td class="align_l p10_lr">@item.EmailAddress</td>
+                            <td class="align_c p10_lr">@item.MobilePhoneNumber</td>
+                            <td class="align_c p10_lr">@item.RegisterDate</td>
+                            <td class="align_c p10_lr">
+                             @(item.Status==1?"启用":"禁用")
+                            </td>
+                            <td class="align_c p10_lr">
+                                <input type="hidden"  value="@item.ID" />
+                                <button id="btn_@item.ID" @if (item.IsAdd) { @: disabled="disabled" class="btn btn_ht26 forbid m10_r PD1001601"
+                                                                                                  } onclick="addUser('@item.ID','@item.Account','@item.UserName','@item.EmailAddress','@item.MobilePhoneNumber','@item.Status')" class="btn btn_ht26 btn_blue m10_r SY1006201">
+                                    <span class="icon icon_plus icon_white"></span>
+                                    <span class="m5_l">添加</span>
+                                </button>
+
+                            </td>
+                        </tr>
+i++;
+                    }
+                }
+            }
+
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+

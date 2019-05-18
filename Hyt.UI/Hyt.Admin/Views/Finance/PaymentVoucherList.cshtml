@@ -1,0 +1,108 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "付款单管理";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" ></script>
+}
+@helper CreateList(List<SelectListItem> items, SelectListItem selectedItem)
+{
+    if (items != null && items.Count > 0)
+    {
+        foreach (var item in items)
+        {
+            <option value="@item.Value" 
+                @if (selectedItem != null)
+                {
+                    if (selectedItem.Text == item.Text || selectedItem.Value == item.Value)
+                    {
+                        @:selected="selected"
+                    }
+                }
+             >@item.Text</option>
+        }
+    }
+}
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+          <h3>付款单管理</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+        	<div class="boxs_tool">
+	            <div class="right_tool clearfix">
+	                <span class="fl">状态</span>
+	                <select class="select_ht28 fl wd120 m10_l m10_r" search="Status" id="statusType">
+	                    <option selected="selected">全部</option>
+	                    @CreateList(ViewBag.statusList,null)
+	                </select>
+	                <span class="fl">单据来源</span>
+	                <select class="select_ht28 fl wd120 m10_l m10_r" search="Source" id="source">
+	                    <option selected="selected">全部</option>
+	                    @CreateList(ViewBag.sourceList,null)
+	                </select>
+<span class="fl">单据编号</span><input type="text" class="input_small m10_r m10_l fl" Search="SourceSysNo">
+
+	                <span class="fl">创建时间</span><div class="date_btn120 m10_l m10_r fl">
+	                                                <input type="text" value="" class="input_ht26" id="d121" name="" search="BeginDate">
+	                                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d121'})"><span class="icon_calendar"></span></button>
+	                                            </div><span class="fl">-</span><div class="date_btn120 m10_l m10_r fl">
+	                                                                               <input type="text" value="" class="input_ht26" id="d122" name="" search="EndDate">
+	                                                                               <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d122'})"><span class="icon_calendar"></span></button>
+	                                                                           </div><button title="搜索" class="btn btn_ht28 fl" type="button" id="searchBtn"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+	            </div>
+            </div>
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function OpenSource(type, id,sysno) {
+        //销售单
+        if (type == 10) {
+            UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+        }
+        //分销商保证金
+        if (type == 20) {
+            UI.DialogOpen('/Stores/DealerBailOrderView?id=' + id + '&Dialog=true', { title: '保证金详情', width: 950, height: 600 }, false);
+        }
+        //退换货单
+        if (type == 50) {
+            UI.DialogOpen('/RMA/RmaReturnView?id=' + id + '&IsCanRedirect=false', { title: '退换货单', width: 950, height: 600 }, false);
+        }
+        //提现单
+        if (type == 60) {
+            UI.DialogOpen('/Distribution/WithdrawView?id=' + id + '&sysno=' + sysno, { title: '提现单', width: 950, height: 430 }, false);
+        }
+    }
+    function Open(id) {
+        UI.OpenCreatTab('付款单:'+id, '/Finance/PaymentDetail/'+id);
+    }
+    $(document).ready(function () {
+        doSearch();
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        Ajax.get("/Finance/DoPaymentVoucherQuery?r=" + Math.random(), "Search", function (p) {
+            //p.setParams("HandleDepartment",20);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+    //查询条件变化时执行
+    $("#statusType").change(function () {
+        doSearch();
+    });
+    $("#source").change(function () {
+        doSearch();
+    });
+</script>

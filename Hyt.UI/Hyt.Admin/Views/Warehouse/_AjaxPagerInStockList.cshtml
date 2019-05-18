@@ -1,0 +1,245 @@
+﻿@using Hyt.BLL.Warehouse
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.WhStockIn>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.WH1006101, ".WH1006101");
+    @Html.PrivilegeControl(PrivilegeCode.WH1006301, ".WH1006301");
+    @Html.PrivilegeControl(PrivilegeCode.WH1006501, ".WH1006501");
+    @Html.PrivilegeControl(PrivilegeCode.WH1006102, ".WH1006102");
+}
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="53">
+                <input type="checkbox" value="0" id="select_all" /></th>
+            <th class="wd75">入库单号</th>
+            <th width="98">来源单据类型</th>
+            <th width="100">来源单据编号</th>
+            <th class="align_l p10_lr">所属仓库</th>
+            <th width="120">创建时间</th>
+            <th width="56">状态</th>
+            <th width="56">票据</th>
+            <th width="217" class="border_rnone">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TData != null && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td>
+                    <input name="sysno" type="checkbox" value="@item.SysNo" /></td>
+                <td class="blue"><a href="#" name="detail" class="blue" title="查看入库单明细">@item.SysNo</a></td>
+                <td>
+                    @((WarehouseStatus.入库单据类型)item.SourceType)
+                </td>
+                <td class="blue">
+                    <a href="javaScript:void(0);" onclick="showSource('@((WarehouseStatus.入库单据类型)item.SourceType)',@item.SourceType,@item.SourceSysNO)" title="查看@((WarehouseStatus.入库单据类型)item.SourceType):@item.SourceSysNO"   target="_blank">@item.SourceSysNO</a>
+                </td>
+                <td class="align_l p10_lr">@WhWarehouseBo.Instance.GetWarehouseName(item.WarehouseSysNo)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@((WarehouseStatus.入库单状态)item.Status)</td>
+                <td>
+                    @if (item.IsPrinted == 0)
+                    {
+                        <span>未打印</span>
+                    }
+                    else if (item.IsPrinted > 0)
+                    {
+                        <span class="red">已打印</span>
+                    }
+                </td>
+                <td>
+                    @switch (item.Status)
+                    {
+                        case (int)WarehouseStatus.入库单状态.已入库:
+                        <button class="btn btn_ht26 m10_r btn_blue WH1006101" title="查看" data-id="@item.SysNo" name="detail" type="button">
+                            <span class="icon_tosee icon_white"></span><span class="m5_l">查看</span>
+                        </button><button class="btn btn_ht26 m10_r btn_blue WH1006102" title="打印" data-id="@item.SysNo" name="print" type="button">
+                            <span class="icon_print icon_white"></span><span class="m5_l">打印</span>
+                        </button><button class="btn btn_ht26 btn_red WH1006501" title="作废" data-id="@item.SysNo" name="cancel" type="button"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                            break;
+                        case (int)WarehouseStatus.入库单状态.作废:
+                        <button class="btn btn_ht26 m10_r btn_blue WH1006101" title="查看" data-id="@item.SysNo" name="detail" type="button">
+                            <span class="icon_tosee icon_white"></span><span class="m5_l">查看</span>
+                        </button><button class="btn btn_ht26 m10_r disabled WH1006102" disabled="disabled" title="打印" type="button">
+                            <span class="icon_print"></span><span class="m5_l">打印</span>
+                        </button><button class="btn btn_ht26 disabled WH1006501" title="作废" disabled="disabled" type="button"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                            break;
+                        case (int)WarehouseStatus.入库单状态.部分入库:
+                        <button class="btn btn_ht26 m10_r btn_blue WH1006301" title="入库" data-id="@item.SysNo" name="in_stock_create" type="button">
+                            <span class="icon_tostore icon_white"></span><span class="m5_l">入库</span>
+                        </button><button class="btn btn_ht26 m10_r WH1006102" title="打印" data-id="@item.SysNo" name="print" type="button">
+                            <span class="icon_print icon_white"></span><span class="m5_l">打印</span>
+                        </button><button class="btn btn_ht26 disabled WH1006501" title="作废" disabled="disabled" type="button"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                            break;
+                        default:
+                        <button class="btn btn_ht26 m10_r btn_blue WH1006301" title="入库" data-id="@item.SysNo" name="in_stock_create" type="button">
+                            <span class="icon_tostore icon_white"></span><span class="m5_l">入库</span>
+                        </button><button class="btn btn_ht26 m10_r btn_blue WH1006102" title="打印" data-id="@item.SysNo" name="print" type="button">
+                            <span class="icon_print icon_white"></span><span class="m5_l">打印</span>
+                        </button><button class="btn btn_ht26 btn_red WH1006501" title="作废" data-id="@item.SysNo" name="cancel" type="button"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                            break;
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        } 
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+
+        //点击入库单编号事件
+        $("#item_list").delegate("a[name='detail']", "click", function () {
+            var url = '/Warehouse/InStockDetails?sysNo=' + $(this).text();
+            UI.DialogOpen(url, {
+                title: '入库单明细',
+                width: 1000,
+                height: 608,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+
+        //查看事件
+        $("#item_list").delegate("button[name='detail']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = '/Warehouse/InStockDetails?sysNo=' + id;
+            UI.DialogOpen(url, {
+                title: '入库单明细',
+                width: 1000,
+                height: 608,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+        //全选
+        $("#select_all").click(function () {
+            $("[name='sysno']").attr('checked', this.checked);
+        });
+        $("#item_list").delegate("input[name='sysno']", "click", function () {
+            if ($(this).is(":checked") == false) {
+                $("#select_all").removeAttr("checked");
+            }
+            var result = checkItems();
+            if (result) {
+                $("#select_all").attr('checked', 'checked');
+            }
+        });
+
+        function checkItems() {
+            var result = true;
+            $("input[name='sysno']").each(function () {
+                if ($(this).is(":checked") == false) {
+                    result = false;
+                }
+            });
+            return result;
+        }
+        //商品入库
+        $("#item_list").delegate("button[name='in_stock_create']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = '/Warehouse/InStockCreate?sysNo=' + id;
+            UI.DialogOpen(url, {
+                title: '商品入库',
+                width: 1000,
+                height: 608,
+                init: function () {
+                    this.button({
+                        name: '确认入库',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            if (!iframe.document.body) {
+                                UI.Alert({ content: '页面还没加载完毕呢！' });
+                                return false;
+                            };
+                            iframe.inStockComplete();
+                            return false;
+                        },
+                        focus: true
+                    }, {
+                        name: "取消"
+                    });
+                }
+            });
+        });
+
+        //打印
+        $("#item_list").delegate("button[name='print']", 'click', function () {
+            var id = $(this).attr("data-id");
+            var url = '/Print/InStock/' + id;
+            UI.DialogOpen(url, {
+                title: '入库单打印', width: 1024, height: 680, init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        this.iframe.contentWindow.location.reload();
+                    }
+                }
+            }, false);
+        });
+
+        //入库单作废
+        $("#item_list").delegate("button[name='cancel']", 'click', function () {
+            var id = $(this).attr("data-id");
+            UI.Confirm({
+                content: '您确定要作废' + id + '这条入库单吗？', width: '230px',
+                ok: function () {
+                    if (id) {
+                        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                        $.ajax({
+                            type: "POST",
+                            url: "/Warehouse/InStockCancel?sysNo=" + id,
+                            chche: false,
+                            success: function (ret) {
+                                if (ret.IsLogout) {
+                                    eval(data.Callback);
+                                    return;
+                                }
+                                if (ret.StatusCode == 0) {
+                                    showTip("入库单" + id + "作废成功!");
+                                } else {
+                                    UI.Alert({ content: ret.Message });
+                                }
+                                mask.Remove();
+                            },
+                            error: function (ex) {
+                                mask.Remove();
+                                UI.Alert({ content: '操作出错,请稍候重试!' });
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+
+    function showSource(title, type, sysno) {
+        switch (type) {
+            case 10:
+                UI.OpenCreatTab(title, '/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno);
+                break;
+            case 20:
+                UI.OpenCreatTab(title, '/RMA/RMAView/' + sysno);
+                break;
+            case 30:
+                UI.OpenCreatTab(title, '/Warehouse/ProductLendDetails/' + sysno);
+                break;
+            default:
+        }
+    }
+</script>

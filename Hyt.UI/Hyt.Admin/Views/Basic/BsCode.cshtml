@@ -1,0 +1,136 @@
+﻿@{
+    ViewBag.Title = "码表信息管理";
+}
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@model List<BsCode>
+@Html.PrivilegeControl(PrivilegeCode.BS1005002, ".BS1005002")
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case commodity_sortmanage">
+    <div class="sortmanage_fl">
+        <div class="boxs">
+            <!--有导航条时-->
+            <div class="boxs_tit head_m">
+                <h3>代码</h3>
+            </div>
+            <div class="comp51">
+                <ul id="treeTitle">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                        <li data-id="@item.SysNo" id="@item.SysNo"><span class="arrow m5_r"></span><a>@item.CodeName</a></li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="sortmanage_fr">
+        <div class="boxs_tit head_m">
+            <h3>码值</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs boxs_detail_dispay">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <button class="btn btn_ht26 BS1005002 disabled" disabled="disabled" id="btn_add"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加码值</span></button>
+                </div>
+                <div class="boxs_listtabel" id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- test end -->
+</div>
+<!--克隆开始-->
+<div class="caseout" id="new_mb" style="width: 400px; display: none;">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                <tbody>
+                    <tr>
+                        <td width="50" valign="middle" class="nameright">码值</td>
+                        <td>
+                            <textarea id="CodeName" cols="20"></textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+
+        $("#treeTitle li").click(function () {
+            var id = $(this).attr("data-id");
+            if (id) {
+                loadChildNodes(id);
+            }
+        });
+
+        $("#btn_add").click(function () {
+            UI.DialogBox({
+                content: document.getElementById('new_mb'),
+                ok: function () {
+                    var model = getModel();
+                    if (model &&  model.CodeName.length <= 0) {
+                        top.UI.tips.tip_alert("tips_wrong", '码表不能为空！');
+                        return false;
+                    }
+                    $.ajax({
+                        url: "@Url.Action("BsCodeCreate")",
+                        data: JSON.stringify(model),
+                        contentType: 'application/json',
+                        type: "post",
+                        success: function (data) {
+                            if (data.StatusCode > 0) {
+                                showTip("添加码值成功！");
+                            } else {
+                                UI.tips.tip_alert("tips_wrong", data.Message);
+                            }
+                        },
+                        error: function () {
+                            UI.Alert({ content: "操作出错！" });
+                        }
+                    });
+                },
+                title: '添加码值',
+                okVal: '保存',
+                cancelVal: '关闭',
+                cancel: true
+            });
+        });
+        loadChildNodes(1);
+    });
+    function getModel() {
+        var model = {};
+        model.ParentSysNo = $("#btn_add").attr("data-id");
+        model.CodeName = top.$("#CodeName").val();
+        return model;
+    }
+    function loadChildNodes(id) {
+        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+        var data = { id: id };
+        $.get('@Url.Action("BsCode", "Basic")', data,
+             function (ret) {
+                 $("#treeTitle li").each(function () {
+                     $(this).removeClass("bold");
+                 });
+                 $("#" + id).addClass("bold");
+                 $("#btn_add").attr("data-id", id).removeClass("disabled").removeAttr("disabled").addClass("btn_blue");
+                 $('#paging').html(ret);
+                 mask.Remove();
+             });
+    }
+
+    function showTip(msg) {
+        UI.tips.tip_alert('tips_shrot tips_success', msg);
+        $("#CodeName").val("");
+        loadChildNodes($("#btn_add").attr("data-id"));
+    }
+</script>

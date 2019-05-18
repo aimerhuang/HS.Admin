@@ -1,0 +1,150 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.PdTemplate
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int type = ViewBag.Type;
+    const int model = (int) ProductStatus.商品描述模板类型.模块;
+    string str=type==model?"模块":"模板";
+    ViewBag.Title = "商品描述"+str+"管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    
+    <script type="text/javascript">
+        var str = "@str";
+        $(function () {
+            $("#pdTemplateForm").validate({
+                    debug: true,
+                    rules: {
+                        txtName: {
+                            required: true,
+
+                            maxlength: 50,
+                            remote: {
+                                url: "/Product/PdTemplateVerify",
+                                type: "post",
+                                data: {
+                                    txtName: function () {
+                                        return $("#txtName").val();
+                                    },
+                                    hidSysNo: function () {
+                                        return $("#hidSysNo").val();
+                                    }
+                                },
+                                dataType: "json",
+                                dataFilter: function (data, type) {
+                                    if (data == 'true') {
+                                        $('#fortxtName').text('字数限制,1-50个字符');
+                                    } else {
+                                        $('#fortxtName').text(str+'名称已存在');
+                                    }
+                                    return data;
+                                }
+                            }
+                        },
+                        txtIcon: { required: true },
+                        txtRemark: {
+                            required: true,
+
+                            maxlength: 200
+                        },
+                        txtContent: { required: true }
+                    },
+                    errorPlacement:
+
+                        function (error, el) {
+                            $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                        },
+
+                    success: function (label, el) {
+                        $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                    }
+                }
+            );
+        });
+
+        function addOrEdit() {
+            $("#pdTemplateForm").submit();
+            if ($("#pdTemplateForm").valid()) {
+                var da = {
+                    hidSysNo: $("#hidSysNo").val(),
+                    searchType: $("#hidType").val(),
+                    txtName: $("#txtName").val(),
+                    txtIcon: $("#txtIcon").val(),
+                    txtRemark: $("#txtRemark").val(),
+                    txtContent: escape($("#txtContent").val())
+                };
+                $.post('/Product/PdTemplateAddOrEdit/', da, function (data) {
+                    if (data.IsPass) {
+                        UI.Dialog.opener.dialog();
+                        UI.Dialog.opener.searchPdTemplate();
+                        UI.Dialog.close();
+                    }
+                });
+            }
+        }
+
+        function valTo(strUrl) {
+            $("#txtIcon").val(strUrl);
+        }
+    </script>
+}
+
+<form id="pdTemplateForm" name="pdTemplateForm" action="">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    @*<tr>
+                        <td width="57" class="nameright border_rnone">类型</td>
+                        <td>
+                            <select class="fl" id="searchType" name="searchType">
+                                @{
+                                    foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                                    {
+                                        if (dict.Key == Model.Type)
+                                        {
+                                    <option value="@dict.Key" selected="selected">@dict.Value</option>
+                                        }
+                                        else
+                                        {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </td>
+                    </tr>*@
+                    <tr>
+                        <td width="67" class="nameright border_rnone">
+                            <input type="hidden" id="hidType" name="hidSysNo" value="@ViewBag.Type"/>
+                            <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/><span class="v_star">*</span>@(str+"名称")
+                        </td>
+                        <td>
+                            <input type="text" id="txtName" name="txtName" style="width: 300px;" value="@Model.Name" class="c3"/><span id="fortxtName" class="prompt m10_l">字数限制,1-50个字符</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="67" class="nameright border_rnone"><span class="v_star">*</span>@(str+"图标")</td>
+                        <td>
+                            <input type="text" id="txtIcon" name="txtIcon" value="@Model.Icon" class="c3 fl"/>
+                            <button class="btn btn_ht26 m10_l" type="button" onclick="DAO.Upload({callback:function(data){valTo(data[0].url); }})"><span class="icon_upload"></span><span class="m5_l">上传文件</span></button>
+                            <span id="fortxtIcon" class="prompt m10_l">@(str+"图标")</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="67" class="nameright border_rnone"><span class="v_star">*</span>@(str+"备注")</td>
+                        <td>
+                            <textarea id="txtRemark" name="txtRemark">@Model.Remark</textarea><span id="fortxtRemark" class="prompt m10_l">字数限制,1-200个字符</span></td>
+                    </tr>
+                    <tr>
+                        <td width="67" class="nameright border_rnone"><span class="v_star">*</span>@(str+"内容")</td>
+                        <td>
+                            <textarea id="txtContent" name="txtContent" style="width: 400px; height: 250px;">@Server.UrlDecode(Model.Content)</textarea><span id="fortxtContent" class="prompt m10_l">字数限制,1-2000个字符</span></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,367 @@
+﻿@using Hyt.Model;
+@model LgDeliveryUserLocation
+@{
+    ViewBag.Title = "全国配送员定位查询";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1009101, ".LG1009101");
+}
+<style>
+    .wraper {
+        float: left;
+        position: relative;
+    }
+
+    .list {
+        position: absolute;
+        top: 27px;
+        width: 161px;
+        height: 196px;
+        overflow: auto;
+        position: absolute;
+        border: 1px solid #ccc;
+        display: none;
+        background: none repeat scroll 0 0 #f1f1f1;
+        float: left;
+        z-index: 1000000;
+    }
+
+        .list ul li {
+            padding-left: 10px;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #dddddd;
+        }
+
+            .list ul li span {
+                margin-left: 10px;
+            }
+
+    ul {
+        list-style: none outside none;
+    }
+
+    #allmap {
+        margin-right: 300px;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .cityList {
+        height: 320px;
+        width: 372px;
+        overflow-y: auto;
+    }
+
+    .sel_container {
+        z-index: 9999;
+        font-size: 12px;
+        position: absolute;
+        right: 5px;
+        top: 110px;
+        width: 120px;
+        height: 30px;
+        line-height: 30px;
+        padding: 5px;
+    }
+
+    .map_popup {
+        position: absolute;
+        z-index: 200000;
+        width: 382px;
+        height: 344px;
+        right: 30px;
+        top: 150px;
+    }
+
+        .map_popup .popup_main {
+            background: #fff;
+            border: 1px solid #8BA4D8;
+            height: 100%;
+            overflow: hidden;
+            position: absolute;
+            width: 100%;
+            z-index: 2;
+        }
+
+        .map_popup .title {
+            background: url("http://map.baidu.com/img/popup_title.gif") repeat scroll 0 0 transparent;
+            color: #6688CC;
+            font-size: 12px;
+            font-weight: bold;
+            height: 24px;
+            line-height: 25px;
+            padding-left: 7px;
+        }
+
+        .map_popup button {
+            background: url("http://map.baidu.com/img/popup_close.gif") no-repeat scroll 0 0 transparent;
+            border: 0 none;
+            cursor: pointer;
+            height: 12px;
+            position: absolute;
+            right: 4px;
+            top: 6px;
+            width: 12px;
+        }
+</style>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool border_bottom">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">仓库</span>
+                    <div class="fl m10_l">
+                        <input type="text" id="warehouse" name="warehouse" value="" readonly="readonly" />
+                    </div>
+
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select id="status">
+                            <option value="0">全部</option>
+                            <option value="1">30分钟活动</option>
+                            <option value="2">当日活动</option>
+                            <option value="3">当日无活动</option>
+                        </select>
+                    </div>
+
+                    <div class="m10_l fl">
+                        <button class="btn btn_ht26 LG1009101" title="搜索" onclick="ShowPosition()"><span class="icon icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+
+                </div>
+            </div>
+            <!--/百度地图区-->
+            <div class="boxs" style="width: 100%; overflow: hidden;" id="allmap"></div>
+            <!--城市列表-->
+            <div class="sel_container"><strong id="curCity">北京市</strong> [<a id="curCityText" href="javascript:void(0)">更换城市</a>]</div>
+            <div class="map_popup" id="cityList" style="display: none;">
+                <div class="popup_main">
+                    <div class="title">城市列表</div>
+                    <div class="cityList" id="citylist_container"></div>
+                    <button id="popup_close"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+<!-- 加载城市列表 -->
+<script type="text/javascript" src="http://api.map.baidu.com/library/CityList/1.2/src/CityList_min.js"></script>
+<script type="text/javascript">
+    var idlist = [];
+    var namelist = [];
+    $(function () {
+        ShowPosition();
+        $("#warehouse").click(function () {
+            var target = this;
+            var selectwarehouse = DAO.SelectWhareHouse(target, {
+                expandAll: false,
+                areaNoCheck: false,
+                callback: function (data) {
+                    $.each(data, function (index, item) {
+                        idlist.push(item.id);
+                        namelist.push(item.name);
+                    });
+                    $(target).val(namelist.join(','));
+                    selectwarehouse.Remove();
+                    //ShowPosition();
+                },
+                restcallback: function () {
+                    idlist = [];
+                    namelist = [];
+                    $(target).val('');
+                }
+            });
+        });
+    });
+    $("#allmap").css("height", $(window.parent.document).height() - 100 + "px");
+
+    var mp = new BMap.Map("allmap");
+    //mp.centerAndZoom("中国");
+    mp.enableScrollWheelZoom();
+    mp.addControl(new BMap.NavigationControl());  //添加默认缩放平移控件
+    //ip定位当前城市
+    //var myCity = new BMap.LocalCity();
+    //myCity.get(myFun);
+    function myFun(result) {
+        mp.centerAndZoom(result.name);
+        mp.enableScrollWheelZoom();
+    }
+
+    //setInterval("ShowPosition()", 10000);//自动更新位置
+
+    //ajax获取数据
+    function ShowPosition() {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetAllCurrentLocation", "Logistics")',
+            data: { idlist: idlist, status: $("#status").val() },
+            traditional: true,
+            chche: false,
+            success: function (data) {
+                DrawPoint(data);
+            },
+            error: function () {
+                UI.Alert({ content: "查询出错,请稍候再试" });
+
+            }
+        });
+    }
+    //地图上标记
+    function DrawPoint(data) {
+        mp.clearOverlays(); //有数据先清除
+        if (data.Data == null && data.Data.list == null && data.Data.list.length == 0) {
+            UI.Alert({ content: "没有配送员位置信息" });
+            return false;
+        }
+        var point = new BMap.Point(data.Data.list[0].Longitude, data.Data.list[0].Latitude);
+        mp.centerAndZoom(point, 5);
+
+        $.each(data.Data.list, function (idx, item) {
+
+            var txt = item.UserName, mouseoverTxt = txt + " " + JsonTimeConvert(item.GpsDate);
+
+            var myCompOverlay = new ComplexCustomOverlay(new BMap.Point(item.Longitude, item.Latitude), txt, mouseoverTxt, item.GpsDate);
+
+            mp.addOverlay(myCompOverlay);
+
+        });
+    }
+    // 复杂的自定义覆盖物
+    function ComplexCustomOverlay(point, text, mouseoverText, day) {
+        this._point = point;
+        this._text = text;
+        this._overText = mouseoverText;
+        this._day = day;
+    }
+    var oneDay = 24 * 60 * 60 * 1000;
+    var halfHour = 30 * 60 * 1000;
+    var today = new Date();
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    ComplexCustomOverlay.prototype.initialize = function (map) {
+        this._map = map;
+        var div = this._div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+        div._day = this._day;
+        setColor(div);
+        //div.style.border = "1px solid #1fd8f6";
+        div.style.color = "white";
+        div.style.height = "18px";
+        div.style.padding = "2px";
+        div.style.lineHeight = "18px";
+        div.style.whiteSpace = "nowrap";
+        div.style.MozUserSelect = "none";
+        div.style.fontSize = "12px";
+        var span = this._span = document.createElement("span");
+        div.appendChild(span);
+        span.appendChild(document.createTextNode(this._text));
+        var that = this;
+
+        var arrow = this._arrow = document.createElement("div");
+        arrow.style.background = "url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat";
+        arrow.style.position = "absolute";
+        arrow.style.width = "11px";
+        arrow.style.height = "10px";
+        arrow.style.top = "16px";
+        arrow.style.left = "10px";
+        arrow.style.overflow = "hidden";
+        div.appendChild(arrow);
+
+        div.onmouseover = function () {
+            this.style.backgroundColor = "#6BADCA";
+            this.style.borderColor = "#c0c0c0";
+            this.getElementsByTagName("span")[0].innerHTML = that._overText;
+            arrow.style.backgroundPosition = "0px -20px";
+            this.style["z-index"] = 99999;
+        };
+
+        div.onmouseout = function () {
+            setColor(this);
+            //this.style.backgroundColor = "#EE5D5B";
+            //this.style.borderColor = "#c0c0c0";
+            this.getElementsByTagName("span")[0].innerHTML = that._text;
+            arrow.style.backgroundPosition = "0px 0px";
+            this.style["z-index"] = 0;
+        };
+
+        mp.getPanes().labelPane.appendChild(div);
+
+        return div;
+    };
+    ComplexCustomOverlay.prototype.draw = function () {
+        var map = this._map;
+        var pixel = map.pointToOverlayPixel(this._point);
+        this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+        this._div.style.top = pixel.y - 30 + "px";
+    };
+    //JsonTime Example: /Date(1333468581000)/  \\/Date\((\d+)\)\\/
+    function JsonTimeConvert(unixTime) {
+        var unixTimestamp = new Date(parseInt(unixTime.replace("/Date(", "").replace(")/", "")));
+        return formatDate(unixTimestamp, 'yyyy-MM-dd hh:mm:ss');
+    }
+    function formatDate(date, fmt) {
+        var o = {
+            "M+": date.getMonth() + 1,                 //月份 
+            "d+": date.getDate(),                    //日 
+            "h+": date.getHours(),                   //小时 
+            "m+": date.getMinutes(),                 //分 
+            "s+": date.getSeconds(),                 //秒 
+            "q+": Math.floor((date.getMonth() + 3) / 3), //季度 
+            "S": date.getMilliseconds()             //毫秒 
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+    function setColor(div) {
+        var unixTimestamp = eval('new ' + eval(div._day).source);
+        var timestamp = today - unixTimestamp;
+        if (timestamp <= halfHour) {
+            div.style.backgroundColor = "#28ee57";
+        } else if (timestamp > halfHour && timestamp <= oneDay) {
+            div.style.backgroundColor = "#1fd8f6";
+        } else {
+            div.style.backgroundColor = "#c1c1c1";
+        }
+    }
+    // 创建CityList对象，并放在citylist_container节点内
+    var myCl = new BMapLib.CityList({ container: "citylist_container", map: mp });
+
+    // 给城市点击时，添加相关操作
+    myCl.addEventListener("cityclick", function (e) {
+        // 修改当前城市显示
+        document.getElementById("curCity").innerHTML = e.name;
+
+        // 点击后隐藏城市列表
+        document.getElementById("cityList").style.display = "none";
+    });
+
+    // 给“更换城市”链接添加点击操作
+    document.getElementById("curCityText").onclick = function () {
+        var cl = document.getElementById("cityList");
+        if (cl.style.display == "none") {
+            cl.style.display = "";
+        } else {
+            cl.style.display = "none";
+        }
+    };
+
+    // 给城市列表上的关闭按钮添加点击操作
+    document.getElementById("popup_close").onclick = function () {
+        var cl = document.getElementById("cityList");
+        if (cl.style.display == "none") {
+            cl.style.display = "";
+        } else {
+            cl.style.display = "none";
+        }
+    };
+</script>

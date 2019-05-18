@@ -1,0 +1,407 @@
+﻿@model Hyt.Model.DsDealerMall
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改分销商商城";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+@*<script src="~/Theme/scripts/jquery-1.10.2.min.js"></script>*@
+<script src="~/Theme/scripts/layer/layer.js"></script>
+@*<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js?v=20140530")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4a129ccbf39c60f2eb556dba394e969d"></script>*@
+}
+<style>
+    .getShouquanma {
+        border: 1px gray solid;
+        border-top-left-radius: 3px;
+        border-top-right-radius: 3px;
+        border-bottom-left-radius: 3px;
+        border-bottom-right-radius: 3px;
+        height:35px;
+        width:85px;
+    }
+
+
+</style>
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+
+                            <td style="width: 20%" class="nameright border_rnone"><span class="v_star">*</span>分销商</td>
+                            <td style="width: 80%" class="">
+                                <select class="select_ht28 " id="DealerSysNo" name="DealerSysNo">
+                                    @foreach (var item in (IList<Hyt.Model.Transfer.CBDsDealer>)ViewBag.DsDealer)
+                                    {
+                                        <option value="@item.SysNo">@item.DealerName</option>
+                                    }
+                                </select>
+                                <span id="forDealerSysNo" class="prompt m10_l">分销商</span>
+                                <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>商城类型</td>
+                            <td>
+                                <select class="select_ht28 " id="MallTypeSysNo" name="MallTypeSysNo">
+                                    @foreach (var item in (IList<Hyt.Model.DsMallType>)ViewBag.DsMallType)
+                                    {
+                                        <option value="@item.SysNo">@item.MallName</option>
+                                    }
+                                </select>
+                                @*<button id="btnShouquanma" class="btnGetshouquan">获取授权码</button>target="_blank"@Url.Action("GetShouquanma", "Distribution")*@
+                                <span id="forMallTypeSysNo" class="prompt m10_l">商城类型</span>
+                                
+                                <input type="button" value="获取授权码" class="getShouquanma"/>
+                            </td>
+                            @*<td><button>获取授权码</button></td>*@
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">APPKEY</td>
+                            <td>
+                                <select class="select_ht28 " id="DealerAppSysNo" name="DealerAppSysNo"></select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>店铺名称</td>
+                            <td>
+                                <input type="text" value="@Model.ShopName" id="ShopName" name="ShopName" maxlength="50" class="wd156">
+                                <span id="forShopName" class="prompt m10_l">字数限制,1-50个字</span>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>店铺账号</td>
+                            <td>
+                                <input type="text" value="@Model.ShopAccount" id="ShopAccount" name="ShopAccount" maxlength="50" class="wd156">
+                               <input type="hidden" value="@Model.SysNo" class="shopid"/>
+                                <span id="forShopAccount" class="prompt m10_l">字数限制,1-50个字</span>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>是否自营</td>
+                            <td class="">
+                                <select id="IsSelfSupport" name="IsSelfSupport" class="wd170">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.是否自营)))
+                                        {
+                                            <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forIsSelfSupport" class="prompt m10_l">是否自营</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>售后电话</td>
+                            <td>
+                                <input type="text" id="ServicePhone" name="ServicePhone" maxlength="20" class="wd156" value="@Model.ServicePhone">
+                                <span id="forServicePhone" class="prompt m10_l">字数限制,1-20个字</span>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>ERP编码</td>
+                            <td>
+                                <input type="text" id="ErpSysNo" name="ErpSysNo" maxlength="50" class="wd156" value="@Model.ErpSysNo">
+                                <span id="forErpSysNo" class="prompt m10_l">字数限制,1-50个字</span>
+
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>默认仓库</td>
+                            <td>
+                                <input type="text" id="DefaultWarehouse" name="DefaultWarehouse" maxlength="50" class="wd156" value="@Model.DefaultWarehouse">
+                                <span id="forDefaultWarehouse" class="prompt m10_l">字数限制,1-50个字</span>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                            <td>
+                                <select id="status" name="status" class="wd170">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.分销商商城状态)))
+                                        {
+                                            <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forstatus" class="prompt m10_l">分销商商城状态</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">商城配置</td>
+                            <td class="">
+                                <input type="checkbox" id="EnabledAutoConfirmReceipt" name="EnabledAutoConfirmReceipt"  @(ViewBag.Config.EnabledAutoConfirmReceipt ? "checked" : "") />
+                                <span id="forEnabledAutoConfirmReceipt" class="prompt m10_l">升舱时是否自动确认收款单</span>
+                            </td>
+                        <tr>
+                            <td class="nameright border_rnone"></td>
+                            <td class="">
+                                <input type="checkbox" id="EnabledAddGift" name="EnabledAddGift" @(ViewBag.Config.EnabledAddGift ? "checked" : "") />
+                                <span id="forEnabledAddGift" class="prompt m10_l">是否添加赠品</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+    var shopid = "@(Model.SysNo)";
+    $(".getShouquanma").click(function () {       
+        var shopType = $("#MallTypeSysNo").val();
+        var appSysNo = $("#DealerAppSysNo").val();
+   
+        $.ajax({
+            url: "/Distribution/GetAuthorizationCode",
+            data: { shopid: shopid, shopType: shopType, appSysNo: appSysNo },
+            type: "post",
+            dataType:"json",
+            success: function (data) {
+              
+                if (data.Status && data.Data != "") {                  
+                    //alert(data.Data);
+                    UI.DialogOpen(data.Data,
+                    {
+                        title: '获取授权码',
+                        width: 1200,
+                        height: 800,
+                        close: function () {},
+                        resize: false
+                    },
+                    false);
+             
+                } else {
+                    alert(data.Message);
+                }
+            }
+        })
+    });
+
+</script>
+@section FooterJs{
+    <script type="text/javascript">
+        $(function() {
+            $("#MallTypeSysNo").change(function() {
+                GetAppListByMallType($(this).val());
+            });
+            $("#status").find("option[value=@Model.Status]").attr("selected", "true");
+            $("#IsSelfSupport").find("option[value=@Model.IsSelfSupport]").attr("selected", "true");
+            $("#DealerSysNo").find("option[value=@Model.DealerSysNo]").attr("selected", "true");
+            $("#MallTypeSysNo").find("option[value=@Model.MallTypeSysNo]").attr("selected", "true");
+            GetAppListByMallType($("#MallTypeSysNo").val());
+        });
+
+        function GetAppListByMallType(mallType) {
+            $.getJSON("/Distribution/GetListByMallType?r=" + Math.random(),
+                {
+                    mallType: $("#MallTypeSysNo").val()
+                }, function(rows) {
+                    var content = '<option value="0">请选择</option>';
+                    $.each(rows, function(idx, item) {
+                        content += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                    });
+                    $('#DealerAppSysNo').html(content);
+                    $("#DealerAppSysNo").find("option[value=@Model.DealerAppSysNo]").attr("selected", "true");
+                });
+        }
+
+        //验证
+        $().ready(function() {
+            $("#form1").validate({
+                rules: {
+                    // 选择框
+                    DealerSysNo: {
+                        required: true,
+                    },
+                    MallTypeSysNo: {
+                        required: true,
+                    },
+                    status: {
+                        required: true,
+                    },
+                    IsSelfSupport: {
+                        required: true,
+                    },
+                    //文本
+                    ShopName: {
+                        required: true,
+                        maxlength: 50,
+                    },
+                    ServicePhone: {
+                        required: true,
+                        maxlength: 20,
+                    },
+                    ErpSysNo: {
+                        required: true,
+                        maxlength: 50,
+                    },
+
+                    ShopAccount: {
+                        required: true,
+                        maxlength: 50,
+                                                                                                @*remote: {
+                            url: '@Url.Action("IsCanAddDsDealerMall")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                mallTypeSysNo: $("#MallTypeSysNo").val(),
+                                shopAccount: $("#ShopAccount").val(),
+                                ridSysNo: $("#SysNo").val(),
+                            },
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#forShopAccount').text('字数限制,1-50字');
+                                } else {
+                                    $('#forShopAccount').text('店铺账号和商城类型同时重复');
+                                }
+                                return data;//是否通过验证关键点
+                            }
+                        }*@
+                    },
+                },
+                errorPlacement: function(error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+
+                },
+                success: function(label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        (function() {
+            var opener = art.dialog.opener, // 父页面window对象
+                api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('修改分销商商城')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function(win) {
+                            if ($("#form1").valid()) {
+                                $.post('@Url.Action("IsCanAddDsDealerMall")', {
+                                        mallTypeSysNo: $("#MallTypeSysNo").val(),
+                                        shopAccount: $("#ShopAccount").val(),
+                                        ridSysNo: $("#SysNo").val()
+                                    }, function(data, status) {
+                                        if (!data) {
+                                            UI.Alert({ content: "有店铺账号和商城类型同时重复" });
+                                        } else {
+                                            UI.Confirm({
+                                                content: "您确定修改吗？",
+                                                ok: function() {
+                                                    var model = getModel();
+                                                    $.ajax({
+                                                        url: "@Url.Action("AjaxDsDealerMallUpdate")",
+                                                        data: JSON.stringify(model),
+                                                        contentType: 'application/json',
+                                                        type: "post",
+                                                        success: function(ret) {
+                                                            if (ret.Status) {
+                                                                UI.DialogOpener().ExecSuccess("修改分销商商城成功");
+                                                                UI.Dialog.close();
+                                                            } else {
+                                                                UI.tips.tip_alert('tips_shrot tips_wrong', ret.Message);
+                                                            }
+                                                        },
+                                                        error: function() {
+                                                            UI.tips.tip_alert('tips_shrot tips_wrong', "操作出错！");
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '关闭'
+                    }
+                );
+
+            function getModel() {
+                var data = {};
+                var model = {};
+                model.SysNo = $("#SysNo").val();
+                model.DealerSysNo = $("#DealerSysNo").val();
+                model.Status = $("#status").val();
+                model.MallTypeSysNo = $("#MallTypeSysNo").val();
+                model.ShopName = $("#ShopName").val();
+                model.ShopAccount = $("#ShopAccount").val();
+                model.IsSelfSupport = $("#IsSelfSupport").val();
+                model.ServicePhone = $("#ServicePhone").val();
+                model.DealerAppSysNo = $("#DealerAppSysNo").val();
+                model.ErpSysNo = $("#ErpSysNo").val();
+                model.DefaultWarehouse = $("#DefaultWarehouse").val();
+                data.model = model;
+                if ($("#EnabledAutoConfirmReceipt").attr("checked")) {
+                    data.enabledAutoConfirmReceipt = true;
+                } else {
+                    data.enabledAutoConfirmReceipt = false;
+                }
+                if ($("#EnabledAddGift").attr("checked")) {
+                    data.enabledAddGift = true;
+                } else {
+                    data.enabledAddGift = false;
+                }
+                return data;
+            }
+        })();
+    </script>
+
+
+    <script>
+
+
+        //$(".btnGetshouquan").click(function () {
+
+        //    location.href ='';
+
+        //})
+        //var shopid = $(".ShopAccount").val();
+        //$(".btnGetshouquan").click(function (shopid) {
+        //    UI.DialogOpen('/DoGetShouquanma?shopid=' + shopid, {
+        //        title:'请输入商家账号',
+        //        width:'400',
+        //        height:'500'
+        //        init:function(){
+        //            this.button({
+        //                name:'确定'
+        //            });
+                
+        //        }
+
+        //},false);
+            
+
+
+        //})
+       
+
+    </script>
+}

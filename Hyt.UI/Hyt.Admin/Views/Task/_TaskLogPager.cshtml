@@ -1,0 +1,41 @@
+﻿
+@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.SyTaskLog>
+
+
+<!--表格列开始-->
+        <div class="boxs_listtabel">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                <thead>
+                    <tr>
+                        <th width="60">日志编号</th>
+                        <th width="60">任务编号</th>
+                        <th width="125">执行开始时间</th>
+                        <th width="125">执行结束时间</th>
+                        <th width="60">执行耗时(ms)</th>
+                        <th>运行结果</th>
+                        <th width="125">创建时间</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 0;
+                        foreach (var item in Model.TData)
+                        {
+                            <tr @Html.Raw(i%2 != 0 ? "class='stag_color'" : "")>
+                                <td>@item.SysNo</td>
+                                <td>@item.TaskConfigSysNo</td>
+                                <td>@item.ExecuteStartTime</td>
+                                <td>@item.ExecuteEndTime</td>
+                                <td>@Html.Raw((item.ExecuteEndTime - item.ExecuteStartTime).TotalMilliseconds)</td>
+                                <td>@item.ExecuteMessage</td>
+                                <td>@item.CreateTime</td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+     <!--表格列结束-->
+@{Html.RenderPartial("_UrlPaging", Model); }

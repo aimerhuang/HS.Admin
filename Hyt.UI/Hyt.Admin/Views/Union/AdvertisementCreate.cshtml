@@ -1,0 +1,204 @@
+﻿@using Hyt.Model.WorkflowStatus
+@{
+    ViewBag.Title = "新增联盟广告";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/TableBind/TableBind.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#advertisement_form").validate({
+                rules: {
+                    UnionSiteSysNo: { required: true },
+                    AdvertisementType: { required: true },
+                    AccessUrl: { required: true,url: true },
+                    Status: { required: true }
+                },
+                messages: {
+                    
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l');
+                },
+                success: function(span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            $("#btnAdd,#product_list").hide();
+
+            $("#AdvertisementType").change(function() {
+                var val = $(this).val();
+                if (cps == val) {
+                    $("#btnAdd,#product_list").show();
+                } else {
+                    $("#btnAdd,#product_list").hide();
+                }
+            });
+
+            $("#btnAdd").click(function() {
+                var products = Products;
+                DAO.SelectProduct({
+                    selectedProducts: products,
+                    onselect: function(result) {
+                        if (result) {
+                            for (var i = 0; i < result.length; i++) {
+                                var item = result[i];
+                                if (item) {
+                                    if (!isProductAdd(item.pid)) {
+                                        Products.push(item.pid);
+                                        var str = "<tr>";
+                                        str += "<td class='border_lnone'>" + item.pid + "</td>";
+                                        str += "<td class='align_l p10_lr'>" + item.name + "</td>";
+                                        str += "<td><button class='btn btn_ht26 btn_red' type='button' data-id='" + item.pid + "'><span class='icon_trash icon_white'></span></button></td>";
+                                        str += "</tr>";
+                                        $("#item_body").append(str);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+
+            $("#item_body").delegate("button[type='button']", "click", function(e) {
+                var id = $(this).attr("data-id");
+
+                UI.Confirm({
+                    content: "确定删除该商品吗？",
+                    cancel: true,
+                    ok: function() {
+                        deleteProduct(id);
+                        $(e.target).parents("tr").remove();
+                    }
+                });
+            });
+
+        });
+
+        var cps = @UnionStatus.联盟广告类型.CPS.GetHashCode();
+        var Products = [];
+        //检查商品是否已添加(已添加：true；未添加：false)
+
+        function isProductAdd(/*待添加商品编号*/productSysno) {
+            var len = Products.length;
+            for (var i = 0; i < len; i++) {
+                if (Products[i] == productSysno) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        //删除指定的商品
+
+        function deleteProduct(/*商品系统编号*/sysno) {
+            var len = Products.length;
+            for (var i = 0; i < len; i++) {
+                if (Products[i] == sysno) {
+                    Products.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        function submitAdvertisement() {
+            if ($("#advertisement_form").valid()) {
+                UI.Confirm({
+                    content: '您确定要添加联盟广告吗？',
+                    ok: function() {
+                        var model = $("#advertisement_form").JsonBind();
+                        var val = $("#AdvertisementType").val();
+                        if (cps == val) {model.Products = Products;}
+                        if (model) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("AdvertisementCreate", "Union")",
+                                data: JSON.stringify(model),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function(ret) {
+                                    mask.Remove();
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('联盟广告添加成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function() {
+                                    mask.Remove();
+                                }
+                            });
+                        } else {
+                            UI.Alert({ content: '数据错据,请检查重试!' });
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+<form id="advertisement_form" action="@Url.Action("AdvertisementCreate")" method="post">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td width="60" class="nameright border_lnone"><span class="v_star">*</span>联盟网站</td>
+                        <td class="border_right1">
+                            @Html.DropDownList("UnionSiteSysNo", ViewBag.UnionSiteSysNo as SelectList, htmlAttributes: new { @class = "m10_r wd180", @dn = "UnionSiteSysNo" })
+                            <span class="prompt">请选择联盟网站</span>
+                        </td>
+                        <td class="nameright" width="80"><span class="v_star">*</span>状态</td>
+                        <td>
+                            @Html.DropDownList("Status", ViewBag.Status as SelectList, htmlAttributes: new { @class = "m10_r wd180", @dn = "Status" })
+                            <span class="prompt">请选择状态</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone" width="80"><span class="v_star">*</span>有效访问Url</td>
+                        <td colspan="3">
+                            <input type="text" id="AccessUrl" name="AccessUrl" dn="AccessUrl" maxlength="50" class="wd300 m10_r">
+                            <span class="prompt">请填写有效访问Url　例如:（http://127.0.0.1/product/details/）</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone"><span class="v_star">*</span>联盟通知代码</td>
+                        <td class="border_right" colspan="3">
+                            <textarea id="NotificationCode" name="NotificationCode" dn="NotificationCode" class="wd300 m10_r"></textarea>
+                            <span class="prompt">联盟通知代码参数说明：（{$orders}：订单号，{$price}：价格，{$like}：URL地址）</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone" valign="top"><span class="v_star">*</span>广告类型</td>
+                        <td class="border_right" colspan="3">
+                            @Html.DropDownList("AdvertisementType", ViewBag.AdvertisementType as SelectList, htmlAttributes: new { @class = "m10_r wd180", @dn = "AdvertisementType" })
+                            <span class="prompt">请选择广告类型</span>
+                            <button class="btn btn_ht26 m10_l btn_blue" id="btnAdd" type="button"><span class="icon icon_plus icon_white"></span><span class="m5_l">选择商品</span></button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="product_list">
+            <div class="head_detail m10_t">
+                <h5>商品信息</h5>
+            </div>
+            <div class="boxs_detail border_lnone">
+                <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                    <thead>
+                        <tr>
+                            <th width="140" class="border_lnone">商品编号</th>
+                            <th class="align_l p10_lr">商品名称</th>
+                            <th width="50">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="item_body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>

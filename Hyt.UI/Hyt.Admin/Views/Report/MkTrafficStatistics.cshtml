@@ -1,0 +1,607 @@
+﻿@{
+    ViewBag.Title = "流量统计报表";
+}
+
+@section HeadJs
+{
+    <script language="javascript" type="text/javascript" src="/Theme/Plugins/ichart/ichart.1.2.min.js"></script>
+    <script type="text/javascript">
+
+        var minValue = 0;
+        //最小值
+        var maxValue = 0;
+        //最大值
+        var INtimeType = @ViewBag.INtimeType;
+        var markObject;
+        var ajaxLoadingMask;
+
+        //标签
+        var labelsArray = new Array();
+
+        //月标签
+        labelsArray.push(["01月", "02月", "03月", "04月", "05月", "06月", "07月", "08月", "09月", "10月", "11月", "12月"]);
+        var tempArray = new Array();
+        //临时数组用于拼凑标签
+        var colorList = ['#4572a7', '#aa4643', '#89a54e', '#80699b', '#3d96ae', '#1ebd5e', '#e0745a', '#5ae0dc', '#f2e057', '#f558bc'];
+
+        //日标签
+        @for (int i = 6; i >= 0; i--)
+        {
+            @:tempArray.push('@(DateTime.Now.Subtract(new TimeSpan(i, 0, 0, 0)).Day)号');
+        }
+        labelsArray.push(tempArray);
+
+
+        //小时标签
+        tempArray = new Array();
+        @for (int i = 12; i > 0; i--)
+        {
+            @:tempArray.push('@DateTime.Now.Subtract(new TimeSpan(i, 0, 0)).Hour:00');
+        }
+        labelsArray.push(tempArray);
+
+        //10分钟标签
+        tempArray = new Array();
+        @for (int i = 11; i >= 0; i--)
+        {
+            @:tempArray.push('@DateTime.Now.Subtract(new TimeSpan(0, i * 10, 0)).ToString("HH:mm")');
+        }
+        labelsArray.push(tempArray);
+
+
+        $(function() {
+
+            var data = [
+                {
+                    name: 'PV',
+                    value: new Array(),
+                    color: '#aad0db',
+                    line_width: 2
+                },
+                {
+                    name: 'IP',
+                    value: new Array(),
+                    color: '#f68f70',
+                    line_width: 2
+                }
+            ];
+
+            //读取统计报表数据
+
+            function LoadTotalReport(sourceType, dataType, isMobile, callback) {
+
+                var para = {};
+                para.sourceType = sourceType;
+                para.dataType = dataType;
+                para.isMobilePlatform = false;
+
+                $.ajax({
+                    url: "@Url.Action("GetTotalReportDataSource", "Ajax")",
+                    data: para,
+                    type: "JSON",
+                    success: function(response) {
+                        if ($.isFunction(callback)) {
+                            callback(response);
+                        }
+                    }
+                });
+
+            }
+
+            //组织数据结构
+            function createDataSource(dataSource) {
+
+                data[0].value = new Array();
+                data[1].value = new Array();
+
+                //对天进行特数据处理，因为只进行了7天环比计算
+                var loop = (INtimeType == 1) ? 7 : 12;
+                for (var i = 1; i <= loop; i++) {
+
+                    if (i < 10) {
+                        data[0].value.push(dataSource["m_0" + i + "_PV"]);
+                        data[1].value.push(dataSource["m_0" + i + "_IP"]);
+                    } else {
+                        data[0].value.push(dataSource["m_" + i + "_PV"]);
+                        data[1].value.push(dataSource["m_" + i + "_IP"]);
+                    }
+
+                    //取最大值
+                    if (data[0].value[data[0].value.length - 1] > maxValue) {
+                        maxValue = data[0].value[data[0].value.length - 1];
+                    }
+
+                    //取最小值
+                    if (data[0].value[data[0].value.length - 1] < minValue) {
+                        minValue = data[0].value[data[0].value.length - 1];
+                    }
+
+                }
+
+                DrowTotalReport();
+            }
+
+            //生产统计报表
+            function DrowTotalReport() {
+
+                var labels = labelsArray[INtimeType];
+
+                var width = $("#canvasDiv").width();
+
+                var chart = new iChart.Area2D({
+                    render: 'canvasDiv',
+                    data: data,
+                    title: '流量实时监控',
+                    width: width,
+                    height: 300,
+                    padding: 40,
+                    legend: {
+                        enable: true,
+                        row: 1,//设置在一行上显示，与column配合使用
+                        column: 'max',
+                        valign: 'top',
+                        background_color: null,//设置透明背景
+                        offsetx: -30,//设置x轴偏移，满足位置需要
+                        border: false
+                    },
+                    tip: {
+                        enable: true,
+                        listeners: {
+                            //tip:提示框对象、name:数据名称、value:数据值、text:当前文本、i:数据点的索引
+                            parseText: function(tip, name, value, text, i) {
+                                return labels[i] + name + "：" + value;
+                            }
+                        }
+                    },
+                    crosshair: {
+                        enable: true,
+                        line_color: '#62bce9',
+                        line_width: 2
+                    },
+                    sub_option: {
+                        label: false,
+                        point_size: 10
+                    },
+                    background_color: '#f2f2f2',
+                    coordinate: {
+                        axis: {
+                            width: [0, 0, 2, 0]
+                        },
+                        background_color: '#ffffff',
+                        height: '90%',
+                        scale: [{
+                            position: 'left',
+                            scale_space: Math.round((maxValue - minValue) / 8),
+                            scale_enable: false,//禁用小横线
+                            listeners: {
+                                parseText: function(t, x, y) {
+                                    return { text: t }
+                                }
+                            }
+                        }, {
+                            position: 'bottom',
+                            start_scale: 1,
+                            end_scale: 12,
+                            parseText: function(t, x, y) {
+                                return { textY: y + 10 };
+                            },
+                            labels: labels
+                        }]
+                    }
+                });
+                chart.draw();
+
+                ShowMark(false);
+            }
+
+
+            //初始化
+
+            function Init() {
+
+                $("#total_totalButton button").click(function() {
+                    
+                    if ($(this).hasClass("disabled")) {
+                        return;
+                    }
+
+
+                    $("#total_totalButton .disabled").attr("disabled", null);
+                    $("#total_totalButton .disabled").removeClass("disabled").removeClass("white");
+
+                    $(this).attr("disabled", "disabled");
+                    $(this).addClass("disabled").addClass("white");
+
+                    INtimeType = $(this).attr("value");
+                    markObject = $("#totalDiv");
+                    ShowMark(true);
+                    LoadTotalReport("total", INtimeType, false, createDataSource);
+                });
+
+            }
+
+            //显示Mark层
+
+            function ShowMark(show) {
+
+                if (show == true) {
+                    if (markObject != null) {
+                        ajaxLoadingMask = UI.Mask({
+                            obj: $(markObject),
+                            zindex: 1000
+                        });
+                    }
+                } else if (ajaxLoadingMask != null) {
+                    ajaxLoadingMask.Remove();
+                }
+            }
+
+            function ShowPie(obj, data, title) {
+
+                if (data.length == 0) {
+                    data.push({
+                        name: '',
+                        value: 0,
+                        color: colorList[0]
+                    });
+                }
+
+                var width = $("#" + obj).width();
+
+                var chart = new iChart.Pie3D({
+                    render: obj,
+                    data: data,
+                    title: {
+                        text: title,
+                        height: 40,
+                        fontsize: 30,
+                        color: '#282828'
+                    },
+                    footnote: {
+                        text: '品胜商城',
+                        color: '#486c8f',
+                        fontsize: 12,
+                        padding: '0 38'
+                    },
+                    sub_option: {
+                        mini_label_threshold_angle: 40,//迷你label的阀值,单位:角度
+                        mini_label: {
+                            //迷你label配置项
+                            fontsize: 14,
+                            fontweight: 600,
+                            color: '#ffffff'
+                        },
+                        label: {
+                            background_color: null,
+                            sign: false,//设置禁用label的小图标
+                            padding: '0 4',
+                            border: {
+                                enable: false,
+                                color: '#666666'
+                            },
+                            fontsize: 11,
+                            fontweight: 600,
+                            color: '#4572a7'
+                        },
+                        border: {
+                            width: 2,
+                            color: '#ffffff'
+                        },
+                        listeners: {
+                            parseText: function(d, t) {
+                                return d.get('value') + "%"; //自定义label文本
+                            }
+                        }
+                    },
+                    legend: {
+                        enable: true,
+                        padding: 0,
+                        offsetx: 60,
+                        offsety: 50,
+                        color: '#3e576f',
+                        fontsize: 14,//文本大小
+                        sign_size: 14,//小图标大小
+                        line_height: 28,//设置行高
+                        sign_space: 10,//小图标与文本间距
+                        border: false,
+                        align: 'left',
+                        background_color: null//透明背景
+                    },
+                    shadow: true,
+                    border: false,
+                    shadow_blur: 6,
+                    shadow_color: '#aaaaaa',
+                    shadow_offsetx: 0,
+                    shadow_offsety: 0,
+                    align: 'right',//右对齐
+                    offsetx: -100,//设置向x轴负方向偏移位置60px
+                    offset_angle: -90,//逆时针偏移120度
+                    width: width,
+                    height: 400,
+                    radius: 150,
+                    padding: 0
+                });
+
+                chart.draw();
+
+            }
+            
+            function LoadDefaultData() {
+                //读取实时监控数据
+                LoadTotalReport("total", INtimeType, false, createDataSource);
+
+                //读取简报数据
+                LoadTotalReport("sample", INtimeType, false, function(response) {
+                    if (response != null && response.length > 0) {
+                        var sampleTableRow = $("#pvSampleTotalDiv table tr");
+
+                        $.each(sampleTableRow, function(i, e) {
+                            //避开第一行标题行
+                            if (i == 0) {
+                                return;
+                            }
+
+                            $("td:eq(1)", e).html(response[i - 1].PV);
+                            $("td:eq(2)", e).html(response[i - 1].IP);
+                            $("td:eq(3)", e).html(response[i - 1].AverageViewPages);
+                            $("td:eq(4)", e).html(response[i - 1].AverageStayTime + "秒");
+                            $("td:eq(5)", e).html(response[i - 1].OldCustomerReviewRate + "%");
+                        });
+                    }
+                });
+
+
+                //显示访客来源TOP10
+                LoadTotalReport("Top10", 1, false, function(response) {
+                    var data = new Array();
+               
+                    $.each(response, function(i, e) {
+                        data.push({
+                            name: e.Item,
+                            value: e.TotalPV,
+                            color: colorList[i]
+                        });
+                    });
+                    ShowPie("canvasViewerTop10", data, '访客来源TOP10');
+                });
+
+
+                //显示访客地区TOP10
+                LoadTotalReport("Top10", 2, false, function(response) {
+                    var data = new Array();
+               
+                    $.each(response, function(i, e) {
+                        data.push({
+                            name: e.Item,
+                            value: e.TotalPV,
+                            color: colorList[i]
+                        });
+                    });
+                    ShowPie("canvasAreaTop10", data, '访客地区TOP10');
+                });
+
+                //显示分辨率TOP10
+                LoadTotalReport("Top10", 3, false, function(response) {
+                    var data = new Array();
+               
+                    $.each(response, function(i, e) {
+                        data.push({
+                            name: e.Item,
+                            value: e.TotalPV,
+                            color: colorList[i]
+                        });
+                    });
+                    ShowPie("canvasScreenTop10", data, '分辨率TOP10');
+                });
+
+                //显示浏览器TOP10
+                LoadTotalReport("Top10", 4, false, function(response) {
+                    var data = new Array();
+               
+                    $.each(response, function(i, e) {
+                        data.push({
+                            name: e.Item,
+                            value: e.TotalPV,
+                            color: colorList[i]
+                        });
+                    });
+                    ShowPie("canvasBrowerTop10", data, '浏览器TOP10');
+                });
+
+
+                //显示浏览器TOP10
+                LoadTotalReport("Top10", 5, false, function(response) {
+                    var data = new Array();
+               
+                    $.each(response, function(i, e) {
+                        data.push({
+                            name: e.Item,
+                            value: e.TotalPV,
+                            color: colorList[i]
+                        });
+                    });
+                    ShowPie("canvasProductsTop10", data, '商品TOP10');
+                });
+            }
+
+            Init();
+
+            LoadDefaultData();
+
+            window.onresize = function() {
+                //canvasDiv canvasViewerTop10 canvasAreaTop10 canvasScreenTop10 canvasBrowerTop10 canvasProductsTop10
+
+                $("#canvasDiv").html("加载中...");
+                $("#canvasViewerTop10").html("加载中...");
+                $("#canvasAreaTop10").html("加载中...");
+                $("#canvasScreenTop10").html("加载中...");
+                $("#canvasBrowerTop10").html("加载中...");
+                $("#canvasProductsTop10").html("加载中...");
+                LoadDefaultData();
+            };
+        });
+        
+
+        function directorTo(url) {
+            window.location.href = url;
+        }
+
+    </script>
+
+}
+<div class="case">
+
+    <!-- 实时监控 -->
+    <div class="box_dis Operations m20_b" id="totalDiv">
+        <div class="box_con3">
+            <div class="m10_t m10_b">
+                <span class="bold f14">实时监控:
+                </span>
+                <button class="btn btn_ht26 m10_r fr" onclick="directorTo('/Report/MkTrafficStatisticsRealTime')"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button>
+            </div>
+            <div id='canvasDiv' style="height:300px;">加载中...</div>
+            <div class="p10_t" id="total_totalButton">
+                <button class="btn btn_ht26 m10_r btn btn_ht22 disabled white" disabled="disabled" value="0"><span class="m5_l">每月监控</span></button>
+                <button class="btn btn_ht26 m10_r" value="1"><span class="m5_l">7天监控</span></button>
+                <button class="btn btn_ht26 m10_r " value="2"><span class="m5_l">12小时监控</span></button>
+                <button class="btn btn_ht26 m10_r" value="3"><span class="m5_l">10分钟时监控</span></button>
+            </div>
+        </div>
+    </div>
+    <!-- 实时监控 结束 -->
+
+
+    <!-- 流量概况 -->
+    <div class="box_dis Operations m20_b" id="pvSampleTotalDiv">
+        <div class="box_con3">
+            <div class="m10_t m10_b">
+                <span class="bold f14">流量概况:
+                </span>
+                <button class="btn btn_ht26 m10_r fr"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button>
+            </div>
+            <div class="boxs_detail_table">
+                <!--只有数据详情-->
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr class="head_detail">
+                            <th>&nbsp;</th>
+                            <th>浏览量</th>
+                            <th>访客数</th>
+                            <th>平均访问深度</th>
+                            <th>平均停留时间</th>
+                            <th>回访客占比</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>今日</td>
+                            <td><span class="p10_l">0</span></td>
+                            <td><span class="p10_l">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0秒</span></td>
+                            <td class="align_r red"><span class="p10_r">0%</span></td>
+                        </tr>
+                        <tr>
+                            <td>昨日</td>
+                            <td><span class="p10_l">0</span></td>
+                            <td><span class="p10_l">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0秒</span></td>
+                            <td class="align_r red"><span class="p10_r">0%</span></td>
+                        </tr>
+                        <tr>
+                            <td>上周同期</td>
+                            <td><span class="p10_l">0</span></td>
+                            <td><span class="p10_l">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0秒</span></td>
+                            <td class="align_r red"><span class="p10_r">0%</span></td>
+                        </tr>
+                        <tr>
+                            <td>前七天日均</td>
+                            <td><span class="p10_l">0</span></td>
+                            <td><span class="p10_l">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0</span></td>
+                            <td class="align_r red"><span class="p10_r">0秒</span></td>
+                            <td class="align_r red"><span class="p10_r">0%</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- 流量概况 结束 -->
+
+
+    <div>
+        <!--访客来源TOP10-->
+        <div class="boxs fl m20_b" style="width: 49%">
+
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button></span>
+                <h3>最近7天访客来源TOP10</h3>
+            </div>
+
+            <div class="boxs_con_c1" id="canvasViewerTop10" style="height:400px;">加载中...</div>
+        </div>
+        <!--访客来源TOP10-->
+
+        <!--访客地区TOP10-->
+        <div class="boxs fr m20_b" style="width: 49%">
+
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button></span>
+                <h3>最近7天访客地区TOP10</h3>
+            </div>
+
+            <div class="boxs_con_c1" id="canvasAreaTop10" style="height:400px;">加载中...</div>
+        </div>
+        <!--访客地区TOP10-->
+    </div>
+
+    <div>
+        <!--分辨率TOP10-->
+        <div class="boxs fl m20_b" style="width: 49%">
+
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button></span>
+                <h3>最近7天分辨率TOP10</h3>
+            </div>
+
+            <div class="boxs_con_c1" id="canvasScreenTop10" style="height:400px;">加载中...</div>
+        </div>
+        <!--分辨率TOP10-->
+
+        <!--浏览器TOP10-->
+        <div class="boxs fr m20_b" style="width: 49%">
+
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button></span>
+                <h3>最近7天浏览器TOP10</h3>
+            </div>
+
+            <div class="boxs_con_c1" id="canvasBrowerTop10" style="height:400px;">加载中...</div>
+        </div>
+        <!--浏览器TOP10-->
+    </div>
+
+
+    <div>
+        <!--被访问的商品TOP10-->
+        <div class="boxs fl m20_b" style="width: 100%">
+
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l">更多</span></button></span>
+                <h3>最近7天被访问的商品TOP10</h3>
+            </div>
+
+            <div class="boxs_con_c1" id="canvasProductsTop10" style="height:400px;">加载中...</div>
+        </div>
+        <!--被访问的商品TOP10-->
+    </div>
+</div>

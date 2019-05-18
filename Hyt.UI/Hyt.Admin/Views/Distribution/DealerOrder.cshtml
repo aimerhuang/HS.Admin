@@ -1,0 +1,149 @@
+﻿@{
+    ViewBag.Title = "DealerOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.DsOrder>
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+@section HeadCss
+{
+    <style type="text/css">
+        #divMsg dl dt, #divMsg dl dd {
+            width: 100%;
+        }
+
+        #divMsg dl dd {
+            color: red;
+        }
+
+            #divMsg dl dd span {
+                width: 100px;
+                text-align: right;
+                display: block;
+                float: left;
+                color: #000;
+            }
+
+        #divMsg .msg_context_box {
+            max-height: 100px;
+            overflow: auto;
+        }
+    </style>
+}
+
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+<script src="~/Theme/scripts/layer/layer.js"></script>
+}
+<script type="text/javascript">
+    //查询列表
+    function doSearch(id) {
+        checkedsysnolist = [];
+        checkedspsysnopricelist = [];
+        checkedsysnopricelist = [];
+
+        var status = $('#status').val();
+        //if ($('#chkHasChangePrice').is(':checked')) {
+        //    haschangeprice = 1;
+        //}
+
+        var mallOrderId = $.trim($("#mallOrderId").val());
+        currentSearchType = 1;
+        curpage = id;
+        Utils.MaskStart($('#paging'));
+        $.ajax({
+            type: "get",
+            url: "/Distribution/DealerOrder",
+            data: { id: id, mallOrderId: mallOrderId, status: status },
+            dataType: "html",
+            success: function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            },
+            error: function () {
+                alert("error")
+            }
+        })
+        @*$.get('@Url.Action("DealerOrder", "Distribution")',
+            //{ id: id, ProductName: name,status:status },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });*@
+    }
+    //查询按钮
+    $(function () {
+        doSearch(1);
+        $("#btnSearch").click(function () {
+            doSearch(1);
+        });
+        
+    })
+   
+
+
+</script>
+
+
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>经销商升舱订单</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    @*<div class="fl m10_r">
+                            <label> 显示已调价
+                                <input type="checkbox" id="chkHasChangePrice" />
+                            </label>
+                        </div>*@
+                    <span class="veralign_t fl">状态</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="status" onchange=" doSearch(1)">
+                            <option value="0">全部</option>
+                            <option value="10">升舱中</option>
+                            <option value="20">已发货</option>
+                            <option value="30">已完成</option>
+                            <option value="-10">失败</option>
+                        </select>
+                    </div>
+
+                    <div class="search_btn wd200 m10_l fl">
+                        <input name="" type="text" id="mallOrderId" class="input_ht28" placeholder="商城订单号..." onclick="$(this).select()" />
+                        <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                    @*<button class="btn btn_ht28 m10_l fl" title="高级搜索" id="JS_btnSearch" type="button"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>*@
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+               
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+
+            </div>
+            <!--表格列结束-->
+
+        </div>
+    </div>
+</div>

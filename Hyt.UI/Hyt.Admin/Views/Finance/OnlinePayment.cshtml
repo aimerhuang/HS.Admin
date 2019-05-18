@@ -1,0 +1,290 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "在线支付查询";
+    @Html.PrivilegeControl(PrivilegeCode.FN1003201, ".FN1003201")
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+ <style type="text/css">
+        body
+        {
+            background: none;
+        }
+
+        select, input[type='text'], button
+        {
+            font-size: 12px;
+        }
+
+        .commoditybox tr td
+        {
+            padding: 0 5px;
+        }
+    </style>
+
+
+<!--以下是弹出框中-->
+<div class="outbox6" id="JS_combox" style="display: none; width: 650px;">
+    <div class="boxs p10">
+        <div class="boxs_detail_dispay boxs_con_c1">
+            <div class="tit_con">
+                <form id="addForm" name="addForm" action="">
+                  <table width="100%" cellspacing="0" cellpadding="0" border="0" class="bd_none">
+                        <tbody>
+                            <tr>
+                                <td width="80" class="nameright bd_none p10_r"><span class="v_star">*</span>订单编号</td>
+                                <td class="bd_none">
+                                    <input type="text" class="wd150" id="txtOrderSysNo" name="txtOrderSysNo" onfocus="this.blur()" createitem="SourceSysNo">
+                                    <button type="button" class="btn btn_ht28" title="选择订单" onclick="pickOrder();"><span></span><span class="m5_l">选择订单</span></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>支付方式</td>
+                                <td class="bd_none">
+                                    <select id="SelPaymentTypeName" name="SelPaymentTypeName" class="wd150">
+                                        <option value="0">--请选择--</option>
+                                        <option value="3">支票</option>
+                                        <option value="2">刷卡</option>
+                                        <option value="4">转账</option>
+                                        <option value="5">网银</option>
+                                        <option value="6">支付宝</option>
+                                        <option value="7">售后换货</option>
+                                        <option value="1"> 现金</option>
+                                        <option value="8">经销商预存</option>
+                                        <option value="9">现金预付</option>
+                                        <option value="10">刷卡预付</option>
+                                        <option value="14">余额支付</option>
+                                        <option value="12">易宝支付</option>
+                                        <option value="20">拉卡拉微信支付</option>
+                                        <option value="22">汇付天下</option>
+                                        <option value="13">通联支付</option>
+                                        <option value="15">经销商预付</option>
+                                        <option value="16">退换货支付</option>
+                                        <option value="17">修改订单号</option>
+                                        <option value="21">易汇支付</option>
+                                        <option value="11">微信支付</option>
+
+                                    </select>
+                                    @*<input type="text" class="wd150" id="txtPaymentTypeName" name="txtPaymentTypeName" onfocus="this.blur()">*@
+                                    <input type="hidden" id="txtPaymentTypeSysNo" createitem="PaymentTypeSysNo" />
+                                    <span class="prompt m10_l">选择支付方式</span>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>金额</td>
+                                <td class="bd_none">
+                                    <input type="text" class="wd150" id="txtAmount" name="txtAmount" onfocus="this.blur()" createitem="Amount" />
+                                    <span class="prompt m10_l">订单总金额</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>交易凭证</td>
+                                <td class="bd_none">
+                                    <input type="text" class="wd150" id="txtVoucherNo" name="txtVoucherNo" maxlength="200" createitem="VoucherNo" />
+                                    <span class="prompt m10_l">填写交易凭证</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>提交单号</td>
+                                <td class="bd_none">
+                                    <input type="text" class="wd150" id="txtBusinessOrderSysNo" name="txtBusinessOrderSysNo" maxlength="200" createitem="BusinessOrderSysNo" />
+                                    <span class="prompt m10_l">填写提交单号</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--弹出框中结束-->
+
+<script>
+    $('#SelPaymentTypeName').change(function () {
+        $("#txtPaymentTypeSysNo").val($(this).val());
+    })
+</script>
+
+
+<div class="case" id="bd">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>在线支付查询</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+            <div class="boxs_tool">
+                <form id="form1">
+                    <div class="right_tool clearfix">
+                        <span class="fl">订单编号</span><input type="text" class="input_small m10_r m10_l fl" name="OrderSysNo" search="OrderSysNo"><span class="fl">支付方式</span><select id="PaymentTypeSysNos" name="PaymentTypeSysNos" class="wd120 select_ht28 fl m10_l m10_r"></select><span class="fl">支付时间</span><div class="date_btn120 m10_l m10_r fl">
+                            <input type="text" class="input_ht26" search="BeginDate" id="BeginDate" name="BeginDate" onclick="UI.Date({ el: 'BeginDate', maxDate: $(EndDate).val() });">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'BeginDate' }); return false;"  type="button"><span class="icon_calendar"></span></button>
+                        </div>
+                        <span class="fl">-</span><div class="date_btn120 m10_l m10_r fl">
+                                                     <input type="text" class="input_ht26" search="EndDate" id="EndDate" name="EndDate" onclick="UI.Date({ el: 'EndDate' })">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'EndDate', minDate: $(BeginDate).val() }); return false;" type="button"><span class="icon_calendar"></span></button>
+                        </div>
+                        <button title="查询" class="btn btn_ht28 fl" type="button" id="btnSearch"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                    </div>
+                    <div class="left_tool">
+
+                        <button class="btn btn_blue btn_ht26 FN1003201" onclick="openDetail();return false;"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加网上支付</span></button>&nbsp;
+                        <button class="btn btn_ht26 m10_r" id="btnExport" type="button"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                </form>
+
+</div>
+            <div class="paging" id="paging">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //加载支付方式
+        loadAllPayType();
+
+        doSearch();
+
+        //绑定按钮查询事件
+        $("#btnSearch").click(function () {
+            doSearch();
+        });
+
+        $("#PaymentTypeSysNos").change(function () {
+            doSearch();
+        });
+
+        $("#addForm").validate({
+            rules: {
+                txtPaymentTypeName: {
+                    required: true,
+                    maxlength: 30
+                },
+                txtVoucherNo: {
+                    required: true,
+                    maxlength: 200
+                },
+                txtBusinessOrderSysNo: {
+                    required: true,
+                    maxlength: 50
+                },
+                txtAmount: {
+                    required: true,
+                    maxlength: 18,
+                    number: true,
+                    min: 0
+                }
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+        $('#btnExport').click(function () {
+            var form = $("#form1");
+            form.attr('action', '@Url.Action("ExportOnlinePayment", "Finance")');
+            form.attr('method', 'post');
+            form.submit();
+        });
+
+    });
+
+    //查询列表
+    function doSearch() {
+        Ajax.get("/Finance/DoQuery/?r=" + Math.random(), "Search", function (p) {
+            if ($("#PaymentTypeSysNos").val() != "") {
+                p.setParams("PaymentTypeSysNos", $("#PaymentTypeSysNos").val());
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+    function pickOrder() {
+        DAO.SelectOrder({
+            onlinepay: true,
+            callback: function(orderId) {
+                $.ajax({
+                    async: false,
+                    type: "get",
+                    url: "/Finance/GetOrder?orderSysNo=" + orderId,
+                    success: function(order) {
+                        $("#txtOrderSysNo").val(order.Data.orderSysNo);
+                        $("#txtPaymentTypeSysNo").val(order.Data.payTypeSysNo);
+                        $("#txtPaymentTypeName").val(order.Data.paymentName);
+                        $("#txtAmount").val(order.Data.cashPay);
+                    }
+                });
+            }
+        });
+    }
+
+    //加载支付方式
+    function loadAllPayType() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadAllPayType",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                });
+                $('#PaymentTypeSysNos').html(content);
+            }
+        });
+    }
+
+    //create
+    function doSave() {
+        if ($("#addForm").valid()) {
+            Ajax.post("/Finance/CreateOnlinePayment", "createItem", function () {
+
+            }, function (data) {
+                if (data.Status) {
+                    $("#addForm")[0].reset();
+                    UI.Alert({ content: '添加成功!', icon: 'succeed', callback: function () { doSearch(); }, width: '200px' });
+                    UI.CloseDialog("dialog");
+                    //UI.tips.tip_alert("tips_success", "添加成功");
+
+                } else {
+                    //UI.tips.tip_alert("tips_wrong", "操作失败。订单支付方式类型为预付且为未付款的订单才能进行操作。");
+                    UI.Alert({ content: '操作失败!<br>订单支付方式类型为预付且为未付款的订单才能进行操作。', callback: function () { }, width: '200px' });
+                }
+            });
+        }
+    }
+
+    function openDetail() {
+        UI.DialogBox({
+            title: '添加网上支付', content: document.getElementById('JS_combox'), padding: '0px', parent: false, drag: false,
+            button: [{
+                name: '保存',
+                callback: function () {
+                    doSave();
+                    return false;
+                },
+                focus: true
+            }, {
+                name: '取消'
+            }]
+        });
+    }
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+
+</script>

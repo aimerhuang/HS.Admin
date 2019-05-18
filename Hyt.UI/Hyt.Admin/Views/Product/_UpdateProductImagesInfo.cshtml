@@ -1,0 +1,88 @@
+﻿<!-- 商品图片维护 -->
+<div class="pic_box clearfix"></div>
+<div class="align_c m10_t">
+    <button id="btnSave_Images" type="button" class="btn btn_blue btn_ht30" onclick="ProductImagesInfoAdd()"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;&nbsp;
+    <button id="btnSave_Images_Next" class="btn btn_green btn_ht30" onclick="ProductImagesInfoNextAdd();"><span class="icon_save icon_white"></span><span class="m5_l">保存 进入下一步</span></button>
+    <span class="v_star">*</span><span class="f12 c9 m20_t m10_b">必须上传商品图片否则商品将无法上架销售</span>
+</div>
+<script type="text/javascript">
+    //设置保存按钮
+    $(document).ready(function () {
+        productImagesBtnControl(editModel);
+    });
+    //从隐藏文本域中取出商品系统编号
+    var productSysNo = ($("#hdf_ProductSysNo").val().length > 0) ? parseInt($("#hdf_ProductSysNo").val()) : 0;
+    function ProductImagesInfoAdd() {
+
+        var IsHome = false;
+        var result = new Array();
+        $(".pic_box>ul>li.li").each(function (index, element) {
+            var json = {};
+            json.ProductSysNo = productSysno;
+            json.ImageUrl = $(element).find("img").attr("imageurl");
+            json.DisplayOrder = index + 1;
+            json.Status = $(element).find("img").attr("isHome");
+            if (json.Status == 1) {
+                IsHome = true;
+            }
+            result.push(json);
+        });
+        if (result.length == 0) {
+            UI.Alert({ content: '还没有要提交的图片' });
+            return;
+        }
+        if (IsHome == false) {
+            UI.Alert({ content: '还没有设置产品封面！' });
+            return;
+        }
+        UI.tips.tip_alert('tips_shrot tips_success', '保存成功!');
+    }
+    function ProductImagesInfoNextAdd() {
+        var IsHome = false;
+        var result = new Array();
+
+        $(".pic_box>ul>li.li").each(function (index, element) {
+            var json = {};
+            json.ProductSysNo = productSysno;
+            json.ImageUrl = $(element).find("img").attr("src");
+            json.DisplayOrder = index + 1;
+            json.Status = $(element).find("img").attr("isHome");
+            if (json.Status==1) {
+                IsHome = true;
+            }
+            result.push(json);
+        });
+        if (result.length == 0) {
+            UI.Alert({ content: '还没有要提交的图片' });
+            return;
+        }
+        if (IsHome == false) {
+            UI.Alert({ content: '还没有设置产品封面！' });
+            return;
+        }
+        prodctEditTab.Active('3');
+    }
+    
+    //保存按钮状态控制
+    function productImagesBtnControl(isEdit) {
+        if (isEdit) {
+            $("#btnSave_Images").show();
+            $("#btnSave_Images_Next").hide();
+        } else {
+            $("#btnSave_Images").hide();
+            $("#btnSave_Images_Next").show();
+        }
+    }
+
+
+    function GetProductImagesInfo(productSysNo) {
+
+        if ($(".pic_box").attr("init") == undefined) {
+            $.get('/Product/ProductImagesInfo/?' + Math.random(), { productSysno: productSysNo }, function (result) {
+                $(".pic_box").attr("init", true);
+                $(".pic_box").html(result);
+            });
+        }
+    }
+</script>
+<!-- 商品图片维护 END -->

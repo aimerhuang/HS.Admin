@@ -1,0 +1,59 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.BLL.Order
+@using Hyt.BLL.Sys
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_left border_right">
+    <thead>
+        <tr>
+            <th width="53" class="border_lnone">
+                <input class="checkall" name="" type="checkbox" value="">
+            </th>
+            <th width="50px">标识</th>
+            <th class="align_l p10_lr">工作任务描述</th>
+            <th width="100">任务对象编号</th>
+            <th width="140px">优先级</th>
+            <th width="90">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var pager = new Pager<CBSyJobPool>
+                {
+                    PageFilter =
+                        {
+
+                            ExecutorSysNo = AdminAuthenticationBo.Instance.Current.Base.SysNo,
+                            TaskType = ViewBag.TaskType,
+                            Status = 2,
+                            IsBindAllDealer = true,
+                            SelectedAgentSysNo = -1,
+                            HasAllWarehouse = true
+                        },
+                    PageSize = 1000
+                };
+            SyJobPoolManageBo.Instance.GetJobSpoolList(pager);
+            var list = pager.Rows;
+            if (list.Count > 0)
+            {
+                foreach (var job in pager.Rows)
+                {
+                    var className = "blue";
+                    <tr>
+                        <td class="border_lnone">
+                            <input name="" class="checktd" type="checkbox" value="@job.SysNo" />
+                        </td>
+                        <td>@Html.Raw(SoOrderBo.Instance.GetMallType(job.TaskSysNo, job.TaskType))</td>
+                        <td class="align_l blue p10_l"><a href="javascript:void()" onclick='UI.OpenCreatTab("任务详情", "@job.JobUrl");'>@job.JobDescription</a></td>
+                        <td>@job.TaskSysNo</td>
+                        <td class="@className"><a href="javascript:void()" onclick='showDiv(this,"@job.SysNo")'>@SyJobPoolPriorityBo.Instance.GetPriorityName(job.Priority)</a></td>
+                        <td>
+                            <button class="btn btn_blue btn_ht26" onclick="rleaseJob('@job.SysNo');return false;"><span class="icon_minus icon_white"></span><span class="m5_l">解除</span></button>
+                        </td>
+                    </tr>
+                }
+            }
+
+        }
+    </tbody>
+</table>

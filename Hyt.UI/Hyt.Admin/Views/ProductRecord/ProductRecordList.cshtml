@@ -1,0 +1,80 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品备案";
+}
+@section headjs{
+    <link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js?v=2"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+    <script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+    <script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品备案</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="right_tool clearfix">
+
+                </div>
+                <div class="left_tool">
+                    <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon_importing icon_white m5_r"></span><span>Excel商品备案信息导入</span></button>
+                    
+                    &nbsp;&nbsp; 可导入的文件名称：
+                    <button class="btn btn_ht26 m10_r" id="btnExportNS" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载南沙商检导入模板</span></button>
+                    <button class="btn btn_ht26 m10_r" id="btnExportGaoJie" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载高捷商品导入模板</span></button>                    
+                    
+                    
+                    @*&nbsp;&nbsp; <span style="color:red;">南沙商检商品备案信息.xls</span>,
+                    &nbsp;&nbsp; <span style="color:red;">高捷商品备案信息.xls</span>*@
+                    <iframe id="pifrmImport" name="pifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                </div>
+            </div>
+
+
+        </div>
+
+
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(function () {
+        $('#btnExportNS').click(function () {
+            window.location = '@Url.Action("ExportTemplateNS")';
+        });
+
+        $('#btnExportGaoJie').click(function () {
+            window.location = '@Url.Action("ExportTemplateGJ")';
+        });
+
+        $('#btnImport').click(function () {
+            if (window.frames["pifrmImport"].chooseFile) {
+                window.frames["pifrmImport"].chooseFile();
+            }
+        });
+    });
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.indexOf('成功') !== -1) {
+            UI.tips.tip_alert("tips_success", res);
+        } else
+            UI.tips.tip_alert("tips_wrong", res);
+
+    }
+</script>
+
+

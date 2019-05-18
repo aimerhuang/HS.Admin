@@ -1,0 +1,41 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBSyJobPool>
+@{
+    //系统消息
+    ViewBag.Title = "_SyMessages";
+}
+<div class="boxs_tit head_m">
+
+    <span class="ra10 c6 m5_t">
+      <span class="f14 m10_r blue"><a  href="javascript:void(0)" onclick="javascript:UI.OpenCreatTab('系统消息','/Main/SyMessagesList')" title="">更多...</a></span>
+  
+    </span>
+    <h3>系统消息</h3>
+</div>
+<div class="boxs_con_c1" style="height: 340px;">
+    <ul class="msg">
+        @{
+            var row = 1;
+            string cs = string.Empty;
+            foreach (var item in Model.TData)
+            {
+                cs = row % 2 == 0 ? "msg_grayer" : "msg_gray";
+            <li class="@cs border_lnone border_rnone c6 f12 li p0"><i class="icon_envelope m10_r m10_l"></i>
+                <a href="javascript:void(0)" onclick="UI.OpenCreatTab('任务详情','@item.JobUrl')" title="">【@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.任务对象类型), item.TaskType) (<span class="red">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.任务池状态), item.Status)</span>)】                                                                               
+                </a>
+            </li>
+                row++;
+            }
+        }
+        @{
+            if ((int)ViewBag.QueCounts > 0)
+            {
+                 <li class="@cs border_lnone border_rnone c6 f12 li p0">
+                 <i class="icon_envelope m10_r m10_l"></i>
+                 <a href="javascript:void(0)" onclick="javascript: UI.OpenCreatTab('商品咨询', '/Front/CrCustomerQuestion')" title="">【商品咨询(<span class="red">待回复 @ViewBag.QueCounts</span>)】</a>
+                 </li>
+            }            
+        }
+
+    </ul>
+</div>

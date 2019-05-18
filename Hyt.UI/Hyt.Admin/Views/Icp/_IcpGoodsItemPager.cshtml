@@ -1,0 +1,59 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBIcpGoodsItem>
+
+      <!--表格列开始-->
+<div class="boxs_listtabel">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="70">系统编号</th>
+                                <th width="70">商品编号</th>
+                                <th width="140">商品名称</th>
+                                <th width="140">商检类型</th>
+                                <th width="140">报文类型</th>
+                                <th width="140">报文编号</th>
+                                <th width="140">备案时间</th>
+                                <th width="140">接收状态</th>
+                                <th width="140">审核状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBIcpGoodsItem>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    } 
+
+                    <td>@item.SysNo</td>
+                    <td>@item.ErpCode</td>
+                    <td>@item.ProductName</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.CommonEnum.商检), item.IcpType)</td>
+                    <td>@item.MessageType</td>                
+                    <td>@item.MessageID</td>
+                    <td >@item.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@item.PlatStatus</td>
+                    <td>@item.CiqStatus</td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

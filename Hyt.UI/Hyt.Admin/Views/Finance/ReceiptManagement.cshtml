@@ -1,0 +1,518 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.FnReceiptTitleAssociation>
+@{
+    ViewBag.Title = "ReceiptManagement";
+    @Html.PrivilegeControl(PrivilegeCode.FN1005101, ".right_tool")
+    ;
+    @Html.PrivilegeControl(PrivilegeCode.FN1005201, "#btnAdd")
+    ;
+    @Html.PrivilegeControl(PrivilegeCode.FN1005301, "#btnImport,button[name=btnEdit]")
+    ;
+    @Html.PrivilegeControl(PrivilegeCode.FN1005401, "#btnDelMulti,button[name=btnDel]")
+    ;
+}
+
+
+@section HeadJs{
+    
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+   
+
+    <script type="text/javascript">
+
+        function doFormValidation(form) {
+            /// <summary>
+            ///     form validation
+            /// </summary>
+            /// <param name="form">form Element</param>
+            
+            //#region add custom validation methods
+            //then canbe used within rules
+            $.validator.addMethod('selValid', function(currElVal, el, params) {
+                //params--e.g. 5 or[1,5](array)
+                return currElVal != -1;
+            });
+
+            //#endregion
+
+            //#region form validate setup
+            $(form).validate({
+                rules: {
+                    //科目代码
+                    EasReceiptCode: {
+                        required: true,
+                        maxlength: 20
+                    },
+                    //科目名称
+                    EasReceiptName: {
+                        required: true,
+                        maxlength: 50
+                    },
+                    //仓库
+                    WarehouseSysNo: {
+                        required: true
+                    },
+                    PaymentTypeSysNo: {
+                        selValid: true
+                    },
+                    IsDefault: {
+                        selValid: true
+                    }
+                },
+                messages: {
+                    //科目代码
+                    EasReceiptCode: {
+                        required: '请输入科目代码',
+                        maxlength: '不能超过20个字符',
+                    },
+                    //科目名称
+                    EasReceiptName: {
+                        required: '请输入科目名称',
+                        maxlength: '不能超过50个字符',
+                    },
+                    //仓库
+                    WarehouseSysNo: {
+                        required: '请选择仓库'
+                    },
+                    PaymentTypeSysNo: {
+                        selValid: '请选择支付方式'
+                    },
+                    IsDefault: {
+                        selValid: '请选择是否默认项'
+                    }
+                },
+                errorPlacement: function(error, el) {
+                    $(form).find('#for' + el.attr('id')).attr('class', 'error m10_l');
+                    $(form).find('#for' + el.attr('id')).text(error.text());
+                },
+                success: function(label, el) {
+                    $(form).find('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+            //#endregion
+
+            //return $(form).valid();
+        }
+
+//#region 新增修改
+
+        function createOrUpdate(id) {
+            /// <summary>
+            ///     create/update
+            /// </summary>
+            /// <param name="id">sysno optional</param>
+            //450
+            var width = '640px', height = '226px'; //automatic does not work
+            if (id === undefined) {
+                //#region 新增
+                UI.DialogOpen('@Url.Action("CreateOrUpdateReceipt")', {
+                        init: function() {
+                            var win = this.iframe.contentWindow;
+                            var form = win.document.getElementById('formDialogOpen');
+                            $(form).find('#IsDefault').val('-1'); //fix the unworked binding default value
+
+                            //$(form).find('#IsDefault').children().each(function() {
+                            //    if ($(this).text() === '请选择') {
+                            //        $(this).prop('selected', true);
+                            //        $(form).find('#IsDefault').children().not($(this)).prop('selected', false);
+                            //        return false;
+                            //    }
+                            //    return true;
+                            //});
+
+                            doFormValidation(form);
+
+                        },
+                        title: '新增科目',
+                        width: width,
+                        height: height,
+                        button: [
+                            {
+                                name: '保存',
+                                focus: true,
+                                callback: function() {
+                                    var win = this.iframe.contentWindow;
+                                    var form = win.document.getElementById('formDialogOpen');
+
+
+                                    if (!$(form).valid()) {
+                                        return false; //not close the dialog
+                                    }
+
+                                    $.ajax({
+                                        url: '@Url.Action("CreateReceipt")',
+                                        type: 'post',
+                                        //data: $(form).serialize(),
+                                        data: {
+                                            IsDefault: $(form).find('#IsDefault').val(),
+                                            EasReceiptCode: $(form).find('#EasReceiptCode').val(),
+                                            EasReceiptName: $(form).find('#EasReceiptName').val(),
+                                            PaymentTypeSysNo: $(form).find('#PaymentTypeSysNo').val(),
+                                            WarehouseSysNo: $(form).find('#WarehouseSysNo').attr('sysno')
+                                        },
+                                        success: function(data) {
+                                            if (data.IsLogout) {
+                                                eval(data.callback);
+                                                return;
+                                            }
+                                            if (data.Status) {
+
+                                                UI.tips.tip_alert('tips_success', data.Message);
+                                                //setTimeout(location.reload(), 6000);
+                                                ajaxAction(getFilterVals());
+                                            } else {
+
+                                                UI.tips.tip_alert('tips_wrong', data.Message);
+                                            }
+                                        }
+                                    });
+
+                                    return true; //close the dialog
+                                }
+                            },
+                            {
+                                name: '关闭'
+                            }
+                        ]
+                    },
+                    false);
+            }
+                //#endregion
+            else {
+                //#region 修改
+                var lastUpdateDate;
+                UI.DialogOpen('@Url.Action("CreateOrUpdateReceipt")', {
+                        title: '更新版本',
+                        width: width,
+                        height: height,
+                        init: function() {
+                            var tr = $('#tableResult').find('tr[name=' + id + ']'),
+                                win = this.iframe.contentWindow,
+                                form = win.document.getElementById('formDialogOpen');
+                            //set the ini values
+                            $(form).find('#IsDefault').val(tr.find('td[name=Status]').attr('selVal'));
+                            $(form).find('#EasReceiptCode').val(tr.find('td[name=Code]').text());
+                            $(form).find('#EasReceiptName').val(tr.find('td[name=Name]').text());
+                            $(form).find('#WarehouseSysNo').val(tr.find('td[name=WareHouseName]').text());
+                            $(form).find('#PaymentTypeSysNo').val(tr.find('td[name=TitleType]').attr('selVal'));
+                            lastUpdateDate = tr.find('td[name=CreatedDate]').attr('timespan');
+
+                            doFormValidation(form);
+                        },
+                        button: [
+                            {
+                                name: '保存',
+                                focus:true,
+                                callback: function() {
+                                    var iframe = this.iframe.contentWindow,
+                                        form = iframe.document.getElementById('formDialogOpen');
+
+                                    if (!$(form).valid()) {
+                                        return false; //not close the dialog
+                                    }
+
+                                    $.ajax({
+                                        url: '@Url.Action("UpdateReceipt")',
+                                        type: 'post',
+                                        data: {
+                                            SysNo: id,
+                                            IsDefault: $(form).find('#IsDefault').val(),
+                                            EasReceiptCode: $(form).find('#EasReceiptCode').val(),
+                                            EasReceiptName: $(form).find('#EasReceiptName').val(),
+                                            PaymentTypeSysNo: $(form).find('#PaymentTypeSysNo').val(),
+                                            WarehouseSysNo: $(form).find('#WarehouseSysNo').attr('sysno'),
+                                            LastUpdateDate: lastUpdateDate
+                                        },
+                                        success: function(data) {
+                                            if (data.IsLogout) {
+                                                eval(data.callback);
+                                                return;
+                                            }
+                                            if (data.Status) {
+
+                                                UI.tips.tip_alert('tips_success', data.Message);
+                                                ajaxAction(getFilterVals());
+                                            } else {
+                                                UI.tips.tip_alert('tips_wrong', data.Message);
+                                            }
+                                        }
+                                    });
+                                    return true;
+                                }
+                            },
+                            {
+                                name: '关闭'
+                            }
+                        ]
+                    },
+                    false);
+            }
+
+            //#endregion
+        }
+
+        //#endregion
+
+        //#region  function del
+
+        function del(vals) {
+            /// <summary>
+            ///     del operation
+            /// </summary>
+            /// <param name="vals">data to post</param>
+            $.ajax({
+                url: 'DeleteReceipt',
+                type: 'post',
+                data: { arrDelSysnos: vals },
+                //async: false,//for refresh later judgement
+                success: function(data) {
+
+                    if (data.IsLogout) {
+                        eval(data.callback);
+                        return;
+                    }
+                    if (data.Status) {
+
+                        UI.tips.tip_alert('tips_success', data.Message);
+                        //setTimeout(location.reload(), 6000);
+                        ajaxAction(getFilterVals());
+                    } else {
+
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    }
+                }
+            });
+        }
+
+//#endregion
+
+        function getFilterVals() {
+            /// <summary>
+            ///     get the filter vals
+            /// </summary>
+            /// <returns type=""></returns>
+            return {
+                CodeOrName: $('#txtCodeOrName').val() == '请输入科目编码或名称..' ? undefined : $('#txtCodeOrName').val(),
+                IsDef: $('#selIsDefault').val(),
+                PayMentType: $('#selPaymentTypeSysNo').val()
+            };
+        }
+
+        function ajaxAction(vals, url, type) {
+            /// <summary>
+            ///     ajax function
+            /// </summary>
+            /// <param name="vals"></param>
+            /// <param name="url">1</param>
+            $.ajax({
+                url: url === undefined ? '@Url.Action("ReceiptManagement")' + "?r=" + Math.random() : url + "?r=" + Math.random(),
+                type: type === undefined ? 'get' : type,
+                //async: false,             
+                data: vals,
+                success: function(data) {
+                    //login time out handling
+                    /*CustomActionFilter
+                    
+                    */
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    $('#divSearchResult').html(data);
+                }
+            });
+        }
+
+        function setVal() {
+            alert('a');
+        }
+
+        $(document).ready(function() {
+
+
+            //#region btnAdd
+            $('#btnAdd').click(function () {
+                createOrUpdate();
+            });
+            //#endregion
+
+            //#region btnDelMulti删除多个
+            $('#btnDelMulti').click(function() {
+
+                if (!$('input[type=checkbox]').is(':checked')) {
+                    UI.Alert({ content: '请至少选择一条记录!' });
+                    return;
+                }
+
+                UI.Confirm({
+                        content: '确定要删除吗?',
+                        ok: function() {
+
+                            var sysNos = [];
+                            $('input[type=checkbox]:checked').each(function() {
+                                if ($(this).attr('name') != undefined)
+                                    sysNos.push($(this).attr('name'));
+                            });
+
+                            //post to server to delete the data checked
+                            del(sysNos.join(','));
+                        }
+                    }
+                );
+
+            });
+            //#endregion
+
+
+            //#region 下拉选择
+            $('#selIsDefault').bind('change', function() {
+                /* 不用serialize()传值到后台 前台要增加很多判断及替换,后台还要拆分 */
+                ajaxAction({ IsDef: $('#selIsDefault').val() });
+
+            });
+            $('#selPaymentTypeSysNo').bind('change', function() {
+                /* 不用serialize()传值到后台 前台要增加很多判断及替换,后台还要拆分 */
+                ajaxAction({ PayMentType: $('#selPaymentTypeSysNo').val() });
+
+            });
+            //#endregion
+
+            //#region 版本号输入查找
+            $('#txtCodeOrName').defaultValue("请输入科目编码或名称..");
+            $('#btnSearch').click(function() {
+
+                ajaxAction(
+                    {
+                        CodeOrName: $('#txtCodeOrName').val() == '请输入科目编码或名称..' ? undefined : $('#txtCodeOrName').val(),
+                        IsDef: $('#selIsDefault').val(),
+                        PayMentType: $('#selPaymentTypeSysNo').val()
+                    }
+                );
+
+            });
+            //#endregion
+            var sel = $('#selPaymentTypeSysNo').children('option[value=-1]').remove().end().html();
+            var content = $('<div id="divPrompt" class="p10"><select id="selType">' + sel + '<select><div>')[0];
+            $(content).find('select').change(function () {
+                importPayType = $(this).val();
+                
+            });
+
+            //#region btnImport
+            var importPayType;
+            $('#btnImport').click(function() {
+               
+                UI.DialogBox({
+
+                    title: '选择支付方式',
+                    content:
+                        content,
+                    resize:
+                        false,
+                    button:
+                    [{
+                        name: '确定',
+                        callback: function() {
+                            $.ajax({
+                                url: '@Url.Action("SetPayTypeForImported")' + '?id=' + importPayType,
+                                type: 'post',
+                                async: false
+                            });
+
+                            if (window.frames["ifrmImport"].chooseFile) {
+                                //window.frames["ifrmImport"].setPaytype(importPayType);
+                                window.frames["ifrmImport"].chooseFile();
+                            }
+
+                        }
+                    }]
+                });
+
+
+            });
+
+            //#endregion
+            $('#btnExport').click(function() {
+
+                window.location = '@Url.Action("ExportRecTemplate")';
+
+            });
+
+
+        });
+
+        function importCallBack(res) {
+            /// <summary>
+            ///     excel import call back
+            /// </summary>
+            /// <param name="res">JsonResult passed from iframe with the backend action </param>
+            if (res.indexOf('导入成功') !== -1)
+                UI.tips.tip_alert("tips_success", res);
+            else
+                UI.tips.tip_alert("tips_wrong", res);
+            //setTimeout(location.reload, 1000);
+            setTimeout(function() {
+                ajaxAction();
+                $('#txtCodeOrName').val();
+                $('#selIsDefault').val('-1');
+                $('#selPaymentTypeSysNo').val('-1');
+            }, 1000);
+        }
+    </script>
+}
+
+
+
+   
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>收款科目管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!-- left tool bar-->
+                <div class="left_tool" style="float: left">
+                    <button class="btn btn_ht26 m5_r btn_blue" type="button" title="添加收款账目" id="btnAdd"><span class="icon icon_plus icon_white m5_r"></span><span>新增</span></button><button type="button" id="btnDelMulti" class="btn btn_ht26  m5_r btn_red"><span class="icon_trash icon_white m5_r"></span><span>删除</span></button><button type="button"  id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m5_l btn_blue"><span class="icon_importing icon_white m5_r"></span><spa>导入</span></button><button class="btn btn_ht26 m10_l" id="btnExport" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载模板</span></button>
+
+                    @*<button type="button" id="btnImport" class="btn btn_ht26"><span class="m5_l">导入</span></button>*@
+                    <iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                            
+                    <!-- '/Order/Query' -->
+                           
+
+                    @*<form id="frmImport" action="@Url.Action("ImportExcel")" method="POST" enctype="multipart/form-data">
+                                <input type="file" id="txtUpload" name="txtUpload" class="hide" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+                            </form>*@
+                </div>
+                <!-- right tool bar-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">是否默认科目</span>
+                    @Html.DropDownList("selIsDefault", ViewBag.lstStatus as List<SelectListItem>, new {@class = "fl m10_r m10_l"})
+                    <span class="veralign_t fl">支付类型</span>
+                    @Html.DropDownList("selPaymentTypeSysNo", ViewBag.lstTitleType as List<SelectListItem>, new {@class = "fl m10_r m10_l"})
+                    <span class="veralign_t fl">科目编码/名称</span>
+                    <div class="search_btn m10_l fl">
+                        <input id="txtCodeOrName" type="text" class="input_ht28" value="请输入科目编码或名称.." title="请输入科目编码或名称..">
+                        <button id="btnSearch" type="button" class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+
+            </div>
+      
+            <!-- 查询结果 -->
+            <div id="divSearchResult" class="boxs_listtabel">
+             
+                @{ Html.RenderPartial("pAjaxPager_Receipt", Model); }
+
+            </div>
+
+        </div>
+    </div>
+</div>

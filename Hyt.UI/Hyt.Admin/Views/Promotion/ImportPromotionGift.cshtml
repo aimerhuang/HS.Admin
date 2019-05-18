@@ -1,0 +1,41 @@
+﻿@using System.Web.Script.Serialization
+@using Hyt.Model.Transfer
+@{
+    string data ="";
+    string message="";
+    bool status= false;
+    if (ViewBag.Result != null)
+    {
+         data = ViewBag.Result.Data!=null ? HttpUtility.UrlEncode(new JavaScriptSerializer().Serialize((List<CBSpPromotionGift>)ViewBag.Result.Data)):"";
+        if (data != null)
+        {
+            data = data.Replace("+", " ");
+        }
+        message = ViewBag.Result.Message;
+         status = ViewBag.Result.Status;
+    }
+}
+<form id="formImport" action="@Url.Action("ImportPromotionGift")" method="POST" enctype="multipart/form-data">
+    <!-- upload with excel format -->
+    <input type="file" id="txtUpload" name="txtUpload" class="hide" accept=".csv,application/vnd.ms-excel" />
+</form>
+
+<script>
+    $(document).ready(function() {
+        $('#txtUpload').change(function () {
+            //must to do the submit (not ajax) to post the data(uploaded file)
+            window.parent.maskStart();
+            formImport.submit();
+
+        });    
+        //not (undefined/''/null) 
+        if ("@message" != "") {
+            window.parent.maskStop();
+            window.parent.importCallBack({status:'@status',message:decodeURIComponent('@message'),data:'@data'});
+        }
+    });
+
+    function chooseFile() {
+        $("#txtUpload").click();
+    }
+</script>

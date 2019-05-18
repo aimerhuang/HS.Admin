@@ -1,0 +1,382 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "广告项管理";
+    @Html.PrivilegeControl(PrivilegeCode.FE1008202, "button.FE1008202")
+    @Html.PrivilegeControl(PrivilegeCode.FE1008602, "button.FE1008602")
+    @Html.PrivilegeControl(PrivilegeCode.FE1008501, "button.FE1008501")
+}
+@section headCss{
+    <style type="text/css">
+        /*
+        body { overflow:hidden;}
+        .pagination { position: absolute; bottom: 0; width: 100%; padding: 0; }
+            */
+    </style>
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入广告项名称...";
+        var mid = @ViewBag.GroupSysNo;
+
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo").html("");
+                //$("#dealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                searchClass();
+            });
+        }
+
+        $(function () {
+            $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#agentSysNo").change(function () {
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            //设置默认参数
+            //$("body").keydown(function (event) {
+            //    switch (event.keyCode) {
+            //        case 13:
+            //            searchClass();
+            //            break;
+            //    }
+            //});
+            UI.CheckAllbox(".boxs_listtabel", ".checkall");
+
+            $("#dealerSysNo").change(function () {
+                if($(this).val() == 0){
+                    $("#InStepFeAdvertItem").hide();
+                }else{
+                    $("#InStepFeAdvertItem").show();
+                }
+                searchClass();
+            });
+        });
+        //添加或修改 type 1为文字 sysNo 0为修改
+        function addOrEdit(type, sysNo) {
+            var url, title, w, h;
+            if (type == 1) {
+                if (sysNo != 0) {
+                    url = "/Front/FeAdvertItemAddOrUpdateAndFont/" + sysNo;
+                    title = "修改广告";
+                } else {
+                    url = "/Front/FeAdvertItemAddOrUpdateAndFont/?mid="+mid;
+                    title = "新增广告";
+                }
+                w = '600px';
+                h = '288px';
+            } else {
+                if (sysNo != 0) {
+                    url = "/Front/FeAdvertItemAddOrUpdateAndImg/" + sysNo;
+                    title = "修改广告";
+                } else {
+                    url = "/Front/FeAdvertItemAddOrUpdateAndImg/?mid="+mid;
+                    title = "新增广告";
+                }
+                w = '680px';
+                h = '350px';
+            }
+            UI.DialogOpen(url, {
+                title: title,
+                width: w,
+                height: h,
+                init: function () {
+                    this.button(
+                        {
+                            name: '保存',
+                            callback: function() {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+
+                                if (!iframe.document.body) {
+                                    alert('iframe还没加载完毕呢');
+                                    return false;
+                                }
+                                ;
+                                iframe.addOrEdit();
+                                return false;
+                            },
+                            focus: true
+                        },
+                        {
+                            name: '取消',
+                        }
+                    );
+                }
+            });
+        }
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function tip_alert(mode, context) {
+            UI.tips.tip_alert(mode, context);
+        }
+        function ChkDate(str) {
+            var pattern = /^(\d{4})(\-)(\d{1,2})(\-)(\d{1,2})$/;
+            return pattern.test(str);
+        }
+
+        function viewImage(type, url) {
+            if(type==1){
+                return;
+            }
+            var w, h;
+            w = '640px';
+            h = '310px';
+            UI.DialogBox({
+                content:'<img style="max-height:300px;max-width:600px;" src="'+url+'"/>',
+                title: '广告图预览',
+                width: w,
+                height: h,
+                cancel: false,
+                ok:true
+            });
+        }
+
+        /// <summary>
+        /// 更新状态
+        /// </summary>
+        /// <param name="提示内容">方式</param>
+        /// <param name="status">状态</param>
+        /// <param name="sysNo">广告项编号</param>
+        function UpdateStatus(content,status,sysNo) {
+            var result = [];
+
+            var json = {};
+            json.sysNo = sysNo;
+            json.status = status;
+
+            result.push(json);
+
+            UI.Confirm({
+                content: content,
+                ok: function () {
+                    $.ajax({
+                        url: "/Front/FeAdvertItemStatus/",
+                        data: JSON.stringify({ collocation: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.IsLogout) {
+                                eval(data.Callback);
+                                return;
+                            }
+                            if (data.result) {
+                                UI.tips.tip_alert('tips_success',data.info);
+                                refresh(1);
+                                UI.Dialog.close();
+                            } else {
+                                dialog(data.info);
+                                UI.Dialog.close();
+                            }
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        //批量更新
+        function UpdateFeAdvStatus()
+        {
+            var result = [];
+            $("#collocationASTable tbody input:checkbox:checked").each(function () {
+                var json = {};
+                json.sysNo = $(this).val();
+                json.status = @((int)Hyt.Model.WorkflowStatus.ForeStatus.广告项状态.已审);
+                result.push(json);
+            });
+            if (result.length == 0) {
+                UI.Alert({ content: '请选择批量审核的广告项数据' });
+                return;
+            }
+
+            UI.Confirm({
+                content: "确定启用该广告项吗？",
+                ok: function () {
+                    $.ajax({
+                        url: "/Front/FeAdvertItemStatus/",
+                        data: JSON.stringify({ collocation: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.IsLogout) {
+                                eval(data.Callback);
+                                return;
+                            }
+                            if (data.result) {
+                                dialog(data.info);
+                                refresh(1);
+                                UI.Dialog.close();
+                            } else {
+                                dialog(data.info);
+                                UI.Dialog.close();
+                            }
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        function refresh(id) {
+            var json = { id: 1, groupSysNo: @ViewBag.GroupSysNo};
+            var searchStaus = $("#status").val();
+            var SelectedDealerSysNo = $("#dealerSysNo").val();
+            if ($.trim(searchStaus) != "") {
+                json.status = searchStaus;
+            }
+            json.SelectedDealerSysNo = SelectedDealerSysNo;
+            $.get('/Front/FeAdvertItem/', json, function (data) {
+                $('#paging').html(data);
+            });
+        }
+        function searchClass() {
+            AjaxStart();
+            var searchMid = @ViewBag.GroupSysNo;
+            var searchName = $("#seachName").val().trim();
+            var searchStaus = $("#status").val();
+            var searchBeginDate = $("#beginDate").val();
+            var searchEndDate = $("#endDate").val();
+            var SelectedDealerSysNo = $("#dealerSysNo").val();
+            var json = {};
+            json.id =1;
+            json.groupSysNo=searchMid;
+
+            if ($.trim(searchStaus) != "") {
+                json.status = searchStaus;
+            }
+            if ($.trim(searchName) != "" && searchName != searchNameTxt) {
+                json.linkTitle = searchName;
+            }
+            if (ChkDate(searchBeginDate) && ChkDate(searchEndDate)) {
+                json.beginDate = searchBeginDate;
+                json.endDate = searchEndDate;
+            }
+            json.SelectedDealerSysNo = SelectedDealerSysNo;
+            $.get('/Front/FeAdvertItem/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+        //同步广告
+        function ProCreateFeAdvertItem(){
+            UI.Confirm({
+                content: "您确定同步吗？",
+                ok: function () {
+                    if ($("#dealerSysNo").val() == -1) {
+                        UI.Alert({ content: '请选择要同步的分销商' });
+                        return;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "/Front/ProCreateFeAdvertItem",
+                        data: {GroupSysNo:mid,DealerSysNo:$("#dealerSysNo").val()},
+                        success: function (data) {
+                            if (data.Status) {
+                                searchClass();
+                            }
+                            UI.Alert({ content: data.Message });
+                        }
+                    });
+                }
+            })
+        }
+    </script>
+}
+<form id="form" method="Get" action="@Url.Action("FeAdvertItem")">
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button type="button" class="btn btn_ht26" onclick="document.location.href='/Front/FeAdvertGroup'"><span class="icon_share_alt"></span><span class="m5_l">返回广告组管理</span></button>
+                </span>
+                <h3>广告项管理</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="veralign_t fl">代理商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="agentSysNo"></select>
+                        </div>
+
+                        <span class="veralign_t fl">分销商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="dealerSysNo"></select>
+                        </div>
+                        <span class="fl veralign_t">状态</span>
+                        <div class="m10_l  fl">
+                            <select id="status" name="status" class="select_ht28" onchange="searchClass()">
+                                <option value="-1">全部</option>
+                                @{
+                                    string sel;
+                                    foreach (var dict in (IDictionary<int, string>)ViewBag.StatusList)
+                                    {
+                                        @*sel = dict.Key == (int)Hyt.Model.WorkflowStatus.ForeStatus.广告项状态.待审' ? "selected='selected'" : string.Empty;
+                                            <option value="@dict.Key" @sel>@dict.Value</option>*@
+                                        <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <span class="fl m10_l veralign_t">广告项名称</span>
+                        <div class="m10_l fl">
+                            <input name="seachName" type="text" maxlength="20" id="seachName" class="input_ht28" value="请输入广告项名称..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入广告项名称...'" onfocus="this.select()" onclick="if (this.value == '请输入广告项名称...') this.value = ''" />
+                        </div>
+                        <span class="fl m10_l veralign_t">广告项时间</span>
+                        <div class="date_btn120 m10_l fl">
+                            <input type="text" class="input_small input_ht28" name="beginDate" id="beginDate">
+                            <button type="button" onclick="UI.Date({el:'beginDate',maxDate: '#F{$dp.$D(\'endDate\')}'})" class="btn btn_ht28" title="日历"><span class="icon_calendar"></span></button>
+                        </div>
+                        <div class="date_btn120 m10_l fl">
+                            <input id="endDate" class="input_small input_ht28" type="text" name="endDate">
+                            <button type="button" onclick="UI.Date({el:'endDate',minDate: '#F{$dp.$D(\'beginDate\')}'})" class="btn btn_ht28" title="日历"><span class="icon_calendar"></span></button>
+                        </div>
+                        <button type="button" title="搜索" class="btn btn_ht28 m10_l fl" onclick="searchClass()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+
+                    <div>
+                        @if (ViewBag.Type == (int)Hyt.Model.WorkflowStatus.ForeStatus.广告组类型.代码)
+                        {<button type="button" class="btn btn_ht26 btn_blue FE1008202" onclick="addOrEdit(1,0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加广告项</span></button>}
+                        else
+                        {<button type="button" class="btn btn_ht26 btn_blue FE1008202" onclick="addOrEdit(0,0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加广告项</span></button>}
+                        <button type="button" class="btn btn_ht26 btn_blue m10_l FE1008602" onclick="UpdateFeAdvStatus(1,@((int)Hyt.Model.WorkflowStatus.ForeStatus.广告项状态.已审))"><span class="icon icon_unlock icon_white"></span><span class="m5_l">批量审核</span></button>
+                        <button type="button" class="btn btn_ht26 btn_blue m10_l FE1008701" id="InStepFeAdvertItem" onclick="ProCreateFeAdvertItem()" title="同步广告"><span class="icon icon_white icon_pencil"></span><span class="m5_l">同步广告</span></button>
+                    </div>
+                </div>
+
+                <div class="boxs_list">
+                    <!--/表格列表区-->
+                    <div class="boxs_listtabel">
+                        @{Html.RenderPartial("_AjaxFeAdvertItem", Model); }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

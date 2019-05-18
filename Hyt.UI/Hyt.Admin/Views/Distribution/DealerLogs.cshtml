@@ -1,0 +1,216 @@
+﻿@{
+    ViewBag.Title = "分销商升舱错误日志";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="~/Theme/Plugins/json-viewer/jquery.json-viewer.css" rel="stylesheet" />
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script src="/Theme/scripts/shCore.js"></script>
+<script src="~/Theme/Plugins/json-viewer/jquery.json-viewer.js"></script>
+
+
+<style type="text/css" id="json-viewer-css">
+    /* Syntax highlighting for JSON objects */
+    ul.json-dict, ol.json-array {
+        list-style-type: none;
+        margin: 0 0 0 1px;
+        border-left: 1px dotted #ccc;
+        padding-left: 2em;
+    }
+
+    .json-string {
+        color: #0B7500;
+    }
+
+    .json-literal {
+        color: #1A01CC;
+        font-weight: bold;
+    }
+
+    /* Toggle button */
+    a.json-toggle {
+        position: relative;
+        color: inherit;
+        text-decoration: none;
+    }
+
+        a.json-toggle:focus {
+            outline: none;
+        }
+
+        a.json-toggle:before {
+            color: #aaa;
+            content: "\25BC"; /* down arrow */
+            position: absolute;
+            display: inline-block;
+            width: 1em;
+            left: -1em;
+        }
+
+        a.json-toggle.collapsed:before {
+            transform: rotate(-90deg); /* Use rotated down arrow, prevents right arrow appearing smaller than down arrow in some browsers */
+            -ms-transform: rotate(-90deg);
+            -webkit-transform: rotate(-90deg);
+        }
+
+    /* Collapsable placeholder links */
+    a.json-placeholder {
+        color: #aaa;
+        padding: 0 1em;
+        text-decoration: none;
+    }
+
+        a.json-placeholder:hover {
+            text-decoration: underline;
+        }
+</style>
+<!--下面是弹出框-->
+<div id="JS_tanchu" class="f14 bold red" style="display:none; text-align:left; vertical-align:top;"></div>
+<!--弹出框end-->
+
+
+<div id="JS_search" class="search_box" style="right:-267px;">
+    <div class="search_title clearfix">
+        <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+    </div>
+    <div class="search_body">
+        <form id="form1">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td width="28%" align="right">状态</td>
+                        <td width="72%">
+                            <select class="wd170" search="Status" id="Status" name="Status">
+                                <option value="0" selected="selected">全部</option>
+                                <option value="10">待解决</option>
+                                <option value="20">已解决</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">商城类型</td>
+                        <td width="72%">
+                            <select name="MallTypeSysNo" search="MallTypeSysNo" class="wd170">
+                                <option value="" selected="selected">全部</option>
+                                @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.DistributionStatus.商城类型预定义>(null, null).ToString())
+                            </select>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">三方订单号</td>
+                        <td>
+                            <input type="text" search="MallOrderId" name="MallOrderId" value="" class="wd156">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">同步日期</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" class="input_ht26" id="BeginDate" search="BeginDate" name="BeginDate" onclick="UI.Date({ el: 'BeginDate', dateFmt: 'yyyy-MM-dd 00:00:00', readOnly: true });">
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'BeginDate', dateFmt: 'yyyy-MM-dd 00:00:00' })"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">&nbsp;</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" class="input_ht26" id="EndDate" search="EndDate" name="EndDate" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd 23:59:59', readOnly: true });">
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd 23:59:59' })"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+
+
+
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" id="searchBtn" class="btn btn_blue btn_ht30 bold">开始查询</button><button type="reset" title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+  <div class="boxs">
+  
+    <div class="boxs_tit head_m"><span class="ra10 c6"><button class="btn btn_ht26 m10_r" style="display:none"><span class="icon_share_alt"></span><span class="m5_l">返回</span></button></span>
+      <h3>分销商升舱错误日志</h3>
+    </div>
+    
+    <div class="boxs_con_c1">    
+    
+      <!--工具条开始-->
+      <div class="boxs_tool"> 
+          <!--功能按钮开始-->
+          @*<div class="right_tool clearfix">
+                    <span class="fl">商城订单号</span><input type="text" class="wd120 m10_r m10_l fl" value="" searchItem="MallOrderId">
+              <span class="fl">商城订单号</span><input type="text"  class="wd120 m10_r m10_l fl" value="" searchItem="OrderSysNo">                                    
+              <button id="searchBtn" title="查询" class="btn btn_ht26 fl" type="button"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+          </div>*@
+
+          <!--/工具条-->
+          <div class="right_tool clearfix">
+              <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="outbtn2"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+          </div>
+        
+        <!--功能按钮结束-->
+      </div>
+      <!--工具条结束-->
+      
+        <div class="paging" id="paging">
+        </div>
+      
+    </div>
+  </div>
+    
+</div>
+
+
+
+  
+
+<script type="text/javascript">
+
+
+
+
+    $(document).ready(function () {
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+        //$("#searchBtn").click(function () {
+        //    doSearch(1);
+        //});
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch(1);
+            return false;
+        });
+        doSearch(1);
+    });
+
+    function doSearch(id) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Distribution/DealerLogs/?r=" + Math.random(), "search", function (p) {
+            p.setParams("id", id);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function browseDetail(id) {
+        var text = $("#detail_" + id).val();
+        if (text == "")
+            return false;
+        var obj = document.getElementById('JS_tanchu');
+        $("#JS_tanchu").html("<pre style='word-wrap: break-word; white-space: pre-wrap; white-space: -moz-pre-wrap;'>" + text + "</pre>");
+        UI.DialogBox({  content: obj, width:700, title: '异常消息', padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' });
+    }
+   
+    
+</script>

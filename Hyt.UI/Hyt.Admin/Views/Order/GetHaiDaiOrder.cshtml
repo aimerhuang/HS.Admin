@@ -1,0 +1,415 @@
+﻿@{
+    ViewBag.Title = "获取海带订单设置";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string t2 = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+    string t1 = DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd HH:mm");
+    var model = (IList<Hyt.Model.DsMallType>)ViewBag.dsMallType;
+    //if (Model.StartTime > DateTime.MinValue)
+    //{
+    //    t1 = Model.StartTime.ToString("yyyy-MM-dd HH:mm");
+    //}
+    //if (Model.EndTime > DateTime.MinValue)
+    //{
+    //    t2 = Model.EndTime.ToString("yyyy-MM-dd HH:mm");
+    //}
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+}
+@section HeadCss
+{
+    <style>
+        .wd270 {
+            width: 450px !important;
+        }
+    </style>
+}
+<form id="form1">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="" class="nameright border_rnone">商城类型</td>
+                            <td width="">
+                                <select name="shop" id="shoptype" class="select_ht28">
+                                    <option value="0" selected="selected">请选择...</option>
+                                    @{
+                                        foreach (Hyt.Model.DsMallType ds in model)
+                                        {
+                                            <option value="@ds.SysNo" >@ds.MallName</option>
+
+                                        }
+
+                                    }
+                                    @*<option value="13" selected="selected">海带网</option>*@
+                                </select>
+                            </td>
+                            <td width="" class="nameright border_rnone">所属网店</td>
+                            <td width="">
+                                <select name="shop" id="shop" class="select_ht28">
+                                    <option value="0" selected="selected">请选择...</option>
+                                   
+                                </select>
+                            </td>
+                          
+                           
+                        </tr>
+                        <tr>
+                            @*<td>
+                                <select name="status" id="status" class="select_ht28">
+                                    <option value="" selected="selected">创建时间</option>
+
+                                </select>
+                            </td>*@
+                            <td valign="top" class="nameright border_rnone">订单时间起</td>
+                            <td>
+                                <div class="date_btn fl">
+                                    <input type="text" value="@t1" class="input_ht26" id="StartTime" name="StartTime" required="true" datecn="true">
+                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'StartTime',dateFmt:'yyyy-MM-dd HH:mm'});return false;"><span class="icon_calendar"></span></button>
+                                </div>
+                                <span id="c_StartTime" class="prompt m10_l">填写订单时间起</span>
+                            </td>
+                            <td valign="top" class="nameright border_rnone">订单时间止</td>
+                            <td>
+                                <div class="date_btn fl">
+                                    <input type="text" value="@t2" class="input_ht26" id="EndTime" name="EndTime" required="true" datecn="true">
+                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndTime',dateFmt:'yyyy-MM-dd HH:mm'});return false;"><span class="icon_calendar"></span></button>
+                                </div>
+                                <span id="c_EndTime" class="prompt m10_l">填写订单时间止</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="1">
+                                <input type="checkbox" id="Status" name="Status" class="valid"> 按网上订单号下载 　
+                            </td>
+                            <td colspan="3">
+                                <textarea id="Orders" name="Orders" maxlength="500" class="wd270" style="height: 100px;width:450px" required="false"></textarea>
+                                <span id="c_Orders" class="prompt m10_l">填写订单ID，每个订单ID用“,”逗号隔开</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="boxs_detail border_lnone">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                <thead>
+                    @*<tr>
+                            <th class="border_lnone align_l p10_lr">订单号</th>
+                            <th width="">代码</th>
+                            <th width="">订单金额</th>
+                            <th width="">下单时间</th>
+                            <th width="">操作</th>
+                        </tr>*@
+                </thead>
+                <tbody id="bodyYY">
+                    @*@{
+                            if (Model.AssociateItem != null)
+                            {
+                                foreach (var item in Model.AssociateItem)
+                                {
+                            <tr data="@item.CouponSysNo">
+                                <td>@Html.Raw(item.Description)</td>
+                                <td>@Html.Raw(item.CouponCode)</td>
+                                <td>@Html.Raw(item.CouponAmount)</td>
+                                <td>
+                                    <input type="text" id='@Html.Raw("input" + item.CouponSysNo)'  sysno="@item.CouponSysNo" type="text" name="inputNum"  style="width:48px"  maxlength="5" digits="true" required="true" min="1" value="@item.BindNumber" />
+                                </td>
+                                <td>
+                                    <button class="btn btn_ht26" type="button" onclick="$(this).parent().parent().remove();"><span class="icon icon_trash"></span><span class="m5_l">删除</span></button>
+                                </td>
+                            </tr>
+
+                                }
+                            }
+                        }*@
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</form>
+<input type="hidden" id="SysNo" name="SysNo" value="" />
+<script lang="javascript" type="text/javascript">
+
+    //加载按钮
+    function LoadBtn() {
+        var parent = artDialog.open.origin,		// 父页面window对象
+        api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '确定',
+                callback: function () {
+
+                    var $iframe = this.iframe.contentWindow;
+                    $iframe.Save(parent);
+                    return false;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    }
+    //保存数据
+    function Save(win) {
+        if (!setting.form()) {
+            return false;
+        }
+        if (!checkEndTime()) {
+            UI.Alert({
+                content: "起止日期有误"
+            });
+            return;
+        }
+        if ($("#shoptype").val()=="0")
+        {
+            UI.Alert({
+                content: "请选择类型"
+            });
+            return;
+        }
+        if ($("#shop").val() == "0") {
+            UI.Alert({
+                content: "请选择商城"
+            });
+            return;
+        }
+        if ($("#Status").attr('checked')) {
+            if ($("#Orders").val() == "") {
+                UI.Alert({
+                    content: "请输入订单id"
+                });
+                return;
+            }
+        } else {
+            //ischeck = false;
+            // alert(ischeck);
+        }
+       
+        var arr = new Array();
+        //$("input[name='inputNum']").each(function (i, o) {
+        //    var item = {
+        //        CardTypeSysNo: $("#SysNo").val(),
+        //        CouponSysNo: $(o).attr("sysno"),
+        //        BindNumber: $(o).val()
+        //    };
+        //    arr.push(item);
+        //});
+        //if (arr.length < 1) {
+        //    UI.Alert({
+        //        content: ""
+        //    });
+        //    return;
+        //}
+        var ooo = $("#Orders").val();
+        var orders = delfh(ooo).split(',');
+        var main = {
+            Type: $("#shoptype").val(),
+            SysNo: $("#shop").val(),
+            StartDate: $("#StartTime").val(),
+            EndDate: $("#EndTime").val(),
+            OrderList: JSON.stringify(orders),
+            Status: $("#Status").attr('checked') ? true : false
+        };
+        var sendjson = JSON.stringify(main);
+        $.ajax({
+            url: '/ajax/SynchronizeOrderHaiDaiToMall',
+            type: 'POST',
+            cache: false,
+            data: sendjson,
+            contentType: 'application/json; charset=utf-8',
+            success: function (result) {
+                if (result.Status) {
+                    UI.CloseDialog();
+                    win.SuccessTip();
+                    window.parent.doSearch();
+                }
+                else {
+                    UI.Alert({
+                        content: result.Message
+
+                    });
+                }
+            }
+        });
+
+    }
+    function delfh(str) {
+        str = str.replace(",,", ",");
+        if (str.substring(str.length - 1, str.length) == ",") {
+            str2 = str.substring(0, str.length - 1);
+            delfh(str2);
+        } else {
+            str2 = str;
+        }
+        return str2;
+    }
+    function checkEndTime() {
+        var startTime = $("#StartTime").val();
+        var start = new Date(startTime.replace("-", "/").replace("-", "/"));
+        var endTime = $("#EndTime").val();
+        var end = new Date(endTime.replace("-", "/").replace("-", "/"));
+        if (end < start) {
+            return false;
+        }
+        return true;
+    }
+    function AddCoupOn(SysNo, CouponCode, Description, CouponAmount) {
+        var input = $("#input" + SysNo);
+        if (input.length > 0) {
+            try {
+                var num = parseInt(input.val());
+                if (!isNaN(num)) {
+                    input.val(num + 1);
+                }
+                else {
+                    input.val(1);
+                }
+            }
+            catch (e) {
+                input.val(1);
+            }
+        }
+        else {
+            var td1 = $("<td></td>").html(Description);
+            var td2 = $("<td></td>").html(CouponCode);
+            var td3 = $("<td></td>").html(CouponAmount);
+            var td4 = $("<td></td>").html('<input id="input' + SysNo + '" sysno="' + SysNo + '" type="text" name="inputNum"  style="width:48px"  maxlength="5" digits="true" required="true" min="1" value="1"/> ');
+            var td5 = $("<td></td>").html('<button class="btn btn_ht26" type="button" onclick="$(this).parent().parent().remove();"><span class="icon icon_trash"></span><span class="m5_l">删除</span></button>');
+            var tr = $("<tr></tr>").attr("data", SysNo);
+            tr.append(td1);
+            tr.append(td2);
+            tr.append(td3);
+            tr.append(td4);
+            tr.append(td5);
+            tr.appendTo($("#bodyYY"));
+        }
+    }
+    $(function () {
+        LoadBtn();
+       LoadRule();
+        $("#Status").change(function () {
+            //alert($("#Status").attr('checked'));
+            var or = $("#Orders").val();
+            if ($(this).attr('checked')) {
+                $("#StartTime").attr("required", "false");
+                $("#EndTime").attr("required", "false");
+                $("#Orders").attr("required", "true");
+                //$("#StartTime").val("2016-07-11 16:06");
+                //$("#EndTime").val("2017-07-11 16:06");
+                $("#StartTime").attr("disabled", "disabled");
+                $("#EndTime").attr("disabled", "disabled");
+                $("#Orders").val(or);
+                if (or != "12345") {
+                    $("#Orders").val(or);
+                } else {
+                    $("#Orders").val("");
+                }
+                $("#Orders").removeAttr("disabled");
+                LoadRule();
+            }
+            else {
+                $("#StartTime").attr("required", "true");
+                $("#EndTime").attr("required", "true");
+                $("#Orders").attr("required", "false");
+                //$("#StartTime").val("");
+                //$("#EndTime").val("");
+                $("#StartTime").removeAttr("disabled");
+                $("#EndTime").removeAttr("disabled");
+                if (or) {
+                    $("#Orders").val(or);
+                } else {
+                    //$("#Orders").val("12345");
+                }
+
+                $("#Orders").attr("disabled", "disabled");
+                LoadRule();
+            }
+        });
+        //$("#btnSelect").click(function () {
+        //    var url = '/Promotion/SelectCardCoupon';
+        //    UI.DialogOpen(url, {
+        //        title: '选择',
+        //        width: '640px',
+        //        height: '400px'
+        //    }, false);
+        //});
+        $("#shoptype").change(function () {
+            doSearch();
+            // setDefaultValue();
+        });
+    });
+    //查询商家列表
+    function doSearch() {
+        $.get('@Url.Action("GetHaiDaiOrder", "Order")',
+            {
+              
+                MallTypeSysNo: $("#shoptype").val(),
+              
+            },
+            function (data) {
+                var html = "<option value="/">请选择...</option>";
+                if (data.Status == 1) {
+                        
+                    $.each(data.Data, function (i, item) {
+                        html += "<option value=\"" + item.SysNo + "\">" + item.ShopName + "</option>";
+                    });
+                }
+               
+                $('#shop').html(html);
+            });
+    }
+    var setting;
+    var ischeck = false;
+    //加载验证规则
+    function LoadRule() {
+       // alert(ischeck);
+        if ($("#Status").attr('checked')) {
+            ischeck = true;
+            //alert(ischeck);
+        } else
+        {
+            ischeck = false;
+           // alert(ischeck);
+        }
+        setting = $("#form1").validate({
+            onclick: true,
+            onkeyup: true,
+            rules: {
+                StartTime:
+                {
+                    required: ischeck ? false : true,
+                },
+                EndTime:
+                {
+                    required: ischeck ? false : true,
+                },
+                Orders:
+                {
+                    required: ischeck ? true : false,
+                }
+              
+            },
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+            },
+            ignore: ""
+        });
+    }
+    //日期验证
+    jQuery.validator.addMethod("dateCN", function (value, element) {
+        value = value.replace(/-/g, '\/');
+        return this.optional(element) || !/Invalid|NaN/.test(new Date(value));
+    }, "日期格式错误");
+</script>

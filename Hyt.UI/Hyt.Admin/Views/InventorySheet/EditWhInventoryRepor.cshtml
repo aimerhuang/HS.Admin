@@ -1,0 +1,777 @@
+﻿@model Hyt.Model.InventorySheet.WhInventoryRepor
+<script src="~/Theme/scripts/jquery.validate.yui.js"></script>
+<script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+<script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+
+
+@*导入Excel*@
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+
+<script src="~/Theme/scripts/UtilLike.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#btnExport').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });
+
+        $('#btnImport').click(function () {
+            if (window.frames["ifrmImport"].chooseFile) {
+                window.frames["ifrmImport"].chooseFile();
+            }
+        });
+    });
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+
+    //导入excel回调方法
+    function importCallBack(res) {
+        res = JSON.parse(res);
+        if (res.Status) {//成功
+            UI.tips.tip_alert("tips_success", res.Message);
+            for (var i = 0; i < res.listModel.length; i++) {
+                var count = $("#v_tboody").children("tr").length;
+                if (count == 1)
+                {
+                    var productCode = $("#v_tboody").children("tr").children().siblings().eq(1).children(".productCode ").val();
+                    if (productCode == "")
+                    {
+                        $("#v_tboody").children("tr").eq(0).remove();
+                        count = 0;
+                    }
+                }
+
+            var html = "";
+            if (count % 2 == 0) {
+                html += "<tr class='stag_color'>";
+            } else {
+                html += "<tr>";
+            }
+            html += "<td class='hh' >" + (count + 1) + "</td>";
+            html += '<td><input type="text" value="' + res.listModel[i].PrErpCode + '" class="wd100  m10_lr productCode" readonly onclick="SelectProduct(this)" /><input type="hidden" value="' + res.listModel[i].PrSysNo + '" class="PrSysNo"   />';
+            html += '<button type="button" onclick="SelectProduct(this)"  style="height:27px;" >';
+            html += '<span class="icon_search"></span>';
+            html += '</button></td>';
+            html += "<td class=\"ProductName\">" + res.listModel[i].PrEasName + "</td>";
+            html += '<td><select class="wd100 m10_lr CName" onchange="btnChange(this);">';
+            html += '<option value="' + res.listModel[i].WhSysId + '">' + res.listModel[i].WhBackWarehouseName + '</option>';
+            html += '</select></td>';
+            html += "<td class='CErpCode'>" + res.listModel[i].WhErpCode + "</td>";
+            html += "<td class='CZCount'>" + res.listModel[i].WhStockQuantity + "</td>";
+            html += '<td><input type="text" value="' + res.listModel[i].ShiQuantity + '" class="wd50 m10_lr ShiSum" onblur="ShiCun(this)" /></td>';
+            html += '<td><input type="text" value="' + res.listModel[i].WhCostPrice + '" class="wd50 m10_lr DanJia" /></td>';
+            html += "<td class='PanYingCount'>" + (res.listModel[i].ShiQuantity - res.listModel[i].WhStockQuantity) + "</td>";
+            html += "<td class='PanYingJinE'>" + (res.listModel[i].WhCostPrice * (res.listModel[i].ShiQuantity - res.listModel[i].WhStockQuantity)) + "</td>";
+            html += '<td><input type="text" value="' + res.listModel[i].BeiZhu + '" class="wd100 m10_lr BeiZhu" /></td>';
+            html += '<td>';
+            html += '<button type="button" onclick="AddDt()">';
+            html += '<span class="icon icon_plus"></span>';
+            html += '</button>';
+            html += '<button type="button" onclick="DeleteDy(this)"  class="m10_l" >';
+            html += ' <span class="icon_forbidden"></span>';
+            html += '</button>';
+            html += '</td>';
+            html += '</tr>';
+            $("#v_tboody").append(html);
+           }
+        } else {//失败
+            UI.tips.tip_alert("tips_wrong", res.Message);
+        }
+    }
+</script>
+
+<form id="inputForm">
+    <div class="boxs case">
+        <div class="caseout" style="margin-bottom:50px;">
+            <div class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>打印次数：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input type="text" value="@(Model.PrintCount)" id="PrintCount" name="PrintCount" readonly="true" />
+                                    <span class="prompt m10_l">打印次数</span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>盘点单编号：</td>
+                                <td>
+                                    <input type="text" value="@(string.IsNullOrEmpty(Model.WhInventoryCode) ? "0" : Model.WhInventoryCode)" id="WhInventoryCode" name="WhInventoryCode" readonly="true" />
+                                    <span class="prompt m10_l">盘点单编号</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>生成报告单日期：</td>
+                                <td class="border_right">
+                                    <input type="text" value="@(string.IsNullOrEmpty(Model.Time.ToString()) ? DateTime.Now.ToString("yyyy-MM-dd") : Model.Time.ToString())" id="Time" name="Time" readonly="true" />
+                                    <span class="prompt m10_l">生成报告单日期</span>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tit_dispay tit_dispay_2 m10_t" onclick="yc(this)" style="border-left: #c9c9c9 solid 1px; border-right: #c9c9c9 solid 1px; border-bottom: #c9c9c9 solid 1px; ">
+                    <div class="more10r m5_t">
+                        <span class="btn_arrow btn_tableup"></span>
+                    </div>
+                    <h5 class="accordingtitle">
+                        <span class=""></span>
+                        @(ViewBag.PageType == 1 || ViewBag.PageType == 5 ? "盘盈商品信息" : "盘亏商品信息")
+                    </h5>
+                </div>
+
+
+                <div class="boxs_listtabel " style="border-bottom: 1px solid #c1c1c1; max-height: 450px; overflow-y: scroll; ">
+
+
+                    <div class="boxs_tool" style="border-left: #c9c9c9 solid 1px; border-right: #c9c9c9 solid 1px; ">
+                        <!--搜索开始-->
+                        <div class="right_tool clearfix" style="@(ViewBag.PageType == 5 || ViewBag.PageType == 6 ? "" : "display:none;")">
+                            <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m5_l btn_blue">
+                                <span class="icon_importing icon_white m5_r"></span><span>导入</span>
+                            </button>
+                            <iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                            <button type="button" class="btn btn_ht26 m10_l" id="btnExport" title="下载模板">
+                                <span class="icon_download_alt"></span>
+                                <span class="m5_l">下载模板</span>
+                            </button>
+                        </div>
+                        <!--搜索结束-->
+                        <!--功能按钮开始-->
+                        <div class="left_tool">
+
+                        </div>
+                        <!--功能按钮结束-->
+                    </div>
+
+
+
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone">
+                        <thead>
+                            <tr>
+                                <th width="50">行号</th>
+                                <th width="100">商品代码</th>
+                                <th width="150">商品名称</th>
+                                <th width="100" style="@(ViewBag.PageType != 5 && ViewBag.PageType != 6 ? "display:none;" : "")">仓库名称</th>
+                                <th width="100">@(ViewBag.PageType == 5 || ViewBag.PageType == 6 ? "仓库Erp编号" : "仓库名称")</th>
+                                <th width="70">帐存数</th>
+                                <th width="70">实存数</th>
+                                <th width="70">单价</th>
+                                <th width="70">@(ViewBag.PageType == 1 || ViewBag.PageType == 5 ? "盘盈数量" : "盘亏数量")</th>
+                                <th width="70">@(ViewBag.PageType == 1 || ViewBag.PageType == 5 ? "盘盈金额" : "盘亏金额")</th>
+                                <th width="105">备注</th>
+
+                                <th width="100" style="@(ViewBag.PageType != 5 && ViewBag.PageType != 6 ? "display:none;" : "")">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="v_tboody">
+                            @{
+                                if (Model.DataList != null && Model.DataList.Count > 0)
+                                {
+                                    foreach (var item in Model.DataList)
+                                    {
+                                        <tr @(Model.DataList.IndexOf(item) % 2 == 0 ? "" : "class='stag_color'")>
+                                            <td>@(Model.DataList.IndexOf(item) + 1)</td>
+                                            <td>@item.ProduceCode</td>
+                                            <td>@item.ProductName</td>
+                                            <td>@item.WarehouseName</td>
+                                            <td>@item.ADQuantity</td>
+                                            <td>@item.RealityQuantity</td>
+                                            <td>@item.PlanPrice</td>
+                                            <td>@item.ProfitAndLoss</td>
+                                            <td>@item.ProfitAndLossPrice</td>
+                                            <td>@item.Remark</td>
+                                        </tr>
+                                    }
+                                }
+
+
+                                if (ViewBag.PageType == 5 || ViewBag.PageType == 6)
+                                {
+                                    <tr class='stag_color'>
+                                        <td class="hh">1</td>
+                                        <td>
+                                            <input type="text" value="" class="wd100  m10_lr productCode" readonly onclick="SelectProduct(this)" />
+                                            <input type="hidden" value="" class="PrSysNo" />
+                                            <button type="button" onclick="SelectProduct(this)" style="height:27px;">
+                                                <span class="icon_search"></span>
+                                            </button>
+                                        </td>
+                                        <td class="ProductName"></td>
+                                        <td>
+                                            <select class="wd100 m10_lr CName" onchange='btnChange(this);'></select>
+                                        </td>
+                                        <td class="CErpCode"></td>
+                                        <td class="CZCount"></td>
+                                        <td><input type="text" value="0.00" class="wd50 m10_lr ShiSum" onblur="ShiCun(this)" /></td>
+                                        <td><input type="text" value="0.00" class="wd50 m10_lr DanJia" /></td>
+                                        <td class="PanYingCount">0.00</td>
+                                        <td class="PanYingJinE">0.00</td>
+                                        <td><input type="text" value="" class="wd100 m10_lr BeiZhu" /></td>
+                                        <td>
+                                            <button type="button" onclick="AddDt()">
+                                                <span class="icon icon_plus"></span>
+                                            </button>
+                                            <button type="button" onclick="DeleteDy(this)" class="m10_l">
+                                                <span class="icon_forbidden"></span>
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                }
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tit_con m10_t ">
+                    <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>审核：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input type="text" value="@(string.IsNullOrEmpty(Model.Audit)? ViewBag.AdminName : Model.Audit)" id="Audit" name="Audit" readonly="true" />
+                                    <input type="hidden" value="" id="AuditSysNo" />
+                                    <span class="prompt m10_l">审核人名称</span>
+                                </td>
+                                <td style="width: 10%" class="nameright border_rnone">记账：</td>
+                                <td style="width: 40%" >
+                                    <div  class="search_btn fl m5_r" style="width: 218px;">
+                                        @Html.UtilLike("Tally", "TallyNo", 1, (string.IsNullOrEmpty(Model.Tally) ? string.Empty : Model.Tally), 0, "input_ht26")
+                                    </div>
+                                    <span class="prompt m10_l">记账人名称</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>保管：</td>
+                                <td class="border_right">
+                                    <div class="search_btn fl m5_r" style="width: 218px;">
+                                        @Html.UtilLike("CustodySysNo", "Custody", 1, (string.IsNullOrEmpty(Model.CustodySysNo) ? string.Empty : Model.CustodySysNo), 0, "input_ht26")
+                                    </div>
+                                    <span class="prompt m10_l">保管人名称</span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>负责人：</td>
+                                <td>
+                                    <div class="search_btn fl m5_r" style="width: 218px;">
+                                        @Html.UtilLike("HeadSysNo", "Head", 1, (string.IsNullOrEmpty(Model.HeadSysNo) ? string.Empty : Model.HeadSysNo), 0, "input_ht26")
+                                    </div>
+                                    <span class="prompt m10_l">负责人名称</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>经办人：</td>
+                                <td class="border_right">
+                                    <div class="search_btn fl m5_r" style="width: 218px;">
+                                        @Html.UtilLike("AgentSysNo", "Agent", 1, (string.IsNullOrEmpty(Model.AgentSysNo) ? string.Empty : Model.AgentSysNo), 0, "input_ht26")
+                                    </div>
+                                    <span class="prompt m10_l">经办人名称</span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>制单：</td>
+                                <td>
+                                    <input type="text" value="@(string.IsNullOrEmpty(Model.Make) ? ViewBag.AdminName : Model.Make)" id="Make" name="Make" readonly="true" />
+                                    <span class="prompt m10_l">制单名称</span>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>审核日期：</td>
+                                <td class="border_right">
+                                    <div class="date_btn">
+                                        <input type="text" name="AuditTime" value="@(DateTime.Now.ToString("yyyy-MM-dd"))" id="AuditTime" class="input_ht26" @(ViewBag.PageType == 4 ? "readonly" : "")>
+                                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'AuditTime' })" type="button"><span class="icon_calendar"></span></button>
+                                    </div>
+                                    @*<span class="prompt m10_l">审核日期</span>*@
+                                </td>
+                                <td class="nameright border_rnone"></td>
+                                <td></td>
+                            </tr>
+
+
+                            <tr>
+                                <td class="nameright border_rnone">备注：</td>
+                                <td class="border_right">
+                                    <textarea id="Remarks" name="Remarks" @(ViewBag.PageType == 4 ? "readonly" : "")>@(Model.Remarks)</textarea>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+        <table style="  position:fixed;bottom:0; _position:absolute;_margin-top:expression(this.style.pixelHeight+document.documentElement.scrollTop); width:100%; ">
+            <tr>
+                <td colspan="2" class="aui_footer">
+                    <div class="aui_buttons">
+                        <button class="aui_state_highlight" id="btnSubmit" type="button" style="@(ViewBag.PageType==4?"display:none;":"")">
+                            <span class="icon_pencil icon_white"></span>
+                            提交
+                        </button>
+
+                        <button type="button" onclick="document.location.href = '/InventorySheet/WhInventoryRepor?id=@(Request.QueryString["Pageindex"])'">
+                            <span class="icon_share_alt"></span>
+                            返回报告单管理
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+    </div>
+
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#inputForm").validate({
+            rules: {
+                PrintCount: {
+                    required: true
+                },
+
+                PrintCount: {
+                    required: true
+                },
+                Time: {
+                    required: true
+                },
+                WhInventoryCode: {
+                    required: true
+                },
+                Audit: {
+                    required: true
+                },
+                CustodySysNo: {
+                    required: true
+                },
+                HeadSysNo: {
+                    required: true
+                },
+                AgentSysNo: {
+                    required: true
+                },
+                Make: {
+                    required: true
+                }
+            },
+            errorPlacement: function (error, element) {
+                if (jQuery('#' + element.attr("id")).parent().find('span').length == 0)
+                {
+                    jQuery('#' + element.attr("id")).parent().parent().find('span').attr('class', 'error m10_l');
+                }else
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                if (jQuery('#' + element.attr("id")).parent().find('span').length == 0) {
+                    jQuery('#' + element.attr("id")).parent().parent().find('span').attr('class', 'success m10_l');
+                }else
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+
+
+
+    });
+
+    function yc() {
+        if ($(".boxs_listtabel").is(":hidden")) {
+            $(".boxs_listtabel").show();
+            $(".btn_tabledown").removeClass("btn_tabledown").addClass("btn_tableup");
+        } else {
+            $(".boxs_listtabel").hide();
+            $(".btn_tableup").removeClass("btn_tableup").addClass("btn_tabledown");
+        }
+    }
+
+    ///入库
+    $("#btnSubmit").click(function () {
+        if ($("#inputForm").valid()) {
+            UI.Confirm({
+                content: '确认提交？',
+                ok: function () {
+                    var page = '@(ViewBag.PageType)';
+                    if (page != 5 && page != 6) {
+                        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                        var status = 0;
+
+                        if (page == 1) {
+                            status = '@((int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhInventoryReporStatus.盘盈审核)';
+                        } else {
+                            status = '@((int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhInventoryReporStatus.盘亏审核)';
+                        }
+                        var json = {
+                            "id": '@(Model.SysNo)',
+                            "status": status,
+                            "Tally": $("#Tally").val(),
+                            "CustodySysNo": $("#CustodySysNo").val(),
+                            "HeadSysNo": $("#HeadSysNo").val(),
+                            "AgentSysNo": $("#AgentSysNo").val(),
+                            "AuditTime": $("#AuditTime").val(),
+                            "Remarks": $("#Remarks").val()
+                        };
+                        $.post("/InventorySheet/UpdateWhInventoryReporStatus", json, function (data) {
+                            if (data.Message != "成功!") {
+                                UI.tips.tip_alert('tips_wrong', data.Message);
+                            } else {
+                                UI.tips.tip_alert('tips_success', data.Message);
+                                setTimeout(function () {
+                                    document.location.href = '/InventorySheet/WhInventoryRepor';
+                                }, 1500);
+                                
+                            }
+                            mask.Remove();
+                        });
+                    } else {
+                        AddWhInventoryReporList();
+                    }
+                },
+                cancel: true
+            });
+        }
+    })
+    //新增盘盈盘亏
+    function AddWhInventoryReporList() {
+        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+        //商品代码
+        var productCode = "";
+        $(".productCode").each(function () {
+            productCode += $(this).val() + ",";
+        });
+
+        //商品名称
+        var ProductName = "";
+        $(".ProductName").each(function () {
+            ProductName += $(this).html() + ",";
+        });
+
+        //仓库id
+        var CSysId = "";
+        $(".CName").each(function () {
+            CSysId += $(this).val() + ",";
+        });
+
+        //仓库名称
+        var CSysName = "";
+        $(".CName").each(function () {
+            CSysName += $(this).find("option:selected").text() + ",";
+        });
+
+        //仓库编号
+        var CErpCode = "";
+        $(".CErpCode").each(function () {
+            CErpCode += $(this).html() + ",";
+        });
+
+        //帐存数量
+        var CZCount = "";
+        $(".CZCount").each(function () {
+            CZCount += $(this).html() + ",";
+        });
+
+        //实存数量
+        var ShiSum = "";
+        $(".ShiSum ").each(function () {
+            ShiSum += $(this).val() + ",";
+        });
+
+        //单价
+        var DanJia = "";
+        $(".DanJia ").each(function () {
+            DanJia += $(this).val() + ",";
+        });
+
+        //盘盈数量
+        var PanYingCount = "";
+        $(".PanYingCount ").each(function () {
+            PanYingCount += $(this).html() + ",";
+        });
+
+        //盘盈金额
+        var PanYingJinE = "";
+        $(".PanYingJinE ").each(function () {
+            PanYingJinE += $(this).html() + ",";
+        });
+
+        //备注
+        var BeiZhu = "";
+        $(".BeiZhu ").each(function () {
+            if ($(this).val() != "") {
+                BeiZhu += $(this).val() + "^";
+            } else {
+                BeiZhu +="无^";
+            }
+        });
+
+        var json = {
+            "PrintCount": $("#PrintCount").val(),//打印次数
+            "WhInventoryCode": $("#WhInventoryCode").val(),//盘点单系统编号
+            "Time": $("#Time").val(),//生成报告单日期
+            "Audit": $("#Audit").val(),//审核
+            "Tally": $("#Tally").val(),//记账
+            "CustodySysNo": $("#CustodySysNo").val(),//保管人名称
+            "HeadSysNo": $("#HeadSysNo").val(),//负责人名称
+            "AgentSysNo": $("#AgentSysNo").val(),//经办人名称
+            "Make": $("#Make").val(),//制单机构
+            "AuditTime": $("#AuditTime").val(),//审核日期
+            "Remarks": $("#Remarks").val(),//备注
+            "productCode": productCode,//商品代码
+            "ProductName": ProductName,//商品名称
+            "CSysId": CSysId,//仓库id
+            "CSysName": CSysName,//仓库名称
+            "CErpCode": CErpCode,//仓库编号
+            "CZCount": CZCount,//帐存数量
+            "ShiSum": ShiSum,//实存数量
+            "DanJia": DanJia,//单价
+            "PanYingCount": PanYingCount,//盘盈数量
+            "PanYingJinE": PanYingJinE,//盘盈金额
+            "BeiZhu": BeiZhu,//备注
+            "pdStatus": '@(ViewBag.PageType)'
+        }
+        $.post("/InventorySheet/AddWhInventoryReporList", json, function (data) {
+            if (data.Message != "成功!") {
+                UI.tips.tip_alert('tips_wrong', data.Message);
+            } else {
+                UI.tips.tip_alert('tips_success', data.Message);
+            }
+            mask.Remove();
+        });
+
+    }
+
+
+    ///增加商品信息
+    function AddDt() {
+        var count = $("#v_tboody").children("tr").length;
+        var html = "";
+        if (count % 2 == 0) {
+            html += "<tr class='stag_color'>";
+        } else {
+            html += "<tr>";
+        }
+        html += "<td class='hh' >" + (count + 1) + "</td>";
+        html += '<td><input type="text" value="" class="wd100  m10_lr productCode" readonly onclick="SelectProduct(this)" /><input type="hidden" value="" class="PrSysNo"   />';
+        html += '<button type="button" onclick="SelectProduct(this)"  style="height:27px;" >';
+        html += '<span class="icon_search"></span>';
+        html += '</button></td>';
+        html += "<td class=\"ProductName\"></td>";
+        html += '<td><select class="wd100 m10_lr CName" onchange="btnChange(this);"></select></td>';
+        html += "<td class='CErpCode'></td>";
+        html += "<td class='CZCount'></td>";
+        html += '<td><input type="text" value="0.00" class="wd50 m10_lr ShiSum" onblur="ShiCun(this)" /></td>';
+        html += '<td><input type="text" value="0.00" class="wd50 m10_lr DanJia" /></td>';
+        html += "<td class='PanYingCount'>0.00</td>";
+        html += "<td class='PanYingJinE'>0.00</td>";
+        html += '<td><input type="text" value="" class="wd100 m10_lr BeiZhu" /></td>';
+        html += '<td>';
+        html += '<button type="button" onclick="AddDt()">';
+        html += '<span class="icon icon_plus"></span>';
+        html += '</button>';
+        html += '<button type="button" onclick="DeleteDy(this)"  class="m10_l" >';
+        html += ' <span class="icon_forbidden"></span>';
+        html += '</button>';
+        html += '</td>';
+        html += '</tr>';
+        $("#v_tboody").append(html);
+    }
+
+    ///删除商品信息
+    function DeleteDy(th) {
+        var count = $("#v_tboody").children("tr").length;
+        if (count > 1) {
+            $(th).parent().parent().remove();
+            for (var i = 0; i < (count - 1) ; i++) {
+                $(".hh").eq(i).html(i + 1);
+            }
+        }
+    }
+
+    function SelectProduct(th) {
+        var selectproduct = [];
+        DAO.SelectProduct({
+            selectStockProduct: 1,
+            selectedProducts: selectproduct,
+            selectedIsReadOnly: true,
+            syncWebFront: true,
+            onselect: function (data) {
+                // var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                var cw = "";
+                for (var i = 0; i < data.length; i++) {
+                    var rtn = GetWhWarehouse(data[i].pid);
+                    if (rtn.Data.length == 0) {
+                        cw += data[i].name + ",";
+                        continue;
+                    }
+                    if (i == 0) {
+                        $(th).parent().parent().children().siblings().eq(1).children(".productCode ").val(data[i].erp); //商品代码
+                        $(th).parent().parent().children().siblings().eq(1).children(".PrSysNo ").val(rtn.Data[0].PrSysNo); //商品编号
+                        $(th).parent().parent().children(".ProductName").html(data[0].name);
+                        for (var ii = 0; ii < rtn.Data.length; ii++) {
+                            $(th).parent().parent().children().siblings().eq(3).children(".CName").append('<option value="' + rtn.Data[ii].WhSysId + '">' + rtn.Data[ii].WhBackWarehouseName + '</option>')
+                        }
+                        $(th).parent().parent().children().siblings().eq(4).html(rtn.Data[i].WhErpCode);
+                        $(th).parent().parent().children().siblings().eq(5).html(rtn.Data[i].WhStockQuantity);
+                        $(th).parent().parent().children().siblings().eq(7).children(".DanJia").val(rtn.Data[i].WhCostPrice);
+                        $(th).parent().parent().children().siblings().eq(8).html(rtn.Data[i].WhStockQuantity - 0);
+                        $(th).parent().parent().children().siblings().eq(9).html(rtn.Data[i].WhStockQuantity * rtn.Data[i].WhCostPrice);
+                    } else {
+                        var count = $("#v_tboody").children("tr").length;
+                        var html = "";
+                        if (count % 2 == 0) {
+                            html += "<tr class='stag_color'>";
+                        } else {
+                            html += "<tr>";
+                        }
+                        html += "<td class='hh' >" + (count + 1) + "</td>";
+                        html += '<td><input type="text" value="' + data[i].erp + '" class="wd100  m10_lr productCode" readonly onclick="SelectProduct(this)"  />';
+                        html += '<input type="hidden" value="' + rtn.Data[0].PrSysNo + '" class="PrSysNo" />';
+                        html += '<button type="button" onclick="SelectProduct(this)"  style="height:27px;" >';
+                        html += '<span class="icon_search"></span>';
+                        html += '</button></td>';
+                        html += "<td class=\"ProductName\">" + data[i].name + "</td>";
+                        html += '<td><select class="wd100 m10_lr CName"  onchange="btnChange(this);" >';
+                        for (var ii = 0; ii < rtn.Data.length; ii++) {
+                            html += '<option value="' + rtn.Data[ii].WhSysId + '">' + rtn.Data[ii].WhBackWarehouseName + '</option>';
+                        }
+                        html += '</select></td>';
+                        html += "<td class='CErpCode'>" + rtn.Data[0].WhErpCode + "</td>";
+                        html += "<td class='CZCount'>" + rtn.Data[0].WhStockQuantity + "</td>";
+                        html += '<td><input type="text" value="0.00" class="wd50 m10_lr ShiSum" onblur="ShiCun(this)" /></td>';
+                        html += '<td><input type="text" value="' + rtn.Data[0].WhCostPrice + '" class="wd50 m10_lr DanJia" /></td>';
+                        html += "<td class='PanYingCount'>" + rtn.Data[0].WhStockQuantity + "</td>";
+                        html += "<td class='PanYingJinE' >0.00</td>";
+                        html += '<td><input type="text" value="" class="wd100 m10_lr BeiZhu" /></td>';
+                        html += '<td>';
+                        html += '<button type="button" onclick="AddDt()">';
+                        html += '<span class="icon icon_plus"></span>';
+                        html += '</button>';
+                        html += '<button type="button" onclick="DeleteDy(this)"  class="m10_l" >';
+                        html += ' <span class="icon_forbidden"></span>';
+                        html += '</button>';
+                        html += '</td>';
+                        html += '</tr>';
+                        $("#v_tboody").append(html);
+                    }
+
+                }
+
+                if (cw != "") {
+                    UI.tips.tip_alert('tips_wrong', '商品名称：' + cw + '未入库,无法盘点此商品！');
+                }
+                //  mask.Remove();
+
+            }
+        });
+    }
+
+    function GetWhWarehouse(sysNo) {
+        var rtn;
+        $.ajax({
+            cache: true,
+            type: "POST",
+            url: "/InventorySheet/GetWhWarehouse",
+            data: { "sysNo": sysNo },
+            async: false,
+            success: function (data) {
+                rtn = data;
+            }
+        });
+        return rtn;
+    }
+
+
+    function btnChange(th) {
+      
+        var whSysId = $(th).val(); //仓库id
+        var SysId = $(th).parent().parent().children().siblings().eq(1).children(".PrSysNo ").val(); //商品编号
+        $.ajax({
+            cache: true,
+            type: "POST",
+            url: "/InventorySheet/GetWhWarehouse",
+            data: { "sysNo": SysId, "whSysId": whSysId },
+            async: false,
+            success: function (data) {
+                $(th).parent().parent().children().siblings().eq(4).html(data.Data[0].WhErpCode);
+                $(th).parent().parent().children().siblings().eq(5).html(data.Data[0].WhStockQuantity);
+                $(th).parent().parent().children().siblings().eq(7).children(".DanJia").val(data.Data[0].WhCostPrice);
+                $(th).parent().parent().children().siblings().eq(8).html(data.Data[0].WhStockQuantity - 0);
+                $(th).parent().parent().children().siblings().eq(9).html(data.Data[0].WhStockQuantity * data.Data[0].WhCostPrice);
+            }
+        });
+    }
+
+    ///更改实存数量
+    function ShiCun(th) {
+        var shisum = $(th).val(); //实存数量
+        var zhangSum = $(th).parent().parent().children().siblings().eq(5).html();//帐存数量
+        var danjia = $(th).parent().parent().children().siblings().eq(9).html(); //单价
+        if (zhangSum.length == 0) {
+            $(th).val("0.00");
+            UI.tips.tip_alert('tips_wrong', '请先选择需要盘点的商品!');
+            return;
+        }
+
+        var PageType = '@(ViewBag.PageType)';
+        if (PageType == 5 && shisum <= zhangSum) {
+            $(th).val("0.00");
+            UI.tips.tip_alert('tips_wrong', '错误：新建盘盈单,实存数量需大于帐存数量!');
+            return;
+        } else if (PageType == 6 && shisum >= zhangSum) {
+            UI.tips.tip_alert('tips_wrong', '错误：新建盘亏单,实存数量需小于帐存数量!');
+        }
+        $(th).parent().parent().children().siblings().eq(8).html(shisum - zhangSum);
+        $(th).parent().parent().children().siblings().eq(9).html(danjia * shisum);
+    }
+
+
+    var thlist;
+    //选择用户
+    function popUserInfo(th) {
+        thlist = th;
+        UI.DialogOpen('/InventorySheet/GetUserPageIndex', {
+            width: 1000,
+            height: 600,
+            title: '选择用户',
+            button: [{
+                name: '确认',
+                callback: function () {
+                    var iframe = this.iframe.contentWindow;
+                    var form = iframe.document.getElementById('form');
+                    iframe.edit();
+                },
+                focus: true
+            }, { name: '关闭' }
+            ]
+        }, false);
+    }
+
+    //选择用户回调    
+    function GetUserBtn(id, name)
+    {
+        $(thlist).siblings().eq(0).val(name);
+        $(thlist).siblings().eq(1).val(id);
+    }
+</script>

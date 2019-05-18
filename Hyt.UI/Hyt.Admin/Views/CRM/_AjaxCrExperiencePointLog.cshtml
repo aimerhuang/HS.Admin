@@ -1,0 +1,54 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model.Transfer
+@using Hyt.Util
+@model PagedList<CBCrExperiencePointLog>
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+              <th width="68">变更类型</th>
+              <th width="68">增加积分</th>
+              <th width="68">减少积分</th>
+              <th width="68">剩余积分</th>
+              <th width="120">变更时间</th>
+              <th width="58">变更人</th>
+              <th width="79">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData.Count > 0)
+                {
+                    var Index = 0;
+                    string cs = string.Empty;
+                    foreach (var item in Model.TData)
+                    {
+                        cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                        <tr class="@cs">
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.经验积分变更类型), item.PointType)</td>
+                            <td>@item.Increased</td>
+                            <td>@item.Decreased</td>
+                            <td>@item.Surplus</td>
+                            <td>@(item.ChangeDate.ToString("yyyy-MM-dd HH:mm"))</td>
+                            <td>@item.UserName</td>
+                            <td>
+                                <button onclick="CrExperiencePointLogDetail(@item.SysNo)" type="button" class="btn btn_ht26" title="查看"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+                            </td>
+                        </tr>
+                        Index++;
+                    }
+                }
+                else
+                {
+                      <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                      </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <!--分页开始-->
+    <div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+    <!--分页结束-->
+</div>

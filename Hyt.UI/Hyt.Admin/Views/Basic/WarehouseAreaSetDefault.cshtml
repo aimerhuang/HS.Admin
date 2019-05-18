@@ -1,0 +1,103 @@
+﻿@Html.PrivilegeControl(PrivilegeCode.WH1001301, ".WH1001301")
+@using Hyt.Model.SystemPredefined
+@model IList<Hyt.Model.CBWhWarehouse>
+
+
+<div id="paging">
+    <div class="caseout">
+        <div class="boxs_listtabel">
+            <!--/表格列表区-->
+            <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <thead>
+                    <tr>
+                        <th class="wd75">仓库编号</th>
+                        <th width="98">仓库名称</th>
+                        <th width="98">区域</th>
+                        <th class="align_l p10_lr">地址</th>
+                        <th width="98">是否默认仓库</th>
+                        <th width="105">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        foreach (var item in Model)
+                        { 
+                        <tr>
+                            <td>@item.SysNo</td>
+                            <td>@item.BackWarehouseName</td>
+                            <td>@item.AreaName</td>
+                            <td class="align_l p10_lr">@item.StreetAddress</td>
+                            <td id="IsDefault@(item.SysNo)" class="IsDefault">@((Hyt.Model.WorkflowStatus.WarehouseStatus.是否默认仓库)item.IsDefault)</td>
+                            @{
+                                var cls = item.IsDefault == (int) Hyt.Model.WorkflowStatus.WarehouseStatus.是否默认仓库.是 ? "disabled" : "";
+                            } 
+                            <td>
+                                <button id="btn@(item.SysNo)"  class="btn btn_ht26 @cls WH1001301 BtnDefault" type="button" onclick="setStatus(@item.AreaSysNo, @item.SysNo)" ><span class="icon_pencil m5_r"></span><span>设为默认</span></button>
+                            </td>
+                        </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            //表格加入隔行样式
+            DAO.InterlineStyle();
+        });
+
+        function setStatus(areaSysNo, warehouseSysNo) {
+            if ($("#IsDefault" + warehouseSysNo).text().indexOf("是") >= 0)
+                return;
+            UI.Confirm({
+                content: '确认要该仓库设为默认仓库吗?',
+                padding: '10px 20px',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("SetAreaDefaultWareouse", "Basic")",
+                        data: {
+                            AreaSysNo: areaSysNo,
+                            WarehouseSysNo: warehouseSysNo
+                        },
+                        chche: false,
+                        success: function (ret) {
+                            if (ret.StatusCode == 0) {
+                                StatusChange(warehouseSysNo);
+                                UI.DialogOpener().quickSearch();
+                                UI.tips.tip_alert('tips_shrot tips_success', "设置成功！");
+                                //UI.Alert({
+                                //    title: '提示',
+                                //    content: ret.Message,
+                                //    icon:"succeed",
+                                //    callback: function () {
+                                //        UI.DialogOpener().quickSearch();
+                                //       // UI.CloseDialog();
+                                //    },
+                                //    cancel: false,
+                                //    padding: '10px 20px'
+                                //});
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function () {
+                            UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                        }
+                    });
+                },
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }
+
+        function StatusChange(sysno) {
+            $(".IsDefault").text("否");            
+            $("#IsDefault" + sysno).text("是");
+
+            $(".BtnDefault").removeClass("disabled");
+            $("#btn" + sysno).addClass("disabled");
+        }
+    </script>
+</div>

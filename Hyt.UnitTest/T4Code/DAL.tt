@@ -1,0 +1,723 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ output extension=".cs" #>
+
+<#@ assembly name="System.Data.dll" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@include file="MultiOutputHelper.ttinclude"  #>
+<#@include file="ModelHelper.ttinclude"  #>
+
+<#  var multiManager=Manager.Create(Host,GenerationEnvironment);//多文件分割器  
+	ModelHelper modelCreator=ModelHelper.CreateOracleHelper(); //注意创建的数据库类型
+	List<TableInfo> tableInfoList=modelCreator.GetTableInfoList(); //从数据库获取所有表
+	foreach(TableInfo tInfo in tableInfoList)
+    {	
+	    
+		var TableName=System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(tInfo.TableName.ToLower());
+		if(TableName.Contains("$")||TableName.Contains("System")||TableName.Contains("Logmnr"))
+		  continue;
+
+		//块文件开始
+		multiManager.StartNewFile(TableName+"DAL.cs");
+		string strTableName=TableName;//表名
+		string strModelName=TableName+"Info";//model名称
+		string strPrimaryKey=(tInfo.PrimaryColumn!=null?tInfo.PrimaryColumn.ColumnName:"");
+		string strAllColumns=modelCreator.GetAllColumnString(tInfo);
+#>
+
+/*******************************************************************************
+* 创建描述：由T4引擎自动创建于 <#=DateTime.Now.ToString()#>
+*******************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Data;
+using Oracle.DataAccess.Client;
+using Hyt.Model;
+using DBUtility;
+
+namespace DAL
+{
+	///<summary>
+	///<#=strTableName#>  dal数据操作类
+	///</summary>
+	public class <#=strTableName#>DAL
+	{
+		OracleHelper orcDb=new OracleHelper();
+		///<summary>
+		///新增
+		///</summary>
+		/// <param name="model"></param>
+		/// <returns></returns>
+		public bool Add(<#=strModelName#> model)
+		{
+			string strSql=@"insert into <#=strTableName#> values(@<#=strAllColumns.Replace(",",",@")#>)";
+			Dictionary<string, object> paramDic=new Dictionary<string, object>();
+			<# foreach(TableColumnInfo columnInfo in tInfo.TableColumns){ #>
+				paramDic.Add("<#=columnInfo.ColumnName#>",model.<#=System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(columnInfo.ColumnName.ToLower())#>);
+			<# } #>
+			int effectLine=orcDb.ExecuteNonQuery(strSql);
+			return effectLine>0?true:false;
+		}
+		///<summary>
+		///删除
+		///</summary>
+		/// <param name="strModelID"></param>
+		/// <returns></returns>
+		public bool Delete(string strModelID)
+		{
+			string strSql="Delete from <#=strTableName#> where <#=strPrimaryKey#>=@<#=strPrimaryKey#>";
+			Dictionary<string, object> paramDic=new Dictionary<string, object>();
+			paramDic.Add("@<#=strPrimaryKey#>",strModelID);
+			int effectLine=orcDb.ExecuteNonQuery(strSql,paramDic);
+			return effectLine>0?true:false;
+		}
+		///<summary>
+		///更新
+		///</summary>
+		/// <param name="model"></param>
+		/// <returns></returns>
+		public bool Update(<#=strModelName#> model)
+		{
+			<# string strSet=string.Empty; 
+			   foreach(TableColumnInfo columnInfo in tInfo.TableColumns){ 
+				   if(columnInfo.ColumnName!=tInfo.PrimaryColumn.ColumnName)
+				   {
+					strSet+=string.Format("{0}=@{0},",columnInfo.ColumnName);
+				   }
+			   }
+			#>
+			string strSql=@"update <#=strTableName#> set <#=strSet.TrimEnd(',')#> where <#=strPrimaryKey#>=@<#=strPrimaryKey#>";
+			Dictionary<string, object> paramDic=new Dictionary<string, object>();
+			<#  foreach(TableColumnInfo columnInfo in tInfo.TableColumns){  #>
+				paramDic.Add("<#=columnInfo.ColumnName#>",model.<#=System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(columnInfo.ColumnName.ToLower())#>);
+			<# } #>
+		
+			int effectLine=orcDb.ExecuteNonQuery(strSql,paramDic);
+			return effectLine>0?true:false;
+		}
+		///<summary>
+		///获取单个实体对象
+		///</summary>
+		/// <param name="strModelID"></param>
+		/// <returns></returns>
+		public <#=strModelName#> GetModelByID(string strModelID)
+		{
+			List<<#=strModelName#>> modelList=new List<<#=strModelName#>>();
+			<#=strModelName#>  model=new <#=strModelName#>();
+			string strSql="select * from <#=strTableName#> where <#=strPrimaryKey#>=@<#=strPrimaryKey#>";
+			Dictionary<string, object> paramDic=new Dictionary<string, object>();
+			paramDic.Add("@<#=strPrimaryKey#>",strModelID);
+			modelList=ChangeReaderToModel(orcDb.ExecuteReader(strSql));
+			return modelList.Count>0?modelList[0]:null;
+		}
+		///<summary>
+		///获取多个实体对象
+		///</summary>
+		/// <param name="strWhere"></param>
+		/// <returns></returns>
+		public List<<#=strModelName#>> GetModelList(string strWhere)
+		{
+			List<<#=strModelName#>> modelList=new List<<#=strModelName#>>();
+			string strSql="select * from <#=strTableName#> where 1=1 ";
+			if(!string.IsNullOrEmpty(strWhere))
+			{
+				strSql+=strWhere;
+			}
+			modelList=ChangeReaderToModel(orcDb.ExecuteReader(strSql));
+			return modelList;
+		}
+		///<summary>
+		///获取多个实体对象（分页）
+		///</summary>
+		/// <param name="strWhere">扩展条件查询语句</param>
+		/// <param name="pageIndex">页索引</param>
+		/// <param name="pageSize">单页行数</param>
+		/// <param name="itemCount">查询总行数</param>
+		/// <returns></returns>
+		public List<<#=strModelName#>> GetModelList(string strWhere,int pageIndex,int pageSize,out int itemCount)
+		{
+			List<<#=strModelName#>> modelList=new List<<#=strModelName#>>();
+			string strSql="select * from <#=strTableName#> where 1=1 ";
+			if(!string.IsNullOrEmpty(strWhere))
+			{
+				strSql+=strWhere;
+			}
+			itemCount=orcDb.GetCount(strSql);//查询总行数
+			strSql=orcDb.GetPaginationSql(strSql,pageIndex,pageSize);//构建分页查询语句
+			modelList=ChangeReaderToModel(orcDb.ExecuteReader(strSql));
+			return modelList;
+		}
+
+		#region 私有方法
+		///<summary>
+		///将reader转换为model
+		///</summary>
+		/// <param name="reader">reader</param>
+		/// <returns></returns>
+		private List<<#=strModelName#>> ChangeReaderToModel(OracleDataReader reader)
+		{
+			List<<#=strModelName#>> modelList=new List<<#=strModelName#>>();
+			using (OracleDataReader odr = reader)
+			{
+				while (odr.Read())
+				{
+					<#=strModelName#> model=new <#=strModelName#>();
+					<# foreach(TableColumnInfo columnInfo in tInfo.TableColumns){#>
+						model.<#=System.Threading.Thread.CurrentThread.CurrentCulture.TextInfo.ToTitleCase(columnInfo.ColumnName.ToLower())#>=(<#=columnInfo.ColumnDataType#>)odr["<#=columnInfo.ColumnName#>"];
+					<#} #>
+					modelList.Add(model);
+				}
+			}
+			return modelList;
+		}
+		#endregion
+	}
+}
+<# multiManager.EndBlock();}#>//块结束标记
+
+
+
+
+
+
+/******************************************************************************
+	数据访问帮助类
+******************************************************************************/
+<# multiManager.StartNewFile("DbHelper.cs");#>
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Data;
+using Oracle.DataAccess.Client;
+
+namespace DBUtility
+{
+    /// <summary>
+    /// oralce数据库操作实现类
+    /// </summary>
+    public class OracleHelper 
+    {
+        string str_connection = string.Empty;
+        /// <summary>
+        ///获取数据库连接字符串 
+        /// </summary>
+        public string StrConnection
+        {
+            get { return str_connection; }
+        }
+
+        #region 构造函数
+		/// <summary>
+        /// 初始化Oracle数据库连接类
+        /// </summary>
+        /// <param name="ConStr"></param>
+        public OracleHelper()
+        {
+            str_connection = str_connection = "Data Source=172.0.0.1;Persist Security Info=True;User ID=sysdb Password=111111;Unicode=True";
+        }
+        /// <summary>
+        /// 初始化Oracle数据库连接类
+        /// </summary>
+        /// <param name="ConStr"></param>
+        public OracleHelper(string ConStr)
+        {
+            str_connection = ConStr;
+        }
+        /// <summary>
+        /// 初始化Oracle数据库连接类
+        /// </summary>
+        /// <param name="hostIP">主机地址</param>
+        /// <param name="userID">Oracle用户名</param>
+        /// <param name="pwd">Oracle用户名密码</param>
+        public OracleHelper(string hostIP, string userID, string pwd)
+        {
+            str_connection = "Data Source=" + hostIP + ";Persist Security Info=True;User ID=" + userID + " Password=" + pwd + ";Unicode=True";
+        }
+        #endregion
+
+        #region 公共方法
+        /// <summary>
+        /// 获取查询结果
+        /// </summary>
+        /// <param name="Sql">sql查询语句</param>
+        /// <returns></returns>
+        public OracleDataReader ExecuteReader(string Sql)
+        {
+            return ExecuteReader(Sql, null);
+        }
+        /// <summary>
+        /// 执行参数化查询
+        /// </summary>
+        /// <param name="sql">sql语句</param>
+        /// <param name="parames">参数字典<参数名，参数值></param>
+        /// <returns></returns>
+        public OracleDataReader ExecuteReader(string sql, Dictionary<string, object> parameCollection)
+        {
+            List<OracleParameter> parameList = CreateParamList(parameCollection);
+            OracleConnection con = (OracleConnection)this.getCon();
+            OracleCommand command = con.CreateCommand();
+            command.CommandText = sql;
+            foreach (OracleParameter param in parameList)
+            {
+                command.Parameters.Add(param);
+            }
+            con.Open();
+            return command.ExecuteReader();
+        }
+        /// <summary>
+        /// 执行Sql返回影响的行数
+        /// </summary>
+        /// <param name="sql">sql语句</param>
+        /// <returns></returns>
+        public int ExecuteNonQuery(string sql)
+        {
+            int EffectLine = 0;
+            OracleConnection con = (OracleConnection)this.getCon();
+            OracleCommand command = new OracleCommand(sql, con);
+            con.Open();
+            int count = command.ExecuteNonQuery();
+            con.Close();
+            return EffectLine;
+        }
+        /// <summary>
+        /// 执行参数化sql语句，
+        /// </summary>
+        /// <param name="Sql"></param>
+        /// <param name="paramesCollection">参数数组</param>
+        /// <returns></returns>
+        public int ExecuteNonQuery(string Sql, Dictionary<string, object> paramesCollection)
+        {
+            List<OracleParameter> parames = CreateParamList(paramesCollection);
+            int effectLine = -1;
+            OracleConnection con = (OracleConnection)this.getCon();
+            OracleCommand command = con.CreateCommand();
+            command.CommandText = Sql;
+            for (int i = 0; i < parames.Count; i++)
+            {
+                command.Parameters.Add(parames[i]);
+            }
+            con.Open();
+            effectLine = command.ExecuteNonQuery();
+            con.Close();
+            return effectLine;
+        }
+        /// <summary>
+        ///  执行非查询事务
+        /// </summary>
+        /// <param name="arraySql">不带参数纯sql数组</param>
+        /// <returns></returns>
+        public void ExecuteNonQueryTran(string[] arraySql)
+        {
+            List<CommandInfo> commandList = new List<CommandInfo>();
+            foreach (string strSql in arraySql)
+            {
+                CommandInfo cInfo = new CommandInfo();
+                cInfo.ComandText = strSql;
+                commandList.Add(cInfo);
+            }
+            ExecuteNonQueryTran(commandList);
+        }
+
+        /// <summary>
+        /// 执行非查询事务,sql语句参数化
+        /// </summary>
+        /// <param name="commandList">参数命令集</param>
+        public void ExecuteNonQueryTran(List<CommandInfo> commandList)
+        {
+            if (commandList.Count == 0)
+            {
+                return;
+            }
+            OracleConnection con = (OracleConnection)this.getCon();
+            con.Open();
+            OracleTransaction sqlTran = con.BeginTransaction();
+            List<OracleParameter> ps = new List<OracleParameter>();
+            try
+            {
+                OracleCommand command = con.CreateCommand();
+                command.Transaction = sqlTran;
+                for (int i = 0; i < commandList.Count; i++)
+                {
+                    command.CommandText = commandList[i].ComandText;
+                    ps = CreateParamList(commandList[i].Parames);
+                    command.Parameters.Clear();
+                    foreach (OracleParameter param in ps)
+                    {
+                        command.Parameters.Add(param);
+                    }
+                    command.ExecuteNonQuery();
+                }
+                sqlTran.Commit();
+            }
+            catch (Exception ex)
+            {
+                sqlTran.Rollback();
+                throw new Exception("事务已回滚，执行非查询事务出错：" + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
+
+        /// <summary>
+        /// 执行存储过程，返回影响的行数
+        /// </summary>
+        /// <param name="parames">参数对象数组</param>
+        /// <param name="storedName">存储过程名称</param>
+        /// <returns></returns>
+        public int ExecuteStoredPro(string storedName, Dictionary<string, object> paramesCollection)
+        {
+            List<OracleParameter> parames = CreateParamList(paramesCollection);
+            OracleConnection con = (OracleConnection)this.getCon();
+            int effectLine = -1;
+            try
+            {
+                OracleCommand command = new OracleCommand();
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = storedName;
+                foreach (OracleParameter param in parames)
+                {
+                    command.Parameters.Add(param);
+                }
+                con.Open();
+                effectLine = command.ExecuteNonQuery();
+                command.Dispose();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("执行存储过程发生异常：" + ex);
+            }
+            finally
+            {
+                con.Close();
+
+            }
+            return effectLine;
+        }
+
+        /// <summary>
+        /// 返回查询结果的第一个元素
+        /// </summary>
+        /// <param name="sql">sql查询语句</param>
+        /// <returns></returns>
+        public object ExecuteScalar(string sql)
+        {
+            OracleConnection con = (OracleConnection)this.getCon();
+            OracleCommand command = new OracleCommand(sql, con);
+            con.Open();
+            object obj = command.ExecuteScalar();
+            con.Close();
+            return obj;
+        }
+
+        /// <summary>
+        /// 返回查询结果的第一个元素
+        /// </summary>
+        /// <param name="sql">sql查询语句</param>
+        /// <param name="parameDic">结构化参数数组</param>
+        /// <returns></returns>
+        public object ExecuteScalar(string sql, Dictionary<string, object> parameDic)
+        {
+            List<OracleParameter> ps = CreateParamList(parameDic);
+            OracleConnection con = (OracleConnection)this.getCon();
+            object obj = null;
+            try
+            {
+                OracleCommand command = con.CreateCommand();
+                command.CommandText = sql;
+                foreach (OracleParameter p in ps)
+                {
+                    command.Parameters.Add(p);
+                }
+                con.Open();
+                obj = command.ExecuteScalar();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("执行参数化sql语句出错:" + ex.Message);
+            }
+            finally
+            {
+                con.Close();
+            }
+            return obj;
+        }
+
+        /// <summary>
+        /// 获取一个SQL构成的动态对象集合
+        /// </summary>
+        /// <param name="Sql"></param>
+        /// <returns></returns>
+        public List<dynamic> GetDynamicList(string Sql)
+        {
+            return GetDynamicList(Sql, null);
+        }
+        /// <summary>
+        /// 获取一个SQL构成的动态对象集合
+        /// </summary>
+        /// <param name="Sql"></param>
+        /// <param name="paramDic"></param>
+        /// <returns></returns>
+        public List<dynamic> GetDynamicList(string Sql, Dictionary<string, object> paramDic)
+        {
+            List<dynamic> objList = new List<dynamic>();
+            List<OracleParameter> paramLis = CreateParamList(paramDic);
+            OracleConnection con = getCon();
+            OracleCommand command = new OracleCommand(Sql, con);
+            foreach (OracleParameter param in paramLis)
+            {
+                command.Parameters.Add(param);
+            }
+            con.Open();
+            using (OracleDataReader sdr = command.ExecuteReader())
+            {
+                while (sdr.Read())
+                {
+                    List<ObjPropertyInfo> listPInfo = new List<ObjPropertyInfo>();
+                    for (int i = 0; i < sdr.VisibleFieldCount; i++)
+                    {
+                        ObjPropertyInfo opInfo = new ObjPropertyInfo();
+                        opInfo.Name = sdr.GetName(i);
+                        opInfo.Value = sdr.GetValue(i);
+                        listPInfo.Add(opInfo);
+                    }
+                    object dTempObj = ClassHelper.CreateDynamicObj(listPInfo);
+                    objList.Add(dTempObj);
+                }
+
+            }
+            return objList;
+        }
+
+        /// <summary>
+        /// 获取总行数
+        /// </summary>
+        /// <param name="strSql"></param>
+        /// <returns></returns>
+        public int GetCount(string strSql)
+        {
+            int count = 0;
+            string strGetCountSql = "select count(1)as item from({0})as tab";
+            object obj = ExecuteScalar(string.Format(strGetCountSql, strSql));
+            if (obj == null)
+            {
+                count = Convert.ToInt32(obj);
+            }
+            return count;
+        }
+
+        /// <summary>
+        /// 构造分页Sql
+        /// </summary>
+        /// <param name="strChildSql">子查询语句</param>
+        /// <param name="pageIndex">页索引(从0开始)</param>
+        /// <param name="pageSize">单页显示条数</param>
+        /// <returns>返回构建的分页查询语句</returns>
+        public string GetPaginationSql(string strChildSql, int pageIndex, int pageSize)
+        {
+            string strPageSQL = "SELECT * FROM(SELECT A.*,ROWNUM RN FROM({0})A WHERE ROWNUM <= {1}) WHERE RN >= {2} ";
+            strPageSQL = string.Format(strPageSQL, strChildSql, (pageIndex + 1) * pageSize, pageIndex * pageSize + 1);
+            return strPageSQL;
+        }
+        #endregion
+
+        #region 私有方法
+        /// <summary>
+        /// 获取SqlServer连接对象
+        /// </summary>
+        /// <returns></returns>
+        private OracleConnection getCon()
+        {
+            OracleConnection sqlCon = new OracleConnection(StrConnection);
+            return sqlCon;
+        }
+        /// <summary>
+        /// 根据字典创建参数    
+        /// </summary>
+        /// <param name="paramDic">参数字典</param>
+        /// <returns></returns>
+        private List<OracleParameter> CreateParamList(Dictionary<string, object> paramDic)
+        {
+            List<OracleParameter> paramList = new List<OracleParameter>();
+            if (paramDic == null) return paramList;
+            foreach (KeyValuePair<string, object> kv in paramDic)
+            {
+                OracleParameter param = new OracleParameter(kv.Key, kv.Value);
+                paramList.Add(param);
+            }
+            return paramList;
+        }
+        #endregion
+    }
+}
+
+<# multiManager.EndBlock();#>//块结束标记
+
+/******************************************************************************
+	sql语句操作类
+******************************************************************************/
+<# multiManager.StartNewFile("CommandInfo.cs");#>
+
+using System;
+using System.Collections.Generic;
+
+namespace DBUtility
+{
+    /// <summary>
+    /// sql语句操作类，用来记录执行带参数的非查询事务
+    /// </summary>
+    public class CommandInfo
+    {
+        #region 变量
+        string comandText = string.Empty;
+        Dictionary<string, object> parameDic = new Dictionary<string,object>();
+        #endregion
+        /// <summary>
+        /// 构造函数
+        /// </summary>
+        public CommandInfo()
+        { 
+        
+        }
+        /// <summary>
+        /// 构造函数
+        /// <param name="commandText">SQL语句</param>
+        /// <param name="parameDic">参数数组</param>
+        /// </summary>
+        public CommandInfo(string commandText, Dictionary<string, object> parameDic)
+        {
+            this.comandText = commandText;
+            this.parameDic = parameDic;
+        }
+        /// <summary>
+        /// Sql语句
+        /// </summary>
+        public string ComandText
+        {
+            get { return comandText; }
+            set { comandText = value; }
+        }
+        
+        /// <summary>
+        /// 参数
+        /// </summary>
+        public Dictionary<string, object> Parames
+        {
+            get { return parameDic; }
+            set { parameDic = value; }
+        }
+    }
+}
+<# multiManager.EndBlock();#>//块结束标记
+
+
+/******************************************************************************
+	动态创建类工具
+******************************************************************************/
+<# multiManager.StartNewFile("ClassHelper.cs");#>
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Reflection;
+using System.Reflection.Emit;
+
+namespace DBUtility
+{
+    public class ClassHelper
+    {
+        /// <summary>
+        /// 动态创建类
+        /// </summary>
+        /// <param name="pList">属性列表</param>
+        /// <returns></returns>
+        public static dynamic CreateDynamicObj(List<ObjPropertyInfo> pList)
+        {
+            AssemblyName aName = new AssemblyName("DynamicAssembly");
+            AssemblyBuilder ab =
+                AppDomain.CurrentDomain.DefineDynamicAssembly(aName, AssemblyBuilderAccess.RunAndSave);
+            ModuleBuilder mb = ab.DefineDynamicModule(aName.Name, aName.Name + ".dll");
+            TypeBuilder tb = mb.DefineType("MyDynamicType", TypeAttributes.Public);
+            foreach (ObjPropertyInfo p in pList)
+            {
+                FieldBuilder fbNumber = tb.DefineField(
+                   p.Name.ToLower(),typeof(string),FieldAttributes.Private);
+
+                PropertyBuilder pbTemp = tb.DefineProperty(p.Name, PropertyAttributes.HasDefault, typeof(string), null);
+                // The property "set" and property "get" methods require a special
+                // set of attributes.
+                MethodAttributes getSetAttr = MethodAttributes.Public |
+                    MethodAttributes.SpecialName | MethodAttributes.HideBySig;
+
+
+                // Define the "get" accessor method for Number. The method returns
+                // an integer and has no arguments. (Note that null could be 
+                // used instead of Types.EmptyTypes)
+                MethodBuilder mbTempGetAccessor = tb.DefineMethod(
+                    "get_" + p.Name,
+                    getSetAttr,
+                    typeof(string),
+                    Type.EmptyTypes);
+
+                ILGenerator numberGetIL = mbTempGetAccessor.GetILGenerator();
+                // For an instance property, argument zero is the instance. Load the 
+                // instance, then load the private field and return, leaving the
+                // field value on the stack.
+                numberGetIL.Emit(OpCodes.Ldarg_0);
+                numberGetIL.Emit(OpCodes.Ldfld, fbNumber);
+                numberGetIL.Emit(OpCodes.Ret);
+
+                // Define the "set" accessor method for Number, which has no return
+                // type and takes one argument of type int (Int32).
+                MethodBuilder mbTempSetAccessor = tb.DefineMethod(
+                    "set_" + p.Name,
+                    getSetAttr,
+                    null,
+                    new Type[] { typeof(string) });
+
+                ILGenerator numberSetIL = mbTempSetAccessor.GetILGenerator();
+                // Load the instance and then the numeric argument, then store the
+                // argument in the field.
+                numberSetIL.Emit(OpCodes.Ldarg_0);
+                numberSetIL.Emit(OpCodes.Ldarg_1);
+                numberSetIL.Emit(OpCodes.Stfld, fbNumber);
+                numberSetIL.Emit(OpCodes.Ret);
+
+                // Last, map the "get" and "set" accessor methods to the 
+                // PropertyBuilder. The property is now complete. 
+                pbTemp.SetGetMethod(mbTempGetAccessor);
+                pbTemp.SetSetMethod(mbTempSetAccessor);
+            }
+            Type t = tb.CreateType();
+            object obj = Activator.CreateInstance(t);
+            PropertyInfo[] pInfos = t.GetProperties();
+            foreach (ObjPropertyInfo p in pList)
+            {
+                PropertyInfo pInfo=t.GetProperty(p.Name);
+                pInfo.SetValue(obj, p.Value.ToString(), null);
+            }
+            return obj;
+        }
+    }
+    /// <summary>
+    /// 自定义动态对象属性类
+    /// </summary>
+    public class ObjPropertyInfo
+    {
+        /// <summary>
+        /// 属性名
+        /// </summary>
+        public string Name { set; get; }
+        /// <summary>
+        /// 属性值
+        /// </summary>
+        public object Value { set; get; }
+        /// <summary>
+        /// 数据类型
+        /// </summary>
+        public string Type { set; get; }
+    }
+}
+<# multiManager.EndBlock();#>//块结束标记
+<# multiManager.Process(true);#>//根据块标记分割生成多个文件 

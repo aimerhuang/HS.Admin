@@ -1,0 +1,42 @@
+﻿@using Hyt.BLL.Front
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.FeArticle
+@{
+    ViewBag.Title = "查看文章";
+}
+<div class="caseout">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <td width="60" class="nameright border_rnone">文章分类：</td>
+                    <td>
+                        @{
+                            var categorys = FeArticleCategoryBo.Instance.GetAll(ForeStatus.文章分类类型.新闻);
+                            if (categorys != null)
+                            {
+                                var category = categorys.FirstOrDefault(x => x.SysNo == Model.CategorySysNo);
+                                if (category != null)
+                                {
+                            @category.Name
+                                }
+                            }
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="nameright border_rnone">标题：</td>
+                    <td>
+                        @Model.Title
+                    </td>
+                </tr>
+                <tr>
+                    <td class="nameright border_rnone">文章内容：</td>
+                    <td>
+                        @Html.Raw(Server.UrlDecode(Model.Content))
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

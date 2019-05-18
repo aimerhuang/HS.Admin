@@ -1,0 +1,818 @@
+﻿@model Hyt.Model.SysAuthorization
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = " - 电子商务管理系统";
+}
+@section HeadJs {
+    <script type="text/javascript" src="/Theme/scripts/moving.min.js"></script>
+}
+<!--header-->
+@Html.Partial("_Header")
+<!--paymain-->
+@section FooterJs{
+}
+<div id="paymain">
+    <div class="py_lf clearfix">
+        <div id="btnshow"></div>
+        <div id="btnhide"></div>
+        <div id="navmain_con" class="navmain fl">
+            <div class="linelfm userbox">
+                <div class="userpic"><div class="message white">0</div><img src="../Theme/images/pho1.png" width="58" height="58" /></div>
+                <div class="usertxt">@Model.Base.UserName</div>
+            </div>
+            <div id="navtopscroll" class="linelfm topscroll"><span></span></div>
+            <div id="navdownscroll" class="linelfm downscroll"><span></span></div>
+            <div id="navmain_inner">
+                <ul id="navmain_ul" class="f14">
+                    <li>
+                        <div class="iconnav mymenu" mainmenuid='001'></div>
+                        <div>我的菜单</div>
+                    </li>
+                    @{
+                        foreach (var menu in Model.MenuList.Where((x) => x.ParentSysNo == 0 && x.InNavigator == 1).OrderBy(x => x.DisplayOrder))
+                        {
+                            <li>
+                                <div class="iconnav @menu.MenuImage" mainmenuid='@menu.SysNo'></div>
+                                <div>@menu.MenuName</div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+        <div class="navson fl" id="navson">
+
+            <div id="001" class="mymenu">
+                <div class="title f14"><span></span>我的菜单</div>
+                <ul id="ulMyMenu">
+                    <li pagehref="/Account/ModifyPwd">修改密码</li>
+              @*      <li id="mymenu452" userid="a452"  pagehref="/JobPool/MyJob">我的工作</li>*@
+                    @foreach (var node in Model.MyMenuList)
+                    {
+                        <li id="@Html.Raw("mymenu" + node.SysNo)" userid="@Html.Raw("a" + node.SysNo)" pagehref="@node.MenuUrl"><span sysno="@node.SysNo " class="fr icon_minus_sign icon_gray" title="移除"></span>@node.MenuName</li>
+                    }
+                </ul>
+            </div>
+            
+            @{
+                //系统二级子菜单
+                foreach (var menu in Model.MenuList.Where((x) => x.ParentSysNo == 0 && x.InNavigator == 1))
+                {
+                    <div id="@menu.SysNo" class="sysmg hidden">
+                        <div class="title f14"><span></span>@menu.MenuName</div>
+                        <ul>
+                            @foreach (var node in Model.MenuList.Where((x) => x.ParentSysNo == menu.SysNo && x.InNavigator == 1).OrderBy(x => x.DisplayOrder))
+                            {
+                                <li userid="@Html.Raw("a" + node.SysNo)" pagehref="@node.MenuUrl"><span name="imgspan" sysno="@node.SysNo" menuUrl="@node.MenuUrl" menuName="@node.MenuName"  class="fr icon_plus_sign icon_gray" title="添加到我的菜单"></span>@node.MenuName</li>
+                            }
+                        </ul>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <div class="py_rf">
+        <div class="tabstate">
+            <div class="state_s hide">
+                <dl class="orange"><dd><font class="bold f18">1458</font><br />今日访问</dd><dt class="icons v_today"></dt></dl>
+                <dl class="red"><dd><font class="bold f18">1458</font><br />今日访问</dd><dt class="icons p_number"></dt></dl>
+                <dl class="green"><dd><font class="bold f18">1458</font><br />今日访问</dd><dt class="icons o_money"></dt></dl>
+            </div>       
+            <div class="tabtop" id="carousel_con">
+                <div class="arrow a_l" id="left_scroll"></div>
+                <div class="arrow a_r" id="right_scroll"></div>
+                <div id="carousel_inner">
+                    <ul class="clearfix" id="carousel_ul">
+                        <li class="menuon" userid="a00001" breadname=""><a>用户首页</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!--当前位置-->
+        <div class="location" id="breaCut">
+            <div class="search fr">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td><button class="btn btn_ht26 wd28" title="刷新" id="btn_reload"><span class="icon_refresh" ></span></button></td>
+                        <td><button class="btn btn_ht26 wd28" title="全屏" id="btn_fullscreen"><span class="icon_fullscreen"></span></button></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="current c6"><span class="icon_home"></span>&nbsp;用户首页<span></span></div>
+        </div>
+        <div class="iframepage" id="iframewrap">
+          
+            <iframe class="block" width="100%" height="233" userid="a00001" frameborder="0" scrolling-x="no" src="/Main/Default"></iframe>
+        </div>    
+    </div>
+    </div>
+    <div class="def_outInfor"> </div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        //全屏按钮实现与关闭全屏按钮
+        $("#btn_fullscreen").click(function() {
+            if ($(this).children().hasClass("icon_exitFScreen")) {
+                if ($("#breaCut")) {
+                    $("#breaCut").removeClass("breadFull");
+                }
+                if ($("#btn_fullscreen")) {
+                    $(this).children().addClass("icon_fullscreen").removeClass("icon_exitFScreen");
+                    $(this).attr("title", "全屏");
+                }
+                $(window.parent.document).find('#iframewrap').find('.block').each(function() {
+                    $(this).removeClass('away').css('min-height', '0px');
+                    return;
+                });
+            } else {
+                if ($.trim($('#iframewrap').html())) {
+                    if ($("#breaCut")) {
+                        $("#breaCut").addClass("breadFull");
+                    }
+                    if ($("#btn_fullscreen")) {
+                        $(this).children().removeClass("icon_fullscreen").addClass("icon_exitFScreen");
+                        $(this).attr("title", "退出全屏，或按Esc退出全屏");
+                    }
+                    $('#iframewrap').find('.block').each(function() {
+                        $(this).addClass('away').css('min-height', $(window).height() - 42);
+                        return;
+                    });
+                }
+                if ($("#btn_fullscreen")) {
+                    $(this).children().removeClass("icon_fullscreen").addClass("icon_exitFScreen");
+                    $(this).attr("title", "退出全屏，或按Esc退出全屏");
+                }
+                $('#iframewrap').find('.block').each(function() {
+                    $(this).addClass('away').css('min-height', $(window).height() - 42);
+                    return;
+                });
+            }
+
+
+        });
+
+        //ESC退出全屏（在全屏下进行了操作，下面不可以删）
+        $('#iframewrap').find('.block').each(function() {
+            $($(this)[0].contentWindow.window).keydown(function(e) {
+                if (e && e.keyCode == 27) {
+                    if ($("#breaCut")) {
+                        $("#breaCut").removeClass("breadFull");
+                    }
+                    if ($("#btn_fullscreen")) {
+                        $("#btn_fullscreen").children().addClass("icon_fullscreen").removeClass("icon_exitFScreen");
+                        $("#btn_fullscreen").attr("title", "全屏");
+                    }
+                    $(window.parent.document).find('#iframewrap').find('.block').each(function() {
+                        $(this).removeClass('away').css('min-height', '0px');
+                        return;
+                    });
+                }
+            });
+            
+
+        });
+
+        //刷新按钮实现
+        $('#btn_reload').click(function() {
+            ReloadFrame();
+        });
+        //ESC退出全屏=（在全屏情况下为进行任何操作下面的不可以删除）
+        $('html,body').keydown(function(e) {
+            if (e && e.keyCode == 27) {
+                if ($("#breaCut")) {
+                    $("#breaCut").removeClass("breadFull");
+                }
+                if ($("#btn_fullscreen")) {
+                    $("#btn_fullscreen").children().addClass("icon_fullscreen").removeClass("icon_exitFScreen");
+                    $("#btn_fullscreen").attr("title", "全屏");
+                }
+                $('#iframewrap').find('.block').each(function() {
+                    $(this).removeClass('away').css('min-height', '0px');
+                    return;
+                });
+            }
+        });
+    });
+
+    function ReloadFrame() {
+        $('#iframewrap').find('.block').each(function() {
+            var url = changeURLArg($(this).attr('src'), "r", Math.random());
+            $(this).attr('src', url);
+            return;
+        });
+    }
+
+    function changeURLArg(url, arg, argval) {
+        var pattern = arg + '=([^&]*)';
+        var replaceText = arg + '=' + argval;
+        if (url.match(pattern)) {
+            var tmp = '/(' + arg + '=)([^&]*)/gi';
+            tmp = url.replace(eval(tmp), replaceText);
+            return tmp;
+        } else {
+            if (url.match('[\?]')) {
+                return url + '&' + replaceText;
+            } else {
+                return url + '?' + replaceText;
+            }
+        }
+    }
+
+//--> 
+</script>
+<script type="text/javascript">
+
+    var RowScroll = new SellerScroll({ container: "carousel_con", con_nner: "carousel_inner", lButton: "left_scroll", rButton: "right_scroll", oList: "carousel_ul", showSum: 1, showmun: 7, direction: "left" });
+//外div,内DIV,左arrow,右arrow,内UL,一次滑动数,显示个数
+    var VerScroll = new SellerScroll({ container: "navmain_con", con_nner: "navmain_inner", lButton: "navtopscroll", rButton: "navdownscroll", oList: "navmain_ul", showSum: 1, showmun: 3, direction: "top" });
+//外div,内DIV,左arrow,右arrow,内UL,一次滑动数,显示个数
+
+
+    //设置菜单
+    $(document).ready(function() {
+        /*=====一级菜单鼠标滚动=====*/
+        $('#navmain_con').mousewheel(function(event, delta) {
+            VerScroll.tdscroll(event, delta);
+        });
+
+        /*=====一级菜单鼠标滚结束=====*/
+
+
+        //自动显示左右按钮
+        RowScroll.Arrowshow();
+
+
+        /*=====一级菜单点击显示二级菜单=====*/
+        //显示二级菜单方法
+
+        function SecondShow(obj) {
+            $("#navmain_ul>li.menuon").removeClass("menuon");
+            obj.addClass("menuon");
+            var menuid = obj.children("div:first").attr("mainmenuid");
+            $(".navson").children("div[class!=hidden]").addClass("hidden");
+
+            $(".navson").children("#" + menuid).removeClass("hidden").attr("breadname", obj.text());
+            //判断展示按钮是否显示状态，显示就展示二级菜单
+            if ($("#btnshow").css("display") == "block") {
+                Navson_show();
+                $("#btnshow").hide();
+            }
+        }
+
+        //如果二级菜单隐藏时点击一级菜单展开二级菜单
+        $("#navmain_ul>li").bind("click", function() {
+            SecondShow($(this));
+        });
+
+
+        //点击收缩和展示按钮来显示隐藏二级菜单
+        $("#btnhide").bind("click", function() {
+            Navson_hide();
+            $(this).hide();
+        });
+        $("#btnshow").bind("click", function() {
+            Navson_show();
+            $(this).hide();
+        });
+
+        //二级菜单隐藏
+
+        function Navson_hide() {
+            $(".navson").hide();
+            $("#btnshow").show();
+            $(".py_lf").css("width", 100);
+            $(".py_rf").css("margin-left", 100);
+            RowScroll.Arrowshow();
+        }
+
+        //二级菜单显示
+
+        function Navson_show() {
+            $(".navson").show();
+            $("#btnhide").show();
+            $(".py_lf").css("width", 261);
+            $(".py_rf").css("margin-left", 261);
+            RowScroll.Arrowshow();
+        }
+
+
+        //二级菜单点击添加选项卡
+        $(".navson div>ul>li").live("click", function () {
+            //选中二级菜显示
+            SelectSecond($(this));
+            //定义breadname内容
+            var breadname = " > " + $(this).parents("div").attr("breadname") + " > " + $(this).text();
+            //创建选项卡
+            CreatTabEvent($(this).attr("userid"), $(this).text(), $(this).attr("pagehref"), breadname);
+        });
+
+        //选中二级菜单\选项卡显示
+
+        function SelectSecond(obj) {
+            $(".navson div>ul>li.menu_on").removeClass("menu_on");
+            obj.addClass("menu_on");
+        }
+
+
+        //选项卡点击效果
+        $("#carousel_ul>li").live("click", function() {
+            SelectTab($(this));
+        });
+
+        //初始浏览器高度设置
+        autoheight();
+        //窗口变化事件
+        $(window).resize(function() {
+            RowScroll.Arrowshow();
+            autoheight();
+        });
+
+        //li删除事件
+        $(".delx").live("click", function() {
+            DelectEvent($(this).parent());
+            //冒泡
+            return false;
+        });
+
+
+    });
+
+
+    //移除选项卡和IFRAME
+
+    function RemoveTab(obj) {
+        var iframe_i = $(".iframepage>iframe[userid=" + obj.attr("userid") + "]");
+        obj.remove();
+        iframe_i.remove();
+        //RowScroll.moveMaxWidth = (RowScroll.moveMaxWidth-RowScroll.moveWidth);
+        RowScroll.iListSum -= 1;
+        RowScroll.Arrowshow();
+    }
+
+
+    //高度自动适应窗口
+
+    function autoheight() {
+        var winheight = $(window).height();
+        var objnav_inner = $("#navmain_inner");
+        var objnav_son = $(".navson");
+        var objiframe = $(".iframepage");
+        objnav_inner.css({ height: (winheight - 160) });
+        $("iframe.block", objiframe).css({ height: (winheight - 147) });
+        objnav_son.css({ height: (winheight - 51) });
+    }
+
+
+    //关闭选项时再打开一个选项卡
+
+    function SelectTab(obj) {
+        //alert("prev");
+        var corruserid = obj.attr("userid");
+        //carousel_ul li显示隐藏
+        $("#carousel_ul>li.menuon").removeClass("menuon");
+        obj.addClass("menuon");
+        //navson显示隐藏
+        $(".navson div>ul>li.menu_on").removeClass("menu_on");
+        $(".navson div>ul>li[userid='" + corruserid + "']").addClass("menu_on");
+        var breadname = obj.attr("breadname");
+        $(".current").children("span:last").html(breadname);
+        //iframe显示隐藏
+        $(".iframepage iframe.block").removeClass("block").addClass("hide");
+        $(".iframepage iframe[userid='" + corruserid + "']").removeClass("hide").addClass("block");
+
+        //是的主父级菜单也选中 王耀发 2016-06-21 创建
+        //-----------------------------------------------
+        var mainmenuid = $(".navson div>ul>li[userid='" + corruserid + "']").parent().parent("div").attr("id");
+        var obj2 = $("#navmain_ul>li>div[mainmenuid='" + mainmenuid + "']").parent("li");
+
+        $("#navmain_ul>li.menuon").removeClass("menuon");
+        obj2.addClass("menuon");
+        //var menuid = obj2.children("div:first").attr("mainmenuid");
+        //$(".navson").children("div[class!=hidden]").addClass("hidden");
+        //$(".navson").children("#" + menuid).removeClass("hidden").attr("breadname", obj2.text());
+        //Navson_show();
+        //-----------------------------------------------
+    }
+    //关闭当前选项卡，打开前后选项卡
+    function UseridDelTab(objid) {
+       
+        var currentliobj = $("#carousel_ul>li[userid='" + objid + "']");
+
+        //currentliobj当前选项卡的关闭按钮对象
+        if (currentliobj.length != 0) {
+            DelectEvent(currentliobj);
+        }
+    }
+    //关闭当前选项卡，重新打开指定选项卡
+    function UseridDelTabUrl(reloadId) {
+
+        //currentliobj当前选项卡的关闭按钮对象
+        var removeObj = $("#carousel_ul").find(".menuon");
+        var currentliobj = $("#carousel_ul>li[userid='" + reloadId + "']");
+        
+        if (currentliobj.length != 0) {
+            SelectTab(currentliobj);
+        }
+        RemoveTab(removeObj);
+    }
+    //设置当前选项卡
+    function SetCurTab(id) {
+        if (id) {
+            var currentliobj = $("#carousel_ul>li[userid='" + id + "']");
+            if (currentliobj.length > 0) {
+                SelectTab(currentliobj);
+            }
+        }
+    }
+    //关闭当前选项卡
+    function CloseCurTab(id) {
+        var removeObj;
+        if (id) {
+            removeObj = $("#carousel_ul>li[userid='" + id + "']");
+        } else {
+            removeObj = $("#carousel_ul").find(".menuon");
+        }
+        RemoveTab(removeObj);
+    }
+    //关闭指定选项卡，重新打开指定选项卡
+    function UseridDelTabUrl(reloadId) {
+
+        //currentliobj当前选项卡的关闭按钮对象
+        var removeObj = $("#carousel_ul").find(".menuon");
+        var currentliobj = $("#carousel_ul>li[userid='" + reloadId + "']");
+
+        if (currentliobj.length != 0) {
+            SelectTab(currentliobj);
+        }
+        RemoveTab(removeObj);
+    }
+
+    /*********
+    删除选项卡
+    objdelx当前选项卡的关闭按钮对象
+    *******/
+
+    function DelectEvent(objdelx) {
+        var objprev = objdelx.prev();
+        var objnext = objdelx.next();
+        if (objprev.length != 0) {
+            SelectTab(objprev);
+        } else if (objnext.length != 0) {
+            SelectTab(objnext);
+        } else {
+            $(".navson div>ul>li.menu_on").removeClass("menu_on");
+            $("#ifmamedefault").removeClass("hide").addClass("block");
+            $(".current").children("span:last").html("");
+        }
+        RemoveTab(objdelx);
+    }
+
+
+    /*********
+    创建选项卡
+    creatuserid选项唯一userid
+    creaturl打开的页面url
+    creattext 选项卡的标题
+    *******/
+    var i_menu = 0;
+    function CreatTabEvent(creatuserid, creattext, creaturl, breadname) {
+        //添加选项卡
+        breadname == null ? "" : breadname;
+        var winheight = $(window).height();
+        var carousel_conv = $("#carousel_con");
+        var carousel_ulv = $("#carousel_ul");
+        var carousel_li = $("#carousel_ul li[userid=" + creatuserid + "]");
+        var iframe_i = $(".iframepage iframe[userid=" + creatuserid + "]");
+        //在选项卡中是否已有此选项卡
+        if (carousel_li.length == 0) {
+            $("#carousel_ul>li.menuon").removeClass("menuon");
+            $(".iframepage iframe.block").removeClass("block").addClass("hide");
+            $("#carousel_ul").append("<li class='menuon' userid='" + creatuserid + "' breadname='" + breadname + "'><span class='delx'></span><a>" + creattext + "</a></li>").css("left", "0");
+            $(".iframepage").append("<iframe class='block' width='100%' height='" + (winheight - 147) + "' userid='" + creatuserid + "'  frameborder='0' scrolling-x='no' src='" + creaturl + "'></iframe>");
+            $(".current").children("span:last").html(breadname);
+
+            //在选择卡打开的确保是case样式
+            //var parentWin = parent.document.getElementById("test");
+            var parentWin = $($("iframe[userid=" + creatuserid + "]"), $(".iframepage"))
+            parentWin.load(function () {
+                if ($('.caseout', parentWin.contents()).length != 0) {
+                    $('.caseout', parentWin.contents()).css('padding', '20px');
+                }
+            });
+
+
+            //RowScroll.moveMaxWidth = (RowScroll.moveMaxWidth+RowScroll.moveWidth);
+            if (RowScroll.iListWidth == null) {
+                RowScroll.iListWidth = $("#carousel_ul>li").outerWidth(true);
+            }
+            ;
+            RowScroll.iListSum = RowScroll.iListSum + 1;
+
+            var conWidth = carousel_conv.width(); //div容器tabtop的宽度
+            var ulMove = RowScroll.ReturnLeft(); //ul滑动的距离
+            var moveoff = (Math.floor(carousel_conv.width() / RowScroll.iListWidth) * RowScroll.iListWidth);
+            //在右边隐藏时，显示在当前窗口中
+            if ((RowScroll.iListWidth * RowScroll.iListSum + ulMove) > moveoff) {
+                i_menu++;
+                carousel_ulv.css("left", "-" + (RowScroll.iListWidth * i_menu + "px"));
+                //carousel_ulv.css("left","-50px");
+            }
+
+
+            RowScroll.Arrowshow();
+            return creatuserid;
+        } else {
+            $(".current").children("span:last").html(breadname); //当前位置
+            $("#carousel_ul>li.menuon").removeClass("menuon");
+            $(".iframepage iframe.block").removeClass("block").addClass("hide");
+            carousel_li.addClass("menuon");
+            iframe_i.removeClass("hide").addClass("block");
+            var liIndex = carousel_li.index(); //选中当前选项卡的在第几个
+            var conWidth = carousel_conv.width(); //div容器tabtop的宽度
+            var ulMove = RowScroll.ReturnLeft(); //ul滑动的距离
+            var moveoff = (Math.floor(carousel_conv.width() / RowScroll.iListWidth) * RowScroll.iListWidth);
+            //在右边隐藏时，显示在当前窗口中
+            if ((RowScroll.iListWidth * liIndex + ulMove) >= moveoff) {
+                carousel_ulv.css("left", "-" + (RowScroll.iListWidth * (liIndex + 1) - moveoff + "px"));
+            }
+            //在左边隐藏时，显示在当前窗口中
+            if (Math.abs(ulMove) >= RowScroll.iListWidth * liIndex) {
+                carousel_ulv.css("left", "-" + RowScroll.iListWidth * (liIndex) + "px");
+            }
+        }
+    }
+
+
+    //添加到我的菜单
+    function insertMyMenu(sysno, url, name) {
+        $.ajax({
+            type: "POST",
+            url: "/Main/MyMenuInsert/",
+            data: {
+                menuSysNo: sysno
+            },
+            chche: false,
+            success: function(ret) {
+                if (ret.StatusCode == 0) {
+                    UI.tips.tip_alert('tips_success', ret.Message);
+                    if (url.lastIndexOf("/") == url.length - 1) {
+                        url = url.substring(0, url.lastIndexOf("/"));
+                    }
+                    var html = $("<li id='mymenu" + sysno + "' userid='a" + sysno + "' pagehref=" + url + "><span name='imgspan' sysno='" + sysno + "' class='fr icon_minus_sign icon_gray' title='移除'></span>" + name + "</li>").find("span").click(function (e) {
+                        e.stopPropagation();
+                        var elem = $(this);
+                        removeMyMenu(elem.attr("sysno"));
+                    }).end();
+                    $("#ulMyMenu").append(html);
+                } else {
+                    UI.tips.tip_alert('tips_warning', ret.Message);
+                }
+            },
+            error: function() {
+                UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+            }
+        });
+       
+    }
+
+    //删除我的菜单
+    function removeMyMenu(sysno) {
+        $.ajax({
+            type: "POST",
+            url: "/Main/MyMenuDelete/",
+            data: {
+                menuSysNo: sysno
+            },
+            chche: false,
+            success: function(ret) {
+                if (ret.StatusCode == 0) {
+                    UI.tips.tip_alert('tips_success', ret.Message);
+                    $("#mymenu" + sysno).remove();
+                } else {
+                    UI.tips.tip_alert('tips_warning', ret.Message);
+                }
+            },
+            error: function() {
+                UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+            }
+        });
+    }
+    
+    $(function() {
+        $("#navson").find("span[name='imgspan']").click(function (e) {
+            e.stopPropagation();
+            var elem = $(this);
+            insertMyMenu(elem.attr("sysno"),elem.attr("menuUrl"),elem.attr("menuName"));
+        });
+        
+        $("#ulMyMenu").find("span").click(function (e) {
+            e.stopPropagation();
+            var elem = $(this);
+            removeMyMenu(elem.attr("sysno"));
+        });
+    });
+</script>
+
+<script type="text/javascript" src="/Theme/scripts/secmenu.js"></script>
+
+<div class="def_outInfor" id="def_outInfor">
+    <div class="align_r blue txt_a p5_r"><span class="upone m10_r grayc9"><a>上一条</a></span><span class="nextone m10_r"><a>下一条</a></span></div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        /*========================
+        消息弹出开始
+        ==========================*/
+        var outObj = $("#def_outInfor");
+        var closeObj = outObj.find(".close");
+        var uponeOjb = $('.upone', outObj);
+        var nextoneOjb = $('.nextone', outObj);
+        var EventHandler = null;	 //时间把
+        var ddListObj = outObj.find('dd');
+        
+        
+        function message() {
+            var json = {}, tpl = "";
+            json.id = 0;
+            $.post('/Main/JobPool/', json, function (data) {
+                var str = "您没有权限进行此操作";
+                var index = data.indexOf(str);
+                if (index==-1) {
+                    if (data.length > 0) {
+                        if (data.length > 99)
+                            $("div.message").html("99+");
+                        else
+                            $("div.message").html(data.length);
+                        //替换模板
+                        tpl += "  	<dl>\r\n";
+                        tpl += "        <dt><span class=\"close icon_remove icon_gray fr\"></span><span class='bold'></span></dt>\r\n";
+                        var i = 1;
+                        $.each(data, function (idx, item) {
+                            if (i < 100) {
+                                tpl += i == 1 ? "    <dd class='show'>\r\n" : "    <dd>\r\n";
+                                tpl += "			<div class=\"clearfix\">\r\n";
+                                tpl += "				<div class=\"icon_envelope fl\"></div>\r\n";
+                                tpl += "				<div class=\"fr\">" + item.JobDescription + "(<span color='blue'>" + item.Status + "</span>)<span class=\"blue\"><a href=\"javascript:void(0)\" onclick=\'UI.OpenCreatTab(\"任务详情\",\"" + item.JobUrl + "\")\'>去看看 &raquo;</a></span></div>";
+                                tpl += "    </div>\r\n";
+                                tpl += "</dd>\r\n";
+                            }
+                            i++;
+                        });
+                        tpl += "	</dl>\r\n";
+                        tpl += "    <div class=\"align_r blue txt_a p5_r\"><span class=\"upone m10_r grayc9\"><a>上一条</a></span><span class=\"nextone m10_r\"><a>下一条</a></span></div>\r\n";
+
+                        //console.info(tpl);
+                        $("#def_outInfor").html(tpl);
+                        //重新加载
+                        outObj = $("#def_outInfor");
+                        ddListObj = outObj.find('dd');
+                        outObj.find(".close");
+                        
+                        uponeOjb = $('.upone', outObj);
+                        nextoneOjb = $('.nextone', outObj);
+                        //上一条
+                        uponeOjb.click(function () {
+                            var currentobj = outObj.find("dd[class='show']");
+                            var _index = ddListObj.index(currentobj);
+                            //前面没有DD返回
+                            if (currentobj.prev('dd').length == 0) {
+                                return;
+                            } else {
+                                outObj.find("dt>span[class='bold']").text("系统消息（" + (_index) + "/" + ddListObj.length + "）");//消息数据
+                                nextoneOjb.removeClass('grayc9');
+                                currentobj.removeClass('show').prev().addClass('show');
+                                //判断是否是第一个
+                                if ((_index - 1) == 0) {
+                                    $(this).addClass('grayc9');
+                                }
+                            }
+                        });
+                        //下一条
+                        nextoneOjb.click(function () {
+                            var currentobj = outObj.find("dd[class='show']");
+                            var _index = ddListObj.index(currentobj) + 1;
+                            //后面没有DD返回
+                            if (currentobj.next('dd').length == 0) {
+                                return;
+                            } else {
+                                outObj.find("dt>span[class='bold']").text("系统消息（" + (_index + 1) + "/" + ddListObj.length + "）");//消息数据
+                                uponeOjb.removeClass('grayc9');
+                                currentobj.removeClass('show').next().addClass('show');
+                                //判断是否是最后一个
+                                if ((_index + 1) == ddListObj.length) {
+                                    $(this).addClass('grayc9');
+                                }
+                            }
+                        });
+
+                        var currentobj = outObj.find("dd[class='show']");
+                        var _index = ddListObj.index(currentobj);
+
+                        //页面加载时判断是否有下一个
+                        if (ddListObj.length == 1) {
+                            nextoneOjb.addClass('grayc9');
+                        }
+                        if (ddListObj.length > 0) {
+                            OutObjEvent(outObj, (ddListObj.length), (_index + 1));
+                        }
+                    }
+                }
+                window.setTimeout(message, 120000);
+            });
+        }
+        message();
+        
+        //上一条
+        uponeOjb.click(function () {
+            var currentobj = outObj.find("dd[class='show']");
+            var _index = ddListObj.index(currentobj);
+            //前面没有DD返回
+            if (currentobj.prev('dd').length == 0) {
+                return;
+            } else {
+                outObj.find("dt>span[class='bold']").text("系统消息（" + (_index) + "/" + ddListObj.length + "）");//消息数据
+                nextoneOjb.removeClass('grayc9');
+                currentobj.removeClass('show').prev().addClass('show');
+                //判断是否是第一个
+                if ((_index - 1) == 0) {
+                    $(this).addClass('grayc9');
+                }
+            }
+        });
+
+
+        //下一条
+        nextoneOjb.click(function () {
+            var currentobj = outObj.find("dd[class='show']");
+            var _index = ddListObj.index(currentobj) + 1;
+            //后面没有DD返回
+            if (currentobj.next('dd').length == 0) {
+                return;
+            } else {
+                outObj.find("dt>span[class='bold']").text("系统消息（" + (_index + 1) + "/" + ddListObj.length + "）");//消息数据
+                uponeOjb.removeClass('grayc9');
+                currentobj.removeClass('show').next().addClass('show');
+                //判断是否是最后一个
+                if ((_index + 1) == ddListObj.length) {
+                    $(this).addClass('grayc9');
+                }
+            }
+        });
+
+        //点击close关闭消息框
+        closeObj.live("click", function () {
+            CloseobjEvent($(this).parents('#def_outInfor'));
+        });
+
+        //鼠标移进清除时间把，移出加上时间把
+        outObj.live({
+            mouseenter: function () {
+                $(this).attr("stop", "stop");
+                RemoveEventHandler();
+            },
+            mouseleave: function () {
+                $(this).attr("stop", null);
+                var $that = $(this);
+                EventHandler = window.setTimeout(function () {
+                    CloseobjEvent($that);
+                }, 10000);
+            }
+
+        });
+
+        //新建一个数组
+        var queueList = new Array();
+        function OutObjEvent(obj, tobal, current) {
+            obj.find("dt>span[class='bold']").text("系统消息（" + current + "/" + tobal + "）");
+            //objFirstDL = obj.children('dl:last');
+            //将对象加入堆栈
+            obj.animate({ bottom: '0' }, 'fast', function () {
+                $that = $(this);
+                window.setTimeout(function () {
+                    //判断鼠标在上面
+                    if ($that.attr("stop") == undefined) {
+                        $that.animate({ bottom: '-110px' }, 'fast');
+                    }
+                }, 10000);
+            });
+        }
+
+        //闭关移除消息
+        function CloseobjEvent(obj) {
+            obj.animate({ bottom: '-110px' }, 'fast');
+        }
+
+        //清除时间把
+        function RemoveEventHandler() {
+            if (EventHandler != null)
+                window.clearTimeout(EventHandler);
+        }
+
+    });
+    /*========================
+    消息弹出结束
+    ==========================*/
+</script> 
+

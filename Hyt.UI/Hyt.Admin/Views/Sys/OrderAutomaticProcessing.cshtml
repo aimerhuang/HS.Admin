@@ -1,0 +1,250 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Hyt.Model.SyConfig
+
+@section HeadCss{
+    <link href="/Theme/css/shCoreDefault.css" rel="stylesheet" />
+  }
+@section HeadJs{
+  <script type="text/javascript" src="/Theme/scripts/jquery.validate.min.js"></script>	
+  <script src="/Theme/scripts/shCore.js"></script>
+  <script src="/Theme/scripts/shBrushJScript.js"></script>
+  }
+
+<form id="form">
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>订单自动处理配置</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_detail_dispay">
+                    <div class="tit_con clearfix">
+                        
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr> 
+                                    <td  style="vertical-align:top;">
+                                      <div id="divConfig">
+                                        @{
+                                            if (Model == null)
+                                            {
+                                            <textarea  id="txtConfig" name="txtConfig" style="height:600px;width:98%;" class="input_ht28 fl" ></textarea>
+                                            }
+                                            else
+                                            {
+                                                <textarea  id="txtConfig" name="txtConfig" style="height:600px;width:98%;" class="input_ht28 fl" value="@Model.Value">@Model.Value</textarea>
+                                            }}
+                                        </div>
+                                      <div id="divPreview">                                        
+                                      </div>
+                                    </td>
+                                  <td width="400px;" style="vertical-align:top;" >
+                                    <input type="button" id="btnPreview" value="预览" onclick="showPreview();" />
+                                    <input type="button" id="btnBack" value="返回" onclick="showConfig();" />
+                                    <br />
+                                    <strong class="red">命令示例</strong><br />
+                                    商城<br />
+第三方快递<br />
+订单金额大于:50<br />
+对内备注包含:快递、圆通<br />
+购买了商品:031130601003、031170201129<br />
+顾客留言包含:快递、晚上送<br />
+分销商城编号是:2、5、3<br />
+分销商城名称是：品胜数码旗舰店、 品胜配点专卖店<br />
+商品数量大于：10<br />
+收货地区省是：四川、上海、北京<br />
+收货地区市是：成都、宜宾<br />
+收货地区区是：金牛区、成华区<br />
+收货地区和仓库匹配<br />
+只购买了商品：031130601003<br />
+仓库有库存<br />
+仓库名称是：成都A世界档口、成都总库<br />
+                                    <strong class="red">自定义命令</strong> &nbsp; <a onclick="addCommand();">添加</a> <br />
+                                    <div class="var">
+
+                                    </div>
+                                  </td>
+                                </tr>
+                            </table>
+                        
+                    </div>
+
+                </div>
+                <div class="align_c m10_t" style="padding-bottom: 10px">
+                    <button class="btn btn_ht30 btn_blue" title="保存" onclick="Save(); return false;"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>
+                </div>
+            </div>
+            <div id="editCommand" style="display:none;">
+              名称：<input type="text" id="txtKey" style="width:200px;" />
+                <input type="button" id="btnPreview1" value="预览" onclick="showPreview1();" />
+                <input type="button" id="btnBack1" value="返回" onclick="showConfig1();" />
+              <br /><br />
+              <div id="divConfig1" >
+              <textarea  id="txtValue" style="height:500px;width:1000px;"></textarea>
+              </div>
+              <div id="divPreview1" >
+              </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+  var keys = ["not", "and", "or", "\\(", "\\)", ","];
+  var commands = ["仓库名称是", "只购买了商品", "收货地区和仓库匹配", "收货地区区是", "收货地区市是", "收货地区省是", "商品数量大于", "分销商城名称是", "分销商城编号是", "顾客留言包含", "购买了商品", "对内备注包含", "订单金额大于", "第三方快递", "百城当日达", "仓库有库存", "Var"];
+
+    function Save() {
+        if ($("#form").valid()) {
+          var configValue = $("#txtConfig").val();
+            $.post("/Sys/SaveOrderAutomaticProcessing", { value: configValue }, function (data) {
+                if (data.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功。');
+
+                }
+                else {
+                    alert(data.Message);
+                }
+            });
+            }
+        }
+    $(document).ready(function () {
+      $("#divPreview").hide();
+      $("#btnBack").hide();
+      
+      $("#form").validate(
+          {
+              rules: {
+                txtConfig: {
+                      required: true
+                  }
+              },
+              message: {
+                txtConfig: {
+                      required: "文本框中的值不能为空！"
+                  }
+              },
+              errorPlacement: function (error, el) {
+                  $('#for' + el.attr('id')).attr('class', 'error m10_l');
+              }
+          });
+      
+      //加载自定义命令
+      $.post("/Sys/SelectVar", {}, function (data) {
+        var html = "";
+        for (var i = 0; i < data.length; i++) {
+          html += '<a onclick="editCommand(\'' + $.trim(data[i].Key) + '\');">' + data[i].Key + '</a><br/>';
+          commands.push($.trim(data[i].Key));
+        }
+        $(".var").html(html);
+      }, "json");
+
+    });
+
+    function showPreview() {
+      $("#divConfig,#btnPreview").hide();
+      $("#divPreview,#btnBack").show();
+      var configValue = $("#txtConfig").val();
+      $("#divPreview").html('<pre name="code" class="brush: js;">' + configValue + '</pre>');
+      SyntaxHighlighter.highlight("code");
+      
+
+
+
+      $("#divPreview .string").each(function () {
+        var html = $(this).text();
+        for (var i = 0; i < keys.length; i++) {
+          html = html.replace(new RegExp(keys[i], "gm"), '<b class="red1">' + keys[i].replace("\\","") + '</b>');
+        } 
+        for (var j = 0; j < commands.length; j++) {
+          html = html.replace(new RegExp(commands[j], "gm"), '<span class="orange">' + commands[j] + '</span>');
+        }
+        $(this).html(html);
+
+      });
+
+    }
+    
+    function showConfig() {
+      $("#divConfig,#btnPreview").show();
+      $("#divPreview,#btnBack").hide();
+      $("#divPreview").html("");
+    }
+
+    function addCommand() {
+      $("#txtKey,#txtValue").val("");
+      showEditCommand();
+    }
+    
+    function showEditCommand() {
+
+      $("#divConfig1,#btnPreview1").show();
+      $("#divPreview1,#btnBack1").hide();
+      $("#divPreview1").html("");
+
+      $(document).dialog =  UI.DialogBox({
+        title: '管理命令',
+        padding: '20px 15px 20px 10px',
+        content: document.getElementById('editCommand'),
+        parent: false,
+        lock: true,
+        fixed: false,
+        ok: saveCommand,
+        cancel: true
+      });
+    }
+
+    function editCommand(key) {
+      
+      $("#txtKey").val(key);
+      $.post("/Sys/GetVar", { key: key }, function (result) {
+        $("#txtValue").val(result);
+        showEditCommand();
+      });
+    }
+    
+    function saveCommand() {
+      var data = {
+        key: $("#txtKey").val(),
+        value: $("#txtValue").val()
+      };      
+
+      $.post("/Sys/SaveVar", data, function (result) {
+        alert(result);
+      });
+      return false;
+    }
+
+    function showPreview1() {
+      $("#divConfig1,#btnPreview1").hide();
+      $("#divPreview1,#btnBack1").show();
+      var key = $("#txtKey").val();
+      var configValue = $("#txtValue").val();
+      configValue = '{\r\n' + key + ':\r\n"' + configValue + '"\r\n}';
+
+      $("#divPreview1").html('<pre name="code" class="brush: js;">' + configValue + '</pre>');
+      SyntaxHighlighter.highlight("code");
+      $("#divPreview1 > div").css({ height: "500px", width: "1000px" });
+
+      $("#divPreview1 .string").each(function () {
+        var html = $(this).text();
+        for (var i = 0; i < keys.length; i++) {
+          html = html.replace(new RegExp(keys[i], "gm"), '<b class="red1">' + keys[i].replace("\\", "") + '</b>');
+        }
+        for (var j = 0; j < commands.length; j++) {
+          html = html.replace(new RegExp(commands[j], "gm"), '<span class="orange">' + commands[j] + '</span>');
+        }
+        $(this).html(html);
+
+      });
+
+    }
+
+    function showConfig1() {
+      $("#divConfig1,#btnPreview1").show();
+      $("#divPreview1,#btnBack1").hide();
+      $("#divPreview1").html("");
+    }
+
+</script>
+
+

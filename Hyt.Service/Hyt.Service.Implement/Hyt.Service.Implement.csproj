@@ -1,0 +1,325 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{45DE822E-0F5D-44A6-98CB-7B9C7C66982B}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.Service.Implement</RootNamespace>
+    <AssemblyName>Hyt.Service.Implement</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <WcfConfigValidationEnabled>True</WcfConfigValidationEnabled>
+    <UseIISExpress>false</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\x86\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WCFMock, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\x86\WCFMock.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="ApiPayNotify\PayNotify.svc" />
+    <Content Include="ApiPay\Pay.svc" />
+    <Content Include="B2CApp\Account.svc" />
+    <Content Include="B2CApp\Address.svc" />
+    <Content Include="B2CApp\Common.svc" />
+    <Content Include="B2CApp\Orders.svc" />
+    <Content Include="B2CApp\Product.svc" />
+    <Content Include="B2CApp\ShoppingCart.svc" />
+    <Content Include="B2CApp\UserCenter.svc" />
+    <Content Include="ExpressService.svc" />
+    <Content Include="FileProcessor\ThumbnailService.svc" />
+    <Content Include="FileProcessor\UploadService.svc" />
+    <Content Include="Global.asax" />
+    <Content Include="LogisApp\Logistics.svc" />
+    <Content Include="MallSeller\ExtendMallOrder.svc" />
+    <Content Include="MallSeller\MallAccount.svc" />
+    <Content Include="MallSeller\MallOrder.svc" />
+    <Content Include="MallSeller\MallProduct.svc" />
+    <Content Include="MallSeller\MallRma.svc" />
+    <Content Include="Task\TaskService.svc" />
+    <Content Include="TwoDimensionCode.svc" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="WeiXin\WebChatService.svc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiPayNotify\PayNotify.svc.cs">
+      <DependentUpon>PayNotify.svc</DependentUpon>
+    </Compile>
+    <Compile Include="ApiPay\Pay.svc.cs">
+      <DependentUpon>Pay.svc</DependentUpon>
+    </Compile>
+    <Compile Include="App_Code\BaseService.cs" />
+    <Compile Include="B2CApp\Account.svc.cs">
+      <DependentUpon>Account.svc</DependentUpon>
+    </Compile>
+    <Compile Include="B2CApp\Address.svc.cs">
+      <DependentUpon>Address.svc</DependentUpon>
+    </Compile>
+    <Compile Include="B2CApp\Common.svc.cs">
+      <DependentUpon>Common.svc</DependentUpon>
+    </Compile>
+    <Compile Include="B2CApp\Orders.svc.cs">
+      <DependentUpon>Orders.svc</DependentUpon>
+    </Compile>
+    <Compile Include="B2CApp\Product.svc.cs">
+      <DependentUpon>Product.svc</DependentUpon>
+    </Compile>
+    <Compile Include="B2CApp\ShoppingCart.svc.cs">
+      <DependentUpon>ShoppingCart.svc</DependentUpon>
+    </Compile>
+    <Compile Include="B2CApp\UserCenter.svc.cs">
+      <DependentUpon>UserCenter.svc</DependentUpon>
+    </Compile>
+    <Compile Include="ExpressService.svc.cs">
+      <DependentUpon>ExpressService.svc</DependentUpon>
+    </Compile>
+    <Compile Include="FileProcessor\ThumbnailService.svc.cs">
+      <DependentUpon>ThumbnailService.svc</DependentUpon>
+    </Compile>
+    <Compile Include="FileProcessor\UploadService.svc.cs">
+      <DependentUpon>UploadService.svc</DependentUpon>
+    </Compile>
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="LogisApp\Logistics.svc.cs">
+      <DependentUpon>Logistics.svc</DependentUpon>
+    </Compile>
+    <Compile Include="MallSeller\ExtendMallOrder.svc.cs">
+      <DependentUpon>ExtendMallOrder.svc</DependentUpon>
+    </Compile>
+    <Compile Include="MallSeller\MallAccount.svc.cs">
+      <DependentUpon>MallAccount.svc</DependentUpon>
+    </Compile>
+    <Compile Include="MallSeller\MallOrder.svc.cs">
+      <DependentUpon>MallOrder.svc</DependentUpon>
+    </Compile>
+    <Compile Include="MallSeller\MallProduct.svc.cs">
+      <DependentUpon>MallProduct.svc</DependentUpon>
+    </Compile>
+    <Compile Include="MallSeller\MallRma.svc.cs">
+      <DependentUpon>MallRma.svc</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Task\TaskService.svc.cs">
+      <DependentUpon>TaskService.svc</DependentUpon>
+    </Compile>
+    <Compile Include="TwoDimensionCode.svc.cs">
+      <DependentUpon>TwoDimensionCode.svc</DependentUpon>
+    </Compile>
+    <Compile Include="WeiXin\WebChatService.svc.cs">
+      <DependentUpon>WebChatService.svc</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="LogisApp\upgrade\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\ProductImage.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Attachment.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Customs.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\AlipayCustoms.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Pay.config" />
+    <Content Include="Config\schedule.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\General.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <None Include="Properties\PublishProfiles\Hyt.Service.Implement.pubxml" />
+    <None Include="Properties\PublishProfiles\Hyt.Serice.pubxml" />
+    <None Include="Properties\PublishProfiles\Hyt.Service.pubxml" />
+    <None Include="Properties\PublishProfiles\MallSeller.pubxml" />
+    <None Include="Properties\PublishProfiles\MallSellerWcf.pubxml" />
+    <None Include="Properties\PublishProfiles\server.pubxml" />
+    <None Include="Properties\PublishProfiles\walamall.pubxml" />
+    <None Include="Properties\PublishProfiles\WCFmall.pubxml" />
+    <None Include="Properties\PublishProfiles\WCFUpGrades.pubxml" />
+    <None Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+    <None Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\B2B.Service.Img\B2B.Service.Img.csproj">
+      <Project>{995c2610-5dc6-4751-b06d-0118b44a1ccc}</Project>
+      <Name>B2B.Service.Img</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.BLL\Hyt.BLL.csproj">
+      <Project>{c49d2a21-1e3c-438c-8f30-f5cef9597e17}</Project>
+      <Name>Hyt.BLL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.DataAccess.Oracle\Hyt.DataAccess.Oracle.csproj">
+      <Project>{35bd3c9e-11db-442e-90ce-e1f9b2d7df82}</Project>
+      <Name>Hyt.DataAccess.Oracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.DataAccess\Hyt.DataAccess.csproj">
+      <Project>{d3af6913-f96c-45e0-ad43-4fe1ef542da8}</Project>
+      <Name>Hyt.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.EDM\Extra.EDM.csproj">
+      <Project>{27f910f8-f501-453d-96d7-aef59228dd09}</Project>
+      <Name>Extra.EDM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.SMS\Extra.SMS.csproj">
+      <Project>{2c317e9e-4806-49a9-a5bb-75976e26ed0c}</Project>
+      <Name>Extra.SMS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.UpGrade\Extra.UpGrade.csproj">
+      <Project>{dfa0c19c-69c5-46fb-8833-3041f3496848}</Project>
+      <Name>Extra.UpGrade</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Infrastructure\Hyt.Infrastructure.csproj">
+      <Project>{17216f5e-0585-4d11-a869-ad8119604f2a}</Project>
+      <Name>Hyt.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{cb555155-5eeb-41fd-ae7b-48f80ded197c}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Service.Contract\Hyt.Service.Contract.csproj">
+      <Project>{c3718184-d933-4570-bc9d-ddb03730ac31}</Project>
+      <Name>Hyt.Service.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Service.Event\ClearJsTicketEvent\Hyt.Service.Event.csproj">
+      <Project>{e2fca00b-a461-462c-b446-7751dcf4bc6d}</Project>
+      <Name>Hyt.Service.Event</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>False</UseIIS>
+          <AutoAssignPort>False</AutoAssignPort>
+          <DevelopmentServerPort>60005</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:9021/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,115 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.ReportMarketDepartmentSale>
+@{
+    ViewBag.Title = "MarketPresentDetails";
+}
+
+@section FooterJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+
+    <script type="text/javascript">
+        var paras;
+
+        function ajaxAction(url,type,vals,async) {
+            $.ajax({
+                url: url,
+                type: type===undefined?'get':type,
+                //async: async === undefined ? true : async,
+                data: vals,
+                success: function(data) {
+                    //login time out handling
+                    /*CustomActionFilter
+                    
+                    */
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    $('#divSearchResult').html(data);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            paras = {
+                BeginDate: $('#BeginDate').val(),
+                EndDate: $('#EndDate').val()
+            };
+            $('#btnSearch').click(function() {
+                paras = {
+                    BeginDate: $('#BeginDate').val(),
+                    EndDate: $('#EndDate').val()
+                };
+                ajaxAction('@Url.Action("MarketPresentDetails")',undefined, paras,undefined);
+            });
+
+            $('#btnExport').click(function () {
+                if ($('#tableResult tbody tr').length == 0){
+                    UI.Alert({ content: '没有数据!' });
+                    return;
+                }
+  
+                window.location = '@Url.Action("ExportMarketPresentDetails")'
+                    + '?BeginDate=' + paras.BeginDate
+                + '&EndDate=' + paras.EndDate
+                ;
+            });
+
+        });
+
+    </script>
+}
+
+<body>
+
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>市场部赠送明细</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <div class="left_tool" style="float: left">
+                        <button class="btn btn_ht26 m10_r" id="btnExport" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                    <div class="right_tool clearfix">
+                        <span class="fl">发货日期</span>
+                        <div class="date_btn120 fl m10_r m10_l">
+                            <input type="text" value="" id="BeginDate" name="" class="input_ht26">
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate',maxDate:$(EndDate).val()})"><span class="icon_calendar"></span></button>
+                        </div>
+                        
+                        <span class="fl">-</span>
+                        <div class="date_btn120 fl m10_r m10_l">
+                            <input type="text" value="" id="EndDate" name="" class="input_ht26">
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate',minDate:$(BeginDate).val()})"><span class="icon_calendar"></span></button>
+                        </div>
+                        <button type="button" id="btnSearch" class="btn btn_ht28 fl" title="搜索"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                        
+                    </div>
+                </div>
+            
+                
+
+      
+                <!-- 查询结果 -->
+                <div id="divSearchResult" class="boxs_listtabel">
+             
+                    @{Html.RenderPartial("pAjaxPager_MarketPresentDetails", Model);}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+</body>
+
+
+

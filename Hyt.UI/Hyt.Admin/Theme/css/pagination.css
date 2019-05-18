@@ -1,0 +1,13 @@
+@charset "utf-8";
+/* CSS Document */
+.pagination{ height:48px; line-height:48PX; padding:0px 10px; background:url(../images/pagination_bg.png) 0px 0px repeat-x; border:1PX solid #c1c1c1;}
+.pagination .mr5{ margin-right:5px;}
+.pagination .ml5{ margin-left:5px;}
+.pagination .mr10{ margin-right:10px;}
+.pagination .ml10{ margin-left:10px;}
+.pagination .mr0{ margin-right:0px;}
+.pagination a{ display:inline-block; padding:4px 8px; height:16px; line-height:16px; background:url(../images/btnbg.png) 0px 0px repeat-x; font-size:12px; font-family:Arial, Helvetica, sans-serif; border:1px solid #c1c1c1; box-shadow:1px 1px 1px #d2d2d2; text-decoration:none!important; border-radius:5px; color:#666; margin-right:5px; vertical-align:middle;}
+.pagination a.disabled{ background:#c1c1c1;}
+.pagination a.disabled:hover{ background-position:0px 0px; color:#666; border-color:#c1c1c1;}
+.pagination a.hover,.pagination a:hover{ background-position:0px -68px; color:#fff; border-color:#0a74b9;}
+.pagination .boxx{ padding-top:10px; line-height:0px;}

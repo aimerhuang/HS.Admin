@@ -1,0 +1,116 @@
+﻿@model List<Hyt.Model.Transfer.CBMonthExpress>
+@{
+    ViewBag.Title = "快递100月统计报表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section headjs{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+}
+<div class="case" id="createDeliverMainDiv">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>快递100月统计报表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool clearfix">
+                    <form id="form1" method="post">
+                        <span class="veralign_t fl">报表时间</span>
+                        <div class="fl m10_l">
+
+                            <select id="year" name="year" class="wid" onchange="javascript: ReLoadData();">
+                                @{
+                                    int n = 0;
+                                    while (n < 5)
+                                    {
+                                        <option value="@(DateTime.Now.Year-n)">@(DateTime.Now.Year - n)</option>
+                                        n++;
+                                    }
+                                }
+                            </select>
+
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="btnSearch" type="button" onclick="javascript: ReLoadData();"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                    </form>
+                </div>
+                <!--/工具条按钮-->
+                <div class="left_tool" id="feature_area">
+                    &nbsp;
+                </div>
+            </div>
+            <!--报表数据-->
+            <div class="boxs_listtabel" id="paging">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+                    <thead>
+                        <tr>
+                            <th>月份</th>
+                            <th>成功单量</th>
+                            <th>失败单量</th>
+                            <th> 总单量</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (!Model.Any())
+                            {
+                                <tr>
+                                    <td colspan="4" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                int i = 1;
+                                foreach (var item in Model)
+                                {
+
+                                    if (i % 2 == 0)
+                                    {
+                                        @Html.Raw("<tr>")
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("<tr class='stag_color'>")
+                                    }
+                                <td class="blue"><a href='javascript:UI.OpenCreatTab(" 快递100统计明细","/report/LgExpressDetail?StartTime=@(item.YearMonth+"-01")");'>@item.YearMonth</a></td>
+                                <td class="blue"><a href='javascript:UI.OpenCreatTab(" 快递100统计明细","/report/LgExpressDetail?IsSuccess=true&StartTime=@(item.YearMonth+"-01")");'>@item.SuccessFlgs</a></td>
+                                <td class="blue"><a href='javascript:UI.OpenCreatTab(" 快递100统计明细","/report/LgExpressDetail?IsSuccess=false&StartTime=@(item.YearMonth+"-01")");'>@item.FailFlgs</a></td>
+                                <td>@item.AllFlgs</td>
+                                @Html.Raw("</tr>")
+                                    i++;
+                                }
+                                if (i % 2 == 0)
+                                {
+                                    @Html.Raw("<tr>")
+                                }
+                                else
+                                {
+                                    @Html.Raw("<tr class='stag_color'>")
+                                }
+                                <td>合计</td>
+                                <td>@Model.Sum(m => m.SuccessFlgs)</td>
+                                <td>@Model.Sum(m => m.FailFlgs)</td>
+                                <td>@Model.Sum(m => m.AllFlgs)</td>
+                                @Html.Raw("</tr>")
+                            }
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script language="javascript" type="text/javascript">
+        //刷新数据
+        function ReLoadData() {
+            Utils.MaskStart($('#paging'));
+            var nyear = $("#year").val();
+            $.get('@Url.Action("MonthExpressList")', { year: nyear }, function (data) {
+                $("#paging").html(data);
+                Utils.MaskStop();
+            });
+        }
+    </script>

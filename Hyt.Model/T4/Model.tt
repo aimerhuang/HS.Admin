@@ -1,0 +1,46 @@
+﻿<#@ template debug="false" hostspecific="True" language="C#" #>
+<#@ output extension=".cs" #>
+
+<#@ assembly name="System.Data.dll" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@include file="MultiOutputHelper.ttinclude"  #>
+<#@include file="ModelHelper.ttinclude"  #>
+
+<#  var multiManager=Manager.Create(Host,GenerationEnvironment);//多文件分割器  
+	ModelHelper modelCreator=ModelHelper.CreateSqlserverHelper(); //注意创建的数据库类型
+	List<TableInfo> tableInfoList=modelCreator.GetTableInfoList(); //从数据库获取所有表	
+	foreach(TableInfo tInfo in tableInfoList)
+    {
+	   
+	    var TableName=tInfo.TableName;
+		
+		//块文件开始
+		multiManager.StartNewFile(TableName+".cs");
+#>
+
+using System;
+using System.ComponentModel;
+namespace Hyt.Model
+{
+    /// <summary>
+	/// <#=modelCreator.GetTableDesc(tInfo.TableName)#>
+	/// </summary>
+    /// <remarks>
+    /// <#=DateTime.Now.ToString("yyyy-MM-dd")#> 杨浩 T4生成
+    /// </remarks>
+	[Serializable]
+	public partial class <#=TableName#>
+	{
+	  <# foreach(TableColumnInfo tcolumnInfo in tInfo.TableColumns){#>
+		/// <summary>
+		/// <#=modelCreator.GetColumnDesc(TableName,tcolumnInfo.ColumnName)#>
+		/// </summary>
+		[Description("<#=modelCreator.GetColumnDesc(TableName,tcolumnInfo.ColumnName)#>")]
+		public <#=tcolumnInfo.ColumnDataType#> <#=tcolumnInfo.ColumnName#> { get; set; }
+ <#}#>
+	}
+}
+
+	<# multiManager.EndBlock();}#>//块结束标记
+	<# multiManager.Process(true);#>//根据块标记分割生成多个文件 

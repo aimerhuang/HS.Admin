@@ -1,0 +1,92 @@
+﻿@using Hyt.BLL.Warehouse
+@using Hyt.Model.WorkflowStatus
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ViewBag.Prompt;
+    bool IsCanRedirect = true;
+    if (Request.QueryString["IsCanRedirect"] != null && Request.QueryString["IsCanRedirect"].ToString() == "false")
+    {
+        IsCanRedirect = false;
+    }
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>@ViewBag.Prompt</title>
+    <script type="text/javascript">
+        //商品入库
+        function openInstock(id) {
+            var url = '/Warehouse/InStockCreate?sysNo=' + id;
+            UI.DialogOpen(url, {
+                title: '商品入库',
+                width: 1000,
+                height: 608,
+                init: function () {
+                    this.button({
+                        name: '确认入库',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            if (!iframe.document.body) {
+                                UI.Alert({ content: '页面还没加载完毕呢！' });
+                                return false;
+                            };
+                            iframe.inStockComplete();
+                            return false;
+                        },
+                        focus: true
+                    }, {
+                        name: "取消"
+                    });
+                }
+            });
+        };
+        function showTip(tip) {
+            UI.tips.tip_alert('tips_success', tip);
+            location.reload();
+        }
+    </script>
+
+</head>
+<body>
+
+    <div class="boxs_detail_dispay border_none bg_f5 " id="div1" style="padding: 10px;">
+            @if (IsCanRedirect&&ViewBag.Status != null && ViewBag.Status != (int)Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.待审核)
+            {
+                string prompt = "";
+                if (ViewBag.Status == (int) Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.待入库)
+                {
+                    var instockModel = InStockBo.Instance.GetStockInBySource((int)WarehouseStatus.入库单据类型.RMA单, ViewBag.SysNo);
+                    var id = instockModel != null ? instockModel.SysNo.ToString() : "0";
+                    prompt = "提示消息：该退货单的入库单等待处理，跳转到处理页面？【<a href='javascript:void();' onclick='openInstock(" +id + ")'><span class='blue'>跳转</span></a>】";
+                }
+                else if (ViewBag.Status == (int) Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.待退款)
+                {
+                    prompt = "提示消息：该退货单的付款单正在处理，跳转到处理页面？【<a href='/Finance/RMAPaymentDetail/"+ViewBag.SysNo+"'><span class='blue'>跳转</span></a>】";
+                }
+                else if (ViewBag.Status == (int) Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.已完成)
+                {
+                    prompt = "提示消息：该退货单已处理";
+                }
+                else if (ViewBag.Status == (int) Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.作废)
+                {
+                    prompt = "提示消息：该退货单已作废";
+                }
+                 <div @if(!string.IsNullOrWhiteSpace(prompt)){
+                          @:style="margin-bottom:10px;"
+                 }
+                    class="red_bg"><ul>
+	                    <li>
+	                        @MvcHtmlString.Create(prompt) 
+	                    </li>
+                    </ul>
+                 </div>
+            }
+      <div class="tit_dispay border_left border_right">
+                <h5>退货订单信息</h5>
+            </div>
+     @{Html.RenderAction("ReturnView", new { id = ViewBag.SysNo });}
+    </div>
+
+</body>
+</html>
+

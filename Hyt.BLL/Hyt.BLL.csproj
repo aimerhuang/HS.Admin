@@ -1,0 +1,783 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C49D2A21-1E3C-438C-8F30-F5CEF9597E17}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.BLL</RootNamespace>
+    <AssemblyName>Hyt.BLL</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="com.ehking.sdk.utils">
+      <HintPath>..\lib\x86\com.ehking.sdk.utils.dll</HintPath>
+    </Reference>
+    <Reference Include="com.ekhing">
+      <HintPath>..\lib\x86\com.ekhing.dll</HintPath>
+    </Reference>
+    <Reference Include="Game.Utils">
+      <HintPath>..\lib\x86\Game.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Framework.Service">
+      <HintPath>..\lib\soa\Grand.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Api.Contract">
+      <HintPath>..\lib\soa\Grand.Platform.Api.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Express.Contract">
+      <HintPath>..\lib\soa\Grand.Platform.Express.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Wms.Contract">
+      <HintPath>..\lib\soa\Grand.Platform.Wms.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Service.EC.Core.SMS.Contract">
+      <HintPath>..\lib\soa\Grand.Service.EC.Core.SMS.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Service.Share.SSO.Contract">
+      <HintPath>..\lib\soa\Grand.Service.Share.SSO.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\IronPython.dll</HintPath>
+    </Reference>
+    <Reference Include="LitJSON">
+      <HintPath>..\lib\x86\LitJSON.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net">
+      <HintPath>..\lib\x86\lucene\Lucene.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting, Version=1.1.0.20, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\Microsoft.Scripting.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="PanGu, Version=2.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\PanGu.dll</HintPath>
+    </Reference>
+    <Reference Include="PanGu.HighLight, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\PanGu.HighLight.dll</HintPath>
+    </Reference>
+    <Reference Include="PanGu.Lucene.Analyzer, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\PanGu.Lucene.Analyzer.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Framework.Service">
+      <HintPath>..\lib\soa\Pisen.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Service.Dispatch, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\soa\Pisen.Service.Dispatch.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Service.Kuaidi">
+      <HintPath>..\lib\soa\Pisen.Service.Kuaidi.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Service.Share.SSO.Contract, Version=1.0.5401.19416, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\soa\Pisen.Service.Share.SSO.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Workflow.Runtime" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Allocation\AllocationBo.cs" />
+    <Compile Include="ApiCustoms\GACustoms\CustomsProvider.cs" />
+    <Compile Include="ApiCustoms\GuangZhou\CustomsProvider.cs" />
+    <Compile Include="ApiCustoms\ICustomsProvider.cs" />
+    <Compile Include="ApiCustoms\SzCross\CustomsProvider.cs" />
+    <Compile Include="ApiHaiDai\HaiDaiBll.cs" />
+    <Compile Include="ApiLogistics\CrossBorder\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\WuZhou\LogisticsProvider.cs" />
+    <Compile Include="ApiPay\Chinapnr\PayProvider.cs" />
+    <Compile Include="ApiPay\Joinpay\PayProvider.cs" />
+    <Compile Include="ApiPay\KaiLianTong\PayProvider.cs" />
+    <Compile Include="ApiCustoms\Kj\CustomsProvider.cs" />
+    <Compile Include="ApiElectricBusiness\HXT\ElectricBusinessProvider.cs" />
+    <Compile Include="ApiElectricBusiness\IElectricBusinessProvider.cs" />
+    <Compile Include="ApiFactory\ApiProviderFactory.cs" />
+    <Compile Include="ApiIcq\GZBaiYunJiChang\BYJiChangProvider.cs" />
+    <Compile Include="ApiIcq\GZNanSha\NanShaProvider.cs" />
+    <Compile Include="ApiIcq\IIcqProvider.cs" />
+    <Compile Include="ApiIcq\IcpBo.cs" />
+    <Compile Include="ApiLogistics\DFWT\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\Easycross\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\EightDT\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\Anna\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\EMS\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\ETrade\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\GaoJiePersonal\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\GaoJie\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\HYH\ActionResponse.cs" />
+    <Compile Include="ApiLogistics\HYH\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\ILogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\LianGang\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\QiBang\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\QiBang\PayData.cs" />
+    <Compile Include="ApiLogistics\Wtd\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\XinYing\LogisticsProvider.cs" />
+    <Compile Include="ApiLogistics\YourSender\LogisticsProvider.cs" />
+    <Compile Include="ApiPay\AliPay\PayProvider.cs" />
+    <Compile Include="ApiPay\EhkingCip\PayProvider.cs" />
+    <Compile Include="ApiPay\Ehking\PayProvider.cs" />
+    <Compile Include="ApiPay\EPay\Account.cs" />
+    <Compile Include="ApiPay\EPay\PayProvider.cs" />
+    <Compile Include="ApiPay\IAccount .cs" />
+    <Compile Include="ApiPay\IPayProvider.cs" />
+    <Compile Include="ApiPay\QianDai\Core.cs" />
+    <Compile Include="ApiPay\QianDai\PayProvider.cs" />
+    <Compile Include="ApiPay\QianDai\VipCardInfo.cs" />
+    <Compile Include="ApiPay\TLPay\PayProvider.cs" />
+    <Compile Include="ApiPay\WeiXin\PayProvider.cs" />
+    <Compile Include="ApiSupply\HYH\ApiResponse.cs" />
+    <Compile Include="ApiSupply\HYH\HYHMD5.cs" />
+    <Compile Include="ApiSupply\HYH\HYHProvider.cs" />
+    <Compile Include="ApiSupply\HaiTun\HaiTunProvider.cs" />
+    <Compile Include="ApiSupply\HYH\ProductResponse.cs" />
+    <Compile Include="ApiSupply\HYH\WebUtils.cs" />
+    <Compile Include="ApiSupply\ISupplyProvider.cs" />
+    <Compile Include="ApiSupply\Kebilin\KebilinProvider.cs" />
+    <Compile Include="ApiSupply\KuaJingYi\KuaJingYiProvider.cs" />
+    <Compile Include="ApiSupply\PaPaGo\PaPaGoProvider.cs" />
+    <Compile Include="ApiSupply\QianhaiSail\QianhaiSailProvider.cs" />
+    <Compile Include="ApiSupply\U1City\Client.cs" />
+    <Compile Include="ApiSupply\U1City\Comm.cs" />
+    <Compile Include="ApiSupply\U1City\Dto_Pro_Sku_Info.cs" />
+    <Compile Include="ApiSupply\U1City\ProductSpec.cs" />
+    <Compile Include="ApiSupply\U1City\Pro_Sku_Info.cs" />
+    <Compile Include="ApiSupply\U1City\U1CityProvider.cs" />
+    <Compile Include="ApiWarehouse\FuJian\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\IWarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\JuMei\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\ManJiangHong\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\ShaTian\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\ShenZhen\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\TongYong\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\WuZhou\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\XingYe\WarehouseProvider.cs" />
+    <Compile Include="ApiWarehouse\ZhuoDing\WarehouseProvider.cs" />
+    <Compile Include="AppContent\AppContentBo.cs" />
+    <Compile Include="Atten\ClockTypeBo.cs" />
+    <Compile Include="Balance\CrRechargeBo.cs" />
+    <Compile Include="Base\InstanceProviderBo.cs" />
+    <Compile Include="Basic\OriginBo.cs" />
+    <Compile Include="Basic\ReceiptNumberBo.cs" />
+    <Compile Include="Basic\TransferCargoConfigBo.cs" />
+    <Compile Include="Convergence\ScanParamBo.cs" />
+    <Compile Include="CRM\CrCustomerShipCardBo.cs" />
+    <Compile Include="CRM\CrDealerApplyBo.cs" />
+    <Compile Include="CRM\CrPredepositCashRebatesRecordAssociationBo.cs" />
+    <Compile Include="CRM\CrWeChatBindBo.cs" />
+    <Compile Include="Distribution\DsAgentBo.cs" />
+    <Compile Include="Distribution\DsAgentPrePaymentBo.cs" />
+    <Compile Include="Distribution\DsAgentPrePaymentItemBo.cs" />
+    <Compile Include="Distribution\DsDealerApplyBo.cs" />
+    <Compile Include="Distribution\DsDealerPayTypeBo.cs" />
+    <Compile Include="Distribution\DsDealerRebatesRecordBo.cs" />
+    <Compile Include="Distribution\DsProductAssociationBo.cs" />
+    <Compile Include="Distribution\DsThreeMallSyncLogBo.cs" />
+    <Compile Include="DouShabao\DouShabaoSign.cs" />
+    <Compile Include="ExpressList\ExpressListBLL.cs" />
+    <Compile Include="Express\ElectronicsSurfaceBo.cs" />
+    <Compile Include="Extra\MallEhkingClientBo.cs" />
+    <Compile Include="Extra\PosServiceBo.cs" />
+    <Compile Include="Feedback\FFeedbackBo.cs" />
+    <Compile Include="FinancialStatistics\FnStatisticsBo.cs" />
+    <Compile Include="FreightModule\FreightModuleDaoBo.cs" />
+    <Compile Include="FreightModule\FreightModuleItemPricesBo.cs" />
+    <Compile Include="CrossBorderLogistics\CrossBorderLogisticsOrderBo.cs" />
+    <Compile Include="Front\FeNewsCategoryBo.cs" />
+    <Compile Include="InventorySheet\PdProductSpecBo.cs" />
+    <Compile Include="InventorySheet\WhInventoryBo.cs" />
+    <Compile Include="Kis\ICStockBillEntryTemBo.cs" />
+    <Compile Include="Kis\IcStockBillTemBo.cs" />
+    <Compile Include="LiJia\LiJiaNewProvider.cs" />
+    <Compile Include="Logistics\LgBestExpressSurfaceBillServiceBo.cs" />
+    <Compile Include="Logistics\LgElectronicWayBillBo.cs" />
+    <Compile Include="Logistics\LogisticsBo.cs" />
+    <Compile Include="Logistics\LgFreightModuleDetailsBo.cs" />
+    <Compile Include="Logistics\LgFreightModuleBo.cs" />
+    <Compile Include="Logistics\LgFreightValuationModuleBo.cs" />
+    <Compile Include="Mobile\CrCustomerMobileLoginBo.cs" />
+    <Compile Include="Mobile\MBDesignFrameBo.cs" />
+    <Compile Include="OrderRule\Command_与高德数据一致.cs" />
+    <Compile Include="OrderRule\Command_千城当日达.cs" />
+    <Compile Include="OrderRule\Command_商品名称包含.cs" />
+    <Compile Include="OrderRule\Command_当日达配送商品.cs" />
+    <Compile Include="OrderRule\Command_支付状态是.cs" />
+    <Compile Include="OrderRule\Command_有顾客留言.cs" />
+    <Compile Include="OrderRule\Command_百度与高德数据一致.cs" />
+    <Compile Include="OrderRule\Command_自营仓库.cs" />
+    <Compile Include="OrderRule\Command_订单创建时间大于分钟.cs" />
+    <Compile Include="OrderRule\Command_订单来源编号是.cs" />
+    <Compile Include="OrderRule\Command_订单金额小于.cs" />
+    <Compile Include="OrderRule\Command_配送方式编号是.cs" />
+    <Compile Include="OrderRule\Command_非自营仓库.cs" />
+    <Compile Include="OrderRule\Command_预付订单必须完成支付.cs" />
+    <Compile Include="OrderRule\Command_高德千城当日达.cs" />
+    <Compile Include="OrderRule\ThingDo.cs" />
+    <Compile Include="OrderRule\Thing_非升舱订单自动处理.cs" />
+    <Compile Include="Order\LiJiaSoOrderSynchronize.cs" />
+    <Compile Include="Order\OutboundReturnBo.cs" />
+    <Compile Include="Order\SendOrderReturnBo.cs" />
+    <Compile Include="Order\SoChangeOrderPriceBo.cs" />
+    <Compile Include="Order\SoCustomsOrderLogBo.cs" />
+    <Compile Include="Order\SoOrderItemBo.cs" />
+    <Compile Include="Order\SoOrderOtherExpensesBo.cs" />
+    <Compile Include="Order\SoOrderPayLogBo.cs" />
+    <Compile Include="Order\SoOrderPayPushLogBo.cs" />
+    <Compile Include="Order\SoOrderSyncLogisticsLogBo.cs" />
+    <Compile Include="PdPackaged\PdPackagedGoodsBo.cs" />
+    <Compile Include="Pos\DsDealerPayConfigBo.cs" />
+    <Compile Include="Pos\DsMemberBo.cs" />
+    <Compile Include="Pos\DsPosBarcodePayLogBo.cs" />
+    <Compile Include="Pos\DsPosFrontConfigBo.cs" />
+    <Compile Include="Pos\DsPosFrontDealerConfigBo.cs" />
+    <Compile Include="Pos\DsPosManageBo.cs" />
+    <Compile Include="Pos\DsPosMoneyBoxBo.cs" />
+    <Compile Include="Pos\DsPosOrderBo.cs" />
+    <Compile Include="Pos\DsPosReturnOrderBo.cs" />
+    <Compile Include="Pos\DsPosTLPosResultBo.cs" />
+    <Compile Include="Pos\DsPosVersionBo.cs" />
+    <Compile Include="Pos\DsPosWebSocketHistoryBo.cs" />
+    <Compile Include="Pos\DsPosWebSocketManageBo.cs" />
+    <Compile Include="Pos\DsTakeStockOrderBo.cs" />
+    <Compile Include="Pos\SyWSOrderToClientJobBo.cs" />
+    <Compile Include="Procurement\PmBaseDataBo.cs" />
+    <Compile Include="Procurement\PmManufacturProductBo.cs" />
+    <Compile Include="Procurement\PmProcurementBo.cs" />
+    <Compile Include="Procurement\PmWareGoodsBo.cs" />
+    <Compile Include="Procurement\PurchasePaymentOrderBo.cs" />
+    <Compile Include="Procurement\WhWarehouseMonthStockHistoryBo.cs" />
+    <Compile Include="Product\PdProductCrossBorderBo.cs" />
+    <Compile Include="Product\PdProductFreightBo.cs" />
+    <Compile Include="Product\PdProductAttributeOptionBo.cs" />
+    <Compile Include="Product\PdProductPrivateBo.cs" />
+    <Compile Include="Promotion\SpSpikeBo.cs" />
+    <Compile Include="Promotion\WhouseFreightFreeBo.cs" />
+    <Compile Include="Properties\Authentication\AdminAuthenticationBo.cs" />
+    <Compile Include="Properties\Authentication\CustomerAuthenticationBo.cs" />
+    <Compile Include="Properties\Authentication\IAuthenticationBo.cs" />
+    <Compile Include="Base\BOBase.cs" />
+    <Compile Include="Base\DataProviderBo.cs" />
+    <Compile Include="Basic\BasicAreaBo.cs" />
+    <Compile Include="Basic\BsCodeBo.cs" />
+    <Compile Include="Basic\BsDeliveryPaymentBo.cs" />
+    <Compile Include="Basic\SmartConfigBo.cs" />
+    <Compile Include="Cart\EditOrderCart.cs" />
+    <Compile Include="Config\ConfigBo.cs" />
+    <Compile Include="CRM\CrSsoCustomerAssociationBo.cs" />
+    <Compile Include="CRM\CrSmsQuestionBo.cs" />
+    <Compile Include="Distribution\DsDealerAppBo.cs" />
+    <Compile Include="Distribution\DsDealerWharehouseBo.cs" />
+    <Compile Include="Distribution\DsForbidProductBo.cs" />
+    <Compile Include="Distribution\DsUserBo.cs" />
+    <Compile Include="Extra\AdminSmsBo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Front\FeNewsBo.cs" />
+    <Compile Include="Front\FeNewsProductAssociationBo.cs" />
+    <Compile Include="Front\FeSoftCategoryBo.cs" />
+    <Compile Include="Front\FeSoftwareBo.cs" />
+    <Compile Include="Front\MkBlogrollBo.cs" />
+    <Compile Include="Logistics\LgDeliveryCompanyCodeBo.cs" />
+    <Compile Include="Logistics\LgExpressBo.cs" />
+    <Compile Include="Logistics\MkExpressLogBo.cs" />
+    <Compile Include="Logistics\WhDeliveryScopeBo.cs" />
+    <Compile Include="MallSeller\DsDealerLogBo.cs" />
+    <Compile Include="MallSeller\DsMallAreaRelationBo.cs" />
+    <Compile Include="MallSeller\DsMallExpressCodeBo.cs" />
+    <Compile Include="MallSeller\DsMallSyncLogBo.cs" />
+    <Compile Include="MallSeller\DsProductRelationBo.cs" />
+    <Compile Include="Map\Location.cs" />
+    <Compile Include="OrderRule\Command_Var.cs" />
+    <Compile Include="OrderRule\Command_仓库名称是.cs" />
+    <Compile Include="OrderRule\Command_仓库有库存.cs" />
+    <Compile Include="OrderRule\Command_只购买了商品.cs" />
+    <Compile Include="OrderRule\Command_商品数量大于.cs" />
+    <Compile Include="OrderRule\Command_对内备注包含.cs" />
+    <Compile Include="OrderRule\Command_收货地区.cs" />
+    <Compile Include="OrderRule\Command_收货地区和仓库匹配.cs" />
+    <Compile Include="OrderRule\Command_百城当日达.cs" />
+    <Compile Include="OrderRule\Command_第三方快递.cs" />
+    <Compile Include="OrderRule\Command_经销商城名称是.cs" />
+    <Compile Include="OrderRule\Command_经销商城编号是.cs" />
+    <Compile Include="OrderRule\Command_订单金额大于.cs" />
+    <Compile Include="OrderRule\Command_购买了商品.cs" />
+    <Compile Include="OrderRule\Command_顾客留言包含.cs" />
+    <Compile Include="OrderRule\OrderData.cs" />
+    <Compile Include="OrderRule\ICommand.cs" />
+    <Compile Include="OrderRule\IThing.cs" />
+    <Compile Include="OrderRule\OrderEngine.cs" />
+    <Compile Include="OrderRule\ThingModel.cs" />
+    <Compile Include="OrderRule\Thing_升舱订单自动处理.cs" />
+    <Compile Include="Order\SoOrderExtensions.cs" />
+    <Compile Include="Order\TwoSaleBo.cs" />
+    <Compile Include="Promotion\SpCouponCardBo.cs" />
+    <Compile Include="Promotion\SpCouponReceiveLogBo.cs" />
+    <Compile Include="Promotion\SpPromotionDataExtensions.cs" />
+    <Compile Include="Purchase\PrPurchaseReturnDetailsBo.cs" />
+    <Compile Include="Purchase\PrPurchaseReturnBo.cs" />
+    <Compile Include="Purchase\PrPurchaseBo.cs" />
+    <Compile Include="Purchase\PrPurchaseDetailsBo.cs" />
+    <Compile Include="QJT\QJTProductImeiBo.cs" />
+    <Compile Include="QJT\QJTStockOutImeiBo.cs" />
+    <Compile Include="Report\MkTrafficStatisticsBo.cs" />
+    <Compile Include="RMA\RefundReturnDao.cs" />
+    <Compile Include="ScheduledEvents\Event.cs" />
+    <Compile Include="ScheduledEvents\EventLogs.cs" />
+    <Compile Include="ScheduledEvents\EventManager.cs" />
+    <Compile Include="ScheduledEvents\IEvent.cs" />
+    <Compile Include="SellBusiness\CrCustomerRebatesRecordBo.cs" />
+    <Compile Include="SellBusiness\CrPredepositCashBo.cs" />
+    <Compile Include="SellBusiness\CrSellBusinessGradeBo.cs" />
+    <Compile Include="Service References\CrossBorder\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\EPayServiceReference\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\ServiceRefEightDT\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Stores\DsDealerBailOrderBo.cs" />
+    <Compile Include="Stores\DsOrderAssociationBo.cs" />
+    <Compile Include="Stores\DsSpecialPriceBo.cs" />
+    <Compile Include="Stores\StoresBo.cs" />
+    <Compile Include="Subject\SubjectBo.cs" />
+    <Compile Include="Supply\ScProductBo.cs" />
+    <Compile Include="Sys\AutoAssignJob.cs" />
+    <Compile Include="Sys\EasBo.cs" />
+    <Compile Include="Basic\OrganizationBo.cs" />
+    <Compile Include="Basic\PaymentTypeBo.cs" />
+    <Compile Include="Basic\ReceiptManagementBo.cs" />
+    <Compile Include="Cache\HistoryLookBo.cs" />
+    <Compile Include="Cart\CookieCart.cs" />
+    <Compile Include="Cart\DataBaseCart.cs" />
+    <Compile Include="Cart\ICart.cs" />
+    <Compile Include="Cart\ICookieCart.cs" />
+    <Compile Include="Config\Config.cs" />
+    <Compile Include="CRM\CrBrowseHistoryBo.cs" />
+    <Compile Include="CRM\CrFavoritesBo.cs" />
+    <Compile Include="CRM\CrNoticeBo.cs" />
+    <Compile Include="CRM\CrShoppingCartBo.cs" />
+    <Compile Include="CRM\CrReceiveAddressBo.cs" />
+    <Compile Include="CRM\CrShoppingCartConvertBo.cs" />
+    <Compile Include="CRM\CrSiteMessageBo.cs" />
+    <Compile Include="CRM\CrShoppingCartToCacheBo.cs" />
+    <Compile Include="CRM\CrShoppingCartExtensions.cs" />
+    <Compile Include="Distribution\DsDealerMallBo.cs" />
+    <Compile Include="Distribution\DsPrePaymentBo.cs" />
+    <Compile Include="Distribution\DsPrePaymentItemBo.cs" />
+    <Compile Include="Distribution\DsSpecialPriceBo.cs" />
+    <Compile Include="Distribution\DsLevelPriceBo.cs" />
+    <Compile Include="Extra\EmailBo.cs" />
+    <Compile Include="Front\FeCommentSupportBo.cs" />
+    <Compile Include="Log\ISysLog.cs" />
+    <Compile Include="Feedback\FeedbackBo.cs" />
+    <Compile Include="Feedback\FeedbackTypeBo.cs" />
+    <Compile Include="Distribution\DsDealerBo.cs" />
+    <Compile Include="Distribution\DsDealerLevelBo.cs" />
+    <Compile Include="Distribution\DsMallTypeBo.cs" />
+    <Compile Include="MallSeller\DsEasBo.cs" />
+    <Compile Include="MallSeller\DsOrderBo.cs" />
+    <Compile Include="MallSeller\DsReturnBo.cs" />
+    <Compile Include="Map\BaiduMapAPI.cs" />
+    <Compile Include="Product\PdProductStatisticsBo.cs" />
+    <Compile Include="Promotion\GroupShoppingBo.cs" />
+    <Compile Include="Promotion\SpCouponEngineBo.cs" />
+    <Compile Include="Promotion\SpPromotionBo.cs" />
+    <Compile Include="Promotion\SpPromotionEngineBo.cs" />
+    <Compile Include="Promotion\SpPromotionRuleBo.cs" />
+    <Compile Include="Promotion\SpCouponBo.cs" />
+    <Compile Include="Promotion\SpComboBo.cs" />
+    <Compile Include="Report\ReportBO.cs" />
+    <Compile Include="Sys\LiJiaBo.cs" />
+    <Compile Include="Sys\MemoryBo.cs" />
+    <Compile Include="Sys\SyConfigBo.cs" />
+    <Compile Include="Sys\SyJobMessageBo.cs" />
+    <Compile Include="Sys\SyJobSmsConfigBo.cs" />
+    <Compile Include="Sys\SyLockJobBo.cs" />
+    <Compile Include="Sys\SyJobPoolPriorityBo.cs" />
+    <Compile Include="Sys\SyJobPoolPublishBo.cs" />
+    <Compile Include="Sys\SyJobPoolManageBo.cs" />
+    <Compile Include="Sys\SyMyMenuBo.cs" />
+    <Compile Include="Sys\SySsoUserAssociationBo.cs" />
+    <Compile Include="Sys\SyTaskBo.cs" />
+    <Compile Include="Sys\SyUpgradeTheDatabaseBo.cs" />
+    <Compile Include="Sys\TdWebsiteBo.cs" />
+    <Compile Include="Sys\XingYeBo.cs" />
+    <Compile Include="Transport\DsWhCustomerBo.cs" />
+    <Compile Include="Transport\DsWhCustomerConfigBo.cs" />
+    <Compile Include="Transport\DsWhCustomerMessageBo.cs" />
+    <Compile Include="Transport\DsWhGoodsManagementBo.cs" />
+    <Compile Include="Transport\DsWhHistoryBo.cs" />
+    <Compile Include="Transport\DsWhLogisticsNumberBo.cs" />
+    <Compile Include="Transport\DsWhOutStockBo.cs" />
+    <Compile Include="Transport\DsWhPackageBo.cs" />
+    <Compile Include="Transport\DsWhProductBo.cs" />
+    <Compile Include="Transport\DsWhRecipienterBo.cs" />
+    <Compile Include="Transport\DsWhTotalWaybillBo.cs" />
+    <Compile Include="Union\Tuan\GsGroupShoppingBo.cs" />
+    <Compile Include="Union\IWeChatBo.cs" />
+    <Compile Include="Union\UnCpsProductBo.cs" />
+    <Compile Include="Union\UnUnionBo.cs" />
+    <Compile Include="Union\UnAdvertisementBo.cs" />
+    <Compile Include="Union\UnUnionSiteBo.cs" />
+    <Compile Include="Union\UnAdvertisementLogBo.cs" />
+    <Compile Include="Union\WeChatBo.cs" />
+    <Compile Include="Version\VersionBo.cs" />
+    <Compile Include="VipCard\QianDaiVipCardBo.cs" />
+    <Compile Include="VipCard\QianDaiVipCardWithdrawLogBo.cs" />
+    <Compile Include="VipCard\QianDaiVipCardRechargeLogBo.cs" />
+    <Compile Include="Warehouse\AtAllocationBo.cs" />
+    <Compile Include="Warehouse\ERPStockProductBo.cs" />
+    <Compile Include="Warehouse\WhInventoryOutBo.cs" />
+    <Compile Include="Warehouse\WhInventoryAlarmBo.cs" />
+    <Compile Include="Warehouse\WhInventoryBo.cs" />
+    <Compile Include="Warehouse\WhProductWarehousePositionAssociationBo.cs" />
+    <Compile Include="Warehouse\WhStockOutLogBo.cs" />
+    <Compile Include="Warehouse\WhWarehouseChangeLogBo.cs" />
+    <Compile Include="Warehouse\WhWarehousePositionBo.cs" />
+    <Compile Include="Warehouse\PdProductStockInDetailBo.cs" />
+    <Compile Include="Warehouse\PdProductStockInBo.cs" />
+    <Compile Include="Warehouse\PdProductStockBo.cs" />
+    <Compile Include="Warehouse\TransferCargoBo.cs" />
+    <Compile Include="Web\BsAreaBo.cs" />
+    <Compile Include="Logistics\LgPickUpTypeBo.cs" />
+    <Compile Include="Web\CrAvailablePointLogBo.cs" />
+    <Compile Include="Web\CrComplaintReplyBo.cs" />
+    <Compile Include="Web\CrExperienceCoinLogBo.cs" />
+    <Compile Include="Web\CrExperiencePointLogBo.cs" />
+    <Compile Include="Web\CrFavoritesBo.cs" />
+    <Compile Include="Web\CrLevelPointLogBo.cs" />
+    <Compile Include="Web\EmailBo.cs" />
+    <Compile Include="Extra\SmsBo.cs" />
+    <Compile Include="CRM\CrComplaintReplyBo.cs" />
+    <Compile Include="CRM\CrBulkPurchaseBo.cs" />
+    <Compile Include="CRM\CrComplaintBo.cs" />
+    <Compile Include="CRM\CrCustomerBo.cs" />
+    <Compile Include="CRM\CrCustomerLevelBo.cs" />
+    <Compile Include="Finance\FinanceBo.cs" />
+    <Compile Include="Finance\FnInvoiceBo.cs" />
+    <Compile Include="Finance\FnReceiptVoucherBo.cs" />
+    <Compile Include="Front\CrCustomerQuestionBo.cs" />
+    <Compile Include="Front\FeProductCommentBo.cs" />
+    <Compile Include="Front\FeProductCommentImageBo.cs" />
+    <Compile Include="Front\FeProductCommentReplyBo.cs" />
+    <Compile Include="Front\FeSearchKeywordBo.cs" />
+    <Compile Include="LevelPoint\PointBo.cs" />
+    <Compile Include="Logistics\IDeliveryUserBo.cs" />
+    <Compile Include="Logistics\ILgSettlementBo.cs" />
+    <Compile Include="Logistics\ILgDeliveryBo.cs" />
+    <Compile Include="Logistics\LgDeliveryScopeBo.cs" />
+    <Compile Include="Logistics\LgPickUpBo.cs" />
+    <Compile Include="Logistics\LgSettlementBo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Logistics\LogisticsOrderBo.cs" />
+    <Compile Include="Log\SysLog.cs" />
+    <Compile Include="Module\ISelectProductBo.cs" />
+    <Compile Include="Module\ISelectWarehouseBo.cs" />
+    <Compile Include="Order\ShopOrderBo.cs" />
+    <Compile Include="Print\DeliveryPrintTemplateBo.cs" />
+    <Compile Include="Print\PrintBo.cs" />
+    <Compile Include="Product\PdAttributeBo.cs" />
+    <Compile Include="Product\PdAttributeGroupBo.cs" />
+    <Compile Include="Product\PdBrandBo.cs" />
+    <Compile Include="Product\PdCategoryAssociationBo.cs" />
+    <Compile Include="Product\PdPriceBo.cs" />
+    <Compile Include="Product\PdPriceHistoryBo.cs" />
+    <Compile Include="Product\PdCategoryBo.cs" />
+    <Compile Include="Product\PdProductAssociationBo.cs" />
+    <Compile Include="Product\PdProductCollocationBo.cs" />
+    <Compile Include="Product\PdProductImageBo.cs" />
+    <Compile Include="Product\PdTemplateBo.cs" />
+    <Compile Include="Promotion\IPromotionBo.cs" />
+    <Compile Include="Promotion\PromotionBo.cs" />
+    <Compile Include="RMA\IRmaBo.cs" />
+    <Compile Include="RMA\RmaBo.cs" />
+    <Compile Include="Sys\SyGroupUserBo.cs" />
+    <Compile Include="Sys\SyJobDispatcherBo.cs" />
+    <Compile Include="Sys\SyMenuBO.cs" />
+    <Compile Include="Sys\SyPermissionBo.cs" />
+    <Compile Include="Sys\SyPrivilegeBo.cs" />
+    <Compile Include="Sys\SyRoleBo.cs" />
+    <Compile Include="Sys\SyUserGroupBo.cs" />
+    <Compile Include="Warehouse\IInStockBo.cs" />
+    <Compile Include="Warehouse\IInvoiceBo.cs" />
+    <Compile Include="Warehouse\InvoiceBo.cs" />
+    <Compile Include="Warehouse\IOutStockBo.cs" />
+    <Compile Include="Warehouse\IProductLendBo.cs" />
+    <Compile Include="Warehouse\IWhWarehouseBo.cs" />
+    <Compile Include="Warehouse\ProductLendBo.cs" />
+    <Compile Include="Warehouse\WhWarehouseBo.cs" />
+    <Compile Include="Front\FeAdvertGroupBo.cs" />
+    <Compile Include="Front\FeAdvertItemBo.cs" />
+    <Compile Include="Front\FeArticleBo.cs" />
+    <Compile Include="Front\FeArticleCategoryBo.cs" />
+    <Compile Include="Front\FeProductGroupBo.cs" />
+    <Compile Include="Front\FeProductItemBo.cs" />
+    <Compile Include="Logistics\DeliveryUserCreditBo.cs" />
+    <Compile Include="Logistics\LgDeliveryBo.cs" />
+    <Compile Include="Logistics\DeliveryTypeBo.cs" />
+    <Compile Include="Module\ISelectCustomerBo.cs" />
+    <Compile Include="Order\SoOrderBo.cs" />
+    <Compile Include="Product\PdProductBo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sys\SystemUserWarehouseBo.cs" />
+    <Compile Include="Sys\SyUserBo.cs" />
+    <Compile Include="Test.cs" />
+    <Compile Include="Warehouse\InStockBo.cs" />
+    <Compile Include="Logistics\DeliveryUserLocationBo.cs" />
+    <Compile Include="Warehouse\FnInvoiceTypeBo.cs" />
+    <Compile Include="Warehouse\IFnInvoiceTypeBo.cs" />
+    <Compile Include="Warehouse\WhWarehouseAreaBo.cs" />
+    <Compile Include="Warehouse\IWhWarehouseAreaBo.cs" />
+    <Compile Include="Web\ComplaintBo.cs" />
+    <Compile Include="Cache\DeleteCache.cs" />
+    <Compile Include="Web\CrCustomerBo.cs" />
+    <Compile Include="Web\CustomerQuestionBo.cs" />
+    <Compile Include="Web\FeAdvertGroupBo.cs" />
+    <Compile Include="Web\FeCommentSupportBo.cs" />
+    <Compile Include="Web\FeNewsBo.cs" />
+    <Compile Include="Web\FeNewsProductAssociationBo.cs" />
+    <Compile Include="Web\FeProductItemBo.cs" />
+    <Compile Include="Web\FeProductCommentBo.cs" />
+    <Compile Include="Web\FeSearchKeywordBo.cs" />
+    <Compile Include="Log\LocalLogBo.cs" />
+    <Compile Include="Web\FeSoftCategoryBo.cs" />
+    <Compile Include="Web\FeSoftwareBo.cs" />
+    <Compile Include="Web\MkBlogrollBo.cs" />
+    <Compile Include="Web\MKNitagoDateBindBo.cs" />
+    <Compile Include="Web\PdAttributeBo.cs" />
+    <Compile Include="Web\PdCategoryBo.cs" />
+    <Compile Include="Web\PdProductAssociationBo.cs" />
+    <Compile Include="Web\PdProductBo.cs" />
+    <Compile Include="Web\ProductImageBo.cs" />
+    <Compile Include="Web\ProductIndexBo.cs" />
+    <Compile Include="Web\RMABo.cs" />
+    <Compile Include="Web\SoOrderBo.cs" />
+    <Compile Include="Web\SpPromotionBo.cs" />
+    <Compile Include="Web\WhWarehouseBo.cs" />
+    <Compile Include="Weixin\AutoReplyBo.cs" />
+    <Compile Include="Weixin\CallCenterReplyBo.cs" />
+    <Compile Include="Weixin\MkCustomizeMenuBo.cs" />
+    <Compile Include="Weixin\WeiXinTemplateBo.cs" />
+    <Compile Include="YTO\TmsWayBillNotifyImplBo.cs" />
+    <Compile Include="YTO\YTOGetParamBo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\B2B.Service.Img\B2B.Service.Img.csproj">
+      <Project>{995c2610-5dc6-4751-b06d-0118b44a1ccc}</Project>
+      <Name>B2B.Service.Img</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.DataAccess\Hyt.DataAccess.csproj">
+      <Project>{d3af6913-f96c-45e0-ad43-4fe1ef542da8}</Project>
+      <Name>Hyt.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.EDM\Extra.EDM.csproj">
+      <Project>{27f910f8-f501-453d-96d7-aef59228dd09}</Project>
+      <Name>Extra.EDM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.Erp\Extra.Erp.csproj">
+      <Project>{10ffd80f-2011-4684-a1b7-bc906454bfb4}</Project>
+      <Name>Extra.Erp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.SMS\Extra.SMS.csproj">
+      <Project>{2c317e9e-4806-49a9-a5bb-75976e26ed0c}</Project>
+      <Name>Extra.SMS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.UpGrade\Extra.UpGrade.csproj">
+      <Project>{dfa0c19c-69c5-46fb-8833-3041f3496848}</Project>
+      <Name>Extra.UpGrade</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Infrastructure\Hyt.Infrastructure.csproj">
+      <Project>{17216f5e-0585-4d11-a869-ad8119604f2a}</Project>
+      <Name>Hyt.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{AB819FAF-0E0C-4D9B-94AF-DBC5531B47C2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Service\Hyt.Service.Contract\Hyt.Service.Contract.csproj">
+      <Project>{c3718184-d933-4570-bc9d-ddb03730ac31}</Project>
+      <Name>Hyt.Service.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{cb555155-5eeb-41fd-ae7b-48f80ded197c}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="ApiExpress\" />
+    <Folder Include="GroupShopping\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Service References\CrossBorder\Express.wsdl" />
+    <None Include="Service References\CrossBorder\Express.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\CrossBorder\Express1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\CrossBorder\Express2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\CrossBorder\Express3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\CrossBorder\Express4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Service References\CrossBorder\Hyt.BLL.CrossBorder.RouteListClass.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\CrossBorder\Hyt.BLL.CrossBorder.T_Address.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\CrossBorder\Hyt.BLL.CrossBorder.T_Express.datasource">
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </None>
+    <None Include="Service References\EPayServiceReference\UmpsTradeService.wsdl" />
+    <None Include="Service References\ServiceRefEightDT\APIWebService.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\CrossBorder\" />
+    <WCFMetadataStorage Include="Service References\EPayServiceReference\" />
+    <WCFMetadataStorage Include="Service References\ServiceRefEightDT\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ServiceRefEightDT\APIWebService.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ServiceRefEightDT\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ServiceRefEightDT\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\ServiceRefEightDT\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\EPayServiceReference\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\EPayServiceReference\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\EPayServiceReference\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\CrossBorder\Express.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\CrossBorder\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\CrossBorder\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\CrossBorder\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,343 @@
+﻿<#@ template debug="false" hostspecific="true" language="C#" #>
+<#@ assembly name="System.Data.dll" #>
+<#@ assembly name="System.Data.OracleClient.dll" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Data.OracleClient" #>
+<#@ import namespace="System.Data.SqlClient" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+<#+
+public class ModelHelper{
+	static string dbName=string.Empty;
+	static string hostIP=string.Empty;
+	static string userID=string.Empty;
+	static string pwd=string.Empty;
+	static string strConnection =string.Empty;
+	static DbType InstanceDbType;
+	string _tables="'POOrder','POInStock','SEOutStock','POOrderEntry','POInStockEntry'"; //需要生成的表
+	//构造函数
+	private ModelHelper(){  }
+	///创建sqlserver数据库的帮组实例
+	public static ModelHelper CreateSqlserverHelper()
+    {
+		hostIP="211.154.139.8";
+		dbName="AIS20160412101109";
+		userID="demo";
+		pwd="demo";
+		strConnection=string.Format("Data Source={0};Initial Catalog={1};User ID={2};Password={3}",hostIP,dbName,userID,pwd);
+		//strConnection="server=192.168.24.127;User ID=sa;Password=pisen@2012;database=hyt-v3-entity-new";
+		InstanceDbType=DbType.sqlserver;
+		return new ModelHelper();
+	}
+	///创建oracle数据库的帮组实例
+	public static ModelHelper CreateOracleHelper()
+    {
+		hostIP="myhyt";
+		userID="yhy";
+		pwd="123456";
+		strConnection=string.Format("Data Source={0};User ID={1};Password={2}",hostIP,userID,pwd);
+		InstanceDbType=DbType.sqlserver;
+		return new ModelHelper();
+	}
+	//获取数据表结合
+    public List<TableInfo> GetTableInfoList()
+    {
+		List<TableInfo> tableInfoList=new List<TableInfo>();
+		switch(InstanceDbType)
+        {
+			case DbType.oracle:
+				tableInfoList=GetOracleTableList();
+			break;
+			case DbType.sqlserver:
+				tableInfoList=GetsqlserverTableList();
+			break;
+        }
+		
+		return tableInfoList;
+	}
+	//获取oracle数据库的所有数据表
+	private List<TableInfo> GetOracleTableList()
+    {
+		List<string> tableNameList=new List<string>();//获取所有表
+		List<TableInfo> tableInfoList=new List<TableInfo>();
+		OracleConnection con =new OracleConnection(strConnection);
+		OracleCommand command = con.CreateCommand();
+		command.CommandText = "SELECT table_name FROM USER_TABLES";
+		con.Open();
+		using(OracleDataReader odr = command.ExecuteReader())
+		{
+			while(odr.Read())
+			{
+				tableNameList.Add(odr["table_name"].ToString());
+			}
+		}
+		//获取每张表的字段属性
+		foreach(string tableName in tableNameList)
+        {
+			TableInfo tInfo=new TableInfo();
+			tInfo.TableName=tableName;
+			tInfo.TableColumns=new List<TableColumnInfo>();
+			command.CommandText=string.Format("select column_name,DATA_TYPE,DATA_PRECISION from user_tab_columns  where table_name='{0}'",tableName);
+			using(OracleDataReader odr = command.ExecuteReader())
+			{
+				while(odr.Read())
+				{
+					TableColumnInfo tColumn=new TableColumnInfo();
+					tColumn.ColumnName=odr["column_name"].ToString();
+					tColumn.ColumnDataType=MapColumnType(odr["DATA_TYPE"].ToString(),odr["DATA_PRECISION"].ToString());
+					tInfo.TableColumns.Add(tColumn);
+					if(tInfo.PrimaryColumn==null)
+                    {
+						tInfo.PrimaryColumn=tColumn;
+					}
+				}
+			}
+			tableInfoList.Add(tInfo);
+		}
+		con.Close();
+		return tableInfoList;
+	}
+	
+	//获取sqlserver数据库的所有数据表
+	private List<TableInfo> GetsqlserverTableList()
+    {
+		List<string> tableNameList=new List<string>();//获取所有表
+		List<TableInfo> tableInfoList=new List<TableInfo>();
+		SqlConnection con =new SqlConnection(strConnection);
+		SqlCommand command = con.CreateCommand();
+		command.CommandText = "select name table_name from sysobjects where xtype='u'";
+		if(_tables!="")
+		{
+		   command.CommandText+=" and name in("+_tables+")";
+		}
+		con.Open();
+		using(SqlDataReader odr = command.ExecuteReader())
+		{
+			while(odr.Read())
+			{
+				tableNameList.Add(odr["table_name"].ToString());
+			}
+		}
+		//获取每张表的字段属性
+		foreach(string tableName in tableNameList)
+        {
+			TableInfo tInfo=new TableInfo();
+			tInfo.TableName=tableName;
+			tInfo.TableColumns=new List<TableColumnInfo>();
+			string strSql=string.Format(@"SELECT   SC.name column_name,  ST.name DATA_TYPE  
+							FROM  sysobjects SO,syscolumns   SC, systypes  ST  
+							WHERE  SO.id = SC.id  AND   SO.xtype = 'U'    
+							AND   SO.status >= 0AND   SC.xtype = ST.xusertype     
+							AND   SO.name = '{0}'  
+							ORDER BY   SO.name, SC.colorder ",tableName);
+			command.CommandText=strSql;
+			using(SqlDataReader odr = command.ExecuteReader())
+			{
+				while(odr.Read())
+				{
+					TableColumnInfo tColumn=new TableColumnInfo();
+					tColumn.ColumnName=odr["column_name"].ToString();
+					tColumn.ColumnDataType=MapColumnType(odr["DATA_TYPE"].ToString(),"");
+					tInfo.TableColumns.Add(tColumn);
+					if(tInfo.PrimaryColumn==null)
+                    {
+						tInfo.PrimaryColumn=tColumn;
+					}
+				}
+			}
+			tableInfoList.Add(tInfo);
+		}
+		con.Close();
+		return tableInfoList;
+	}
+	//获取单个表的所有字段字符串(,)号分隔
+	public string GetAllColumnString(TableInfo tInfo)
+    {
+		string strColumn=string.Empty;
+		foreach(TableColumnInfo columnInfo in tInfo.TableColumns)
+        {
+			strColumn+=columnInfo.ColumnName+",";
+		}
+		return strColumn.TrimEnd(',');
+	}
+
+	public string GetTableDesc(string tabName)
+    {		
+		string name = "";
+	    if(InstanceDbType== DbType.oracle)
+		{
+		    OracleConnection con =new OracleConnection(strConnection);
+			OracleCommand command = con.CreateCommand();
+			command.CommandText = "select Comments from user_tab_comments where  Table_Name = '"+ tabName.ToUpper()+"'";
+			con.Open();			
+			try{
+			name = Convert.ToString(command.ExecuteScalar());
+			}
+			catch{}
+			con.Close();
+			return name;
+		}
+		else
+		{ 
+		        SqlConnection con =new SqlConnection(strConnection);
+		        SqlCommand command = con.CreateCommand();
+
+				command.CommandText = @"select sys.extended_properties.Value
+										from sys.extended_properties,sys.tables
+										where minor_ID=0
+											and sys.extended_properties.Major_ID=sys.tables.Object_ID
+											and sys.extended_properties.name='MS_Description'
+											and sys.tables.name='"+tabName+"' order by sys.tables.name";
+			
+
+				con.Open();				
+				try{
+				name = Convert.ToString(command.ExecuteScalar());
+				}
+				catch{}
+				con.Close();
+				return name;
+		}
+
+
+	}
+	public string GetColumnDesc(string tabName,string columnName)
+    {
+	    string name = "";
+	    if(InstanceDbType== DbType.oracle)
+		{
+				
+				OracleConnection con =new OracleConnection(strConnection);
+		        OracleCommand command = con.CreateCommand();
+				command.CommandText = "select   comments   from   user_col_comments   where   TABLE_NAME= '"+tabName.ToUpper()+"' AND COLUMN_NAME = '"+columnName.ToUpper()+"'";
+				con.Open();				
+				try{
+				name = Convert.ToString(command.ExecuteScalar());
+				}
+				catch{}
+				con.Close();
+				return name;
+		  }
+		  else
+		  {
+		        SqlConnection con =new SqlConnection(strConnection);
+		        SqlCommand command = con.CreateCommand();
+
+				command.CommandText = @"select   comments from(SELECT
+                    COLUMN_NAME= convert(varchar(100), a.name),                   
+                    comments=convert(varchar(50), isnull(g.[value],'')),
+                    TABLE_NAME= convert(varchar(50), d.name )
+                    FROM dbo.syscolumns a
+                    left join dbo.systypes b on a.xusertype=b.xusertype
+                    inner join dbo.sysobjects d on a.id=d.id and d.xtype='U' and d.name<>'dtproperties'
+                    left join dbo.syscomments e on a.cdefault=e.id
+                    left join sys.extended_properties g on a.id=g.major_id and a.colid=g.minor_id
+                    left join sys.extended_properties f on d.id=f.major_id and f.minor_id=0 )as a where   TABLE_NAME= '"+tabName.ToUpper()+"' AND COLUMN_NAME = '"+columnName.ToUpper()+"'";
+			
+
+				con.Open();				
+				try{
+				name = Convert.ToString(command.ExecuteScalar());
+				}
+				catch{}
+				con.Close();
+				return name;
+		  }	
+	}
+	//数据库类型转换为c#数据类型
+	public string  MapColumnType(string columnType,string precision)
+    {
+		int p = 0;
+		try{
+			p = int.Parse(precision);
+		}
+		catch{}
+		if(InstanceDbType==DbType.oracle)
+        {
+			switch(columnType.ToUpper())
+			{
+				case"DATE":
+					columnType="DateTime";
+					break;
+				case"NUMBER":
+					if( p > 0){
+					columnType="decimal";	
+					}
+					else{
+					columnType="int";
+					}
+					break;
+				case"INTEGER":
+					columnType="int";
+					break;
+				case"LONG":
+					columnType="long";
+					break;
+				default:
+					columnType="string";
+					break;
+			}
+        }
+		else
+        {
+			switch(columnType.ToUpper())
+			{
+				case"SMALLDATETIME":
+				case"DATETIME":
+					columnType="DateTime";
+					break;
+				case"NUMERIC":
+					columnType="decimal";//double
+					break;
+				case "BIGINT":
+				case "SMALLINT":
+				case "INT":
+					columnType="int";
+					break;
+				case "FLOAT":
+					columnType="float";
+					break;
+				case "BIT":
+					columnType="bool";
+					break;
+				case "MONEY":
+					columnType="decimal";
+					break;
+				case "DECIMAL":
+					columnType="decimal";
+					break;
+				case "TIMESTAMP":
+					columnType="DateTime";
+					break;
+				default:
+					columnType="string";
+					break;
+			}
+		}
+		return columnType;
+	}
+	//数据库类型
+	enum DbType
+    {
+		oracle,
+		sqlserver
+	}
+}
+//数据表实体
+public class TableInfo{
+	//表名
+	public string TableName{get;set;}
+	//主键列
+	public TableColumnInfo PrimaryColumn{get;set;}
+	//表列集合
+	public List<TableColumnInfo> TableColumns{get;set;}
+}
+//数据表列实体
+public class TableColumnInfo{
+	//列名
+	public string ColumnName{get;set;}
+	//列数据类型
+	public string ColumnDataType{get;set;}
+
+} 
+#>

@@ -1,0 +1,301 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{10FFD80F-2011-4684-A1B7-BC906454BFB4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Extra.Erp</RootNamespace>
+    <AssemblyName>Extra.Erp</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Grand.Framework.Service">
+      <HintPath>..\..\lib\soa\Grand.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Framework.Utility">
+      <HintPath>..\..\lib\soa\Grand.Framework.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Api.Contract">
+      <HintPath>..\..\lib\soa\Grand.Platform.Api.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\HKB2B后台\Hyt.UI\Hyt.Admin\bin\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Framework.Service">
+      <HintPath>..\..\lib\soa\Pisen.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Control\LiJiaConfig.cs" />
+    <Compile Include="DataContract\BaseRequest.cs" />
+    <Compile Include="DataContract\GetAllUnitRequest.cs" />
+    <Compile Include="DataContract\SaleIssueBillFacadeRequest.cs" />
+    <Compile Include="DataContract\SaleSearchRequest.cs" />
+    <Compile Include="DataContract\SaleSearchResponse.cs" />
+    <Compile Include="DataContract\StockOutAddResponse.cs" />
+    <Compile Include="DataContract\WebInventoryRequest.cs" />
+    <Compile Include="ErpConfigs.cs" />
+    <Compile Include="Control\Config.cs" />
+    <Compile Include="Control\ERPTransfersControl.cs" />
+    <Compile Include="Control\ERPProductControl.cs" />
+    <Compile Include="Control\ERPStockControl.cs" />
+    <Compile Include="Control\ERPSellOutStockControl.cs" />
+    <Compile Include="Eas.Helper.cs" />
+    <Compile Include="EasCore.cs" />
+    <Compile Include="EasNullProvider.cs" />
+    <Compile Include="EasProvider.cs" />
+    <Compile Include="EasProviderFactory.cs" />
+    <Compile Include="IEas.cs" />
+    <Compile Include="Ims.Helper.cs" />
+    <Compile Include="Kis\KisCore.cs" />
+    <Compile Include="Kis\KisNullProvider.cs" />
+    <Compile Include="Kis\KisProvider.cs" />
+    <Compile Include="Kis\IKis.cs" />
+    <Compile Include="Kis\KisProviderFactory.cs" />
+    <Compile Include="LiJia\ILiJia.cs" />
+    <Compile Include="LiJia\LiJiaCore.cs" />
+    <Compile Include="LiJia\LiJiaNullProvider.cs" />
+    <Compile Include="LiJia\LiJiaProvider.cs" />
+    <Compile Include="LiJia\LiJiaProviderFactory.cs" />
+    <Compile Include="Model\BaseData\Eas.BaseAccount.cs" />
+    <Compile Include="Model\BaseData\Eas.Product.cs" />
+    <Compile Include="Model\BaseData\Eas.SellOutStock.cs" />
+    <Compile Include="Model\BaseData\Eas.Stock.cs" />
+    <Compile Include="Model\BaseData\Eas.StockProduct.cs" />
+    <Compile Include="Model\BaseData\KisUnit.cs" />
+    <Compile Include="Model\Eas.Borrowing.cs" />
+    <Compile Include="Model\Kis.Inventory.cs" />
+    <Compile Include="Model\Eas.Inventory.cs" />
+    <Compile Include="Model\Eas.Receiving.cs" />
+    <Compile Include="Model\Eas.Result.cs" />
+    <Compile Include="Model\Eas.Status.cs" />
+    <Compile Include="Model\Eas.SaleIssue.cs" />
+    <Compile Include="Model\Eas.WhReplenish.cs" />
+    <Compile Include="Model\Eas.WhReplenishItem.cs" />
+    <Compile Include="Model\BaseData\EasTransfers.cs" />
+    <Compile Include="Model\ErpBillSource.cs" />
+    <Compile Include="Model\Kis.Purchase.cs" />
+    <Compile Include="Model\Kis.StockBillHead.cs" />
+    <Compile Include="Model\Kis.StockBillIem.cs" />
+    <Compile Include="Model\Kis.TransferStock.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\Eas.Authentication\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\Eas.Inventory\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\Eas.OtherIssueBillFacade\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\Eas.ReceivingBillFacade\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="Web References\Eas.SaleIssueBillFacade\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.map</DependentUpon>
+    </Compile>
+    <Compile Include="XingYe\IXingYe.cs" />
+    <Compile Include="XingYe\XingYeCore.cs" />
+    <Compile Include="XingYe\XingYeNullProvider.cs" />
+    <Compile Include="XingYe\XingYeProvider.cs" />
+    <Compile Include="XingYe\XingYeProviderFactory.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\Eas.Authentication\EASLogin.wsdl" />
+    <None Include="Web References\Eas.Authentication\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\Eas.Authentication\WSContext1.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Eas.Inventory\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\Eas.Inventory\Result.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Eas.Inventory\WSInventoryFacade.wsdl" />
+    <None Include="Web References\Eas.OtherIssueBillFacade\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\Eas.OtherIssueBillFacade\Result.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Eas.OtherIssueBillFacade\WSOtherIssueBillFacade.wsdl" />
+    <None Include="Web References\Eas.ReceivingBillFacade\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\Eas.ReceivingBillFacade\Result.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Eas.ReceivingBillFacade\WSReceivingBillFacade.wsdl" />
+    <None Include="Web References\Eas.SaleIssueBillFacade\Reference.map">
+      <Generator>MSDiscoCodeGenerator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Web References\Eas.SaleIssueBillFacade\Result.datasource">
+      <DependentUpon>Reference.map</DependentUpon>
+    </None>
+    <None Include="Web References\Eas.SaleIssueBillFacade\WSSaleIssueBillFacade.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferences Include="Web References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WebReferenceUrl Include="http://192.168.8.8:6888/ormrpc/services/EASLogin%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\Eas.Authentication\</RelPath>
+      <UpdateFromURL>http://192.168.8.8:6888/ormrpc/services/EASLogin%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Extra_Erp_Authentication_EASLoginProxyService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\Eas.Inventory\</RelPath>
+      <UpdateFromURL>http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Extra_Erp_Eas_Inventory_WSInventoryFacadeSrvProxyService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://192.168.8.8:6888/ormrpc/services/WSOtherIssueBillFacade%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\Eas.OtherIssueBillFacade\</RelPath>
+      <UpdateFromURL>http://192.168.8.8:6888/ormrpc/services/WSOtherIssueBillFacade%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Extra_Erp_Eas_OtherIssueBillFacade_WSOtherIssueBillFacadeSrvProxyService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://192.168.8.8:6888/ormrpc/services/WSReceivingBillFacade%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\Eas.ReceivingBillFacade\</RelPath>
+      <UpdateFromURL>http://192.168.8.8:6888/ormrpc/services/WSReceivingBillFacade%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Extra_Erp_Eas_ReceivingBillFacade_WSReceivingBillFacadeSrvProxyService</CachedSettingsPropName>
+    </WebReferenceUrl>
+    <WebReferenceUrl Include="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade%3fwsdl">
+      <UrlBehavior>Dynamic</UrlBehavior>
+      <RelPath>Web References\Eas.SaleIssueBillFacade\</RelPath>
+      <UpdateFromURL>http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade%3fwsdl</UpdateFromURL>
+      <ServiceLocationURL>
+      </ServiceLocationURL>
+      <CachedDynamicPropName>
+      </CachedDynamicPropName>
+      <CachedAppSettingsObjectName>Settings</CachedAppSettingsObjectName>
+      <CachedSettingsPropName>Extra_Erp_Eas_SaleIssueBillFacade_WSSaleIssueBillFacadeSrvProxyService</CachedSettingsPropName>
+    </WebReferenceUrl>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Hyt.DataAccess\Hyt.DataAccess.csproj">
+      <Project>{d3af6913-f96c-45e0-ad43-4fe1ef542da8}</Project>
+      <Name>Hyt.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Infrastructure\Hyt.Infrastructure.csproj">
+      <Project>{17216f5e-0585-4d11-a869-ad8119604f2a}</Project>
+      <Name>Hyt.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{CB555155-5EEB-41FD-AE7B-48F80DED197C}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

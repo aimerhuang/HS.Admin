@@ -1,0 +1,594 @@
+﻿@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<MkWeixinKeywordsReply>
+@{
+    ViewBag.Title = "CreateOrUpdateKeyWords";
+}
+@using Hyt.BLL.Authentication;
+@using Hyt.Model.Transfer;
+
+@section FooterJs{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+    <script type="text/javascript">
+        //record the keyWordsSysno
+        //in case that the keyWordsInput didnot saved,then to click addtext or addmix
+        var _keyWordsSysNo;
+        var _keyWordsDef = '请输入关键词,以;分开';
+        var sysnoAttr;
+
+        function ajaxAction(vals, url, type) {
+            /// <summary>
+            ///     ajax function
+            /// </summary>
+            /// <param name="vals"></param>
+            /// <param name="url"></param>
+            $.ajax({
+                url: url === undefined ? '@Url.Action("CreateOrUpdateKeyWords")' + '?sysNo=' + (_keyWordsSysNo === undefined ? sysnoAttr : _keyWordsSysNo) : url,
+                type: type === undefined ? 'get' : type,
+                //async: false,             
+                data: vals,
+                success: function (data) {
+                    $('#divSearchResult').html(data);
+                }
+            });
+        }
+
+        $(document).ready(function () {
+
+            UI.CheckAllbox(".boxs_listtabel", ".checkall");
+
+            $('#txtKeyWords').defaultValue(_keyWordsDef);
+            sysnoAttr = '@ViewBag.keyWordSysNo';
+            $('#btnSave').click(function () {
+                var val = $.trim($('#txtKeyWords').val());
+                if (val === '' || val === _keyWordsDef) {
+                    UI.Alert({ content: '请输入关键词!' });
+                    return;
+                }
+                $.ajax({
+                    url: '@Url.Action("CreateKeyWords")',
+                    type: 'post',
+                    data: { keyWords: val, AgentSysNo: $("#AgentSysNo").val(), DealerSysNo: $("#DealerSysNo").val() },
+                    success: function (data) {
+                        if (data.Status) {
+                            UI.tips.tip_alert('tips_success', data.Message);
+                            _keyWordsSysNo = data.Data;
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    }
+                });
+            });
+
+            //#region btnDelMulti删除多个
+            $('#btnDelMulti').click(function () {
+
+                if (!$('input[type=checkbox]').is(':checked')) {
+                    UI.Alert({ content: '请至少选择一条记录!' });
+                    return;
+                }
+
+                UI.Confirm({
+                    content: '确定要删除吗?',
+                    ok: function () {
+
+                        var sysNos = [];
+                        $('input[type=checkbox]:checked').each(function () {
+                            if ($(this).attr('name') != undefined)
+                                sysNos.push($(this).attr('name'));
+                        });
+
+                        //post to server to delete the data checked
+                        del(sysNos.join(','));
+                    }
+                });
+            });
+
+            $("#AgentSysNo").change(function () {
+                GetDealersListByCreatedBy($("#AgentSysNo").val());
+            });
+
+            function GetDealersListByCreatedBy(DealerCreatedBy) {
+                $("#DealerSysNo").html("");
+                if (DealerCreatedBy != -1) {
+                    $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                        $("#DealerSysNo").append("<option value='-1'>全部</option>");
+                        $.each(data, function (idx, item) {
+                            if (item.SysNo != undefined) {
+                                $("#DealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                            }
+                        });
+                    });
+                } else {
+                    $("#DealerSysNo").append("<option value='-1'>全部</option>");
+                }
+            }
+
+            //#endregion
+
+
+            //#region form validation            
+
+            function doFormValidationMix(form) {
+                /// <summary>
+                ///     form validation
+                /// </summary>
+                /// <param name="form">form Element</param>
+                //#region form validate setup
+                $(form).validate({
+                    rules: {
+                        //文本内容/描述
+                        Content: {
+                            required: true,
+                            maxlength: 1000
+                        },
+                        //图片
+                        Image: {
+                            required: true,
+                            maxlength: 150
+                        },
+                        //标题
+                        Title: {
+                            required: true,
+                            maxlength: 200
+                        },
+                        //原文链接
+                        Hyperlink: {
+                            required: true,
+                            maxlength: 150,
+                            url: true
+                        }
+                    },
+                    messages: {
+                        //文本内容/描述
+                        Content: {
+                            required: '请输入回复内容',
+                            maxlength: '最大长度为100个字符'
+                        },
+                        //图片
+                        Image: {
+                            required: '请选择图片',
+                            maxlength: '最大长度为150个字符'
+                        },
+                        //标题
+                        Title: {
+                            required: '请输入标题',
+                            maxlength: '最大长度为200个字符'
+                        },
+                        //原文链接
+                        Hyperlink: {
+                            required: '请输入原文链接',
+                            maxlength: '最大长度为150个字符',
+                            url: '请输入有效的url'
+                        }
+                    },
+                    errorPlacement: function (error, el) {
+                        $(form).find('#for' + el.attr('id')).text(error.text()).attr('class', 'error m10_l');
+                    },
+                    success: function (label, el) {
+                        $(form).find('#for' + el.attr('id')).attr('class', 'success m10_l');
+                    },
+                });
+                //#endregion
+                return $(form).valid();
+            }
+
+            function doFormValidationText(form) {
+                /// <summary>
+                ///     form validation
+                /// </summary>
+                /// <param name="form">form Element</param>
+                //#region form validate setup
+                
+                $(form).validate({
+                    rules: {
+                        //文本内容
+                        Content: {
+                            required: true,
+                            maxlength: 1000
+                        }
+                    },
+                    messages: {
+                        //文本内容
+                        Content: {
+                            required: '请输入回复内容',
+                            maxlength: '最大长度为100个字符'
+                        }
+                    },
+                    errorPlacement: function (error, el) {
+                        $(form).find('#for' + el.attr('id')).attr('class', 'error m10_l');
+                        $(form).find('#for' + el.attr('id')).text(error.text());
+                    },
+                    success: function (label, el) {
+                        $(form).find('#for' + el.attr('id')).attr('class', 'success m10_l');
+                    },
+                });
+                //#endregion
+                return $(form).valid();
+            }
+
+            //#endregion
+
+            //新增文本,图文
+            $('#btnAddText,#btnAddMix').click(function () {
+                //the keywords has value,(''/undefined/null return false)
+                var val = $.trim($('#txtKeyWords').val());
+                var isDisable = $('#txtKeyWords').prop('disabled');
+                if (!isDisable&&(!_keyWordsSysNo || val === '' || val === _keyWordsDef)) {
+                    UI.Alert({ content: '请先添加关键词!' });
+                    return;
+                }
+
+                cuKeyWordsContent($(this).attr('name'));
+
+            });
+
+            //#region partial view QueryKeyWordsContent scripts
+
+            function del(vals) {
+                /// <summary>
+                ///     del operation
+                /// </summary>
+                /// <param name="vals">data to post</param>
+                $.ajax({
+                    url: '@Url.Action("DeleteKeyWordsContent")',
+                    type: 'post',
+                    data: { arrDelSysnos: vals },
+                    success: function (data) {
+
+                        if (data.Status) {
+
+                            UI.tips.tip_alert('tips_success', data.Message);;
+                            ajaxAction();
+                        } else {
+
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    }
+                });
+            }
+
+            $(document).on('click', 'button[name=btnConDel]', function () {
+                var vals = $(this).attr('id');
+                UI.Confirm({
+                    content: '确定要删除吗?',
+                    ok: function () {
+                        del(vals);
+                    }
+                });
+            });
+            //here to continue
+            $(document).on('click', 'button[name=btnConEnable],button[name=btnConDisable]', function () {
+                var vals = { sysNo: $(this).siblings('[name=btnConDel]').attr('id'), status: $(this).text() };
+                var btn = $(this);
+                $.ajax({
+                    url: '@Url.Action("SetKeyWordsContentStatus")',
+                    type: 'post',
+                    data: vals,
+                    success: function (data) {
+                        if (data.Status) {
+                            UI.tips.tip_alert('tips_success', data.Message);
+                            ajaxAction();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+
+                    }
+                });
+
+            });
+
+            $(document).on('click', 'button[name=btnConEdit]', function () {
+                var tr = $(this).parents('tr');
+
+                if ($(this).attr('mix')) {
+                    //passed to display 
+
+                    //to modify the mix
+                    cuKeyWordsContent('mix', $(this).next().attr('id'), tr, $(this).attr('timespan'));
+                } else {
+                    cuKeyWordsContent('text', $(this).next().attr('id'), tr, $(this).attr('timespan'));
+                }
+            });
+
+
+            //#endregion
+
+
+            function cuKeyWordsContent(type, contentSysno, tr, timeSpan) {
+                /// <summary>
+                ///     create/update
+                /// </summary>
+                /// <param name="type">text Or mix</param>
+                /// <param name="contentSysno">undefined:means adding,else update with the sysno</param>
+                //450
+                var width = '860px', height = '253px'; //automatic does not work
+                if (type === 'text') {
+                    //#region 文本
+                    UI.DialogOpen('@Url.Action("AddKeyWordsContent")' + '?type=' + type, {
+                        title: '添加文本',
+                        width: '740px',
+                        height: '120px',
+                        init: function () {
+                            //修改文本
+                            if (contentSysno !== undefined) {
+                                //with the content sysno,to do the update, take the data along with
+                                var win = this.iframe.contentWindow;
+                                var form = win.document.getElementById('formPost');
+                                //set the values
+                                $(form).find('#Content').val($.trim(tr.find('td[name=Content]').text()));
+                            }
+                        },
+                        button: [
+                            {
+                                name: '保存',
+                                callback: function () {
+                                    var win = this.iframe.contentWindow;
+                                    var form = win.document.getElementById('formPost');
+
+                                    if (!doFormValidationText(form)) {
+                                        return false; //not close the dialog
+                                    }
+                                    var kSysNo = _keyWordsSysNo === undefined ? '@ViewBag.keyWordSysNo' : _keyWordsSysNo;
+                                    //alert('@ViewBag.keyWordSysNo');
+                                    if (contentSysno === undefined) {
+                                        //新增文本
+                                        $.ajax({
+                                            url: '@Url.Action("AddKeyWordsContent")',
+                                            type: 'post',
+                                            data: $(form).serialize() + '&WeixinKeywordsSysNo=' + kSysNo + '&ReplyType=' + '@MarketingStatus.微信关键词回复类型.文本.GetHashCode()',
+                                            success: function (data) {
+
+                                                if (data.Status) {
+                                                    UI.tips.tip_alert('tips_success', data.Message);
+                                                    ajaxAction();
+
+                                                } else {
+
+                                                    UI.tips.tip_alert('tips_wrong', data.Message);
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        //修改文本
+                                        $.ajax({
+                                            url: '@Url.Action("UpdateKeyWordsContent")',
+                                            type: 'post',
+                                            data: $(form).serialize() + '&SysNo=' + contentSysno + '&LastUpdateDate=' + timeSpan,
+                                            success: function (data) {
+
+                                                if (data.Status) {
+                                                    UI.tips.tip_alert('tips_success', data.Message);
+                                                    ajaxAction();
+
+                                                } else {
+
+                                                    UI.tips.tip_alert('tips_wrong', data.Message);
+                                                }
+                                            }
+                                        });
+                                    }
+
+
+                                    return true; //close the dialog
+                                }
+                            },
+                            {
+                                name: '关闭'
+                            }
+                        ]
+                    }, false);
+                    }
+                    //#endregion
+                    else {
+                    //#region 图文
+                        UI.DialogOpen('@Url.Action("AddKeyWordsContent")' + '?type=' + type, {
+                        title: '添加图文',
+                        width: '900px',
+                        height: '253px',
+                        init: function () {
+                            //with the content sysno,to do the update, take the data along with
+                            if (contentSysno) {
+
+                                var win = this.iframe.contentWindow;
+                                var form = win.document.getElementById('formPost');
+
+                                //set the values
+                                $(form).find('#Image').val($.trim(tr.find('img').attr('src')));
+                                $(form).find('img').attr('src', tr.find('img').attr('src'));
+                                $(form).find('#Title').val(tr.find('td[name=Status]').attr('mTitle'));
+                                $(form).find('#Content').val($.trim(tr.find('td[name=Content]').text()));
+                                $(form).find('#Hyperlink').val(tr.find('td[name=Status]').attr('mHyperlink'));
+
+
+                            }
+                        },
+                        button: [
+                            {
+                                name: '保存',
+                                callback: function () {
+                                    var iframe = this.iframe.contentWindow,
+                                        form = iframe.document.getElementById('formPost'),
+                                        imageUrl = $(form).find('#Image').val();
+                                    if (!doFormValidationMix(form)) {
+                                        return false; //not close the dialog
+                                    }
+                                    var kSysNo = _keyWordsSysNo === undefined ? '@ViewBag.keyWordSysNo' : _keyWordsSysNo;
+                                        if (contentSysno === undefined) {
+                                            //新增图文
+                                            $.ajax({
+                                                url: '@Url.Action("AddKeyWordsContent")',
+                                                type: 'post',
+                                                data: $(form).serialize() + '&WeixinKeywordsSysNo=' + kSysNo + '&ReplyType=' + '@MarketingStatus.微信关键词回复类型.图文.GetHashCode()' + '&Image=' + imageUrl,
+                                                success: function (data) {
+                                                    if (data.Status) {
+                                                        UI.tips.tip_alert('tips_success', data.Message);
+                                                        ajaxAction();
+
+                                                    } else {
+                                                        UI.tips.tip_alert('tips_wrong', data.Message);
+                                                    }
+                                                }
+                                            });
+                                        } else {
+                                            //修改图文
+                                            $.ajax({
+                                                url: '@Url.Action("UpdateKeyWordsContent")',
+                                                type: 'post',
+                                                data: $(form).serialize() + '&SysNo=' + contentSysno + '&Image=' + imageUrl + '&LastUpdateDate=' + timeSpan,
+                                                success: function (data) {
+                                                    if (data.Status) {
+                                                        UI.tips.tip_alert('tips_success', data.Message);
+                                                        ajaxAction();
+
+                                                    } else {
+                                                        UI.tips.tip_alert('tips_wrong', data.Message);
+                                                    }
+                                                }
+                                            });
+                                        }
+                                        return true;
+                                    }
+                                },
+                                {
+                                    name: '关闭'
+                                }
+                            ]
+                    },
+                        false);
+                        }
+
+                //#endregion
+                    }
+
+
+        });
+
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <form id="formPost">
+            <div class="boxs_con_c1 m10_b">
+                <div class="boxs_tool">
+                    <div class="line28 ">
+                        <span class=" fl m10_l">代理商:</span>
+                        <div class=" fl m10_l">
+                             @{
+                                var info = AdminAuthenticationBo.Instance.GetCurrentUserInfo();
+                                string Type; //ZD(总代理),D(代理),F(分销商)
+                                int TypeSysNo; //传入的对应类型系统编号
+                                if (!info.IsBindAllDealer)
+                                {
+                                    //判断是否绑定分销商
+                                    if (!info.IsBindDealer)
+                                    {
+                                        Type = "D";
+                                        TypeSysNo = info.Base.SysNo;
+                                    }
+                                    else
+                                    {
+                                        Type = "F";
+                                        TypeSysNo = info.Dealer.SysNo;
+                                    }
+                                }
+                                else
+                                {
+                                    Type = "ZD";
+                                    TypeSysNo = 0;
+                                }
+                                string dename = "分销商";
+                                <select name="AgentSysNo" id="AgentSysNo" class="{required:true,messages:{required:'请选择代理商'}} wd150">
+                                    @{
+                                        IList<CBDsDealer> AgentList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDaiLiShangList(Type, TypeSysNo);
+                                        foreach (CBDsDealer item in AgentList)
+                                        {
+                                            if (ViewBag.AgentSysNo != null && int.Parse(ViewBag.AgentSysNo.ToString()) == item.SysNo)
+                                            {
+                                                <option value="@item.SysNo" selected="selected">@item.DealerName</option>
+                                            }
+                                            else
+                                            {
+                                                <option value="@item.SysNo">@item.DealerName</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                @Html.Raw("&nbsp;&nbsp;") @dename
+                                <select name="DealerSysNo" id="DealerSysNo" class="{required:true,messages:{required:'请选择分销商'}} wd150">
+                                    @{
+                                        int AgentSysNo = 1;
+                                        if (ViewBag.AgentSysNo != null)
+                                        {
+                                            AgentSysNo = int.Parse(ViewBag.AgentSysNo.ToString());
+                                        }
+                                        IList<DsDealer> DealerList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDealersListByCreatedBy(AgentSysNo, Type, TypeSysNo);
+                                        foreach (DsDealer item in DealerList)
+                                        {
+                                            if (ViewBag.DealerSysNo != null && int.Parse(ViewBag.DealerSysNo.ToString()) == item.SysNo)
+                                            {
+                                                <option value="@item.SysNo" selected="selected">@item.DealerName</option>
+                                            }
+                                            else
+                                            {
+                                            <option value="@item.SysNo">@item.DealerName</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                            }
+                        </div>
+                        <span class=" fl m10_l">关键词:</span>
+                        <div class=" fl m10_l">
+                            <input id="txtKeyWords" type="text" style="width: 170px;" sysno="" value="请输入关键词,以;分开" title="请输入关键词,以;分开">
+                            <button id="btnSave" type="button" class="btn btn_ht26 m5_l"><span class="icon_save"></span><span class="m5_l">保存</span></button>
+                        </div>
+                        </div>
+                </div>
+            </div>
+            @*  <div class="boxs_detail_dispay p10_b">
+                <div class="tit_con ">
+                    <span></span>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_right border_left border_bottom  border_top">
+                        <tbody>
+                            <tr>
+                                <td width="8%" class="nameright">关键词:</td>
+                                <td>
+                                   
+                                </td>
+
+                            </tr>
+                       
+                        </tbody>
+
+                    </table>
+                </div>
+            
+            
+            </div>*@
+
+            <div class="boxs_con_c1">
+
+                <div class="boxs_tool">
+                    <!-- left tool bar-->
+                    <div class="left_tool" style="float: left">
+                        <button type="button" id="btnDelMulti" class="btn btn_ht26 m5_l  m5_r"><span class="icon_trash"></span><span class="m5_l">批量删除</span></button>
+                    </div>
+                    <!-- right tool bar-->
+                    <div class="right_tool clearfix">
+                        <button class="btn btn_ht26 m5_r" type="button" title="添加文本" id="btnAddText" name="text"><span class="icon icon_plus"></span><span class="m5_l">添加文本</span></button>
+                        <button class="btn btn_ht26 m5_r" type="button" title="添加图文" id="btnAddMix" name="mix"><span class="icon icon_plus"></span><span class="m5_l">添加图文</span></button>
+                    </div>
+
+                </div>
+
+                <!--partial view boxs_listtabel -->
+                <div id="divSearchResult" class="boxs_listtabel">
+                    @{ Html.RenderPartial("QueryKeyWordsContent", Model);}
+                    <!--end boxs_listtabel -->
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>

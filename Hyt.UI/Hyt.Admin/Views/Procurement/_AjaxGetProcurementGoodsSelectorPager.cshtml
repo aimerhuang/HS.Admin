@@ -1,0 +1,68 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@using Hyt.Util.Extension
+@model PagedList<Hyt.Model.Procurement.CBPmWareGoods>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="35">
+                &nbsp;
+            </th>
+            <th width="150px" class="p10_lr">商品编号</th>
+            <th class="p10_lr">商品名称</th>
+            <th width="68px" class="p10_lr">库存数量</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            //判断结构数据，如果没有数据将提示无数据
+            if (Model.TData.Count == 0)
+            {
+                <tr id="tr_noData" class="odd_color trhover">
+                    <td colspan="4" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+            }
+            else
+            {
+
+                int i = 0;
+
+                //绑定结构集到table
+                foreach (var item in Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    i++;
+
+                <td>
+                    <input name="sysNo" class="p10_lr" type="checkbox" value="@item.ProSysNo" />
+                </td>
+                <td class="align_c p10_lr">@item.ProSysNo</td>
+                <td class="align_c p10_lr">@item.ProName</td>
+                <td class="align_c p10_lr">@item.WareNum</td>
+                @Html.Raw("</tr>")
+                }
+            }
+
+        }
+        </tbody>
+    </table>
+    @if (Model.PageSize > 0)
+    {
+        { Html.RenderPartial("_UrlPaging", Model); }
+    }
+    <script type="text/javascript">
+        $(function () {
+            //设置选中商品
+            setSelectedChecked();
+        });
+
+    </script>

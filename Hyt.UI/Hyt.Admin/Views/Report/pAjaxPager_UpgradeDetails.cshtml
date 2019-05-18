@@ -1,0 +1,122 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.ReportDsorderDetail>
+
+@{
+    <style type="text/css">
+     td{ word-break: break-all;}
+    </style>
+
+    <div id="paging"><!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th class="wd75">订单编号</th>
+                    <th width="110px">第三方订单号</th>
+                    <th width="128px">升舱付款时间</th>
+                    <th width="128px">商城订单时间</th>
+                    <th class="align_l p10_l" style="min-width:98px">所属分支机构</th>
+                    <th class="align_l p10_l" style="min-width:85px">客户所在城市</th>
+                    <th width="72px">商城类型</th>
+                    <th class="align_l p10_l"style="min-width:98px">升舱来源店面</th>
+                    <th width="102px">物流类型</th>
+                    <th class="align_l p10_l" style="min-width:90px">产品名称</th>
+                    <th class="wd75">付款金额</th>
+                    <th width="120px">发货时间</th>
+                    <th class="align_l p10_l" style="min-width:85px">未发货原因</th>
+                    <th class="align_l p10_l" style="min-width:46px"  >备注</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @{
+                    if (Model.TData == null)
+                    {
+                        <tr>
+                            <td colspan="99" class="align_l">&nbsp;暂无数据.</td>
+                        </tr>
+                        return;
+                    }
+
+                    var count = 1;
+
+                    foreach (var m in Model.TData)
+                    {
+
+                        if (count % 2 == 0)
+                        {
+                            @:<tr class="stag_color">
+                        }
+                        else
+                        {
+                            @:<tr>
+
+
+                        }
+
+                        <td>@m.订单编号</td>
+                        <td>@m.第三方订单号</td>
+                        <td>@m.升舱付款时间.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>@m.商城订单时间.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="align_l p10_l">@{
+                                                      if (m.所属分支机构 != "[]")
+                                                      {
+                                                          @Html.Raw(m.所属分支机构)
+                                                      }
+                                                  }</td>
+                        <td class="align_l p10_l">@m.客户所在城市</td>
+                        <td>@m.商城名称</td>
+                        <td class="align_l p10_l">@m.升舱来源店面</td>
+                        <td>@m.物流类型</td>
+                        <td class="align_l p10_l">@m.产品名称</td>
+                        <td class="align_r red p10_r">@m.付款金额.ToString("c")</td>
+                        <td>@{
+                                if (m.发货时间 != "0001/1/1 0:00:00")
+                                {
+                                    @Html.Raw(m.发货时间)
+                                }
+                            }</td>
+                        <td class="align_l p10_l">@m.未发货原因</td>
+                        <td class="align_l p10_l">@m.备注</td>
+
+                        @:</tr>
+
+
+                        count++;
+                    }
+                }
+
+            <thead>
+                <tr>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td align="right" class="red p10_r" colspan="2">
+                        <span style="color:#000;">合计:</span>
+                        @MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(ViewBag.totalAmount, 2))
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+            </thead>
+
+            </tbody>
+        </table>
+        <!-- end content -->
+        
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+        -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+
+}  

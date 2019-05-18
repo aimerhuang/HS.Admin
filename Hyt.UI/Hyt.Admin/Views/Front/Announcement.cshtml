@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "公司公告";
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+            <!--搜索-->
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <div class="search_btn m10_l fl">
+                        <input class="input_ht28" name="searchName" id="searchName" type="text" maxlength="100" placeholder="请输入标题..." />
+                        <button id="btn_search" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+            </div>
+
+             <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section FooterJs
+{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            $("#btn_search").click(function () {
+                doSearch();
+            });
+            //注册页面回车事件为查询操作
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+            doSearch();
+        });
+
+        function doSearch() {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            $.get('@Url.Action("Announcement", "Front")',
+                 { searchName: $("#searchName").val().trim() },
+                 function (data) {
+                     $('#paging').html(data);
+                     mask.Remove();
+                 });
+
+           }
+    </script>
+
+}

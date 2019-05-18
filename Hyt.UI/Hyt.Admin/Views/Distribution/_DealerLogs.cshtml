@@ -1,0 +1,140 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.DsDealerLog>
+
+
+@helper ShowData(Hyt.Model.DsDealerLog entity)
+{
+    <div id="jsonMsg_@entity.SysNo" style="display: none">
+        @*<textarea class="txt" style="min-width: 500px; min-height: 300px; word-break: break-all; word-wrap: break-word; display:none;">*@
+            @entity.LogContent
+        @*</textarea>*@
+        
+    </div>
+    @*<button onclick="Open(@entity.SysNo);return false;" class="btn btn_ht26 EAS1001101"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>*@
+    <button onclick="showxml('@entity.SysNo')" class="btn btn_ht26 EAS1001101"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+}
+<div id="divPreview" style="display:none;">
+    <pre class="json-renderer"></pre>
+</div>
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="120">商城类型</th>
+                <th width="120">订单号</th>
+                <th width="180">同步消息</th>               
+                <th width="120">最后更新人</th>
+                <th width="130">最后更新时间</th>
+                <th width="60">同步数据</th>
+                <th width="60">状态</th>
+               
+                <th width="200">操作</th>                
+            </tr>
+        </thead>
+
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.DsDealerLog>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    } 
+                    <td>
+                        @{
+                            var mall = Hyt.BLL.Distribution.DsMallTypeBo.Instance.GetDsMallType(item.MallTypeSysNo);
+                        }
+                        @if (mall != null)
+                        {
+                            @mall.MallName
+                        }
+                    </td>
+                    
+                    <td >@item.MallOrderId</td>
+                    <td>@item.Message</td>
+                    <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.LastUpdateBy)</td>
+                    <td>@item.LastUpdateDate</td>
+                
+                <td class="blue">@ShowData(item)</td>
+                <td id="td_@item.SysNo">@Hyt.Util.EnumUtil.GetDescription(typeof (DistributionStatus.分销商升舱错误日志状态), item.Status)</td>
+                
+                <td>    
+                    <textarea style="display:none;" id="detail_@item.SysNo">@item.LogContent</textarea>
+
+                    <button class="btn btn_ht26 btn_blue" onclick="changeStatus(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">更改状态</span></button>
+
+                    <button class="btn btn_ht26 
+                        @if (string.IsNullOrEmpty(item.LogContent))
+                        {@:disabled
+                            }" onclick="browseDetail(@item.SysNo);"><span class="icon_tosee"></span><span class="m5_l">查看内容</span></button></td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    function changeStatus(sysNo) {
+        $.post("/distribution/changeDealerLogStatus", { sysNo: sysNo }, function(data) {
+            if (data.Status) {
+                if (data.StatusCode == '@DistributionStatus.分销商升舱错误日志状态.已解决.GetHashCode()') {
+                    $("#td_" + sysNo).attr("class", "green bold");
+                    $("#td_" + sysNo).text("已解决");
+                } else {
+                    $("#td_" + sysNo).attr("class", "red bold");
+                    $("#td_" + sysNo).text("待解决");
+                }
+            } else {
+                UI.Alert({ content: data.Message != '' ? data.Message : '未知错误，请联系管理员' });
+            }
+        });
+    }
+
+    function showxml(id) {
+
+            try {
+                var input = eval('(' + $('#jsonMsg_' + id).html() + ')');
+            }
+            catch (error) {
+               var strHtml = '<pre name="code" class="brush: js;">' + $('#jsonMsg_' + id).html() + '</pre>';
+               UI.DialogBox({ width: 500, title: id, content: strHtml, padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' })
+               return false;
+            }
+
+            var options = {
+                collapsed:false,
+                withQuotes:true
+            };
+
+            $("#divPreview").find('.json-renderer').jsonViewer(input,options);  
+            var cssStr = '<style type="text/css">' + $("#json-viewer-css").html() + '</style>';
+            UI.DialogBox({ width: 500, height:600, title: id, content: cssStr+ $('#divPreview').html(), padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' })
+
+    }
+
+
+    function showPreview() {
+
+        var configValue = $(".txt").val();
+ 
+
+    }
+</script>

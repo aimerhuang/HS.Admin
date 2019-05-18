@@ -1,0 +1,93 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBCrBrowseHistory>
+
+@{
+
+    <div id="paging">
+        <!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th width="53px">
+                        <input class="checkall" type="checkbox" value=""></th>
+                    <th class="wd75">商品编号</th>
+                    <th width="100px">ERP编号</th>
+                    <th class="wd75">客户账号</th>
+                    <th class="align_l p10_l">后台显示名称</th>
+                    <th width="72px">浏览次数</th>
+                    <th width="124px">浏览方式</th>
+                    <th width="79px">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @{
+                    if (Model.TData.Count == 0)
+                    {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                    </tr>
+                        return;
+                    }
+                    var count = 1;
+
+                    foreach (var m in Model.TData)
+                    {
+                        if (count % 2 == 0)
+                        {
+                    @: <tr class="stag_color">
+                        }
+                        else
+                        {
+                    @: <tr>
+}
+                        <td><input type="checkbox" name="@m.SysNo" value=""></td>
+                        <td>@m.ProductSysNo</td>
+                        <td>@m.ErpCode</td>
+                        <td>@m.CustomerAccount</td>
+                        <td class="align_l p10_l">@PdProductBo.Instance.GetProductEasName(m.ProductSysNo)</td>
+                        <td>@m.BrowseNum</td>
+                        <td>@Enum.Parse(typeof(CustomerStatus.商品浏览方式), m.BrowseType + "")</td>
+
+                        <td><button type="button" id="@m.SysNo" name="btnDel" class="btn btn_ht26 btn_red"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                        @:</tr>
+                    
+                        count++;
+                    }
+                }
+
+            </tbody>
+        </table>
+        <!-- end content -->
+
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+            -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //checkbox 
+        UI.CheckAllbox(".boxs_listtabel", ".checkall");
+
+        $('[name=btnDel]').click(function () {
+            var vals = $(this).attr('id');
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function () {
+                    delHis(vals);
+                }
+            });
+
+
+        });
+
+    });
+</script>

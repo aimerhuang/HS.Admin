@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "FeSoftCategorySelector";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+             <h3>软件分类管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <div class="search_btn m10_l fl" style="width:233px;">
+                          <input name="Name" type="text" id="Name" style="width:189px;" class="input_ht28" value="搜索软件分类名称..." />
+                          <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>                   
+                </div>
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/JavaScript">
+    var curpage = 1;
+    //查询列表
+    function doSearch(id) {        
+        var name;
+        if ($("#Name").val() != "搜索软件分类名称...") {
+            name = $.trim($("#Name").val());
+        }
+        
+        if (!!id && id > 0) {
+            curpage = id;
+        } else {
+            id = curpage;
+        }
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("FeSoftCategory","Front")',
+            { id: id, name: name, selector: "selector" },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+
+    function CallBack() {
+        var obj = $("#paging input:radio:checked");
+        var sysno = obj.val();
+        var name = $.trim(obj.parent().next().html());
+        var data = { sysno: sysno, name: name }
+        parent && parent._ActiveBrandSelectorCallBack(data);
+    }
+
+    $(function () {
+        $("#Name").defaultValue("搜索软件分类名称...");
+        doSearch();       
+        //查询按钮
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+       
+    });
+</script>

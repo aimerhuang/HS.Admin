@@ -1,0 +1,66 @@
+﻿@using Hyt.BLL.Basic
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.BsOrganization
+@{
+    Layout = null;
+    ViewBag.Title = "组织机构信息";
+    @Html.PrivilegeControl(PrivilegeCode.BS1004101, ".BS1004101");
+}
+<div class="boxs boxs_detail_dispay BS1004101">
+    @if (Model != null)
+    {
+        var parent = OrganizationBo.Instance.GetEntity(Model.ParentSysNo);
+        <div class="tit_con">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone">
+
+                <tr>
+                    <td width="100" class="nameright">机构名称：</td>
+                    <td width="40%" class="border_right1">@Model.Name</td>
+                    <td width="100" class="nameright">父级机构：</td>
+                    <td width="40%">
+                        @if (parent != null)
+                        {
+                            @parent.Name
+                        }
+                        else
+                        {
+                            <span>无</span>
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td width="100" class="nameright">机构代码：</td>
+                    <td width="40%" class="border_right1">@Model.Code</td>
+                    <td width="100" class="nameright">状态：</td>
+                    <td width="40%">@((BasicStatus.组织机构状态)Model.Status)</td>
+                </tr>
+                <tr>
+                    <td width="100" class="nameright">备注：</td>
+                    <td width="40%" colspan="3">@Model.Description</td>
+                </tr>
+            </table>
+        </div>
+        <div id="paging"></div>
+        <script type="text/javascript">
+            $(function () {
+                doSearch();
+            });
+
+            function doSearch() {
+                var sysno = @Model.SysNo;
+                $.get('@Url.Action("OrganizationManage", "Basic")',{ sysNo:sysno },
+                    function (data) {
+                        $('#paging').html(data);
+                    });
+            }
+        </script>
+
+    }
+    else
+    {
+        <div class="boxs_tool">
+            未找到该组织机构
+        </div>
+    }
+</div>

@@ -1,0 +1,93 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Model.Transfer.CBCrCustomer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "会员详情";
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>会员详情</title>
+</head>
+<body>
+    <div class="p10">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="80" class="nameright">帐号:</td>
+                            <td width="134" class="border_right">@Model.Account</td>
+                            <td width="80" class="nameright">性别:</td>
+                            <td class="border_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.性别), Model.Gender)</td>
+                            <td width="120" rowspan="4">
+                                <div style="width:118px; height:147px; border:1px solid #d6d6d6;">
+                                <img src="@Hyt.BLL.Web.ProductImageBo.Instance.GetHeadImagePath(Hyt.BLL.Web.ProductThumbnailType.CustomerFace, Model.SysNo)" onerror="javascript:this.src='/Theme/images/defaultpic.gif'" width="118" height="147" alt="@Model.Name"/>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">姓名:</td>
+                            <td class="border_right">@Model.Name</td>
+                            <td class="nameright">昵称:</td>
+                            <td class="border_right">@Model.NickName</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">生日:</td>
+                            <td class="border_right">@Model.Birthday.ToString("yyyy-MM-dd")</td>
+                            <td class="nameright">身份证:</td>
+                            <td class="border_right">@Model.IDCardNo</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">婚否:</td>
+                            <td class="border_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.婚姻状况), Model.MaritalStatus)</td>
+                            <td class="nameright">月收入:</td>
+                            <td class="border_right">@Model.MonthlyIncome</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">手机号码:</td>
+                            <td class="border_right">@Model.MobilePhoneNumber<span class="red p10_l">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.手机状态), Model.MobilePhoneStatus)</span></td>
+                            <td class="nameright">电子邮箱:</td>
+                            <td colspan="2">@Model.EmailAddress<span class="red p10_l">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.邮箱状态), Model.EmailStatus)</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">所在地:</td>
+                            <td colspan="4">@ViewBag.Area</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">注册来源:</td>
+                            <td class="border_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.注册来源), Convert.ToInt32(Model.RegisterSource))</td>
+                            <td class="nameright">注册时间:</td>
+                            <td colspan="2">@Model.RegisterDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_bnone">最后登录IP:</td>
+                            <td class="border_right border_bnone">@Model.LastLoginIP</td>
+                            <td class="nameright border_bnone">最后登录时间:</td>
+                            <td colspan="2" class="border_bnone">@Model.LastLoginDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="80" class="nameright">锁定等级:</td>
+                            <td width="134" class="border_right red">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.等级是否固定), Model.IsLevelFixed)</td>
+                            <td width="80" class="nameright">锁定等级积分:</td>
+                            <td class="border_right red">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.等级是否固定), Model.IsLevelFixed)</td>
+                            <td width="80" class="nameright">锁定经验积分:</td>
+                            <td width="121" class="red">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.经验积分是否固定), Model.IsExperiencePointFixed)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright" valign="top">兴趣爱好</td>
+                            <td colspan="5"><textarea style="width:486px;" disabled="disabled">@Model.Hobbies</textarea></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

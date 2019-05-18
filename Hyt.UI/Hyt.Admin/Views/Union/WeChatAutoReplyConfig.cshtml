@@ -1,0 +1,307 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.MkWeixinConfig
+@{
+    ViewBag.Title = "WeChatAutoReplyConfig";
+}
+@using Hyt.BLL.Authentication;
+@using Hyt.Model.Transfer;
+@using Hyt.Model;
+
+@section FooterJs
+{
+    <script type="text/javascript" src="../../Theme/scripts/jquery.validate.min.js"> </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+
+            $('input[type=text],textarea').each(function () {
+                var val = $('<div/>').html($(this).val()).text();
+                $(this).text(val);
+            });
+
+            //required field
+            $('tr td:even').each(function() {
+
+                $(this).html('<span class="v_star">*</span>' + $(this).text());
+            });
+            //end req
+
+            $('button[name=btnImgUpload]').click(function() {
+                var btn = $(this);
+                DAO.Upload(
+                    {
+                        config: 'WeChatImages',//image config
+                        callback: function(data) {
+                            btn.prev().val(data[0].url); //txt for path
+                            btn.siblings('img').attr('src', data[0].url);
+                        }
+                    }
+                );
+
+            });
+
+
+            $('#btnSave').click(function () {
+                if (!doValidation())
+                    return;
+                var divTemp = $('<div/>');
+                var formData = {
+                    AgentSysNo: $("#AgentSysNo").val(),
+                    DealerSysNo: $("#DealerSysNo").val(),
+                    Token: divTemp.text($.trim($('#Token').val())).html(),
+                    AppId: divTemp.text($.trim($('#AppId').val())).html(),
+                    AppSecret: divTemp.text($.trim($('#AppSecret').val())).html(),
+                    FollowText: divTemp.text($.trim($('#FollowText').val())).html(),
+                    MessageText: divTemp.text($.trim($('#MessageText').val())).html(),
+                    sysNo: divTemp.text($.trim($('#SysNo').val())).html(),
+                    LastUpdateDate: divTemp.text($.trim($('#LastUpdateDate').val())).html(),
+                };
+
+                $.ajax({
+                    url: '@Url.Action("SaveAutoRelpyConf")',
+                    type: 'post',
+                    data: formData,
+                    success: function(data) {
+                        if (data.Status) {
+                            UI.tips.tip_alert('tips_success', data.Message);
+                            //setTimeout('location.reload()',1500);
+
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    }
+                });
+            });
+
+            //#region add custom validation methods
+            //then canbe used within rules
+            $.validator.addMethod('selValid', function(currElVal, el, params) {
+                //params--e.g. 5 or[1,5](array)
+                return currElVal != -1;
+            }, '请选择');
+
+            //#endregion
+
+            function doValidation() {
+                
+
+                return $('#formPost').valid();
+            }
+
+            $('#formPost').validate({
+                rules: {
+                    Token: {
+                        required: true,
+                        maxlength: 10
+                    },
+                    AppId: {
+                        required: true,
+                        maxlength: 30
+                    },
+                    AppSecret: {
+                        required: true,
+                        maxlength: 32
+                    },
+                    FollowText: {
+                        required: true,
+                        maxlength: 200
+                    },
+                    MessageText: {
+                        required: true,
+                        maxlength: 200
+                    }
+                },
+                messages:
+                {
+                    Token: {
+                        required: '请输入微信token',
+                        maxlength:
+                            '最大长度为10个字符'
+                    },
+                    AppId: {
+                        required: '请输入AppId',
+                        maxlength:
+                            '最大长度为30个字符'
+                    },
+                    AppSecret: {
+                        required: '请输入AppSecret',
+                        maxlength:
+                            '最大长度为32个字符'
+                    },
+                    FollowText:
+                    {
+                        required: '请输入回复内容',
+                        maxlength:
+                            '最大长度为200个字符'
+                    },
+
+                    MessageText: {
+                        required: '请输入回复内容',
+                        maxlength:
+                            '最大长度为200个字符'
+                    }
+                },
+
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                    $('#for' + el.attr('id')).text(error.text());
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+
+                },
+                //settings done
+            });
+        });
+
+        $("#AgentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#AgentSysNo").val());
+        });
+
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $("#DealerSysNo").html("");
+            if (DealerCreatedBy != -1) {
+                $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                    $.each(data, function (idx, item) {
+                        if (item.SysNo != undefined) {
+                            $("#DealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    });
+                });
+            }
+        }
+
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>微信自动回复配置</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!-- form -->
+            <form id="formPost">
+                <div class="boxs_detail_dispay">
+    
+                    <div class="tit_con">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_righte1">
+                            <tr>
+                                <td width="10%" class="nameright">代理商</td>
+                                <td>
+                                    @{
+                                        var info = AdminAuthenticationBo.Instance.GetCurrentUserInfo();
+                                        string Type; //ZD(总代理),D(代理),F(分销商)
+                                        int TypeSysNo; //传入的对应类型系统编号
+                                        if (!info.IsBindAllDealer)
+                                        {
+                                            //判断是否绑定分销商
+                                            if (!info.IsBindDealer)
+                                            {
+                                                Type = "D";
+                                                TypeSysNo = info.Base.SysNo;
+                                            }
+                                            else
+                                            {
+                                                Type = "F";
+                                                TypeSysNo = info.Dealer.SysNo;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            Type = "ZD";
+                                            TypeSysNo = 0;
+                                        }
+                                        string dename = "分销商";
+                                        <select id="AgentSysNo" class="{required:true,messages:{required:'请选择代理商'}} wd200">
+                                            @{
+                                                IList<CBDsDealer> AgentList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDaiLiShangList(Type, TypeSysNo);
+                                                foreach (CBDsDealer item in AgentList)
+                                                {
+                                                    if (Model.AgentSysNo == item.SysNo)
+                                                    {
+                                                        <option value="@item.SysNo" selected="selected">@item.DealerName</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.SysNo">@item.DealerName</option>
+                                                    }                                                  
+                                                }
+                                            }
+                                        </select>
+                                        @Html.Raw("&nbsp;&nbsp;") @dename
+                                        <select id="DealerSysNo" class="{required:true,messages:{required:'请选择分销商'}} wd200">
+                                            @{
+                                                int AgentSysNo = 1;
+                                                if (ViewBag.ProductSysNo != null)
+                                                {
+                                                    AgentSysNo = Hyt.BLL.Web.PdProductBo.Instance.GetProductEntity(ViewBag.ProductSysNo).AgentSysNo;
+                                                }
+
+                                                IList<DsDealer> DealerList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDealersListByCreatedBy(AgentSysNo, Type, TypeSysNo);
+                                                foreach (DsDealer item in DealerList)
+                                                {
+                                                    if (Model.DealerSysNo == item.SysNo)
+                                                    {
+                                                        <option value="@item.SysNo" selected="selected">@item.DealerName</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.SysNo">@item.DealerName</option>
+                                                    }                                                                                                      
+                                                }
+                                            }
+                                        </select>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">微信Token1</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.Token)
+                                    <span id="forToken" class="prompt m10_l">请输入微信Token(最大长度为10个字符)</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">AppId</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.AppId)
+                                    <span id="forAppId" class="prompt m10_l">请输入AppId(最大长度为30个字符)</span>
+                                </td>
+                            </tr>
+                            <tr name="trFwText">
+                                <td width="10%" class="nameright">AppSecret</td>
+                                <td>
+                                    @Html.TextBoxFor(m => m.AppSecret)
+                                    <span id="forAppSecret" class="prompt m10_l">请输入AppSecret(最大长度为32个字符)</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td width="10%" class="nameright">关注回复文本</td>
+                                <td>
+                                    @Html.TextAreaFor(m => m.FollowText)
+                                    <span id="forFollowText" class="prompt m10_l">请输入回复内容(最大长度为200个字符)</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td width="10%" class="nameright">消息回复文本</td>
+                                <td>
+                                    @Html.TextAreaFor(m => m.MessageText)
+                                    <span id="forMessageText" class="prompt m10_l">请输入回复内容(最大长度为200个字符)</span>
+                                </td>
+                            </tr>
+                           
+                        </table>
+                    </div>
+    
+                </div>
+                <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo"/>
+                <input type="hidden" id="LastUpdateDate" name="LastUpdateDate" value="@Model.LastUpdateDate"/>
+            </form>
+            <div class="pagination align_c clearfix">
+                <button id="btnSave" type="button" class="btn btn_blue btn_ht32 wd100 bold f14">保存</button>&nbsp;
+            </div>
+
+        </div>
+    </div>
+</div>

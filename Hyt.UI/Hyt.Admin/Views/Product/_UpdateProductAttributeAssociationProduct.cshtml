@@ -1,0 +1,427 @@
+﻿<script type="text/javascript">
+
+    var relationCode="";               //关联关系吗
+    var attribAssociationTable;     //绑定datatable 对象
+    var productListAssociation = new Array();   //关联关系商品列表
+
+    $(function () {
+        $("#btn_add_associationAttr").click(function () {
+            
+            if (attribDataTemplate.length == 0) {
+                UI.Confirm({
+                    content: '商品属性中没有可用作关联的属性，请在扩展属性中添加可用作关联的属性？',
+                    ok: function () {
+                        prodctEditTab.Active('4');
+                    },
+                    cancel: function () {
+                    },
+                    width: '200px'
+                });
+                return false;
+            }
+
+            var setting = {
+                title:"选择商品（单选商品）",
+                selectSingleNode:true,
+                associationAttr: {
+                    productSysNo: $("#hdf_ProductSysNo").val()
+                },
+                otherFilter:function() {
+                    return "rc=" + relationCode;
+                },
+                onselect: function (data) {
+                    $(data).each(function (index, element) {
+                        
+                        //如果管理关系码为空，将从选择的商品中或取关联关系码，和管理的商品
+                        if (relationCode.length ==0) {
+                            GetAssociationProductInfo(element.pid);
+                        }
+
+                        //组合商品和商品属性信息为邦迪JSON数据格式
+                        var hasValue = true;
+                        for (var i = 0; i < attribDataTemplate.length; i++) {
+                            hasValue = false;
+                            for (var j = 0; j < element.attributes.length; j++) {
+                                if (attribDataTemplate[i].SysNo == element.attributes[j].AttributeSysNo) {
+                                    eval('element.A_' + attribDataTemplate[i].SysNo + ' = "' + element.attributes[j].AttributeText + '";');
+                                    hasValue = true;
+                                    break;
+                                }
+                            }
+
+                            if (!hasValue) {
+                                eval('element.A_' + attribDataTemplate[i].SysNo + ' = "";');
+                            }
+                        }
+
+                        attribAssociationTable.InsertRow(element);
+                    });
+                    productListAssociation = data;
+                }
+                
+
+            };
+
+            
+            DAO.SelectProduct(setting);
+        });
+
+        $("#btn_del_associationAttr").click(function () {
+            $("#attrASTable tbody input:checked").each(function (index, element) {
+                attribAssociationTable.DelRow($(element).val());
+            });
+        });
+
+        attribAssociationTable = new TableBind({
+            table: $("#attrASTable"),
+            data: [],
+            key: 'pid',
+            selectedCss: '',
+            rowCss: "",               //交替行样式
+            hoverCss: "trhover",
+            alternatelyCss: ""
+        });
+
+        $("#btn_Save_Attr_Asso").click(function () {
+            SaveAttributeAssociationProduct();
+        });
+
+        $("#btn_Save_Attr_Asso_Next").click(function () {
+            SaveAttributeAssociationProduct();
+        });
+
+        AssociationProductButtonControl(editModel);
+
+    });
+
+    //读取商品管理关系码，如果为第一次添加将带出同商品的其他关联关系商品
+    function GetAssociationProductInfo(productSysNo) {
+        $.ajax({
+            url: "@Url.Action("GetRelationCode", "Product")",
+            data: JSON.stringify({ productSysNo: productSysNo }),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                if (response.RelationCode != null) {
+                    relationCode = response.RelationCode;
+                    UI.Confirm({
+                        content: "您选择的商品已经是其他商品的关联商品，您是否要加入到给关联中",
+                        ok: function() {
+                            $.ajax({
+                                url: "@Url.Action("GetProductAssociationProductList", "Product")",
+                                data: JSON.stringify({ productSysNo: productSysNo }),
+                                dataType: "json",
+                                type: "POST",
+                                cache: false,
+                                contentType: 'application/json; charset=utf-8',
+                                success: function (response) {
+                                    //将结果中的关联属性格式化并生产table的模板行数据
+                                    $(response.result).each(function (index, data) {
+                                        //用嵌套循环来设置对应模板列的数据。
+                                        for (var i = 0; i < attribDataTemplate.length; i++) {
+                                            for (var j = 0; j < data.attributes.length; j++) {
+
+                                                //对比是否有数据，如果有就开始设置数据到模板对应字段,如果没有这个属性数据就直接设置成空
+                                                if (data.attributes[j] != undefined) {
+                                                    //判断这个商品的属性是否和模板属性石同一个属性，否则设置默认空值
+                                                    if (attribDataTemplate[i].SysNo == data.attributes[j].AttributeSysNo) {
+                                                        //为属性设置值并中断内循环，进入商品的下一个属性对比工作
+                                                        eval('data.A_' + attribDataTemplate[i].SysNo + ' = "' + data.attributes[j].AttributeText + '";');
+                                                        break;
+                                                    } else {
+                                                        eval('data.A_' + attribDataTemplate[i].SysNo + ' = "";');
+                                                    }
+
+                                                } else {
+                                                    eval('data.A_' + attribDataTemplate[i].SysNo + ' = "";');
+                                                }
+                                            }
+                                        }
+
+                                        //插入数据
+                                        attribAssociationTable.InsertRow(data);
+                                        //添加商品到已选择商品列表
+                                        productListAssociation.push(data.pid);
+
+                                    });
+                                }
+                            });
+                        },
+                        cancel: function () {
+                            relationCode = "";
+                            attribAssociationTable.DelRow(productSysNo);
+                        }
+                    });
+
+                   
+                    
+
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //默认错误处理
+                var error = JSON.parse(XMLHttpRequest.responseText);
+                alert(error.ErrorMessage);
+            }
+        });
+    }
+
+    function SaveAttributeAssociationProduct() {
+
+        var productSysNo = $("#hdf_ProductSysNo").val();
+
+        var updateProductSysNo = new Array();
+        $("#attrASTable tbody tr input[type='checkbox']").each(function (index, item) {
+            updateProductSysNo.push($(item).val());
+        });
+
+        $.ajax({
+            url: "@Url.Action("SaveProductAssociation", "Product")",
+            data: JSON.stringify({ mainProductSysNo: productSysNo, productSysNoList: updateProductSysNo, relationCode: relationCode }),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                if (response == true) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+
+                    if (!editModel) {
+                        prodctEditTab.Active('6');
+                    }
+
+                    AssociationProductButtonControl(editModel);
+                }
+
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //默认错误处理
+                var error = JSON.parse(XMLHttpRequest.responseText);
+                alert(error.ErrorMessage);
+            }
+        });
+    }
+
+    //读取商品关联列表
+    var attribDataTemplate;
+    function GetProductAssociationProductList(productSysNo) {
+        if ($("#attrASTable").attr("loaded") == undefined) {
+            attribAssociationTable.Clear();
+            productListAssociation = new Array();
+            $.ajax({
+                url: "@Url.Action("GetProductAssociationProductList", "Product")",
+                data: JSON.stringify({ productSysNo: productSysNo }),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+
+                    relationCode = response.relationcode;
+
+                    if (!!response.attributes && !!response.attributes.length >= 0 && !!response.attributes) {
+                        //清理动态字段
+
+                        //清理表头
+                        $("#attrASTable thead tr th").each(function (index, element) {
+                            if (index > 3)
+                                $(element).remove();
+                        });
+
+                        //清理模板列
+                        $("#attrASTable thead tr td").each(function (index, element) {
+                            if (index > 3)
+                                $(element).remove();
+                        });
+
+                        //添加动态字段
+                        createDynamicFields(response.attributes);
+                        attribDataTemplate = response.attributes;
+                    }
+
+
+                     //将结果中的关联属性格式化并生产table的模板行数据
+                    $(response.result).each(function (index, data) {
+                        //用嵌套循环来设置对应模板列的数据。
+                        for (var i = 0; i < attribDataTemplate.length; i++) {
+                            for (var j = 0; j < data.attributes.length; j++) {
+                                
+                                //对比是否有数据，如果有就开始设置数据到模板对应字段,如果没有这个属性数据就直接设置成空
+                                if (data.attributes[j] != undefined) {
+                                    //判断这个商品的属性是否和模板属性石同一个属性，否则设置默认空值
+                                    if (attribDataTemplate[i].SysNo == data.attributes[j].AttributeSysNo) {
+                                        //为属性设置值并中断内循环，进入商品的下一个属性对比工作
+                                        eval('data.A_' + attribDataTemplate[i].SysNo + ' = "' + data.attributes[j].AttributeText + '";');
+                                        break;
+                                    } else {
+                                        eval('data.A_' + attribDataTemplate[i].SysNo + ' = "";');
+                                    }
+
+                                } else {
+                                    eval('data.A_' + attribDataTemplate[i].SysNo + ' = "";');
+                                }
+                            }
+                        }
+                        
+                        //插入数据
+                        attribAssociationTable.InsertRow(data);
+                        //添加商品到已选择商品列表
+                        productListAssociation.push(data.pid);
+
+                    });
+
+                    $("#attrASTable").attr("loaded", true);
+                    //判断前台显示字段数值等于多少 王耀发 2015-12-23  创建
+                    $(".clsifd").each(function () {
+                        var obj = $(this);
+                        if (obj.attr("isfrontdisplay") != "{isfrontdisplay}") {
+                            if (obj.attr("isfrontdisplay") == 1) {
+                                obj.attr("checked", true);
+                            }
+                        }
+                    });
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //默认错误处理
+                    var error = JSON.parse(XMLHttpRequest.responseText);
+                    alert(error.ErrorMessage);
+                }
+            });
+        }
+    }
+
+    //创建动态字段到tabel的模板行
+    function createDynamicFields(sampleData) {
+
+        //读取模板行HTML
+        var trTrTemplate = tableThSample.getMultiLine();
+        //读取模板字段HTML
+        var tdTemplate = tableTdSample.getMultiLine();
+
+        //分析数据样本来生产模板行
+        $(sampleData).each(function (index, element) {
+            //如果属性行没有保护在模板行上就进行添加
+            if ($("#attrASTable thead tr td[attributesysno='" + element.AttributeSysNo + "']").length == 0) {
+                //生产模板字段插入到模板行
+                $("#attrASTable thead tr:first").append(trTrTemplate.replace("{0}", element.SysNo).replace("{1}", element.AttributeName));
+                $("#attrASTable thead tr[template='true']").append(tdTemplate.replace("{0}", "{A_" + element.SysNo + "}"));
+            }
+        });
+        
+        //改变tablebind控件的模板行以用于更新生产新的数据行
+        attribAssociationTable.ChangeTemplate($("#attrASTable thead tr[template='true']"));
+
+    }
+
+
+    function AssociationProductButtonControl(isEdit) {
+        if (isEdit) {
+            $("#btn_Save_Attr_Asso").show();
+            $("#btn_Save_Attr_Asso_Next").hide();
+        } else {
+            $("#btn_Save_Attr_Asso").hide();
+            $("#btn_Save_Attr_Asso_Next").show();
+        }
+
+    }
+
+    function tableThSample() {
+        /*
+        <th align="center" width="120" attributesysno={0}>{1}</th>
+        */
+    }
+
+    function tableTdSample() {
+        /*
+        <td align="center" width="120" >{0}</td>
+        */
+    }
+    //点击是否前台显示 王耀发 2015-12-24 创建
+    $(".clsifd").live('click', function () {
+        var productSysNo = $(this).val();
+        var IsFrontDisplay = 0;
+        if ($(this).attr("checked") == "checked") {
+            IsFrontDisplay = 1;
+        }
+        UpdateProductIsFrontDisplay(productSysNo, IsFrontDisplay);
+        
+    });
+
+    function UpdateProductIsFrontDisplay(productSysNo, IsFrontDisplay) {
+        var data = {
+            productSysNo: productSysNo,
+            IsFrontDisplay: IsFrontDisplay
+        };
+
+        //提交表单
+        $.ajax({
+            url: "@Url.Action("UpdateProductIsFrontDisplay", "Product")",
+            data: JSON.stringify(data),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                if (!response.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + response.result.Message);
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //默认错误处理
+                var error = JSON.parse(XMLHttpRequest.responseText);
+                alert(error.ErrorMessage);
+            }
+        });
+    }
+</script>
+
+<!-- 关联规格商品维护 -->
+<!--工具条开始-->
+<div class="boxs_tool boxs_toolbgnone p0">
+    <!--功能按钮开始-->
+    <div class="left_tool">
+        <button id="btn_add_associationAttr" class="btn btn_ht28 m10_r" title="添加商品"><span class="icon_plus"></span><span class="m5_l">添加商品</span></button>
+        <button id="btn_del_associationAttr" class="btn btn_ht28 m10_r" title="取消关联"><span class="icon_trash"></span><span class="m5_l">取消关联</span></button>
+    </div>
+    <!--功能按钮结束-->
+</div>
+<!--工具条结束-->
+<div class="boxs_detail line25" >
+    <table id="attrASTable" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="53" class="border_lnone align_c p10_lr">
+                    <input class="checkall" name="" type="checkbox" value="" /></th>
+                <th align="center" width="260" class="p10_lr">商品编号</th>
+                <th class="p10_lr" width="300">后台显示名称</th>
+                <th class="p10_lr" width="80">前台显示</th>
+            </tr>
+            <tr template="true" style="display: none;">
+                <td class="border_lnone align_c p10_lr">
+                    <input name="" type="checkbox" value="{pid}" /></td>
+                <td align="center" class="p10_lr blue"><a href="@Url.Action("ViewProduct","Product")?sysno={pid}">{erp}</a></td>
+                <td class="align_l p10_lr">{name}</td>
+                <td align="center" class="p10_lr">
+                    <input name="" type="checkbox" value="{pid}" isfrontdisplay="{isfrontdisplay}" class="clsifd"/>
+                </td>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+</div>
+<div class="f12 c9 m20_t m10_b">
+    注释：关联商品是依据属性中可做关联属性并且该属性状态为可用。
+
+</div>
+<div class="align_c m10_t">
+    <button id="btn_Save_Attr_Asso" class="btn btn_blue btn_ht30"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;&nbsp;
+    <button id="btn_Save_Attr_Asso_Next" class="btn btn_green btn_ht30" onclick="prodctEditTab.Active('6')"><span class="icon_save icon_white"></span><span class="m5_l">保存 进入下一步</span></button>
+</div>
+
+<!-- 关联规格商品维护 END -->
+

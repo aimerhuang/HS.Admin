@@ -1,0 +1,18 @@
+﻿@{
+    ViewBag.Title = "获取授权码";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Hyt.Model.Result
+@{
+    <div style="padding-top:50px;">
+        @if (Model.Status)
+        {
+            <div id="top" style=" width:740px;margin:0 auto;"><center><img src="~/Theme/images/fail.png" class="fail" /></center></div>
+        }
+        else
+        {
+           <div id="top" style=" width:740px;margin:0 auto;"><center><img src="~/Theme/images/success.png" class="success" /></center></div>       
+        }
+        <div style="margin: 0 auto; width: 740px;font-size:16px;color:red;padding:10px; text-align:center;">@Model.Message</div>
+    </div>
+}

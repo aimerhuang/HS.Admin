@@ -1,0 +1,456 @@
+﻿@{
+    ViewBag.Title = "ProductAttributeCreate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.PdAttribute
+@section HeadCss{
+    <style type="text/css">
+        .boxs_detail {
+            border: none;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .boxs_detail_dispay .boxs_detail table {
+            border-bottom: #d6d6d6 solid 1px;
+            border-right: #d6d6d6 solid 1px;
+            border-top: none !important;
+            border-left: none !important;
+        }
+
+            .boxs_detail_dispay .boxs_detail table tr th {
+                border-top: #d6d6d6 solid 1px;
+                border-left: #d6d6d6 solid 1px;
+                border-bottom: none !important;
+                border-right: none !important;
+            }
+
+            .boxs_detail_dispay .boxs_detail table tr td {
+                border-top: #d6d6d6 solid 1px;
+                border-left: #d6d6d6 solid 1px;
+                border-bottom: none !important;
+                border-right: none !important;
+                text-align: center;
+            }
+    </style>
+}
+
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            $("#pdAttributeForm").validate({
+                rules: {
+                    attributename: {
+                        required: true,
+                        maxlength: 30
+                    },
+                    backendname: {
+                        required:true
+                    },
+                    attributetype: {
+                        min: 1
+                    }
+                },
+                messages: {
+                    attributename: {
+                        required: "属性组名称必填",
+                        maxlength: "长度超出30个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('span').attr('class', 'error m10_l');
+
+                },
+                success: function (span, element) {
+                    element.parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+
+            $("#btnAddOption").click(function () {
+                var row = $("#listOptions").find("tbody").append($("#trTmp").clone().html());
+                resetRowClass();
+            });
+
+            $(".btnUp").live("click", function () {
+                var objRow = $(this).closest("tr");
+                var index = $("#listOptions tr").index(objRow);
+                if (index > 1) {
+                    objRow.insertBefore(objRow.prev());
+                }
+                resetRowClass();
+            });
+
+            $(".btnDown").live("click", function () {
+                var objRow = $(this).closest("tr");
+                var index = $("#listOptions tr").index(objRow);
+                var length = $("#listOptions tr").length;
+                if (index < length - 1) {
+                    objRow.insertAfter(objRow.next());
+                }
+                resetRowClass();
+            });
+
+            $(".btnToTop").live("click", function () {
+                var objRow = $(this).closest("tr");
+                var index = $("#listOptions tr").index(objRow);
+                if (index > 1) {
+                    objRow.insertBefore($("#listOptions tr:eq(1)"));
+                }
+                resetRowClass();
+            });
+
+            $(".btnToBottom").live("click", function () {                
+                var objRow = $(this).closest("tr");
+                var index = $("#listOptions tr").index(objRow);
+                var length = $("#listOptions tr").length;
+                if (index < length - 1) {
+                    objRow.insertAfter($("#listOptions tr:last"));
+                }
+                resetRowClass();
+            });
+
+
+            //删除功能
+            $(".btnDel").live("click", function () {
+                if ($(this).hasClass("disabled")) {
+                    return;
+                }
+                var obj = this;
+                UI.Confirm({
+                    content: '确定要删除吗?',
+                    ok: function () {
+                        var sysno = parseInt($(obj).closest("tr").find("input.optionSysno").val());
+                        if (sysno > 0) {
+                            $.post('@Url.Action("IsAttributeOptionsInProduct","Product")',
+                            { sysNo: sysno},
+                            function (data) {
+                                if (data.Status) {
+                                    UI.Alert({ content: data.Message });
+                                } else {
+                                    $(obj).closest("tr").remove();
+                                    resetRowClass();
+                                    UI.Prompt.Success('操作成功');                                 
+                                }
+                            });
+                        } else {
+                            $(obj).closest("tr").remove();
+                            resetRowClass();
+                            UI.Alert({ content: '操作成功' });
+                        }
+                       
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+            //禁用功能
+            $(".btnForbid").live("click", function () {
+                var obj = this;
+                UI.Confirm({
+                    content: '确定要禁用吗?',
+                    ok: function () {
+                        $(obj).closest("tr").find("input:hidden").val(0);
+                        $(obj).closest("tr").find("td").eq(1).html("禁用");
+                        $(obj).closest("tr").find(".btnAgree").removeClass("hide");                       
+                        $(obj).addClass("hide");
+                        $(obj).closest("tr").find(".btnDel").removeClass("disabled");
+                        UI.Prompt.Success('操作成功');
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+            //启用功能
+            $(".btnAgree").live("click", function () {
+                var obj = this;
+                UI.Confirm({
+                    content: '确定要启用吗?',
+                    ok: function () {
+                        $(obj).closest("tr").find("input:hidden").val(1);
+                        $(obj).closest("tr").find("td").eq(1).html("启用");
+                        $(obj).closest("tr").find(".btnForbid").removeClass("hide");
+                        $(obj).addClass("hide");
+                        $(obj).closest("tr").find(".btnDel").addClass("disabled");
+                        UI.Prompt.Success('操作成功');
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+            $("#attributetype").change(function () {
+                if ($(this).val() == $("#typeOptionValue").val()) {
+                    $("#trsearch").removeClass("hide").show();
+                    $("#divOptionBox").removeClass("hide").show();
+                } else {
+                    $("#trsearch").addClass("hide").hide();
+                    $("#divOptionBox").addClass("hide").hide();
+                }
+            });
+
+            Array.prototype.isUnique = function () {
+                var hash = {};
+                for (var i in this) {
+                    if (hash[this[i]])
+                        return false;
+                    hash[this[i]] = true;
+                }
+                return true;
+            }
+           
+
+            function generalFormData() {
+                var data = $("#pdAttributeForm").serializeArray();
+                if ($("#attributetype").val() == $("#typeOptionValue").val()) {
+                    var items = [], textItems = [];
+                    var reg = /^\s*$/g;
+                    var isHasEmpty = false;
+                    $("#listOptions tr").each(function () {
+                        if ($(this).find("input:text").length > 0) {
+                            var item = {};
+                            item.AttributeText = $(this).find("input:text").val();
+                            textItems.push(item.AttributeText);
+                            if (reg.test(item.AttributeText)) {
+                                UI.Prompt.Error("属性选项文本值不能为空");                       
+                                isHasEmpty = true;
+                            }
+                            item.Status = $(this).find("input.optionStatus").val();
+                            item.SysNo = parseInt($(this).find("input.optionSysno").val());
+                            items.push(item);
+                        }
+                    });
+                    //有空的选项
+                    if (isHasEmpty) {
+                        return false;
+                    }
+                    if (!textItems.isUnique()) {
+                        UI.Prompt.Error("属性选项文本值重复");
+                        return false;
+                    }
+                    data.push({ name: 'items', value: JSON.stringify(items) });
+                }
+                return data;
+            }
+           
+
+           
+
+
+            //重置样式
+            function resetRowClass() {
+                $("#listOptions tr").removeClass("stag_color");
+                $("#listOptions tr:odd").addClass("stag_color");
+                $(".btnToTop").removeClass("disabled");
+                $(".btnToBottom").removeClass("disabled");
+
+                $(".orderBtns button").removeClass("disabled");
+                $("#listOptions tr:last").find(".icon_arrow_down").parent().addClass("disabled");
+                $("#listOptions tr:last").find(".btnToBottom").addClass("disabled");
+                $("#listOptions tr:eq(1)").find(".icon_arrow_up").parent().addClass("disabled");
+                $("#listOptions tr:eq(1)").find(".btnToTop").addClass("disabled");
+            }
+
+            
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮               
+                api.button([
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#pdAttributeForm").valid()) {
+                                var data = generalFormData();
+                                if (data == false)
+                                {                                   
+                                    return false;
+                                }
+                                $.post('/Product/ProductAttributeCreate/', data, function (result) {
+
+                                    if (result.Status) {
+                                        UI.tips.tip_alert("tips_success", "保存成功");
+                                        setTimeout(function () {
+                                            try {                                               
+                                                UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage);
+                                            } catch (e) {
+                                            };
+                                            UI.Dialog.close();
+                                        }, 1000);
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                            if (result.StatusCode == -2) {
+                                                $("#name").focus();
+                                            }
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                     {
+                         name: '取消'
+                     }
+                ]
+                );
+                //设置属性表格设置样式
+                resetRowClass();                
+            }
+            initDialog();
+        });
+
+    </script>
+}
+<div class="caseout">
+    
+    <div class="boxs_detail_dispay boxs_con_c2  ">
+        <div class="tit_con">
+            <form id="pdAttributeForm" name="pdAttributeForm" action="">
+               <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone border_lnone">
+                    <tbody>
+                        <tr>
+                            <td width="25%" class="nameright border_rnone"><span class="v_star">*</span>前台显示名称</td>
+                            <td width="75%" class="border_rnone">
+                                <input type="text" name="attributename" class="wd200" value="@Model.AttributeName" maxlength="30"/>
+                                <span id="forattributename" class="prompt m10_l">前台显示名称必填</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="red1">*</span>后台显示名称</td>
+                            <td class="border_rnone">
+                                <input type="text" name="backendname" value="@Model.BackEndName" class="wd200" maxlength="30"/>
+                                <span class="prompt m10_l">后台显示名称必填</span></td>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>属性类型</td>
+                            <td class="border_rnone">
+                                <select class="wd200" id="attributetype" name="attributetype">
+                                    <option value="0">请选择</option>
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型)))
+                                        {
+                                        <option value="@dict.Key" @if (Model.AttributeType == dict.Key)
+                                                                  { @Html.Raw("selected = \"selected\"");
+                                                                  }>@dict.Value</option>
+                                        }
+                                    }
+                                </select><span id="forattributetype" class="prompt m10_l">属性类型必选</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone border_bnone">关联属性</td>
+                            <td class="border_rnone border_bnone">
+                                <label>
+                                    <input type="radio" name="isrelationflag" @if (Model.IsRelationFlag == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品属性关联状态.有效 )
+                                                                              { @Html.Raw("checked=\"checked\"");
+                                                                              } value="@Hyt.Model.WorkflowStatus.ProductStatus.商品属性关联状态.有效.GetHashCode()" class="m5_r" />是</label><label><input type="radio" name="isrelationflag" class="m10_l m5_r"  @if (Model.IsRelationFlag == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品属性关联状态.无效 ) { @Html.Raw("checked=\"checked\""); } value="@Hyt.Model.WorkflowStatus.ProductStatus.商品属性关联状态.无效.GetHashCode()" />否</label></td>
+                        </tr>
+                        
+                        <tr id="trsearch" @if (Model.AttributeType != (int)Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.选项类型.GetHashCode()){ @Html.Raw("class=\"hide\"");} >
+                            <td class="nameright border_rnone border_top">是否作为搜索条件</td>
+                            <td class="border_rnone border_top">
+                                <label>
+                                    <input type="radio" name="issearchkey"  @if (Model.IsSearchKey == (int)Hyt.Model.WorkflowStatus.ProductStatus.是否作为搜索条件.是)
+                                                                            { @Html.Raw("checked=\"checked\"");
+                                                                            } value="@Hyt.Model.WorkflowStatus.ProductStatus.是否作为搜索条件.是.GetHashCode()" class="m5_r"/>是</label><label><input type="radio" name="issearchkey"  @if (Model.IsSearchKey == (int)Hyt.Model.WorkflowStatus.ProductStatus.是否作为搜索条件.否) { Html.Raw("checked=\"checked\""); } value="@Hyt.Model.WorkflowStatus.ProductStatus.是否作为搜索条件.否.GetHashCode()"  class="m10_l m5_r"/>否</label></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="hidden" id="typeOptionValue" value="@Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.选项类型.GetHashCode()" />
+                <input type="hidden" name="SysNo" value="@Model.SysNo" />
+            </form>
+
+
+
+            <div id="divOptionBox"  class="@if (Model.AttributeType != (int)Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.选项类型.GetHashCode()) {@Html.Raw("hide");}">
+                <div class="tit_dispay border_tnone">
+                  <h5>属性选项管理</h5>
+                </div>
+                <div class="p10 border_tnone">
+                    <div class="p10_b">
+                        <button class="btn btn_blue btn_ht26" type="button" id="btnAddOption"><span class="icon_plus icon_white"></span><span class="m5_l">新建</span></button>
+                    </div>
+
+
+                    <div class="boxs_detail">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" id="listOptions" class="border_tnone">
+                            <thead>
+                                <tr>
+                                    <th width="102">属性选项文本值</th>
+                                    <th>状态</th>
+                                    <th width="170">排序</th>
+                                    <th width="147">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{
+                                    foreach (var item in (List<PdAttributeOption>)ViewBag.ListAttributeOptions)
+                                    {
+                                    <tr>
+                                        <td>
+                                            <input type="text" value="@item.AttributeText" class="wd70" />
+                                            <input type="hidden" class="optionStatus" value="@item.Status" />
+                                            <input type="hidden" class="optionSysno" value="@item.SysNo" />
+                                        </td>
+                                        <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品属性选项状态), item.Status)</td>
+                                        <td class="orderBtns">
+                                            <button class="btn btn_ht26 btnUp m5_r"><span class="icon_arrow_up"></span></button><button class="btn btn_ht26 btnDown m5_r"><span class="icon_arrow_down"></span></button><button class="btn btn_ht26 btnToTop m5_r"><span class="icon_toTop"></span></button><button class="btn btn_ht26 btnToBottom"><span class="icon_toDown"></span></button>
+                                        </td>
+                                        <td class="bd_rs bd_c line20">
+                                            <button class="btn btn_ht26 m5_r btnAgree @if (item.Status == 1){@Html.Raw("hide");}"><span class="icon  icon_unlock"></span><span class="m5_l">启用</span></button>
+                                            <button class="btn btn_ht26 m5_r btnForbid @if (item.Status != 1){ @Html.Raw("hide"); }"><span class="icon  icon_lock"></span><span class="m5_l">禁用</span></button>
+                                            <button class="btn btn_ht26 @if (item.Status == 1){@Html.Raw("disabled");} btnDel"><span class="icon icon_trash"></span><span class="m5_l">删除</span></button>
+                                        </td>
+                                    </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+       
+    </div>
+</div>
+
+
+<table style="display: none;">
+    <tbody id="trTmp">
+        <tr>
+            <td>
+                <input type="text" value="" class="wd70" />
+                <input type="hidden" class="optionStatus" value="1" />
+                 <input type="hidden" class="optionSysno" value="0" />
+            </td>
+            <td>启用</td>
+            <td class="orderBtns">
+                <button class="btn btn_ht26 btnUp m5_r"><span class="icon_arrow_up"></span></button>
+                <button class="btn btn_ht26 btnDown m5_r"><span class="icon_arrow_down"></span></button>
+                <button class="btn btn_ht26 btnDown m5_r"><span class="icon_toTop"></span></button>
+                <button class="btn btn_ht26 btnDown"><span class="icon_toDown"></span></button>
+            </td>
+            <td class="bd_rs bd_c line20">
+                <button class="btn btn_ht26 m5_r btnAgree hide"><span class="icon  icon_unlock"></span><span class="m5_l">启用</span></button>
+                <button class="btn btn_ht26 m5_r btnForbid"><span class="icon  icon_lock"></span><span class="m5_l">禁用</span></button>
+                <button class="btn btn_ht26  btnDel"><span class="icon  icon_trash"></span><span class="m5_l">删除</span></button>
+            </td>
+        </tr>
+    </tbody>
+</table>

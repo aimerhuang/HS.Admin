@@ -1,0 +1,223 @@
+﻿@model Hyt.Model.WhWarehouse
+@{
+    ViewBag.Title = "选择仓库";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section HeadJs{
+    <script type="text/javascript" src='@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")'></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+    <script type="text/javascript">
+        //ztree设置
+        var setting = {
+            view: {
+                selectedMulti: false
+            },
+            async: {
+                enable: true,
+                url: '@Url.Content("~/Ajax/GetAreaWarehouseTree/")',
+                autoParam: ["id"],
+                otherParam: { "DeliveryTypeSysNo": '@Request.QueryString["DeliveryTypeSysNo"]', "CityID": '@Request.QueryString["CityID"]' },
+                dataFilter: filter
+            },
+            callback: {
+                onClick: onClick,
+                beforeAsync: beforeAsync,
+                onAsyncSuccess: onAsyncSuccess
+            }
+        };
+        function filter(treeId, parentNode, childNodes) {
+            if (!childNodes) return null;
+            for (var i = 0, l = childNodes.length; i < l; i++) {
+                childNodes[i].name = childNodes[i].name.replace(/\.n/g, '.');
+            }
+            return childNodes;
+        }
+
+        function beforeAsync() {
+            curAsyncCount++;
+        }
+
+        function onAsyncSuccess(event, treeId, treeNode, msg) {
+            curAsyncCount--;
+            //alert(curAsyncCount);
+            if (curStatus == "expand") {
+                expandNodes(treeNode.children);
+            } else if (curStatus == "async") {
+                asyncNodes(treeNode.children);
+            }
+
+            if (curAsyncCount <= 0) {
+                curStatus = "";
+            }
+        }
+
+        var curStatus = "init", curAsyncCount = 0, goAsync = false;
+        function expandAll() {
+            if (!check()) {
+                return;
+            }
+            var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+            expandNodes(zTree.getNodes());
+            if (!goAsync) {
+                curStatus = "";
+            }
+        }
+        function expandNodes(nodes) {
+            if (!nodes) return;
+            curStatus = "expand";
+            var zTree = $.fn.zTree.getZTreeObj("treeDemo");
+            for (var i = 0, l = nodes.length; i < l; i++) {
+                zTree.expandNode(nodes[i], true, false, false);//展开节点就会调用后台查询子节点  
+                if (nodes[i].isParent && nodes[i].zAsync) {
+                    expandNodes(nodes[i].children);//递归  
+                } else {
+                    goAsync = true;
+                }
+            }
+        }
+
+        function check() {
+            if (curAsyncCount > 0) {
+                return false;
+            }
+            return true;
+        }
+
+        // 点击事件
+        function onClick(event, treeId, treeNode, clickFlag) {
+            if (treeNode.target == "Warehouse") {
+                $.getJSON('@Url.Content("~/Ajax/GetWarehouseInfo/")', { sysNo: treeNode.id, random: Math.random() }, function (data) {
+                if (data != null) {
+                    $("#spanWarehouseName").text(data.BackWarehouseName);
+                    $("#spanSysNo").text(data.ErpCode);
+                    $("#spanContact").text(data.Contact);
+                    $("#spanPhone").text(data.Phone);
+                    $("#spanStreetAddress").text(data.StreetAddress);
+                    $("#spanArea").text(GetLocalArea(treeNode));
+                    $("#WarehouseName").val(data.BackWarehouseName);
+                    $("#SysNo").val(data.SysNo);
+                    if (data.IsSelfSupport == 1) {
+                        $("#spanIsSelfSupport").text("是");
+                    }
+                    else {
+                        $("#spanIsSelfSupport").text("否");
+                    }
+                }
+            });
+        }
+    }
+
+    //初始化ZTree
+
+    //显示省市区
+    function GetLocalArea(treeNode) {
+        var str = "";
+        var pnode = treeNode.getParentNode();
+        while (pnode != null) {
+            if (str != "") {
+                str = pnode.name + " > " + str;
+            }
+            else {
+                str = pnode.name;
+            }
+            pnode = pnode.getParentNode();
+        }
+        return str;
+    }
+    $(document).ready(function () {
+        UI.ZTree.init($("#treeDemo"), setting);
+        //alert();
+        setTimeout(function () {
+            expandAll("treeDemo");
+        }, 100);//延迟加载  
+        //UI.ZTree.ExpandAllStatus = true;
+        //UI.ZTree.expandAll(myZTree.ExpandAllStatus);
+        //var treeObj = UI.ZTree;
+        //treeObj.expandAll(true);
+    });
+    </script>
+}
+<input id="WarehouseName" type="hidden"  value="@Model.BackWarehouseName"/>
+<input id="SysNo" type="hidden"  value="@Model.SysNo"/>
+<div class=" p10 outbox8 clearfix ">
+    <div class="outtree_fl">
+
+
+        <div class="boxs">
+            <!--有导航条时-->
+            <div class="head_detail">
+                <h5>仓库列表</h5>
+            </div>
+            <div class="comp5" style="height:435px">
+                <div class="zTreeDemoBackground left">
+                    <ul id="treeDemo" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <div class="outtree_fr">
+
+        <div class="boxs outtree_fr_intro">
+            <!--有导航条时-->
+            <div class="head_detail">
+                <h5>仓库信息</h5>
+            </div>
+            <div class="boxs_detail">
+                <div class="detail_con line35">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="15%" align="right"  class="border_lnone border_rnone">仓库名称:</td>
+                            <td width="35%" class="border_lnone">
+                                <span id="spanWarehouseName">@Model.BackWarehouseName</span>
+                            </td>
+                            <td width="15%" align="right" >ERP编号:</td>
+                            <td width="35%"  class="border_lnone">
+                                <span id="spanSysNo">@Model.ErpCode</span></td>
+                        </tr>
+                        <tr>
+                            <td align="right" class="border_lnone border_rnone">联 系 人:</td>
+                            <td class="border_lnone">
+                                <span id="spanContact">@Model.Contact</span></td>
+                            <td align="right">联系电话:</td>
+                            <td class="border_lnone">
+                                <span id="spanPhone">@Model.Phone</span></td>
+                        </tr>
+                        <tr>
+                            <td align="right"  class="border_lnone border_rnone">所在地区:</td>
+                            <td   class="border_lnone">
+                                <span id="spanArea">@ViewBag.LocalArea</span></td>
+                            <td align="right">是否自营:</td>
+                            <td class="border_lnone">
+                                <span id="spanIsSelfSupport">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.WarehouseStatus.是否自营), Model.IsSelfSupport)</span>
+                           </td>
+                       </tr>
+                        <tr>
+                            <td align="right"  class="border_lnone border_rnone">仓库地址:</td>
+                            <td colspan="3"  class="border_lnone">
+                                <span id="spanStreetAddress">@Model.StreetAddress</span></td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="boxs outtree_fr_order m10_t">
+            <!--有导航条时-->
+            <div class="head_detail">
+                <h5>订单库存状况</h5>
+            </div>
+            <div class="comp5">
+                <div style="width: 100%; height: 150px;">&nbsp;</div>
+            </div>
+        </div>
+        
+
+    </div>
+</div>
+
+@section FooterJs{
+   
+}

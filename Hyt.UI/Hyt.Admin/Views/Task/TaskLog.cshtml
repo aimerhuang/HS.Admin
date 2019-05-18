@@ -1,0 +1,13 @@
+﻿@using Hyt.Service.Task.Core
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.SyTaskLog>
+@{
+    ViewBag.Title = "查看任务日志";
+}
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="caseout">
+    <div class="boxs">
+        <div id="paging" class="boxs_con_c1">
+             @{Html.RenderPartial("_TaskLogPager", Model); }
+        </div>
+    </div>
+    </div>

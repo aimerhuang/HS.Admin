@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:intf="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns1="urn:client.saleissuebillfacade" xmlns:impl="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade" targetNamespace="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:client.saleissuebillfacade">
+      <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <xsd:complexType name="Result">
+        <xsd:sequence>
+          <xsd:element name="status" type="xsd:boolean" />
+          <xsd:element name="statusCode" nillable="true" type="xsd:string" />
+          <xsd:element name="message" nillable="true" type="xsd:string" />
+          <xsd:element name="data" nillable="true" type="xsd:anyType" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="WSInvokeException">
+        <xsd:sequence />
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="importDataRequest">
+    <wsdl:part name="xmlData" type="xsd:string" />
+  </wsdl:message>
+  <wsdl:message name="WSInvokeException">
+    <wsdl:part name="fault" type="tns1:WSInvokeException" />
+  </wsdl:message>
+  <wsdl:message name="importDataResponse">
+    <wsdl:part name="importDataReturn" type="tns1:Result" />
+  </wsdl:message>
+  <wsdl:portType name="WSSaleIssueBillFacadeSrvProxy">
+    <wsdl:operation name="importData" parameterOrder="xmlData">
+      <wsdl:input name="importDataRequest" message="impl:importDataRequest" />
+      <wsdl:output name="importDataResponse" message="impl:importDataResponse" />
+      <wsdl:fault name="WSInvokeException" message="impl:WSInvokeException" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSSaleIssueBillFacadeSoapBinding" type="impl:WSSaleIssueBillFacadeSrvProxy">
+    <wsdlsoap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc" />
+    <wsdl:operation name="importData">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="importDataRequest">
+        <wsdlsoap:body use="encoded" namespace="http://webservice.ws.custom.eas.kingdee.com" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="importDataResponse">
+        <wsdlsoap:body use="encoded" namespace="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+      <wsdl:fault name="WSInvokeException">
+        <wsdlsoap:fault use="encoded" name="WSInvokeException" namespace="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSSaleIssueBillFacadeSrvProxyService">
+    <wsdl:port name="WSSaleIssueBillFacade" binding="impl:WSSaleIssueBillFacadeSoapBinding">
+      <wsdlsoap:address location="http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

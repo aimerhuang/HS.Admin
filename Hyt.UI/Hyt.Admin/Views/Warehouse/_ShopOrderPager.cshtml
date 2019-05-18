@@ -1,0 +1,74 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBSoOrder>
+<div class="boxs_listtabel">
+    <table class="list_tit border_rnone border_bnone" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="90">订单号</th>
+                <th width="95">状态</th>
+                <th width="">仓库</th>
+                <th width="90" style="display:none">出库单</th>
+                <th width="">会员帐号</th>
+                <th width="10%">支付金额</th>
+                <th width="70">积分</th>
+                @* <th width="17%">操作时间</th>*@
+                
+                <th width="100">配送方式</th>
+                <th width="10%">支付方式</th>
+                <th width="120">下单时间</th>
+                <th width="120">下单人</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                foreach (var item in Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td class="blue"><a href="javascript:OrderBrowse(@item.SysNo);">@item.SysNo</a></td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单状态), item.Status)</td>
+                <td>@item.WarehouseName</td>
+                <td style="display:none">@item.WhStockOutSysNo</td>
+                <td class="blue"><a href="javascript:void(0)" onclick="browseUserInfo(@item.CustomerId)">@item.CustomerAccount</a></td>
+                <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.CashPay,2))</td>
+                <td>@item.Point</td>@*
+                <td width="17%" style="line-height: 26px">@if (item.CreateDate != (DateTime.Parse("0001-01-01")))
+                                                          {<span>订购时间:</span>@item.CreateDate.ToString("yyyy-MM-dd")}<br />
+                    @if (item.StockOutDate != (DateTime.Parse("0001-01-01")))
+                    {<span>出库时间:</span>@item.StockOutDate.ToString("yyyy-MM-dd")}
+                </td>*@
+                  
+                <td>@item.DeliveryTypeName</td>
+                <td>@item.PaymentName</td>
+                <td >@item.CreateDate.ToString("yyyy-MM-dd HH:mm")</td>   
+                <td>@item.OrderCreator</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+        </div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    function browseUserInfo(sysNo) {
+        UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+            title: '会员信息',
+            width: '698px',
+            height: '489px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    }
+</script>

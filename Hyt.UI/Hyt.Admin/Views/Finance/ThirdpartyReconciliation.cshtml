@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = " 加盟商对账";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadCss{
+
+}
+@section HeadJs{
+
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+}
+@helper CreateList(List<SelectListItem> items, SelectListItem selectedItem)
+{
+    if (items != null && items.Count > 0)
+    {
+        foreach (var item in items)
+        {
+            <option value="@item.Value"
+                    @if (selectedItem != null) { 
+                        if (selectedItem.Text == item.Text || selectedItem.Value == item.Value) 
+                        { @: selected="selected"
+                                       
+                    } }>
+                @item.Text
+            </option>
+        }
+    }
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"></span>
+            <h3> 加盟商对账</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <div class="left_tool" style="float: left">
+                    <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m5_l btn_blue"><span class="icon_importing icon_white m5_r"></span><span>Excel账单导入</span></button>
+                    <iframe id="ajaxUpload" name="ajaxUpload" style="display:none"></iframe>
+                    <form id="formImport" action="@Url.Action("ImportReconciliation")" method="POST" enctype="multipart/form-data" target = "ajaxUpload">
+                        <input type="file" id="txtUpload" name="txtUpload" class="hide" accept="application/vnd.ms-excel" />
+                    </form>
+                </div>
+                <!--功能按钮开始-->
+                <div class="right_tool clearfix">
+                    <span class="fl">账单来源</span>
+                    <select class="select_ht28 fl wd90 m10_l m10_r" id="selSource" search="Source">
+                        <option value="">请选择</option>
+                        @CreateList(ViewBag.SelectList, new SelectListItem() { Value = Hyt.Model.WorkflowStatus.FinanceStatus.第三方财务对账来源.支付宝.GetHashCode().ToString() })
+                    </select>
+                    <span class="fl">状态</span>
+                    <select class="select_ht28 fl wd90 m10_l m10_r" id="selStatus" search="Status">
+                        <option value="">请选择</option>
+                        @CreateList(ViewBag.StatusList, null)
+                    </select>
+                    <span class="fl">订单号</span>
+                    <input type="text" class="wd80 fl m10_l m10_r" value="" search="TraderNo">
+                    <span class="fl">财务流水号</span>
+                    <input type="text" class="wd80 fl m10_l m10_r" value="" search="FnNo">
+                    <span class="fl">发生日期</span><div class="date_btn120 m10_l m10_r fl">
+                                                    <input type="text" value="" class="input_ht26" id="d121" name="" search="BeginDate">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d121'})"><span class="icon_calendar"></span></button>
+                    </div><span class="fl">-</span><div class="date_btn120 m10_l m10_r fl">
+                                                       <input type="text" value="" class="input_ht26" id="d122" name="" search="EndDate">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d122'})"><span class="icon_calendar"></span></button>
+                    </div><button title="搜索" class="btn btn_ht28 fl" type="button" id="searchBtn" onclick="javascript: LoadData();"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+                <!--功能按钮结束-->
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+
+            <div id="paging">
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+@section FooterJs{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#btnImport").click(function () {
+                var source = $("#selSource").val();
+                if (source == null || source == "")
+                {
+                    UI.Prompt.Error("请先选择账单来源");
+                    return;
+                }
+                formImport.action = "@Url.Action("ImportReconciliation")?source=" + $("#selSource").val();
+                $("#txtUpload").click();
+            });
+            $('#txtUpload').change(function () {
+                formImport.submit();
+                $("#txtUpload").val("");
+            });
+            $("#ajaxUpload").load(function () {
+                var v = $("#ajaxUpload").contents().find("body").text();
+                if (v != "" && v != null) {
+                    if (v == "ok") {
+                        UI.Prompt.Success("文件上传成功，系统正进行数据处理!");
+                    }
+                    else {
+                        if (v.length > 50) {
+                            UI.Prompt.Error("上传文件太大！");
+                        }
+                        else {
+                            UI.Prompt.Error(v);
+                        }
+                    }
+                }
+            });
+            LoadData();
+        });
+
+        function LoadData()
+        {
+            Utils.MaskStart($('#paging'));
+            Ajax.get("/Finance/_ThirdpartyReconciliation/?r=" + Math.random(), "Search", function () {
+
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+            });
+        }
+    </script>
+    }

@@ -1,0 +1,36 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@model PagedList
+
+
+<div id="paging">
+    @if(Model != null)
+{
+    <table cellspacing="0" cellpadding="0" border="0" width="100%">
+        <tbody id="tbSearch">
+                
+               
+            
+            @{
+        
+                foreach (var item in Model.Data as List<ProductSimple>)
+                {
+                    <tr id="tr2_@item.ProductID">
+                        <td width="17%" class="bt">@item.ProductID</td>
+                        <td width="17%" class="bt">@item.ProductName</td>
+                        <td width="17%" class="bt">@item.PriceBase</td>
+                        <td width="17%" class="bt">@item.PriceReal</td>
+                        <td width="18%" class="bt">
+                            <input type="text" style="width: 100px;" class="input_mini m5_r" value="1"></td>
+                        <td width="18%" class="bt"><button  value="@item.ProductID" class="btn btn_ht22 wd50 btn_blue" onclick="selectProduct(this.value)">订购</button></td>
+                    </tr>
+                }
+            }
+    
+        </tbody>
+    </table>
+
+
+    Html.RenderPartial("_UrlPaging", Model);
+}
+</div>

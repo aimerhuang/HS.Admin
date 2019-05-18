@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+<h2>Ajax分页</h2>
+
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<form method="Get" action="@Url.Action("Index2")">
+    <input name="name" value="yhy" type="text" />
+    <input type="submit" value="导出Demo" />
+</form>
+
+@{Html.RenderPartial("_AjaxPager", Model); }
+
+
+
+@Html.ActionLink("保持Url参数示例", "Index", "PageTest", new RouteValueDictionary { { "id", "" }, { "Name", "yhy" }, { "Age", 12 }}, null)
+

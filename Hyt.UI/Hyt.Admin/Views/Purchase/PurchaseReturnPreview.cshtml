@@ -1,0 +1,207 @@
+﻿@model Hyt.Model.PrPurchaseReturn
+@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "采购退货单详情";
+    var imgUrl = Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer + "Product/Image240/";
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+    <link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+    <style type="text/css">
+        .thumb {
+            position: relative;
+        }
+
+            .thumb img {
+                padding: 4px;
+                top: 0;
+                left: 0;
+                height: 30px;
+            }
+    </style>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+    <script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+
+
+
+}
+
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_con_c1">
+            <form id="form1" novalidate="novalidate">
+                <div class="boxs_detail_dispay" id="main_div">
+                    <div group="64" id="accordion_497131" accourdindex="0">
+                        <div class="tit_dispay">
+                            <h5><span class=""></span>采购退货单信息</h5>
+                        </div>
+                        <div class="tit_con attributebox" title="采购退货单信息">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tbody>
+                                    <tr>
+                                        <td class="nameright wd100"><span class="v_star">*</span>出库仓库</td>
+                                        <td width="300">
+                                            @ViewBag.WarehouseName
+                                        </td>
+                                        <td class="nameright wd100"><span class="v_star">*</span>采购单代码</td>
+                                        <td width="300">
+                                            @ViewBag.PurchaseCode
+                                        </td>
+                                        <td class="wd115"></td>
+                                        <td><span id="deliveryman_credit" class="red" data-price="0"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_bnone" valign="top">备注</td>
+                                        <td colspan="5" class="border_bnone">
+                                            @Model.Remarks
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tit_dispay">
+                        <h5>采购退货单详情</h5>
+                    </div>
+
+                    <div class="boxs_listtabel">
+                        <table width="100%" border="0" id="item_list" name="ItemList" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                            <thead>
+                                <tr>
+                                    <th class="border_bnone wd60">商品图片</th>
+                                    <th class="border_bnone wd200 align_l p10_lr">产品编码</th>
+                                    <th class="border_bnone align_l p10_lr">产品名称</th>
+                                    <th class="border_bnone wd90">退货数量</th>
+                                    <th class="border_bnone wd70">采购价</th>
+                                    <th class="border_bnone wd100">总价</th>
+                                </tr>
+                            </thead>
+                            <tbody id="main_body">
+                                @if (Model.SysNo > 0 && Model.PurchaseReturnDetails != null)
+                                {
+                                    foreach (var item in Model.PurchaseReturnDetails)
+                                    {
+                                        Hyt.Model.PdProduct Product = Hyt.BLL.Product.PdProductBo.Instance.GetProductBySysNo(item.ProductSysNo);
+                                        Hyt.Model.PrPurchaseDetails PurchaseDetail = Hyt.BLL.Purchase.PrPurchaseDetailsBo.Instance.GetPurchaseDetailByPurAndProSysNo(Model.PurchaseSysNo, item.ProductSysNo);
+                                        <tr id="tr_@item.ProductSysNo">
+                                            <td>
+                                                <div class="thumb"><img alt="@item.ProductSysNo" src="@imgUrl@(item.ProductSysNo).jpg"></div>
+                                            <td class="align_l p10_lr">@Product.ErpCode</td>
+                                            <td name="inventory_@(item.ProductSysNo)" id="eas_@(item.ProductSysNo)" class="align_l p10_lr">@(Product.ProductName)</td>
+                                            <td>@item.ReturnQuantity</td>
+                                            <td>@PurchaseDetail.Money</td>
+                                            <td>@item.ReturnTotalMoney</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td align="right" colspan="9" class="border_top">
+                                        <span>合计数量:</span>
+                                        <span class="m10_r" id="sum_num">
+                                            @(Model.SysNo > 0 ? Model.ReturnQuantity : 0)
+                                        </span>
+                                        <span>合计金额:</span>
+                                        <span class="p10_r red" id="sum_price" data-price="0">
+                                            ¥@(Model.SysNo > 0 ? Model.ReturnTotalMoney : 0.00M)
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </form>
+            <div class="pagination align_c clearfix tit_dispay">
+                @*<span id="span_pass" class="wd100">
+                        <input id="forcibly_pass" type="checkbox" name="IsEnforceAllow" /><span class="m5_r red">是否强制放行</span>
+                    </span>*@
+                &nbsp;
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+        var imgUrl = "@imgUrl";
+        //#region 数字控件需要使用
+        Function.prototype.getMultiLine = function () {
+            var lines = new String(this);
+            lines = lines.substring(lines.indexOf("/*") + 3, lines.lastIndexOf("*/"));
+            return lines;
+        };
+        //#region 本页面操作类--PagerOperation
+        var PagerOperation = {};
+        var DelSysNos = [];
+        //初始化事件
+        PagerOperation.InitializeEvent = function () {
+
+            $("img").error(function () {
+                $(this).unbind("error").attr("src", "/Theme/images/noimage.jpg?v=1");
+            });
+            $("div.thumb").hover(function () {
+                var $img=$(this).find("img");
+                var left = (parseFloat($img.width())+8) + "px";
+                $(this).append("<img class='thumbMax' src='" + $img.attr("src") + "' style='position:absolute;left:" + left + ";top:0px;height:auto;z-index:99999;'/>");
+            }, function () {
+                $(this).find(".thumbMax").remove();
+            });
+        };
+        //重置表格交替行样式
+        PagerOperation.setTableCss = function () {
+            //重置表格交替行样式
+            DAO.InterlineStyle();
+        };
+        //#endregion
+        $(function () {
+            PagerOperation.InitializeEvent();
+            PagerOperation.disable();
+            PagerOperation.setTableCss();
+
+
+            //修改下拉列表框为select2
+            @*UI.SelectWhareHouse($("#choose_warehouse"),0,null,"@ViewBag.WarehouseName");
+            $("#choose_warehouse").val("@(Model.WarehouseSysNo <=0 ? "" : Model.WarehouseSysNo.ToString())");*@
+
+        });
+
+        //#region 保存页面数据--PageData
+        //  数组中包含的类有如下属性：
+        //   ProductLendItemSysNo:借货单明细系统编号,
+        //   ProductSysNo:商品编号,
+        //   ProductName:商品名称,
+        //   ProductNum:仓库中的商品存货数量,
+        //   ProductOrderNum:商品订购数量（由页面控件设置）,
+        //   Price:会员等级价格
+        var PageData = [];
+
+
+
+
+
+
+        //#endregion
+
+        //开启页面功能
+        PagerOperation.enable = function () {
+            //$("#choose_product,#create_btn,#remarks").removeAttr("disabled").removeClass("disabled");
+        };
+        //关闭页面功能
+        PagerOperation.disable = function () {
+            //$("#choose_product,#create_btn,#remarks").attr("disabled", "disabled").addClass("disabled");
+        };
+
+</script>

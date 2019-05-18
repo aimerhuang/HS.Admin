@@ -1,0 +1,365 @@
+﻿@{
+    ViewBag.Title = "商品分类选择";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/base.css")' rel="stylesheet" type="text/css" media="all" />
+    <link href='@Url.Content("~/Theme/css/btn.css")' rel="stylesheet" type="text/css" media="all" />
+    <link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" type="text/css" media="all" />
+    <style type="text/css">
+        .zTreeBackground {
+            height: 240px;
+            overflow-y: scroll;
+        }
+
+        .wrap {
+            background: #eee;
+            position: absolute;
+        }
+
+        .module_tree {
+            width: 282px;
+            height: 360px;
+        }
+
+        .search_btn {
+            width: 260px;
+        }
+
+            .search_btn input {
+                width: 216px;
+            }
+
+        .comp5 {
+            background-color: #f5f5f5;
+            height: 260px;
+            overflow-y: auto;
+        }
+
+        .pagination {
+            border: #c1c1c1 solid 1px;
+            margin-left: 0px;
+        }
+    </style>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript">
+        //ztree对象
+        var zTreeObj;
+
+        //默认参数
+        var Default = {
+            url: '@Url.Content("~/Ajax/GetProductCategoryZTreeList/")',
+            isMulti: '@(ViewBag.IsMultipleSelect ? "true" : "false")',
+            width: '@ViewBag.Width',
+            height: '@ViewBag.Height',
+            onlyleaftSelect: '@(ViewBag.OnlyLeaftSelect ? "true" : "false")'
+        };
+
+        //设置ztree参数
+        var ztreeSetting = {
+            view: {
+                addDiyDom: OnAddDiyTreeNodeDom
+            },
+            callback: {
+                onClick: CategoryOnClick,
+                beforeCheck: CategoryBeforeCheck
+            },
+            data:
+            {
+                simpleData: {
+                    enable: true,
+                    idKey:
+                        "id",
+                    pIdKey:
+                        "pId",
+                    rootPId:
+                        0
+                }
+            }
+        };
+
+        function OnAddDiyTreeNodeDom(treeId, treeNode) {
+            var parentNode = treeNode.getParentNode(); //父节点
+            //如果文字有ft_lt样式表示父节点是禁用状态
+            if (parentNode) {
+                if ($("#" + parentNode.tId).children("a").children("span").hasClass("ft_lt"))
+                    treeNode.status = 0;
+
+                if ($("#" + parentNode.tId).children("a").children("span").hasClass("icon_eye_open")) {
+                    treeNode.isOnline = 0;
+                }
+            }
+
+            if (treeNode.status == 0) {
+                $("#" + treeNode.tId + " a span:odd").addClass("ft_lt red");
+            }
+
+            if (treeNode.isOnline == 0) {
+                $("#" + treeNode.tId + " a span:odd").each(function (i, e) {
+                    $(e).append('<span class="iconn_eye_close" title="隐藏"></span>');
+                });
+            }
+        }
+
+        var opts;
+        $(function () {
+
+            InitAjaxLoading();
+
+            var Options = {};
+            opts = $.extend(Default, Options || {});
+
+            //设置窗口大小
+            $("#PdCategory_Single_Select_Panel").height(opts.height);
+            $("#PdCategory_Single_Select_Panel").width(opts.width);
+
+            //如果是多选将初始化ztree多选参数
+            if (opts.isMulti) {
+                //如果是多选就将按钮显示出来
+                //$(".comp5").height(opts.height - 2 - $("#btnContainer").height());
+                var multiZTreeSetting = {
+                    view: {
+                        addDiyDom: OnAddDiyTreeNodeDom,
+                        selectedMulti: opts.isMulti
+                    },
+                    check: {
+                        enable: true,
+                        chkboxType: { "Y": "ps", "N": "ps" }
+                    }
+                }
+
+                //如果是多选就将多选框设置添加到ztree设置中去
+                ztreeSetting = $.extend(ztreeSetting, multiZTreeSetting || {});
+                $("#btnClear").hide();
+            } else {
+
+                $("#btnClear").show();
+                $("#btnOk").hide();
+
+            }
+
+            //读取数据并生产树
+            //CreateZtree(zTreeNodes);
+            $.ajax({
+                url: opts.url,
+                success: function (response) {
+                    if (response != null) {
+                        CreateZtree(response);
+                    }
+                }
+            });
+
+            //回调方法
+            if ($.isFunction(parent._ActiveSelectBatchCategoryCallBack))
+                CloseEvent = parent._ActiveSelectBatchCategoryCallBack;
+
+            $("#btnOk").bind("click", ButtonSelectedOnClick);
+            $("#btnCancel").bind("click", ButtonCancelOnClick);
+            $("#btnClear").bind("click", ButtonClearOnClick);
+
+
+        });
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $("#PdCategory_Single_Select_Panel"),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //窗口关闭事件设置默认方法
+        var CloseEvent = function () {
+        };
+
+        //创建zTree
+
+        function CreateZtree(data) {
+            if (data != null && data.length > 0) {
+                zTreeObj = UI.ZTree.init($("#productCategoryTree"), ztreeSetting, data);
+            } else {
+                $("#ztreeContainer").html(
+                    '<div class="tips tips_warning" id="JS_tip">'
+                        + '<a href="javascript:;" onclick="UI.tips.tip_delete();">&times;</a><span class="icons"></span>系统暂无商品分类可供选择'
+                        + '</div>'
+                );
+            }
+
+        }
+
+        //zTree节点点击事件
+
+        function CategoryOnClick(event, treeId, treeNode) {
+            //判断点击的是不是叶子节点。只都能选择叶子节点才能返回，如果不是叶子节点将不做任何操作
+            if (treeNode.children != null && treeNode.children.length != 0 && opts.onlyleaftSelect) {
+                zTreeObj.expandNode(treeNode, true, true, true);
+                return false;
+            }
+
+            if (opts.isMulti) {
+                zTreeObj.checkNode(treeNode, true, true);
+                return false;
+            }
+
+            //判断是不是单选，应为只有单选是才是点击即返回
+            //if (opts.isMulti == false) {
+            //    treeNode.FullName = GetFullPath(treeNode);
+            //    CloseEvent([treeNode]);
+            //}
+        }
+
+        var productsCategories = new Array();  //原商品分类
+        function CategoryBeforeCheck(treeId, treeNode) {
+            if (treeNode.children != null && treeNode.children.length != 0 && opts.onlyleaftSelect) {
+                zTreeObj.expandNode(treeNode, true, true, true);
+                return false;
+            }
+
+            if (treeNode.halfCheck) {
+                treeNode.halfCheck = false;
+                treeNode.checked = true;
+                zTreeObj.checkNode(treeNode, true, true);
+            } else if (treeNode.checked) {
+                treeNode.checked = false;
+                zTreeObj.checkNode(treeNode, false, true);
+            } else if (!treeNode.checked) {
+                // 判断原本是否为halfCheck
+                if ($.inArray(treeNode.id, productsCategories) >= 0) {
+                    treeNode.halfCheck = true;
+                    treeNode.checked = true;
+                } else {
+                    treeNode.checked = true;
+                }
+                
+                zTreeObj.checkNode(treeNode, true, true);
+            }
+            return false;
+        }
+
+        //设置已经被选择的节点
+
+        function SetCheckedNode(selectedData) {
+            var node;
+
+            if (!!selectedData) {
+                zTreeObj.checkAllNodes(false);
+            }
+
+            //遍历选择节点数据
+            for (var i = 0; i < selectedData.length; i++) {
+                //查找接单并设置成选择状态
+                node = zTreeObj.getNodeByParam("id", selectedData[i]);
+                if (node == null)
+                    continue;
+                zTreeObj.checkNode(node, true, true);
+                node.halfCheck = true;
+            }
+            zTreeObj.refresh();
+        }
+
+        //多选时点击确定按钮
+
+        function ButtonSelectedOnClick() {
+
+            //获取所有已经选择的节点
+            var selectedNodes = zTreeObj.getCheckedNodes(true);
+            var resultList = new Array();
+
+            //轮询节点
+            for (var i = 0; i < selectedNodes.length; i++) {
+                //如果不是子节点将不计入结果
+                if (selectedNodes[i].children != null && selectedNodes[i].children.length > 0)
+                    continue;
+
+                //添加到结果集
+                selectedNodes[i].FullName = "";
+                selectedNodes[i].FullName = GetFullPath(selectedNodes[i]);
+                resultList.push(selectedNodes[i]);
+            }
+
+            //返会结果
+            CloseEvent(resultList);
+        }
+
+        //取消按钮点击事件
+
+        function ButtonCancelOnClick() {
+            CloseEvent(null);
+        }
+
+        function ButtonClearOnClick() {
+            CloseEvent([]);
+        }
+
+        //递归找出选择节点的父节点，并拼接成全路径
+
+        function GetFullPath(node, fullPath) {
+            if (node == null)
+                return false;
+
+            //初始化节点值
+            if (fullPath == null) {
+                fullPath = "";
+            }
+            fullPath = node.name + fullPath;
+
+            //递归查找
+            if (node.getParentNode() != null) {
+                node = node.getParentNode();
+                fullPath = " -> " + fullPath;
+                fullPath = GetFullPath(node, fullPath);
+            }
+
+            return fullPath;
+        }
+
+        function ClearCheckedNode() {
+            //获取所有已经选择的节点
+            var selectedNodes = zTreeObj.getCheckedNodes(true);
+
+            //轮询节点
+            for (var i = 0; i < selectedNodes.length; i++) {
+                //如果不是子节点将不计入结果
+                if (selectedNodes[i].children != null && selectedNodes[i].children.length > 0)
+                    continue;
+
+                zTreeObj.checkNode(selectedNodes[i], false, true);
+                selectedNodes[i].halfCheck = false;
+            }
+        }
+    </script>
+}
+<div id="PdCategory_Single_Select_Panel" class="selectPanel module_tree">
+
+    <div class="boxs_tit head_m">
+        <div class='search_btn m5_t'>
+            <h5 style="margin-top:-5px;">商品分类选择</h5>
+        </div>
+    </div>
+
+    <div class="comp5">
+        <div id="ztreeContainer" class="zTreeDemoBackground left">
+            <ul id="productCategoryTree" class="ztree"></ul>
+        </div>
+    </div>
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnClear">清除</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>

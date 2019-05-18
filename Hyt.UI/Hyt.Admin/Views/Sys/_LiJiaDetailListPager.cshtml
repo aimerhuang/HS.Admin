@@ -1,0 +1,68 @@
+﻿@using Hyt.Infrastructure.Pager;
+@using System.Data;
+@model PagedList<object>
+@helper LoadTableHead()
+{
+    var tableHead = ViewBag.TableHead as List<string>;
+    if (tableHead != null && tableHead.Count > 0)
+    {
+        foreach (var colname in tableHead)
+        {
+            <th>@colname</th>
+        }
+    }
+}
+<style>
+    .boxs_listtabel table th, .boxs_listtabel table td {
+        padding: 0 5px;
+        min-width: 30px;
+    }
+</style>
+<!--表格列开始-->
+<div class="boxs_listtabel" id="JS_width" style="overflow:auto;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                @LoadTableHead()
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var mode = Model.TData as List<object>;
+                if (mode != null && mode.Count > 0)
+                {
+                    foreach (var item in mode)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }
+                        else
+                        {
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                        var dr = item as DataRow;
+                        for (int j = 0; j < dr.ItemArray.Length; j++)
+                        {
+                            if (!Convert.IsDBNull(dr[j]) && dr[j] is DateTime)
+                            {
+                            <td style="min-width:120px;">@DateTime.Parse(dr[j].ToString()).ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            }
+                            else
+                            {
+                                <td>@dr[j]</td>
+                            }
+                        }
+
+                        @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    <!--表格列结束-->
+    @{Html.RenderPartial("_UrlPaging", Model); }
+

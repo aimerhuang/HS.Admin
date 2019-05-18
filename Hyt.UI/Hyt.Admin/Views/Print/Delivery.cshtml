@@ -1,0 +1,122 @@
+﻿@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "配送单打印";
+}
+@model Hyt.Model.Transfer.PrtDelivery
+
+<div id="print">
+    <div id="divmain" class="divdisplay">
+        <div class="print_title">配送单(@Model.SysNo)</div>
+        <table class="main_tb">
+            <tr>
+                <td class="main_title">配送员：</td>
+                <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(Model.DeliveryUserSysNo)（@Model.List.Count<span>单</span>）</td>
+                <td class="main_title">配送时间：</td>
+                <td>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id="divitem" class="divdisplay">
+        <table class="item_tb">
+            <thead>
+                <tr>
+                    <th style="width: 30px">序号</th>
+                    <th style="width: 60px">单据类型</th>
+                    <th style="width: 60px">单据编号</th>
+                    <th style="width: 60px">订单号</th>
+                    <th style="width: 60px">收货人</th>
+                    <th>收货/取件地址</th>
+
+                    <th style="width: 90px">联系电话</th>
+                    <th style="width: 60px">是否到付</th>
+                    <th style="width: 80px">应收款</th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @if (null != Model && Model.List.Count > 0)
+                {
+                    int i = 1;
+                    foreach (var item in Model.List)
+                    { 
+                    <tr>
+                        <td>@i</td>
+                        <td>@((Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型)item.NoteType)</td>
+                        <td>@item.NoteSysNo </td>
+                        <td>@item.OrderSysNo</td>
+                        <td>@item.Name</td>
+                        <td class="auto_left">@item.StreetAddress</td>
+
+                        <td>@item.MobilePhoneNumber
+                            <br />@item.PhoneNumber</td>
+                        <td>@((Hyt.Model.WorkflowStatus.LogisticsStatus.是否到付)item.IsCOD)</td>
+                        <th>@item.Receivable.ToString("C")</th>
+                    </tr>
+                        i++;
+                    }
+                }
+            </tbody>
+            <tr class="item_allcount">
+                <th colspan="8">合计：
+                </th>
+                <th>@ViewBag.ReceivableCount
+                </th>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id="divfoot" class="divdisplay">
+        <table class="foot_tb_delivery">
+            <tr>
+                <td>配货员(库管)：</td>
+                <td>配送人/交款人：</td>
+                <td>收货人(库管)：</td>
+                <td>收货人(内勤)：</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<object id="LODOP_OB_DV" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width="100%" height="600">
+    <embed id="LODOP_EM_DV" type="application/x-print-lodop" width="100%" height="1185" pluginspage="~/Print/install_lodop32.exe"></embed>
+</object>
+@section FooterJs
+{
+    <script type="text/javascript">
+
+        $(function () {
+            document.getElementById('LODOP_OB').style.display = "none";
+           
+        });
+
+     
+
+        function CreatePrintPage() {
+            LODOP = getLodop(document.getElementById('LODOP_OB_DV'), document.getElementById('LODOP_EM_DV'));
+            LODOP.PRINT_INIT("配送单打印");
+            LODOP.SET_PRINT_PAGESIZE(1, 0, 0, 'A4');
+
+            var strStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+            LODOP.ADD_PRINT_HTM(20, "4%", "92%", "BottomMargin:20px", strStyle + document.getElementById("print").innerHTML);
+            // LODOP.ADD_PRINT_TABLE(88, "5%", "90%", 315, strStyle + document.getElementById("divitem").innerHTML); //明细
+            // LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+            // LODOP.ADD_PRINT_HTM(20, "5%", "90%", 60, strStyle + document.getElementById("divmain").innerHTML);//头
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);//页眉页脚
+            //// LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            // LODOP.ADD_PRINT_HTM(405, "5%", "90%", 50, strStyle + document.getElementById("divfoot").innerHTML); //脚
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            // LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            LODOP.ADD_PRINT_TEXT(3, "86%", 135, 20, "第#页/共&页");
+            LODOP.SET_PRINT_STYLEA(0, "ItemType", 2);
+            LODOP.SET_PRINT_STYLEA(0, "Horient", 1);
+
+        }
+
+    </script>
+}

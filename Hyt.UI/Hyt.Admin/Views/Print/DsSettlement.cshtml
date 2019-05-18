@@ -1,0 +1,225 @@
+﻿@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "配送结算单打印（分销）未使用";
+}
+@model Hyt.Model.Transfer.PrtDsDelivery
+
+<div id="print">
+    <div id="divmain" class="divdisplay">
+        <div class="print_title">配送结算单(@Model.SysNo)</div>
+        <table class="main_tb">
+            <tr>
+                <td class="main_title">配送员：</td>
+                <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(Model.DeliveryUserSysNo)（@Model.List.Count<span>单</span>）</td>
+                <td class="main_title">配送时间：</td>
+                <td>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td class="main_title">出库仓库：</td>
+                <td></td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id="divitem" class="divdisplay">
+        <table class="item_tb" id="maintable">
+            <thead>
+                <tr>
+                    <th rowspan="2" style="width: 36px">序号</th>
+                    <th rowspan="2" style="width: 72px">订单号</th>
+                    <th rowspan="2" style="width: 36px">地址</th>
+                    <th rowspan="2" style="width: 72px">收货人</th>
+                    <th rowspan="2" style="width: 36px">联系电话</th>
+                    <th rowspan="2" style="width: 72px">后台显示名称</th>
+                    <th rowspan="2" style="width: 36px">数量</th>
+
+                    <th colspan="3">商城价格</th>
+                    <th rowspan="2" style="width: 72px">升舱价格</th>
+                    <th rowspan="2" style="width: 36px">分销结算价</th>
+                    <th rowspan="2" style="width: 72px">小计</th>
+                    <th rowspan="2" style="width: 36px">备注</th>
+                </tr>
+                <tr>
+                    <th style="width: 59px">支付方式</th>
+                    <th style="width: 50px">应收</th>
+                    <th style="width: 50px">实收</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (null != Model && Model.List.Count > 0)
+                {
+                    var i = 1;
+
+                    foreach (var item in Model.List)
+                    { 
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.DeliverySysNo</td>
+                        <td>@item.Name</td>
+                        <td class="auto_left">@item.StreetAddress</td>
+                        <td>@item.MobilePhoneNumber
+                            <br />@item.PhoneNumber</td>
+                        <th>@item.Receivable.ToString("C")</th>
+                        <td></td>
+                    </tr>
+                        i++;
+                    }
+                }
+            </tbody>
+            <tr class="item_allcount">
+                <th colspan="5">合计：
+                </th>
+                <th>
+                </th>
+                <th></th>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id="divfoot" class="divdisplay">
+
+        <table class="foot_subtb">
+            <tr>
+                <td rowspan="7" style="width: 2.5%;">结算统计</td>
+                <td colspan="3" style="width: 30%;">订单统计</td>
+                <td rowspan="7" style="width: 19.5%; vertical-align: top; text-align: left;">订单情况说明：</td>
+                <td rowspan="7" style="width: 2.5%;">财务统计</td>
+                <td colspan="3" style="width: 26%;">财务结算</td>
+                <td rowspan="7" style="width: 19.5%; vertical-align: top; text-align: left;">备注：</td>
+            </tr>
+            <tr>
+                <td>订单类型</td>
+                <td>应送订单</td>
+                <td>实送订单</td>
+
+                <td>派送订单</td>
+                <td>应收款</td>
+                <td>实收款</td>
+
+            </tr>
+            <tr>
+                <td>商城</td>
+                <td></td>
+                <td></td>
+                <td>商城</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>升舱订单</td>
+                <td></td>
+                <td></td>
+                <td>升舱订单</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>分销订单</td>
+                <td></td>
+                <td></td>
+                <td>分销订单</td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>RMA派送</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>RMA取件</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+        </table>
+
+
+        <table class="foot_tb_settlement">
+            <tr>
+                <td>库管：</td>
+                <td>配送人：</td>
+                <td>内勤：</td>
+                <td>会计：</td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+@section FooterJs
+{
+    <script type="text/javascript">
+        //合并表重复行索引1,2,3,4
+        MergeTable();
+
+        function CreatePrintPage() {
+            LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+            LODOP.PRINT_INIT("结算单打印");
+            LODOP.SET_PRINT_PAGESIZE(1, 2100, 1480, '');
+
+            var strStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+            LODOP.ADD_PRINT_HTM(20, "4%", "92%", "BottomMargin:20px", strStyle + document.getElementById("print").innerHTML);
+
+            // LODOP.ADD_PRINT_TABLE(88, "5%", "90%", 275, strStyle + document.getElementById("divitem").innerHTML); //明细
+            // LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+            // LODOP.ADD_PRINT_HTM(20, "5%", "90%", 60, strStyle + document.getElementById("divmain").innerHTML);//头
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);//页眉页脚
+            //// LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            // LODOP.ADD_PRINT_HTM(365, "5%", "90%", 450, strStyle + document.getElementById("divfoot").innerHTML); //脚
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            // LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            LODOP.ADD_PRINT_TEXT(3, "86%", 135, 20, "第#页/共&页");
+            LODOP.SET_PRINT_STYLEA(0, "ItemType", 2);
+            LODOP.SET_PRINT_STYLEA(0, "Horient", 1);
+
+        }
+
+        //合并表
+        function MergeTable() {
+            var tbl = document.getElementById("maintable");
+            MergeCellsVertical(tbl, 1);
+            MergeCellsVertical(tbl, 2);
+            MergeCellsVertical(tbl, 3);
+            MergeCellsVertical(tbl, 4);
+        }
+
+        // 合并某一列相同的行
+        function MergeCellsVertical(tbl, cellIndex) {
+            if (tbl.rows.length < 2) return;
+            var i, j;
+            var last = tbl.rows(0).cells(cellIndex).innerHTML;
+            var lastIndex = 0;
+            for (i = 1; i < tbl.rows.length; i++) {
+                if (tbl.rows(i).cells(cellIndex).innerHTML != last) // 发现新的值
+                {
+                    if (i > lastIndex + 1) {
+                        for (j = lastIndex + 1; j < i; j++) {
+                            tbl.rows(j).cells(cellIndex).removeNode();
+                        }
+                        tbl.rows(lastIndex).cells(cellIndex).rowSpan = i - lastIndex;
+                    }
+                    last = tbl.rows(i).cells(cellIndex).innerHTML;
+                    lastIndex = i;
+                }
+            }
+            // 最后一行要特别处理
+            if (lastIndex != tbl.rows.length - 1) {
+                for (j = lastIndex + 1; j < tbl.rows.length; j++) {
+                    tbl.rows(j).cells(cellIndex).removeNode();
+                }
+                tbl.rows(lastIndex).cells(cellIndex).rowSpan = tbl.rows.length - lastIndex + 1;
+            }
+        }
+    </script>
+
+}

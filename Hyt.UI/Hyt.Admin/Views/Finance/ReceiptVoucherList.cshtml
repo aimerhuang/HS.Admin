@@ -1,0 +1,161 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "收款单管理";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" ></script>
+}
+@helper CreateList(List<SelectListItem> items, SelectListItem selectedItem)
+{
+    if (items != null && items.Count > 0)
+    {
+        foreach (var item in items)
+        {
+            <option value="@item.Value" 
+                @if (selectedItem != null)
+                {
+                    if (selectedItem.Text == item.Text || selectedItem.Value == item.Value)
+                    {
+                        @:selected="selected"
+                    }
+                }
+             >@item.Text</option>
+        }
+    }
+}
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+          <h3>收款单管理</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+        	<div class="boxs_tool">
+                <form id="formPost" method="post" action="@Url.Action("ExportReceiptVoucher")">
+                    <div class="right_tool clearfix">
+                        <span class="fl">支付方式</span>
+                        <select class="select_ht28 fl wd90 m10_l m10_r" search="paymentType" name="paymentType" id="paymentType"></select>
+                        <span class="fl">收入类型</span>
+                        <select class="select_ht28 fl wd90 m10_l m10_r" search="IncomeType" name="IncomeType" id="incomeType">
+                            <option selected="selected">全部</option>
+                            @CreateList(ViewBag.typeList, null)
+                        </select>
+                        <span class="fl">状态</span>
+                        <select class="select_ht28 fl wd90 m10_l m10_r" search="Status" name="Status" id="statusType">
+                            <option selected="selected">全部</option>
+                            @CreateList(ViewBag.statusList, null)
+                        </select>
+                        <span class="fl">单据来源编号</span><input type="text" class="input_small m10_r m10_l fl" search="SourceSysNo" name="SourceSysNo">
+                        <span class="fl">创建时间</span><div class="date_btn120 m10_l m10_r fl">
+                            <input type="text" value="" class="input_ht26" id="d121" search="BeginDate" name="BeginDate">
+                                                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d121',maxDate: '#F{$dp.$D(\'d122\')}'})" type="button"><span class="icon_calendar"></span></button>
+                        </div><span class="fl">-</span><div class="date_btn120 m10_l m10_r fl">
+                            <input type="text" value="" class="input_ht26" id="d122" name="EndDate" search="EndDate">
+                                                           <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d122',minDate: '#F{$dp.$D(\'d121\')}'})" type="button"><span class="icon_calendar"></span></button>
+                        </div><button title="搜索" class="btn btn_ht28 fl" type="button" id="searchBtn"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="btnExport" type="submit"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                        <button class="btn btn_ht26 btn_blue" id="btnConfirm" title="批量确认"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量确认</span></button>
+                    </div>
+                </form>
+            </div>
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function OpenSource(type, id) {
+        //销售单
+        if (type == 10)
+        {
+            UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+        }
+        else
+        {
+            //分销商保证金
+            if (type == 20)
+            {
+                UI.DialogOpen('/Stores/DealerBailOrderView?id=' + id + '&Dialog=true', { title: '保证金详情', width: 950, height: 600 }, false);
+            }
+            else
+            {
+                UI.DialogOpen('/RMA/RmaReturnView?id=' + id + '&IsCanRedirect=false', { title: '退换货单', width: 950, height: 600 }, false);
+            }           
+        }
+    }
+    $(document).ready(function () {
+        loadAllPayType();
+        doSearch();
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+        $("#btnConfirm").click(function () {
+            var ids = [];
+            $('#paging input.checktd:checked').each(function () {
+                    var mSysNo = $(this).val();
+                    ids.push(mSysNo);
+            });
+            if (ids.length == 0) {
+                Utils.alert("请先选择要确认的收款单！");
+                return false;
+            }
+            UI.Confirm({
+                content: '是否确定要执行批量确认?',
+                ok: function () {
+                    var json = JSON.stringify({ sysNos: ids });
+                    $.ajax({
+                        url: '/Finance/BatchConfirmReceiptVoucher/',
+                        type: 'POST',
+                        cache: false,
+                        data: json,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (ret) {
+                            if (ret.StatusCode == 0) {
+                                UI.tips.tip_alert("tips_success", "提交成功");
+                                doSearch(1);
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+            return false;
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Finance/DoReceiptVoucherQuery?r=" + Math.random(), "Search", function (p) {
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    //查询条件变化时执行
+    $("#statusType,#incomeType,#paymentType").change(function () {
+        doSearch();
+    });
+    
+    //加载支付方式
+    function loadAllPayType() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadAllPayType",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                });
+                $('#paymentType').html(content);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,78 @@
+﻿@model IList<Hyt.Model.CBFeArticle>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "广告展示模块管理";
+}
+
+<div class="case">
+    <!--title开始-->
+    <div class="boxs_tit head_m">
+        <h3>信息详情</h3>
+    </div>
+    <div class="boxs_con_c1 m_detailbox1 clearfix">
+        <div class="conlf">
+            <ul class="mgul">
+                @{
+                    foreach (var item in Model)
+                    {
+                        <li aid="@item.SysNo"><i class="icon_envelope m10_r m10_l"></i><a class="title" title="@item.Title">@item.Title</a>
+                            <span class="content hide">@Html.Raw(item.Content)</span>
+
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        <div class="conrf c6">
+            <div class="list" style="display:block;">
+                <h5 class="title"></h5>
+                <div class="content m10_t"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section headjs{
+    <script type="text/javascript">
+        $(document).ready(function (e) {
+            $('.m_detailbox1').M_detail();
+            var show = $('.mgul > li[aid="' + @ViewBag.ShowSysNo +'"]')
+            if (show.length > 0) {
+                show.click();
+            } else {
+                $('.mgul > li:eq(0)').click();
+            }
+        });
+        $.fn.M_detail = function (options) {
+            var opts = {
+            }
+            opts = $.extend({}, opts, options);
+            var Navliobj = $('.mgul > li');
+            var Conlistobj = $('.conrf > .list');
+            
+            Navliobj.bind('click', function () {
+                var $that = $(this);
+                var _index = Navliobj.index($that);
+                if ($that.hasClass('active')) return;
+                Navliobj.removeClass('active').children('.arrow').remove();
+                //Conlistobj.removeClass('block');
+                $that.addClass('visited active').append('<span class="arrow"></span>');
+                //Conlistobj.eq(_index).addClass('block');
+
+                var title = $that.find('a.title').html();
+                var content = $that.find('span.content').html();
+                $('.list > h5.title').html(title);
+                $('.list > div.content').html(unescape(content));
+            });
+            //$(window).scroll(function () {
+            //    var WinH = $(window).scrollTop();
+            //    if (WinH >= 5) {
+            //        Conlistobj.parents('.conrf').css({ position: 'fixed', top: 0, 'padding-right': 40 })
+            //    } else {
+            //        Conlistobj.parents('.conrf').css({ position: 'relative', 'padding-right': 20 })
+            //    }
+            //});
+        };
+    </script>
+}

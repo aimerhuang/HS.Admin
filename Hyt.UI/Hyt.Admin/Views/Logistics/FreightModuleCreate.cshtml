@@ -1,0 +1,1111 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.LgFreightModule
+
+@{
+    ViewBag.Title = "运费模板";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool CanEdit = true;
+}
+@section HeadCss{
+
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type='text/javascript' src='/Theme/scripts/jquery.min.js'></script>
+    <script type='text/javascrip' src='/Theme/scripts/common.yui.js'></script>
+    <script type='text/javascript' src='/Theme/Plugins/Dialog/Dialog.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/UI.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/Utils.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/DAO.yui.js'></script>
+
+    <style type="text/css">
+        a:hover {
+            text-decoration:underline;
+        }
+    table #aExpress_DeliveryArea thead tr td {
+        border-left: 1px solid #E1E1E1;
+        border-top: 1px solid #E1E1E1;
+    }
+    table #aExpress_DeliveryArea tbody tr td {
+        border-left: 1px solid #E1E1E1;
+    }
+    table #aExpress_DeliveryArea tr td.lasttd {
+        border-right: 1px solid #E1E1E1;
+    }
+    table #aExpress_DeliveryArea tbody tr td input[type=text]{
+        width:40%;
+    }
+    table #aexpressdeliverydefult tbody tr td input[type=text] {
+        width: 5%;
+    }
+
+    table #aEMS_DeliveryArea thead tr td {
+        border-left: 1px solid #E1E1E1;
+        border-top: 1px solid #E1E1E1;
+    }
+
+    table #aEMS_DeliveryArea tbody tr td {
+        border-left: 1px solid #E1E1E1;
+    }
+
+    table #aEMS_DeliveryArea tr td.lasttd {
+        border-right: 1px solid #E1E1E1;
+    }
+
+    table #aEMS_DeliveryArea tbody tr td input[type=text] {
+        width: 40%;
+    }
+
+    table #aemsdeliverydefult tbody tr td input[type=text] {
+        width: 5%;
+    }
+
+    table #aSurfaceMail_DeliveryArea thead tr td {
+        border-left: 1px solid #E1E1E1;
+        border-top: 1px solid #E1E1E1;
+    }
+
+    table #aSurfaceMail_DeliveryArea tbody tr td {
+        border-left: 1px solid #E1E1E1;
+    }
+
+    table #aSurfaceMail_DeliveryArea tr td.lasttd {
+        border-right: 1px solid #E1E1E1;
+    }
+
+    table #aSurfaceMail_DeliveryArea tbody tr td input[type=text] {
+        width: 40%;
+    }
+
+    table #asurfacemaildeliverydefult tbody tr td input[type=text] {
+        width: 5%;
+    }
+    
+.pro {
+    border: 1px solid #e8e8e8;
+    color: #666;
+    float: left;
+    height: 18px;
+    line-height: 18px;
+    margin: 4px 5px 0 0;
+    max-width: 144px;
+    overflow: hidden;
+    padding: 0 4px 0 4px;
+    position: relative;
+    text-decoration: none;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+  .icon-btn-x {
+            background: rgba(0, 0, 0, 0) url("/Theme/images/icons/TB1500kKFXXXXcQXVXX6sGuHVXX-458-458.png") no-repeat scroll 0 0; display: inline-block;
+ }  
+ .pro:hover {
+    border-color: #f40;
+}
+a:hover{ text-decoration:none;}
+.icon-btn-x {
+    background-position: -73px -445px;
+    height: 7px;
+    width: 7px;
+}
+    </style>
+
+}
+<script id="tempValuationItem" type="text/template">
+    <tr class="trValuationItme" data-id="0">
+        <td style="border:none;" align="center"><input type='text' name='itemTitle' value='' style='width:250px;' /></td>
+        <td style="border:none;" align="center"><a class="a_SelectArea" onclick="a_Click_SelectAareaControl(this)">选择区域</a><input type='hidden' name='itemAreaNo' value='0' style='width:30px;' /></td>
+        <td style="border:none;" align="center"><input type='text' name='itemMinValue' value='0' style='width:50px;' /></td>
+        <td style="border:none;" align="center"><input type='text' name='itemMaxValue' value='0' style='width:50px;' /></td>
+        <td style="border:none;" align="center">
+            <select name="itemValueType">
+                <option value="固定值">固定值</option>
+                <option value="费率">费率</option>
+            </select>
+        </td>
+        <td style="border:none;" align="center"><input type='text' name='itemFreightValue' value='0' style='width:50px;' />（元）</td>
+        <td style="border:none;" align="center"><button onclick="" class="btn btn_ht26 m10_l btn_red delValuationItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+    </tr>
+</script>
+
+<script id="tempPriceItem" type="text/template">
+    <tr class="trPriceItme" data-id="0">
+        <td style="border:none;"><input type='text' name='itemLowest' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><input type='text' name='itemService' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><input type='text' name='itemFirst' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><input type='text' name='itemFirstFee' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><input type='text' name='itemContinue' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><input type='text' name='itemContinueFee' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><input type='text' name='itemDeviation' value='0' style='width:30px;' /></td>
+        <td style="border:none;"><button onclick="" class="btn btn_ht26 m10_l btn_red delPriceItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+    </tr>
+</script>
+<script type="text/template" id="tempAreaItem">
+    <tr data-id="0">
+        <td>
+            <div style='position:relative; float: left; width: 92%;text-align:left;'>
+                <div><input type='checkbox' class='chkPL' style='display:none;' /></div>
+                <div class='areacls' id="area_{%=this.count%}">
+
+                </div>
+            </div>
+            <div style='position:relative; float: left;  margin-top:4px;'>
+                <button class="btn btn_ht26 btn_blue areaEdit"><span class="icon_pencil icon_white"></span><span class="m5_l">选择城市</span></button>
+            </div>
+        </td>
+        <td colspan="5">
+            <table style="width:100%; border:1px solid #E1E1E1;">
+                <thead>
+                    <tr>
+                        <th style='width:30px;'>最低费用</th>
+                        <th style='width:30px;'>服务费</th>
+                        <th style='width:30px;'>首重</th>
+                        <th style='width:30px;'>首费</th>
+                        <th style='width:30px;'>续重</th>
+                        <th style='width:30px;'>续费</th>
+                        <th style='width:30px;'>重量下限</th>
+                        <th style='width:30px;'>重量上限</th>
+                        <th style='width:30px;'>偏差</th>
+                        <th style='width:74px;'>操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="10" style="text-align:right;">
+                            <button type="button" class="btn btn_blue btn_ht26 newPriceItem"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增</span></button>
+                        </td>
+                    </tr>
+                    <tr class="trPriceItme" data-id="0">
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemLowest' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemService' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirst' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirstFee' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinue' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinueFee' value='0' style='width:30px;' /></td>
+
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMinWeight' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMaxWeight' value='0' style='width:30px;' /></td>
+
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemDeviation' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><button onclick="" class="btn btn_ht26 m10_l btn_red delPriceItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </td>
+
+        <td>
+            <button class="btn btn_ht26 m10_l btn_red delAreaItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+        </td>
+    </tr>
+</script>
+<script type="text/javascript">
+    $(function () {
+        $("body").mousemove(function (e) {
+            if ($(e.target).hasClass("icon-btn-x")) {
+                $(e.target).css("background-position", "-90px -445px");
+                return false;
+            }
+            if ($(e.target).hasClass("pro")) {
+                $(e.target).find(".icon-btn-x").css("background-position", "-90px -445px");
+                return false;
+            } 
+            $(".icon-btn-x").css("background-position", "-73px -445px");
+            e.stopPropagation();
+        });
+
+        $("span.icon-btn-x").live("click", function () {
+            $(this).parent().remove();
+        });
+        //校验价格和重量是否有效数字
+        $("input.priceOrWeight").live("blur", function () {
+            var pattern =/^(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*))$/;
+            var value = $(this).val();
+            if (!pattern.test(value))
+                $(this).val(0).css("border", "1px solid rgb(197, 58, 40)"); 
+            else
+                $(this).css("border", "1px solid #CCCCCC");
+        });
+        //新增地区项
+        $("button.newAreaItem").live("click", function () {
+            var $tbody = $(this).parent().parent().children("table").children("tbody");
+            var data = {};
+            data.count = $tbody.children("tr").length+1;
+            $tbody.append(myTempl("#tempAreaItem",data));
+        });
+        //新增价格项
+        $("button.newPriceItem").live("click", function () {
+            var $tr = $(this).parent().parent().parent().children("tr");
+            if ($tr.length >= 2) {
+                $tr.parent().append($tr.last().clone());
+                $(this).parent().parent().parent().children("tr").last().attr("data-id", "0");
+            }else
+                $tr.parent().append(myTempl("#tempPriceItem"));
+        });
+
+        //新增保价
+        $("button.newValuationItem").live("click", function () {
+            var $tr = $(this).parent().parent().parent().children("tr");
+            if ($tr.length >= 2) {
+                $tr.parent().append($tr.last().clone());
+                $(this).parent().parent().parent().children("tr").last().attr("data-id", "0");
+            } else {
+                $tr.parent().append(myTempl("#tempValuationItem"));
+               
+            }
+        });
+
+        //删除价格项
+        $("button.delPriceItem").live("click", function () {
+            var ids = $("#delLgFreightModuleItemPricesIds").val();
+            var id = $(this).parent().parent().attr("data-id");
+         
+            if (id != "0") {
+                if (ids =="")
+                    ids = id;
+                else
+                    ids = ids + "," + id;
+            }
+            $("#delLgFreightModuleItemPricesIds").val(ids);
+            $(this).parent().parent().remove();
+        });
+
+        //删除价格项
+        $("button.delValuationItem").live("click", function () {
+            var ids = $("#delLgFreightModuleItemValuationIds").val();
+            var id = $(this).parent().parent().attr("data-id");
+
+            if (id != "0") {
+                if (ids == "")
+                    ids = id;
+                else
+                    ids = ids + "," + id;
+            }
+            $("#delLgFreightModuleItemValuationIds").val(ids);
+            $(this).parent().parent().remove();
+        });
+
+        //删除地区项
+        $("button.delAreaItem").live("click", function () {
+            var ids = $("#delLgFreightModuleDetailsIds").val();
+
+            var id = $(this).parent().parent().attr("data-id");
+
+            if (id != "0") {
+                if (ids == "")
+                    ids = id;
+                else
+                    ids = ids + "," + id;
+            }
+            $("#delLgFreightModuleDetailsIds").val(ids);
+
+            var _ids = $("#delLgFreightModuleItemPricesIds").val();
+
+            $(this).parent().parent().find("table").find("tbody").children("tr").each(function (i) {
+                
+                var _id = $(this).attr("data-id");
+                if (i > 0&&_id != "0") {
+                    if (_ids == "")
+                        _ids = _id;
+                    else
+                        _ids = _ids + "," + _id; 
+                }
+            });
+            $("#delLgFreightModuleItemPricesIds").val(_ids);
+
+            $(this).parent().parent().remove();
+        });
+        //运送地区伪回调
+        window.top._ActiveSelectAreaCallBack = function (data) {};
+        //选择城市
+        $(".areaEdit").live("click", function () {
+            var id = $(this).parent().parent().find("div.areacls").attr("id");
+            var width = '400px', height = '500px';
+            UI.DialogOpen('/Logistics/FreightModuleArea?id='+id, {
+                init: function () {
+
+                },
+                title: '运送地区列表',
+                width: width,
+                height: height,
+                button: [
+            {
+                name: '保存',
+                focus: true,
+                callback: function () {
+                    var win = this.iframe.contentWindow;
+                    var $iframe = this.iframe.contentWindow;
+                    $iframe.CallBack();
+                    return true; 
+                }
+            },
+        {
+            name: '关闭'
+        }
+                ]
+            },
+            false);
+        });
+    });
+</script>
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3 id="testH3">运费模板</h3>
+            </div>
+            <div class="boxs_con_c1">
+
+                <div id="divEdit" class="boxs_detail_dispay">
+                    <div class="tit_con">
+                        <input type="hidden" id="mSysNo" value="@Model.SysNo" />
+                        <input type="hidden" id="mDeliveryTime" value="@Model.DeliveryTime" />
+                        <input type="hidden" id="mIsPost" value="@Model.IsPost" />
+                        <input type="hidden" id="mValuationStyle" value="@Model.ValuationStyle" />
+                        <input type="hidden" id="mExpress" value="@Model.Express" />
+                        <input type="hidden" id="mEMS" value="@Model.EMS" />
+                        <input type="hidden" id="mSurfaceMail" value="@Model.SurfaceMail" />
+                        <input type="hidden" id="delLgFreightModuleDetailsIds" value=""/>
+                        <input type="hidden" id="delLgFreightModuleItemPricesIds" value="" />
+                        <input type="hidden" id="delLgFreightModuleItemValuationIds" value="" />
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                            <tbody>
+                                <tr>
+                                    <td width="180" class="nameright"><span class="v_star">*</span>模板代码</td>
+                                    <td>
+                                        <input type="text" name="ModuleCode" id="ModuleCode" save="ModuleCode" maxlength="50" value="@if (Model.ModuleCode != null){@Model.ModuleCode}" class="wd600" />
+                                        <span class="prompt m10_l" id="c_ModuleCode">填写模板代码</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="180" class="nameright"><span class="v_star">*</span>模板名称</td>
+                                    <td>
+                                        <input type="text" name="ModuleName" id="ModuleName" maxlength="50" value="@if (Model.ModuleName != null){@Model.ModuleName}" class="wd600">
+                                        <span class="prompt m10_l" id="c_ModuleName">填写模板名称</span>
+                                    </td>
+                                </tr>
+                                <tr style="display:none;">
+                                    <td class="nameright"><span class="v_star">*</span>商品地址</td>
+                                    <td>
+                                        <div id="DivProductAddress" style='position: relative; float: left; width: 144px;height:21px; text-align:left;border:1px solid #CCCCCC;padding:1.5px;cursor:pointer;'>
+                                            @if (Model.ProductAddress != null && Model.ProductAddress != 0)
+                                            {
+                                                Hyt.Model.BsArea BasicArea = Hyt.BLL.Basic.BasicAreaBo.Instance.GetArea(Model.ProductAddress);
+                                                <span class='areacls' id='@Model.ProductAddress'>@(BasicArea.AreaName != null ? BasicArea.AreaName : "")</span>
+                                            }
+                                            else
+                                            {
+                                                <span class='areacls' id='@Model.ProductAddress'>@Model.ProductAddress</span>
+                                            }
+                                        </div>&nbsp;
+                                        <span class="prompt m10_l" id="c_DivProductAddress">选择商品地址</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>发货时间</td>
+                                    <td>
+                                        <select id="DeliveryTime" name="DeliveryTime" class="wd150">
+                                            <option value="">--请选择--</option>
+                                            <option value="4小时内">4小时内</option>
+                                            <option value="8小时内">8小时内</option>
+                                            <option value="12小时内">12小时内</option>
+                                            <option value="16小时内">16小时内</option>
+                                            <option value="20小时内">20小时内</option>
+                                            <option value="1天内">1天内</option>
+                                            <option value="2天内">2天内</option>
+                                            <option value="3天内">3天内</option>
+                                            <option value="5天内">5天内</option>
+                                            <option value="7天内">7天内</option>
+                                            <option value="8天内">8天内</option>
+                                            <option value="10天内">10天内</option>
+                                            <option value="12天内">12天内</option>
+                                            <option value="15天内">15天内</option>
+                                            <option value="17天内">17天内</option>
+                                            <option value="20天内">20天内</option>
+                                            <option value="25天内">25天内</option>
+                                            <option value="30天内">30天内</option>
+                                            <option value="35天内">35天内</option>
+                                            <option value="45天内">45天内</option>
+                                        </select>
+                                        <span class="prompt m10_l" id="c_DeliveryTime">选择发货时间</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright"><span class="v_star">*</span>是否包邮</td>
+                                    <td>
+                                        <input type="radio" value="1" name="IsPost" checked="checked" id="IsPost_Yes" /><label for="IsPost_Yes" class="m10_r"> 自定义运费</label>
+                                        <input type="radio" value="2" name="IsPost" id="IsPost_No" /><label for="IsPost_No"> 卖家承担运费</label>
+                                        <span class="prompt m10_l" id="c_IsPost">选择是否包邮</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright"><span class="v_star">*</span>计价方式</td>
+                                    <td>
+                                        <input type="radio" value="1" name="ValuationStyle"  id="ValuationStyle_Num" /><label for="ValuationStyle_Num" class="m10_r"> 按件数</label>
+                                        <input type="radio" value="2" name="ValuationStyle" checked="checked" id="ValuationStyle_Weight" /><label for="ValuationStyle_Weight" class="m10_r"> 按重量</label>
+                                        <input type="radio" value="3" name="ValuationStyle" id="ValuationStyle_Capacity" /><label for="ValuationStyle_Capacity"> 按体积</label>
+                                        <span class="prompt m10_l" id="c_ValuationStyle">选择计价方式</span>
+                                    </td>
+                                </tr>
+                                
+                                <tr style="display:none;">
+                                    <td valign="top" class="nameright">
+                                        <span class="v_star">*</span>增值服务
+                                    </td>
+                                    <td>
+                                        <table style="width: 100%; border: #e1e1e1 solid 1px;" >
+                                            <tr>
+                                                <td style="width: 30px;" align="center" ><input type="checkbox" @(Model.IsTurnVtW == 1 ? "checked" : "") id="cb_TurnVtW" name="cb_TurnVtW" /></td>
+                                                <td style="width: 30px;" valign="top">
+                                                    <select id="sele_TurnVtW">
+                                                        <option value="体积转重量" @(Model.TurnVtWType == "体积转重量"?"selected":"") >体积转重量</option>
+                                                    </select>
+                                                </td>
+                                                <td>
+                                                    <input type="text" style="width:300px;" id="ipt_txt_TurnVtW" value="@(Model.TurnVtWFormula)" />
+                                                    <span class="prompt m10_l" id="c_ModuleCode">请输入计算公式。例如体积转重量：[立方米]/6000 其结构就是想要的重量了，重量固定为Kg</span>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td style="width: 30px;" align="center" valign="top"><input type="checkbox" @(Model.IsValuation == 1 ? "checked" : "") id="Quoted_Price" name="Quoted_Price" /></td>
+                                                <td style="width: 30px;" valign="top">保价</td>
+                                                <td>
+                                                    <table id="tab_ValuationForm" style="width:100%">
+                                                        <thead>
+                                                            <tr>
+                                                                <th style="width:260px;">标题</th>
+                                                                <th>区域值</th>
+                                                                <th>最小保值</th>
+                                                                <th>最大保值</th>
+                                                                <th>保费形式</th>
+                                                                <th>费额</th>
+                                                                <th></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr>
+                                                                <td colspan="7" style="text-align:right;">
+                                                                    <button type="button" class="btn btn_blue btn_ht26 newValuationItem"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增</span></button>
+                                                                </td>
+                                                            </tr>
+                                                            @{
+                                                                List<Hyt.Model.Generated.LgFreightValuationModule> list = ViewBag.ValuationList as List<Hyt.Model.Generated.LgFreightValuationModule>;
+                                                                foreach (Hyt.Model.Generated.LgFreightValuationModule mod in list)
+                                                                {
+                                                                        <tr class="trValuationItme" data-id="@mod.SysNo">
+                                                                            <td style="border:none;" align="center"><input type='text' name='itemTitle' value='@mod.lgfvm_title' style='width:250px;' /></td>
+                                                                            <td style="border:none;" align="center"><a class="a_SelectArea" onclick="a_Click_SelectAareaControl(this)">选择区域(@(mod.lgfvm_AreaSysNo.Split(',').Length-2))</a>
+                                                                                <input type='hidden' name='itemAreaNo' value='@mod.lgfvm_AreaSysNo' style='width:30px;' /></td>
+                                                                            <td style="border:none;" align="center"><input type='text' name='itemMinValue' value='@mod.lgfvm_MinValua' style='width:50px;' /></td>
+                                                                            <td style="border:none;" align="center"><input type='text' name='itemMaxValue' value='@mod.lgfvm_MaxValua' style='width:50px;' /></td>
+                                                                            <td style="border:none;" align="center">
+                                                                                <select name="itemValueType">
+                                                                                    <option value="固定值" @(mod.lgfvm_ValueType == "固定值" ? "selected" : "")>固定值</option>
+                                                                                    <option value="费率" @(mod.lgfvm_ValueType == "费率" ? "selected" : "")>费率</option>
+                                                                                </select>
+                                                                            </td>
+                                                                            <td style="border:none;" align="center"><input type='text' name='itemFreightValue' value='@mod.lgfvm_FreightValue' style='width:50px;' />（元）</td>
+                                                                            <td style="border:none;" align="center"><button onclick="" class="btn btn_ht26 m10_l btn_red delValuationItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                                                                        </tr>
+                                                                }
+                                                            }
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                @*<tr>
+                                 <td class="nameright"><span class="v_star">*</span>运送方式</td>
+                                 <td>
+                                  指定地区@*外，其余地区的运费采用“默认运费”
+    >><span class="prompt m10_l" id="c_DeliveryStyle">选择运送方式</span>
+                                    </td>
+                                </tr>*@
+
+                                <tr id="trLogistics">
+                                    <td class="nameright"></td>
+                                    <td>
+                                        <div class="tit_con1" style="border:1px solid #B2D1FF; ">
+                                            <table id="aLogistics_DeliveryArea" cellspacing="0" cellpadding="0" border="0" class="freTable" style="width:100%; text-align: center; padding: 5px; ">                                            
+                                                <thead>
+                                                    <tr>
+                                                        <td style='width:30%;'>运送到</td>
+                                                        <td colspan="5">运费计算规则</td>
+                                                        <td style='width:80px;' class='lasttd'>操作</td>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    @{     
+                                                        List<Hyt.Model.LgFreightModuleDetails> LgFreightModuleDetails = Hyt.BLL.Logistics.LgFreightModuleDetailsBo.Instance.GetFreightModuleDetailsBy(Model.SysNo, Model.IsPost, Model.ValuationStyle, Model.Express);
+                                                     }
+
+                                                    @foreach (Hyt.Model.LgFreightModuleDetails itemv in LgFreightModuleDetails)
+                                                    {
+                                                        @Html.Partial("_FreightModuleDetailsItems", itemv)                                                     
+                                                    }
+                                                    @if (LgFreightModuleDetails.Count==0)
+                                                    {
+                                                        @Html.Partial("_FreightModuleDetailsItems", new Hyt.Model.LgFreightModuleDetails() {SysNo=0})
+                                                    }
+                                                </tbody>
+                                            </table>
+                                            <div style="padding:4px 0 10px 10px;"><button type="button" class="btn btn_blue btn_ht26 newAreaItem"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增一行</span></button></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="pagination align_c clearfix">
+                    @if (CanEdit && (Model.Status == (int)Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态.待审核 || Model.Status == 0))
+                    {
+                        <button id="btnSave" class="btn btn_blue btn_ht30 m10_r" type="submit">
+                            <span class="icon_save icon_white"></span>
+                            <span>保存</span>
+                        </button>
+                    }
+                    @if (CanEdit && Model.Status == (int)Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态.待审核 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.LG1015101))
+                    {
+                        <button id="btnAudit" class="btn btn_blue btn_ht30 m10_r" type="button">
+                            <span class="icon_white icon_thumbs_up"></span>
+                            <span>审核通过</span>
+                        </button>
+
+                    }
+                    @if (CanEdit && Model.Status != 0 && Model.Status != (int)Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态.作废 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.LG1015101))
+                    {
+                        <button id="btnCancel" class="btn btn_red btn_ht30 m10_r" type="button">
+                            <span class="icon_white icon_trash"></span>
+                            <span>作废</span>
+                        </button>
+                    }
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ModuleDiv" style="position: absolute; z-index: 9998; left:0;top:0;display:none;"></div>
+    <div id="PL_SET" style="position: absolute; z-index: 9999; border: 1px solid #B2D1FF; overflow: hidden; background: #FFF; text-align: left; height: auto; padding: 10px; display: none; ">
+          <table cellspacing="0" cellpadding="0" border="0" style="padding-left: 20px; padding-right: 20px; width: 100%;">
+              <tbody>
+                  <tr id="trPL_SET" style="background-color: #F3FEED;">
+
+                  </tr>
+                  <tr><td colspan="5" style="text-align: center; padding-top:10px;"><button id="PL_SET_OK">确定</button>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<button id="PL_SET_CANCEL">取消</button></td></tr>
+              </tbody>
+          </table>
+    </div>
+
+    <input type="hidden" id="IsPostFlag" value="true" />
+    <input type="hidden" id="ValuationStyle" value="ValuationStyle_Num" />
+    <input type="hidden" id="aExpressPLFlag" value="0" />
+    <input type="hidden" id="aEMSPLFlag" value="0" />
+    <input type="hidden" id="aSurfaceMailPLFlag" value="0" />
+    @section FooterJs{
+        <script type="text/javascript">
+            function a_Click_SelectAareaControl(ele)
+            {
+                var iptEle = $(ele).parent().children("input");
+                var tvalue = $(iptEle).val();
+             
+                $.ajax({
+                    url: '@Url.Action("GetFreightModelBySysArea")',
+                    type: 'post',
+                   
+                    success: function (data) {
+                        var tableInfo = "";
+                        for (var i = 0; i < data.length; i++)
+                        {
+                            tableInfo += "<label style=\"width:150px;display:inline-block;padding:5px;\"><input value=\"" + data[i].SysNo + "\" " + (tvalue.indexOf(',' + data[i].SysNo + ",") != -1 ? "checked" : "")
+                                + " type=\"checkbox\" name=\"city_area_data\"/>" + data[i].AreaName + "</label>"
+                        }
+                        tableInfo = "<div style=\"padding:10px;\">" + tableInfo + "</div>";
+                        art.dialog({
+                            content: tableInfo, width: 500, title: "保价申请区域设置",
+                            ok: function () {
+                                var chEleList = $("input[name='city_area_data']");
+                                var tValueList = "";
+                                var indx = 0;
+                                for (var i = 0; i < chEleList.length; i++)
+                                {
+                                    if ($(chEleList[i]).attr("checked"))
+                                    {
+                                        if (tValueList != "")
+                                        {
+                                            tValueList += ",";
+                                        }
+                                        tValueList += $(chEleList[i]).val();
+                                        indx++;
+                                    }
+                                }
+                                if (tValueList != "") {
+                                    iptEle.val("," + tValueList + ",");
+                                }
+                                if (indx > 0) {
+                                    $(ele).text("选择区域(" + indx + ")");
+                                }
+                                else {
+                                    $(ele).text("选择区域");
+                                }
+                               // alert(iptEle.val());
+                                return true;
+                            },
+                            cancel: function () {
+                                return true;
+                            }
+
+                        });
+                    }
+                });
+            }
+            function init() {
+                $("#IsPostFlag").val("true");
+                $("#ValuationStyle").val("ValuationStyle_Num");
+                $("#aExpressPLFlag").val("0");
+                $("#aEMSPLFlag").val("0");
+                $("#aSurfaceMailPLFlag").val("0");
+                $("#IsPost_Yes").attr("checked", true);
+                $("#ValuationStyle_Weight").attr("checked", true);
+                $("#Express").removeAttr("checked");
+                $("#EMS").removeAttr("checked");
+                $("#SurfaceMail").removeAttr("checked");
+                /*修改*/
+                if ($("#mSysNo").val() > 0) {
+                    initvalue();
+                }
+            }
+            function initvalue() {
+
+                $("#DeliveryTime").val($.trim($("#mDeliveryTime").val()));
+
+                if ($("#mIsPost").val() == 1) {
+                    $("#IsPost_Yes").attr("checked", true);
+                    $("#IsPostFlag").val("true")
+                }
+                if ($("#mIsPost").val() == 2) {
+                    $("#IsPost_No").attr("checked", true);
+                    $("#IsPostFlag").val("false")
+                }
+                if ($("#mValuationStyle").val() == 1) {
+                    $("#ValuationStyle_Num").attr("checked", true);
+                }
+                if ($("#mValuationStyle").val() == 2) {
+                    $("#ValuationStyle_Weight").attr("checked", true);
+                }
+                if ($("#mValuationStyle").val() == 3) {
+                    $("#ValuationStyle_Capacity").attr("checked", true);
+                }
+                if ($("#mExpress").val() == 1) {
+                    $("#Express").attr("checked", true);
+                    showDiv($("#Express"));
+                }
+                if ($("#mEMS").val() == 2) {
+                    $("#EMS").attr("checked", true);
+                    showDiv($("#EMS"));
+                }
+                if ($("#mSurfaceMail").val() == 3) {
+                    $("#SurfaceMail").attr("checked", true);
+                    showDiv($("#SurfaceMail"));
+                }
+            }
+            $(function () {
+                init();
+
+                //审核
+                $("#btnAudit").click(function () {
+                    UI.Confirm({
+                        content: "确认审核通过?",
+                        ok: function () {
+                            $.post('/Logistics/AuditFreightModule', { id: $("#mSysNo").val() }, function (r) {
+                                if (r.Status) {
+                                    LoadEdit(false);
+                                    UI.CloseTab(null, "/Logistics/FreightModuleList/", null, true);
+                                    Utils.alert("提交成功！", null, "succeed");
+
+                                }
+                                else {
+                                    UI.Alert({
+                                        content: r.Message
+
+                                    });
+                                }
+                            });
+                        },
+                        cancel: true
+                    });
+                });
+                //作废
+                $("#btnCancel").click(function () {
+                    UI.Confirm({
+                        content: "确认作废?",
+                        ok: function () {
+                            $.post('/Logistics/CancelFreightModule', { id: $("#mSysNo").val() }, function (r) {
+                                if (r.Status) {
+                                    LoadEdit(false);
+                                    $("#btnCancel").hide();
+                                    UI.CloseTab(null, "/Logistics/FreightModuleList/", null, true);
+                                    Utils.alert("提交成功！", null, "succeed");
+                                }
+                                else {
+                                    UI.Alert({
+                                        content: r.Message
+
+                                    });
+                                }
+                            });
+                        },
+                        cancel: true
+                    });
+                });
+
+            });
+            function LoadEdit(flg) {
+
+                if (!flg) {
+                    $("#divView").show();
+                    $("#divEdit").hide();
+                    $("#btnSave").hide();
+                    $("#btnAudit").hide();
+                    //  $("#btnCancel").hide();
+                }
+                else {
+                    $("#divView").hide();
+                    $("#divEdit").show();
+                    $("#btnSave").show();
+                    $("#btnAudit").show();
+                    // $("#btnCancel").show();
+                }
+            }
+
+            
+            $("#IsPost_Yes,#IsPost_No").live('click', function () {
+                //点击自定义运费
+                var str = '';
+                if ($(this).attr("id") == "IsPost_Yes") {
+                    $("#IsPostFlag").val("true");
+                    str = '您的运费设置将变为未设置状态，请设置运费'
+                    $("#Express,#EMS,#SurfaceMail").removeAttr("checked");
+                } else {
+                    $("#IsPostFlag").val("false");
+                    str = '选择“卖家承担运费”后，所有区域的运费将设置为0元且原运费设置无法恢复，请保存原有运费设置。'
+                    init2();
+                }
+               // alert(str);
+            });
+
+
+            //点击计价方式，保存点击的按钮ID
+            $("#ValuationStyle_Num,#ValuationStyle_Weight,#ValuationStyle_Capacity").live('click', function () {
+                $("#ValuationStyle").val($(this).attr("id"));
+
+                //UI.Confirm({
+                //    content: '切换计价方式后，所设置当前模板的运输信息将被清空，确定继续么？',
+                //    ok: function () {
+                        
+                //    },
+                //    cancelVal: '取消',
+                //    cancel: true
+                //});
+            });
+
+      
+
+            function showDiv(obj) {
+                if ($("#IsPostFlag").val() == "true") {
+                    //var id = obj.attr('id');
+                    //if (obj.attr("checked")) {
+                    //    $("#tr" + id).show();
+                    //    var id2 = $("#ValuationStyle").val() + "_" + id;
+                    //    $("#" + id2).show();
+                    //    $("#a" + id).show();
+                    //    /*显示批量操作按钮*/
+                    //    if ($.trim($("#a" + id + "_DeliveryArea").html()) != "") {
+                    //        $("#a" + id + "_PL").show();
+                    //    }
+                    //} else {
+                    //    $("#tr" + id).hide();
+                    //}
+                }
+            }
+
+ 
+
+   
+
+     
+  
+  
+            //选择商品地址
+            $("#DivProductAddress").live('click', function () {
+                obj = $(this);
+                if (obj.find("span.areacls").attr("id") != "0")
+                {
+                    GetProductAddress(obj);
+                }
+            });
+
+            //商品地址伪回调
+            window.top._ActiveSelectAddressCallBack = function (data) {
+                var node = data.split(',');
+                var nodeid = node[0];
+                var nodename = node[1];
+                $.ajax({
+                    url: '@Url.Action("GetEntityByProductAddress")',
+                    type: 'post',
+                    data: { "ProductAddress": nodeid },
+                    success: function (data) {
+                        if (data == null) {   
+                            obj.html("<span class = 'areacls' id = '" + nodeid + "'>" + nodename + "</span>");
+                        } else {
+                            alert("该商品地址对应的运费模板已存在！");
+                        }
+                    }
+                });
+            };
+
+            //运送商品地址
+            function GetProductAddress(obj) {
+                var idList = "";
+                if (obj.html() != "") {
+                    $(obj).children().each(function () {
+                        if (idList == "") {
+                            idList += $(this).attr("id");
+                        } else {
+                            idList += ',' + $(this).attr("id");
+                        }
+                    });
+                }
+                var width = '400px', height = '500px'; //automatic does not work
+                //#region 新增
+                UI.DialogOpen('/Logistics/ProductAddress?ids=' + idList, {
+                    init: function () {
+
+                    },
+                    title: '商品地址列表',
+                    width: width,
+                    height: height,
+                    button: [
+                {
+                    name: '保存',
+                    focus: true,
+                    callback: function () {
+                        var win = this.iframe.contentWindow;
+                        var $iframe = this.iframe.contentWindow;
+                        $iframe.CallBack();
+                        if (!$(form).valid()) {
+                            return false; //not close the dialog
+                        }
+                        return true; //close the dialog
+                    }
+                },
+            {
+                name: '关闭'
+            }
+                    ]
+                },
+                false);
+            }
+
+       
+
+           
+  
+
+            $("#btnSave").live('click', function () {
+                var aValid = true;
+                if ($.trim($("#ModuleCode").val()) == "") {
+                    $("#ModuleCode").css("border", "1px solid #C53A28");
+                    $('#c_' + $("#ModuleCode").attr('id')).attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $("#ModuleCode").css("border", "1px solid #CCCCCC");
+                    $('#c_' + $("#ModuleCode").attr('id')).attr('class', 'success m10_l');
+                }
+                if ($.trim($("#ModuleName").val()) == "") {
+                    $("#ModuleName").css("border", "1px solid #C53A28");
+                    $('#c_' + $("#ModuleName").attr('id')).attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $("#ModuleName").css("border", "1px solid #CCCCCC");
+                    $('#c_' + $("#ModuleName").attr('id')).attr('class', 'success m10_l');
+                }
+                if ($.trim($("#DivProductAddress").html()) == "") {
+                    $("#DivProductAddress").css("border", "1px solid #C53A28");
+                    $('#c_' + $("#DivProductAddress").attr('id')).attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $("#DivProductAddress").css("border", "1px solid #CCCCCC");
+                    $('#c_' + $("#DivProductAddress").attr('id')).attr('class', 'success m10_l');
+                }
+                if ($.trim($("#DeliveryTime").val()) == "") {
+                    $("#DeliveryTime").css("border", "1px solid #C53A28");
+                    $('#c_' + $("#DeliveryTime").attr('id')).attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $("#DeliveryTime").css("border", "1px solid #CCCCCC");
+                    $('#c_' + $("#DeliveryTime").attr('id')).attr('class', 'success m10_l');
+                }
+          
+
+                //商品地址
+                var ProductAddress = $("#DivProductAddress").children().attr('id');
+                //是否包邮
+                var IsPost
+                if ($("#IsPost_Yes").attr("checked")) {
+                    IsPost = 1;  //自定义运费
+                }
+                if ($("#IsPost_No").attr("checked")) {
+                    IsPost = 2;  //卖家承担运费
+                }
+                ////计价方式
+                //var ValuationStyle;
+                //if ($("#ValuationStyle_Num").attr("checked")) {
+                //    ValuationStyle = 1; //按件数
+                //}
+                //if ($("#ValuationStyle_Weight").attr("checked")) {
+                //    ValuationStyle = 2; //按重量
+                //}
+                //if ($("#ValuationStyle_Capacity").attr("checked")) {
+                //    ValuationStyle = 3; //按体积
+                //}
+
+
+               
+
+
+                //城市id列表和价格列表
+                var cityIdAndPrices = "";
+                //城市数组
+                var cityAndPriceArray = [];
+                //是否选择了城市
+                var isCity =$("#aLogistics_DeliveryArea").children("tbody").children("tr").length==0?false:true;
+                //是否添加了物流计算规则
+                var isAddDeliveryrule = true;
+                //循环地区项
+                $("#aLogistics_DeliveryArea").children("tbody").children("tr").each(function () {
+                    var cityId = "";
+                    //循环地区项里的所有城市
+                    $(this).find("div.areacls").children("a").each(function () {
+                        if (cityId != "")
+                            cityId += ",";
+                        cityId += $(this).attr("id");
+                    })
+                    if (cityId == "")
+                        isCity = false;
+                    var prices = "";//价格列表
+
+                    isAddDeliveryrule = $(this).find("table").children("tbody").children("tr").length <= 1 ? false : true;
+                    //循环地区项里的价格项
+                    $(this).find("table").children("tbody").children("tr").each(function (index){
+                        if (index != 0) {
+                            var itemLowest = $(this).find("input[name='itemLowest']").val();
+                            var itemService = $(this).find("input[name='itemService']").val();
+                            var itemFirst = $(this).find("input[name='itemFirst']").val();
+                            var itemFirstFee = $(this).find("input[name='itemFirstFee']").val();
+                            var itemContinue = $(this).find("input[name='itemContinue']").val();
+                            var itemContinueFee = $(this).find("input[name='itemContinueFee']").val();
+                            var itemDeviation = $(this).find("input[name='itemDeviation']").val();
+                            var itemMinWeight = $(this).find("input[name='itemMinWeight']").val();
+                            var itemMaxWeight = $(this).find("input[name='itemMaxWeight']").val();
+                            if (prices != "")
+                                prices += ",";
+                            prices += itemLowest + "$" + itemService + "$" + itemFirst + "$" + itemFirstFee + "$" + itemContinue + "$" + itemContinueFee + "$" + itemDeviation + "$" + itemMinWeight + "$" + itemMaxWeight+"<"+$(this).attr("data-id");
+                        }
+                        
+                    });
+                    if (prices == "") {
+                        isAddDeliveryrule = false;
+                    }
+                    //将城市与价格以'|'分隔
+                    cityIdAndPrices = cityId + "|" + prices+">"+$(this).attr("data-id");
+
+                    cityAndPriceArray.push(cityIdAndPrices);
+
+                });
+               
+                var valuationList = "";
+                ///保价表格数据内容
+                $("#tab_ValuationForm").children("tbody").children("tr").each(function (index) {
+                    if (index != 0)
+                    {
+                        var title = $(this).find("input[name='itemTitle']").val();
+                        var areaNo = $(this).find("input[name='itemAreaNo']").val();
+                        var minValue = $(this).find("input[name='itemMinValue']").val();
+                        var maxValue = $(this).find("input[name='itemMaxValue']").val();
+                        var valueType = $(this).find("select[name='itemValueType']").val();
+                        var freightValue = $(this).find("input[name='itemFreightValue']").val();
+
+                        if (valuationList != "")
+                        {
+                            valuationList += "|";
+                        }
+                        valuationList += title + "$" + areaNo + "$" + minValue + "$" + maxValue + "$" + valueType + "$" + freightValue + "<" + $(this).attr("data-id");
+                    }
+                });
+                
+
+                var cityAndPriceStr = cityAndPriceArray.join("-");
+
+                if (!isCity)
+                {
+                    alert("请添加城市");
+                    return false;
+                }
+
+                if (!isAddDeliveryrule) {
+                    alert("请添加运费计算规则");
+                    return false;
+                }
+
+                if (!aValid) {
+                    return false;
+                }
+            
+                
+                ValuationStyle = 2;
+                Express = 1;
+
+
+
+                var postData={
+                    SysNo: $("#mSysNo").val(),
+                    ModuleCode: $.trim($("#ModuleCode").val()),
+                    ModuleName: $.trim($("#ModuleName").val()),
+                    ProductAddress: 0,
+                    DeliveryTime: $.trim($("#DeliveryTime").val()),
+                    IsPost: IsPost,
+                    ValuationStyle: ValuationStyle,
+                    Express: Express,
+                    FreightExpress:escape(cityAndPriceStr),
+                    EMS: 0,
+                    SurfaceMail:0,
+                    delLgFreightModuleItemPricesIds:$("#delLgFreightModuleItemPricesIds").val(),
+                    delLgFreightModuleDetailsIds: $("#delLgFreightModuleDetailsIds").val(),
+                    IsValuation: $("#Quoted_Price").attr("checked")?1:0,
+                    delLgFreightModuleItemValuationIds:$("#delLgFreightModuleItemValuationIds").val(),
+                    valuationList: valuationList,
+                    IsTurnVtW: $("#cb_TurnVtW").attr("checked") ? 1 : 0,
+                    TurnVtWType: $("#sele_TurnVtW").val(),
+                    TurnVtWFormula: $("#ipt_txt_TurnVtW").val()
+                };
+
+                $.post('@Url.Action("SaveFreightModule")', postData, function (data) {
+                    if (data.Status) {
+                        Utils.alert(data.Message, function () {
+                            window.location.href = '/Logistics/FreightModuleCreate/' + data.StatusCode
+                        }, 'succeed');
+                    }
+                    else {
+                        UI.Alert({ content: data.Message });
+                    }
+                });
+         
+            });
+        </script>
+    }

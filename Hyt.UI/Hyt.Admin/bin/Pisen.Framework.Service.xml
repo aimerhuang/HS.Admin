@@ -1,0 +1,404 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pisen.Framework.Service</name>
+    </assembly>
+    <members>
+        <member name="T:Pisen.Framework.Service.Assist">
+            <summary>
+            帮助类
+            </summary>
+            <remarks>2014-07-25 杨合余 添加</remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Assist.HasPrivilege(Pisen.Framework.Service.ServiceConfig,System.String)">
+            <summary>
+            判断应用是否授权
+            </summary>
+            <param name="config">服务基础配置</param>
+            <param name="toAction">授权方法</param>
+            <returns>是否授权</returns>
+            <remarks>2014-07-25 杨合余 添加</remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Assist.ParseFromJson``1(System.String)">
+            <summary>
+            Json转换为实体
+            </summary>
+            <typeparam name="T"></typeparam>
+            <param name="szJson"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Pisen.Framework.Service.Core.CustomInvoker">
+            <summary>
+            自定义拦截器
+            </summary>
+            <remarks>
+            2013-7-10  杨合余 添加
+            </remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.CustomInvoker.Invoke(System.Object,System.Object[],System.Object[]@)">
+            <summary>
+            从一个实例和输入对象的集合返回一个对象和输出对象的集合
+            </summary>
+            <param name="instance">要调用的对象</param>
+            <param name="inputs">方法的输入</param>
+            <param name="outputs">方法的输出</param>
+            <returns>返回值</returns>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.CustomInvoker.Result(Pisen.Framework.Service.Proxy.Result)">
+            <summary>
+            返回类型转换
+            </summary>
+            <param name="result"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Pisen.Framework.Service.Core.CustomOperationBehaviorAttribute">
+            <summary>
+            实现可用于扩展服务端应用程序中的操作的运行时行为的方法。
+            </summary>
+            <remarks>
+            2013-7-10  杨合余 添加
+            </remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.CustomOperationBehaviorAttribute.#ctor(System.Boolean)">
+            <summary>
+            是否验证登陆状态
+            </summary>
+            <param name="isCheck">
+            false:表明只处理服务异常、应用授权;
+            true:包含检查客户登录授权</param>
+        </member>
+        <member name="T:Pisen.Framework.Service.Core.IPagedList`1">
+            <summary>
+            分页列表接口
+            </summary>
+            <remarks>2014-04-17 杨合余 添加</remarks>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.Items">
+            <summary>
+            数据项
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.PageIndex">
+            <summary>
+            当前页索引
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.PageSize">
+            <summary>
+            分页长度
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.TotalCount">
+            <summary>
+            数据总数
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.TotalPages">
+            <summary>
+            分页总数
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.HasPreviousPage">
+            <summary>
+            是否有上一页
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.IPagedList`1.HasNextPage">
+            <summary>
+             /// <summary>
+            是否有下一页
+            </summary>
+            </summary>
+        </member>
+        <member name="T:Pisen.Framework.Service.Core.PagedList`1">
+            <summary>
+            分页列表
+            </summary>
+            <typeparam name="T">T</typeparam>
+            <remarks>2014-04-17 杨合余 添加</remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.PagedList`1.#ctor">
+            <summary>
+            序列化的默认构造函数
+            </summary>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.PagedList`1.#ctor(System.Linq.IQueryable{`0},System.Int32,System.Int32)">
+            <summary>
+            Ctor
+            </summary>
+            <param name="source">数据源</param>
+            <param name="pageIndex">当前页索引</param>
+            <param name="pageSize">分页大小</param>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.PagedList`1.#ctor(System.Collections.Generic.IList{`0},System.Int32,System.Int32)">
+            <summary>
+            Ctor
+            </summary>
+            <param name="source">数据源</param>
+            <param name="pageIndex">当前页索引</param>
+            <param name="pageSize">分页大小</param>
+        </member>
+        <member name="M:Pisen.Framework.Service.Core.PagedList`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Ctor
+            </summary>
+            <param name="source">数据源</param>
+            <param name="pageIndex">当前页索引</param>
+            <param name="pageSize">分页大小</param>
+            <param name="totalCount">数据总条数</param>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.Items">
+            <summary>
+            数据项
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.PageIndex">
+            <summary>
+            当前页索引
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.PageSize">
+            <summary>
+            分页大小
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.TotalCount">
+            <summary>
+            数据总条数
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.TotalPages">
+            <summary>
+            分页总数
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.HasPreviousPage">
+            <summary>
+            是否有上一页
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Core.PagedList`1.HasNextPage">
+            <summary>
+            是否有下一页
+            </summary>
+        </member>
+        <member name="T:Pisen.Framework.Service.Core.ServiceContext">
+            <summary>
+            当前请求上下文
+            </summary>
+            <remarks>
+            2014-05-08  杨合余 添加
+            </remarks>
+        </member>
+        <member name="F:Pisen.Framework.Service.Core.StatusCode.Succeed">
+            <summary>
+            服务执行成功
+            </summary>
+        </member>
+        <member name="F:Pisen.Framework.Service.Core.StatusCode.Failure">
+            <summary>
+            调用失败
+            </summary>
+        </member>
+        <member name="F:Pisen.Framework.Service.Core.StatusCode.Exception">
+            <summary>
+            应用异常
+            </summary>
+        </member>
+        <member name="F:Pisen.Framework.Service.Core.StatusCode.Unauthorized">
+            <summary>
+            授权失败
+            </summary>
+        </member>
+        <member name="T:Pisen.Framework.Service.Proxy.ChannelFactoryManager">
+            <summary>
+            表示Channel Factory管理器。
+            </summary>
+            <Remark> 2013-6-26 杨合余 创建 </Remark>
+        </member>
+        <member name="T:Pisen.Framework.Service.Proxy.DisposableObject">
+            <summary>
+            表示派生类是一次性的对象
+            </summary>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.DisposableObject.Finalize">
+            <summary>
+            析构函数隐式释放对象.
+            </summary>
+            <returns></returns>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.DisposableObject.Dispose(System.Boolean)">
+            <summary>
+            对象回收.
+            </summary>
+            <returns></returns>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.DisposableObject.ExplicitDispose">
+            <summary>
+            显示强制回收不被使用的对象
+            </summary>
+            <returns></returns>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.DisposableObject.Dispose">
+            <summary>
+            执行应用程序定义的任务相关联的释放,或非托管资源的重置
+            </summary>
+            <returns></returns>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.ChannelFactoryManager.Dispose(System.Boolean)">
+            <summary>
+            释放对象
+            </summary>
+            <param name="disposing"></param>
+            <returns></returns>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.ChannelFactoryManager.GetFactory``1(Pisen.Framework.Service.Proxy.RequestHeader)">
+            <summary>
+            获取与指定服务契约类型相关的Channel Factory实例。
+            </summary>
+            <typeparam name="T">服务契约的类型。</typeparam>
+            <returns>与指定服务契约类型相关的Channel Factory实例。</returns>
+            <Remark>2013-6-26 杨合余 创建</Remark>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.ChannelFactoryManager.GetEndpoint(System.String)">
+            <summary>
+            读取 Endpoint Address
+            </summary>
+            <param name="endpointName"></param>
+            <returns></returns>
+            <Remark>2014-06-03 杨合余 创建</Remark>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.ChannelFactoryManager.Instance">
+            <summary>
+            获取<c>ChannelFactoryManager</c>的单件（Singleton）实例。
+            </summary>
+            <returns></returns>
+            <remarks>2013-6-26 杨合余 创建</remarks>
+        </member>
+        <member name="T:Pisen.Framework.Service.Proxy.IApplicationServiceContract">
+            <summary>
+            标识为服务接口
+            </summary>
+            <remarks>杨合余 添加</remarks>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.RequestHeader.AppKey">
+            <summary>
+            应用Key
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.RequestHeader.AppSecret">
+            <summary>
+            应用Secret
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.RequestHeader.AuthCode">
+            <summary>
+            授权码(用户登录场景下必填)
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.RequestHeader.MachineId">
+            <summary>
+            机器码(用户登录场景下必填)
+            </summary>
+        </member>
+        <member name="T:Pisen.Framework.Service.Proxy.Result">
+            <summary>
+            服务响应的基类
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.Result.IsError">
+            <summary>
+            响应结果是否错误
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.Result.ErrCode">
+            <summary>
+            错误码
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.Result.ErrMsg">
+            <summary>
+            错误信息
+            </summary>
+        </member>
+        <member name="T:Pisen.Framework.Service.Proxy.ServiceProxy`1">
+            <summary>
+            表示用于调用WCF服务的会员端服务代理类型。
+            </summary>
+            <typeparam name="T">需要调用的服务契约类型。</typeparam>
+            <remarks>
+            2013-6-26 杨合余 创建
+            </remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.ServiceProxy`1.#ctor(Pisen.Framework.Service.Proxy.RequestHeader)">
+            <summary>
+            代理构造函数
+            </summary>
+            <param name="header">请求头</param>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.ServiceProxy`1.Dispose(System.Boolean)">
+            <summary>
+            释放资源
+            </summary>
+            <param name="disposing"></param>
+            <remarks>2013-6-26 杨合余 添加</remarks>
+        </member>
+        <member name="M:Pisen.Framework.Service.Proxy.ServiceProxy`1.Close">
+            <summary>
+            关闭并断开会员端通道（Client Channel）。
+            </summary>
+            <remarks>
+            如果使用using语句对ServiceProxy进行了包裹，那么当程序执行点离开using的
+            覆盖范围时，Close方法会被自动调用，此时会员端无需显式调用Close方法。反之
+            如果没有使用using语句，那么则需要显式调用Close方法。
+            </remarks>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.ServiceProxy`1.Channel">
+            <summary>
+            获取调用WCF服务的通道。
+            </summary>
+            <returns>类型通道</returns>
+            <remarks>2013-6-26 杨合余 添加</remarks>
+        </member>
+        <member name="P:Pisen.Framework.Service.Proxy.ServiceProxy`1.AppKey">
+            <summary>
+            获取当前应用Key
+            </summary>
+        </member>
+        <member name="T:Pisen.Framework.Service.ServiceConfig">
+            <summary>
+            ServiceConfig处理对特定的配置节的访问
+            </summary>
+        </member>
+        <member name="M:Pisen.Framework.Service.ServiceConfig.Create(System.Object,System.Object,System.Xml.XmlNode)">
+            <summary>
+            创建配置节处理程序
+            </summary>
+            <param name="parent">父对象.</param>
+            <param name="configContext">配置上下文对象.</param>
+            <param name="section">节 XML 节点.</param>
+            <returns>创建的节处理程序对象.</returns>
+        </member>
+        <member name="P:Pisen.Framework.Service.ServiceConfig.AppKey">
+            <summary>
+            服务AppKey
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.ServiceConfig.AppSecret">
+            <summary>
+            服务AppSecret
+            </summary>
+        </member>
+        <member name="P:Pisen.Framework.Service.ServiceConfig.AuthorizeUrl">
+            <summary>
+            服务授权地址
+            </summary>
+        </member>
+    </members>
+</doc>

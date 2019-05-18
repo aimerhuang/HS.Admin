@@ -1,0 +1,72 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Util
+@model List<BsCode>
+@Html.PrivilegeControl(PrivilegeCode.BS1005002, ".BS1005002")
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">码值名称</th>
+            <th class="borde_r_none wd80">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+            <tr>
+                <td class="align_l p10_lr">@item.CodeName</td>
+                <td>
+                    <button class="btn btn_ht26 btn_red BS1005002" type="button" name="remove" data-id="@item.SysNo"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="2" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script>
+    $(function () {
+        DAO.InterlineStyle();
+
+        $("#item_list").delegate("button[name='remove']", "click", function () {           
+            var id = $(this).attr("data-id");
+            if (id) {
+                var url = '@Url.Action("RemoveCode")' + '/' + id;
+                UI.Confirm({
+                    content: '确定要删除吗?',
+                    ok: function () {
+                        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                        $.ajax({
+                            type: "POST",
+                            url: url,
+                            success: function (ret) {
+                                if (ret.StatusCode == 0) {
+                                    loadChildNodes($("#btn_add").attr("data-id"));
+                                } else {
+                                    UI.Alert({ content: ret.Message });
+                                }
+                                mask.Remove();
+                            },
+                            error: function () {
+                                mask.Remove();
+                                UI.Alert({ content: '操作出错,请稍候重试!' });
+                            }
+                        });
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            }
+        });
+
+    });
+</script>

@@ -1,0 +1,118 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+
+@{
+    ViewBag.Title = "包裹单推送";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#OverseaCarrierForm").validate({
+                rules: {
+                    OverseaCarrier: {
+                        required: true
+                        , maxlength: 100
+                    },
+                    OverseaTrackingNo: {
+                        required: true
+                         , maxlength: 100
+                    }
+                },
+                messages: {
+                    OverseaCarrier: {
+                        required: "快递公司编号必填"
+                        , maxlength: "长度超出100个字"
+                    },
+                    OverseaTrackingNo: {
+                        required: "包裹单号必填"
+                       , maxlength: "长度超出100个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法    //$("#OverseaCarrierForm").serialize()
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#OverseaCarrierForm").valid()) {
+                                $.post('/Warehouse/InboundCreate', { "ProductStockInSysNo": $("#ProductStockInSysNo").val(), "OverseaCarrier": $.trim($("#OverseaCarrier").val()), "OverseaTrackingNo": $.trim($("#OverseaTrackingNo").val()), "WarehouseSysNo": $("#WarehouseSysNo").val() }, function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doSearch();
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="OverseaCarrierForm" name="OverseaCarrierForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>快递公司编号</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="OverseaCarrier" id="OverseaCarrier" class="wd200" value="" maxlength="100" /><span class="prompt m10_l" id="c_OverseaCarrier">快递公司编号</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>包裹单号</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="OverseaTrackingNo" id="OverseaTrackingNo" class="wd200" value="" maxlength="100" /><span class="prompt m10_l" id="c_OverseaTrackingNo">包裹单号</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" id="ProductStockInSysNo" value="@ViewBag.ProductStockInSysNo" />
+            <input type="hidden" id="WarehouseSysNo" value="@ViewBag.WarehouseSysNo" />
+        </div>
+
+    </form>
+</div>

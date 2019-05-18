@@ -1,0 +1,188 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList<Hyt.Model.FeArticleCategory>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "文章分类";
+    @Html.PrivilegeControl(PrivilegeCode.FE1004201, "button.FE1004201")
+    @Html.PrivilegeControl(PrivilegeCode.FE1004601, "button.FE1004601")
+    @Html.PrivilegeControl(PrivilegeCode.FE1004501, "button.FE1004501")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入分类名称...";
+        $(function () {
+            $("#searchName").focus(function () {
+                if ($("#searchName").val() == searchNameTxt) {
+                    $("#searchName").val("");
+                }
+            });
+            $("#searchName").blur(function () {
+                if ($("#searchName").val() == "") {
+                    $("#searchName").val(searchNameTxt);
+                }
+            });
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        searchFeArticleCategory();
+                        break;
+                }
+            });
+        });
+
+        function deleteOne(sysNo) {
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function () {
+                    $.post('@Url.Action("FeArticleCategoryDelete", "Front")', { sysNo: sysNo }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchFeArticleCategory();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function audit(sysNo, status, type) {
+            var str;
+            if (type == 0)
+                str = "确定要审核该记录吗?";
+            else if (type == 1) {
+                str = "确定要作废该记录吗?";
+            } else {
+                str = "确定要取消审核吗?";
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeArticleCategoryAudit", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchFeArticleCategory();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function addOrEdit(sysNo) {
+            var url, title;
+            if (sysNo != 0) {
+                url = "/Front/FeArticleCategoryAddOrUpdate/" + sysNo;
+                title = "修改文章分类";
+            } else {
+                url = "/Front/FeArticleCategoryAddOrUpdate/";
+                title = "新增文章分类";
+            }
+            UI.DialogOpen(url, {
+                title: title,
+                width: '597px',
+                height: '202px',
+                init: function () {
+                    this.button({
+                        name: '保存',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            var form = iframe.document.getElementById('feArticleCategoryForm');
+
+                            iframe.addOrEdit();
+                            return false;
+                        },
+                        focus: true
+                    },
+                        {
+                            name: "取消"
+                        }
+                    );
+                }
+            });
+        }
+
+        function dialog() {
+            UI.tips.tip_alert('tips_success', '保存成功');
+        }
+        function dataLoad(id) {
+            $.get('/Front/FeArticleCategory/', { id: id }, function (data) {
+                $('#paging').html(data);
+            });
+        }
+
+        function searchFeArticleCategory() {
+            AjaxStart();
+            var searchName = $("#searchName").val();
+            var searchStaus = $("#searchStaus").val();
+            var search = { id: 1, searchStaus: searchStaus };
+            if ($.trim(searchName) != "" && searchName != searchNameTxt) {
+                search = { id: 1, searchName: searchName, searchStaus: searchStaus };
+            }
+            $.get('/Front/FeArticleCategory/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+@using (Html.BeginForm("FeArticleCategory", "Front", FormMethod.Get, new { id = "form", aa = "" }))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>文章分类</h3>
+            </div>
+
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="fl m3_t veralign_t">状态</span>
+                        <select class="select_ht28 fl m10_l m10_r" id="searchStaus" name="searchStaus" onchange="searchFeArticleCategory()">
+                            <option value="0">全部</option>
+                            @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                            {
+                                                        <option value="@dict.Key">@dict.Value</option>
+                            }
+                            }
+                        </select>
+                        <span class="fl m3_t veralign_t">分类名称</span>
+                        <div class="search_btn m10_l fl">
+                            <input class="input_ht28" name="searchName" id="searchName" maxlength="50" type="text" value="请输入分类名称..." />
+                            <button onclick="searchFeArticleCategory()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                        </div>
+                        @* <button type="button" class="btn btn_ht28" title="搜索" onclick="searchFeArticleCategory()"><span class="icon_search" ></span><span class="m5_l">搜索</span></button>*@
+
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn_ht26 btn_blue FE1004201" onclick="addOrEdit(0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增分类</span></button>
+                    </div>
+                </div>
+
+                <div class="boxs_list">
+                    <!--/表格列表区-->
+                    <!--/表格列表区-->
+                    <div class="boxs_listtabel" id="paging">
+                        <!--/表格列表区-->
+                        @{Html.RenderPartial("_AjaxFeArticleCategoryList", Model); }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

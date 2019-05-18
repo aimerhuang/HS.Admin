@@ -1,0 +1,96 @@
+﻿@model Hyt.Model.Transfer.CBLgDeliveryType
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "查看配送方式";
+}
+
+<div class="caseout" >
+    <div class="boxs_detail_dispay">
+        <div class="tit_con" style="display: block;">
+            <table width="100%" style="table-layout:fixed;" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td class="nameright border_rnone">父级配送：</td>
+                        <td class="border_right1">
+                            @Model.ParentName
+                        </td>
+                        <td width="15%" class="nameright border_rnone">名称：</td>
+                        <td width="35%">
+                            @Model.DeliveryTypeName</td>
+                    </tr>
+
+                    <tr>
+                        <td class="nameright border_rnone">运费：</td>
+                        <td class="border_right1">
+                            @Model.Freight.ToString("C")</td>
+                        <td width="15%" class="nameright border_rnone">显示顺序：</td>
+                        <td width="35%">@Model.DisplayOrder
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">配送级别：</td>
+                        <td class="border_right1">@Model.DeliveryLevel
+                        </td>
+                        <td class="nameright border_rnone">是否第三方快递：</td>
+                        <td>
+                            @if (Model.IsThirdPartyExpress == 1)
+                            {
+                                <p>是</p>
+                            }
+                            else
+                            {
+                                <p>否</p>
+                            }</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">前台可见：</td>
+                        <td class="border_right1" >
+                            @((Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式前台是否可见)Model.IsOnlineVisible)
+                        </td>
+                        <td class="nameright border_rnone">状态：</td>
+                        <td>
+                            @((Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式状态)Model.Status)</td>
+                    </tr>
+
+                    <tr>
+                        <td width="15%;" class="nameright border_rnone">提供商：</td>
+                        <td width="35%;" class="border_right1">
+                            @Model.Provider</td>
+                        <td width="15%;" class="nameright border_rnone">配送耗时：</td>
+                        <td width="35%;">
+                            @Model.DeliveryTime</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone" >描述：</td>
+                        <td colspan="3" style="word-wrap: break-word;">
+                            @Model.DeliveryTypeDescription</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">物流跟踪查询Url：</td>
+                        <td colspan="3" style="word-wrap: break-word;">
+                            @Model.TraceUrl</td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    (function () {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+
+        if (!api) return;
+
+        // 操作对话框
+        api.title('查看配送方式')
+            // 自定义按钮
+            .button(
+               {
+                   name: '关闭'
+               }
+            );
+    })();
+
+</script>

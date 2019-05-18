@@ -1,0 +1,205 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@model PagedList<CBSyUser>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户管理";
+    @Html.PrivilegeControl(PrivilegeCode.CR1004201, "button." + PrivilegeCode.CR1004201.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004202, "button." + PrivilegeCode.CR1004202.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004601, "button." + PrivilegeCode.CR1004601.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004101, "button." + PrivilegeCode.CR1004101.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004203, "button." + PrivilegeCode.CR1004203.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004204, "button." + PrivilegeCode.CR1004204.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004205, "button." + PrivilegeCode.CR1004205.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004102, "button." + PrivilegeCode.CR1004102.ToString())
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>客户管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">状态</span>
+                    <div class="fl m10_l">
+                        <select id="Status" name="Status" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictStatus)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <span class="fl m10_l veralign_t">帐号</span>
+                    <div class="search_btn m10_l fl">
+                        <input name="account" type="text" id="account" class="input_ht28" maxlength="20" value="请输入帐号..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入帐号...'" onclick="if (this.value == '请输入帐号...') this.value = ''" />
+                        <button type="button" title="搜索" class="btn btn_ht28 m10_l fl" onclick="doSearch()"><span class="icon_search"></span><span class="m5_l"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel">
+                @{Html.RenderPartial("_AjaxCrCustomer", Model); }
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+@section headjs{
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+}
+@section FooterJs{
+    <script type="text/javascript">
+        var searchAccountTxt = "请输入帐号...";
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function tip_alert(mode, context) {
+            UI.tips.tip_alert(mode, context);
+        }
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+        function AjaxStop() {
+            cover.Remove();
+        }
+
+        function doSearchClass() {
+            var isReceiveEmail = $("#IsReceiveEmail").val();
+            var isReceiveShortMessage = $("#IsReceiveShortMessage").val();
+            var isPublicAccount = $("#IsPublicAccount").val();
+
+            var isLevelFixed = $("#IsLevelFixed").val();
+            var isExperiencePointFixed = $("#IsExperiencePointFixed").val();
+            var isExperienceCoinFixed = $("#IsExperienceCoinFixed").val();
+            var agentSysNo = $("#agentSysNo").val();
+            var dealerSysNo = $("#dealerSysNo").val();
+
+            AjaxStart();
+            var json = {};
+            if ($.trim(isReceiveEmail) != "") {
+                json.isReceiveEmail = isReceiveEmail;
+            }
+
+            if ($.trim(isReceiveShortMessage) != "") {
+                json.isReceiveShortMessage = isReceiveShortMessage;
+            }
+
+            if ($.trim(isPublicAccount) != "") {
+                json.isPublicAccount = isPublicAccount;
+            }
+
+            if ($.trim(isLevelFixed) != "") {
+                json.isLevelFixed = isLevelFixed;
+            }
+
+            if ($.trim(isExperiencePointFixed) != "") {
+                json.isExperiencePointFixed = isExperiencePointFixed;
+            }
+
+            if ($.trim(isExperienceCoinFixed) != "") {
+                json.isExperienceCoinFixed = isExperienceCoinFixed;
+            }
+            json.agentSysNo = agentSysNo;
+            json.dealerSysNo = dealerSysNo;
+
+            $.get('/InventorySheet/GetUserPageIndex/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+        function doSearch() {
+            var status = $("#Status").val();
+            var account = $("#account").val();
+            AjaxStart();
+            var json = {};
+            if ($.trim(status) != "") {
+                json.status = status;
+            }
+            if ($.trim(account) != "" && account != searchAccountTxt) {
+                json.account = account;
+            }
+            $.get('/InventorySheet/GetUserPageIndex/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+     
+        
+        $(function () {
+            $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+                $("#agentSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#agentSysNo").change(function () {
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+
+            $("#dealerSysNo").change(function () {
+                doSearch();
+            });
+
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        doSearch();
+                        break;
+                }
+            });
+            $('#btn_addleave').click(function () {
+                DAO.CreateCustomer({
+                    from: '70',//(int)CustomerStatus.注册来源.商城客户管理
+                    fromNo: '@ViewBag.CreatorSysNo',  //当前用户编号
+                    onselect: function (result) {
+                        var c = result.customer;
+                        var row = result.address;
+                        if (result.error == "") {
+                            doSearch();
+                            UI.Alert({ content: "添加会员成功！" });
+                            UI.Dialog.close();
+                        } else {
+                            UI.Alert({ content: result.error });
+                        }
+                    }
+                });
+            });
+        })
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $("#dealerSysNo,#complexDealerSysNo").html("");
+            if (DealerCreatedBy != -1) {
+                $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                    $("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+                    $.each(data, function (idx, item) {
+                        if (item.SysNo != undefined) {
+                            $("#dealerSysNo,#complexDealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    });
+                    doSearch();
+                });
+            } else {
+                $("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+                doSearch();
+            }
+        }
+    </script>
+    <script type="text/javascript">
+        UI.searchbox($("#searchCustomer"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+    </script>
+}

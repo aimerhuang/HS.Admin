@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ReferenceGroup xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="2ebd621d-81c8-4904-91fc-a60412648ccc" xmlns="urn:schemas-microsoft-com:xml-wcfservicemap">
+  <ClientOptions>
+    <GenerateAsynchronousMethods>false</GenerateAsynchronousMethods>
+    <EnableDataBinding>true</EnableDataBinding>
+    <ExcludedTypes />
+    <ImportXmlTypes>false</ImportXmlTypes>
+    <GenerateInternalTypes>false</GenerateInternalTypes>
+    <GenerateMessageContracts>false</GenerateMessageContracts>
+    <NamespaceMappings />
+    <CollectionMappings />
+    <GenerateSerializableTypes>true</GenerateSerializableTypes>
+    <Serializer>Auto</Serializer>
+    <UseSerializerForFaults>true</UseSerializerForFaults>
+    <ReferenceAllAssemblies>true</ReferenceAllAssemblies>
+    <ReferencedAssemblies />
+    <ReferencedDataContractTypes />
+    <ServiceContractMappings />
+  </ClientOptions>
+  <MetadataSources>
+    <MetadataSource Address="http://wms.lc-shipping.com/WCF/Express.svc" Protocol="http" SourceId="1" />
+  </MetadataSources>
+  <Metadata>
+    <MetadataFile FileName="Express.wsdl" MetadataType="Wsdl" ID="fba85099-7422-4921-863e-44394391b623" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?wsdl" />
+    <MetadataFile FileName="Express.xsd" MetadataType="Schema" ID="c2e10246-7cce-49c4-8a0d-0629afccf137" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?xsd=xsd0" />
+    <MetadataFile FileName="Express1.xsd" MetadataType="Schema" ID="2dbf69d3-12e2-4d79-b391-7c4717f498f3" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?xsd=xsd3" />
+    <MetadataFile FileName="Express2.xsd" MetadataType="Schema" ID="21b8cb96-bdca-4b41-9881-917b056c5c5a" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?xsd=xsd1" />
+    <MetadataFile FileName="Express.disco" MetadataType="Disco" ID="8007f7f8-205b-497a-bcf3-94893f22c293" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?disco" />
+    <MetadataFile FileName="Express3.xsd" MetadataType="Schema" ID="01b772d6-09a4-42ce-a902-518c88d6158d" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?xsd=xsd2" />
+    <MetadataFile FileName="Express4.xsd" MetadataType="Schema" ID="004c6fd5-2867-4f40-b83c-0069ae7a23c1" SourceId="1" SourceUrl="http://wms.lc-shipping.com/WCF/Express.svc?xsd=xsd4" />
+  </Metadata>
+  <Extensions>
+    <ExtensionFile FileName="configuration91.svcinfo" Name="configuration91.svcinfo" />
+    <ExtensionFile FileName="configuration.svcinfo" Name="configuration.svcinfo" />
+  </Extensions>
+</ReferenceGroup>

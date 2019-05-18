@@ -1,0 +1,58 @@
+﻿@{
+    Layout = null;
+}
+ 
+@model IList<Hyt.Model.Transfer.CBWhWarehouseDeliveryType>
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">仓库名称</th>
+            <th width="98">常用快递名称</th>
+            <th width="72">配送级别</th>
+            <th width="66">运费</th>
+            <th width="72">配送耗时</th>
+            <th width="85">创建人</th>
+            <th width="120">创建时间</th>
+            <th width="79">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+      @if (Model.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBWhWarehouseDeliveryType item in Model)
+            {
+            <tr>
+                <td class="align_l p10_lr">@item.WareHouseName</td>
+                <td class="blue">
+                    <input type="hidden" name="sysno" value="@item.DeliveryTypeSysNo"/>
+                    <a href="javascript:LookDeliveryType('@item.DeliveryTypeSysNo');">@item.DeliveryTypeName</a>
+                </td>
+                <td>@item.DeliveryLevel</td>
+                <td class="red p10_r" align="right">@item.Freight.ToString("C")</td>
+                <td>@item.DeliveryTime</td>
+                <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+
+                <td>
+                    <button class="btn btn_ht26 " onclick="DelWareHouseDeliveryType(@item.SysNo)" title="删除"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+
+                </td>
+            </tr>                                           
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    //隔行样式
+    DAO.InterlineStyle();   
+</script>

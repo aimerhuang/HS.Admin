@@ -1,0 +1,39 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model IList<CrReceiveAddress>
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th style="text-align: left; text-indent: 10px;" width="50">收货人</th>
+                <th style="text-align: left; text-indent: 10px;" width="100">收货电话</th>
+                <th style="text-align: left; text-indent: 10px;" >收货地址</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.Count > 0)
+                {
+                    var row = 1;
+                    string cs = string.Empty;
+                    foreach (var item in (List<CrReceiveAddress>)Model)
+                    {
+                        cs = row%2 == 0 ? "stag_color" : string.Empty;
+                        <tr class="@cs">
+                            <td style="text-align: left; text-indent: 10px;">@item.Name</td>
+                            <td style="text-align: left; text-indent: 10px;">@item.MobilePhoneNumber</td>
+                            <td style="text-align: left; text-indent: 10px;">@item.StreetAddress</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                <tr class="odd_color">
+                    <td class="align_l p10_l bgr_eb" colspan="2">暂无数据</td>
+                </tr>
+                }
+            }
+     </tbody>
+    </table>
+</div>

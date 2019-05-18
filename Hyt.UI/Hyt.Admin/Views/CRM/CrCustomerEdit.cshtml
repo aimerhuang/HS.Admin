@@ -1,0 +1,343 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+
+@model Hyt.Model.CrCustomer
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>修改</title>
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var year, month, day;
+        var today, todayY, todayM, todayD;
+        //加入一个Item   
+
+        function AddItem(obj, text, value) {
+            var varItem = new Option(text, value);
+            obj.options.add(varItem);
+        }
+
+//设置select中指定text的第一个Item为选中   
+
+        function SelectItemByText(obj, value) {
+            var isExit = false;
+            for (var i = 0; i < obj.options.length; i++) {
+                if (obj.options[i].value == value) {
+                    obj.options[i].selected = true;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+//清空所有选项
+
+        function Clear(obj) {
+            obj.options.length = 0;
+        }
+
+        $(function() {
+            year = document.getElementById("year");
+            month = document.getElementById("month");
+            day = document.getElementById("day");
+
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    IsReceiveEmail: { required: true },
+                    IsReceiveShortMessage: { required: true },
+                    IsPublicAccount: { required: true },
+                    IsLevelFixed: { required: true },
+                    IsExperiencePointFixed: { required: true },
+                    IsExperienceCoinFixed: { required: true }
+                },
+                errorPlacement: function(error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function(label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+            //今天日期
+            today = '@ViewBag.Today'.split("-");
+            todayY = parseInt(today[0]);
+            todayM = parseInt(today[1]);
+            todayD = parseInt(today[2]);
+            //年份
+            AddItem(year, "请选择", 0);
+            for (var i = (new Date()).getFullYear(); i >= 1900; i--) {
+                AddItem(year, i, i);
+            }
+            @if (ViewBag.Year != null)
+            {
+                @:SelectItemByText(year, @ViewBag.Year);
+            }
+            //月
+            AddItem(month, "请选择", 0);
+            for (var j = 1; j < 13; j++) {
+                if ('@ViewBag.Year' != todayY || ('@ViewBag.Year' == todayY && j <= todayM)) {
+                    AddItem(month, j, j);
+                }
+            }
+            //日
+            @if (ViewBag.Day != null)
+            {
+                @:fillDays(@ViewBag.Year,@ViewBag.Month,@ViewBag.Day);
+                            @:SelectItemByText(day, @ViewBag.Day);
+            }
+            else
+            {
+                @:fill(todayY,todayM, todayD);
+            }
+            //事件
+            $("#year").change(function () {
+                fillDays($("#year").val(),$("#month").val(),$("#day").val());  
+            });
+            $("#month").change(function () {
+                if ($(this).val() != null) {
+                    fillDays($("#year").val(),$(this).val(),$("#day").val());
+                } else {
+                    fillDays($("#year").val(),$("#month").val(),$("#day").val());
+                }
+            });
+            
+        });
+        function checkBirthday() { //生日
+            var y = $('#year').val();
+            var m = $('#month').val();
+            var d = $('#day').val();
+            var hasDate = (y != 0) && (m != 0) && (d != 0);
+            var noDate = (y == 0) && (m == 0) && (d == 0);
+            if (hasDate || noDate) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        function addOrEdit() {
+            
+            var from = $("#form");
+            $(from).submit();
+            var result = new Array();
+            if ($(from).valid()) {
+                //AjaxStart();
+
+                var json = {};
+                
+                json.IsReceiveEmail = $("select[name='IsReceiveEmail']").val();
+                json.IsReceiveShortMessage = $("select[name='IsReceiveShortMessage']").val();
+                json.IsPublicAccount = $("select[name='IsPublicAccount']").val();
+
+                json.IsLevelFixed = $("select[name='IsLevelFixed']").val();
+                json.IsExperiencePointFixed = $("select[name='IsExperiencePointFixed']").val();
+                json.IsExperienceCoinFixed = $("select[name='IsExperienceCoinFixed']").val();
+                if (!checkBirthday()) {
+                    UI.tips.tip_alert('tips_wrong', "请选择生日");
+                    return false;
+                } else {
+                    json.Birthday = $("#year").val() + "-" + $("#month").val() + "-" + $("#day").val();
+                }
+
+                $.ajax({
+                    url: "/CRM/CrCustomerUpdate/?sysNo=" + @Model.SysNo,
+                    data: JSON.stringify({ customer: json }),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.result) {
+                            UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                            UI.Dialog.close();
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_wrong', data.info);
+                        }
+                    }
+                });
+            }
+        }
+        //根据年月获取天数填充下拉框
+        function fillDays(y,m,d) {
+            //月处理
+            Clear(month);
+            AddItem(month, "请选择", 0);
+            for(var i=1;i<=12;i++) {
+                var blMonthAdd = true;
+                if(y == todayY && i > todayM) blMonthAdd = false;
+                if(blMonthAdd) month.options.add(new Option((i>9?i:"0"+i),i,false));
+            }
+            if (m) {
+                SelectItemByText(month,m);
+            }
+
+
+            //日处理
+            var days = new Date(y,m,0).getDate();
+            Clear(day);
+            AddItem(day, "请选择", 0);
+            for(i=1;i<=days;i++) {
+                var blDayAdd = true;
+                if(y == todayY && m == todayM && i > todayD) blDayAdd = false;
+                if(blDayAdd) day.options.add(new Option((i>9?i:"0"+i),i,false));
+            };
+            if(d && d<=days) {
+                SelectItemByText(day,d);
+            }
+        }
+        //根据年月获取天数填充下拉框
+        function fill(y,m,d) {
+            //月处理
+            Clear(month);
+            AddItem(month, "请选择", 0);
+            for(var i=1;i<=12;i++) {
+                var blMonthAdd = true;
+                if(y == todayY && i > todayM) blMonthAdd = false;
+                if(blMonthAdd) month.options.add(new Option((i>9?i:"0"+i),i,false));
+            }
+
+
+
+            //日处理
+            var days = new Date(y,m,0).getDate();
+            Clear(day);
+            AddItem(day, "请选择", 0);
+            for(i=1;i<=days;i++) {
+                var blDayAdd = true;
+                if(y == todayY && m == todayM && i > todayD) blDayAdd = false;
+                if(blDayAdd) day.options.add(new Option((i>9?i:"0"+i),i,false));
+            };
+        }
+    </script>
+}
+</head>
+    <body>
+        <form id="form" name="form" action="">
+            <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+            <div class="p10">
+                <div class="boxs_detail_dispay">
+                    <div class="tit_con">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                            <tbody>
+                                <tr>
+                                    <td width="107" class="nameright"><span class="v_star">*</span>是否接收邮件:</td>
+                                    <td>
+                                        <select name="IsReceiveEmail" id="IsReceiveEmail" style="width:213px;" class="select_ht28 valid">
+                                            <option value="">请选择</option>
+                                            @{
+                                                string sel;
+                                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsReceiveEmail)
+                                                {
+                                                    sel = Model.IsReceiveEmail == dict.Key ? "selected='selected'" : string.Empty;
+                                                    <option value="@dict.Key" @sel>@dict.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="forIsReceiveEmail" class="prompt m10_l">是否接收邮件</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="107" class="nameright"><span class="v_star">*</span>是否接收短信:</td>
+                                    <td>
+                                        <select name="IsReceiveShortMessage" id="IsReceiveShortMessage" style="width:213px;" class="select_ht28 valid">
+                                            <option value="">请选择</option>
+                                            @{
+                                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsReceiveShortMessage)
+                                                {
+                                                    sel = Model.IsReceiveShortMessage == dict.Key ? "selected='selected'" : string.Empty;
+                                                    <option value="@dict.Key" @sel>@dict.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="forIsReceiveShortMessage" class="prompt m10_l">是否接收短信</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="107" class="nameright"><span class="v_star">*</span>是否是公共账户:</td>
+                                    <td>
+                                        <select name="IsPublicAccount" id="IsPublicAccount" style="width:213px;" class="select_ht28 valid">
+                                            <option value="">请选择</option>
+                                            @{
+                                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsPublicAccount)
+                                                {
+                                                    sel = Model.IsPublicAccount == dict.Key ? "selected='selected'" : string.Empty;
+                                                    <option value="@dict.Key" @sel>@dict.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="forIsPublicAccount" class="prompt m10_l">是否是公共账户</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="107" class="nameright"><span class="v_star">*</span>等级是否固定:</td>
+                                    <td>
+                                        <select name="IsLevelFixed" id="IsLevelFixed" style="width:213px;" class="select_ht28 valid">
+                                            <option value="">请选择</option>
+                                            @{
+                                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsLevelFixed)
+                                                {
+                                                    sel = Model.IsLevelFixed == dict.Key ? "selected='selected'" : string.Empty;
+                                                    <option value="@dict.Key" @sel>@dict.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="forIsLevelFixed" class="prompt m10_l">等级是否固定</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="107" class="nameright"><span class="v_star">*</span>经验积分是否固定:</td>
+                                    <td>
+                                        <select name="IsExperiencePointFixed" id="IsExperiencePointFixed" style="width:213px;" class="select_ht28 valid">
+                                            <option value="">请选择</option>
+                                            @{
+                                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsExperiencePointFixed)
+                                                {
+                                                    sel = Model.IsExperiencePointFixed == dict.Key ? "selected='selected'" : string.Empty;
+                                                    <option value="@dict.Key" @sel>@dict.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="forIsExperiencePointFixed" class="prompt m10_l">经验积分是否固定</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="107" class="nameright"><span class="v_star">*</span>惠源币是否固定:</td>
+                                    <td>
+                                        <select name="IsExperienceCoinFixed" id="IsExperienceCoinFixed" style="width:213px;" class="select_ht28 valid">
+                                            <option value="">请选择</option>
+                                            @{
+                                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsExperienceCoinFixed)
+                                                {
+                                                    sel = Model.IsExperienceCoinFixed == dict.Key ? "selected='selected'" : string.Empty;
+                                                    <option value="@dict.Key" @sel>@dict.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="forIsExperienceCoinFixed" class="prompt m10_l">惠源币是否固定</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="107" class="nameright">生日:</td>
+                                    <td>
+                                        <select id="year" name="year">
+                                        </select>  
+                                        <select id="month" name="month">
+                                        </select>  
+                                        <select id="day" name="day">
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </body>
+</html>

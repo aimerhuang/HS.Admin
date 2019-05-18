@@ -1,0 +1,66 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品选择";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+
+<div class="caseout">
+    <div class="boxs">
+
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="fl"></span><input type="text" placeholder="商品名称..." class="input_small m10_r m10_l fl" style="width:180px;" id="keyword">
+                    <button type="button" class="btn btn_ht28 fl" title="查询" id="searchBtn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                </div>
+            </div>
+            <div id="paging">
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#keyword").defaultValue("商品名称...");
+        doSearch();
+
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+
+        $("#keyword").click(function () {
+            this.select();
+        });
+
+    });
+    function CallBack() {
+        var obj = $("#paging input:radio:checked");
+        var sysno = obj.val();
+        var name = obj.attr("code");
+        var data = { sysno: sysno, name: name }
+        parent && parent._ActiveProductListSelectorCallBack(data);
+    }
+    //查询列表
+    function doSearch(id) {
+        var keyword = $("#keyword").val();
+        if (keyword == "商品名称...")
+            keyword = "";
+        Ajax.get("/Product/PdProductListQuery/?r=" + Math.random(), "Search", function (p) {
+            p.setParams("id", id);
+            p.setParams("keyword", keyword);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+</script>

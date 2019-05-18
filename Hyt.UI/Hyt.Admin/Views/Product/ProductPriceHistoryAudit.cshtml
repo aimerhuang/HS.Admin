@@ -1,0 +1,122 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model  IList<Hyt.Model.Transfer.CBPdPriceHistory>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "调价申请审批";
+    const int processed = (int)ProductStatus.产品价格变更状态.已审;
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var txtOpinionTxt = "请输入审核意见...";
+        $(function () {
+
+            $("#txtOpinion").focus(function () {
+                if ($("#txtOpinion").val() == txtOpinionTxt) {
+                    $("#txtOpinion").val("");
+                }
+            });
+            $("#txtOpinion").blur(function () {
+                if ($("#txtOpinion").val() == "") {
+                    $("#txtOpinion").val(txtOpinionTxt);
+                }
+            });
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    Name: {
+                        required: true,
+                        maxlength: 10
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function edit(status) {
+            var opinion = $("#txtOpinion").val();
+            opinion = opinion == txtOpinionTxt ? "" : opinion;
+            $.post('/Product/ProductPriceHistoryAudit/', { relationCode: $("#hidRelationCode").val(), status: status, opinion: opinion }, function (data) {
+                if (data.IsPass) {
+                    UI.Dialog.opener.dialog();
+                    UI.Dialog.opener.searchPriceHistory();
+                    UI.Dialog.close();
+                }
+            });
+        }
+    </script>
+}
+<form id="form" name="form" action="" style="background-color: #f5f5f5">
+    <div class="caseout">
+
+
+
+        <div class="head_detail">
+            <h5>商品名称:@Model[0].ProductName</h5>
+        </div>
+        <input type="hidden" id="hidRelationCode" name="hidRelationCode" value="@Model[0].RelationCode" />
+
+        <div class="boxs_detail">
+            <table border="0" cellspacing="0" cellpadding="0" width="100%">
+                <thead>
+                    <tr>
+                        <th class="border_lnone" colspan="2" width="50%">原价格</th>
+                        <th width="50%" colspan="2">申请价格</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @{
+                        var opinion = string.IsNullOrEmpty(Model[0].Opinion) ? "请输入审核意见..." : Model[0].Opinion;
+                        var list = PdPriceBo.Instance.GetPriceTypeItems();
+                        foreach (var item in Model)
+                        {
+                            string str = PdPriceBo.Instance.GetPriceTypeName(list, item.PriceSource, item.SourceSysNo) + "：";
+                        <tr>
+                            <td class="border_lnone align_r" width="80">@str</td>
+                            <td class="border_lnone red align_l p10_l">¥@item.OriginalPrice</td>
+                            <td class="align_r" width="80">@str</td>
+                            <td class="border_lnone red align_l p10_l">¥@item.ApplyPrice</td>
+                        </tr>
+                        }
+                          
+                    }
+                    @{if (Model[0].Status == processed)
+                      {
+                        <tr>
+                            <td colspan="4" class="border_lnone">
+                                <textarea name="txtOpinion" disabled="disabled" style="width: 387px; height: 100px">@(string.IsNullOrEmpty(Model[0].Opinion) ? "无审核意见" : Model[0].Opinion)</textarea>
+                            </td>
+                        </tr>
+                      }
+                      else
+                      {
+                        <tr>
+                            <td colspan="4" class="border_lnone">
+                                <textarea id="txtOpinion" name="txtOpinion" style="width: 387px; height: 100px">@opinion</textarea>
+                            </td>
+                        </tr>
+                      }
+                    }
+                    @if (Model[0].Status == processed)
+                    {
+                        <tr>
+                            <td class="border_lnone align_r p10_l align_l" width="50" colspan="4">审批人:
+                            @Model[0].AuditorName &nbsp; @Model[0].AuditDate.ToString("yyyy-MM-dd HH:mm")
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+</form>

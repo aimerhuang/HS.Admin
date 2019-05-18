@@ -1,0 +1,61 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<Hyt.Model.Procurement.CBWhWarehouseMonthStockHistory>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="50">ID</th>
+            <th width="180">商品ERP编号</th>
+            <th>商品EAS名称</th>
+            <th>规格型号</th>
+            <th>单位</th>
+            <th>上月库存</th>
+            <th>本月入库数</th>
+            <th>本月销售量</th>
+            <th>本月损耗量</th>
+            <th>本月退货量</th>
+            <th>本月库存</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count > 0)
+            {
+                var Index = 0;
+                string cs = string.Empty;
+                int productSysNo = 0;
+                foreach (var item in Model.TData)
+                {
+                    if (item.ProductSysNo != productSysNo)
+                    {
+                        productSysNo = item.ProductSysNo;
+                        <tr>
+                            <td>@productSysNo</td>
+                            <td>@item.ErpCode</td>
+                            <td>@item.EasName</td>
+                            <td>@item.Spec</td>
+                            <td>@item.SpecUnit</td>
+                            <td>@item.UpMonthQuantity</td>
+                            <td>@(item.InWareQuantity - item.UpMonthInQuantity)</td>
+                            <td>@(item.SalesQuantity - item.UpMonthSalesQuantity)</td>
+                            <td>@(item.LossQuantity - item.UpMonthLossQuantity)</td>
+                            <td>@(item.RetQuantity - item.UpMonthRetQuantity)</td>
+                            <td>@(item.TotalQuantity - item.LossQuantity)</td>
+                        </tr>
+                    }
+                }
+            }
+            else
+            {
+                <tr class="odd_color">
+                    <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+

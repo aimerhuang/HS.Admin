@@ -1,0 +1,79 @@
+﻿@model Hyt.Model.FeProductItem
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "广告展示模块管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    DispalySymbol: { required: true, number: true },
+                    DisplayOrder: { required: true, number: true },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        function addOrEdit(currentPage) {
+            var from = $("#form");
+            $(from).submit();
+            if ($(from).valid()) {
+                var ajax = {
+                    url: '/Front/FeProductItemEdit', data: from.serialize(), type: 'POST', dataType: 'json', cache: false,
+                    success: function (json, statusText) {
+                        if (json.result) {
+                            UI.Dialog.opener.tip_alert('tips_shrot tips_success', json.info);
+                            UI.Dialog.opener.searchClass(currentPage);
+                            UI.Dialog.close();
+                        } else {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.close();
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    }
+                };
+                $.ajax(ajax);
+            }
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr style="display:none;">
+                  <td width="60" class="nameright" valign="top"><span class="v_star">*</span>显示类型</td>
+                  <td>
+                      <select id="DispalySymbol" name="DispalySymbol" class="select_ht28 wd170">
+                          @{
+                              string sel;
+                              foreach (var dict in (IDictionary<int, string>)ViewBag.StatusList)
+                              {
+                                  sel = Model.DispalySymbol == dict.Key ? "selected='selected'" : string.Empty;
+                                  <option value="@dict.Key" @sel>@dict.Value</option>
+                              }
+                          }
+                      </select>
+                      <span id="forDispalySymbol" class="prompt m10_l">显示类型</span>
+                  </td>
+                </tr>
+                <tr>
+                    <td width="60" class="nameright"><span class="v_star">*</span>排序号</td>
+                    <td>@Html.TextBoxFor(m => m.DisplayOrder, new { @class = "wd160" })<span id="forDisplayOrder" class="prompt m10_l">用于显示排序的数字编号</span></td>
+                </tr>
+          </table>
+        </div>
+    </div>
+</div>
+</form>

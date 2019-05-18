@@ -1,0 +1,137 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.CBWhWarehouse
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "仓库信息";
+    if (Model == null)
+    {
+        return;
+    }
+}
+<script src="~/Theme/scripts/showpic.js"></script>
+
+<div class="caseout">
+    <div class="boxs" >
+        <div class="boxs_detail_dispay" >
+            <div class="tit_dispay border_left border_right1">
+                <h5>仓库信息</h5>
+            </div>
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="15%" class="nameright border_rnone">仓库编号：</td>
+                        <td width="35%" class="border_right1">@Model.SysNo</td>
+                        <td style="width: 15%;" class="nameright border_rnone">仓库名称：</td>
+                        <td style="width: 35%;">@Model.BackWarehouseName</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 15%;" class="nameright border_rnone">仓库类型：</td>
+                        <td style="width: 35%;">@(Enum.IsDefined(typeof(WarehouseStatus.仓库类型), Model.WarehouseType)
+                                                      ? ((WarehouseStatus.仓库类型)Model.WarehouseType).ToString()
+                                                      : "未知类型 " + Model.WarehouseType)</td>
+
+                        <td width="16%" class="nameright border_rnone">状态：</td>
+                        <td width="34%">@(Enum.IsDefined(typeof(WarehouseStatus.仓库状态), Model.Status)
+                                                      ? ((WarehouseStatus.仓库状态)Model.Status).ToString()
+                                                      : "未知类型 " + Model.Status)</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">仓库ERP编号：</td>
+                        <td class="border_right1">@Model.ErpCode</td>
+                        <td class="nameright border_rnone">售后库位ERP编号：</td>
+                        <td>@Model.ErpRmaCode</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">联系人：</td>
+                        <td class="border_right1">@Model.Contact</td>
+                        <td class="nameright border_rnone">联系电话：</td>
+                        <td>@Model.Phone</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">地区：</td>
+                        <td colspan="3">@(Model.ProvinceName) @(Model.CityName) @(Model.AreaName)</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">街道地址：</td>
+                        <td colspan="3">@Model.StreetAddress</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">坐标：</td>
+                        <td colspan="3" class="border_right1"><span class="c6 m5_r">经度：@Model.Longitude</span> <span class="c6 m5_r m5_l">纬度：@Model.Latitude</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">是否自营：</td>
+                        <td>@(Enum.IsDefined(typeof(WarehouseStatus.是否自营), Model.IsSelfSupport)
+                                              ? ((WarehouseStatus.是否自营)Model.IsSelfSupport).ToString()
+                                              : "未知类型 " + Model.IsSelfSupport)</td>
+                        <td class="nameright border_rnone">对应分销商：</td>
+                        <td >
+                            @ViewBag.DearlName
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">仓库/门店图片：</td>
+                        <td colspan="3">
+                            <a href="@Model.ImgUrl" target="_blank">
+                                <img id="warehouseImage" onmouseover="picShow(this,this.src)" onmouseout="closeLayerCity()" src="@Model.ImgUrl" dn="warehouseImage" width="50" height="50" class="bordergary">
+                            </a>
+                        </td>
+                    </tr>
+
+                </table>
+            </div>
+            <div class="tit_dispay border_tnone">
+                <h5>仓库服务地区</h5>
+            </div>
+
+            <div class="boxs_detail border_lnone" style="overflow-y:auto;height:168px;">
+                <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <thead >
+                        <tr  >
+                            <th class="wd75">仓库编号</th>
+                            <th width="111">仓库名称</th>
+                            <th class="align_l p10_lr">地区</th>
+                            <th width="124">是否默认发货仓库</th>
+                        </tr> 
+                    </thead>
+                    <tbody>
+                        <tr/>
+               
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("input[type=text]").attr("disabled", true);
+        $("input[type=radio]").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+
+        //表格加入隔行样式
+        DAO.InterlineStyle();
+
+        //加载已保存的仓库覆盖地区
+        $.getJSON('@Url.Content("~/Basic/GetWhWarehouseArea/")', { warehouseSysNo: '@Model.SysNo' }, function (data) {
+                if (data != null) {
+                    $.each(data, function () {
+                        var areaName = this.AreaName;
+                        var def = this.IsDefault == 1 ? '是' : '否';
+                        var newRow = "<tr><td>" + eval(this.SysNo) + "</td><td>@Model.BackWarehouseName</td><td class='align_l p10_lr'>" + areaName + "</td><td>" + def + "</td></tr>";
+                    $("#item_list tbody tr:last").after(newRow);
+                });
+            }
+            });
+
+    });
+    //图片显示 
+    function picShow(obj, src) {
+        if (src.indexOf("/Theme/images/addpic.png") < 0)//没有时返回-1
+        { showp(obj, src); }
+    }
+</script>

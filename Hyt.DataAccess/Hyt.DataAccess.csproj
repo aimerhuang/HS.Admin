@@ -1,0 +1,423 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{D3AF6913-F96C-45E0-AD43-4FE1EF542DA8}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.DataAccess</RootNamespace>
+    <AssemblyName>Hyt.DataAccess</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="MiniProfiler, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MiniProfiler.2.1.0\lib\net40\MiniProfiler.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Allocation\IAllocationDao.cs" />
+    <Compile Include="AppContent\IAppContentDao.cs" />
+    <Compile Include="Atten\ClockTypeDao.cs" />
+    <Compile Include="Balance\CrRechargeDao.cs" />
+    <Compile Include="Base\TransactionLocal.cs" />
+    <Compile Include="Basic\IBasicAreaDao.cs" />
+    <Compile Include="Basic\IBasicShipDao.cs" />
+    <Compile Include="Base\DaoBase.cs" />
+    <Compile Include="Base\DaoFactory.cs" />
+    <Compile Include="Base\FluentData.cs" />
+    <Compile Include="Basic\IBasicPayDao.cs" />
+    <Compile Include="Basic\IBsCodeDao.cs" />
+    <Compile Include="Basic\IBsDeliveryPaymentDao.cs" />
+    <Compile Include="Basic\IOrganizationDao.cs" />
+    <Compile Include="Basic\IOriginDao.cs" />
+    <Compile Include="Basic\IReceiptNumberDao.cs" />
+    <Compile Include="Cargo\ICargoOrderBao.cs" />
+    <Compile Include="Convergence\ScanParamDao.cs" />
+    <Compile Include="CRM\ICrCustomerShipCardDao.cs" />
+    <Compile Include="CRM\ICrDealerApplyDao.cs" />
+    <Compile Include="CRM\ICrPredepositCashRebatesRecordAssociationDao.cs" />
+    <Compile Include="CRM\ICrSsoCustomerAssociationDao.cs" />
+    <Compile Include="CRM\ICrSmsQuestionDao.cs" />
+    <Compile Include="Distribution\IDsAgentDao.cs" />
+    <Compile Include="Distribution\IDsAgentPrePaymentDao.cs" />
+    <Compile Include="Distribution\IDsAgentPrePaymentItemDao.cs" />
+    <Compile Include="Distribution\IDsDealerApplyDao.cs" />
+    <Compile Include="Distribution\IDsDealerPayTypeDao.cs" />
+    <Compile Include="Distribution\IDsDealerRebatesRecordDao.cs" />
+    <Compile Include="Distribution\IDsThreeMallSyncLogDao.cs" />
+    <Compile Include="Express\ILgDeliveryCompanyAccountDao.cs" />
+    <Compile Include="Express\ILgStoreLogisticsCompanyDao.cs" />
+    <Compile Include="Extra\IPosServiceDao.cs" />
+    <Compile Include="Feedback\FeedBackDao.cs" />
+    <Compile Include="FinancialStatistics\IFnStatisticsDao.cs" />
+    <Compile Include="FreightModule\IFreightModuleDao.cs" />
+    <Compile Include="FreightModule\IFreightModuleItemPricesDao.cs" />
+    <Compile Include="Front\IFeNewsCategoryDao.cs" />
+    <Compile Include="Icp\IcpDao.cs" />
+    <Compile Include="CrossBorderLogistics\ICrossBorderLogisticsOrderDao.cs" />
+    <Compile Include="ExpressLists\IExpressListDao.cs" />
+    <Compile Include="InventorySheet\IPdProductSpecDao.cs" />
+    <Compile Include="InventorySheet\IWhInventoryDao.cs" />
+    <Compile Include="Kis\IICStockBillEntryTemDao.cs" />
+    <Compile Include="Kis\IIcStockBillTemDao.cs" />
+    <Compile Include="Logistics\ILgElectronicWayBillDao.cs" />
+    <Compile Include="Logistics\ILogisticsDao.cs" />
+    <Compile Include="Logistics\ILgFreightModuleDetailsDao.cs" />
+    <Compile Include="Logistics\ILgFreightModuleDao.cs" />
+    <Compile Include="Logistics\ILgFreightValuationModuleDao.cs" />
+    <Compile Include="Logistics\IThirdDeliveryConfigDao.cs" />
+    <Compile Include="Log\IWhStockOutLogDao.cs" />
+    <Compile Include="Mobile\ICrCustomerMobileLoginDao.cs" />
+    <Compile Include="Mobile\IMBDesignFrameDao.cs" />
+    <Compile Include="Order\ICrWeChatBindDao.cs" />
+    <Compile Include="Order\IOutboundReturnDao.cs" />
+    <Compile Include="Order\ISendOrderReturnDao.cs" />
+    <Compile Include="Order\ISoChangeOrderPriceDao.cs" />
+    <Compile Include="Order\ISoCustomsOrderLogDao.cs" />
+    <Compile Include="Order\ISoOrderPayLogDao.cs" />
+    <Compile Include="Order\ISoOrderPayPushLogDao.cs" />
+    <Compile Include="Order\ISoOrderSyncLogisticsLogDao.cs" />
+    <Compile Include="Order\ISoSoOrderOtherExpensesDao.cs" />
+    <Compile Include="PdPackaged\IPdPackagedGoodsDao.cs" />
+    <Compile Include="Pos\IDsDealerPayConfigDao.cs" />
+    <Compile Include="Pos\IDsPosFrontDealerConfigDao.cs" />
+    <Compile Include="Pos\IDsMembershioLevelDao.cs" />
+    <Compile Include="Pos\IDsMembershipCardDao.cs" />
+    <Compile Include="Pos\IDsPaymentToPointConfigDao.cs" />
+    <Compile Include="Pos\IDsPosBarcodePayLogDao.cs" />
+    <Compile Include="Pos\IDsPosFrontConfigDao.cs" />
+    <Compile Include="Pos\IDsPosManageDao.cs" />
+    <Compile Include="Pos\IDsPosMoneyBoxDao.cs" />
+    <Compile Include="Pos\IDsPosOrderDao.cs" />
+    <Compile Include="Pos\IDsPosReturnOrderDao.cs" />
+    <Compile Include="Pos\IDsPosTLPosResultDao.cs" />
+    <Compile Include="Pos\IDsPosVersionDao.cs" />
+    <Compile Include="Pos\IDsPosWebSocketHistoryDao.cs" />
+    <Compile Include="Pos\IDsPosWebSocketManageDao.cs" />
+    <Compile Include="Pos\IDsTakeStockOrderDao.cs" />
+    <Compile Include="Pos\IMemberPointHistoryDao.cs" />
+    <Compile Include="Pos\ISyWSOrderToClientJobDao.cs" />
+    <Compile Include="Procurement\IPmBaseDataDao.cs" />
+    <Compile Include="Procurement\IPmDeliveryDao.cs" />
+    <Compile Include="Procurement\IPmManufacturProductDao.cs" />
+    <Compile Include="Procurement\IPmPointsOrderDao.cs" />
+    <Compile Include="Procurement\IPmProcurementDao.cs" />
+    <Compile Include="Procurement\IPmWareGoodsDao.cs" />
+    <Compile Include="Procurement\IPurchasePaymentOrderDao.cs" />
+    <Compile Include="Procurement\IWhWarehouseMonthStockHistoryDao.cs" />
+    <Compile Include="Product\IPdProductCrossBorderDao.cs" />
+    <Compile Include="Product\IPdProductFreightDao.cs" />
+    <Compile Include="Product\IPdProductAttributeOptionDao.cs" />
+    <Compile Include="Product\IPdProductPrivateDao.cs" />
+    <Compile Include="Promotion\ISpSpikeDao.cs" />
+    <Compile Include="Promotion\IWhouseFreightFreeDao.cs" />
+    <Compile Include="Purchase\IPrPurchaseDao.cs" />
+    <Compile Include="Purchase\IPrPurchaseDetailsDao.cs" />
+    <Compile Include="Purchase\IPrPurchaseReturnDao.cs" />
+    <Compile Include="Purchase\IPrPurchaseReturnDetailsDao.cs" />
+    <Compile Include="QJT\IQJTProductImeiDao.cs" />
+    <Compile Include="QJT\IQJTStockOutImeiDao.cs" />
+    <Compile Include="RMA\IRcNoReturnExchangeDao.cs" />
+    <Compile Include="RMA\IRcRefundReturnDao.cs" />
+    <Compile Include="SellBusiness\ICrCustomerRebatesRecordDao.cs" />
+    <Compile Include="SellBusiness\ICrPredepositCashDao.cs" />
+    <Compile Include="SellBusiness\ICrSellBusinessGradeDao.cs" />
+    <Compile Include="Stores\IDsDealerBailOrderDao.cs" />
+    <Compile Include="Stores\IDsOrderAssociationDao.cs" />
+    <Compile Include="Stores\IDsSpecialPriceDao.cs" />
+    <Compile Include="Stores\IStoresDao.cs" />
+    <Compile Include="Supply\IScProductDao.cs" />
+    <Compile Include="Sys\ILiJiaDao.cs" />
+    <Compile Include="Sys\ISyJobMessageDao.cs" />
+    <Compile Include="Sys\ISyKingdeeUserDao.cs" />
+    <Compile Include="Sys\ISySsoUserAssociationDao.cs" />
+    <Compile Include="Distribution\IDsDealerDaoApp.cs" />
+    <Compile Include="Distribution\IDsDealerWharehouse.cs" />
+    <Compile Include="Distribution\IDsForbidProductDao.cs" />
+    <Compile Include="Distribution\IDsUserDao.cs" />
+    <Compile Include="Finance\IFnThirdpartyReconciliationDao.cs" />
+    <Compile Include="Finance\IFnReceiptTitleAssociationDao.cs" />
+    <Compile Include="Front\IFeNewsDao.cs" />
+    <Compile Include="Front\IFeNewsProductAssociationDao.cs" />
+    <Compile Include="Front\IFeSoftCategoryDao.cs" />
+    <Compile Include="Front\IFeSoftwareDao.cs" />
+    <Compile Include="Front\IFeSoftwareListDao.cs" />
+    <Compile Include="Front\IMkBlogrollDao.cs" />
+    <Compile Include="Logistics\IWhDeliveryScopeDao.cs" />
+    <Compile Include="MallSeller\IDsMallAreaRelationDao.cs" />
+    <Compile Include="MallSeller\IDsMallSyncLogDao.cs" />
+    <Compile Include="Logistics\ILgDeliveryCompanyCodeDao.cs" />
+    <Compile Include="Logistics\ILgExpressDao.cs" />
+    <Compile Include="Logistics\IMkExpressLogDao.cs" />
+    <Compile Include="MallSeller\IDsDealerLog.cs" />
+    <Compile Include="MallSeller\IDsMallExpressCodeDao.cs" />
+    <Compile Include="MallSeller\IDsProductRelationDao.cs" />
+    <Compile Include="Order\ITwoSaleDao.cs" />
+    <Compile Include="Promotion\ISpCouponCardAssociateDao.cs" />
+    <Compile Include="Promotion\ISpCouponCardDao.cs" />
+    <Compile Include="Promotion\ISpCouponCardTypeDao.cs" />
+    <Compile Include="Promotion\ISpCouponReceiveLogDao.cs" />
+    <Compile Include="Promotion\ISpPromotionExtensionsDao.cs" />
+    <Compile Include="Report\IMkTrafficStatisticsDao.cs" />
+    <Compile Include="RMA\ISoReturnOrderItemDao.cs" />
+    <Compile Include="Sys\IEasDao.cs" />
+    <Compile Include="Basic\IProductDao.cs" />
+    <Compile Include="Basic\IReceiptManagementDao.cs" />
+    <Compile Include="CRM\ICrBrowseHistoryDao.cs" />
+    <Compile Include="CRM\ICrFavoritesDao.cs" />
+    <Compile Include="CRM\ICrBulkPurchaseDao.cs" />
+    <Compile Include="CRM\ICrComplaintReplyDao.cs" />
+    <Compile Include="CRM\ICrCustomerDao.cs" />
+    <Compile Include="CRM\ICrCustomerLevelDao.cs" />
+    <Compile Include="CRM\ICrExperienceCoinLogDao.cs" />
+    <Compile Include="CRM\ICrExperiencePointLogDao.cs" />
+    <Compile Include="CRM\ICrLevelLogDao.cs" />
+    <Compile Include="CRM\ICrLevelPointLogDao.cs" />
+    <Compile Include="CRM\ICrNoticeDao.cs" />
+    <Compile Include="CRM\ICrReceiveAddressDao.cs" />
+    <Compile Include="CRM\ICrShoppingCartItemDao.cs" />
+    <Compile Include="CRM\ICrSiteMessageDao.cs" />
+    <Compile Include="Distribution\IDsDealerMallDao.cs" />
+    <Compile Include="Distribution\IDsPrePaymentDao.cs" />
+    <Compile Include="Distribution\IDsPrePaymentItemDao.cs" />
+    <Compile Include="Distribution\IDsProductAssociationDao.cs" />
+    <Compile Include="Distribution\IDsSpecialPriceDao.cs" />
+    <Compile Include="Distribution\IDsLevelPriceDao.cs" />
+    <Compile Include="MallSeller\IDsEasDao.cs" />
+    <Compile Include="Notification\INcEmailDao.cs" />
+    <Compile Include="Notification\INcSmsDao.cs" />
+    <Compile Include="Feedback\ICrFeedbackDao.cs" />
+    <Compile Include="Feedback\ICrFeedbackTypeDao.cs" />
+    <Compile Include="Finance\IFnOnlinePaymentDao.cs" />
+    <Compile Include="Finance\IFnReceiptVoucherDao.cs" />
+    <Compile Include="Finance\IFnReceiptVoucherItemDao.cs" />
+    <Compile Include="CRM\ICrComplaintDao.cs" />
+    <Compile Include="Finance\IFnPaymentVoucherDao.cs" />
+    <Compile Include="Front\ICrCustomerQuestionDao.cs" />
+    <Compile Include="Front\IFeAdvertGroupDao.cs" />
+    <Compile Include="Front\IFeAdvertItemDao.cs" />
+    <Compile Include="Front\IFeArticleCategoryDao.cs" />
+    <Compile Include="Front\IFeArticleDao.cs" />
+    <Compile Include="Front\IFeCommentSupportDao.cs" />
+    <Compile Include="Front\IFeProductCommentDao.cs" />
+    <Compile Include="Front\IFeProductCommentImageDao.cs" />
+    <Compile Include="Front\IFeProductCommentReplyDao.cs" />
+    <Compile Include="Front\IFeProductGroupDao.cs" />
+    <Compile Include="Front\IFeProductItemDao.cs" />
+    <Compile Include="Front\IFeSearchKeywordDao.cs" />
+    <Compile Include="LevelPoint\IPointDao.cs" />
+    <Compile Include="Logistics\ILgDeliveryScopeDao.cs" />
+    <Compile Include="Logistics\ILgPickUpDao.cs" />
+    <Compile Include="Logistics\ILgSettlementItemDao.cs" />
+    <Compile Include="Logistics\ILgPickUpItemDao.cs" />
+    <Compile Include="Logistics\ILogisticsOrderDao.cs" />
+    <Compile Include="Log\ISoTransactionLogDao.cs" />
+    <Compile Include="Log\ISySystemLogDao.cs" />
+    <Compile Include="Log\IPfPerformanceLogDao.cs" />
+    <Compile Include="Distribution\IDsDealerDao.cs" />
+    <Compile Include="Distribution\IDsDealerLevelDao.cs" />
+    <Compile Include="Distribution\IDsMallTypeDao.cs" />
+    <Compile Include="MallSeller\IDsOrderDao.cs" />
+    <Compile Include="MallSeller\IDsReturnDao.cs" />
+    <Compile Include="Order\IWhPickUpCodeDao.cs" />
+    <Compile Include="Print\IDeliveryPrintTemplateDao.cs" />
+    <Compile Include="Print\IPrintDao.cs" />
+    <Compile Include="Product\IPdAttributeDao.cs" />
+    <Compile Include="Product\IPdAttributeGroupAssociationDao.cs" />
+    <Compile Include="Product\IPdAttributeGroupDao.cs" />
+    <Compile Include="Product\IPdBrandDao.cs" />
+    <Compile Include="Product\IPdCategoryAssociationDao.cs" />
+    <Compile Include="Product\IPdPriceDao.cs" />
+    <Compile Include="Product\IPdPriceHistoryDao.cs" />
+    <Compile Include="Product\IPdCategoryDao.cs" />
+    <Compile Include="Product\IPdProductAssociationDao.cs" />
+    <Compile Include="Product\IPdProductAttributeDao.cs" />
+    <Compile Include="Product\IPdProductCollocationDao.cs" />
+    <Compile Include="Product\IPdProductDao.cs" />
+    <Compile Include="ITest.cs" />
+    <Compile Include="Logistics\ILgDeliveryUserCreditDao.cs" />
+    <Compile Include="Logistics\ILgDeliveryDao.cs" />
+    <Compile Include="Logistics\ILgDeliveryTypeDao.cs" />
+    <Compile Include="Logistics\ILgSettlementDao.cs" />
+    <Compile Include="Order\IFnInvoiceDao.cs" />
+    <Compile Include="Order\ISoOrderDao.cs" />
+    <Compile Include="Order\ISoOrderItemDao.cs" />
+    <Compile Include="Order\ISoReceiveAddressDao.cs" />
+    <Compile Include="Product\IPdProductImageDao.cs" />
+    <Compile Include="Product\IPdTemplateDao.cs" />
+    <Compile Include="Product\PdProductStatisticsDao.cs" />
+    <Compile Include="Promotion\IGsGroupShoppingDao.cs" />
+    <Compile Include="Promotion\ISpComboDao.cs" />
+    <Compile Include="Promotion\ISpComboItemDao.cs" />
+    <Compile Include="Promotion\ISpCouponDao.cs" />
+    <Compile Include="Promotion\ISpPromotionDao.cs" />
+    <Compile Include="Promotion\ISpPromotionGiftDaocs.cs" />
+    <Compile Include="Promotion\ISpPromotionOverlayDao.cs" />
+    <Compile Include="Promotion\ISpPromotionRuleConditionDao.cs" />
+    <Compile Include="Promotion\ISpPromotionRuleDao.cs" />
+    <Compile Include="Promotion\ISpPromotionRuleKeyValueDao.cs" />
+    <Compile Include="Promotion\IGsSupportAreaDao.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Provider\IDataProvider.cs" />
+    <Compile Include="Provider\ProviderManager.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Report\IReportDao.cs" />
+    <Compile Include="RMA\ILgPickUpDao.cs" />
+    <Compile Include="RMA\ILgPickUpItemDao.cs" />
+    <Compile Include="RMA\IRcReturnDao.cs" />
+    <Compile Include="RMA\IRcReturnImageDao.cs" />
+    <Compile Include="RMA\IRcReturnItemDao.cs" />
+    <Compile Include="RMA\IRcReturnLogDao.cs" />
+    <Compile Include="Sys\ISyConfigDao.cs" />
+    <Compile Include="Sys\ISyLockJob.cs" />
+    <Compile Include="Sys\ISyJobPoolDao.cs" />
+    <Compile Include="Sys\ISyGroupUserDao.cs" />
+    <Compile Include="Sys\ISyJobPoolPriorityDao.cs" />
+    <Compile Include="Sys\ISyMenuDao.cs" />
+    <Compile Include="Sys\ISyMenuPrivilegeDao.cs" />
+    <Compile Include="Sys\ISyMyMenuDao.cs" />
+    <Compile Include="Sys\ISyPermissionDao.cs" />
+    <Compile Include="Sys\ISyPrivilegeDao.cs" />
+    <Compile Include="Sys\ISyRoleDao.cs" />
+    <Compile Include="Sys\ISyRoleMenuDao.cs" />
+    <Compile Include="Sys\ISyRolePrivilegeDao.cs" />
+    <Compile Include="Sys\ISySmartConfigDao.cs" />
+    <Compile Include="Sys\ISystemUserWarehouse.cs" />
+    <Compile Include="Sys\ISyJobDispatcher.cs" />
+    <Compile Include="Sys\ISySystemLogDao.cs" />
+    <Compile Include="Sys\ISyTaskDao.cs" />
+    <Compile Include="Sys\ISyUserDao.cs" />
+    <Compile Include="Sys\ISyUserGroupDao.cs" />
+    <Compile Include="Sys\ISyJobSmsConfigDao.cs" />
+    <Compile Include="Sys\ISyUpgradeTheDatabaseDao.cs" />
+    <Compile Include="Sys\IXingYeDao.cs" />
+    <Compile Include="Sys\TdWebsiteDao.cs" />
+    <Compile Include="Transport\IDsWhCustomerConfigDao.cs" />
+    <Compile Include="Transport\IDsWhCustomerDao.cs" />
+    <Compile Include="Transport\IDsWhCustomerMessageDao.cs" />
+    <Compile Include="Transport\IDsWhGoodsManagementDao.cs" />
+    <Compile Include="Transport\IDsWhHistoryDao.cs" />
+    <Compile Include="Transport\IDsWhLogisticsNumberDao.cs" />
+    <Compile Include="Transport\IDsWhOutStockDao.cs" />
+    <Compile Include="Transport\IDsWhPackageDao.cs" />
+    <Compile Include="Transport\IDsWhProductDao.cs" />
+    <Compile Include="Transport\IDsWhRecipienterDao.cs" />
+    <Compile Include="Transport\IDsWhTotalWaybillDao.cs" />
+    <Compile Include="Tuan\IGsGroupShoppingDao.cs" />
+    <Compile Include="Union\IUnAdvertisementDao.cs" />
+    <Compile Include="Union\IUnUnionSiteDao.cs" />
+    <Compile Include="Union\IUnAdvertisementLogDao.cs" />
+    <Compile Include="Union\IWeChatDao.cs" />
+    <Compile Include="Union\UnCpsProductDao.cs" />
+    <Compile Include="Version\IApVersionDao.cs" />
+    <Compile Include="VipCard\ICrQianDaiVipCardWithdrawLogDao.cs" />
+    <Compile Include="VipCard\ICrQianDaiVipCardRechargeLogDao.cs" />
+    <Compile Include="VipCard\IQianDaiVipCardDao.cs" />
+    <Compile Include="Warehouse\IAtAllocationDao.cs" />
+    <Compile Include="Warehouse\IERPStockProductDao.cs" />
+    <Compile Include="Warehouse\IWhInventoryOutDao.cs" />
+    <Compile Include="Warehouse\IWhInventoryAlarmDao.cs" />
+    <Compile Include="Warehouse\IWhInventoryDao.cs" />
+    <Compile Include="Warehouse\IWhProductWarehousePositionAssociationDao.cs" />
+    <Compile Include="Warehouse\IWhWarehouseChangeLogDao.cs" />
+    <Compile Include="Warehouse\IWhWarehousePositionDao.cs" />
+    <Compile Include="Warehouse\IInvoiceDao.cs" />
+    <Compile Include="Warehouse\IPdProductStockInDetailDao.cs" />
+    <Compile Include="Warehouse\IPdProductStockInDao.cs" />
+    <Compile Include="Warehouse\IPdProductStockDao.cs" />
+    <Compile Include="Warehouse\IProductLendDao.cs" />
+    <Compile Include="Warehouse\ITransferCargoConfigDao.cs" />
+    <Compile Include="Warehouse\ITransferCargoDao.cs" />
+    <Compile Include="Warehouse\IWhWarehouseDao.cs" />
+    <Compile Include="Warehouse\IInStockDao.cs" />
+    <Compile Include="Logistics\ILgDeliveryUserLocationDao.cs" />
+    <Compile Include="Warehouse\IOutStockDao.cs" />
+    <Compile Include="Warehouse\IFnInvoiceTypeDao.cs" />
+    <Compile Include="Warehouse\IWhWarehouseAreaDao.cs" />
+    <Compile Include="Web\ICrAvailablePointLogDao.cs" />
+    <Compile Include="Web\ICrComplaintReplyDao.cs" />
+    <Compile Include="Web\ICrCustomerDao.cs" />
+    <Compile Include="Web\ICrCustomerQuestionDao.cs" />
+    <Compile Include="Web\IComplaintDao.cs" />
+    <Compile Include="Web\ICrExperienceCoinLogDao.cs" />
+    <Compile Include="Web\ICrExperiencePointLogDao.cs" />
+    <Compile Include="Web\ICrLevelPointLogDao.cs" />
+    <Compile Include="Web\IFeAdvertItemDao.cs" />
+    <Compile Include="Web\IFeCommentSupportDao.cs" />
+    <Compile Include="Web\IFeProductItemDao.cs" />
+    <Compile Include="Web\IFeProductCommentDao.cs" />
+    <Compile Include="Web\IFeSearchKeywordDao.cs" />
+    <Compile Include="Web\IMKNitagoDateBindDao.cs" />
+    <Compile Include="Web\IPdAttributeDao.cs" />
+    <Compile Include="Web\IPdCategoryDao.cs" />
+    <Compile Include="Web\IPdProductDao.cs" />
+    <Compile Include="Web\IRMADao.cs" />
+    <Compile Include="Web\IWhWarehouseDao.cs" />
+    <Compile Include="Web\ISoOrderDao.cs" />
+    <Compile Include="Weixin\IMkCustomizeMenuDao.cs" />
+    <Compile Include="Weixin\IMkWeixinQuestionDao.cs" />
+    <Compile Include="YTO\TmsWayBillNotifyDao.cs" />
+    <Compile Include="YTO\YTOGetParamDao.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Promotion\IGsGroupShoppingItemDao.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

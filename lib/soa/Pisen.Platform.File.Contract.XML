@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pisen.Platform.File.Contract</name>
+    </assembly>
+    <members>
+        <member name="T:Pisen.Platform.File.Contract.DataContract.GetUploadFilePathResponse">
+            <summary>
+            GetUploadFilePathResponse
+            </summary>
+        </member>
+        <member name="P:Pisen.Platform.File.Contract.DataContract.GetUploadFilePathResponse.Address">
+            <summary>
+            文件地址
+            </summary>
+        </member>
+        <member name="T:Pisen.Platform.File.Contract.DataContract.UploadFileRequest">
+            <summary>
+            消息契约（定义与SOAP消息相对应的强类型）
+            因为我们用流传输，所以用消息契约代替传统的数据契约
+            </summary>
+            <remarks>2013-12-9 杨合余 创建</remarks>
+        </member>
+        <member name="F:Pisen.Platform.File.Contract.DataContract.UploadFileRequest.FilePath">
+            <summary>
+            文件路径,包含文件名[SOAP消息头]
+            </summary>
+        </member>
+        <member name="F:Pisen.Platform.File.Contract.DataContract.UploadFileRequest.FileData">
+            <summary>
+            文件流[SOAP消息内容]
+            </summary>
+        </member>
+        <member name="T:Pisen.Platform.File.Contract.DataContract.UploadFileResponse">
+            <summary>
+            UploadFileResponse
+            </summary>
+        </member>
+        <member name="P:Pisen.Platform.File.Contract.DataContract.UploadFileResponse.DomainAddress">
+            <summary>
+            域名地址
+            </summary>
+        </member>
+        <member name="T:Pisen.Platform.File.Contract.IFileService">
+            <summary>
+            文件服务
+            </summary>
+        </member>
+        <member name="M:Pisen.Platform.File.Contract.IFileService.UploadFile(System.String,System.String,System.Byte[])">
+            <summary>
+            上传文件
+            </summary>
+            <param name="filePath">上传路径</param>
+            <param name="fileName">文件名</param>
+            <param name="fileData">文件数据</param>
+            <remarks>2013-12-9 杨合余 创建</remarks>
+        </member>
+        <member name="M:Pisen.Platform.File.Contract.IFileService.GetUploadFilePath(System.String)">
+            <summary>
+            通过appkey获取上传文件公共地址
+            </summary>
+            <param name="appkey">应用key</param>
+            <returns>上传文件公共目录</returns>
+            <remarks>2014-07-10 周唐炬 创建</remarks>
+        </member>
+    </members>
+</doc>

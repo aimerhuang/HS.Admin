@@ -1,0 +1,64 @@
+﻿@using Hyt.BLL.Product
+@model IList<Hyt.Model.CBPdProductJson>
+<div class="caseout">
+    <div class="boxs_detail_dispay">
+        <div class="boxs_listtabel">
+            <table width="100%" border="0" id="main_table" cellspacing="0" cellpadding="0">
+                <thead>
+                    <tr>
+                        <th width="53px;">
+                            <input id="select_all" name="" type="checkbox" />
+                        </th>
+                        <th width="56px">商品号</th>
+                        <th class="align_l p10_lr">后台显示名称</th>
+                        <th width="68px">存货数量</th>
+                        <th width="92px">会员等级价格</th>
+                    </tr>
+                </thead>
+                <tbody id="main_body">
+                    @{
+                        if (Model.Count > 0)
+                        {
+                            var alter = false;
+                            foreach (var item in Model)
+                            {
+                        <tr @(alter ? "" : "class = stag_color")>
+                            <td>
+                                @if (@item.Price >= 0)
+                                {
+                                    <input name="box" type="checkbox" data-price="@item.Price" value="@item.ProductSysNo"/>
+                                }
+                                else
+                                {
+                                    <input type="checkbox" class="disabled" disabled="disabled" value="@item.ProductSysNo"/>
+                                }
+                            </td>
+                            <td>@item.ProductSysNo</td>
+                            <td class="align_l p10_lr">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                            <td>@item.ProductNum</td>
+                            <td class='red p10_r align_r'>
+                                @if (item.Price >= 0)
+                                {
+                                    @item.Price.ToString("C")
+                                }
+                                else
+                                {
+                                    <span>暂无价格</span>
+                                }
+                            </td>
+                        </tr>
+                                alter = !alter;
+                            }
+                        }
+                        else
+                        {
+                        <tr>
+                            <td colspan="5">暂无数据</td>
+                        </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

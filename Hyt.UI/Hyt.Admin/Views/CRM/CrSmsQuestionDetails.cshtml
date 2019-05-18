@@ -1,0 +1,225 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@using Hyt.Util.Extension
+@model  IList<Hyt.Model.CBCrSmsQuestion> 
+
+@Html.PrivilegeControl(PrivilegeCode.CR1004093, ".CR1004093")
+
+@{
+    ViewBag.Title = "客户咨询短信详细";
+
+    var lastCanReplayItemSysNo = 0;
+}
+
+@section HeadCss
+{
+    <style type="text/css">
+.cjout{ width:450px;}
+.pople01{ background:url(../Theme/images/pic01.jpg) no-repeat; width:19px; height:19px; float:left; margin-top:20px; margin-right:10px;}
+.pople02{ background:url(../Theme/images/pic02.jpg) no-repeat; width:19px; height:19px; float:right; margin-top:20px; }
+.cjout .popover {
+  position: relative;
+  display: block;
+  margin: 8px 20px;
+}
+
+.popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1010;
+  display: none;
+  max-width: 418px;
+  padding: 1px;
+  text-align: left;
+  background-color: #ffffff;
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+  border: 1px solid #ccc;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 6px;
+  -moz-border-radius: 6px;
+  border-radius: 6px;
+  white-space: normal;
+}
+.popover.bblue {
+  background-color: #bceeff;
+  -webkit-background-clip: padding-box;
+  -moz-background-clip: padding;
+  background-clip: padding-box;
+  border: 1px solid #74c7e4;
+  color:#006487;
+}
+.popover.right {
+  margin-left: 10px;
+  float:left;
+}
+
+.popover.left {
+  margin-left: -10px;
+  float:right;
+}
+.popover-content {
+  padding: 9px 14px;
+}
+.popover .arrow,
+.popover .arrow:after {
+  position: absolute;
+  display: block;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+}
+.popover .arrow {
+  border-width: 11px;
+}
+.popover .arrow:after {
+  border-width: 10px;
+  content: "";
+}
+
+.popover.right .arrow {
+  top: 20px;
+  left: -11px;
+  margin-top: -11px;
+  border-left-width: 0;
+  border-right-color: #999;
+  border-right-color: rgba(0, 0, 0, 0.25);
+}
+.popover.right .arrow:after {
+  left: 1px;
+  bottom: -10px;
+  border-left-width: 0;
+  border-right-color: #ffffff;
+}
+
+.popover.left .arrow {
+  top: 20px;
+  right: -11px;
+  margin-top: -11px;
+  border-right-width: 0;
+  border-left-color: #74c7e4;
+}
+.popover.left .arrow:after {
+  right: 1px;
+  border-right-width: 0;
+  border-left-color: #bceeff;
+  bottom: -10px;
+}
+</style>
+}
+
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+
+<div class="boxs_detail_dispay">
+    <div class="tit_con">
+
+        <div class="cjout p10_lr">
+            <ul>
+                @foreach (var item in Model)
+                {
+                <li class="clearfix">
+                    <div class="pople01"></div>
+                    <div class="popover right">
+                        <div class="arrow"></div>
+                        <div class="popover-content">
+                            <p>@item.Question</p>
+                            <div class="c9">@item.MobilePhoneNumber &nbsp;&nbsp; (@item.QuestionDate.ToString("yyyy-MM-dd HH:mm"))</div>
+                        </div>
+                    </div>
+                </li>
+                    if (!string.IsNullOrWhiteSpace(item.Answer))
+                    {
+                    <li class="clearfix">
+                        <div class="pople02"></div>
+                        <div class="popover bblue left">
+                            <div class="arrow"></div>
+                            <div class="popover-content">
+                                <p>@item.Answer</p>
+                                <div class="c9">@item.AnswerName &nbsp;&nbsp; (@item.AnswerDate.ToString("yyyy-MM-dd HH:mm"))</div>
+                            </div>
+                        </div>
+                    </li>
+                    }
+
+                    lastCanReplayItemSysNo = item.SysNo;
+                }  
+            </ul>
+        </div>
+    </div>
+</div>
+
+<form id="f_customerSmsForm">
+    <div class="boxs_detail_dispay @PrivilegeCode.CR1004093" style="@(ViewBag.IsView ? "display:none;" : "")">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <td width="20%">回复内容</td>
+                    <td width="80%">
+                        <input type="hidden" id="sysNo" dn="sysNo" name="sysNo" value="@lastCanReplayItemSysNo"/>
+                        <textarea id="answer" name="answer" dn="answer" rows="5" class="{required:true,maxlength:100,messages:{required:'必须填写内容',maxlength:'100个字符以内'}} wd240"></textarea>
+                        <span id="answer_error" class="prompt m10_l" msg="回复内容">回复内容</span>
+                    </td>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script language="javascript" type="text/javascript">
+    function getDate() {
+        if (!$("#f_customerSmsForm").valid()) {
+            return false;
+        }
+        var data = $("#f_customerSmsForm").JsonBind();
+        return data;
+    }
+    
+    function switchControlBottonsEnabled(isEnabled) {
+        if (isEnabled) {
+            $(window.parent.document).find(".aui_footer .aui_buttons button").removeClass("disabled");
+            $(window.parent.document).find(".aui_footer .aui_buttons button").attr("disabled", null);
+        } else {
+            $(window.parent.document).find(".aui_footer .aui_buttons button").addClass("disabled");
+            $(window.parent.document).find(".aui_footer .aui_buttons button").attr("disabled", "disabled");
+        }
+    }
+    
+    function closeWindow() {
+        switchControlBottonsEnabled(true);
+        UI.Dialog.close();
+    }
+
+    $(function () {
+        $("#f_customerSmsForm").validate({
+            errorPlacement: function (error, element) {
+
+                //设置错误信息
+                if (error.html() != "") {
+                    $("#" + $(element).attr("id") + '_error').html(error);
+                    $("#" + $(element).attr("id") + '_error').removeClass("prompt");
+                    $("#" + $(element).attr("id") + '_error').removeClass("success");
+                    $("#" + $(element).attr("id") + '_error').addClass("error");
+                }
+            },
+            success: function (element) {
+
+                //设置成功信息
+                var obj = $("#" + element.attr("for") + "_error");
+                obj.html(obj.attr("msg"));
+                $("#" + $(element).attr("for") + '_error').removeClass("error");
+                $("#" + $(element).attr("for") + '_error').removeClass("prompt");
+                if ($("#" + $(element).attr("for")).val() != "" && $("#" + $(element).attr("for") + '_error').attr("msg") != "") {
+                    $("#" + $(element).attr("for") + '_error').addClass("success");
+                }
+            }
+        });
+
+    });
+    
+</script>
+

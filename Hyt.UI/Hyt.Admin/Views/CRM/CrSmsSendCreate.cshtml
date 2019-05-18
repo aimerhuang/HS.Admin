@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "短信发送";
+}
+@section HeadCss{
+
+}
+@section HeadJs{
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+<script type='text/javascript' src='/Theme/scripts/jquery.min.js'></script>
+<script type='text/javascrip' src='/Theme/scripts/common.yui.js'>
+</script>
+<script type='text/javascript' src='/Theme/Plugins/Dialog/Dialog.yui.js'></script>
+<script type='text/javascript' src='/Theme/scripts/UI.yui.js'></script>
+<script type='text/javascript' src='/Theme/scripts/Utils.yui.js'></script>
+<script type='text/javascript' src='/Theme/scripts/DAO.yui.js'></script>
+
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<style type="text/css">
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>短信发送</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <div id="divEdit" class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                        <tbody>
+                            <tr>
+                                <td width="180" class="nameright"></td>
+                                <td><a href="javascript:void(0);" id="add_mobile" style="margin-left: 5px; color: #3366CC;">添加账号</a></td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright"><span class="v_star">*</span>发送账号</td>
+                                <td>
+                                    <div style="overflow-x: hidden; overflow-y: auto; position: relative; float: left; height: 410px; width: 990px; border: 1px solid #CCCCCC" class="wd600">
+                                        <table width="100%" cellpadding="0" cellspacing="0" id="Smstb">
+                                            <tbody id="Smstbdy">                                                                         
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div style="position: relative; float: left; margin-top:14%;">
+                                        <span class="prompt m10_l" id="c_Mobile">填写发送账号</span>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright"><span class="v_star">*</span>发送内容</td>
+                                <td>
+                                    <textarea name="Msg" id="Msg" style="width: 978px"></textarea>
+                                    <span class="prompt m10_l" id="c_Msg">填写发送内容</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pagination align_c clearfix">
+                <button id="btnSave" class="btn btn_blue btn_ht30 m10_r" type="submit" style="margin-top:10px;">
+                    <span class="icon_save icon_white"></span>
+                    <span>发送</span>
+                </button>
+            </div>
+            </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        $("#Smstb tr td .delmobile").live('click', function () {
+            $(this).parent().html("");
+        });
+
+        $("#btnSave").live('click', function () {
+            var aValid = true;
+            if ($.trim($("#Smstbdy").html()) == "") {
+                $('#c_Mobile').attr('class', 'error m10_l');
+                aValid = false;
+            } else {
+                $('#c_Mobile').attr('class', 'success m10_l');
+            }
+            if ($.trim($("#Msg").val()) == "") {
+                $('#c_Msg').attr('class', 'error m10_l');
+                aValid = false;
+            } else {
+                $('#c_Msg').attr('class', 'success m10_l');
+            }
+            if (!aValid) {
+                return false;
+            }
+            var mobilelist = "";
+            $("#Smstbdy tr td").find("span").each(function () {
+                if (mobilelist == "") {
+                    mobilelist = $(this).html();
+                } else {
+                    mobilelist += ';' + $(this).html();
+                }
+            });
+            $.ajax({
+                url: '@Url.Action("CrSmsSend")',
+                type: 'post',
+                data: {
+                    mobilelist: mobilelist,
+                    Msg: $.trim($("#Msg").val())
+                },
+                success: function (data) {
+                    if (data.Status) {
+                        Utils.alert(data.Message, function () {
+                            /*window.location.href = '/CRM/CrSmsSendCreate'*/
+                        }, 'succeed');
+                    }
+                }
+            });
+        });
+
+        //选择商品地址
+
+        //选择模板
+        $("#add_mobile").live('click', function () {
+            DAO.SelectCrCustomer({
+                callBack: function (data) {                   
+                    var html = $.trim($("#Smstbdy").html());
+                    var strHtml = "<tr>";
+                    for (var i = 0 ; i < data.length ; i++) {
+                        if ($("#Smstbdy").find("#" + data[i].SysNo).length <= 0) {
+                            strHtml += "<td><span id='" + data[i].SysNo + "'>" + data[i].Account + "</span><a href='javascript:void(0);' class='delmobile' style='margin-left: 5px; color: #3366CC;'>删除</a></td>";
+                            if (i > 0 && (i + 1) != data.length && i % 7 == 0) {
+                                strHtml += "</tr><tr>";
+                            }
+                        }
+                    }
+                    strHtml += "</tr>";
+                    if (strHtml == "<tr></tr>") {
+                        strHtml = "";
+                    }
+                    if (html == "") {
+                        $("#Smstbdy").html(strHtml);
+                    } else {
+                        $("#Smstbdy").html(html + strHtml);
+                    }
+                }
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,279 @@
+﻿@{
+    ViewBag.Title = "CreateOrUpdateProcuremen";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    @{
+        if((ViewBag.Order as Hyt.Model.Procurement.CBPmProcurementOrder).Po_Status>0)
+        {
+            @Html.Raw(".htn_Control{ display:none; }")
+        }
+    }
+</style>
+<div class="p10">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                <tbody>
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>采购单号:</td>
+                        <td colspan="3">
+                            <input type="text" id="Po_Number" name="Po_Number" maxlength="50" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmProcurementOrder).Po_Number)" />
+                        </td>
+                    </tr>
+                   
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>制单人:</td>
+                        <td>
+                            @ViewBag.CurrentName
+                        </td>
+                        <td width="107" class="nameright"><span class="v_star">*</span>制单时间:</td>
+                        <td>
+                            @ViewBag.CurrentTime
+                        </td>
+                    </tr>
+                   
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="p10">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                <tr>
+                    <td colspan="2">
+                        <h1>采购订单明细</h1>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="2" align="right">
+                        <button id="btnAdd" class="btn btn_blue btn_ht30 m10_r htn_Control" type="button">
+                            <span class="icon_white icon_thumbs_up"></span>
+                            <span>添加商品</span>
+                        </button>
+                    </td>
+
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <div class="boxs_detail m10_t">
+                            <div id="paging">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="table_ProList">
+                                    <thead>
+                                        <tr>
+                                            <th>商品编号</th>
+                                            <th>名称</th>
+                                            <th>商品名称</th>
+                                            <th>单位</th>
+                                            <th>规格</th>
+                                            <th>采购数量</th>
+                                            <th>普通批发价</th>
+                                            <th>加盟商价格</th>
+                                            <th>统一零售价</th>
+                                            @{
+                                                foreach (Hyt.Model.Procurement.PmProcurementWebType item in ViewBag.WabTypeList as List<Hyt.Model.Procurement.PmProcurementWebType>)
+                                                { 
+                                                     <th>@item.Pwt_Name</th>
+                                                }
+                                             }
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="protbody">
+                                        @{
+                                            foreach (var tempMod in (ViewBag.Order as Hyt.Model.Procurement.CBPmProcurementOrder).orderItemList)
+                                            {
+
+                                                <tr id="@(tempMod.SysNo)">
+                                                    <td>
+                                                        @(tempMod.Poi_ProSysNo)
+                                                        
+                                                    </td>
+                                                    <td><input type="text" value="@(tempMod.Poi_ProName)" name="item_ProName" style="text-align:left;width:95%;" /></td>
+                                                    <td style="text-align:left;">@tempMod.Cb_ProName</td>
+                                                    <td>@tempMod.Cb_Unit</td>
+                                                    <td>@tempMod.Cb_Spec</td>
+                                                    <td><input type="text" value="@(@tempMod.Poi_ProQuity)" name="item_ProQuity" style="width:50px;text-align:right;" /></td>
+                                                    <td><input type="text" value="@(tempMod.Poi_TradePrice)" name="item_TradePrice" style="width:50px;text-align:right;" /></td>
+                                                    <td><input type="text" value="@(tempMod.Poi_JoinPrice)" name="item_JoinPrice" style="width:50px;text-align:right;" /></td>
+                                                    <td><input type="text" value="@(tempMod.Poi_SalePrice)" name="item_SalePrice" style="width:50px;text-align:right;" /></td>
+                                                    @{
+                                                        foreach (Hyt.Model.Procurement.PmProcurementWebType item in ViewBag.WabTypeList as List<Hyt.Model.Procurement.PmProcurementWebType>)
+                                                        {
+                                                            Hyt.Model.Procurement.CBPmProcurementWebPrice price = (ViewBag.Order as Hyt.Model.Procurement.CBPmProcurementOrder).webPriceList.Find(
+                                                                p => p.Pwp_ProSysNo == tempMod.Poi_ProSysNo && p.Pwp_TypeSysNo == item.SysNo);
+                                                            <td><input type="text" data-id="@(price==null?0:price.SysNo)" value="@(price==null?0:price.Pwp_Price)" name="item_ProPrice_@item.SysNo" style="width:50px;text-align:right;" /></td>
+                                                        }
+
+                                                    }
+                                                    <td align="center"><button class="btn btn_blue btn_ht26 agree m10_r htn_Control" onclick="DeleteItemRow(this)"><span class="m5_l">删除</span></button></td>
+                                                </tr>
+
+                                            }
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="p10" align="center">
+    <button class="btn btn_blue btn_ht26 agree m10_r htn_Control" onclick="SaveProcurementOrder()"><span class="m5_l">保存</span></button>     
+    <button class="btn btn_blue btn_ht26 agree m10_r " onclick="window.location.href = document.referrer "><span class="m5_l">返回</span></button>   
+</div>
+
+    <script type="text/javascript">
+        var proList = [];
+        $("#btnAdd").live('click', function () {
+            OpenDialogViewList();
+        });
+        @foreach (var item in (ViewBag.Order as Hyt.Model.Procurement.CBPmProcurementOrder).orderItemList)
+        {
+            @Html.Raw("proList.push(" + item.Poi_ProSysNo + ");");
+        }
+        ///弹出商品选中框选择商品
+        ///弹出商品选中框
+        function OpenDialogViewList() {
+
+            DAO.SelectPdProduct({
+                callBack: function (data) {
+
+                    var html = $.trim($("#protbody").html());
+                    var strHtml = "";
+                    for (var i = 0; i < data.length; i++) {
+                        var b = false;
+                        for (var j = 0; j < proList.length; j++) {
+                            if (data[i].SysNo == proList[j]) {
+                                b = true;
+                                break;
+                            }
+                        }
+                        if (!b) {
+                            proList.push(data[i].SysNo);
+                        }
+                        else {
+                            data.splice(data[i]);
+                            i--;
+                        }
+                    }
+                    //alert(proList.length);
+                    for (var i = 0 ; i < data.length ; i++) {
+                        flag = true;
+                        $("tbody#protbody tr").each(function () {
+                            if ($.trim($(this).attr('id')) == $.trim(data[i].SysNo)) {
+                                flag = false;
+                            }
+                        });
+                        if (flag) {
+                            strHtml += '<tr id="0"><td>' + data[i].SysNo + '</td>  <td><input type="text" value="' + data[i].ProductName + '" name="item_ProName" style=\"text-align:left;width:95%;\" /></td><td  style=\"text-align:left;\">' +
+                                data[i].ProductName + '</td><td>' +
+                                data[i].SalesMeasurementUnit + '</td><td>' +
+                                data[i].Spec + '</td><td>' +
+                                 '<input type="text" value="1" name="item_ProQuity" style=\"width:50px;text-align:right;\" /></td><td>' +
+                                 '<input type="text" value="0" name="item_TradePrice" style=\"width:50px;text-align:right;\" /></td><td>' +
+                                 '<input type="text" value="0" name="item_JoinPrice" style=\"width:50px;text-align:right;\"  /></td><td>' +
+                                 '<input type="text" value="0" name="item_SalePrice" style=\"width:50px;text-align:right;\"  /></td>';
+                            @{
+                            foreach (Hyt.Model.Procurement.PmProcurementWebType item in ViewBag.WabTypeList as List<Hyt.Model.Procurement.PmProcurementWebType>)
+                            {
+                                @Html.Raw("strHtml += '<td><input type=\"text\" data-id=\"0\"  value=\"0\" name=\"item_ProPrice_" + item.SysNo + "\" style=\"width:50px;text-align:right;\"  /></td>';");
+                            }
+                        }
+                            strHtml += '<td align="center"><button class="btn btn_blue btn_ht26 agree m10_r " onclick=\"DeleteItemRow(this)\"><span class="m5_l">删除</span></button></td>';
+                        }
+                    }
+                    if (html == "") {
+                        $("#protbody").html(strHtml);
+                    } else {
+                        $("#protbody").html(html + strHtml);
+                    }
+                }
+            });
+
+        }
+
+        function DeleteItemRow(ele) {
+            var tab = $("#table_ProList")[0];
+            var row = ele.parentNode.parentNode;
+            var index = row.rowIndex;//rowIndex属性为tr的索引值，从0开始
+            tab.deleteRow(index);  //从table中删除
+
+            proList.splice($.inArray(parseInt($.trim($(row.children[0]).text())), proList), 1);
+        }
+
+        function SaveProcurementOrder() {
+            var a = "";
+            var number = $("#Po_Number").val();
+            var tab = $("#table_ProList")[0];
+            var items = [];
+            var prices = [];
+            for (var i = 1; i < tab.rows.length; i++) {
+                var obj = {};
+                obj.SysNo = $(tab.rows[i]).attr("id");
+                obj.Poi_ProSysNo = $(tab.rows[i].children[0]).text();
+                obj.Poi_ProName = $(tab.rows[i].children[1].children[0]).val();
+                obj.Poi_ProQuity = $(tab.rows[i].children[5].children[0]).val();
+                obj.Poi_TradePrice = $(tab.rows[i].children[6].children[0]).val();
+                obj.Poi_JoinPrice = $(tab.rows[i].children[7].children[0]).val();
+                obj.Poi_SalePrice = $(tab.rows[i].children[8].children[0]).val();
+                items.push(obj);
+
+                
+                @{
+                    var SysNosList = "";
+                    foreach (Hyt.Model.Procurement.PmProcurementWebType item in ViewBag.WabTypeList as List<Hyt.Model.Procurement.PmProcurementWebType>)
+                    {
+                        if (!string.IsNullOrEmpty(SysNosList))
+                        {
+                            SysNosList += ",";
+                        }
+                        SysNosList += item.SysNo;
+                    }
+                    @Html.Raw("var strSysNoList=\"" + SysNosList + "\" ");
+                }
+                var sysNoList = strSysNoList.split(',');
+                for (var j = 1; j <= sysNoList.length; j++) {
+                    var price = {};
+                    var ele = $(tab.rows[i].children[8 + j].children[0]);
+                    //alert(ele[0].name);
+                    price.SysNo = ele.attr("data-id");
+                    price.Pwp_TypeSysNo = ele[0].name.toString().replace("item_ProPrice_", "");
+                    price.Pwp_ProSysNo = $(tab.rows[i].children[0]).text();
+                    price.Pwp_Price = ele.val();
+                    price.Pwp_OrderItemSysNo = i;
+                    prices.push(price);
+                }
+            }
+
+            $.ajax({
+                url: '/Procurement/SaveProcuremen',
+                type: 'post',
+                async: false,
+                data: {
+                    SysNo: "@((ViewBag.Order as Hyt.Model.Procurement.CBPmProcurementOrder).SysNo)",
+                    Po_Number: number,
+                    orderItemList: JSON.stringify(items),
+                    webPriceList: JSON.stringify(prices)
+                },
+                dataType: 'json',
+                success: function (json) {
+                    if (json.Status) {
+                        //window.location.href = "/Procurement/CreateOrUpdateProcuremen?SysNo=" + json.SysNo;
+                        window.location.href = "/Procurement/GetProcurementPager";
+                    }
+                    else {
+                        UI.Alert({ content: json.Msg });
+                    }
+                }
+            });
+        }
+    </script>

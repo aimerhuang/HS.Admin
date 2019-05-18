@@ -1,0 +1,70 @@
+﻿@{
+    //仓库
+    ViewBag.Title = "_WarehouseList";
+}
+<div class="head_tab">
+    <ul class="tabNav" init="true">
+        <li class="">待出库订单</li>
+        <li class="menuon">待入库订单</li>
+    </ul>
+</div>
+<div class="boxs_con_c1" id="tabcon">
+    <div class="list">
+        <div class="boxs_listtabel">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                <thead>
+                    <tr>
+                        <th width="44" class="border_tnone">查看</th>
+                        <th class="border_tnone">销售单号</th>
+                        <th width="56" class="border_tnone">状态</th>
+                        <th width="68" class="border_tnone">仓库</th>
+                        <th width="95" class="border_tnone">出库单</th>
+                        <th width="68" class="border_tnone">客服</th>
+                        <th width="68" class="border_tnone">收货人</th>
+                        <th width="68" class="border_tnone">支付金额</th>
+                        <th width="44" class="border_tnone">积分</th>
+                        <th width="44" class="border_tnone">来源</th>
+                        <th width="120" class="border_tnone">操作时间</th>
+                        <th width="80" class="border_tnone">分配审单人</th>
+                        <th width="80" class="border_tnone">配送/支付</th>
+                        <th width="124" class="border_tnone">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><button class="btn btn_ht26"><span class="icon_tosee"></span></button></td>
+                        <td><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                        <td>已发货</td>
+                        <td>成都总仓</td>
+                        <td>458852-4586</td>
+                        <td>完继强</td>
+                        <td>赵佳</td>
+                        <td align="right"><span class="p10_r red">&yen;355.00</span></td>
+                        <td>355</td>
+                        <td>网站</td>
+                        <td>2013\05\08 10\12</td>
+                        <td>系统管理员</td>
+                        <td>货到付款</td>
+                        <td><button class="btn btn_ht26 m10_r"><span class="icon_pencil"></span></button>
+                            <button class="btn btn_ht26 m10_r"><span class="icon_trash"></span></button>
+                            <button class="btn btn_ht26"><span class="icon_lock"></span></button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="list">
+        <div class="p10_bnone">222</div>
+    </div>
+    <div class="list">
+        <div class="p10_bnone">333</div>
+    </div>
+    <div class="list">
+        <div class="p10_bnone">444</div>
+    </div>
+      
+    <!--数据分页-->
+    <div class="pagination clearfix"> <b class="fl"><span class="f12 c6 bold4">共</span><span class=" m5_r m5_l f12 c3">15</span><span class="f12 c6 bold4">页</span><span class="f12 c6 m5_r m5_l bold4">|</span><span class="f12 c6 bold4">每页显示</span><span class=" m5_r m5_l f12 c3">30</span><span class="f12 c6 m5_l bold4">条</span></b>
+        <div class="page_con fr clearfix"> <a href="javascript:;" class="disabled m10_r">上一页</a> <a href="javascript:;" class="hover">1</a> <a href="javascript:;">2</a> <a href="javascript:;">3</a> ... <a href="javascript:;" class="m5_l">13</a> <a href="javascript:;">14</a> <a href="javascript:;">15</a> <a href="javascript:;" class="m5_l m0_r">下一页</a> </div>
+    </div>
+</div>

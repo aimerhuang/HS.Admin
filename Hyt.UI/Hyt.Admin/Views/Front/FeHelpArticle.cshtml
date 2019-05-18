@@ -1,0 +1,242 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@model PagedList<CBFeArticle>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "帮助管理";
+    @Html.PrivilegeControl(PrivilegeCode.FE1006201, "button.FE1005201")
+    @Html.PrivilegeControl(PrivilegeCode.FE1006601, "button.FE1005601")
+    @Html.PrivilegeControl(PrivilegeCode.FE1006501, "button.FE1005501")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入文章标题...";
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo").html("");
+                //$("#dealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                searchHelpClass();
+            });
+        }
+
+        $(function () {
+            $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#agentSysNo").change(function () {
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#dealerSysNo").change(function () {
+                searchHelpClass();
+            });
+            $("#searchName").focus(function () {
+                if ($("#searchName").val() == searchNameTxt) {
+                    $("#searchName").val("");
+                }
+            });
+            $("#searchName").blur(function () {
+                if ($("#searchName").val() == "") {
+                    $("#searchName").val(searchNameTxt);
+                }
+            });
+            
+            //$("body").keydown(function (event) {
+            //    switch (event.keyCode) {
+            //        case 13:
+            //            searchHelpClass();
+            //            break;
+            //    }
+            //});
+        });
+
+        function deleteOne(sysNo) {
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function () {
+                    $.post('@Url.Action("FeHelpArticleDelete", "Front")', { sysNo: sysNo }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchHelpClass();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function audit(sysNo, status, type) {
+            var str;
+            if (type == 0)
+                str = "确定要审核该记录吗?";
+            else if (type == 1) {
+                str = "确定要作废该记录吗?";
+            } else {
+                str = "确定要取消审核吗?";
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeArticleAudit", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchHelpClass();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function addOrEdit(sysNo) {
+            var url, title;
+            if (sysNo != 0) {
+                url = "/Front/FeHelpArticleAddOrEdit/" + sysNo;
+                title = "修改帮助文章";
+            } else {
+                url = "/Front/FeHelpArticleAddOrEdit/";
+                title = "新增帮助文章";
+            }
+            UI.DialogOpen(url, {
+                title: title,
+                width: '1275px',
+                height: '610px',
+                init: function () {
+                    this.button({
+                        name: '保存',
+                        callback: function() {
+                            var iframe = this.iframe.contentWindow;
+                            var form = iframe.document.getElementById('feHelpArticleForm');
+
+                            iframe.addOrEdit();
+                            return false;
+                        },
+                        focus: true
+                    },
+                        {
+                            name:"取消"
+                        });
+                },
+            });
+        }
+
+        function dialog() {
+            UI.tips.tip_alert('tips_success', '保存成功');
+        }
+        function dataLoad(id) {
+            $.get('/Front/FeHelpArticle/', { id: id }, function (data) {
+                $('#paging').html(data);
+            });
+        }
+
+        function searchHelpClass() {
+            AjaxStart();
+            var searchName = $("#searchName").val().trim();
+            var searchStaus = $("#searchStaus").val();
+            var searchClass = $("#searchClass").val();
+            var SelectedDealerSysNo = $("#dealerSysNo").val();
+            var search = { id: 1, searchStaus: searchStaus, searchClass: searchClass, SelectedDealerSysNo: SelectedDealerSysNo };
+            if ($.trim(searchName) != "" && searchName != searchNameTxt) {
+                search = { id: 1, searchName: searchName, searchStaus: searchStaus, searchClass: searchClass, SelectedDealerSysNo: SelectedDealerSysNo };
+            }
+            $.get('/Front/FeHelpArticle/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+@using (Html.BeginForm("FeHelpArticle", "Front", FormMethod.Get, new { id = "form", aa = "" }))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>帮助管理</h3>
+            </div>
+
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="veralign_t fl">代理商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="agentSysNo"></select>
+                        </div>
+
+                        <span class="veralign_t fl">分销商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="dealerSysNo"></select>
+                        </div>
+
+                         <span class="fl m3_t veralign_t">状态</span>
+
+                        <select class="select_ht28 fl m10_l m10_r" id="searchStaus" name="searchStaus" onchange="searchHelpClass()">
+                            <option value="0">全部</option>
+                            @{
+    foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+    {
+                                <option value="@dict.Key">@dict.Value</option>
+    }
+                            }
+
+                        </select>
+                        <span class="fl m3_t veralign_t">文章分类</span>
+                        <select class="select_ht28 fl m10_l m10_r" id="searchClass" name="searchClass" onchange="searchHelpClass()">
+                            <option value="0">全部</option>
+                            @{
+    foreach (var dict in (IList<FeArticleCategory>)ViewBag.Category)
+    {
+                                <option value="@dict.SysNo">@dict.Name</option>
+    }
+                            }
+                        </select>
+                        <span class="fl m3_t veralign_t">文章标题</span>
+                        <div class="search_btn m10_l fl">
+                            <input class="input_ht28" name="searchName" id="searchName" maxlength="100" type="text" value="请输入文章标题..." />
+                            <button onclick="searchHelpClass()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                         </div>
+                        @*<button type="button" class="btn btn_ht28" title="搜索" onclick="searchHelpClass()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>*@
+                   
+                    </div>
+
+                    <div>
+                        <button type="button" class="btn btn_ht26 btn_blue FE1005201" onclick="addOrEdit(0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增文章</span></button>
+                    </div>
+                </div>
+
+                <div class="boxs_list">
+                      <!--/表格列表区-->
+                        <!--/表格列表区-->
+                        <div class="boxs_listtabel" id="paging">
+                            <!--/表格列表区-->
+                       @{Html.RenderPartial("_AjaxFeArticleList", Model); }
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+            </div>
+}

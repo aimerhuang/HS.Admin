@@ -1,0 +1,74 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model List<Hyt.Model.Transfer.CBSpCoupon>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone" id="tb_userCoupons">
+    <thead>
+        <tr>
+            <th width="90">优惠劵代码</th>
+            <th width="80">优惠劵金额</th>
+            <th width="90">所需消费金额</th>
+            <th width="90">开始时间</th>
+            <th width="90">到期时间</th>
+            <th class="align_l"><span class="p10_lr">优惠劵描述</span></th>
+            <th width="60">使用次数</th>
+            <th width="80">使用平台</th>
+            <th width="60">优惠卡</th>
+            <th width="60">状态</th>
+            <th width="70">优惠卡号</th>
+            <th width="150">操作</th>
+        </tr>
+    </thead>
+	                        <tbody>
+	                            @{
+	                                if (Model.Any())
+	                                {
+                                        foreach (var item in Model)
+	                                    {
+	                                        <tr>
+	                                            <td class="border_lnone">@item.CouponCode</td>
+	                                            <td>@MvcHtmlString.Create(FormatUtil.FormatCurrency(item.CouponAmount,2))</td>
+	                                            <td>@MvcHtmlString.Create(FormatUtil.FormatCurrency(item.RequirementAmount,2))</td>
+	                                            <td>@item.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                                                <td>@item.EndTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+	                                            <td class="align_l"><span class="p10_lr">@item.Description</span></td>
+	                                            <td>@item.UsedQuantity/@item.UseQuantity</td>
+	                                            <td>@Hyt.Admin.Controllers.PromotionController.GetUserPlatText(new Dictionary<int,int>{{(int)PromotionStatus.促销使用平台.PC商城,item.WebPlatform},{(int)PromotionStatus.促销使用平台.门店,item.ShopPlatform},{(int)PromotionStatus.促销使用平台.手机商城,item.MallAppPlatform},{(int)PromotionStatus.促销使用平台.物流App,item.LogisticsAppPlatform}})</td>
+                                                <td>@EnumUtil.GetDescription(typeof (PromotionStatus.是否优惠卡), item.IsCouponCard)</td>
+	                                            <td id="tdStatus_@item.SysNo">@EnumUtil.GetDescription(typeof (PromotionStatus.优惠券状态), item.Status)</td>
+                                                <td>@item.CouponCardNo</td>
+	                                            <td class="align_r red">
+	                                                @{
+	                                                    if (item.Status == (int) PromotionStatus.优惠券状态.待审核 && item.UsedQuantity <=0 )
+	                                                    {
+                                                            <span class="p10_r"><button class="btn btn_ht26 btn_blue"  type="button" onclick="doAudit(@item.SysNo)" id="btnAudit_@item.SysNo"><span class="icon_ok"></span><span class="m5_l">审核</span></button></span>
+	                                                    }
+	                                                    else
+	                                                    {
+                                                            <span class="p10_r"><button class="btn btn_ht26 disabled"  type="button" id="btnAudit_@item.SysNo"><span class="icon_ok"></span><span class="m5_l">已审</span></button></span>
+	                                                    }
+	                                                }
+	                                                @{
+	                                                    if (item.UsedQuantity <= 0)
+	                                                    {
+	                                                        <span class="p10_r"><button class="btn btn_ht26 btn_red"  type="button" onclick=" doCancel(@item.SysNo) " id="btnCancel_@item.SysNo"><span class="icon icon_trash"></span><span class="m5_l">作废</span></button></span>
+	                                                    }
+	                                                    else
+	                                                    {
+                                                            <span class="p10_r"><button class="btn btn_ht26 disabled"  type="button" id="btnCancel_@item.SysNo"><span class="icon icon_trash"></span><span class="m5_l">作废</span></button></span>
+	                                                    }
+	                                                }
+	                                            </td>
+	                                        </tr>
+	                                    }
+	                                }
+	                                else
+	                                {
+	                                    <tr>
+	                                        <td align="center" colspan="11"><无数据></td>
+	                                    </tr>
+                                    }
+	                            }
+
+	                        </tbody>
+	                    </table>

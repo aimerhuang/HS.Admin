@@ -1,0 +1,60 @@
+﻿@{
+    ViewBag.Title = "InnerOrUpdatePaymentToPointConfig";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 25%" class="nameright border_rnone">积分转金额</td>
+                            <td style="width: 75%" class="">
+                                @{
+                                    if(ViewBag.dsSysNo>0)
+                                    {
+                                        @Html.Raw((ViewBag.mod as Hyt.Model.Pos.DsPaymentToPointConfig).PaymentMoney+"<span>(积分=1分)</span><em>积分为0不启用</em>");
+                                    }
+                                    else
+                                    {
+                                         <input type="text" id="ipt_PointToFen" value="@((ViewBag.mod as Hyt.Model.Pos.DsPaymentToPointConfig).PaymentMoney)" /><span>(积分=1分)</span><em>积分为0不启用</em>
+                                    }
+                                }
+                              
+                            </td>
+                        </tr>
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div align="center" style="padding:10px; display:@(ViewBag.dsSysNo>0?"none":"")">
+        <button type="button" onclick="SavePaymentToPointConfig()">保存</button>
+    </div>
+
+</div>
+<script type="text/javascript">
+    function SavePaymentToPointConfig()
+    {
+        var PointToFen = $("#ipt_PointToFen").val();
+        
+        $.ajax({
+            url: '/DsPosManage/SavePaymentToPointConfig',
+            type: 'POST',
+            cache: false,
+            data: { sysNo: "@((ViewBag.mod as Hyt.Model.Pos.DsPaymentToPointConfig).SysNo)", PaymentMoney: PointToFen ,DsSysNo:0 },
+            success: function (ret) {
+                if (ret.Status) {
+
+                    UI.Prompt.Success("操作成功");
+                }
+                else {
+                    alert(ret.Message);
+                }
+            }
+        });
+    }
+</script>

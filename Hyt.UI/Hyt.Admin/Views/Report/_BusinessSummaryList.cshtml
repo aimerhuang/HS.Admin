@@ -1,0 +1,52 @@
+﻿@model IList<Hyt.Model.CBReportBusinessSummary>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th>日期</th>
+            <th width="120">流量</th>
+            <th width="120">访客</th>
+            <th width="120">下单数</th>
+            <th width="120">销售额</th>
+            <th width="120">退款总额</th>
+            <th width="120">净销售额</th>
+            <th width="120">客单价</th>
+            <th width="120">转换率</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var count = 1;
+            if (Model != null && Model.Count > 0)
+            {
+                foreach (var item in Model)
+                {
+                    if (count % 2 == 0)
+                    {
+            @: <tr class="stag_color">
+                    }
+                    else
+                    {
+            @: <tr>
+                    }
+                    <td>@item.日期.ToString("yyyy-MM-dd")</td>
+                    <td>@item.流量</td>
+                    <td>@item.访客</td>
+                    <td>@item.下单数</td>
+                    <td>@item.销售额</td>
+                    <td>@item.退款总额</td>
+                    <td>@item.净销售额</td>
+                    <td>@item.客单价</td>
+                    <td>@item.转换率%</td>
+                    @:</tr>
+                    count++;
+                }
+            }
+            else
+            {
+            <tr>
+                <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>

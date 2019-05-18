@@ -1,0 +1,54 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Extra.Erp.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="Extra_Erp_Authentication_EASLoginProxyService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.8.8:6888/ormrpc/services/EASLogin</Value>
+    </Setting>
+    <Setting Name="Extra_Erp_Eas_Inventory_WSInventoryFacadeSrvProxyService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade</Value>
+    </Setting>
+    <Setting Name="Extra_Erp_Eas_OtherIssueBillFacade_WSOtherIssueBillFacadeSrvProxyService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.8.8:6888/ormrpc/services/WSOtherIssueBillFacade</Value>
+    </Setting>
+    <Setting Name="Extra_Erp_Eas_SaleIssueBillFacade_WSSaleIssueBillFacadeSrvProxyService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.8.8:6888/ormrpc/services/WSSaleIssueBillFacade</Value>
+    </Setting>
+    <Setting Name="Extra_Erp_Eas_ReceivingBillFacade_WSReceivingBillFacadeSrvProxyService" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">http://192.168.8.8:6888/ormrpc/services/WSReceivingBillFacade</Value>
+    </Setting>
+    <Setting Name="Enable" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="EasLogin_SlnName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">eas</Value>
+    </Setting>
+    <Setting Name="EasLogin_DcName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">a01</Value>
+    </Setting>
+    <Setting Name="EasLogin_Language" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">L2</Value>
+    </Setting>
+    <Setting Name="EasLogin_DbType" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="Log" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="EasLogin_UserName" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">hytformal</Value>
+    </Setting>
+    <Setting Name="EasLogin_Password" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">hytformal</Value>
+    </Setting>
+    <Setting Name="Timeout" Type="System.Int32" Scope="Application">
+      <Value Profile="(Default)">20000</Value>
+    </Setting>
+    <Setting Name="LimitWarehouseArea" Type="System.String" Scope="Application">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="IsLimitWarehouse" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>

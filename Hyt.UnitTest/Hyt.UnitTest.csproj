@@ -1,0 +1,386 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{63EE41B5-DE73-4437-A125-CC4B677F26CB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.UnitTest</RootNamespace>
+    <AssemblyName>Hyt.UnitTest</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Enyim.Caching, Version=2.12.0.0, Culture=neutral, PublicKeyToken=cec98615db04012e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\Enyim.Caching.dll</HintPath>
+    </Reference>
+    <Reference Include="Extra.SMS, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Hyt.Extra\Extra.SMS\bin\Debug\Extra.SMS.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Api.Contract">
+      <HintPath>..\lib\soa\Grand.Platform.Api.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\packages\SharpZipLib.0.86.0\lib\20\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
+    <Reference Include="LitJSON, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\LitJSON.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net, Version=2.9.4.2, Culture=neutral, PublicKeyToken=85089178b9ac3181, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\Lucene.Net.dll</HintPath>
+    </Reference>
+    <Reference Include="Lucene.Net.Fakes">
+      <HintPath>FakesAssemblies\Lucene.Net.Fakes.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Moq">
+      <HintPath>..\lib\x86\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.4.5.6\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI, Version=2.3.0.0, Culture=neutral, PublicKeyToken=0df73ec7942b34e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OOXML">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OOXML.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXml4Net">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OpenXml4Net.dll</HintPath>
+    </Reference>
+    <Reference Include="NPOI.OpenXmlFormats">
+      <HintPath>..\packages\NPOI.2.3.0\lib\net40\NPOI.OpenXmlFormats.dll</HintPath>
+    </Reference>
+    <Reference Include="PanGu, Version=2.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\PanGu.dll</HintPath>
+    </Reference>
+    <Reference Include="PanGu.HighLight, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\PanGu.HighLight.dll</HintPath>
+    </Reference>
+    <Reference Include="PanGu.Lucene.Analyzer, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\x86\lucene\PanGu.Lucene.Analyzer.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Framework.Service">
+      <HintPath>..\lib\soa\Pisen.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Service.Share.SSO.Contract, Version=1.0.5394.31171, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\lib\soa\Pisen.Service.Share.SSO.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Activities" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.EnterpriseServices" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Workflow.Runtime" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="WCFMock">
+      <HintPath>..\lib\x86\WCFMock.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise />
+  </Choose>
+  <ItemGroup>
+    <Compile Include="ApiLogistics\WuZhou\LogisticsProviderTest.cs" />
+    <Compile Include="ApiPay\PayProviderTest.cs" />
+    <Compile Include="AppContentBoTest.cs" />
+    <Compile Include="BasicAreaBoTest.cs" />
+    <Compile Include="BsAreaBoTest.cs" />
+    <Compile Include="BsCodeBoTest.cs" />
+    <Compile Include="Config\ConfigTest.cs" />
+    <Compile Include="ControllerTest\BaseControllerTest.cs" />
+    <Compile Include="CrCustomerBoTest.cs" />
+    <Compile Include="CrExperienceCoinLogDaoImplTest.cs" />
+    <Compile Include="CrFavoritesDaoImplTest.cs" />
+    <Compile Include="CrShoppingCartBoTest.cs" />
+    <Compile Include="CrShoppingCartToCacheBoTest.cs" />
+    <Compile Include="Customs\CustomsProviderTest.cs" />
+    <Compile Include="DaoBase\DaoBaseTest.cs" />
+    <Compile Include="DsDealerBoTest.cs" />
+    <Compile Include="DsDealerLevelBoTest.cs" />
+    <Compile Include="DsMallTypeBoTest.cs" />
+    <Compile Include="EasCoreTest.cs" />
+    <Compile Include="EncryptionUtilTest.cs" />
+    <Compile Include="FeProductCommentTest.cs" />
+    <Compile Include="HytUtil\YwbUtilTest.cs" />
+    <Compile Include="ILgPickUpDaoTest.cs" />
+    <Compile Include="IndexBOTest.cs" />
+    <Compile Include="DsOrderBoTest.cs" />
+    <Compile Include="LgDeliveryScopeBoTest.cs" />
+    <Compile Include="LgSettlementBoTest.cs" />
+    <Compile Include="LogisticsProviderTest.cs" />
+    <Compile Include="OrderNumber.cs" />
+    <Compile Include="PdProductStockBoTest.cs" />
+    <Compile Include="LogisticsTest.cs" />
+    <Compile Include="Logistics\WhDeliveryScopeBoTests.cs" />
+    <Compile Include="LuceneTest.cs" />
+    <Compile Include="MkTrafficStatisticsBoTest.cs" />
+    <Compile Include="OrderRule\AnalysisTest.cs" />
+    <Compile Include="PdCategoryBoTest.cs" />
+    <Compile Include="PdProductBoTest.cs" />
+    <Compile Include="PdProductDaoImplTest.cs" />
+    <Compile Include="ProductIndexBoTest.cs" />
+    <Compile Include="ProductTest.cs" />
+    <Compile Include="SpCouponBoTest.cs" />
+    <Compile Include="SpPromotionBoTest.cs" />
+    <Compile Include="SpPromotionEngineBoTest.cs" />
+    <Compile Include="SubjectBoTest.cs" />
+    <Compile Include="Supply\SupplyControllerTest.cs" />
+    <Compile Include="SysLogTest.cs" />
+    <Compile Include="JobPoolBoTest.cs" />
+    <Compile Include="LogisticBoTest.cs" />
+    <Compile Include="LogisticsDeliverymanLocationBoTest.cs" />
+    <Compile Include="OracleTests.cs" />
+    <Compile Include="PdAttributeGroupBoTest.cs" />
+    <Compile Include="PdPriceDaoImplTest.cs" />
+    <Compile Include="PdProductCategoryBoTest.cs" />
+    <Compile Include="PdProductCollocationBoTest.cs" />
+    <Compile Include="PointBoTest.cs" />
+    <Compile Include="PromotionBoTest.cs" />
+    <Compile Include="SoOrderBoTest.cs" />
+    <Compile Include="Sys\SySsoUserAssociationBoTests.cs" />
+    <Compile Include="Sys\SyUpgradeTheDatabaseBoTest.cs" />
+    <Compile Include="SyTaskBoTest.cs" />
+    <Compile Include="T4Code\BLL.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>BLL.tt</DependentUpon>
+    </Compile>
+    <Compile Include="OrderTest.cs" />
+    <Compile Include="TestTest.cs" />
+    <Compile Include="RmaBoTest.cs" />
+    <Compile Include="FinanceBoTest.cs" />
+    <Compile Include="ExcelTest.cs" />
+    <Compile Include="UnitTest2.cs" />
+    <Compile Include="UpGrade\B2BUpGradeTest.cs" />
+    <Compile Include="UpGrade\HaiDaiUpGradeTest.cs" />
+    <Compile Include="UpGrade\GuoMeiUpGradeTest.cs" />
+    <Compile Include="UpGrade\JingDongUpGradeTest.cs" />
+    <Compile Include="UpGrade\SUNINGUpGradeTest.cs" />
+    <Compile Include="UpGrade\TaobaoUpGradeTest.cs" />
+    <Compile Include="UpGrade\GeGeJiaUpGradeTest.cs" />
+    <Compile Include="UpGrade\YihaodianUpGrade.cs" />
+    <Compile Include="UpGrade\YouZanUpGradeTest.cs" />
+    <Compile Include="UserCenterTest.cs" />
+    <Compile Include="UnitTest3.cs" />
+    <Compile Include="UtilTest.cs" />
+    <Compile Include="Warehouse\OutStockDaoImplTest.cs" />
+    <Compile Include="Warehouse\OutStockBoTest.cs" />
+    <Compile Include="Warehouse\ProductLendBoTest.cs" />
+    <Compile Include="WcfTest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Warehouse\InStockTest.cs" />
+    <Compile Include="OrderJobPoolBoTest.cs" />
+    <Compile Include="WhWarehouseBoTest.cs" />
+    <Compile Include="WhWarehouseDaoTest.cs" />
+    <Compile Include="DsLevelPriceBoTest.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hyt.BLL\Hyt.BLL.csproj">
+      <Project>{C49D2A21-1E3C-438C-8F30-F5CEF9597E17}</Project>
+      <Name>Hyt.BLL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.DataAccess.Oracle\Hyt.DataAccess.Oracle.csproj">
+      <Project>{35BD3C9E-11DB-442E-90CE-E1F9B2D7DF82}</Project>
+      <Name>Hyt.DataAccess.Oracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.DataAccess\Hyt.DataAccess.csproj">
+      <Project>{D3AF6913-F96C-45E0-AD43-4FE1EF542DA8}</Project>
+      <Name>Hyt.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.Erp\Extra.Erp.csproj">
+      <Project>{10FFD80F-2011-4684-A1B7-BC906454BFB4}</Project>
+      <Name>Extra.Erp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.Express\Extra.Express\Extra.Express.csproj">
+      <Project>{6a5489a8-395f-448e-9521-ba2782ac17e7}</Project>
+      <Name>Extra.Express</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Extra\Extra.UpGrade\Extra.UpGrade.csproj">
+      <Project>{dfa0c19c-69c5-46fb-8833-3041f3496848}</Project>
+      <Name>Extra.UpGrade</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Infrastructure\Hyt.Infrastructure.csproj">
+      <Project>{17216f5e-0585-4d11-a869-ad8119604f2a}</Project>
+      <Name>Hyt.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Service\Hyt.Service.Contract\Hyt.Service.Contract.csproj">
+      <Project>{C3718184-D933-4570-BC9D-DDB03730AC31}</Project>
+      <Name>Hyt.Service.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Service\Hyt.Service.Implement\Hyt.Service.Implement.csproj">
+      <Project>{45de822e-0f5d-44a6-98cb-7b9c7c66982b}</Project>
+      <Name>Hyt.Service.Implement</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.UI\Hyt.Admin\Hyt.Admin.csproj">
+      <Project>{21dbd005-0f6f-4dc1-a4e2-0d28fbb5bdaa}</Project>
+      <Name>Hyt.Admin</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{CB555155-5EEB-41FD-AE7B-48F80DED197C}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+    <Fakes Include="Fakes\Lucene.Net.fakes" />
+    <Fakes Include="Fakes\System.Web.Mvc.fakes">
+      <SubType>Designer</SubType>
+    </Fakes>
+    <None Include="packages.config" />
+    <None Include="T4Code\BLL.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BLL.cs</LastGenOutput>
+    </None>
+    <None Include="T4Code\DAL.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DAL.cs</LastGenOutput>
+    </None>
+    <None Include="T4Code\Model.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Model.cs</LastGenOutput>
+    </None>
+    <None Include="T4Code\ModelHelper.ttinclude" />
+    <None Include="T4Code\MultiOutputHelper.ttinclude" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="T4Code\使用说明.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.CodedUITestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Extension, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITesting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

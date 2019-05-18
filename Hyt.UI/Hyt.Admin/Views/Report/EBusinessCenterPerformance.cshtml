@@ -1,0 +1,166 @@
+﻿@using Hyt.Model.WorkflowStatus;
+@using Hyt.Model.SystemPredefined
+@using Hyt.Util;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "EBusinessCenterPerformance";
+    Html.PrivilegeControl(PrivilegeCode.RP1001801, ".RP1001801");
+    var now = DateTime.Now;
+}
+@helper LoadWareHouse()
+{
+    if (ViewBag.Mall != null)
+    {
+        foreach (Hyt.Model.DsDealerMall mall in ViewBag.Mall)
+        {
+            <option value="@mall.SysNo">@Html.Raw(string.Format("<b>{0}</b> {1}", Enum.Parse(typeof(DistributionStatus.商城类型预定义), mall.MallTypeSysNo.ToString()), mall.ShopAccount)) </option>
+        }
+    }
+}
+
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>电商中心绩效报表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <form id="form1">
+                <div class="right_tool clearfix">
+                    <div class="fl m10_l">
+                        <!--<span class="fl">
+                            <select id="DateType">
+                                <option value="1">今天</option>
+                                <option value="2">本周</option>
+                                <option value="3">本月</option>
+                            </select></span>
+                        <div class="date_btn120 fl m10_l">
+                            <input type="text" value="" class="input_ht26" name="DateStart" Search="DateStart" id="DateStart" onclick="UI.Date({ el: 'DateStart',readOnly:true });">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'DateStart'});return false;"><span class="icon_calendar"></span></button>
+                        </div>
+                        <div class="date_btn120 fl m10_l">
+                            <input type="text" value="" class="input_ht26" name="DateEnd" Search="DateEnd" id="DateEnd" onclick="UI.Date({ el: 'DateEnd', readOnly: true });">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'DateEnd'});return false;"><span class="icon_calendar"></span></button>
+                        </div>
+                        <span class="fl m10_l">商城</span>
+                        <span class="fl">
+                            <select name="DealerMallSysNo" class="wd180 m10_l" Search="DealerMallSysNo" id="DealerMallSysNo">
+                                <option value="">全部</option>
+                                @LoadWareHouse()
+                            </select>
+                        </span>-->
+                        
+                         <span class="veralign_t fl">统计月份</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn" >
+                                <input type="text" id="Month" name="Month" class="input_ht26" Search="Month"  value="@DateTime.Now.ToString("yyyy-MM")"  />
+                                <button type="button" title="日历"  class="btn btn_ht26" onclick="UI.Date({el:'Month',dateFmt:'yyyy-MM'})">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="searchBtn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+                    </div>
+                </div>
+                </form>
+                <!--搜索结束-->
+
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r RP1001801" id="btnExport"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div id="paging">
+            </div>
+            <!--表格列结束-->
+
+        </div>
+        <div class="m5_t c9">
+            备注：
+1、金额=当期金额-当期退款
+2、金额都是已结算金额
+        </div>
+
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //setDate();
+        doSearch();
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+            return false;
+        });
+        //查询列表
+        function doSearch() {
+            Ajax.get("/Report/DoEBusinessCenterPerformanceQuery", "Search", function (p) {
+                    //p.setParams("Keyword", $("#Keyword").val());
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+            });
+        }
+
+       @* $("#DateType").change(function() {
+            setDate();
+            //doSearch();
+        });
+        
+        $("#DealerMallSysNo").change(function () {
+            //doSearch();
+        });
+
+        //设置开始结束日期
+        function setDate() {
+            var d = $("#DateType").val();
+            var dateStart, dateEnd;
+            if (d == 1) {
+                //今天
+                dateStart = dateEnd = '@now.ToString("yyyy-MM-dd")';
+            } else if (d == 2) {
+                //本周
+                dateStart = '@DateUtil.GetMonday(now).ToString("yyyy-MM-dd")';
+                dateEnd = '@DateUtil.GetSunday(now).ToString("yyyy-MM-dd")';
+            } else {
+                //本月
+                dateStart = '@DateUtil.GetMonthFirst(now).ToString("yyyy-MM-dd")';
+                dateEnd = '@DateUtil.GetMonthLast(now).ToString("yyyy-MM-dd")';
+            }
+            $("#DateStart").val(dateStart);
+            $("#DateEnd").val(dateEnd);
+        }*@
+        
+
+        $('#btnExport').click(function () {
+             var form = $("#form1");
+            form.attr('action', '@Url.Action("ExportEBusinessCenterPerformance", "Report")');
+            form.attr('method', 'post');
+            form.submit();
+            doSearch();
+        });
+    });
+</script>
+
+
+

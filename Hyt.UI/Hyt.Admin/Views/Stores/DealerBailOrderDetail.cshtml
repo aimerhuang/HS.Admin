@@ -1,0 +1,62 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Model.DsDealerBailOrder
+@{
+    ViewBag.Title = "保证金详情";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="~/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"></script>
+
+<!--弹出内容end-->
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>保证金</h3>
+        </div>
+        <div class="boxs_con_p10">
+            <div class="boxs_detail_dispay">
+                <div class="head_detail border_bnone">
+                    <h5>保证金详情</h5>
+                </div>
+                <div class="tit_con">
+                    <form id="form1">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_right1">
+                            <tbody>
+                                <tr>
+                                    <td width="150" class="nameright">保证金编号：</td>
+                                    <td width="40%" class="border_right1">@Model.SysNo</td>
+                                    <td width="150" class="nameright">会员编号：</td>
+                                    <td>@Model.CustomerSysNo</td>
+                                </tr>
+                                <tr>
+                                    <td width="150" class="nameright">联系人：</td>
+                                    <td width="40%" class="border_right1">@Model.ContactName</td>
+                                    <td width="150" class="nameright">联系方式：</td>
+                                    <td>@Model.ContactWay</td>
+                                </tr>
+                                <tr>
+                                    <td width="150" class="nameright">金额：</td>
+                                    <td width="40%" class="border_right1">@Model.Money</td>
+                                    <td width="150" class="nameright">支付状态：</td>
+                                    <td>@EnumUtil.GetDescription(typeof(StoresStatus.保证金订单支付状态), Model.PayStatus)</td>
+                                </tr>
+                                <tr>
+                                    <td width="150" class="nameright">状态：</td>
+                                    <td width="40%" class="border_right1">@EnumUtil.GetDescription(typeof(StoresStatus.保证金订单状态), Model.Status)</td>
+                                    <td width="150" class="nameright"></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+

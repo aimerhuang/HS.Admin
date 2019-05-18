@@ -1,0 +1,370 @@
+﻿<#@ template debug="false" hostspecific="True" language="C#" #>
+<#@ output extension=".cs" #>
+
+<#@ assembly name="System.Data.dll" #>
+<#@ import namespace="System.Data" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@include file="MultiOutputHelper.ttinclude"  #>
+<#@include file="ModelHelper.ttinclude"  #>
+
+<#		
+		var multiManager=Manager.Create(Host,GenerationEnvironment);//多文件分割器  
+		ModelHelper modelCreator=ModelHelper.CreateSqlserverHelper(); //注意创建的数据库类型
+		List<TableInfo> tableInfoList=modelCreator.GetTableInfoList(); //从数据库获取所有表
+
+		/*自定义设置，生成代码前需要设置表名等信息*/
+		string tableName = "DsDealer";						//设置数据库表名			
+		string tableTitle = "分销商仓库关系";				//设置业务名称，用于描述类名称，例如/// <summary>分销商仓库关系</summary>
+		string _namespace="Distribution";					//设置命名空间，例如Hyt.DataAccess.Distribution中的Distribution
+		string userName="余勇";								//开发人姓名
+		/*自定义设置*/
+
+		string date = DateTime.Now.ToString("yyyy-MM-dd");
+		var tInfo = tableInfoList.First(x => x.TableName == tableName);
+		
+		 //块文件开始（生成实体）
+		multiManager.StartNewFile(tableName+".cs");
+		#>
+using System;
+using System.ComponentModel;
+namespace Hyt.Model
+{
+	/// <summary>
+	/// <#=tableTitle#>
+	/// </summary>
+	/// <remarks>
+	 /// <remarks><#=date#> <#=userName#> 创建</remarks>
+	/// </remarks>
+	[Serializable]
+	public partial class <#=tableName#>
+	{
+	   <# foreach(TableColumnInfo tcolumnInfo in tInfo.TableColumns){#>
+		/// <summary>
+		/// <#=modelCreator.GetColumnDesc(tableName,tcolumnInfo.ColumnName)#>
+		/// </summary>
+		[Description("<#=modelCreator.GetColumnDesc(tableName,tcolumnInfo.ColumnName)#>")]
+		public <#=tcolumnInfo.ColumnDataType#> <#=tcolumnInfo.ColumnName#> { get; set; }
+ <#}#>
+ 	}
+}
+<# multiManager.EndBlock();#>//块结束标记
+
+//块文件开始（生成数据访问接口）
+<#multiManager.StartNewFile("I"+tableName+".cs");#>
+
+using Hyt.DataAccess.Base;
+using Hyt.Model;
+using Hyt.Model.Parameter;
+
+namespace Hyt.DataAccess.<#=_namespace#>
+{
+    /// <summary>
+    /// <#=tableTitle#>
+    /// </summary>
+    /// <remarks><#=date#> <#=userName#> 创建</remarks>
+    public abstract class I<#=tableName#> : DaoBase<I<#=tableName#>>
+    {
+        /// <summary>
+        /// 插入数据
+        /// </summary>
+        /// <param name="entity">实体</param>
+        /// <returns>返回新的编号</returns>
+         /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public abstract int Insert(<#=tableName#> entity);
+
+        /// <summary>
+        /// 更新数据
+        /// </summary>
+        /// <param name="entity">数据实体</param>
+        /// <returns></returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public abstract void Update(<#=tableName#> entity);
+
+        /// <summary>
+        /// 删除数据
+        /// </summary>
+        /// <param name="sysNo">系统编号</param>
+        /// <returns>受影响行数</returns>
+         /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public abstract int Delete(int sysNo);
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <param name="filter">查询参数</param>
+        /// <returns>分页</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public abstract Pager<<#=tableName#>> Query(Para<#=tableName#>Filter filter);
+
+        /// <summary>
+        /// 取单条数据
+        /// </summary>
+        /// <param name="sysNo">系统编号</param>
+        /// <returns>model</returns>
+		/// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public abstract <#=tableName#> Get(int sysNo);
+    }
+}
+<# multiManager.EndBlock();#>//块结束标记
+ //块文件开始（生成数据访问接口实现）
+<# multiManager.StartNewFile(tableName+"DaoImpl.cs");#>
+using System.Collections;
+using Hyt.DataAccess.<#=_namespace#>;
+using Hyt.Model;
+using Hyt.Model.Parameter;
+
+namespace Hyt.DataAccess.Oracle.<#=_namespace#>
+{
+    /// <summary>
+    /// <#=tableTitle#>
+    /// </summary>
+    /// <remarks><#=date#> <#=userName#> 创建</remarks>
+    public class <#=tableName#>DaoImpl : I<#=tableName#>
+    {
+        /// <summary>
+        /// 插入数据
+        /// </summary>
+        /// <param name="entity">实体</param>
+        /// <returns>返回新的编号</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public override int Insert(<#=tableName#> entity)
+        {
+            var sysNo = Context.Insert("<#=tableName#>", entity)
+                                        .AutoMap(o => o.SysNo)
+                                        .ExecuteReturnLastId<int>("SysNo");
+            return sysNo;
+        }
+
+        /// <summary>
+        /// 更新数据
+        /// </summary>
+        /// <param name="entity">数据实体</param>
+        /// <returns>null</returns>
+       /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public override void Update(<#=tableName#> entity)
+        {
+
+            Context.Update("<#=tableName#>", entity)
+                   .AutoMap(o => o.SysNo, o => o.CreatedBy, o => o.CreatedDate)
+                   .Where("SysNo", entity.SysNo)
+                   .Execute();
+        }
+
+        /// <summary>
+        /// 删除数据
+        /// </summary>
+        /// <param name="sysNo">系统编号</param>
+        /// <returns>受影响行数</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public override int Delete(int sysNo)
+        {
+            return Context.Delete("<#=tableName#>")
+                   .Where("SysNo", sysNo)
+                   .Execute();
+        }
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <param name="filter">查询参数</param>
+        /// <returns>分页</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public override Pager<<#=tableName#>> Query(Para<#=tableName#>Filter filter)
+        {
+            string sql = @"<#=tableName#> a where {0} ";
+
+            #region 构造sql
+
+            var paras = new ArrayList();
+            var where = "1=1 ";
+
+            //if (!string.IsNullOrWhiteSpace(filter.MallOrderId))
+            //{
+            //    where += " and a.MallOrderID=:MallOrderID";
+            //    paras.Add(filter.MallOrderId);
+            //}
+            //if (filter.BeginDate.HasValue)
+            //{
+            //    where += " and a.CreatedDate>=:BeginDate";
+            //    paras.Add(filter.BeginDate);
+            //}
+            //if (filter.EndDate.HasValue)
+            //{
+            //    where += " and a.CreatedDate<:EndDate";
+            //    paras.Add(filter.EndDate);
+            //}
+            //if (filter.OrderSysNo != null)
+            //{
+            //    where += " and a.SoOrderSysNo=:OrderSysNo";
+            //    paras.Add(filter.OrderSysNo);
+            //}
+            sql = string.Format(sql, where);
+
+            #endregion
+
+            var dataList = Context.Select<<#=tableName#>>("a.*").From(sql);
+            var dataCount = Context.Select<int>("count(0)").From(sql);
+
+            dataList.Parameters(paras);
+            dataCount.Parameters(paras);
+
+            var pager = new Pager<<#=tableName#>>
+            {
+                PageSize = filter.PageSize,
+                CurrentPage = filter.Id,
+                TotalRows = dataCount.QuerySingle(),
+                Rows = dataList.OrderBy("a.sysNo desc").Paging(filter.Id, filter.PageSize).QueryMany()
+            };
+
+            return pager;
+        }
+
+        /// <summary>
+        /// 取单条数据
+        /// </summary>
+        /// <param name="sysNo">系统编号</param>
+        /// <returns>model</returns>
+       /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public override <#=tableName#> Get(int sysNo)
+        {
+            return Context.Sql("select * from <#=tableName#> where sysNo=:sysNo")
+                          .Parameter("sysNo", sysNo)
+                          .QuerySingle<<#=tableName#>>();
+        }
+    }
+}
+<# multiManager.EndBlock();#>//块结束标记
+
+ //块文件开始（生成业务类）
+<# multiManager.StartNewFile(tableName+"Bo.cs");#>
+
+using Hyt.DataAccess.<#=_namespace#>;
+using Hyt.Model;
+using Hyt.Model.Parameter;
+
+namespace Hyt.BLL.<#=_namespace#>
+{
+    public class <#=tableName#>Bo : BOBase<<#=tableName#>Bo>
+    {
+        /// <summary>
+        /// 插入数据
+        /// </summary>
+        /// <param name="entity">实体</param>
+        /// <returns>返回新的编号</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public int Insert(<#=tableName#> entity)
+        {
+            return I<#=tableName#>.Instance.Insert(entity);
+        }
+
+        /// <summary>
+        /// 更新数据
+        /// </summary>
+        /// <param name="entity">数据实体</param>
+        /// <returns></returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public void Update(<#=tableName#> entity)
+        {
+            I<#=tableName#>.Instance.Update(entity);
+        }
+
+        /// <summary>
+        /// 删除数据
+        /// </summary>
+        /// <param name="sysNo">系统编号</param>
+        /// <returns></returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public int Delete(int sysNo)
+        {
+            return I<#=tableName#>.Instance.Delete(sysNo);
+        }
+
+        /// <summary>
+        /// 分页查询
+        /// </summary>
+        /// <param name="filter">查询参数</param>
+        /// <returns>分页</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public Pager<<#=tableName#>> GetPagerList(Para<#=tableName#>Filter filter)
+        {
+            return I<#=tableName#>.Instance.Query(filter);
+        }
+
+         /// <summary>
+        /// 取单条数据
+        /// </summary>
+        /// <param name="sysNo">系统编号</param>
+        /// <returns>model</returns>
+        /// <remarks><#=date#> <#=userName#> 创建</remarks>
+        public <#=tableName#> Get(int sysNo)
+		{
+			return I<#=tableName#>.Instance.Get(sysNo);
+		}
+    }
+}
+
+<# multiManager.EndBlock();#>//块结束标记
+
+ //块文件开始（生成查询条件实体）
+<# multiManager.StartNewFile("Para"+tableName+"Filter.cs");#>
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Hyt.Model.Parameter
+{
+    /// <summary>
+    /// <#=tableTitle#>
+    /// </summary>
+    /// <remarks><#=date#> <#=userName#> 创建</remarks>
+    public struct Para<#=tableName#>Filter
+    {
+        private int _pageSize;
+        private DateTime? _endDate;
+
+        /// <summary>
+        /// 当前页号
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// 分页大小
+        /// </summary>
+        public int PageSize
+        {
+            get
+            {
+                if (_pageSize == 0)
+                {
+                    _pageSize = 10;
+                }
+                return _pageSize;
+            }
+            set { _pageSize = value; }
+        }
+
+        /// <summary>
+        /// 开始时间(起)
+        /// </summary>
+        public DateTime? BeginDate { get; set; }
+
+        /// <summary>
+        /// 结束时间(止)
+        /// </summary>
+        public DateTime? EndDate
+        {
+            get
+            {
+                //查询日期上限+1
+                return _endDate == null ? (DateTime?)null : _endDate.Value.AddDays(1);
+            }
+            set { _endDate = value; }
+        }
+    }
+}
+<# multiManager.EndBlock();#>//块结束标记
+
+<# multiManager.Process(true);#>//根据块标记分割生成多个文件 
+

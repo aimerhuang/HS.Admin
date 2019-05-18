@@ -1,0 +1,421 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{35BD3C9E-11DB-442E-90CE-E1F9B2D7DF82}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.DataAccess.Oracle</RootNamespace>
+    <AssemblyName>Hyt.DataAccess.Oracle</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.QualityTools.Testing.Fakes, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Allocation\AllocationDaoImpl.cs" />
+    <Compile Include="AppContent\AppContentDaoImpl.cs" />
+    <Compile Include="Atten\ClockTypeDaoImpl.cs" />
+    <Compile Include="Balance\CrRechargeDaolmpl.cs" />
+    <Compile Include="Basic\BasicAreaDaoImpl.cs" />
+    <Compile Include="Basic\BasicShipDaoImpl.cs" />
+    <Compile Include="Basic\BasicPayDaoImpl.cs" />
+    <Compile Include="Basic\BsCodeDaoImpl.cs" />
+    <Compile Include="Basic\BsDeliveryPaymentDaoImpl.cs" />
+    <Compile Include="Basic\OriginDaoImpl.cs" />
+    <Compile Include="Basic\ReceiptNumberDaoImpl.cs" />
+    <Compile Include="Convergence\ScanParamImpl.cs" />
+    <Compile Include="CRM\CrCustomerShipCardDaoImpl.cs" />
+    <Compile Include="CRM\CrDealerApplyDaoImpl.cs" />
+    <Compile Include="CRM\CrPredepositCashRebatesRecordAssociationImpl.cs" />
+    <Compile Include="CRM\CrSsoCustomerAssociationDaoImpl.cs" />
+    <Compile Include="CRM\CrSmsQuestionDaoImpl.cs" />
+    <Compile Include="Distribution\DsAgentDaoImpl.cs" />
+    <Compile Include="Distribution\DsAgentPrePaymentDaoImpl.cs" />
+    <Compile Include="Distribution\DsAgentPrePaymentItemDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerApplyDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerPayTypeDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerRebatesRecordDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerAppDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerWharehouseDaoImpl.cs" />
+    <Compile Include="Distribution\DsForbidProductImpl.cs" />
+    <Compile Include="Distribution\DsUserDaoImpl.cs" />
+    <Compile Include="Distribution\DsThreeMallSyncLogDaoImpl.cs" />
+    <Compile Include="ExpressList\IExpressListImpl.cs" />
+    <Compile Include="Express\LgDeliveryCompanyAccountDaoImpl.cs" />
+    <Compile Include="Express\LgStoreLogisticsCompanyDaoImpl.cs" />
+    <Compile Include="Extra\PosServiceDaoImpl.cs" />
+    <Compile Include="Feedback\CrFeedbackDaoImpl.cs" />
+    <Compile Include="Feedback\CrFeedbackTypeDaoImpl.cs" />
+    <Compile Include="Finance\FnReceiptTitleAssociationDaoImpl.cs" />
+    <Compile Include="Finance\FnThirdpartyReconciliationDaoImpl.cs" />
+    <Compile Include="FinancialStatistics\FnStatisticsDaoImpl.cs" />
+    <Compile Include="FreightModule\FreightModuleDaoImpl.cs" />
+    <Compile Include="FreightModule\FreightModuleItemPricesImpl.cs" />
+    <Compile Include="Front\CrCustomerQuestionDaoImpl.cs" />
+    <Compile Include="Front\FeAdvertGroupDaoImpl.cs" />
+    <Compile Include="Front\FeAdvertItemDaoImpl.cs" />
+    <Compile Include="Front\FeArticleCategoryDaoImpl.cs" />
+    <Compile Include="Front\FeArticleDaoImpl.cs" />
+    <Compile Include="Front\FeCommentSupportDaoImpl.cs" />
+    <Compile Include="Front\FeedBackDaolmpl.cs" />
+    <Compile Include="Front\FeNewsCategoryDaolmpl.cs" />
+    <Compile Include="Front\FeNewsDaoImpl.cs" />
+    <Compile Include="Front\FeNewsProductAssociationDaoImpl.cs" />
+    <Compile Include="Front\FeProductCommentDaoImpl.cs" />
+    <Compile Include="Front\FeProductCommentImageDaoImpl.cs" />
+    <Compile Include="Front\FeProductCommentReplyDaoImpl.cs" />
+    <Compile Include="Front\FeProductGroupDaoImpl.cs" />
+    <Compile Include="Front\FeProductItemDaoImpl.cs" />
+    <Compile Include="Front\FeSearchKeywordDaoImpl.cs" />
+    <Compile Include="Front\FeSoftCategoryDaoImpl.cs" />
+    <Compile Include="Front\FeSoftwareDaoImpl.cs" />
+    <Compile Include="Front\FeSoftwareListDaoImpl.cs" />
+    <Compile Include="Front\MkBlogrollDaoImpl.cs" />
+    <Compile Include="Icp\IcpDaoImpl.cs" />
+    <Compile Include="CrossBorderLogistics\CrossBorderLogisticsOrderDaoImpl.cs" />
+    <Compile Include="InventorySheet\PdProductSpecDao.cs" />
+    <Compile Include="InventorySheet\WhInventoryDao.cs" />
+    <Compile Include="Kis\ICStockBillEntryTemDaoImpl.cs" />
+    <Compile Include="Kis\IcStockBillTemDaoImpl.cs" />
+    <Compile Include="Logistics\LgElectronicWayBillDaoImpl.cs" />
+    <Compile Include="Logistics\LogisticsDaoImpl.cs" />
+    <Compile Include="Logistics\LgDeliveryCompanyCodeDaoImpl.cs" />
+    <Compile Include="Logistics\LgExpressDaoImpl.cs" />
+    <Compile Include="Logistics\LgFreightModuleDetailsDaoImpl.cs" />
+    <Compile Include="Logistics\LgFreightModuleDaoImpl.cs" />
+    <Compile Include="Logistics\LgFreightValuationModuleDaoImpl.cs" />
+    <Compile Include="Logistics\MkExpressLogDaoImpl.cs" />
+    <Compile Include="Logistics\ThirdDeliveryConfigDaoImpl.cs" />
+    <Compile Include="Logistics\WhDeliveryScopeDaoImpl.cs" />
+    <Compile Include="Log\WhStockOutLogDaoImpl.cs" />
+    <Compile Include="MallSeller\DsDealerLogDaoImpl.cs" />
+    <Compile Include="MallSeller\DsMallAreaRelationDaoImpl.cs" />
+    <Compile Include="MallSeller\DsMallExpressCodeDaoImpl.cs" />
+    <Compile Include="MallSeller\DsMallSyncLogDaoImpl.cs" />
+    <Compile Include="MallSeller\DsProductRelationDaoImpl.cs" />
+    <Compile Include="Mobile\CrCustomerMobileLoginDaoImpl.cs" />
+    <Compile Include="Mobile\MBDesignFrameDaoImpl.cs" />
+    <Compile Include="Order\CrWeChatBindDaoImpl.cs" />
+    <Compile Include="Order\OutboundReturnDaoImpl.cs" />
+    <Compile Include="Order\SendOrderReturnDaoImpl.cs" />
+    <Compile Include="Order\SoChangeOrderPriceDaoImpl.cs" />
+    <Compile Include="Order\SoCustomsOrderLogDaoImpl.cs" />
+    <Compile Include="Order\SoOrderOtherExpensesDaoImpl.cs" />
+    <Compile Include="Order\SoOrderPayLogImpl.cs" />
+    <Compile Include="Order\SoOrderPayPushLogDaoImpl.cs" />
+    <Compile Include="Order\SoOrderSyncLogisticsLogDaoImpl.cs" />
+    <Compile Include="Order\TwoSaleDaoImpl.cs" />
+    <Compile Include="PdPackaged\PdPackagedGoodsDao.cs" />
+    <Compile Include="Pos\DsDealerPayConfigDaoImpl.cs" />
+    <Compile Include="Pos\DsMembershioLevelDaoImpl.cs" />
+    <Compile Include="Pos\DsMembershipCardDaoImpl.cs" />
+    <Compile Include="Pos\DsPaymentToPointConfigDaoImpl.cs" />
+    <Compile Include="Pos\DsPosBarcodePayLogDaoImpl.cs" />
+    <Compile Include="Pos\DsPosFrontConfigDaoImpl.cs" />
+    <Compile Include="Pos\DsPosFrontDealerConfigDaoImpl.cs" />
+    <Compile Include="Pos\DsPosManageDaoImpl.cs" />
+    <Compile Include="Pos\DsPosMoneyBoxDaoImpl.cs" />
+    <Compile Include="Pos\DsPosOrderDaoImpl.cs" />
+    <Compile Include="Pos\DsPosReturnOrderDaoImpl.cs" />
+    <Compile Include="Pos\DsPosTLPosResultDaoImpl.cs" />
+    <Compile Include="Pos\DsPosVersionDaoImpl.cs" />
+    <Compile Include="Pos\DsPosWebSocketHistoryDaoImpl.cs" />
+    <Compile Include="Pos\DsPosWebSocketManageDaoImpl.cs" />
+    <Compile Include="Pos\DsTakeStockOrderDaoImpl.cs" />
+    <Compile Include="Pos\MemberPointHistoryDaoImpl.cs" />
+    <Compile Include="Pos\SyWSOrderToClientJobDaoImpl.cs" />
+    <Compile Include="Procurement\PmBaseDataDaoImpl.cs" />
+    <Compile Include="Procurement\PmDeliveryDaoImpl.cs" />
+    <Compile Include="Procurement\PmManufacturProductDaoImpl.cs" />
+    <Compile Include="Procurement\PmPointsOrderDaoImpl.cs" />
+    <Compile Include="Procurement\PmProcurementDaoImpl.cs" />
+    <Compile Include="Procurement\PmWareGoodsDaoImpl.cs" />
+    <Compile Include="Procurement\PurchasePaymentOrderDaoImpl.cs" />
+    <Compile Include="Procurement\WhWarehouseMonthStockHistoryDaoImpl.cs" />
+    <Compile Include="Product\PdProductCrossBorderDaoImpl.cs" />
+    <Compile Include="Product\PdProductFreightDaoImpl.cs" />
+    <Compile Include="Product\PdProductAttributeOptionDaoImpl.cs" />
+    <Compile Include="Product\PdProductPrivateDaoImpl.cs" />
+    <Compile Include="Promotion\SpCouponCardAssociateDaoImpl.cs" />
+    <Compile Include="Promotion\SpCouponCardDaoImpl.cs" />
+    <Compile Include="Promotion\SpCouponCardTypeDaoImpl.cs" />
+    <Compile Include="Promotion\SpCouponReceiveLogDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionExtensionsDaoImpl.cs" />
+    <Compile Include="Promotion\SpSpikeDaoImpl.cs" />
+    <Compile Include="Promotion\WhouseFreightFreeDaoImp.cs" />
+    <Compile Include="Purchase\PrPurchaseReturnDetailsDaoImpl.cs" />
+    <Compile Include="Purchase\PrPurchaseReturnDaoImpl.cs" />
+    <Compile Include="Purchase\PrPurchaseDaoImpl.cs" />
+    <Compile Include="Purchase\PrPurchaseDetailsDaoImpl.cs" />
+    <Compile Include="QJT\QJTProductImeiDaoImpl.cs" />
+    <Compile Include="QJT\QJTStockOutImeiDaoImpl.cs" />
+    <Compile Include="Report\MkTrafficStatisticsDaoImpl.cs" />
+    <Compile Include="RMA\RcNoReturnExchangeDaoImpl.cs" />
+    <Compile Include="RMA\ReRefundReturnDaoImpl.cs" />
+    <Compile Include="RMA\SoReturnOrderItemDaoImpl.cs" />
+    <Compile Include="SellBusiness\CrCustomerRebatesRecordDaoImpl.cs" />
+    <Compile Include="SellBusiness\CrPredepositCashDaoImpl.cs" />
+    <Compile Include="SellBusiness\CrSellBusinessGradeDaoImpl.cs" />
+    <Compile Include="Stores\DsDealerBailOrderDaoImpl.cs" />
+    <Compile Include="Stores\DsOrderAssociationDaoImpl.cs" />
+    <Compile Include="Stores\DsSpecialPriceDaoImpl.cs" />
+    <Compile Include="Stores\StoresDaoImpl.cs" />
+    <Compile Include="Supply\ScProductDaoImpl.cs" />
+    <Compile Include="Sys\EasDaoImpl.cs" />
+    <Compile Include="Basic\OrganizationDaoImpl.cs" />
+    <Compile Include="Basic\ReceiptManagementDaoImpl.cs" />
+    <Compile Include="CRM\CrBrowseHistoryDaoImpl.cs" />
+    <Compile Include="CRM\CrBulkPurchaseDaoImpl.cs" />
+    <Compile Include="CRM\CrComplaintDaoImpl.cs" />
+    <Compile Include="CRM\CrComplaintReplyDaoImpl.cs" />
+    <Compile Include="CRM\CrCustomerLevelDaoIMpl.cs" />
+    <Compile Include="CRM\CrExperienceCoinLogDaoImpl.cs" />
+    <Compile Include="CRM\CrExperiencePointLogDaoImpl.cs" />
+    <Compile Include="CRM\CrFavoritesDaoImpl.cs" />
+    <Compile Include="CRM\CrLevelLogDaoImpl.cs" />
+    <Compile Include="CRM\CrLevelPointLogDaoImpl.cs" />
+    <Compile Include="CRM\CrNoticeDaoImpl.cs" />
+    <Compile Include="CRM\CrReceiveAddressDaoImpl.cs" />
+    <Compile Include="CRM\CrShoppingCartDaoImpl.cs" />
+    <Compile Include="CRM\CrSiteMessageDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerMallDaoImpl.cs" />
+    <Compile Include="Distribution\DsPrePaymentDaoImpl.cs" />
+    <Compile Include="Distribution\DsPrePaymentItemDaoImpl.cs" />
+    <Compile Include="Distribution\DsProductAssociationDaoImpl.cs" />
+    <Compile Include="Distribution\DsSpecialPriceImpl.cs" />
+    <Compile Include="Distribution\DsLevelPriceImpl.cs" />
+    <Compile Include="Finance\FnOnlinePaymentDaoImpl.cs" />
+    <Compile Include="Finance\FnReceiptVoucherDaoImpl.cs" />
+    <Compile Include="Finance\FnReceiptVoucherItemDaoImpl.cs" />
+    <Compile Include="Finance\FnPaymentVoucherDaoImpl.cs" />
+    <Compile Include="LevelPoint\PointDaoImpl.cs" />
+    <Compile Include="Logistics\LgDeliveryScopeDaoImpl.cs" />
+    <Compile Include="Logistics\LgPickUpDaoImpl.cs" />
+    <Compile Include="Logistics\LgSettlementItemDaoImpl.cs" />
+    <Compile Include="Logistics\LgPickUpDaoItemImpl.cs" />
+    <Compile Include="Logistics\LogisticsOrderDaoImpl.cs" />
+    <Compile Include="Log\PfPerformanceLogDaoImpl.cs" />
+    <Compile Include="Log\SoTransactionLogDaoImpl.cs" />
+    <Compile Include="Log\SySystemLogDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerDaoImpl.cs" />
+    <Compile Include="Distribution\DsDealerLevelDaoImpl.cs" />
+    <Compile Include="Distribution\DsMallTypeDaoImpl.cs" />
+    <Compile Include="MallSeller\DsEasDaoImpl.cs" />
+    <Compile Include="MallSeller\DsOrderDaoImpl.cs" />
+    <Compile Include="MallSeller\DsReturnDaoImpl.cs" />
+    <Compile Include="Notification\NcEmailDaoImpl.cs" />
+    <Compile Include="Notification\NcSmsDaoImpl.cs" />
+    <Compile Include="Order\FnInvoiceDaoImpl.cs" />
+    <Compile Include="Order\SoOrderItemDaoImpl.cs" />
+    <Compile Include="Order\WhPickUpCodeDaoImpl.cs" />
+    <Compile Include="Print\DeliveryPrintTemplateDaoImpl.cs" />
+    <Compile Include="Print\PrintDaoImpl.cs" />
+    <Compile Include="Product\IPdProductAttributeDaoImpl.cs" />
+    <Compile Include="Product\IPdTemplateDaoImpl.cs" />
+    <Compile Include="Product\PdCategoryAssociationDaoImpl.cs" />
+    <Compile Include="Product\PdProductAssociationDaoImpl.cs" />
+    <Compile Include="Product\PdProductImageDaoImpl.cs" />
+    <Compile Include="Product\PdProductStatisticsDaoImpl.cs" />
+    <Compile Include="Promotion\GsGroupShoppingDaoImpl.cs" />
+    <Compile Include="Promotion\SpComboDaoImpl.cs" />
+    <Compile Include="Promotion\SpComboItemDaoImpl.cs" />
+    <Compile Include="Promotion\SpCouponDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionGiftDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionOverlayDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionRuleConditionDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionRuleDaoImpl.cs" />
+    <Compile Include="Promotion\SpPromotionRuleKeyValueDaoImpl.cs" />
+    <Compile Include="Promotion\GsGroupShoppingItemDaoImpl.cs" />
+    <Compile Include="Promotion\GsSupportAreaDaoImpl.cs" />
+    <Compile Include="Report\ReportDaoImpl.cs" />
+    <Compile Include="RMA\LgPickUpDaoImpl.cs" />
+    <Compile Include="RMA\LgPickUpItemDaoImpl.cs" />
+    <Compile Include="RMA\RcReturnDaoImpl.cs" />
+    <Compile Include="RMA\RcReturnImageDaoImpl.cs" />
+    <Compile Include="RMA\RcReturnItemDaoImpl.cs" />
+    <Compile Include="RMA\RcReturnLogDaoImpl.cs" />
+    <Compile Include="Sys\LiJiaDaolmpl.cs" />
+    <Compile Include="Sys\SyConfigDaoImpl.cs" />
+    <Compile Include="Sys\SyJobMessageDaoImpl.cs" />
+    <Compile Include="Sys\SyJobSmsConfigDaoImpl.cs" />
+    <Compile Include="Sys\SyKingdeeUserDao.cs" />
+    <Compile Include="Sys\SyLockJobDaoImpl.cs" />
+    <Compile Include="Sys\SyJobPoolDaoImpl.cs" />
+    <Compile Include="Sys\SyGroupUserDaoImpl.cs" />
+    <Compile Include="Sys\SyJobPoolPriorityDaoImpl.cs" />
+    <Compile Include="Sys\SyMenuPrivilegeDaoImpl.cs" />
+    <Compile Include="Sys\SyMyMenuImpl.cs" />
+    <Compile Include="Sys\SyRoleDaoImpl.cs" />
+    <Compile Include="Sys\SyRoleMenuDaoImpl.cs" />
+    <Compile Include="Sys\SyRolePrivilegeDaoImpl.cs" />
+    <Compile Include="Sys\SySmartConfigDaoImpl.cs" />
+    <Compile Include="Sys\SySsoUserAssociationDaoImpl.cs" />
+    <Compile Include="Sys\SySystemLogDaoImpl.cs" />
+    <Compile Include="Sys\SyTaskDaoImpl.cs" />
+    <Compile Include="Sys\SyUpgradeTheDatabaseDaoImpl.cs" />
+    <Compile Include="Sys\SyUserGroupDaoImpl.cs" />
+    <Compile Include="Sys\TdWebsiteDaolmpl.cs" />
+    <Compile Include="Sys\XingYeDaoImpl.cs" />
+    <Compile Include="Transport\DsWhCustomerConfigDaoImpl.cs" />
+    <Compile Include="Transport\DsWhCustomerDaoImpl.cs" />
+    <Compile Include="Transport\DsWhCustomerMessageDaoImpl.cs" />
+    <Compile Include="Transport\DsWhGoodsManagementDaoImpl.cs" />
+    <Compile Include="Transport\DsWhHistoryDaoImpl.cs" />
+    <Compile Include="Transport\DsWhLogisticsNumberDaoImpl.cs" />
+    <Compile Include="Transport\DsWhOutStockDaoImpl.cs" />
+    <Compile Include="Transport\DsWhPackageDaoImpl.cs" />
+    <Compile Include="Transport\DsWhProductDaoImpl.cs" />
+    <Compile Include="Transport\DsWhRecipienterDaoImpl.cs" />
+    <Compile Include="Transport\DsWhTotalWaybillDaoImpl.cs" />
+    <Compile Include="Tuan\GsGroupShoppingDaoImpl.cs" />
+    <Compile Include="Union\UnAdvertisementDaoImpl.cs" />
+    <Compile Include="Union\UnCpsProductImpl.cs" />
+    <Compile Include="Union\UnUnionSiteDaoImpl.cs" />
+    <Compile Include="Union\UnAdvertisementLogDaoImpl.cs" />
+    <Compile Include="Union\WeChatDaoImpl.cs" />
+    <Compile Include="Version\ApVersionImpl.cs" />
+    <Compile Include="VipCard\CrQianDaiVipCardWithdrawLogImpl.cs" />
+    <Compile Include="VipCard\CrQianDaiVipCardRechargeLogImpl.cs" />
+    <Compile Include="VipCard\QianDaiVipCardImpl.cs" />
+    <Compile Include="Warehouse\AtAllocationDaoImpl.cs" />
+    <Compile Include="Warehouse\ERPStockProductDaoImpl.cs" />
+    <Compile Include="Warehouse\FnInvoiceTypeDaoImpl.cs" />
+    <Compile Include="Product\PdAttributeDaoImpl.cs" />
+    <Compile Include="Product\PdAttributeGroupDaoImpl.cs" />
+    <Compile Include="Product\PdBrandDaoImpl.cs" />
+    <Compile Include="Product\PdCategoryDaoImpl.cs" />
+    <Compile Include="Product\PdPriceDaoImpl.cs" />
+    <Compile Include="Product\PdPriceHistoryDaoImpl.cs" />
+    <Compile Include="Product\PdProductCollocationDaoImpl.cs" />
+    <Compile Include="Product\PdProductDaoImpl.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Sys\SyJobDispatcherImpl.cs" />
+    <Compile Include="Sys\SyMenuDaoImpl.cs" />
+    <Compile Include="Sys\SyPermissionDaoImpl.cs" />
+    <Compile Include="Sys\SyPrivilegeDaoImpl.cs" />
+    <Compile Include="Warehouse\FnInvoiceDaoImpl.cs" />
+    <Compile Include="Warehouse\WhInventoryOutDaoImpl.cs" />
+    <Compile Include="Warehouse\WhInventoryAlarmDaoImpl.cs" />
+    <Compile Include="Warehouse\WhInventoryDaoImpl.cs" />
+    <Compile Include="Warehouse\WhProductWarehousePositionAssociationDaoImpl.cs" />
+    <Compile Include="Warehouse\WhWarehouseChangeLogDaoImpl.cs" />
+    <Compile Include="Warehouse\WhWarehousePositionDaoImpl.cs" />
+    <Compile Include="Warehouse\PdProductStockInDaoImpl.cs" />
+    <Compile Include="Warehouse\PdProductStockInDetailDaoImpl.cs" />
+    <Compile Include="Warehouse\PdProductStockDaoImpl.cs" />
+    <Compile Include="Warehouse\ProductLendDaoImpl.cs" />
+    <Compile Include="Warehouse\TransferCargoConfigDaoImpl.cs" />
+    <Compile Include="Warehouse\TransferCargoDaoImpl.cs" />
+    <Compile Include="Warehouse\WhWarehouseDaoImpl.cs" />
+    <Compile Include="Basic\ProductDaoImpl.cs" />
+    <Compile Include="Core\DataProvider.cs" />
+    <Compile Include="CRM\CrCustomerDaoImpl.cs" />
+    <Compile Include="Logistics\LgSettlementDaoImpl.cs" />
+    <Compile Include="Logistics\LgDeliveryUserCreditDaoImpl.cs" />
+    <Compile Include="Logistics\LgDeliveryDaoImpl.cs" />
+    <Compile Include="Logistics\LgDeliveryUserLocationDaoImpl.cs" />
+    <Compile Include="Logistics\LgDeliveryTypeDaoImpl.cs" />
+    <Compile Include="Order\SoOrderDaoImpl.cs" />
+    <Compile Include="Order\SoReceiveAddressDaoImpl.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sys\SyUserDaoImpl.cs" />
+    <Compile Include="Sys\SystemUserWarehouseImpl.cs" />
+    <Compile Include="TestImpl.cs" />
+    <Compile Include="Warehouse\InStockDaoImpl.cs" />
+    <Compile Include="Warehouse\OutStockDaoImpl.cs" />
+    <Compile Include="Warehouse\WhWarehouseAreaDaoImpl.cs" />
+    <Compile Include="Web\ComplaintDaoImpl.cs" />
+    <Compile Include="Web\CrAvailablePointLogDaoImpl.cs" />
+    <Compile Include="Web\CrComplaintReplyDaoImpl.cs" />
+    <Compile Include="Web\CrCustomerDaoImpl.cs" />
+    <Compile Include="Web\CrExperienceCoinLogDaoImpl.cs" />
+    <Compile Include="Web\CrExperiencePointLogDaoImpl.cs" />
+    <Compile Include="Web\CrLevelPointLogDaoImpl.cs" />
+    <Compile Include="Web\FeProductItemDaoImpl.cs" />
+    <Compile Include="Web\CrCustomerQuestionDaoImpl.cs" />
+    <Compile Include="Web\FeProductCommentDaoImpl.cs" />
+    <Compile Include="Web\FeSearchKeywordDaoImpl.cs" />
+    <Compile Include="Web\FeAdvertGroupDaoImpl.cs" />
+    <Compile Include="Web\FeCommentSupportDaoImpl.cs" />
+    <Compile Include="Web\MKNitagoDateBindDaoIml.cs" />
+    <Compile Include="Web\PdAttributeDaoImpl.cs" />
+    <Compile Include="Web\PdCategoryDaoImpl.cs" />
+    <Compile Include="Web\PdProductDaoImpl.cs" />
+    <Compile Include="Web\RMADaoImpl.cs" />
+    <Compile Include="Web\WhWarehouseDaoImpl.cs" />
+    <Compile Include="Web\SoOrderDaoImpl.cs" />
+    <Compile Include="Weixin\MkCustomizeMenuDaoImpl.cs" />
+    <Compile Include="Weixin\MkWeixinQuestionDaoImpl.cs" />
+    <Compile Include="YTO\TmsWayBillNotifyImpl.cs" />
+    <Compile Include="YTO\YTOGetParamImpl.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Hyt.DataAccess\Hyt.DataAccess.csproj">
+      <Project>{d3af6913-f96c-45e0-ad43-4fe1ef542da8}</Project>
+      <Name>Hyt.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{cb555155-5eeb-41fd-ae7b-48f80ded197c}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /V "$(TargetDir)$(TargetName).dll" "..\..\..\Hyt.UI\Hyt.Admin\Bin\"
+copy /V "$(TargetDir)$(TargetName).pdb" "..\..\..\Hyt.UI\Hyt.Admin\Bin\"
+copy /V "$(TargetDir)$(TargetName).dll" "..\..\..\Hyt.Service\Hyt.Service.Implement\bin\"
+copy /V "$(TargetDir)$(TargetName).pdb" "..\..\..\Hyt.Service\Hyt.Service.Implement\bin\"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

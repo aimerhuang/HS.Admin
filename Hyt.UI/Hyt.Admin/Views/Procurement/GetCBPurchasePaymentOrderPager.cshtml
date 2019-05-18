@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "GetCBPurchasePaymentOrderPager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>采购付款单列表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="left_tool">
+                        <button class="btn btn_blue btn_ht26 " id="createBtn" onclick="CreateProcurement()">
+
+                            <span class="m5_l">新增</span>
+                        </button>
+
+                        <button class="btn btn_blue btn_ht26 "  onclick="ExportExcelData()">
+                            
+                            <span class="m5_l">导出Excel</span>
+                        </button>
+                        </div>
+                </div>
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<iframe id="iframe_Path" src="" style="display:none;"></iframe>
+<script type="text/javascript">
+    function UpdateProcurement(sysNo)
+    {
+        window.location.href = "/Procurement/InsertOrUpdateFnPurchasePaymentOrder?SysNo=" + sysNo;
+    }
+    function CreateProcurement() {
+        window.location.href = "/Procurement/InsertOrUpdateFnPurchasePaymentOrder";
+    }
+    function doSearch(currentPage) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Procurement/GetCBPurchasePaymentOrderPager?r=" + Math.random(), "Search", function (p) {
+
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    function ShowProcuermentProductDetailList(_ProcurementSysNo) {
+        
+        var ProcurementSysNo = _ProcurementSysNo
+        $.ajax({
+            url: '/Procurement/GetProductDetaInfoList',
+            type: 'post',
+            async: false,
+            data: {
+                ProcurmentSysNo: ProcurementSysNo
+            },
+            dataType: 'json',
+            success: function (json) {
+                var table = "";
+                table += "<table style=\"width:450px;\">";
+                table += "<tr>";
+                table += "<th>商品名称</th>";
+                table += "<th>单位</th>";
+                table += "<th>规格</th>";
+                table += "<th>采购数量</th>";
+                table += "</tr>";
+                for (var i = 0; i < json.length; i++) {
+                    table += "<tr>";
+                    table += "<td>" + json[i].Cb_ProName + "</td>";
+                    table += "<td>" + json[i].Cb_Unit + "</td>";
+                    table += "<td>" + json[i].Cb_Spec + "</td>";
+                    table += "<td>" + json[i].Poi_ProQuity + "</td>";
+                    table += "</tr>";
+                }
+                table += "</table>";
+
+                art.dialog({ content: table })
+                //alert(json);
+            }
+        });
+    }
+    doSearch(1)
+    function ExportExcelData() {
+        $("#iframe_Path").attr("src", "/Procurement/ExportPurchaseOrder" )
+    }
+</script>

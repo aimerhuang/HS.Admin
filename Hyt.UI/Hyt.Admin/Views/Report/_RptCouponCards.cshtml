@@ -1,0 +1,50 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBRptCouponCard>
+@{
+    Model.OnBegin = "tableBegin";
+    }
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+        <thead>
+            <tr>
+                <th width="120">月份</th>
+                <th width="300">办事处</th>
+                <th>仓库</th>
+                <th width="140">新绑定优惠卡数量</th>
+                <th width="140">优惠金额合计</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                var i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBRptCouponCard>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    <td class="blue"><span class="p10_lr">@ViewBag.month</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.AreaName</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.WarehouseName</span></td>
+                    <td class="align_r"><span class="p10_lr">@item.TotalNumber</span></td>
+                    <td class="align_r"><span class="p10_lr red">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.TotalAmount, 2))</span></td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,304 @@
+﻿@model IList<Hyt.Model.LgDeliveryType>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "新增配送方式";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+}
+
+
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 10.5%" class="nameright border_rnone "><span class="v_star">*</span>父级配送</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                <select id="parentSysNo" name="parentSysNo" class="wd170">
+                                    <option value="0">无</option>
+                                    @foreach (var item in Model)
+                                    {
+                                        <option value="@item.SysNo">@item.DeliveryTypeName</option>
+                                    }
+                                </select>
+                                <span id="forparentSysNo" class="prompt m10_l">父级配送方式</span>
+                            </td>
+                            <td style="width: 10.5%" class="nameright border_rnone"><span class="v_star">*</span>名称</td>
+                            <td style="width: 39.5%">
+                                <input type="text" id="deliveryTypeName" maxlength="20" name="deliveryTypeName" class="wd156" value="" />
+                                <span id="fordeliveryTypeName" class="prompt m10_l">字数限制,1-20个字</span>
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>运费</td>
+                            <td class="border_right1">
+                                <input type="text" id="freight" name="freight" value="0" class="wd156">
+                                <span id="forfreight" class="prompt m10_l">范围限制,数字0-999999</span>
+                            </td>
+
+                            <td class="nameright border_rnone"><span class="v_star">*</span>显示顺序</td>
+                            <td>
+                                <input type="text" id="displayOrder" name="displayOrder" value="10" class="wd156">
+                                <span id="fordisplayOrder" class="prompt m10_l">范围限制,数字0-9999</span>
+                            </td>
+                        </tr>
+
+
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>配送级别</td>
+                            <td class="border_right1">
+                                <select id="deliveryLevel" name="deliveryLevel" class="wd170">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送响应优先级别)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="fordeliveryLevel" class="prompt m10_l">级别越高越先处理</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>第三方快递</td>
+                            <td>
+                                <select id="IsThirdPartyExpress" name="IsThirdPartyExpress" class="wd170">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.是否第三方快递)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forIsThirdPartyExpress" class="prompt m10_l">是否第三方快递</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>前台可见</td>
+                            <td class="border_right1">
+                                <select id="isOnlineVisible" name="isOnlineVisible" class="wd170">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式前台是否可见)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forisOnlineVisible" class="prompt m10_l">前台是否可见</span></td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                            <td>
+                                <select id="status" name="status" class="wd170">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式状态)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forstatus" class="prompt m10_l">配送方式状态</span>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">提供商</td>
+                            <td class="border_right1">
+                                <input type="text" id="provider" name="provider" maxlength="20" class="wd156">
+                                <span id="forprovider" class="prompt m10_l">字数限制,0-20个字</span>
+                            </td>
+                            <td class="nameright border_rnone">配送耗时</td>
+                            <td>
+                                <input type="text" id="deliveryTime" name="deliveryTime" maxlength="50" class="wd156">
+                                <span id="fordeliveryTime" class="prompt m10_l">字数限制,0-50个字</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>快递公司编号</td>
+                            <td>
+                                <input type="text" id="OverseaCarrier" name="OverseaCarrier" maxlength="200" class="wd156">
+                                <span id="forOverseaCarrier" class="prompt m10_l">快递公司编号,长度0-200</span>
+                            </td>
+                            <td class="nameright border_rnone">物流</td>
+                            <td>
+                                <select id="Logistics" name="Logistics" class="wd170">
+                                    <option value="-1">请选择</option>
+                                    @{
+                                        var larray = Enum.GetValues(typeof(Hyt.Model.CommonEnum.物流代码));
+                                        foreach (Hyt.Model.CommonEnum.物流代码 item in larray)
+                                        {
+                                            <option value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forLogistics" class="prompt m10_l">物流</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">描述</td>
+                            <td colspan="3">
+                                <input type="text" id="deliveryTypeDescription" name="deliveryTypeDescription" class="input_xxlarge input_w" maxlength="200">
+                                <span id="fordeliveryTypeDescription" class="prompt m10_l">字数限制,0-200个字</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone" valign="top">物流跟踪查询Url</td>
+                            <td colspan="3" style="border-left: none;">
+                                <textarea id="traceUrl" name="traceUrl" maxlength="200" style="width:530px"></textarea>
+                                <span id="fortraceUrl" class="prompt m10_l">字数限制,0-200个字</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //验证
+        $(function () {
+            $("#form1").validate({
+                rules: {
+                    //数字
+                    freight: {
+                        required: true,
+                        number: true,
+                        range: [0, 999999],
+                    },
+                    displayOrder: {
+                        required: true,
+                        number: true,
+                        range: [0, 9999]
+                    },
+                    // 选择框
+                    IsThirdPartyExpress: {
+                        required: true,
+                    },
+                    parentSysNo: {
+                        required: true,
+                    },
+                    isOnlineVisible: {
+                        required: true,
+                    },
+                    status: {
+                        required: true,
+                    },
+                    deliveryLevel: {
+                        required: true,
+                    },
+                    //文本
+                    provider: {
+                        maxlength: 20,
+                    },
+                    deliveryTime: {
+                        maxlength: 50,
+                    },
+                    deliveryTypeDescription: {
+                        maxlength: 200,
+                    },
+                    traceUrl: {
+                        // url: true,
+                        maxlength: 200,
+                    },
+                    deliveryTypeName: {
+                        required: true,
+                        remote: {
+                            url: '@Url.Action("IsCanAddDeliveryTypeName")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                deliveryTypeName: $("deliveryTypeName").val(),
+                            },
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#fordeliveryTypeName').text('字数限制,1-20个字');
+                                } else {
+                                    $('#fordeliveryTypeName').text('配送方式名称已存在');
+                                }
+                                return data;
+                            }
+                        }
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        (function () {
+            var opener = art.dialog.opener, // 父页面window对象
+                api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('新增配送方式')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function (win) {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定要增加吗？",
+                                    ok: function () {
+                                        var model = getModel();
+                                        $.ajax({
+                                            url: "@Url.Action("LgDeliveryTypeCreate")",
+                                            data: JSON.stringify(model),
+                                            contentType: 'application/json',
+                                            type: "post",
+                                            success: function (data) {
+                                                if (data.StatusCode == 0) {
+                                                    UI.Alert({ content: "新增配送方式失败" });
+                                                } else {
+                                                    UI.DialogOpener().ExecSuccess("新增配送方式成功");
+                                                    UI.Dialog.close();
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.Alert({ content: "操作出错！" });
+                                            }
+                                        });
+                                    }
+                                });
+
+
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '关闭'
+                    }
+                );
+            function getModel() {
+                var model = {};
+                model.ParentSysNo = $("#parentSysNo").val();
+                model.Status = $("#status").val();
+                model.DeliveryTypeName = $("#deliveryTypeName").val();
+                model.Freight = $("#freight").val();
+                model.DisplayOrder = $("#displayOrder").val();
+                model.DeliveryLevel = $("#deliveryLevel").val();
+                model.IsThirdPartyExpress = $("#IsThirdPartyExpress").val();
+                model.IsOnlineVisible = $("#isOnlineVisible").val();
+                model.Provider = $("#provider").val();
+                model.DeliveryTime = $("#deliveryTime").val();
+                model.DeliveryTypeDescription = $("#deliveryTypeDescription").val();
+                model.TraceUrl = $("#traceUrl").val();
+                model.OverseaCarrier = $("#OverseaCarrier").val();
+                model.Logistics = $("#Logistics").val();
+                return model;
+            }
+        })();
+    </script>
+}

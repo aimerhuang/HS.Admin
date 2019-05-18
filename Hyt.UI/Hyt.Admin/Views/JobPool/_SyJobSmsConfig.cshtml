@@ -1,0 +1,137 @@
+﻿@using Hyt.BLL.Order
+@using Hyt.BLL.Sys
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBSyJobPool>
+<div class="boxs_listtabel">
+    <table class="list_tit border_rnone border_bnone" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="50px">标识</th>
+                <th class="align_l p10_l">工作任务描述</th>
+                <th width="140px">优先级</th>
+                <th width="120px">任务对象类型</th>
+                <th width="100px">任务对象编号</th>
+                <th width="80px">任务执行人</th>
+                <th width="120px">上次处理时间</th>
+                <th width="120px">未处理时间</th>
+                <th width="120px">备注</th>
+                <th width="60px">状态</th>
+                <th width="120px">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+                foreach (var item in Model.TData)
+                {
+                    var className = "blue";
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    var lastDate = item.AssignDate;
+                    if (item.AssignDate.ToString("yyyy-MM-dd") == "0001-01-01")
+                    {
+                        lastDate = item.CreatedDate;
+                    }
+                    var time = DateTime.Now - lastDate;
+                    var pendingDate = (time.Days > 0 ? time.Days + "天" : "") + (time.Hours > 0 ? time.Hours + "小时" : "") + (time.Minutes > 0 ? time.Minutes + "分" : "");
+
+                <td>@Html.Raw(SoOrderBo.Instance.GetMallType(item.TaskSysNo, item.TaskType))</td>
+                <td class="blue align_l p10_l "><a href="javascript:void()" onclick='UI.OpenCreatTab("任务详情", "@item.JobUrl");'>@item.JobDescription</a></td>
+                <td class="@className"><a href="javascript:void()" onclick='showDiv(this,"@item.SysNo")'>@SyJobPoolPriorityBo.Instance.GetPriorityName(item.Priority)</a></td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.任务对象类型), item.TaskType)</td>
+                <td>@item.TaskSysNo</td>
+                <td>@item.ExecutorSysName</td>
+                <td>@lastDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@pendingDate</td>
+                <td class="align_l p10_l ">@item.Remarks</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.任务池状态), item.Status)</td>
+                <td>
+                    @if (item.Status == (int)SystemStatus.任务池状态.待分配)
+                    {
+                        <button class="btn btn_blue btn_ht26" onclick="assign('@item.SysNo','@item.TaskType');return false; "><span class="icon icon_plus icon_white"></span><span class="m5_l">分配任务</span></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_blue btn_ht26" onclick="release('@item.SysNo');return false; "><span class="icon icon_repeat icon_white"></span><span class="m5_l">收回分配</span></button>
+                    }
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+<div style="z-index: 9; background-color: White; position: absolute;display: none; border: #ddd solid 1px; line-height: 22px; padding:5px 10px; top: -10px;" id="divPriority">
+    <ul>
+        @{
+            var list = SyJobPoolPriorityBo.Instance.SelectAll();
+            foreach (SyJobPoolPriority item in list)
+            {
+                @:
+                <li><a id="@item.Priority">@item.PriorityDescription<span>(@item.Priority)</span></a></li>
+            }
+        }
+    </ul>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    var jobObj;
+    var jobSysNo;
+    //显示菜单
+    function showDiv(obj, sysNo) {
+        jobObj = obj;
+        jobSysNo = sysNo;
+        $("#divPriority").find("li").find("a").each(function () {
+            $(this).unbind("click");
+            $(this).click(function () {
+                updatePriority($(this).attr("id"), $(this).text());
+            });
+        });
+        $("#divPriority").css("display", "inline");
+        var offset = $(obj).parent().position();
+        $("#divPriority").css("top", offset.top + 25);
+        $("#divPriority").css("left", offset.left + 20);
+        $("#divPriority").one("mouseleave", function () {
+            hidDiv();
+        });
+    };
+
+    //修改优先级
+    function updatePriority(priority, priorityName) {
+        var obj = jobObj;
+        var sysNo = jobSysNo;
+        if (obj != null && sysNo > 0 && priority >= 0) {
+            $.ajax({
+                type: "POST",
+                url: "/JobPool/ChangePriority",
+                cache: false,
+                data: "sysNo=" + sysNo + "&priority=" + priority,
+                success: function (ret) {
+                    //当开关为关时
+                    if (ret.Status) {
+                        $(obj).text(priorityName);
+                        hidDiv();
+                    } else {
+                        UI.Alert({ content: ret.Message != '' ? ret.Message : '未知错误，请联系管理员' });
+                    }
+                }
+            });
+        }
+    }
+    //隐藏优先级下拉列表
+    function hidDiv() {
+        $("#divPriority").hide();
+    }
+
+</script>
+

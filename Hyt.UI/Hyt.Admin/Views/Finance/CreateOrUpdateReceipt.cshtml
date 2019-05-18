@@ -1,0 +1,103 @@
+﻿
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.FnReceiptTitleAssociation
+
+@{
+    ViewBag.Title = "CreateOrUpdateReceipt";
+}
+@section FooterJs
+{
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            
+            //required field
+            $('tr td:even').each(function () {
+
+                $(this).html('<span class="v_star">*</span>' + $(this).text());
+            });
+            //end req
+
+            //#region 初始化--选择仓库--文本框事件
+            $("#WarehouseSysNo").click(function () {
+                var self = this;
+
+                var obj = DAO.SelectWhareHouseDialog({
+                    chkStyle: 'radio',
+                    //chkStyle: 'checkbox',
+                    callBack: function (data) {
+                        if (data[0]) {
+                            //选择完成后，将选中的仓库添加到文本框中
+                            $(self).val(data[0].name).attr("sysno", data[0].id);
+                        }
+                        //移除弹出层
+                        //obj.Remove();
+                    }
+                });
+            });
+            //#endregion
+        });
+
+    </script>
+}
+
+<div class="caseout">
+    <form id="formDialogOpen" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        @*                        <tr>
+                            <td style="width: 20%" class="nameright border_rnone">状态</td>
+                            <td style="width: 80%" class="border_right">
+                                @Html.DropDownListFor(m=>m.Status,ViewBag.lstStatus as List<SelectListItem>)
+                               
+                            </td>
+                           
+                        </tr>*@
+                        <tr>
+                            <td style="width: 20%" class="nameright border_rnone">科目代码</td>
+                            <td style="width: 80%" class="border_right">
+                                @Html.TextBoxFor(m => m.EasReceiptCode)
+                                <span id="forEasReceiptCode" class="prompt m10_l">请输入科目代码</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">科目名称</td>
+                            <td class="border_right">
+                                @Html.TextBoxFor(m => m.EasReceiptName)
+                                <span id="forEasReceiptName" class="prompt m10_l">请输入科目名称</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">仓库</td>
+                            <td class="border_right">
+                                @Html.TextBox("WarehouseSysNo","",new{@class="disabled"})
+                                <span id="forWarehouseSysNo" class="prompt m10_l">请选择仓库</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">支付方式类型</td>
+                            <td class="border_right">
+                                @Html.DropDownListFor(m => m.PaymentTypeSysNo, ViewBag.lstTitleType as List<SelectListItem>)
+                                <span id="forPaymentTypeSysNo" class="prompt m10_l">请选择支付方式</span>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td class="nameright border_rnone">是否默认收款科目</td>
+                            <td class="border_right">
+                                @Html.DropDownListFor(m => m.IsDefault, ViewBag.lstStatus as List<SelectListItem>)
+                                <span id="forIsDefault" class="prompt m10_l">请选择是否默认项</span>
+                            </td>
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </form>
+
+</div>

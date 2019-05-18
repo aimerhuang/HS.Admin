@@ -1,0 +1,2086 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{21DBD005-0F6F-4DC1-A4E2-0D28FBB5BDAA}</ProjectGuid>
+    <ProjectTypeGuids>{E3E379DF-F4C6-4180-9B81-6769533ABE47};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.Admin</RootNamespace>
+    <AssemblyName>Hyt.Admin</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <MvcBuildViews>false</MvcBuildViews>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <TargetFrameworkProfile />
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <PrecompileBeforePublish>true</PrecompileBeforePublish>
+    <PackageAsSingleFile>true</PackageAsSingleFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AopSdk, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\x86\AliF2F\AopSdk.dll</HintPath>
+    </Reference>
+    <Reference Include="F2FPayDll">
+      <HintPath>..\..\lib\x86\AliF2F\F2FPayDll.dll</HintPath>
+    </Reference>
+    <Reference Include="Game.Utils, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\x86\Game.Utils.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.EAI.SSO.Core">
+      <HintPath>..\..\lib\soa\Grand.EAI.SSO.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Framework.Service">
+      <HintPath>..\..\lib\soa\Grand.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Framework.Utility">
+      <HintPath>..\..\lib\soa\Grand.Framework.Utility.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Api.Contract">
+      <HintPath>..\..\lib\soa\Grand.Platform.Api.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Platform.Express.Contract">
+      <HintPath>..\..\lib\soa\Grand.Platform.Express.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Service.EC.Core.SMS.Contract, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\soa\Grand.Service.EC.Core.SMS.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="Grand.Service.Share.SSO.Contract">
+      <HintPath>..\..\lib\soa\Grand.Service.Share.SSO.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython, Version=2.7.0.40, Culture=neutral, PublicKeyToken=7f709c5b713576e1, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\x86\IronPython.dll</HintPath>
+    </Reference>
+    <Reference Include="LitJSON">
+      <HintPath>..\..\lib\x86\LitJSON.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.JScript" />
+    <Reference Include="MiniProfiler">
+      <HintPath>..\..\packages\MiniProfiler.2.1.0\lib\net40\MiniProfiler.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\x86\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Framework.AppSdk">
+      <HintPath>..\..\lib\soa\Pisen.Framework.AppSdk.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Framework.Service">
+      <HintPath>..\..\lib\soa\Pisen.Framework.Service.dll</HintPath>
+    </Reference>
+    <Reference Include="Pisen.Service.Share.SSO.Contract, Version=1.0.5401.20919, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\soa\Pisen.Service.Share.SSO.Contract.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.4.0.20710.0\lib\net40\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Net.Http.2.0.20710.0\lib\net40\System.Net.Http.WebRequest.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Core.4.0.20710.0\lib\net40\System.Web.Http.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.WebHost.4.0.20710.0\lib\net40\System.Web.Http.WebHost.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.20710.0\lib\net40\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.20710.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="ThoughtWorks.QRCode, Version=1.0.3990.25764, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\ThoughtWorks.QRCode.dll</HintPath>
+    </Reference>
+    <Reference Include="WebActivator">
+      <HintPath>..\..\packages\WebActivator.1.4.4\lib\net40\WebActivator.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Code\BaseController.cs" />
+    <Content Include="App_Code\JsonHelper.cs" />
+    <Content Include="App_Code\JsonHelperMy.cs" />
+    <Compile Include="App_Start\MiniProfiler.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Content Include="App_Code\PrivilegeControlHelper.cs" />
+    <Compile Include="App_Code\PrivilegeAttribute.cs" />
+    <Compile Include="Controllers\AjaxController.cs" />
+    <Compile Include="Controllers\ApiController.cs" />
+    <Compile Include="Controllers\AppContentController.cs" />
+    <Compile Include="Controllers\BasicController.cs" />
+    <Compile Include="Controllers\BootstrapController.cs" />
+    <Compile Include="Controllers\CallCenterController.cs" />
+    <Compile Include="Controllers\DistributionController.cs" />
+    <Compile Include="Controllers\DsPosManageController.cs" />
+    <Compile Include="Controllers\FrontController.cs" />
+    <Compile Include="Controllers\HelperController.cs" />
+    <Compile Include="Controllers\IcpController.cs" />
+    <Compile Include="Controllers\InventorySheetController.cs" />
+    <Compile Include="Controllers\KisController.cs" />
+    <Compile Include="Controllers\ModuleController.cs" />
+    <Compile Include="Controllers\OrderResultController.cs" />
+    <Compile Include="Controllers\PageTestController.cs" />
+    <Compile Include="Controllers\PrintController.cs" />
+    <Compile Include="Controllers\ProcurementController.cs" />
+    <Compile Include="Controllers\ProductRecordController.cs" />
+    <Compile Include="Controllers\PurchaseController.cs" />
+    <Compile Include="Controllers\ReportController.cs" />
+    <Compile Include="Controllers\ScavengingPaymentController.cs" />
+    <Compile Include="Controllers\SellBusinessController.cs" />
+    <Compile Include="Controllers\SharedController.cs" />
+    <Compile Include="Controllers\StoresController.cs" />
+    <Compile Include="Controllers\SysController.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Controllers\TaskController.cs" />
+    <Compile Include="Controllers\TestController.cs" />
+    <Compile Include="Controllers\UnionController.cs" />
+    <Compile Include="Models\BatchCreateLgDeliveryMdl.cs" />
+    <Compile Include="Models\HtmlOption.cs" />
+    <Compile Include="Models\MyResult.cs" />
+    <Compile Include="Models\Nitaga.cs" />
+    <Compile Include="Models\MenuIcon.cs" />
+    <Compile Include="Models\OrderComplex.cs" />
+    <Compile Include="Models\PageTest.cs" />
+    <Compile Include="Models\NitagaPostOrderState.cs" />
+    <Compile Include="Models\ProductStockTemplate.cs" />
+    <Compile Include="Models\ProductStockTemplateSn.cs" />
+    <Compile Include="Models\ProductStockTemplateSnDate.cs" />
+    <Compile Include="Models\ReturnEdit.cs" />
+    <Compile Include="Models\ReturnOther.cs" />
+    <Compile Include="Models\ReturnView.cs" />
+    <Compile Include="upload.ashx.cs">
+      <DependentUpon>upload.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="App_Code\CustomActionFilterAttribute.cs" />
+    <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\JobPoolController.cs" />
+    <Compile Include="Controllers\CRMController.cs" />
+    <Compile Include="Controllers\FinanceController.cs" />
+    <Compile Include="Controllers\LogisticsController.cs" />
+    <Compile Include="Controllers\MainController.cs" />
+    <Compile Include="Controllers\OrderController.cs" />
+    <Compile Include="Controllers\ProductController.cs" />
+    <Compile Include="Controllers\PromotionController.cs" />
+    <Compile Include="Controllers\RMAController.cs" />
+    <Compile Include="Controllers\SecurityController.cs" />
+    <Compile Include="Controllers\WarehouseController.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Content Include="Download.html" />
+    <Content Include="Download\app\version.js" />
+    <Content Include="Download\css\base.css" />
+    <Content Include="Download\css\common.css" />
+    <Content Include="Download\FontImages\success.png" />
+    <Content Include="Download\FontImages\fail.png" />
+    <Content Include="Download\html\index.html" />
+    <Content Include="Download\images\backbg1.png" />
+    <Content Include="Download\images\backbg2.png" />
+    <Content Include="Download\images\line01.png" />
+    <Content Include="Download\images\logo.png" />
+    <Content Include="Download\images\pic01.png" />
+    <Content Include="Download\images\pic02.png" />
+    <Content Include="Download\images\tagbg.png" />
+    <Content Include="Download\js\html5.js" />
+    <Content Include="Download\js\jquery.min.js" />
+    <Content Include="Download\reportfile\readme.txt" />
+    <Content Include="index.html" />
+    <Content Include="MailTemplates\MailArriveNoticeTemplet.htm" />
+    <Content Include="MailTemplates\MailDepreciateNoticeTemplet.htm" />
+    <Content Include="MailTemplates\MailRMAAbandonTemplet.htm" />
+    <Content Include="MailTemplates\MailRMAAuditedTemplet.htm" />
+    <Content Include="MailTemplates\MailRMAExChangeTemplet.htm" />
+    <Content Include="MailTemplates\MailRMARefundTemplet.htm" />
+    <Content Include="MailTemplates\MailSODeliveryOneselfTemplet.htm" />
+    <Content Include="MailTemplates\MailSODeliveryTemplet.htm" />
+    <Content Include="MailTemplates\MailSOTakeOneselfTemplet.htm" />
+    <Content Include="MailTemplates\MailUpGradeSucceedTemplet.htm" />
+    <Content Include="Print\install_lodop64.exe" />
+    <Content Include="Print\Lodop6.204\CLodopPrint_Setup_for_Win32NT.exe" />
+    <Content Include="Print\Lodop6.204\install_lodop32.exe" />
+    <Content Include="Print\Lodop6.204\install_lodop64.exe" />
+    <Content Include="Print\Lodop6.204\LodopFuncs.js" />
+    <Content Include="Print\Lodop6.204\PrintSampIndex.html" />
+    <Content Include="Print\Lodop6.204\PrintSample1.html" />
+    <Content Include="Print\Lodop6.204\PrintSample10.css" />
+    <Content Include="Print\Lodop6.204\PrintSample10.html" />
+    <Content Include="Print\Lodop6.204\PrintSample10.js" />
+    <Content Include="Print\Lodop6.204\PrintSample11.html" />
+    <Content Include="Print\Lodop6.204\PrintSample12.html" />
+    <Content Include="Print\Lodop6.204\PrintSample13.html" />
+    <Content Include="Print\Lodop6.204\PrintSample14.html" />
+    <Content Include="Print\Lodop6.204\PrintSample15.html" />
+    <Content Include="Print\Lodop6.204\PrintSample16.html" />
+    <Content Include="Print\Lodop6.204\PrintSample17.html" />
+    <Content Include="Print\Lodop6.204\PrintSample18.html" />
+    <Content Include="Print\Lodop6.204\PrintSample19.html" />
+    <Content Include="Print\Lodop6.204\PrintSample2.html" />
+    <Content Include="Print\Lodop6.204\PrintSample20.html" />
+    <Content Include="Print\Lodop6.204\PrintSample21.html" />
+    <Content Include="Print\Lodop6.204\PrintSample22.html" />
+    <Content Include="Print\Lodop6.204\PrintSample23.html" />
+    <Content Include="Print\Lodop6.204\PrintSample24.html" />
+    <Content Include="Print\Lodop6.204\PrintSample25.html" />
+    <Content Include="Print\Lodop6.204\PrintSample26.html" />
+    <Content Include="Print\Lodop6.204\PrintSample27.html" />
+    <Content Include="Print\Lodop6.204\PrintSample28.html" />
+    <Content Include="Print\Lodop6.204\PrintSample29.html" />
+    <Content Include="Print\Lodop6.204\PrintSample3.html" />
+    <Content Include="Print\Lodop6.204\PrintSample30.html" />
+    <Content Include="Print\Lodop6.204\PrintSample31.html" />
+    <Content Include="Print\Lodop6.204\PrintSample32.html" />
+    <Content Include="Print\Lodop6.204\PrintSample33.html" />
+    <Content Include="Print\Lodop6.204\PrintSample34.html" />
+    <Content Include="Print\Lodop6.204\PrintSample35.html" />
+    <Content Include="Print\Lodop6.204\PrintSample36.html" />
+    <Content Include="Print\Lodop6.204\PrintSample37.html" />
+    <Content Include="Print\Lodop6.204\PrintSample38.html" />
+    <Content Include="Print\Lodop6.204\PrintSample39.html" />
+    <Content Include="Print\Lodop6.204\PrintSample4.html" />
+    <Content Include="Print\Lodop6.204\PrintSample40.html" />
+    <Content Include="Print\Lodop6.204\PrintSample41.html" />
+    <Content Include="Print\Lodop6.204\PrintSample42.html" />
+    <Content Include="Print\Lodop6.204\PrintSample43.html" />
+    <Content Include="Print\Lodop6.204\PrintSample44.html" />
+    <Content Include="Print\Lodop6.204\PrintSample45.html" />
+    <Content Include="Print\Lodop6.204\PrintSample46.html" />
+    <Content Include="Print\Lodop6.204\PrintSample47.html" />
+    <Content Include="Print\Lodop6.204\PrintSample48.html" />
+    <Content Include="Print\Lodop6.204\PrintSample49.html" />
+    <Content Include="Print\Lodop6.204\PrintSample5.html" />
+    <Content Include="Print\Lodop6.204\PrintSample50.html" />
+    <Content Include="Print\Lodop6.204\PrintSample6.html" />
+    <Content Include="Print\Lodop6.204\PrintSample7.html" />
+    <Content Include="Print\Lodop6.204\PrintSample8.html" />
+    <Content Include="Print\Lodop6.204\PrintSample9.html" />
+    <Content Include="Theme\bootstrap\css\bootstrap-theme.css" />
+    <Content Include="Theme\bootstrap\css\bootstrap-theme.min.css" />
+    <Content Include="Theme\bootstrap\css\bootstrap.css" />
+    <Content Include="Theme\bootstrap\css\bootstrap.min.css" />
+    <Content Include="Theme\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Theme\bootstrap\js\bootstrap.js" />
+    <Content Include="Theme\bootstrap\js\bootstrap.min.js" />
+    <Content Include="Theme\bootstrap\js\npm.js" />
+    <Content Include="Theme\css\shCoreDefault.css" />
+    <Content Include="Theme\images\addpic.png" />
+    <Content Include="Theme\images\appbg1.jpg" />
+    <Content Include="Theme\images\appbg1.png" />
+    <Content Include="Theme\images\appbtn01_1.png" />
+    <Content Include="Theme\images\appbtn01_2.png" />
+    <Content Include="Theme\images\appbtn02_1.png" />
+    <Content Include="Theme\images\appbtn02_2.png" />
+    <Content Include="Theme\images\appdown.png" />
+    <Content Include="Theme\images\appdown_1.png" />
+    <Content Include="Theme\images\appdown_2.png" />
+    <Content Include="Theme\images\appmoble.png" />
+    <Content Include="Theme\images\appmoble2.png" />
+    <Content Include="Theme\images\apppic01.png" />
+    <Content Include="Theme\images\apppic02.jpg" />
+    <Content Include="Theme\images\apppic02.png" />
+    <Content Include="Theme\images\apppic03.jpg" />
+    <Content Include="Theme\images\apppic03.png" />
+    <Content Include="Theme\images\apppic04.jpg" />
+    <Content Include="Theme\images\apppic04.png" />
+    <Content Include="Theme\images\apppic05.png" />
+    <Content Include="Theme\images\apppic06.png" />
+    <Content Include="Theme\images\appsign.png" />
+    <Content Include="Theme\images\arrow_l.png" />
+    <Content Include="Theme\images\arrow_r.png" />
+    <Content Include="Theme\images\btn_add.png" />
+    <Content Include="Theme\images\defaultdata.png" />
+    <Content Include="Theme\images\defaulticon.png" />
+    <Content Include="Theme\images\delivery01.png" />
+    <Content Include="Theme\images\delivery02.png" />
+    <Content Include="Theme\images\file_picture_18px.png" />
+    <Content Include="Theme\images\headtop.png" />
+    <Content Include="Theme\images\help-logo.png" />
+    <Content Include="Theme\images\help01.jpg" />
+    <Content Include="Theme\images\helpbg1.png" />
+    <Content Include="Theme\images\icons\alibaba.png" />
+    <Content Include="Theme\images\icons\amazon.png" />
+    <Content Include="Theme\images\icons\baidu.png" />
+    <Content Include="Theme\images\icons\biaozhi.png" />
+    <Content Include="Theme\images\icons\biaozhi01.png" />
+    <Content Include="Theme\images\icons\biaozhi02.png" />
+    <Content Include="Theme\images\icons\dangdang.png" />
+    <Content Include="Theme\images\icons\jd.png" />
+    <Content Include="Theme\images\icons\operate.png" />
+    <Content Include="Theme\images\icons\paipai.png" />
+    <Content Include="Theme\images\icons\suningyigou.png" />
+    <Content Include="Theme\images\icons\taobao.png" />
+    <Content Include="Theme\images\icons\TB1500kKFXXXXcQXVXX6sGuHVXX-458-458.png" />
+    <Content Include="Theme\images\icons\tmall.png" />
+    <Content Include="Theme\images\icons\tmallnoup.png" />
+    <Content Include="Theme\images\icons\user.png" />
+    <Content Include="Theme\images\icons\user_add.png" />
+    <Content Include="Theme\images\icons\user_delete.png" />
+    <Content Include="Theme\images\icons\user_green.png" />
+    <Content Include="Theme\images\icons\Warehouse1.png" />
+    <Content Include="Theme\images\icons\yhd.png" />
+    <Content Include="Theme\images\login_bg2.jpg" />
+    <Content Include="Theme\images\login_wx.jpg" />
+    <Content Include="Theme\images\login_wxb.jpg" />
+    <Content Include="Theme\images\mapoverlay1.png" />
+    <Content Include="Theme\images\mapoverlay2.png" />
+    <Content Include="Theme\images\mapoverlay3.png" />
+    <Content Include="Theme\images\pg1.png" />
+    <Content Include="Theme\images\pg2.png" />
+    <Content Include="Theme\images\pg3.png" />
+    <Content Include="Theme\images\pic_background.png" />
+    <Content Include="Theme\images\pic_cover.png" />
+    <Content Include="Theme\images\pic_default.png" />
+    <Content Include="Theme\images\pic_upload.png" />
+    <Content Include="Theme\images\select_docs.png" />
+    <Content Include="Theme\images\sign01.png" />
+    <Content Include="Theme\images\tips_iconrow.png" />
+    <Content Include="Theme\images\wx_arrow01.png" />
+    <Content Include="Theme\images\wx_arrow02.png" />
+    <Content Include="Theme\Plugins\json-viewer\jquery.json-viewer.css" />
+    <Content Include="Theme\Plugins\json-viewer\jquery.json-viewer.js" />
+    <Content Include="Theme\Plugins\select2\select2.css" />
+    <Content Include="Theme\Plugins\select2\select2.js" />
+    <Content Include="Theme\Plugins\select2\select2_locale_zh-CN.js" />
+    <Content Include="Theme\scripts\highcharts.js" />
+    <Content Include="Theme\scripts\jquery-1.10.2.min.js" />
+    <Content Include="Theme\scripts\jquery.unobtrusive-ajax.js" />
+    <Content Include="Theme\scripts\layer\layer.js" />
+    <Content Include="Theme\scripts\layer\mobile\layer.js" />
+    <Content Include="Theme\scripts\layer\mobile\need\layer.css" />
+    <Content Include="Theme\scripts\layer\skin\default\icon-ext.png" />
+    <Content Include="Theme\scripts\layer\skin\default\icon.png" />
+    <Content Include="Theme\scripts\layer\skin\default\layer.css" />
+    <Content Include="Theme\scripts\layer\skin\default\loading-0.gif" />
+    <Content Include="Theme\scripts\layer\skin\default\loading-1.gif" />
+    <Content Include="Theme\scripts\layer\skin\default\loading-2.gif" />
+    <Content Include="Theme\scripts\Logistics.js" />
+    <Content Include="Theme\scripts\moving.min.js">
+      <DependentUpon>moving.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\moving.yui.js" />
+    <Content Include="Theme\scripts\secmenu.js" />
+    <Content Include="Theme\scripts\shBrushJScript.js" />
+    <Content Include="Theme\scripts\shCore.js" />
+    <Content Include="Theme\scripts\showpic.js" />
+    <Content Include="Theme\scripts\underscore.js" />
+    <Content Include="Theme\scripts\UtilLike.js" />
+    <Content Include="Views\Distribution\DsDealer.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Distribution\DsDealerAdd.cshtml" />
+    <Content Include="Views\Distribution\DsDealerLevel.cshtml" />
+    <Content Include="Views\Distribution\DsDealerLevelAdd.cshtml" />
+    <Content Include="Views\Distribution\DsDealerLevelUpdate.cshtml" />
+    <Content Include="Views\Distribution\DsDealerUpdate.cshtml" />
+    <Content Include="Views\Distribution\DsDealerView.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Distribution\DsMallType.cshtml" />
+    <Content Include="Views\Distribution\DsMallTypeAdd.cshtml" />
+    <Content Include="Views\Distribution\DsMallTypeUpdate.cshtml" />
+    <Content Include="Views\Distribution\DsSpecialPriceAdd.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Distribution\_AjaxListDsMallType.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsDealer.cshtml" />
+    <Content Include="Views\Promotion\Coupon.cshtml" />
+    <Content Include="Theme\Plugins\Upload\file_manager_json.ashx" />
+    <Content Include="Theme\Plugins\Upload\upload_json.ashx" />
+    <Content Include="Views\CRM\FeedbackManage.cshtml" />
+    <Content Include="Views\CRM\_FeedbackList.cshtml" />
+    <Content Include="Views\AppContent\VersionManagement.cshtml" />
+    <Content Include="Views\AppContent\ProductBrowseHistory.cshtml" />
+    <Content Include="Views\AppContent\pAjaxPager_ProBrowseHis.cshtml" />
+    <Content Include="Views\Distribution\DsSpecialPrice.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsSpecialPriceList.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsSpecialPricePoductList.cshtml" />
+    <Content Include="Views\Distribution\DsSpecialPriceProductSearch.cshtml" />
+    <Content Include="Views\Basic\PaymentTypeManage.cshtml" />
+    <Content Include="Views\Basic\_AjaxPagerPaymentTypeList.cshtml" />
+    <Content Include="Views\Basic\PaymentTypeCreate.cshtml" />
+    <Content Include="Views\Basic\PaymentTypeEdit.cshtml" />
+    <Content Include="Views\Basic\PaymentTypeDetail.cshtml" />
+    <Content Include="Views\Distribution\_SelectDsDealer.cshtml" />
+    <Content Include="Views\Distribution\_SelectDsDealerPager.cshtml" />
+    <Content Include="Views\AppContent\pAjaxPager_AppVersion.cshtml" />
+    <Content Include="Views\AppContent\CreateOrUpdateVersion.cshtml" />
+    <Content Include="Views\Distribution\DealerList.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDealerList.cshtml" />
+    <Content Include="Views\Distribution\Prepaid.cshtml" />
+    <Content Include="Views\Distribution\Withdraw.cshtml" />
+    <Content Include="Views\Distribution\HistoricalDetail.cshtml" />
+    <Content Include="Views\Distribution\_AjaxDsLevelPriceList.cshtml" />
+    <Content Include="Views\Distribution\DsLevelPrice.cshtml" />
+    <Content Include="Views\Distribution\DsLevelPriceMulChange.cshtml" />
+    <Content Include="Views\Print\DsDelivery.cshtml" />
+    <Content Include="Views\Print\DsSettlement.cshtml" />
+    <Content Include="Views\Print\DsPicking.cshtml" />
+    <Content Include="Views\Main\_FrontUser.cshtml" />
+    <Content Include="Views\Main\Default.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerHistoricalItemList.cshtml" />
+    <Content Include="Views\Distribution\DsLevelPriceSingleChange.cshtml" />
+    <Content Include="Views\Distribution\ProductPriceHistoryAudit.cshtml" />
+    <Content Include="Views\Distribution\ProductPriceHistory.cshtml" />
+    <Content Include="Views\Distribution\_AjaxProductPriceHistory.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsDealerMall.cshtml" />
+    <Content Include="Views\Distribution\DsDealerMall.cshtml" />
+    <Content Include="Views\Distribution\DsDealerMallAdd.cshtml" />
+    <Content Include="Views\Distribution\DsDealerMallUpdate.cshtml" />
+    <Content Include="Views\Order\ShoppingCartHtml.cshtml" />
+    <Content Include="Views\Product\_SelectPromotionProduct.cshtml" />
+    <Content Include="Views\Main\_FinanceOrderStatistics.cshtml" />
+    <Content Include="Views\Main\_WarehouseOrderStatistics.cshtml" />
+    <Content Include="Views\Main\_CustomerManagerOrderStatistics.cshtml" />
+    <Content Include="Views\Main\_StoreOrderStatistics.cshtml" />
+    <Content Include="Views\Main\_CustomServiceOrderStatistics.cshtml" />
+    <Content Include="Views\Main\_OperationsOrderStatistics.cshtml" />
+    <Content Include="Views\Main\_FinanceList.cshtml" />
+    <Content Include="Views\Main\_WarehouseList.cshtml" />
+    <Content Include="Views\Main\_CustomerManagerList.cshtml" />
+    <Content Include="Views\Main\_StoreList.cshtml" />
+    <Content Include="Views\Main\_CustomServiceList.cshtml" />
+    <Content Include="Views\Main\_OperationsList.cshtml" />
+    <Content Include="Views\Main\_OperationsCharts.cshtml" />
+    <Content Include="Views\Main\_FinanceCharts.cshtml" />
+    <Content Include="Views\Product\_AjaxProductPromotionSelectorPager.cshtml" />
+    <Content Include="Views\PageTest\Cart1.cshtml" />
+    <Content Include="Views\PageTest\Cart2.cshtml" />
+    <Content Include="Views\Order\CartHtmlForEditOrder.cshtml" />
+    <Content Include="Views\Main\_SyMessages.cshtml" />
+    <Content Include="Views\Main\_CompanyPost.cshtml" />
+    <Content Include="Views\Main\Announcement.cshtml" />
+    <Content Include="Views\JobPool\JobDispatcherSelector.cshtml" />
+    <Content Include="Views\Basic\OrganizationManage.cshtml" />
+    <Content Include="Views\Basic\OrganizationCreate.cshtml" />
+    <Content Include="Views\Basic\OrganizationEdit.cshtml" />
+    <Content Include="Views\Basic\_AjaxPagerOrganizationItemList.cshtml" />
+    <Content Include="Views\Finance\ReceiptManagement.cshtml" />
+    <Content Include="Views\Finance\pAjaxPager_Receipt.cshtml" />
+    <Content Include="Views\JobPool\_JobDispatcherSelector.cshtml" />
+    <Content Include="Views\Basic\OrganizationDetail.cshtml" />
+    <Content Include="Views\Account\FindUserPassword.cshtml" />
+    <Content Include="Views\Product\_AjaxPopProductPriceInfo.cshtml" />
+    <Content Include="Views\Finance\CreateOrUpdateReceipt.cshtml" />
+    <Content Include="Views\CRM\CreateCustomer.cshtml" />
+    <Content Include="Views\Basic\_AjaxPagerBsCodeList.cshtml" />
+    <Content Include="Views\Basic\BsCode.cshtml" />
+    <Content Include="Views\Finance\ImportExcel.cshtml" />
+    <Content Include="Views\Basic\_BsSelectText.cshtml" />
+    <Content Include="Views\Basic\_BsSelectTextPager.cshtml" />
+    <Content Include="Views\Basic\BsCodeCreate.cshtml" />
+    <Content Include="Views\JobPool\MyJob.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Distribution\DealerEas.cshtml" />
+    <Content Include="Views\Distribution\DealerEasDetail.cshtml" />
+    <Content Include="Views\Distribution\_DealerEasPager.cshtml" />
+    <Content Include="Views\Product\_AjaxProductPromotionSelectorForPager.cshtml" />
+    <Content Include="Views\Basic\bsPhyApp.cshtml" />
+    <Content Include="Views\Sys\_EasSyncLogListPager.cshtml" />
+    <Content Include="Views\Sys\EasSyncLogList.cshtml" />
+    <Content Include="Views\Front\_AnnouncementList.cshtml" />
+    <Content Include="Views\Front\Announcement.cshtml" />
+    <Content Include="Views\Front\ArticleDetail.cshtml" />
+    <Content Include="Views\Main\SyMessagesList.cshtml" />
+    <Content Include="Views\Main\_AjaxPagerSyMessages.cshtml" />
+    <Content Include="Views\Sys\_EasDetailListPager.cshtml" />
+    <Content Include="Views\Sys\EasDetailList.cshtml" />
+    <Content Include="Views\Basic\WarehouseMap.cshtml" />
+    <Content Include="Views\Distribution\_AjaxListDsDealerLevel.cshtml" />
+    <Content Include="Views\Helper\_Header.cshtml" />
+    <Content Include="Views\Helper\_LeftNav.cshtml" />
+    <Content Include="Views\Helper\_Layout.cshtml" />
+    <Content Include="Views\Helper\Index.cshtml" />
+    <Content Include="Views\Helper\Test.cshtml" />
+    <Content Include="Views\Account\ModifyPwd.cshtml" />
+    <Content Include="Views\Print\Picking2.cshtml" />
+    <Content Include="Views\Print\DsPicking2.cshtml" />
+    <Content Include="Views\Promotion\CouponList.cshtml" />
+    <Content Include="Views\Task\Index.cshtml" />
+    <Content Include="Views\Sys\_SysUserSelector.cshtml" />
+    <Content Include="Views\Warehouse\ReceiptVoucherList.cshtml" />
+    <Content Include="Views\Task\TaskInfo.cshtml" />
+    <Content Include="Views\Warehouse\ProductLendItems.cshtml" />
+    <Content Include="Views\Union\UnionSiteManage.cshtml" />
+    <Content Include="Views\Union\UnionSiteCreate.cshtml" />
+    <Content Include="Views\Union\UnionSiteEdit.cshtml" />
+    <Content Include="Views\Union\AdvertisementManage.cshtml" />
+    <Content Include="Views\Union\AdvertisementCreate.cshtml" />
+    <Content Include="Views\Union\AdvertisementEdit.cshtml" />
+    <Content Include="Views\Union\_AdvertisementProductList.cshtml" />
+    <Content Include="Views\Union\_UnionSiteList.cshtml" />
+    <Content Include="Views\Union\UnionSiteDetail.cshtml" />
+    <Content Include="Views\Union\AdvertisementDetail.cshtml" />
+    <Content Include="Views\Union\_AdvertisementList.cshtml" />
+    <Content Include="Views\Task\TaskLog.cshtml" />
+    <Content Include="Views\Task\_TaskLogPager.cshtml" />
+    <Content Include="Views\Union\AdvLog.cshtml" />
+    <Content Include="Views\Union\_AdvLogList.cshtml" />
+    <Content Include="Views\Union\WeChatAutoReplyConfig.cshtml" />
+    <Content Include="Views\Union\WeChatAutoReplyKeyWordsList.cshtml" />
+    <Content Include="Views\Union\AdvLogDetail.cshtml" />
+    <Content Include="Views\Union\pAjaxPager_WeChatAutoReplyWordsList.cshtml" />
+    <Content Include="Views\Union\CreateOrUpdateKeyWords.cshtml" />
+    <Content Include="Views\Union\AddKeyWordsContent.cshtml" />
+    <Content Include="Views\Union\QueryKeyWordsContent.cshtml" />
+    <Content Include="Views\Sys\UserInfo.cshtml" />
+    <Content Include="Views\Union\WeChat.cshtml" />
+    <Content Include="Views\Union\WeChatReply.cshtml" />
+    <Content Include="Views\Union\_AjaxPagerWeChat.cshtml" />
+    <Content Include="Views\Union\_AjaxPagerWeChatReplay.cshtml" />
+    <Content Include="Views\Warehouse\InvoiceCreate.cshtml" />
+    <Content Include="促销脚本\[满减][商品]指定商品购买单件减0.00元.py" />
+    <Content Include="促销脚本\[优惠券][商品合计]订单满0.00元减0.00元.py" />
+    <Content Include="促销脚本\[团购].py" />
+    <Content Include="促销脚本\[满减][商品]指定商品满0.00元立减0.00元.py" />
+    <Content Include="促销脚本\[满赠][商品]指定商品满0.00元可选1件赠品.py" />
+    <Content Include="促销脚本\[满赠][商品合计]订单金额满0.00元可选1件赠品.py" />
+    <Content Include="促销脚本\[满赠][订单]订单金额满0.00元可选1件赠品.py" />
+    <Content Include="促销脚本\[组合].py" />
+    <Content Include="促销脚本\[优惠券][商品合计]商品合计金额满0.00元减0.00元.py" />
+    <Content Include="促销脚本\[满减][商品合计]商品金额满0.00元立减0.00元.py" />
+    <Content Include="促销脚本\[满赠][商品分类]指定商品满0.00元可选1件赠品.py" />
+    <Content Include="促销脚本\[其他][商品]生日特惠中级会员7折高级会员5折.py" />
+    <Content Include="促销脚本\测试\Calculation_SummaryOrder.py" />
+    <Content Include="促销脚本\测试\Calculation_SummaryProduct.py" />
+    <Content Include="促销脚本\测试\HelloWorld.py" />
+    <Content Include="促销脚本\测试\new1_rule_满X减X_{p_2,3}.py" />
+    <Content Include="促销脚本\测试\new1_rule_满X送X_{p_20,21}.py" />
+    <Content Include="促销脚本\测试\new_rule_满X减X_{p_2}.py" />
+    <Content Include="促销脚本\测试\rule_买X就送X_{p_20}.py" />
+    <Content Include="促销脚本\测试\rule_加购商品_30.py" />
+    <Content Include="促销脚本\测试\rule_每满X减X_{p_50}.py" />
+    <Content Include="促销脚本\测试\rule_满X减X_{p_1,3}.py" />
+    <Content Include="促销脚本\测试\rule_满X减X_{p_2}.py" />
+    <Content Include="促销脚本\测试\rule_购买多种商品合并组满X就送X_{p_1996,1918,2031}.py" />
+    <Content Include="促销脚本\测试\rule_购买多种商品合并组满X就送X_{p_1996,1997}.py" />
+    <Content Include="促销脚本\测试\Test.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="App_Start\FilterConfig.cs" />
+    <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\WebApiConfig.cs" />
+    <Content Include="Global.asax" />
+    <Content Include="Theme\css\base.css" />
+    <Content Include="Theme\css\base.min.css">
+      <DependentUpon>base.chirp.css</DependentUpon>
+    </Content>
+    <Content Include="Theme\css\boxandtable.css" />
+    <Content Include="Theme\css\outbox.css" />
+    <Content Include="Theme\css\out_box.css" />
+    <Content Include="Theme\css\pagination.css" />
+    <Content Include="Theme\css\search.css" />
+    <Content Include="Theme\css\tips.css" />
+    <Content Include="Theme\images\boxbg.png" />
+    <Content Include="Theme\images\defaultpic.gif" />
+    <Content Include="Theme\images\icons\Warehouse.png" />
+    <Content Include="Theme\images\loading.gif" />
+    <Content Include="Theme\images\outboxnavbg.png" />
+    <Content Include="Theme\images\pagination_bg.png" />
+    <Content Include="Theme\images\print\shunfeng.jpg" />
+    <Content Include="Theme\images\print\ttk.jpg" />
+    <Content Include="Theme\images\print\watermark.png" />
+    <Content Include="Theme\images\print\yuantong.jpg" />
+    <Content Include="Theme\images\search_bg.png" />
+    <Content Include="Theme\images\sorry.jpg" />
+    <Content Include="Theme\images\tips_icon.png" />
+    <Content Include="Theme\images\title_bg.png" />
+    <Content Include="Theme\Plugins\Date\calendar.js" />
+    <Content Include="Theme\Plugins\Date\lang\en.js" />
+    <Content Include="Theme\Plugins\Date\lang\zh-cn.js" />
+    <Content Include="Theme\Plugins\Date\lang\zh-tw.js" />
+    <Content Include="Theme\Plugins\Date\skin\datePicker.gif" />
+    <Content Include="Theme\Plugins\Date\skin\default\datepicker.css" />
+    <Content Include="Theme\Plugins\Date\skin\default\img.gif" />
+    <Content Include="Theme\Plugins\Date\skin\WdatePicker.css" />
+    <Content Include="Theme\Plugins\Date\skin\whyGreen\bg.jpg" />
+    <Content Include="Theme\Plugins\Date\skin\whyGreen\datepicker.css" />
+    <Content Include="Theme\Plugins\Date\skin\whyGreen\img.gif" />
+    <Content Include="Theme\Plugins\Date\WdatePicker.js" />
+    <Content Include="Theme\Plugins\Dialog\Dialog.min.js">
+      <DependentUpon>Dialog.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\Plugins\Dialog\skins\default.css" />
+    <Content Include="Theme\css\base.chirp.css" />
+    <Content Include="Theme\css\btn.css" />
+    <Content Include="Theme\css\common.css" />
+    <Content Include="Theme\css\form.css" />
+    <Content Include="Theme\css\frame.css" />
+    <Content Include="Theme\css\icon.css" />
+    <Content Include="Theme\css\login.css" />
+    <Content Include="Theme\css\special.css" />
+    <Content Include="Theme\images\btnbg.png" />
+    <Content Include="Theme\images\form_bg.png" />
+    <Content Include="Theme\images\headtxt.png" />
+    <Content Include="Theme\images\linelfm.png" />
+    <Content Include="Theme\images\linelfson.png" />
+    <Content Include="Theme\images\linelfsonY.png" />
+    <Content Include="Theme\images\login_bg.jpg" />
+    <Content Include="Theme\images\navmpic.png" />
+    <Content Include="Theme\images\navmpicsmall.png" />
+    <Content Include="Theme\images\pho1.png" />
+    <Content Include="Theme\images\signback.png" />
+    <Content Include="Theme\images\signgray.png" />
+    <Content Include="Theme\images\signwhite.png" />
+    <Content Include="Theme\images\icons\error.png" />
+    <Content Include="Theme\images\icons\face-sad.png" />
+    <Content Include="Theme\images\icons\face-smile.png" />
+    <Content Include="Theme\images\icons\loading.gif" />
+    <Content Include="Theme\images\icons\question.png" />
+    <Content Include="Theme\images\icons\succeed.png" />
+    <Content Include="Theme\images\icons\warning.png" />
+    <Content Include="Theme\Plugins\Editor\kindeditor.min.js">
+      <DependentUpon>kindeditor.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\Plugins\Editor\kindeditor.yui.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\anchor\anchor.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\autoheight\autoheight.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\clearhtml\clearhtml.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\code\code.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\code\prettify.css" />
+    <Content Include="Theme\Plugins\Editor\plugins\code\prettify.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\emoticons.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\0.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\1.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\10.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\100.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\101.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\102.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\103.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\104.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\105.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\106.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\107.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\108.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\109.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\11.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\110.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\111.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\112.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\113.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\114.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\115.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\116.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\117.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\118.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\119.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\12.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\120.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\121.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\122.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\123.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\124.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\125.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\126.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\127.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\128.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\129.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\13.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\130.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\131.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\132.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\133.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\134.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\14.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\15.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\16.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\17.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\18.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\19.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\2.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\20.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\21.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\22.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\23.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\24.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\25.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\26.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\27.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\28.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\29.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\3.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\30.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\31.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\32.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\33.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\34.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\35.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\36.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\37.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\38.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\39.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\4.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\40.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\41.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\42.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\43.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\44.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\45.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\46.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\47.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\48.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\49.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\5.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\50.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\51.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\52.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\53.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\54.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\55.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\56.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\57.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\58.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\59.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\6.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\60.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\61.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\62.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\63.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\64.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\65.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\66.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\67.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\68.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\69.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\7.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\70.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\71.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\72.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\73.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\74.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\75.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\76.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\77.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\78.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\79.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\8.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\80.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\81.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\82.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\83.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\84.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\85.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\86.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\87.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\88.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\89.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\9.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\90.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\91.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\92.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\93.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\94.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\95.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\96.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\97.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\98.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\99.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\emoticons\images\static.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\filemanager\filemanager.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\filemanager\images\file-16.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\filemanager\images\file-64.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\filemanager\images\folder-16.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\filemanager\images\folder-64.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\filemanager\images\go-up.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\image\image.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\image\images\align_left.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\image\images\align_right.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\image\images\align_top.gif" />
+    <Content Include="Theme\Plugins\Editor\plugins\image\images\refresh.png" />
+    <Content Include="Theme\Plugins\Editor\plugins\insertfile\insertfile.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\lineheight\lineheight.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\link\link.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\multiimage\images\image.png" />
+    <Content Include="Theme\Plugins\Editor\plugins\multiimage\images\select-files-en.png" />
+    <Content Include="Theme\Plugins\Editor\plugins\multiimage\images\select-files-zh_CN.png" />
+    <Content Include="Theme\Plugins\Editor\plugins\multiimage\images\swfupload.swf" />
+    <Content Include="Theme\Plugins\Editor\plugins\multiimage\multiimage.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\plainpaste\plainpaste.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\preview\preview.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\quickformat\quickformat.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\table\table.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\template\html\1.html" />
+    <Content Include="Theme\Plugins\Editor\plugins\template\html\2.html" />
+    <Content Include="Theme\Plugins\Editor\plugins\template\html\3.html" />
+    <Content Include="Theme\Plugins\Editor\plugins\template\template.js" />
+    <Content Include="Theme\Plugins\Editor\plugins\wordpaste\wordpaste.js" />
+    <Content Include="Theme\Plugins\Editor\themes\common\anchor.gif" />
+    <Content Include="Theme\Plugins\Editor\themes\common\blank.gif" />
+    <Content Include="Theme\Plugins\Editor\themes\common\loading.gif" />
+    <Content Include="Theme\Plugins\Editor\themes\default\background.png" />
+    <Content Include="Theme\Plugins\Editor\themes\default\default.css" />
+    <Content Include="Theme\Plugins\Editor\themes\default\default.png" />
+    <Content Include="Theme\Plugins\Editor\themes\simple\simple.css" />
+    <Content Include="Theme\Plugins\Print\LodopFuncs.js" />
+    <Content Include="Theme\Plugins\TableBind\TableBind.min.js">
+      <DependentUpon>TableBind.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\Plugins\TableBind\TableBind.yui.js" />
+    <Content Include="Theme\Plugins\Upload\jquery.uploadify.min.js">
+      <DependentUpon>jquery.uploadify.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\Plugins\Upload\jquery.uploadify.yui.js" />
+    <Content Include="Theme\Plugins\Upload\uploadify.swf" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\1_close.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\1_open.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\2.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\3.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\4.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\5.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\6.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\7.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\8.png" />
+    <Content Include="Theme\Plugins\ZTree\img\diy\9.png" />
+    <Content Include="Theme\Plugins\ZTree\img\line_conn.gif" />
+    <Content Include="Theme\Plugins\ZTree\img\loading.gif" />
+    <Content Include="Theme\Plugins\ZTree\img\zTreeStandard.gif" />
+    <Content Include="Theme\Plugins\ZTree\img\zTreeStandard.png" />
+    <Content Include="Theme\Plugins\ZTree\ZTree.min.js">
+      <DependentUpon>ZTree.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\Plugins\ZTree\ZTree.yui.js" />
+    <Content Include="Theme\Plugins\ZTree\skin.css" />
+    <Content Include="Theme\scripts\Common.min.js">
+      <DependentUpon>Common.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\Common.yui.js" />
+    <Content Include="Config\Attachment.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\ProductImage.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Download\app\GpsLoc1.0_V20131112.apk" />
+    <Content Include="Download\app\LogisticsApp_1.0.V20131105.apk" />
+    <Content Include="Download\doc\GPS定位操作手册.doc" />
+    <Content Include="Download\doc\品胜惠源提电子商务管理系统.doc" />
+    <Content Include="Download\doc\客户关系管理系统CRM.doc" />
+    <Content Include="Download\doc\惠源提前台网站.doc" />
+    <Content Include="Download\doc\惠源提商城APP（Android版与iPhone版）.doc" />
+    <Content Include="Download\doc\物流App操作手册.doc" />
+    <Content Include="Download\doc\百城当日达物流查询系统.doc" />
+    <Content Include="Download\doc\惠源提分销升舱平台.doc" />
+    <Content Include="Download\app\GpsLoc.apk" />
+    <Content Include="Download\app\LogisticsApp.apk" />
+    <Content Include="Config\UploadFile.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Download\app\HytMall.apk" />
+    <Content Include="Download\app\HytMall.ipa" />
+    <Content Include="Download\app\LogisticsApp_1.1.v2013120515.apk" />
+    <Content Include="Download\app\LogisticsApp_1.1.v2013120617.apk" />
+    <Content Include="Download\app\LogisticsApp_1.1.v2013120917.apk" />
+    <Content Include="Download\app\LogisticsApp_1.0.V2014012415.apk" />
+    <Content Include="Config\Taobao.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\OrderImgFlag.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Customs.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\AlipayCustoms.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Pay.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\SmsTemplate.config" />
+    <Content Include="Config\General.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Supply.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\IcpInfo.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\GaoJie.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Logistics.config" />
+    <Content Include="Config\Erp.config" />
+    <Content Include="Config\HaiDai.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\DouShabao.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\JingDong.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\GeGeJia.config" />
+    <Content Include="Config\Yihaodian.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\Upgrade.config" />
+    <Content Include="Config\Yihaodian.config" />
+    <Content Include="Config\GuoMei.config" />
+    <Content Include="Config\SUNING.config" />
+    <Content Include="10011070002.pfx" />
+    <Content Include="ChinaPnR.rsa.cer" />
+    <Content Include="10042864953.pfx" />
+    <Content Include="Config\ExpressList.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Config\RongEgou.config" />
+    <None Include="Properties\PublishProfiles\B2C_Admin.pubxml" />
+    <None Include="Properties\PublishProfiles\o2o.pubxml" />
+    <None Include="Properties\PublishProfiles\ShunYing_Admin.pubxml" />
+    <Content Include="Templates\Excel\BusinessManPerformance.xls" />
+    <Content Include="Templates\Excel\OfficePerformance.xls" />
+    <Content Include="Templates\Excel\WarehouseInsideStaff.xls" />
+    <Content Include="Templates\Excel\EBusinessCenterPerformance.xls" />
+    <Content Include="Templates\Excel\ServicePerformance.xls" />
+    <Content Include="Templates\Excel\ShopNewCustomer.xls" />
+    <Content Include="Templates\Excel\BusinessSummary.xls" />
+    <Content Include="Templates\Excel\SalesRanking.xls" />
+    <Content Include="Templates\Excel\ShopCustomerConsume.xls" />
+    <Content Include="Templates\Excel\ShopNewCustomerDetail.xls" />
+    <Content Include="Templates\Excel\CouponCard.xls" />
+    <Content Include="Templates\Excel\PromotionGift.xls" />
+    <Content Include="Templates\Excel\CouponCards.xls" />
+    <Content Include="Templates\Excel\Sales.xls" />
+    <Content Include="Templates\Excel\WarehouseSalesRanking.xls" />
+    <Content Include="Templates\Excel\UpgradeSales.xls" />
+    <Content Include="Templates\Excel\OnlinePayment.xls" />
+    <Content Include="Templates\Excel\ReceiptVoucher.xls" />
+    <Content Include="Templates\Excel\RegionalSales.xls" />
+    <Content Include="Templates\Excel\SoOrder.xls" />
+    <Content Include="Templates\Excel\LgGaoJieGoodsInfo.xls" />
+    <Content Include="Templates\Excel\IcpGZNanShaGoodsInfo.xls" />
+    <Content Include="Templates\Excel\Product.xls" />
+    <Content Include="Templates\Excel\WhIReporPrDetails.xls" />
+    <Content Include="Templates\Excel\OtherOutOfStorage.xls" />
+    <Content Include="Theme\bootstrap\css\bootstrap-theme.css.map" />
+    <Content Include="Theme\bootstrap\css\bootstrap-theme.min.css.map" />
+    <Content Include="Theme\bootstrap\css\bootstrap.css.map" />
+    <Content Include="Theme\bootstrap\css\bootstrap.min.css.map" />
+    <Content Include="Theme\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Theme\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Theme\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Theme\bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Templates\Excel\PdPackagedGoods.xls" />
+    <None Include="Theme\scripts\jquery-2.0.2-vsdoc.js" />
+    <Content Include="Theme\scripts\DAO.min.js">
+      <DependentUpon>DAO.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\jquery.validate.min.js">
+      <DependentUpon>jquery.validate.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\jquery.validate.yui.js" />
+    <Content Include="Theme\scripts\numbercontrol.js" />
+    <Content Include="Theme\scripts\RMA\Utils.min.js">
+      <DependentUpon>rma.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\RMA\rma.js" />
+    <Content Include="Theme\scripts\search.js" />
+    <Content Include="Theme\scripts\selectcontrol.js" />
+    <Content Include="Theme\scripts\tips.js" />
+    <Content Include="Theme\scripts\UI.min.js">
+      <DependentUpon>UI.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\UI.yui.js" />
+    <Content Include="Theme\scripts\jquery.min.js" />
+    <Content Include="Theme\scripts\outbox.js" />
+    <Content Include="Theme\scripts\Pages\moving.js" />
+    <Content Include="Theme\scripts\tab.js" />
+    <Content Include="Theme\scripts\Utils.min.js">
+      <DependentUpon>Utils.yui.js</DependentUpon>
+    </Content>
+    <Content Include="Theme\scripts\DAO.yui.js" />
+    <Content Include="Print\install_lodop32.exe" />
+    <Content Include="Views\Basic\AreaSelector.cshtml" />
+    <Content Include="Views\Print\ShopInvoice.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Sys\UserGroupEdit.cshtml" />
+    <Content Include="Views\Sys\SyRoleCreate.cshtml" />
+    <Content Include="Views\Sys\SyRoleList.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Basic\BsDeliveryPayment.cshtml" />
+    <Content Include="Views\Basic\BsDeliveryPaymentSet.cshtml" />
+    <Content Include="Views\Basic\_AjaxPagerDeliveryPayment.cshtml" />
+    <Content Include="Views\Sys\Icons.cshtml" />
+    <Content Include="Views\Logistics\PickupInvoice.cshtml" />
+    <Content Include="Views\Logistics\PickupInvoiceDetails.cshtml" />
+    <Content Include="Views\Logistics\_AjaxPagerPickupInvoiceList.cshtml" />
+    <Content Include="Views\Logistics\_AjaxPagerPickupInvoiceDetailProducts.cshtml" />
+    <Content Include="Views\Logistics\DeliveryScope.cshtml" />
+    <Content Include="Views\Sys\QueryPrivilege.cshtml" />
+    <Content Include="Views\Basic\WarehouseArea.cshtml" />
+    <Content Include="Views\Basic\_AjaxPagerWarehouseAreaList.cshtml" />
+    <Content Include="Views\Basic\WarehouseAreaSetDefault.cshtml" />
+    <Content Include="Views\Sys\CacheDetailList.cshtml" />
+    <Content Include="Views\Sys\MemcachedList.cshtml" />
+    <Content Include="Views\Sys\MemoryCacheList.cshtml" />
+    <Content Include="Views\Sys\FullTextIndexing.cshtml" />
+    <Content Include="Views\Sys\Logs.cshtml" />
+    <Content Include="Views\Promotion\_PromotionRuleListPager.cshtml" />
+    <Content Include="Views\Promotion\_CouponListPager.cshtml" />
+    <Content Include="Views\Promotion\_PromotionListPager.cshtml" />
+    <Content Include="Views\Promotion\GroupShoppings.cshtml" />
+    <Content Include="Views\Promotion\_GroupShoppingsPager.cshtml" />
+    <Content Include="Views\Promotion\GroupShoppingCreate.cshtml" />
+    <Content Include="Views\Promotion\PromotionRuleDetail.cshtml" />
+    <Content Include="Views\Promotion\PromotionSelector.cshtml" />
+    <Content Include="Views\Promotion\_PromotionSelectorPager.cshtml" />
+    <Content Include="Views\Promotion\PromotionRuleSelector.cshtml" />
+    <Content Include="Views\Promotion\_PromotionRuleSelectorPager.cshtml" />
+    <Content Include="Views\Promotion\PromotionRuleList.cshtml" />
+    <Content Include="Views\Promotion\Promotions.cshtml" />
+    <Content Include="Views\Promotion\PromotionCreate.cshtml" />
+    <Content Include="Views\Report\UpgradeDetails.cshtml" />
+    <Content Include="Views\Report\pAjaxPager_UpgradeDetails.cshtml" />
+    <Content Include="Views\Report\SaleDetails.cshtml" />
+    <Content Include="Views\Report\pAjaxPager_SaleDetails.cshtml" />
+    <Content Include="Views\Report\MarketPresentDetails.cshtml" />
+    <Content Include="Views\Report\pAjaxPager_MarketPresentDetails.cshtml" />
+    <Content Include="Views\Shared\ErrorPrivilege.cshtml" />
+    <Content Include="Views\Sys\SysUserSelector.cshtml" />
+    <Content Include="Views\Report\SalesRanking.cshtml" />
+    <Content Include="Views\Report\BusinessSummary.cshtml" />
+    <Content Include="Views\Report\_SalesRanking.cshtml" />
+    <Content Include="Views\Report\_BusinessSummaryList.cshtml" />
+    <Content Include="Views\Warehouse\WharehouseSelector.cshtml" />
+    <Content Include="Views\CRM\CrBulkPurchase.cshtml" />
+    <Content Include="Views\CRM\CrBulkPurchaseEdit.cshtml" />
+    <Content Include="Views\CRM\CrComplaint.cshtml" />
+    <Content Include="Views\CRM\CrComplaintEdit.cshtml" />
+    <Content Include="Views\CRM\CrLevel.cshtml" />
+    <Content Include="Views\CRM\CrComplaintView.cshtml" />
+    <Content Include="Views\CRM\CrCustomer.cshtml" />
+    <Content Include="Views\CRM\CrLevelLog.cshtml" />
+    <Content Include="Views\CRM\CrLevelLogDetail.cshtml" />
+    <Content Include="Views\CRM\CrLevelPointLog.cshtml" />
+    <Content Include="Views\CRM\CrCustomerDetail.cshtml" />
+    <Content Include="Views\CRM\CrExperiencePointLog.cshtml" />
+    <Content Include="Views\CRM\CrExperienceCoinLog.cshtml" />
+    <Content Include="Views\CRM\CrLevelPointLogOperate.cshtml" />
+    <Content Include="Views\CRM\CrExperiencePointLogOperate.cshtml" />
+    <Content Include="Views\CRM\CrExperienceCoinLogOperate.cshtml" />
+    <Content Include="Views\CRM\CrLevelPointLogDetail.cshtml" />
+    <Content Include="Views\CRM\CrExperiencePointLogDetail.cshtml" />
+    <Content Include="Views\CRM\CrExperienceCoinLogDetail.cshtml" />
+    <Content Include="Views\CRM\CrOrder.cshtml" />
+    <Content Include="Views\CRM\CrOrderDetail.cshtml" />
+    <Content Include="Views\CRM\CrCustomerPassword.cshtml" />
+    <Content Include="Views\CRM\CrCustomerEdit.cshtml" />
+    <Content Include="Views\CallCenter\Index.cshtml" />
+    <Content Include="Views\Basic\BsArea.cshtml" />
+    <Content Include="Views\Order\OrderDetail.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Web.Debug.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Web.Release.config">
+      <DependentUpon>Web.config</DependentUpon>
+    </Content>
+    <Content Include="Views\Web.config" />
+    <Content Include="Views\JobPool\_AjaxPager.cshtml" />
+    <Content Include="Views\Front\FeAdvertGroup.cshtml" />
+    <Content Include="Views\Front\FeHelpClass.cshtml" />
+    <Content Include="Views\Front\FeHelpClassAdd.cshtml" />
+    <Content Include="Views\Front\FeHelpClassUpdate.cshtml" />
+    <Content Include="Views\Order\OrderProduct.cshtml" />
+    <Content Include="Views\Product\CategoryTree.cshtml" />
+    <Content Include="Views\Warehouse\SingleOutStock.cshtml" />
+    <Content Include="Views\Logistics\DeliveryTypeView.cshtml" />
+    <Content Include="Views\Front\_AjaxFeAdvertGroup.cshtml" />
+    <Content Include="Views\Front\FeAdvertGroupAdd.cshtml" />
+    <Content Include="Views\Front\FeAdvertGroupUpdate.cshtml" />
+    <Content Include="Views\Order\productPager.cshtml" />
+    <Content Include="Views\Front\_AjaxFeAdvertItem.cshtml" />
+    <Content Include="Views\Logistics\_DeliveryNoteList.cshtml" />
+    <Content Include="Views\Shared\_pWareHouseAndDeliveryMan.cshtml" />
+    <Content Include="Views\Logistics\DeliveryNoteDetails.cshtml" />
+    <Content Include="Views\PageTest\StockSelector.cshtml" />
+    <Content Include="Views\JobPool\_AssignUser.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInStockItem.cshtml" />
+    <Content Include="Views\Front\FeHelpArticle.cshtml" />
+    <Content Include="Views\Front\FeHelpArticleAddOrEdit.cshtml" />
+    <Content Include="Views\Logistics\pAjaxPager_LgSettlement.cshtml" />
+    <Content Include="Views\Shared\_Upload.cshtml" />
+    <Content Include="Views\Front\_AjaxFeArticleList.cshtml" />
+    <Content Include="Views\Order\MyOrder.cshtml" />
+    <Content Include="Views\Order\_MyOrderPager.cshtml" />
+    <Content Include="Views\Logistics\DeliveryUserCredit.cshtml" />
+    <Content Include="Views\Logistics\DeliveryUserCreditAdd.cshtml" />
+    <Content Include="Views\Logistics\DeliveryUserCreditUpdate.cshtml" />
+    <Content Include="Views\Logistics\_AjaxPagerDeliveryType.cshtml" />
+    <Content Include="Views\Order\Query.cshtml" />
+    <Content Include="Views\Logistics\_AjaxPagerDeliveryUserCredit.cshtml" />
+    <Content Include="Views\Order\_OrderQueryPager.cshtml" />
+    <Content Include="Views\Product\_SelectProduct.cshtml" />
+    <Content Include="Views\Order\_OrderLog.cshtml" />
+    <Content Include="Views\Order\_OutStock.cshtml" />
+    <Content Include="Views\Order\_OrderItemEdit.cshtml" />
+    <Content Include="Views\Front\FeArticleCategoryAddOrUpdate.cshtml" />
+    <Content Include="Views\Module\SelectUserList.cshtml" />
+    <Content Include="Views\Module\SelectWarehouse.cshtml" />
+    <Content Include="Views\Module\SelectCustomer.cshtml" />
+    <Content Include="Views\Module\SelectProduct.cshtml" />
+    <Content Include="Views\Front\FeArticle.cshtml" />
+    <Content Include="Views\Front\FeArticleAddOrEdit.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductItem.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductGroup.cshtml" />
+    <Content Include="Views\Warehouse\ShopOrderCreate.cshtml" />
+    <Content Include="Views\Product\Brand.cshtml" />
+    <Content Include="Views\Front\FeAdvertItemAddOrUpdateAndFont.cshtml" />
+    <Content Include="Views\Front\FeAdvertItemAddOrUpdateAndImg.cshtml" />
+    <Content Include="Views\Warehouse\_ShopOrderPager.cshtml" />
+    <Content Include="Views\Warehouse\ShopOrder.cshtml" />
+    <Content Include="Views\Order\_MyOrderDetail.cshtml" />
+    <Content Include="Views\Print\InStock.cshtml" />
+    <Content Include="Views\Product\BrandCreate.cshtml" />
+    <Content Include="Views\Product\_AjaxBrandPager.cshtml" />
+    <Content Include="Views\Warehouse\StockOutInfo.cshtml" />
+    <Content Include="Views\Print\Delivery.cshtml" />
+    <Content Include="Views\Shared\_Print.cshtml" />
+    <Content Include="Views\Order\_AssociatedCredentials.cshtml" />
+    <Content Include="Views\Logistics\_DeliveryNoteItemList.cshtml" />
+    <Content Include="Views\Logistics\_CreditQuotaList.cshtml" />
+    <Content Include="Views\Product\ProductCategorySelector.cshtml" />
+    <Content Include="Views\Front\_AjaxCrCustomerQuestion.cshtml" />
+    <Content Include="Views\Front\CrCustomerQuestion.cshtml" />
+    <Content Include="Views\Front\CrCustomerQuestionUpdate.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrBulkPurchaseList.cshtml" />
+    <Content Include="Views\Product\BrandSelector.cshtml" />
+    <Content Include="Views\Product\_AjaxBrandPagerSelector.cshtml" />
+    <Content Include="Views\Product\ProductPriceHistory.cshtml" />
+    <Content Include="Views\Product\AddPriceHistory.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerOutStockList.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Print\Picking.cshtml" />
+    <Content Include="Views\Product\ProductAttributeGroup.cshtml" />
+    <Content Include="Views\Product\_AjaxProductAttributeGroupPager.cshtml" />
+    <Content Include="Views\Front\FeSearchKeyword.cshtml" />
+    <Content Include="Views\Front\FeProductComment.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductComment.cshtml" />
+    <Content Include="Views\Front\_AjaxFeSearchKeywordList.cshtml" />
+    <Content Include="Views\Product\ProductAttributeGroupCreate.cshtml" />
+    <Content Include="Views\Front\FeSearchKeywordAddOrEdit.cshtml" />
+    <Content Include="Views\Product\_SelectAttribute.cshtml" />
+    <Content Include="Views\Product\_SelectAttributeGroup.cshtml" />
+    <Content Include="Views\Print\InStockBatch.cshtml" />
+    <Content Include="Views\Print\PickingBatch.cshtml" />
+    <Content Include="Views\Product\ProductCategory.cshtml" />
+    <Content Include="Views\Logistics\SettlementDeliveryList.cshtml" />
+    <Content Include="Views\Main\ValidateTest.cshtml" />
+    <Content Include="Views\Logistics\_AjaxPagerOutStockItems.cshtml" />
+    <Content Include="Views\Logistics\_AjaxPagerDeliveryList.cshtml" />
+    <Content Include="Views\Logistics\CreateSettlement.cshtml" />
+    <Content Include="Views\Warehouse\ShopOrderDetail.cshtml" />
+    <Content Include="Views\Logistics\pWhStockOutDetails.cshtml" />
+    <Content Include="Views\Product\ProductAttribute.cshtml" />
+    <Content Include="Views\Product\_AjaxProductAttributePager.cshtml" />
+    <Content Include="Views\Product\_AjaxSelectAttrbute.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInStockItemDetail.cshtml" />
+    <Content Include="Views\Logistics\_SelectPickUp.cshtml" />
+    <Content Include="Views\Warehouse\_SelectWareHouse.cshtml" />
+    <Content Include="Views\Warehouse\ShopDelivery.cshtml" />
+    <Content Include="Views\Warehouse\ShopDeliveryDetail.cshtml" />
+    <Content Include="Views\Warehouse\ShopDeliveryList.cshtml" />
+    <Content Include="Views\Warehouse\ShopDeliveryShip.cshtml" />
+    <Content Include="Views\Warehouse\_ShopDeliveryInfo.cshtml" />
+    <Content Include="Views\Logistics\SelectOutStockList.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrComplaint.cshtml" />
+    <Content Include="Views\Product\ProductAttributeCreate.cshtml" />
+    <Content Include="Views\Warehouse\_ShopDeliveryPager.cshtml" />
+    <Content Include="Views\Warehouse\ProductLend.cshtml" />
+    <Content Include="Views\Logistics\_SelectPickUpPager.cshtml" />
+    <Content Include="Views\Logistics\_SelectDeliveryType.cshtml" />
+    <Content Include="Views\Logistics\_SelectDeliveryTypePager.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerProductLendList.cshtml" />
+    <Content Include="Views\CRM\CrLevelEdit.cshtml" />
+    <Content Include="Views\Warehouse\WareHouseDeliveryType.cshtml" />
+    <Content Include="Views\Warehouse\WareHouseDeliveryTypeList.cshtml" />
+    <Content Include="Views\Front\FeProductCommentAudit.cshtml" />
+    <Content Include="Views\Front\FeProductCommentReply.cshtml" />
+    <Content Include="Views\Front\FeProductShare.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductShare.cshtml" />
+    <Content Include="Views\Front\FeProductShareAudit.cshtml" />
+    <Content Include="Views\Warehouse\Invoice.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInvoiceList.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Product\ProductAttributeSelector.cshtml" />
+    <Content Include="Views\Product\_AjaxPorductAttributeSelector.cshtml" />
+    <Content Include="Views\Warehouse\InvoiceEdit.cshtml" />
+    <Content Include="Views\Warehouse\ProductLendDetails.cshtml" />
+    <Content Include="Views\Logistics\AdditionalOrders.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductCommentReply.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrLevel.cshtml" />
+    <Content Include="Views\RMA\RmaNewList.cshtml" />
+    <Content Include="Views\RMA\RmaReturn.cshtml" />
+    <Content Include="Views\RMA\RmaExchanges.cshtml" />
+    <Content Include="Views\RMA\ReturnToAudit.cshtml" />
+    <Content Include="Views\RMA\RmaReturnView.cshtml" />
+    <Content Include="Views\RMA\ExchangesToAudit.cshtml" />
+    <Content Include="Views\RMA\RmaExchangesView.cshtml" />
+    <Content Include="Views\RMA\RmaEditList.cshtml" />
+    <Content Include="Views\RMA\_ReturnEdit.cshtml" />
+    <Content Include="Views\RMA\_ReturnView.cshtml" />
+    <Content Include="Views\RMA\_ExchangesEdit.cshtml" />
+    <Content Include="Views\RMA\_ExchangesView.cshtml" />
+    <Content Include="Views\RMA\_Credential.cshtml" />
+    <Content Include="Views\RMA\_RmaNewListPager.cshtml" />
+    <Content Include="Views\Product\_AjaxProductAttributeGroupSelector.cshtml" />
+    <Content Include="Views\Product\ProductAttributeGroupSelector.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductCommentReplyAll.cshtml" />
+    <Content Include="Views\Product\_AjaxProductSelectorPager.cshtml" />
+    <Content Include="Views\RMA\_RmaOrderInfo.cshtml" />
+    <Content Include="Views\RMA\_RmaEditListPager.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerProductLendItemDetail.cshtml" />
+    <Content Include="Views\Logistics\_ProductLendPartView.cshtml" />
+    <Content Include="Views\Print\Pack.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrCustomer.cshtml" />
+    <Content Include="Views\Print\RmaReturned.cshtml" />
+    <Content Include="Views\Product\ProductList.cshtml" />
+    <Content Include="Views\Warehouse\CreateProductLend.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrExperienceCoinLog.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrLevelLog.cshtml" />
+    <Content Include="Views\Print\Settlement.cshtml" />
+    <Content Include="Views\Print\Lend.cshtml" />
+    <Content Include="Views\Product\_AjaxProductPager.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrLevelPointLog.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrExperiencePointLog.cshtml" />
+    <Content Include="Views\Product\ProductAddAndUpdate.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Product\_UpdateProductMainInfo.cshtml" />
+    <Content Include="Views\Product\_UpdateProductPriceInfo.cshtml" />
+    <Content Include="Views\Product\_UpdateProductImagesInfo.cshtml" />
+    <Content Include="Views\Product\_UpdateProductDescription.cshtml" />
+    <Content Include="Views\Product\_UpdateProductAttributeInfo.cshtml" />
+    <Content Include="Views\Product\_UpdateProductAttributeAssociationProduct.cshtml" />
+    <Content Include="Views\RMA\ShopRmaEditList.cshtml" />
+    <Content Include="Views\RMA\ShopRmaNewList.cshtml" />
+    <Content Include="Views\Product\_AjaxProductPriceHistory.cshtml" />
+    <Content Include="Views\Product\CopyProduct.cshtml" />
+    <Content Include="Views\Product\ProductPriceHistoryAudit.cshtml" />
+    <Content Include="Views\Order\SelectOrder.cshtml" />
+    <Content Include="Views\Order\_SelectOrderPager.cshtml" />
+    <Content Include="Views\Finance\OnlinePayment.cshtml" />
+    <Content Include="Views\Finance\_OnlinePaymentPager.cshtml" />
+    <Content Include="Views\Product\_GenerateProductAttributeGroup.cshtml" />
+    <Content Include="Views\Product\_GenerateProductAttribute.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrOrder.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrOrderItem.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrOrderLog.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrOrderRecord.cshtml" />
+    <Content Include="Views\Finance\PaymentDetail.cshtml" />
+    <Content Include="Views\Finance\PaymentVoucherList.cshtml" />
+    <Content Include="Views\Finance\_PaymentVoucherListPager.cshtml" />
+    <Content Include="Views\Finance\ReceiptVoucherList.cshtml" />
+    <Content Include="Views\Finance\ReceiptVoucherDetail.cshtml" />
+    <Content Include="Views\Finance\_ReceiptVoucherListPager.cshtml" />
+    <Content Include="Views\Finance\_ReceiptVoucherDetailList.cshtml" />
+    <Content Include="Views\Print\SettlementBatch.cshtml" />
+    <Content Include="Views\Warehouse\ProductReturn.cshtml" />
+    <Content Include="Views\Product\PdTemplate.cshtml" />
+    <Content Include="Views\Product\_AjaxPdTemplate.cshtml" />
+    <Content Include="Views\Print\DeliveryPrintTemplate.cshtml" />
+    <Content Include="Views\RMA\RMADetail.cshtml" />
+    <Content Include="Views\RMA\_AssociatedCredentials.cshtml" />
+    <Content Include="Views\RMA\_RMALog.cshtml" />
+    <Content Include="Views\Product\PdTemplateAddOrEdit.cshtml" />
+    <Content Include="Views\Product\_AjaxProductCollocation.cshtml" />
+    <Content Include="Views\Product\_AjaxProductImagesInfo.cshtml" />
+    <Content Include="Views\Product\_UpdateProductCollocation.cshtml" />
+    <Content Include="Views\Product\SelectPdTemplate.cshtml" />
+    <Content Include="Views\Product\_AjaxSelectPdTemplate.cshtml" />
+    <Content Include="Views\Shared\_PrintWh.cshtml" />
+    <Content Include="Views\Product\_ProductDescriptionEditor.cshtml" />
+    <Content Include="Views\Shared\Error404.cshtml" />
+    <Content Include="Views\Shared\ErrorLogin.cshtml" />
+    <Content Include="Views\Print\PickingBatchSub.cshtml" />
+    <Content Include="Views\CRM\CustomerCreate.cshtml" />
+    <Content Include="Views\Order\MultipleSelectWarehouse.cshtml" />
+    <Content Include="Views\Sys\SyUserList.cshtml" />
+    <Content Include="Views\Sys\UserGroupList.cshtml" />
+    <Content Include="Views\Sys\UserGroupCreate.cshtml" />
+    <Content Include="Views\Sys\Privilege.cshtml" />
+    <Content Include="Views\Sys\_PrivilegePager.cshtml" />
+    <Content Include="Views\Sys\_SyUserListPager.cshtml" />
+    <Content Include="Views\Sys\Privileges.cshtml" />
+    <Content Include="Views\Basic\WarehouseEdit.cshtml" />
+    <Content Include="Views\Basic\WarehouseInfo.cshtml" />
+    <Content Include="Views\Basic\WarehouseMaintenance.cshtml" />
+    <Content Include="Views\Basic\_AjaxPagerWarehouseList.cshtml" />
+    <Content Include="Views\Sys\MenuManager.cshtml" />
+    <Content Include="Views\Sys\_UserGroupList.cshtml" />
+    <Content Include="Views\Sys\_SyRoleListPager.cshtml" />
+    <Content Include="Views\Sys\_PrivilegeQueryPager.cshtml" />
+    <Content Include="Views\Sys\_CacheDetailListPager.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Sys\_MemcachedListPager.cshtml" />
+    <Content Include="Views\Sys\_MemoryCacheListPager.cshtml" />
+    <Content Include="Views\Sys\_LogsPager.cshtml" />
+    <Content Include="Views\Sys\_FullTextIndexing.cshtml" />
+    <Content Include="Views\Warehouse\WhDeliveryType.cshtml" />
+    <Content Include="Views\Shared\ErrorPrivilegeWithMessage.cshtml" />
+    <Content Include="Views\Basic\WarehouseTree.cshtml" />
+    <Content Include="Views\Warehouse\WhPickUpCodeList.cshtml" />
+    <Content Include="Views\Warehouse\_WhPickUpCodePager.cshtml" />
+    <Content Include="Views\Report\pAjaxPager_RmaDetails.cshtml" />
+    <Content Include="Views\Report\RmaDetails.cshtml" />
+    <Content Include="Views\Promotion\UserCoupon.cshtml" />
+    <Content Include="Views\Promotion\_UserCouponsPager.cshtml" />
+    <Content Include="Views\Promotion\_UserBoundCouponsPager.cshtml" />
+    <Content Include="Views\Report\EBusinessCenterPerformance.cshtml" />
+    <Content Include="Views\Report\_EBusinessCenterPerformancePager.cshtml" />
+    <Content Include="Views\Report\ServicePerformance.cshtml" />
+    <Content Include="Views\Report\_ServicePerformancePager.cshtml" />
+    <Content Include="Views\Report\ShopNewCustomer.cshtml" />
+    <Content Include="Views\Report\_ShopNewCustomerPager.cshtml" />
+    <Content Include="Views\Promotion\SelectUserCoupons.cshtml" />
+    <Content Include="Views\Front\FeLinks.cshtml" />
+    <Content Include="Views\Front\_AjaxFeLinks.cshtml" />
+    <Content Include="Views\Report\BusinessManPerformance.cshtml" />
+    <Content Include="Views\Report\pAjaxPager_BusinessManPerformance.cshtml" />
+    <Content Include="Views\Warehouse\InventorySalesman.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInventoryProductList.cshtml" />
+    <Content Include="Views\Front\FeLinksAdd.cshtml" />
+    <Content Include="Views\Report\WarehouseInsideStaff.cshtml" />
+    <Content Include="Views\Report\_WarehouseInsideStaffList.cshtml" />
+    <Content Include="Views\Report\pAjaxPager_OfficePerformance.cshtml" />
+    <Content Include="Views\Report\OfficePerformance.cshtml" />
+    <Content Include="Views\Front\FeLinksView.cshtml" />
+    <Content Include="Views\Basic\OrganizationTree.cshtml" />
+    <Content Include="Views\Logistics\FakeInfo.cshtml" />
+    <Content Include="Views\Logistics\_LogisticsNoRefreshList.cshtml" />
+    <Content Include="Views\Logistics\_MKExpressLogList.cshtml" />
+    <Content Include="Views\Report\MkTrafficStatistics.cshtml" />
+    <Content Include="Views\Print\TestPrint.cshtml" />
+    <Content Include="Views\Report\ShopCustomerConsume.cshtml" />
+    <Content Include="Views\Report\_ShopCustomerConsumePager.cshtml" />
+    <Content Include="Views\Report\ShopNewCustomerDetail.cshtml" />
+    <Content Include="Views\Report\_ShopNewCustomerDetailPager.cshtml" />
+    <Content Include="Views\Promotion\_CouponCardType.cshtml" />
+    <Content Include="Views\Promotion\CouponCardType.cshtml" />
+    <Content Include="Views\Promotion\CouponCardTypeCreate.cshtml" />
+    <Content Include="Views\Promotion\_CouponCardPager.cshtml" />
+    <Content Include="Views\Promotion\CouponCard.cshtml" />
+    <Content Include="Views\Promotion\ImportExcel.cshtml" />
+    <Content Include="Views\Promotion\SelectCardCoupon.cshtml" />
+    <Content Include="Views\Promotion\_SelectCardCoupon.cshtml" />
+    <Content Include="Views\Promotion\CouponCardSelector.cshtml" />
+    <Content Include="Views\Report\MkTrafficStatisticsRealTime.cshtml" />
+    <Content Include="Views\AppContent\AppPushServiceManage.cshtml" />
+    <Content Include="Views\Front\FeNews.cshtml" />
+    <Content Include="Views\Front\FeNewsAddOrEdit.cshtml" />
+    <Content Include="Views\Front\_AjaxFeNews.cshtml" />
+    <Content Include="Views\Front\FeNewsProductAssociation.cshtml" />
+    <Content Include="Views\Front\_AjaxFeNewsProductAssociation.cshtml" />
+    <Content Include="Views\AppContent\_AppPushServericeDetial.cshtml" />
+    <Content Include="Views\AppContent\_AppPushServiceManage_Pager.cshtml" />
+    <Content Include="Views\Front\FeSoftCategory.cshtml" />
+    <Content Include="Views\Front\_AjaxFeSoftCategoryList.cshtml" />
+    <Content Include="Views\Front\FeSoftware.cshtml" />
+    <Content Include="Views\Front\FeSoftwareAddOrEdit.cshtml" />
+    <Content Include="Views\Front\FeSoftCategoryAddOrEdit.cshtml" />
+    <Content Include="Views\Front\_AjaxFeSoftwareList.cshtml" />
+    <Content Include="Views\Front\FeNewsProductAssociationEdit.cshtml" />
+    <Content Include="Views\Front\FeSoftCategorySelector.cshtml" />
+    <Content Include="Views\Front\_AjaxFeSoftCategorySelector.cshtml" />
+    <Content Include="Views\Front\FeSoftwareListAddOrEdit.cshtml" />
+    <Content Include="Views\Sys\SyConfigManage.cshtml" />
+    <Content Include="Views\Sys\SyConfigCreate.cshtml" />
+    <Content Include="Views\Sys\SyConfigEdit.cshtml" />
+    <Content Include="Views\Sys\_SyConfigList.cshtml" />
+    <Content Include="Views\Promotion\ImportPromotionGift.cshtml" />
+    <Content Include="Views\Promotion\ReutrnCouponCard.cshtml" />
+    <Content Include="Views\Report\PickingReport.cshtml" />
+    <Content Include="Views\CRM\CrSmsQuestion.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrSmsQuestion_Pager.cshtml" />
+    <Content Include="Views\CRM\CrSmsQuestionDetails.cshtml" />
+    <Content Include="Views\Report\CouponCards.cshtml" />
+    <Content Include="Views\Report\_CouponCards.cshtml" />
+    <Content Include="Views\Print\ShopRmaReturned.cshtml" />
+    <Content Include="Views\Logistics\SelectOutStockListFromMap.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\JobPool\JobPriority.cshtml" />
+    <Content Include="Views\JobPool\JobPriorityCreate.cshtml" />
+    <Content Include="Views\JobPool\_JobPriority.cshtml" />
+    <Content Include="Views\Logistics\AllCurrentLocation.cshtml" />
+    <Content Include="Views\Distribution\DsForbidProduct.cshtml" />
+    <Content Include="Views\Distribution\_DsForbidProduct.cshtml" />
+    <Content Include="Views\Distribution\DealerLogs.cshtml" />
+    <Content Include="Views\Distribution\_DealerLogs.cshtml" />
+    <Content Include="Views\Report\WarehouseProductSales.cshtml" />
+    <Content Include="Views\Report\_WarehouseProductSales.cshtml" />
+    <Content Include="Views\Report\_RptCouponCards.cshtml" />
+    <Content Include="Views\Report\RptCouponCards.cshtml" />
+    <Content Include="Views\Report\Sales.cshtml" />
+    <Content Include="Views\Report\_Sales.cshtml" />
+    <Content Include="Views\Warehouse\PicBrowser.cshtml" />
+    <Content Include="Views\Warehouse\UploadSignedImg.cshtml" />
+    <Content Include="Views\Report\_UpgradeSales.cshtml" />
+    <Content Include="Views\Report\UpgradeSales.cshtml" />
+    <Content Include="Views\CRM\CrCustomerEditDetail.cshtml" />
+    <Content Include="Views\Order\ShoppingCartHtmlForChangePrice.cshtml" />
+    <Content Include="Views\Report\BusinessSummaryMonthly.cshtml" />
+    <Content Include="Views\Report\_BusinessSummaryListMonthly.cshtml" />
+    <Content Include="Views\Front\Index.cshtml" />
+    <Content Include="Views\CRM\CrCustomerCallRecord.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrCustomerCallRecord.cshtml" />
+    <Content Include="Views\Distribution\DsDealerApp.cshtml" />
+    <Content Include="Views\Distribution\_DsDealerApp.cshtml" />
+    <Content Include="Views\JobPool\_myjob.cshtml" />
+    <Content Include="Views\Report\MonthExpressList.cshtml" />
+    <Content Include="Views\Report\_MonthExpressList.cshtml" />
+    <Content Include="Views\Report\_LgExpress.cshtml" />
+    <Content Include="Views\Report\_LgExpressDetail.cshtml" />
+    <Content Include="Views\Report\LgExpress.cshtml" />
+    <Content Include="Views\Report\LgExpressDetail.cshtml" />
+    <Content Include="Views\Front\_AjaxFeProductShareImage.cshtml" />
+    <Content Include="Views\Order\ShowBaiduMap.cshtml" />
+    <Content Include="Views\Distribution\DsUserList.cshtml" />
+    <Content Include="Views\Distribution\_DsUserList.cshtml" />
+    <Content Include="Views\Order\MallGifts.cshtml" />
+    <Content Include="Views\Print\MultiplePageDemo.cshtml" />
+    <Content Include="Views\Warehouse\OutStockPrint.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxOutStockPrint.cshtml" />
+    <Content Include="Views\Print\MultiPicking.cshtml" />
+    <Content Include="Views\Print\PartialPicking.cshtml" />
+    <Content Include="Views\Print\PartialDsPicking.cshtml" />
+    <Content Include="Views\Print\MultiPack.cshtml" />
+    <Content Include="Views\Print\DsPickingSelfSupport.cshtml" />
+    <Content Include="Views\JobPool\SyJobSmsConfig.cshtml" />
+    <Content Include="Views\JobPool\_SyJobSmsConfig.cshtml" />
+    <Content Include="Views\Report\RegionalSales.cshtml" />
+    <Content Include="Views\Report\_RegionalSales.cshtml" />
+    <Content Include="Views\Basic\AreaTree.cshtml" />
+    <Content Include="Views\Finance\ThirdpartyReconciliation.cshtml" />
+    <Content Include="Views\Finance\_ThirdpartyReconciliation.cshtml" />
+    <Content Include="Views\Report\Franchisees.cshtml" />
+    <Content Include="Views\Report\FranchiseesSaleDetail.cshtml" />
+    <Content Include="Views\Report\_FranchiseesSaleDetail.cshtml" />
+    <Content Include="Views\Report\FranchiseesRmaDetail.cshtml" />
+    <Content Include="Views\Report\_FranchiseesRmaDetail.cshtml" />
+    <Content Include="Views\Sys\OrderAutomaticProcessing.cshtml" />
+    <Content Include="Views\Report\TwoSaleCheck.cshtml" />
+    <Content Include="Views\Report\_TwoSaleCheck.cshtml" />
+    <Content Include="Views\Report\TwoSaleDetail.cshtml" />
+    <Content Include="Views\Report\_TwoSaleDetail.cshtml" />
+    <Content Include="Views\Report\ExpressLgDelivery.cshtml" />
+    <Content Include="Views\Report\_ExpressLgDelivery.cshtml" />
+    <Content Include="Views\Warehouse\DRDOutStockPrint.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Logistics\WhDeliveryScope.cshtml" />
+    <Content Include="Views\Distribution\DsProductRelationPager.cshtml" />
+    <Content Include="Views\Distribution\_AjaxDsProductRelationList.cshtml" />
+    <Content Include="Views\Distribution\DsMallAreaRelation.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsMallAreaRelation.cshtml" />
+    <Content Include="Views\Sys\SSOUserList.cshtml" />
+    <Content Include="Views\Logistics\FreightModuleList.cshtml" />
+    <Content Include="Views\Logistics\_FreightModuleListPager.cshtml" />
+    <Content Include="Views\Logistics\FreightModuleCreate.cshtml" />
+    <Content Include="Views\Logistics\StoreWarehouse.cshtml" />
+    <Content Include="Views\Logistics\FreightModuleArea.cshtml" />
+    <Content Include="Views\Logistics\ProductAddress.cshtml" />
+    <Content Include="Views\Logistics\_AjaxFreightModulePagerSelector.cshtml" />
+    <Content Include="Views\Logistics\FreightModuleSelector.cshtml" />
+    <Content Include="Views\Product\ProductPrivateList.cshtml" />
+    <Content Include="Views\Product\_PdProductPrivateListPager.cshtml" />
+    <Content Include="Views\Product\ProductPrivateCreate.cshtml" />
+    <Content Include="Views\Warehouse\ProductStockList.cshtml" />
+    <Content Include="Views\Warehouse\ProductStockInList.cshtml" />
+    <Content Include="Views\Warehouse\_ProductStockListPager.cshtml" />
+    <Content Include="Views\Warehouse\_ProductStockInDetailListPager.cshtml" />
+    <Content Include="Views\Warehouse\ProductStockInCreate.cshtml" />
+    <Content Include="Views\Product\ProductSelector.cshtml" />
+    <Content Include="Views\Product\_AjaxProductPagerSelector.cshtml" />
+    <Content Include="Views\Warehouse\ProductStockInAudit.cshtml" />
+    <Content Include="Views\Warehouse\ProductStockInView.cshtml" />
+    <Content Include="Views\Basic\OriginList.cshtml" />
+    <Content Include="Views\Basic\OriginCreate.cshtml" />
+    <Content Include="Views\Basic\_OriginPager.cshtml" />
+    <Content Include="Views\Order\SendOrderDialog.cshtml" />
+    <Content Include="Views\Order\SendOrderReturnList.cshtml" />
+    <Content Include="Views\Order\_SendOrderReturnPager.cshtml" />
+    <Content Include="Views\Order\QueryDetailDialog.cshtml" />
+    <Content Include="Views\Product\ImportExcel.cshtml" />
+    <Content Include="Views\CRM\CrSmsSendCreate.cshtml" />
+    <Content Include="Views\CRM\CrCustomerSelector.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrCustomerSelector.cshtml" />
+    <Content Include="Views\SellBusiness\SellBusinessGradeList.cshtml" />
+    <Content Include="Views\SellBusiness\_SellBusinessGradePager.cshtml" />
+    <Content Include="Views\SellBusiness\CrSellBusinessGradeCreate.cshtml" />
+    <Content Include="Views\SellBusiness\CustomerRebatesRecordList.cshtml" />
+    <Content Include="Views\SellBusiness\_CustomerRebatesRecordPager.cshtml" />
+    <Content Include="Views\SellBusiness\CustomerRelationSchemaList.cshtml" />
+    <Content Include="Views\SellBusiness\CrPredepositCashList.cshtml" />
+    <Content Include="Views\SellBusiness\_CrPredepositCashPager.cshtml" />
+    <Content Include="Views\Product\ProductQRCodeCreate.cshtml" />
+    <Content Include="Views\Order\OutboundReturnList.cshtml" />
+    <Content Include="Views\Order\_OutboundReturnPager.cshtml" />
+    <Content Include="Views\Order\QueryOutboundDetailDialog.cshtml" />
+    <Content Include="Views\Warehouse\SendProductStockInDialog.cshtml" />
+    <Content Include="Views\Logistics\_FreightModuleDetailsItems.cshtml" />
+    <Content Include="Views\Distribution\DealerMallProductList.cshtml" />
+    <Content Include="Views\Distribution\_AjaxDealerMallProductPager.cshtml" />
+    <Content Include="Views\Product\DealerMallProductSelector.cshtml" />
+    <Content Include="Views\Warehouse\ImportExcel.cshtml" />
+    <Content Include="Views\Distribution\_AjaxSpecialPriceProductPager.cshtml" />
+    <Content Include="Views\Distribution\SpecialPriceProductList.cshtml" />
+    <Content Include="Views\Distribution\DealerRebatesRecordList.cshtml" />
+    <Content Include="Views\Distribution\_DealerRebatesRecordPager.cshtml" />
+    <Content Include="Views\Distribution\WithdrawView.cshtml" />
+    <Content Include="Views\Distribution\DealerRebatesRecordView.cshtml" />
+    <Content Include="Views\Distribution\_DealerRebatesRecordViewPager.cshtml" />
+    <Content Include="Views\Order\_OrderItemRecordPager.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerHistoricalItemView.cshtml" />
+    <Content Include="Views\Distribution\MkCustomizeMenuList.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerMkCustomizeMenuList.cshtml" />
+    <Content Include="Views\Distribution\MkCustomizeMenuCreate.cshtml" />
+    <Content Include="Views\Distribution\MkCustomizeSubMenuList.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerMkCustomizeSubMenuList.cshtml" />
+    <Content Include="Views\Distribution\MkCustomizeSubMenuCreate.cshtml" />
+    <Content Include="Views\Distribution\DsDealerCustomerRelationSchemaList.cshtml" />
+    <Content Include="Views\Promotion\SpComboList.cshtml" />
+    <Content Include="Views\Promotion\_SpComboPager.cshtml" />
+    <Content Include="Views\Promotion\SpComboCreate.cshtml" />
+    <Content Include="Views\Report\DealerSales.cshtml" />
+    <Content Include="Views\Report\_DealerSalesPager.cshtml" />
+    <Content Include="Views\Distribution\DealerProductQRCodeCreate.cshtml" />
+    <Content Include="Views\Icp\IcpGoodsList.cshtml" />
+    <Content Include="Views\Icp\_IcpGoodsPager.cshtml" />
+    <Content Include="Views\Icp\IcpGoodsCreate.cshtml" />
+    <Content Include="Views\Icp\_IcpProductPager.cshtml" />
+    <Content Include="Views\Distribution\DealerUserInfo.cshtml" />
+    <Content Include="Views\Distribution\DsDealerUserList.cshtml" />
+    <Content Include="Views\Distribution\_DealerUserListPager.cshtml" />
+    <Content Include="Views\Product\ProductIcpInfo.cshtml" />
+    <Content Include="Views\Product\_BYJiChangIcpInfo.cshtml" />
+    <Content Include="Views\Product\_GZNanShaIcpInfo.cshtml" />
+    <Content Include="Views\Order\_LogisticsTracking.cshtml" />
+    <Content Include="Views\Icp\IcpOrderList.cshtml" />
+    <Content Include="Views\Product\_ProductDescriptionEditorNoTemplet.cshtml" />
+    <Content Include="Views\Product\_UpdateProductDescriptionNoTemplet.cshtml" />
+    <Content Include="Views\CRM\LoadCustomerAddress.cshtml" />
+    <Content Include="Views\Distribution\DsDealerApply.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsDealerApply.cshtml" />
+    <Content Include="Views\Promotion\WhouseFreightFreeList.cshtml" />
+    <Content Include="Views\Promotion\_WhouseFreightFreeListPager.cshtml" />
+    <Content Include="Views\Union\MkWeixinConfigList.cshtml" />
+    <Content Include="Views\Union\_AjaxPagerMkWeixinConfig.cshtml" />
+    <Content Include="Views\Union\MkWeixinConfigCreate.cshtml" />
+    <Content Include="Views\Order\_QueryLogistics.cshtml" />
+    <Content Include="Views\Product\BatchCategorySelector.cshtml" />
+    <Content Include="Views\Distribution\DealerHistoricalDetail.cshtml" />
+    <Content Include="Views\Order\OrderShipDialog.cshtml" />
+    <Content Include="Views\Stores\DsDealerBailOrderList.cshtml" />
+    <Content Include="Views\Stores\_DsDealerBailOrderPager.cshtml" />
+    <Content Include="Views\Report\RebatesRecord.cshtml" />
+    <Content Include="Views\Report\_RebatesRecordPager.cshtml" />
+    <Content Include="Views\Stores\DealerBailOrderDetail.cshtml" />
+    <Content Include="Views\Report\_DealerRebatesRecordPager.cshtml" />
+    <Content Include="Views\Report\DealerRebatesRecord.cshtml" />
+    <Content Include="Views\Warehouse\ShopOrderCreateOld.cshtml" />
+    <Content Include="Views\Warehouse\ShopOrderQuickCreate.cshtml" />
+    <Content Include="Views\DsPosManage\AddOrUpdateDsManage.cshtml" />
+    <Content Include="Views\DsPosManage\AddOrUpdatePosSellManageData.cshtml" />
+    <Content Include="Views\DsPosManage\EditPosMoneyBox.cshtml" />
+    <Content Include="Views\DsPosManage\GetDsMembershioLevelList.cshtml" />
+    <Content Include="Views\DsPosManage\GetDsMembershipCardListPager.cshtml" />
+    <Content Include="Views\DsPosManage\GetDsMembershipCardViewData.cshtml" />
+    <Content Include="Views\DsPosManage\GetPosManageReconciliation.cshtml" />
+    <Content Include="Views\DsPosManage\GetPosMoneyBoxPager.cshtml" />
+    <Content Include="Views\DsPosManage\GetPosReturnSellManagePage.cshtml" />
+    <Content Include="Views\DsPosManage\GetPosReturnSellManageViewData.cshtml" />
+    <Content Include="Views\DsPosManage\GetPosSellManagePage.cshtml" />
+    <Content Include="Views\DsPosManage\GetPosSellManageViewData.cshtml" />
+    <Content Include="Views\DsPosManage\GetTakeStockOrderPage.cshtml" />
+    <Content Include="Views\DsPosManage\GetTakeStockOrderViewData.cshtml" />
+    <Content Include="Views\DsPosManage\Index.cshtml" />
+    <Content Include="Views\DsPosManage\InnerOrUpdatePaymentToPointConfig.cshtml" />
+    <Content Include="Views\DsPosManage\InserOrUpdateDsMembershipLevel.cshtml" />
+    <Content Include="Views\DsPosManage\_AjaxDsMembershipCardPage.cshtml" />
+    <Content Include="Views\DsPosManage\_AjaxPosMoneyBoxPager.cshtml" />
+    <Content Include="Views\DsPosManage\_AjaxPosReturnSellManagePage.cshtml" />
+    <Content Include="Views\DsPosManage\_AjaxPosSellManagePage.cshtml" />
+    <Content Include="Views\DsPosManage\_AjaxTakeStockOrderManagePage.cshtml" />
+    <Content Include="Views\Product\_GaoJieLogisticsInfo.cshtml" />
+    <Content Include="Views\ProductRecord\ProductRecordList.cshtml" />
+    <Content Include="Views\ProductRecord\ImportExcel.cshtml" />
+    <Content Include="Views\Order\OrderLogDialog.cshtml" />
+    <Content Include="Views\Order\_QueryGaoJieLogistics.cshtml" />
+    <Content Include="Views\Order\ImportExcel.cshtml" />
+    <Content Include="Views\Icp\_IcpGoodsItemPager.cshtml" />
+    <Content Include="Views\Icp\_IcpOrderPager.cshtml" />
+    <Content Include="Views\Icp\IcpGoodsItemList.cshtml" />
+    <Content Include="Views\Distribution\DsMallExpressCode.cshtml" />
+    <Content Include="Views\Distribution\DsMallExpressCodeAdd.cshtml" />
+    <Content Include="Views\Distribution\DsMallExpressCodeUpdate.cshtml" />
+    <Content Include="Views\Distribution\_AjaxPagerDsMallExpressCode.cshtml" />
+    <Content Include="Views\CRM\CrRecharge.cshtml" />
+    <Content Include="Views\CRM\_AjaxCrRechargePager.cshtml" />
+    <Content Include="Views\RMA\RefundEditList.cshtml" />
+    <Content Include="Views\RMA\_RefundEditListPager.cshtml" />
+    <Content Include="Views\RMA\RefundDetail.cshtml" />
+    <Content Include="Views\RMA\RefundToAudit.cshtml" />
+    <Content Include="Views\RMA\_RefundEdit.cshtml" />
+    <Content Include="Views\Distribution\AddPriceHistory.cshtml" />
+    <Content Include="Views\Product\PdProductBarcode.cshtml" />
+    <Content Include="Views\Product\ProductBarcodeCreate.cshtml" />
+    <Content Include="Views\Product\_AjaxProductProductBarcodePager.cshtml" />
+    <Content Include="Views\Product\_AjaxProductProductBarcodePagerSelector.cshtml" />
+    <Content Include="Views\Product\BarCodeList.cshtml" />
+    <Content Include="Views\Product\_BarCodeQueryPager.cshtml" />
+    <Content Include="Views\Product\PdProductList.cshtml" />
+    <Content Include="Views\Product\_PdProductListQueryPager.cshtml" />
+    <Content Include="Views\Shared\_AgentDealer.cshtml" />
+    <Content Include="Views\Order\_Beizhu.cshtml" />
+    <Content Include="Views\Print\PickingInStock.cshtml" />
+    <Content Include="Views\Warehouse\ImportExcelSn.cshtml" />
+    <Content Include="Views\Procurement\BaseProcumentPageList.cshtml" />
+    <Content Include="Views\Procurement\CreateOrUpdateProcuremen.cshtml" />
+    <Content Include="Views\Procurement\CreateUpdatePointsOrder.cshtml" />
+    <Content Include="Views\Procurement\CreateUpdateProcurementPackOrder.cshtml" />
+    <Content Include="Views\Procurement\GetCBPurchasePaymentOrderPager.cshtml" />
+    <Content Include="Views\Procurement\GetMonthWarehouseHistoryDataPager.cshtml" />
+    <Content Include="Views\Procurement\GetPaymentListDataPager.cshtml" />
+    <Content Include="Views\Procurement\GetPointsOrderPager.cshtml" />
+    <Content Include="Views\Procurement\GetProcurementPager.cshtml" />
+    <Content Include="Views\Procurement\GetWhWarehousMouthSaleHistoryPager.cshtml" />
+    <Content Include="Views\Procurement\InnerOrUpdateLogisticsCompany.cshtml" />
+    <Content Include="Views\Procurement\InnerOrUpdateManufacturer.cshtml" />
+    <Content Include="Views\Procurement\InsertOrUpdateContainer.cshtml" />
+    <Content Include="Views\Procurement\InsertOrUpdateFnPurchasePaymentOrder.cshtml" />
+    <Content Include="Views\Procurement\ProcurementGoodsSelector.cshtml" />
+    <Content Include="Views\Procurement\ProcurementPmGoodsDeliveryByPager.cshtml" />
+    <Content Include="Views\Procurement\ProcurementWarehouse.cshtml" />
+    <Content Include="Views\Procurement\_AjaxCBPurchasePaymentOrderPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetMonthWarehouseHistoryDataPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetPaymentListDataPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetPmGoodsDeliveryPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetPmPointsOrderPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetProcurementGoodsSelectorPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetProcurementPager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetProcurementWarehousePager.cshtml" />
+    <Content Include="Views\Procurement\_AjaxGetWhWarehousMouthSaleHistoryPager.cshtml" />
+    <Content Include="Views\Purchase\PurchaseCreate.cshtml" />
+    <Content Include="Views\Purchase\PurchaseList.cshtml" />
+    <Content Include="Views\Purchase\PurchasePreview.cshtml" />
+    <Content Include="Views\Purchase\PurchaseReturnCreate.cshtml" />
+    <Content Include="Views\Purchase\PurchaseReturnList.cshtml" />
+    <Content Include="Views\Purchase\PurchaseReturnPreview.cshtml" />
+    <Content Include="Views\Purchase\PurchaseReturnUpdate.cshtml" />
+    <Content Include="Views\Purchase\_AjaxPagerPurchaseList.cshtml" />
+    <Content Include="Views\Purchase\_AjaxPagerPurchaseReturnList.cshtml" />
+    <Content Include="Views\Purchase\ImportExcel.cshtml" />
+    <Content Include="Views\Warehouse\AtAllocation.cshtml" />
+    <Content Include="Views\Warehouse\_AtAllocationPager.cshtml" />
+    <Content Include="Views\Warehouse\AtAllocationOutList.cshtml" />
+    <Content Include="Views\Warehouse\_AtAllocationOutListPager.cshtml" />
+    <Content Include="Views\Warehouse\AtAllocationOutConfirm.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInventoryOutItem.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInventoryOutItemDetail.cshtml" />
+    <Content Include="Views\Warehouse\InventoryOutDetails.cshtml" />
+    <Content Include="Views\Order\GetHaiDaiOrder.cshtml" />
+    <Content Include="Views\Warehouse\WhInventoryOutList.cshtml" />
+    <Content Include="Views\Warehouse\_AjaxPagerInventoryOutList.cshtml" />
+    <Content Include="Views\Warehouse\ImportExcelSnDate.cshtml" />
+    <Content Include="Views\Warehouse\InventoryOutCreate.cshtml" />
+    <Content Include="Views\Warehouse\_AtAllocationAddOrEditPager.cshtml" />
+    <Content Include="Views\Warehouse\AtAllocationAddOrEdit.cshtml" />
+    <Content Include="Views\Bootstrap\Index.cshtml" />
+    <Content Include="Views\InventorySheet\InventoryList.cshtml" />
+    <Content Include="Views\InventorySheet\_InventoryList.cshtml" />
+    <Content Include="Views\InventorySheet\EditInventory.cshtml" />
+    <Content Include="Views\InventorySheet\_EditInventory.cshtml" />
+    <Content Include="Views\InventorySheet\InventoryDetail.cshtml" />
+    <Content Include="Views\InventorySheet\WhInventoryRepor.cshtml" />
+    <Content Include="Views\InventorySheet\_WhInventoryRepor.cshtml" />
+    <Content Include="Views\InventorySheet\EditWhInventoryRepor.cshtml" />
+    <Content Include="Views\InventorySheet\ImportExcel.cshtml" />
+    <Content Include="Views\InventorySheet\ImportWhInventoryExcel.cshtml" />
+    <Content Include="Views\InventorySheet\_AjaxCrCustomer.cshtml" />
+    <Content Include="Views\InventorySheet\GetUserPageIndex.cshtml" />
+    <Content Include="Views\InventorySheet\OtherOutOfStorage.cshtml" />
+    <Content Include="Views\InventorySheet\_OtherOutOfStorage.cshtml" />
+    <Content Include="Views\InventorySheet\EditOtherOutOfStorage.cshtml" />
+    <Content Include="Views\InventorySheet\OtherImportExcel.cshtml" />
+    <Content Include="Views\Distribution\DealerOrder.cshtml" />
+    <Content Include="Views\Distribution\_AjaxDsOrderPage.cshtml" />
+    <Content Include="Views\Distribution\DealerInfo.cshtml" />
+    <Content Include="Views\Distribution\UpOrderInfo.cshtml" />
+    <Content Include="Views\Distribution\OrderBrowse.cshtml" />
+    <Content Include="Views\Distribution\DealerOrderPdInfo.cshtml" />
+    <Content Include="Views\InventorySheet\_UtilLike.cshtml" />
+    <Content Include="Views\Distribution\DoGetShouquanma.cshtml" />
+    <Content Include="Views\Distribution\GetRedirectUriCodes.cshtml" />
+    <Content Include="Views\Product\PdPackagedGoodsList.cshtml" />
+    <Content Include="Views\Product\_PdPackagedGoodsList.cshtml" />
+    <Content Include="Views\Product\EditPdPackagedGoods.cshtml" />
+    <Content Include="Views\Product\ImportWhInventoryExcel.cshtml" />
+    <Content Include="Views\Distribution\_AjaxDsRMAOrderPage.cshtml" />
+    <Content Include="Views\Distribution\DsRMAorder.cshtml" />
+    <Content Include="Views\Distribution\RMADealerInfo.cshtml" />
+    <Content Include="Views\Product\AddPdProductSpec.cshtml" />
+    <Content Include="Views\Product\EditPdProductSpecPrices.cshtml" />
+    <Content Include="Views\Warehouse\ImportExpress.cshtml" />
+    <Content Include="Views\Distribution\DsMallSyncLogs.cshtml" />
+    <Content Include="Views\Distribution\_DsMallSyncLogListPager.cshtml" />
+    <Content Include="Views\Sys\LiJiaSyncLogList.cshtml" />
+    <Content Include="Views\Sys\_LiJiaSyncLogListPager.cshtml" />
+    <Content Include="Views\Sys\_LiJiaDetailListPager.cshtml" />
+    <Content Include="Views\Sys\LiJiaDetailList.cshtml" />
+    <Content Include="Views\Sys\_SSOUserList.cshtml" />
+    <Content Include="Views\Logistics\QueryExpress.cshtml" />
+    <Content Include="Views\ScavengingPayment\ScavengingPayment.cshtml" />
+    <Content Include="Views\Sys\AddThirdPartyUser.cshtml" />
+    <Content Include="Views\Sys\_ThirdPartyUser.cshtml" />
+    <Content Include="Views\Sys\ThirdPartyUser.cshtml" />
+    <Content Include="Views\Sys\_XingYeDetailListPager.cshtml" />
+    <Content Include="Views\Sys\_XingYeSyncLogListPager.cshtml" />
+    <Content Include="Views\Sys\XingYeDetailList.cshtml" />
+    <Content Include="Views\Sys\XingYeSyncLogList.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\_UrlPaging.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\B2B.Service.Img\B2B.Service.Img.csproj">
+      <Project>{995c2610-5dc6-4751-b06d-0118b44a1ccc}</Project>
+      <Name>B2B.Service.Img</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Extra.Logistics\Extra.Logistics.csproj">
+      <Project>{5dc23ec0-57ae-4933-b3b2-e616508457ef}</Project>
+      <Name>Extra.Logistics</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.BLL\Hyt.BLL.csproj">
+      <Project>{c49d2a21-1e3c-438c-8f30-f5cef9597e17}</Project>
+      <Name>Hyt.BLL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.DataAccess.Oracle\Hyt.DataAccess.Oracle.csproj">
+      <Project>{35bd3c9e-11db-442e-90ce-e1f9b2d7df82}</Project>
+      <Name>Hyt.DataAccess.Oracle</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.DataAccess\Hyt.DataAccess.csproj">
+      <Project>{d3af6913-f96c-45e0-ad43-4fe1ef542da8}</Project>
+      <Name>Hyt.DataAccess</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.AliF2F\Extra.AliF2F.csproj">
+      <Project>{f7aaebf1-a6ae-48e5-b567-fb15b86d4a14}</Project>
+      <Name>Extra.AliF2F</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.Customs\Extra.Customs.csproj">
+      <Project>{9a9da141-e736-4162-9239-2cbe1a19e24b}</Project>
+      <Name>Extra.Customs</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.EDM\Extra.EDM.csproj">
+      <Project>{27f910f8-f501-453d-96d7-aef59228dd09}</Project>
+      <Name>Extra.EDM</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.Erp\Extra.Erp.csproj">
+      <Project>{10ffd80f-2011-4684-a1b7-bc906454bfb4}</Project>
+      <Name>Extra.Erp</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.Express\Extra.Express\Extra.Express.csproj">
+      <Project>{6a5489a8-395f-448e-9521-ba2782ac17e7}</Project>
+      <Name>Extra.Express</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.PushService\Extra.PushService.csproj">
+      <Project>{e3a0a573-2acb-4d85-9297-fe3c95ac867c}</Project>
+      <Name>Extra.PushService</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.SfExpress\Extra.SfExpress.csproj">
+      <Project>{00af8b90-d51e-48dc-a901-5b530324e88d}</Project>
+      <Name>Extra.SfExpress</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.SMS\Extra.SMS.csproj">
+      <Project>{2c317e9e-4806-49a9-a5bb-75976e26ed0c}</Project>
+      <Name>Extra.SMS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Extra\Extra.UpGrade\Extra.UpGrade.csproj">
+      <Project>{dfa0c19c-69c5-46fb-8833-3041f3496848}</Project>
+      <Name>Extra.UpGrade</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Infrastructure\Hyt.Infrastructure.csproj">
+      <Project>{17216f5e-0585-4d11-a869-ad8119604f2a}</Project>
+      <Name>Hyt.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Service\Hyt.Service.Contract\Hyt.Service.Contract.csproj">
+      <Project>{c3718184-d933-4570-bc9d-ddb03730ac31}</Project>
+      <Name>Hyt.Service.Contract</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Service\Hyt.Service.Task\Hyt.Service.Task.csproj">
+      <Project>{0918c95a-765f-43d7-b183-3f40c01d89f9}</Project>
+      <Name>Hyt.Service.Task</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{cb555155-5eeb-41fd-ae7b-48f80ded197c}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\_Layout.cshtml" />
+    <Content Include="Views\_ViewStart.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Account\Login.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Main\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\_Header.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Theme\Plugins\Dialog\Dialog.yui.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\DeliveryUserCurrentLocation.cshtml" />
+    <Content Include="Views\Logistics\DeliveryUserHistoryLocation.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Order\OrderCreate.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\JobPool\Index.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="upload.ashx" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Main\test.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\DeliveryNoteMaintain.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Warehouse\InStockManage.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\CreateDeliveryNote.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Warehouse\InStockCreate.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\LgSettlement.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\LgSettlementDetails.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Account\MiniLogin.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\PageTest\Index.cshtml" />
+    <Content Include="Views\PageTest\UrlPage.cshtml" />
+    <Content Include="Views\PageTest\_AjaxPager.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Order\SelectWarehouse.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Warehouse\SingleBatchOutStock.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Warehouse\StockOut.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Warehouse\_AjaxPagerInStockList.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeArticleCategory.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeProductGroup.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeProductGroupAdd.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeProductGroupUpdate.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeProductItem.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeProductItemAdd.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeProductItemUpdate.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\FeAdvertItem.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Views\MallSeller\" />
+    <Folder Include="Xml\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\DeliveryType.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\DeliveryTypeAdd.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Logistics\DeliveryTypeUpdate.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Theme\scripts\Utils.yui.js" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Front\_AjaxFeArticleCategoryList.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Warehouse\InStockDetails.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>False</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:42027/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target> -->
+</Project>

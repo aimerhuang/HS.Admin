@@ -1,0 +1,266 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{5211BBAF-DFF3-4E9B-B94B-C46076F01135}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.DataImporter</RootNamespace>
+    <AssemblyName>Hyt.DataImporter</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Oracle.DataAccess">
+      <HintPath>..\..\lib\x86\Oracle.DataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Common.cs" />
+    <Compile Include="DataProvider.cs" />
+    <Compile Include="FluentData.cs" />
+    <Compile Include="FrmImportData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmImportData.Designer.cs">
+      <DependentUpon>FrmImportData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="FrmMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="FrmMain.Designer.cs">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="log\logRecord.cs" />
+    <Compile Include="MyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MyForm.Designer.cs">
+      <DependentUpon>MyForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TaskThread\BsAreaTaskThread.cs" />
+    <Compile Include="TaskThread\BsDeliveryPaymentTaskThread.cs" />
+    <Compile Include="TaskThread\BsPaymentTypeTaskThread.cs" />
+    <Compile Include="TaskThread\CrCustomerLevelTaskThread.cs" />
+    <Compile Include="TaskThread\CrCustomerQuestionTaskThread.cs" />
+    <Compile Include="TaskThread\CrCustomerTaskThread.cs" />
+    <Compile Include="TaskThread\CrReceiveAddressTaskThread.cs" />
+    <Compile Include="TaskThread\LgDeliveryItemTaskThread.cs" />
+    <Compile Include="TaskThread\LgDeliveryTaskThread.cs" />
+    <Compile Include="TaskThread\LgSettlementItemTaskThread.cs" />
+    <Compile Include="TaskThread\LgSettlementTaskThread.cs" />
+    <Compile Include="TaskThread\SyGroupUserTaskThread.cs" />
+    <Compile Include="TaskThread\SyMenuTaskThread.cs" />
+    <Compile Include="TaskThread\SyPermissionTaskThread.cs" />
+    <Compile Include="TaskThread\SyUserWarehouseTaskThread.cs" />
+    <Compile Include="TaskThread\WhstockOutItemTaskThread.cs" />
+    <Compile Include="TaskThread\WhStockOutTaskThread.cs" />
+    <Compile Include="TaskThread\FeArticleCategoryTaskThread.cs" />
+    <Compile Include="TaskThread\FeArticleTaskThread.cs" />
+    <Compile Include="TaskThread\FeCommentSupportTaskThread.cs" />
+    <Compile Include="TaskThread\FeProductCommentImageTaskThread.cs" />
+    <Compile Include="TaskThread\FeProductCommentReplyTaskThread.cs" />
+    <Compile Include="TaskThread\FnInvoiceTypeTaskThread.cs" />
+    <Compile Include="TaskThread\LgDeliveryScopeTaskThread.cs" />
+    <Compile Include="TaskThread\LgDeliveryTypeTaskThread.cs" />
+    <Compile Include="TaskThread\LgPickupTypeTaskThread.cs" />
+    <Compile Include="TaskThread\PdAttributeGroupAssociationTaskThread.cs" />
+    <Compile Include="TaskThread\PdAttributeGroupTaskThread.cs" />
+    <Compile Include="TaskThread\PdAttributeTaskThread.cs" />
+    <Compile Include="TaskThread\PdBrandTaskThread.cs" />
+    <Compile Include="TaskThread\PdCategoryAssociationTaskThread.cs" />
+    <Compile Include="TaskThread\PdPriceTaskThread.cs" />
+    <Compile Include="TaskThread\PdProductAssociationTaskThread.cs" />
+    <Compile Include="TaskThread\PdProductAttributeTaskThread.cs" />
+    <Compile Include="TaskThread\PdCatAttributeGroupAsoTaskThread.cs" />
+    <Compile Include="TaskThread\PdAttributeOptionTaskThread.cs" />
+    <Compile Include="TaskThread\PdProductTaskThread.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TaskThread\BaseTaskThread.cs" />
+    <Compile Include="TaskThread\PdCategoryTaskThread.cs" />
+    <Compile Include="TaskThread\SoOrderItemTaskThread.cs" />
+    <Compile Include="TaskThread\SoOrderTaskThread.cs" />
+    <Compile Include="TaskThread\SyUserGroupTaskThread.cs" />
+    <Compile Include="TaskThread\SyUserTaskThread.cs" />
+    <Compile Include="TaskThread\WhWarehouseTaskThread.cs" />
+    <Compile Include="Task\BaseTask.cs" />
+    <Compile Include="Task\BsArea.cs" />
+    <Compile Include="Task\BsCode.cs" />
+    <Compile Include="Task\BsDeliveryPayment.cs" />
+    <Compile Include="Task\BsOrganization.cs" />
+    <Compile Include="Task\BsOrganizationWarehouse.cs" />
+    <Compile Include="Task\BsPaymentType.cs" />
+    <Compile Include="Task\CrCustomerLevel.cs" />
+    <Compile Include="Task\CrCustomerQuestion.cs" />
+    <Compile Include="Task\CrCustomer.cs" />
+    <Compile Include="Task\CrReceiveAddress.cs" />
+    <Compile Include="Task\DsDealerLevel.cs" />
+    <Compile Include="Task\DsMallType.cs" />
+    <Compile Include="Task\FeAdvertGroup.cs" />
+    <Compile Include="Task\FeAdvertItem.cs" />
+    <Compile Include="Task\FeArticle.cs" />
+    <Compile Include="Task\FeArticleCategory.cs" />
+    <Compile Include="Task\FeCommentSupport.cs" />
+    <Compile Include="Task\FeProductComment.cs" />
+    <Compile Include="Task\FeProductCommentImage.cs" />
+    <Compile Include="Task\FeProductCommentReply.cs" />
+    <Compile Include="Task\FeProductGroup.cs" />
+    <Compile Include="Task\FeProductItem.cs" />
+    <Compile Include="Task\FeSearchKeyword.cs" />
+    <Compile Include="Task\FnInvoice.cs" />
+    <Compile Include="Task\FnInvoiceType.cs" />
+    <Compile Include="Task\FnOnlinePayment.cs" />
+    <Compile Include="Task\FnPaymentVoucher.cs" />
+    <Compile Include="Task\FnPaymentVoucherItem.cs" />
+    <Compile Include="Task\FnReceiptVoucher.cs" />
+    <Compile Include="Task\FnReceiptVoucherItem.cs" />
+    <Compile Include="Task\LgDeliveryItem.cs" />
+    <Compile Include="Task\LgDeliveryPrintTemplate.cs" />
+    <Compile Include="Task\LgDeliveryScope.cs" />
+    <Compile Include="Task\LgDelivery.cs" />
+    <Compile Include="Task\LgDeliveryType.cs" />
+    <Compile Include="Task\LgDeliveryUserCredit.cs" />
+    <Compile Include="Task\LgPickupType.cs" />
+    <Compile Include="Task\LgSettlement.cs" />
+    <Compile Include="Task\LgSettlementItem.cs" />
+    <Compile Include="Task\PdAttribute.cs" />
+    <Compile Include="Task\PdAttributeGroup.cs" />
+    <Compile Include="Task\PdAttributeGroupAssociation.cs" />
+    <Compile Include="Task\PdAttributeOption.cs" />
+    <Compile Include="Task\PdBrand.cs" />
+    <Compile Include="Task\PdCatAttributeGroupAso.cs" />
+    <Compile Include="Task\PdCategory.cs" />
+    <Compile Include="Task\PdCategoryAssociation.cs" />
+    <Compile Include="Task\PdPrice.cs" />
+    <Compile Include="Task\PdProduct.cs" />
+    <Compile Include="Task\PdProductAssociation.cs" />
+    <Compile Include="Task\PdProductAttribute.cs" />
+    <Compile Include="Task\PdProductImage.cs" />
+    <Compile Include="Task\PdProductStatistics.cs" />
+    <Compile Include="Task\PdTemplate.cs" />
+    <Compile Include="Task\RCReturn.cs" />
+    <Compile Include="Task\RcReturnItem.cs" />
+    <Compile Include="Task\SoOrder.cs" />
+    <Compile Include="Task\SoOrderItem.cs" />
+    <Compile Include="Task\SoReceiveAddress.cs" />
+    <Compile Include="Task\SpCombo.cs" />
+    <Compile Include="Task\SpComboItem.cs" />
+    <Compile Include="Task\spcoupon.cs" />
+    <Compile Include="Task\SPpromotion.cs" />
+    <Compile Include="Task\SPpromotiongift.cs" />
+    <Compile Include="Task\SPpromotionoverlay.cs" />
+    <Compile Include="Task\SPpromotionrule.cs" />
+    <Compile Include="Task\SPpromotionrulecondition.cs" />
+    <Compile Include="Task\SPpromotionrulekeyvalue.cs" />
+    <Compile Include="Task\SyGroupUser.cs" />
+    <Compile Include="Task\SyMenu.cs" />
+    <Compile Include="Task\SyMenuPrivilege.cs" />
+    <Compile Include="Task\SyMyMenu.cs" />
+    <Compile Include="Task\SyPermission.cs" />
+    <Compile Include="Task\SyPrivilege.cs" />
+    <Compile Include="Task\SyRole.cs" />
+    <Compile Include="Task\SyRoleMenu.cs" />
+    <Compile Include="Task\SyRolePrivilege.cs" />
+    <Compile Include="Task\SyTaskConfig.cs" />
+    <Compile Include="Task\SyUser.cs" />
+    <Compile Include="Task\SyUserGroup.cs" />
+    <Compile Include="Task\SyUserWarehouse.cs" />
+    <Compile Include="Task\WhStockIn.cs" />
+    <Compile Include="Task\WHStockinItem.cs" />
+    <Compile Include="Task\WhStockOut.cs" />
+    <Compile Include="Task\WhstockOutItem.cs" />
+    <Compile Include="Task\WhWarehouse.cs" />
+    <Compile Include="Task\WHwarehousearea.cs" />
+    <Compile Include="Task\WHwarehouseDeliveryType.cs" />
+    <Compile Include="Task\WhWarehousePickupType.cs" />
+    <EmbeddedResource Include="FrmImportData.resx">
+      <DependentUpon>FrmImportData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="FrmMain.resx">
+      <DependentUpon>FrmMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MyForm.resx">
+      <DependentUpon>MyForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{ab819faf-0e0c-4d9b-94af-dbc5531b47c2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "ProductQRCodeCreate";
+    var generalConfig = Hyt.BLL.Config.Config.Instance.GetGeneralConfig();
+    string qrSite = "http://qr.liantu.com/api.php?text=" + generalConfig.Domain + "/product/details/";
+}
+
+<div>
+    <div>
+        @foreach (var item in ViewBag.sysNos)
+        {
+            <div style="display:inline-block;height:280px;overflow:hidden;">
+                <img style="width:200px;" src="@qrSite@item">
+                @{
+            string name = Hyt.BLL.Web.PdProductBo.Instance.GetProduct(int.Parse(item)).ProductName;
+                }
+                <div style="width:200px;height:60px;" title="@name">@name</div>
+            </div>
+        }
+    </div>
+</div>

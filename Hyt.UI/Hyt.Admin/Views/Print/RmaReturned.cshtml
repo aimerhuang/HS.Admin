@@ -1,0 +1,159 @@
+﻿@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "退换货单打印";
+
+    var refundTotal = ViewBag.RefundTotal;
+    var warehouseName = ViewBag.WarehouseName;
+    var receiveAddress = ViewBag.ReceiveAddress;
+    var receiveMobile = ViewBag.ReceiveMobile;
+    var refundType = ViewBag.RefundType;
+    var receiveName = ViewBag.ReceiveName;
+}
+@using Hyt.BLL.Product
+@model Hyt.Model.CBRcReturn
+<style type="text/css">
+    .tdhead{ font-weight: bold;}
+    .item_tb
+    {
+        border:none;
+    }
+    .item_tb tr{
+        border: none;
+    }
+    .item_tb td{
+        border: none;
+    }
+</style>
+
+<div id="print" style="display: none; "  class="divdisplay">
+    <br /> 
+<br />    
+        <div id="divmain" class="divdisplay">
+            <div class="print_title">商城退货单</div>
+        </div>
+<br />     
+
+    <table class="item_tb" style="width: 700px; border: none;">
+        <tr style=" border: none;">
+        <td style="width: 120px; font-weight: bold; border: none;" class="auto_left">店铺名称：</td>
+        <td class="auto_left" style="width: 200px; border: none;">@ViewBag.mallShopName</td>
+        <td style="width: 120px; font-weight: bold; border: none;" class="auto_left">销售单来源：</td>
+            <td class="auto_left" style=" border: none;">@ViewBag.OrderSource</td>
+        </tr>
+        <tr style=" border: none;">
+        <td class="auto_left" style="font-weight: bold; border: none;">支付方式：</td>
+            <td class="auto_left" style=" border: none;">@ViewBag.PaymentName</td>
+        <td class="auto_left" style="font-weight: bold; border: none;">入库仓库：</td>
+            <td class="auto_left" style=" border: none;">@ViewBag.WarehouseName</td>
+        </tr>
+        <tr style=" border: none;">
+        <td class="auto_left" style="font-weight: bold; border: none;">第三方订单号：</td>
+            <td class="auto_left" style=" border: none;">@ViewBag.mallOrderId</td>
+        <td class="auto_left" style="font-weight: bold; border: none;">退货日期：</td>
+            <td class="auto_left" style=" border: none;">@Model.CreateDate</td>
+        </tr>
+        <tr style=" border: none;">
+        <td class="auto_left" style="font-weight: bold; border: none;">退货人姓名：</td>
+            <td class="auto_left" style=" border: none; font-size:20px;">@ViewBag.CustomerName</td>
+        <td class="auto_left" style="font-weight: bold; border: none;">退货人电话：</td>
+            <td class="auto_left" style=" border: none;">@ViewBag.CustomerMobilePhoneNumber</td>
+        </tr>
+        <tr style=" border: none;">
+        <td class="auto_left" style="font-weight: bold; border: none;">商城订单号：</td>
+            <td colspan="3" class="auto_left" style=" border: none;">@Model.OrderSysNo</td>
+        </tr>
+    </table>
+    <br /> 
+    <table class="item_tb" style="width: 700px; border: none; border-top: solid 2px #000; border-bottom: solid 2px #000;">
+        <tr style=" border: none;">
+            <td style="width: 100px; font-weight: bold; border: none;">商品编码</td>
+            <td style="width: 100px; font-weight: bold; border: none;">条形码</td>
+            <td style="font-weight: bold; border: none;">名称</td>
+            <td style="width: 90px; font-weight: bold; border: none;">数量</td>
+            <td style="width: 90px; font-weight: bold; border: none;">原单价</td>
+            <td style="width: 90px; font-weight: bold; border: none;">金额</td>
+        </tr>
+                    @if (Model != null && Model.RMAItems != null && Model.RMAItems.Count > 0)
+                    {
+                        foreach (var item in Model.RMAItems)
+                        { 
+                            <tr style=" border: none;">
+                                <td class="auto_left" style=" text-align:center; border: none;">@PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                                @{
+                            var pd = Hyt.DataAccess.Product.IPdProductDao.Instance.GetEntityByErpCode(PdProductBo.Instance.GetProductErpCode(item.ProductSysNo));
+                                }
+                                <td class="auto_left" style="text-align: center; border: none; ">@(pd != null ? pd.Barcode : "")</td>
+                                <td class="auto_left" style="text-align: center; border: none;">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                                <td class="auto_left" style="text-align: center; border: none; ">@item.RmaQuantity</td>
+                                <td class="auto_left" style="text-align: center; border: none; ">@item.OriginPrice</td>
+                                <td class="auto_left" style="text-align: center; border: none; ">@Hyt.Util.FormatUtil.FormatCurrency(-@item.RefundProductAmount, 2, "￥")</td>
+                            </tr>
+                        }
+                    }
+       
+    </table>
+    <br /> 
+    <table class="" style="width:700px;">
+        <tr>
+            <td class="auto_left"  style=" border: none;">合计数量:</td>
+            <td class="auto_left">@ViewBag.ItemsCount</td>
+            <td class="auto_left"  style=" border: none;">合计金额:</td>
+            <td class="auto_left"  style=" border: none;font-size:20px;">@refundTotal</td>
+        </tr>
+        <tr>
+        <td class="auto_left">收货人：</td>
+        <td class="auto_left"></td>
+        <td  style="width: 90px" class="auto_left">日期：</td>
+        <td class="auto_left"></td>
+        </tr>
+        <tr><td style="width: 90px; height:30px;" class="auto_left">备　注：</td><td colspan="3" class="auto_left"></td></tr>
+    </table>
+</div>
+<br />
+
+<script type="text/javascript">
+    var LODOP; //声明为全局变量  
+    //直接加载打印预览
+    window.onload = function myPreviewLoad() {
+        CreatePrintPage();
+        LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+        LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+        LODOP.PREVIEW();
+    };
+    //直接打印
+    function myPrint() {
+        CreatePrintPage();
+        LODOP.PRINT();
+    };
+    //选择打印机打印
+    function myPrintA() {
+        CreatePrintPage();
+        LODOP.PRINTA();
+    };
+    //打印预览
+    function myPreview() {
+        CreatePrintPage();
+        LODOP.PREVIEW();
+    };
+    //打印维护
+    function mySetup() {
+        CreatePrintPage();
+        LODOP.PRINT_SETUP();
+    };
+    //打印设计
+    function myDesign() {
+        CreatePrintPage();
+        LODOP.PRINT_DESIGN();
+    };
+
+    function CreatePrintPage() {
+        LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        LODOP.PRINT_INIT("退换货单打印");
+        LODOP.SET_PRINT_PAGESIZE(1, 0, 0, 'A4');
+        var strBodyStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+        var strFormHtml = strBodyStyle + "<body>" + document.getElementById("print").innerHTML + "</body>";
+        LODOP.ADD_PRINT_HTM("0mm", "5%", "70mm", "200mm", strFormHtml);     //打印边距设定
+        LODOP.SET_PRINT_STYLEA(0, "FontName", "隶书");
+        LODOP.SET_PRINT_STYLEA(0, "FontSize", 20);
+    };
+</script>

@@ -1,0 +1,81 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.rp_绩效_办事处>
+
+@{
+    Model.OnBegin = "setWhData";
+    <style type="text/css">
+        td { word-break: break-all; }
+    </style>
+
+    <div id="paging"><!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th rowspan="3">办事处</th>
+                    <th colspan="6" width="600px" class="border_bnone">配送金额</th>
+                </tr>
+                <tr>
+ 
+                    @*<th colspan="2" class="wd200 border_bnone">升舱</th>*@
+                    <th colspan="2" class="wd200 border_bnone">商城</th>
+                    <th colspan="2" class="wd200 border_bnone">代发</th>
+                </tr>
+                <tr>
+
+                    @*<th class="wd100">百城达</th>
+                      <th class="wd100">三方快递</th>*@
+                    <th class="wd100">百城达</th>
+                    <th class="wd100">三方快递</th>
+                    <th class="wd100">百城达</th>
+                    <th class="wd100">三方快递</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                @{
+                    if (Model.TData == null || !Model.TData.Any())
+                    {
+                        <tr>
+                            <td colspan="99" class="align_l">&nbsp;暂无数据.</td>
+                        </tr>
+                        return;
+                    }
+                    var count = 1;
+
+                    foreach (var m in Model.TData)
+                    {
+                        if (count%2 == 0)
+                        {
+                            @: <tr class="stag_color">
+                        }
+                        else
+                        {
+                            @: <tr>
+                        }
+
+                        <td >@m.办事处</td>
+                        @*<td class="red align_r p10_r">@m.升舱百城达.ToString("C")</td>
+                        <td class="red align_r p10_r">@m.升舱第三方.ToString("C")</td>*@
+                        <td class="red align_r p10_r">@m.商城百城达.ToString("C")</td>
+                        <td class="red align_r p10_r">@m.商城第三方.ToString("C")</td>
+                        <td class="red align_r p10_r">@m.代发百城达.ToString("C")</td>
+                        <td class="red align_r p10_r">@m.代发第三方.ToString("C")</td>
+
+                        @:</tr>
+
+                        count++;
+                    }
+                }
+            
+            </tbody>
+        </table>
+        <!-- end content -->
+        
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+            -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+}

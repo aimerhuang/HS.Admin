@@ -1,0 +1,139 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        
+        function tip_alert(mode, context) {
+            UI.tips.tip_alert(mode, context);
+        }
+
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+        function AjaxStop() {
+            cover.Remove();
+        }
+        
+        function selectProduct() {
+            var newsSysNo = @ViewBag.newsSysNo;
+            DAO.SelectProduct({
+                selectedIsReadOnly: true,
+                syncWebFront: true,
+                onselect: function(data) {
+                    var result = [];
+
+                    var josn = {};
+                    for (var i = 0; i < data.length; i++) {
+                        result[i] = data[i].pid;
+                    }
+                    result.push(josn);
+                    $.ajax({
+                        url: '/Front/FeNewsProductAssociationInsert?newsSysNo=' + newsSysNo,
+                        data: JSON.stringify({ collocation: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function(res) {
+                            if (res.Status) {
+                                doSearch();
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', res.Message);
+                                doSearch();
+                            }
+
+                        }
+                    });
+                }
+            });
+        }
+
+        //修改
+        function doEdit(sysNo) {
+            var url = "/Front/FeNewsProductAssociationEdit/?sysNo=" + sysNo;
+            UI.DialogOpen(url, {
+                title: "修改新闻关联商品",
+                width: 550,
+                height: 110,
+                init: function() {
+                    this.button(
+                        {
+                            name: '保存',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+                                if (!iframe.document.body) {
+                                    alert('iframe还没加载完毕呢');
+                                    return false;
+                                };
+                                iframe.addOrEdit();
+                                return false;
+                            },
+                            focus: true
+                        },
+                        {
+                            name: '取消',
+                        }
+                    );
+                }
+            });
+        }
+
+        //删除
+        function doRemove(sysNo) {
+            $.get('/Front/FeNewsProductAssociationRemove/', { sysNo: sysNo }, function(data) {
+                if (data.Status) {
+                    doSearch();
+                } else {
+                    //
+                }
+            });
+        }
+
+        function doSearch() {
+
+            var json = {};
+            json.newsSysNo = @ViewBag.newsSysNo;
+
+            AjaxStart();
+            $.get('/Front/FeNewsProductAssociation?r=' + Math.random(), json, function(data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+    <!--工具条开始-->
+    <div class="boxs_tool boxs_toolbgnone p0"> 
+      <!--搜索开始-->
+      <!--搜索结束-->
+      <!--功能按钮开始-->
+      <div class="left_tool">
+        <button type="button" class="btn btn_ht26 btn_blue m10_r" onclick="selectProduct(0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加商品</span></button>
+      </div>
+      <!--功能按钮结束-->
+    </div>
+    <!--工具条结束-->
+    
+    <!--列表开始-->
+    <div class="boxs_listtabel">
+    @{Html.RenderPartial("_AjaxFeNewsProductAssociation"); }
+    </div>
+    <!--列表结束-->
+</div>
+</form>
+

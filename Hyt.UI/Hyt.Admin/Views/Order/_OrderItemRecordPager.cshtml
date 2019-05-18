@@ -1,0 +1,61 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBSoOrderItem>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="90">商品编码</th>
+                <th width="90">后台显示名称</th>
+                <th width="90">商品利润</th>
+                <th width="90">单个商品利润</th>
+                <th width="90">订购数量</th>
+                <th width="90">销售单价</th>
+                <th width="90">总部销售单价</th>
+                <th width="90">返利状态</th>
+                <th width="90">返利比例</th>
+                <th width="90">返利操作费</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="11" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBSoOrderItem>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>@item.ErpCode</td>
+                <td>@item.EasName</td>
+                <td>@item.Catle</td>
+                <td>@item.UnitCatle</td>
+                <td>@item.Quantity</td>
+                <td>@item.SalesUnitPrice</td>  
+                <td>@item.OriginalSalesUnitPrice</td> 
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(SellBusinessStatus.状态类型), item.RebatesStatus)</td> 
+                <td>@item.RebateRtio</td>
+                <td>@(item.OperatFee)‰</td>                                                                                                  
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

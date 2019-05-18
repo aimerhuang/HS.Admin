@@ -1,0 +1,63 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBSoOrder>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="90">订单号</th>
+                
+                <th width="">仓库</th>
+@*                <th width="">会员姓名</th>*@
+                <th width="100">会员账号</th>
+                <th width="100">配送方式</th>
+                <th width="100">支付方式</th>
+                <th width="100">支付金额</th>
+                <th>来源</th>
+                <th width="90">状态</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CBSoOrder>)Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    <td>@item.SysNo</td>
+                    
+                    <td>@item.WarehouseName</td>@*
+                    <td>@customerName</td>*@
+                    <td>@item.CustomerAccount</td>
+                    <td>@item.DeliveryTypeName</td>
+                    <td>@item.PaymentName</td>
+                    <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.CashPay,2))</td>
+                    <td >@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单来源),item.OrderSource)</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单状态), item.Status)</td>    
+                <td>
+                        <button class="btn btn_ht26" onclick="doSelect(@item.SysNo);"><span class="icon_changeGoods"></span><span class="m5_l">选择</span></button>
+                        </td>
+
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

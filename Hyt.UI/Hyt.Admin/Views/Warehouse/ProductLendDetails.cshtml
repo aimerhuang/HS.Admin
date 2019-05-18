@@ -1,0 +1,101 @@
+﻿@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.WhProductLend
+
+@{
+    ViewBag.Title = "借货单查看";
+}
+
+@section headjs{
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+        });
+        //查询列表
+        function doSearch() {
+            $.get('@Url.Action("ProductLendDetails", "Warehouse")',
+                { SysNo: $("#hid_sysno").val() },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+@section HeadCss
+{
+    <style type="text/css">
+        Label {
+            word-break: break-all;
+        }
+    </style>
+}
+@if (null != Model)
+{
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="head_detail border_bnone">
+                <h5>借货单明细</h5>
+            </div>
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">借货单系统编号：</td>
+                            <td width="30%">@Model.SysNo</td>
+                            <td width="20%" class="nameright border_rnone">配送员：</td>
+                            <td width="30%" class="border_right">@SyUserBo.Instance.GetUserName(Model.DeliveryUserSysNo)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">仓库：</td>
+                            <td class="border_right">@WhWarehouseBo.Instance.GetWarehouseName(Model.WarehouseSysNo)</td>
+                            <td class="nameright border_rnone">状态：</td>
+                            <td class="border_right">@((WarehouseStatus.借货单状态)Model.Status)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">创建人：</td>
+                            <td class="border_right">@SyUserBo.Instance.GetUserName(Model.CreatedBy)</td>
+                            <td class="nameright border_rnone">创建时间：</td>
+                            <td class="border_right">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">出库人：</td>
+                            <td class="border_right">@SyUserBo.Instance.GetUserName(Model.StockOutBy)</td>
+                            <td class="nameright border_rnone">出库时间：</td>
+                            <td class="border_right">@Model.StockOutDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">最后更新人：</td>
+                            <td class="border_right">@SyUserBo.Instance.GetUserName(Model.LastUpdateBy)</td>
+                            <td class="nameright border_rnone">最后更新时间：</td>
+                            <td class="border_right">@Model.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">金额(业务员信用价格)：</td>
+                            <td class="border_right">@Model.Amount.ToString("C")</td>
+                            <td class="nameright border_rnone">备注：</td>
+                            <td>
+                                @if (!string.IsNullOrWhiteSpace(Model.Remarks))
+                                {
+                                    @Html.Label(Model.Remarks)
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="head_detail m10_t">
+                <h5>借货单商品明细</h5>
+            </div>
+            <div class="boxs_detail border_lnone">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+        <input id="hid_sysno" type="hidden" value="@Model.SysNo" />
+    </div>
+}
+else
+{
+    <div class="align_l p10_l bgr_eb">未找到借货单,请重试！</div>
+}

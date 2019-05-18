@@ -1,0 +1,447 @@
+﻿@model Hyt.Model.Common.EditOrderModel
+@Html.PrivilegeControl(PrivilegeCode.SO1003785, ".SO1003785")
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus;
+@using Hyt.Model.SystemPredefined;
+@using Hyt.Util.Extension
+@{
+    Layout = "";
+    int row = 0;
+    bool canEdit = true; //可编辑订单明细
+    bool isDsOrder = false;  //是否分销商订单
+    bool isCanEditMallGift = false;//是否允许管理升仓赠品
+    var isHideMallGift = false;//是否隐藏管理升仓赠品按钮
+    if (ViewBag.IsCanEdit != null && ViewBag.IsCanEdit is bool)
+    {
+        canEdit = ViewBag.IsCanEdit;//只读视图不能编辑
+    }
+    //已支付订单不允许编辑
+    if (Model.Order.PayStatus == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态.已支付)
+    {
+        canEdit = false;
+    }
+    if (Model.Order.OrderSource == (int)OrderStatus.销售单来源.分销商升舱)
+    {
+        canEdit = false;
+        isDsOrder = true;
+        isCanEditMallGift = (ViewBag.IsCanEdit == true) && (Model.Order.Status == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待审核) && Hyt.BLL.Authentication.AdminAuthenticationBo.Instance.Current.PrivilegeList.Any(x => x.Code == Hyt.Model.SystemPredefined.PrivilegeCode.SO1003601.ToString());//是否有权限
+        isHideMallGift = ViewBag.TaskType != 0 && ((ViewBag.ExecutorSysNo == null || ViewBag.ExecutorSysNo == 0) || (ViewBag.ExecutorSysNo != ViewBag.CurrentSysNo));  //当前用户不是任务执行者，需禁用   
+        
+    }
+    if (Model.Order.CoinPay > 0)//惠源币支付不能编辑明细
+    {
+        canEdit = false;
+    }
+    canEdit = canEdit && Model.Order.Status == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待审核;
+    var couponList = Hyt.BLL.Promotion.SpCouponBo.Instance.GetCurrentCartValidCoupons(Model.Order.CustomerSysNo, Model.ShoppingCart, new[] { Hyt.Model.WorkflowStatus.PromotionStatus.促销使用平台.PC商城 });  //默认是WEB使用的优惠券，门店下单转快递，因为是已经支付了的，所以不存在另外选优惠券的情况
+
+    @*将可使用的优惠券和已经使用的优惠券合并 by ywb 2014-1-2*@
+    if (couponList == null)
+    {
+        couponList = new List<SpCoupon>();
+    }
+    var currentUseCoupon = Hyt.BLL.Order.SoOrderBo.Instance.GetCouponByOrderSysNo(Model.Order.SysNo).FirstOrDefault();
+    //var currentUseCoupon = Hyt.BLL.Promotion.PromotionBo.Instance.GetCoupon(Model.CouponCode);
+    if (currentUseCoupon != null)
+    {
+        if (couponList.Where(p => p.CouponCode == currentUseCoupon.CouponCode).Count() < 1)
+        {
+            couponList.Add(currentUseCoupon);
+        }
+    }
+ 
+    @*将可使用的优惠券和已经使用的优惠券合并 by ywb 2014-1-2*@
+    }
+@helper ChangeDecimal(int productSysNo)
+{
+    var item = Model.OrderItems.FirstOrDefault(p => p.ProductSysNo == productSysNo && string.IsNullOrEmpty(p.GroupCode) && p.ProductSalesType != (int)CustomerStatus.商品销售类型.赠品);
+    if (item != null)
+    {
+    @:@item.ChangeAmount
+        }
+    else
+    {
+    @:0
+    }
+}
+@helper GetOrderItemSysNo(int productSysNo)
+{
+    var item = Model.OrderItems.FirstOrDefault(p => p.ProductSysNo == productSysNo && string.IsNullOrEmpty(p.GroupCode) && p.ProductSalesType != (int)CustomerStatus.商品销售类型.赠品);
+    if (item != null)
+    {
+    @:@item.SysNo
+        }
+    
+}
+@functions{
+    /// <summary>
+    /// 显示商品名称或者后台显示名称
+    /// </summary>
+    /// <param name="productName"></param>
+    /// <param name="productSysNo"></param>
+    /// <returns></returns>
+    System.Web.IHtmlString GetName(string productName, int productSysNo)
+    {
+        return Html.Raw(Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(productSysNo).HtmlEncode());
+    }
+}
+
+ <div class="boxs_tool">
+        <!--/工具条-->
+        <div class="right_tool clearfix">
+            @if (canEdit)
+{
+    <button type="button" onclick='if($("#DeliveryTypeSysNo").val()=="0"){alert("请选择配送方式");return false;}; if($("#DefaultWarehouseSysNo").val()==""){alert("请选择仓库");return false;};DAO.SelectPromotionProduct({ associationAttr: { customerSysNo: @Model.Order.CustomerSysNo,warehouseSysNo:$("#DefaultWarehouseSysNo").val(),dealerSysNo: @Model.Order.DealerSysNo}, onselect:function(a){AddProductToCart(a)}})' class="btn btn_ht28 wd100 " title="挑选商品"><span class="icon_search"></span><span class="m5_l">挑选商品</span></button>
+}
+            @if (isCanEditMallGift)
+            {
+                <button id="btnSelectMallGift" type="button" class="btn btn_ht28 wd100 @if(isHideMallGift){ <text>hide</text>} "  notdisable="1">
+                        <span class="icon_search"></span><span class="m5_l">升舱赠品</span>
+                </button>
+            }
+     </div>
+</div>
+
+<div class="boxs_listtabel @if (!canEdit)
+                           {
+                               @:p10_t
+                           }">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="150">商品编号</th>
+                <th width="150">商品条形码</th>
+                <th align="left" class="p10_l">后台显示名称</th>
+                <th width="90">原单价</th>
+                <th width="82">订购数量</th>
+                <th width="80">购买总价</th>
+                <th width="82">调价</th>
+                @if (canEdit)
+                {
+                    <th width="182" class="border_rnone">操作</th>
+                }
+            </tr>
+        </thead>
+        <tbody id="tbItems">
+            @foreach (var item in Model.ShoppingCart.ShoppingCartGroups)
+            {
+                if (item.GroupPromotions != null)
+                {
+                    foreach (var groupItem in item.GroupPromotions)
+                    {
+                        if (groupItem.RuleType == (int)PromotionStatus.促销规则类型.组合)
+                        { 
+                            <tr style="background-color: #efefef">
+                                <td colspan="3" style="text-align: left; padding-left: 10px;">@groupItem.Description 折扣金额：￥@item.DiscountAmount.ToString(Constant.DecimalFormat)</td>
+                                <td></td>
+                                <td class="tdQuantity">
+                                    <input type="text" style="display:none;width:60px;text-align:center;" value="@item.ShoppingCartItems[0].Quantity"  maxlength="10"/>
+                                    <span>@item.ShoppingCartItems[0].Quantity</span>
+                                </td>
+                                <td></td>
+                                @if (canEdit)
+                                {
+                                    <td>
+                                        <button class="btn btn_ht26 m10_r SO1003785" type="button" onclick="editCart(this)"><span class="icon_pencil"></span></button>
+                                        <button class="btn btn_ht26 m10_r " groupcode="@item.GroupCode" promotionsysno="@groupItem.PromotionSysNo" type="button" style="display:none" onclick="SaveEdit(this)"><span class="icon icon_ok"></span><span class="fr m5_l">确定</span></button>
+                                        <button class="btn btn_ht26 m10_r " type="button" style="display: none" onclick="cancelEdit(this)"><span class="icon icon_share_alt"></span><span class="fr m5_l">取消</span></button>
+                                        <button class="btn btn_ht26" groupcode="@item.GroupCode" promotionsysno="@groupItem.PromotionSysNo" onclick="delCart(this)" type="button"><span class="icon_trash"></span></button>
+                                    </td>
+                                }
+
+                            </tr>
+                        }
+                        else if (groupItem.RuleType == (int)PromotionStatus.促销规则类型.团购)
+                        {
+                            <tr style="background-color: #FDF7E5">
+                                <td colspan="3" style="text-align: left; padding-left: 10px;">@groupItem.Description 折扣金额：￥@item.DiscountAmount.ToString(Constant.DecimalFormat)</td>
+                                <td></td>
+                                <td class="tdQuantity">
+                                    <input type="text"  style="display:none;width:60px;text-align:center;" value="@item.ShoppingCartItems[0].Quantity"  maxlength="10"/>
+                                    <span>@item.ShoppingCartItems[0].Quantity</span>
+                                </td>
+                                <td></td>
+                                @if (canEdit)
+                                {
+                                    <td>
+                                        <button class="btn btn_ht26 m10_r SO1003785" type="button" onclick="editCart(this)"><span class="icon_pencil"></span></button>
+                                        <button class="btn btn_ht26 m10_r " groupcode="@item.GroupCode" promotionsysno="@groupItem.PromotionSysNo" type="button" style="display:none" onclick="SaveEdit(this)"><span class="icon icon_ok"></span><span class="fr m5_l">确定</span></button>
+                                        <button class="btn btn_ht26 m10_r " type="button" style="display: none" onclick="cancelEdit(this)"><span class="icon icon_share_alt"></span><span class="fr m5_l">取消</span></button>
+                                        <button class="btn btn_ht26" groupcode="@item.GroupCode" promotionsysno="@groupItem.PromotionSysNo" onclick="delCart(this)" type="button"><span class="icon_trash"></span></button>
+                                    </td>
+                                }
+
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr style="background-color: #e5f4e5">
+                                <td colspan="@(canEdit ? 7 : 6)">
+                                    <div class="tagfull fl m10_r m2_t" style="cursor:text">
+                                        <!--提示框-->
+                                        <div class="tooltip" style="display: none;">
+                                            <div class="tooltip-inner"></div>
+                                            <div class="tooltip-arrow"></div>
+                                        </div>
+                                        <div class="tagfull-inner" datatitle="">@Hyt.Util.EnumUtil.GetDescription(typeof(PromotionStatus.促销规则类型), groupItem.RuleType)</div>
+                                        <div class="tagfull-arrow "></div>
+                                    </div>
+                                    <span class="fl">@groupItem.Description</span>
+
+                                    @if (groupItem.RuleType == (int)PromotionStatus.促销规则类型.满减 && item.DiscountAmount != 0)
+                                    {
+                                        <div class="tagfull-inner fl">已减@(item.DiscountAmount.ToString(Constant.DecimalFormat))元</div>
+                                    }
+                                    @if ((groupItem.RuleType == (int)PromotionStatus.促销规则类型.满赠 && groupItem.GiftProducts != null && groupItem.GiftProducts.Count > 0))
+                                    {
+                                        <span class="fr m10_r">赠品：
+                                            @if (groupItem.UsedGiftProducts != null && groupItem.UsedGiftProducts.Count > 0)
+                                            {
+                                                foreach (var giftItem in groupItem.UsedGiftProducts)
+                                                {
+                                                    <span promotionsysno="@(giftItem.PromotionSysNo)" productsysno="@(giftItem.ProductSysNo)">@GetName(giftItem.ProductName,giftItem.ProductSysNo)，</span>
+                                                }
+                                            }
+                                            @if (canEdit)
+                                            {
+                                                <button onclick="choiceGift(this)" class="btn btn_ht26 btn_blue m5_l" json="@(Hyt.Util.Serialization.JsonUtil.ToJson(groupItem.GiftProducts).Replace("\"", "{YH}"))">选择赠品</button>
+                                            }
+                                        </span>
+@**以上代码包括3个自定义属性  
+                                            productsysno:已选择的商品系统编号
+                                            promotionsysno :促销系统编号
+                                            json:赠品的json数据(需要测试【'"】是否会破坏html) 选择赠品按钮根据此数据来生成选择赠品html代码
+                                      **@
+                                    }
+
+
+                                </td>
+                            </tr>
+                                  
+                        }
+                    }
+                }
+                foreach (var productItem in item.ShoppingCartItems)
+                {
+                    row++;
+                    <tr json="@(Hyt.Util.Serialization.JsonUtil.ToJson(productItem))" @{if (row % 2 == 0)
+                                                                                        {<text>class='stag_color'</text>}}>
+                        <td>
+                            <!--商品编号-->
+                            @Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(productItem.ProductSysNo)
+                        </td>
+                        <td>
+                            <!--条形码-->
+                            @Hyt.BLL.Product.PdProductBo.Instance.GetProductBarcode(productItem.ProductSysNo)
+                        </td>
+                        <td  align="left" class="p10_l">@GetName(productItem.ProductName, productItem.ProductSysNo)-->@productItem.ProductSysNo</td>
+                        <td>
+                            @MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(productItem.OriginPrice, 2))
+                        </td>
+                        <td class="tdQuantity">
+                            @if (productItem.IsLock == (int)CustomerStatus.购物车是否锁定.否)
+                            {                                    
+                                <input type="text"  style="display:none;width:60px;text-align:center;" value="@productItem.Quantity" maxlength="5" />
+                                <span>@productItem.Quantity</span>
+                            }
+                            else
+                            {
+                                @productItem.Quantity
+                            }
+                        </td>
+                        <td>
+                            @if (isDsOrder)
+                            {
+                                var orderItem = Model.OrderItems.FirstOrDefault(i => i.SysNo == productItem.SysNo);
+                                if (orderItem != null)
+                                {
+                                    @MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(orderItem.SalesAmount, 2))
+                                }
+                            }
+                            else
+                            {
+                                @MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency((productItem.SalesUnitPrice * productItem.Quantity - productItem.DiscountAmount), 2))
+                            }
+                        </td>
+                        <td class="tdChangeAmount">
+                            @if (productItem.IsLock == (int)CustomerStatus.购物车是否锁定.否)
+                            {                                    
+                                <input type="text"  style="display:none;width:60px;text-align:center;" value="@ChangeDecimal(productItem.ProductSysNo)" maxlength="10" />
+                                <span>@ChangeDecimal(productItem.ProductSysNo)</span>
+                            }
+                            else
+                            {
+
+                            }
+                        </td>
+                        @if (canEdit)
+                        {
+                            <td>
+                                @if (productItem.IsLock == (int)CustomerStatus.购物车是否锁定.否)
+                                {
+                                    <button class="btn btn_ht26 m10_r SO1003785" type="button" onclick="editCart(this)"><span class="icon_pencil"></span></button>
+                                    <button class="btn btn_ht26 m10_r" productsysno="@productItem.ProductSysNo"  salesprice="@(productItem.SalesUnitPrice * productItem.Quantity - productItem.DiscountAmount)" type="button" style="display:none" onclick="SaveEdit(this)"><span class="icon icon_ok"></span><span class="fr m5_l">确定</span></button>
+                                    <button class="btn btn_ht26 m10_r" type="button" style="display: none" onclick="cancelEdit(this)"><span class="icon icon_share_alt"></span><span class="fr m5_l">取消</span></button>
+                                    <button class="btn btn_ht26" productsysno="@productItem.ProductSysNo" onclick="delCart(this)" type="button"><span class="icon_trash"></span></button>
+                                   
+                                }
+                            </td>
+                        }
+
+                    </tr>
+                }
+            }
+
+            @**订单优惠**@
+            @if (Model.ShoppingCart.GroupPromotions != null && Model.ShoppingCart.GroupPromotions.Count > 0)
+            {
+                foreach (var item in Model.ShoppingCart.GroupPromotions)
+                {
+                    <tr style="background-color: #e5f4e5">
+                        <td colspan="@(canEdit ? 7 : 6)">
+                            <div class="tagfull fl m10_r m2_t" style="cursor:text">
+                                <!--提示框-->
+                                <div class="tooltip" style="display: none;">
+                                    <div class="tooltip-inner"></div>
+                                    <div class="tooltip-arrow"></div>
+                                </div>
+                                <div class="tagfull-inner" datatitle="">@Hyt.Util.EnumUtil.GetDescription(typeof(PromotionStatus.促销规则类型), item.RuleType)</div>
+                                <div class="tagfull-arrow "></div>
+                            </div>
+                            <span class="fl">@item.Description</span>
+
+                            @if ((item.RuleType == (int)PromotionStatus.促销规则类型.满赠 && item.GiftProducts != null && item.GiftProducts.Count > 0))
+                            {
+                                <span class="fr m10_r">赠品：
+                                    @if (item.UsedGiftProducts != null && item.UsedGiftProducts.Count > 0)
+                                    {
+                                        foreach (var giftItem in item.UsedGiftProducts)
+                                        {
+                                            <span promotionsysno="@(giftItem.PromotionSysNo)" productsysno="@(giftItem.ProductSysNo)">@GetName(giftItem.ProductName, giftItem.ProductSysNo)，</span>
+                                        }
+                                    }
+                                    @if (canEdit)
+                                    {
+                                        <button onclick="choiceGift(this)" class="btn btn_ht26 btn_blue m5_l" json="@(Hyt.Util.Serialization.JsonUtil.ToJson(item.GiftProducts).Replace("\"", "{YH}"))">选择赠品</button>
+                                    }
+                                </span>
+@**以上代码包括3个自定义属性   这是针对订单的满赠促销规则
+                                                productsysno:已选择的商品系统编号
+                                                promotionsysno :促销系统编号
+                                                json:赠品的json数据(需要测试【'"】是否会破坏html) 选择赠品按钮根据此数据来生成选择赠品html代码 {YH}
+                                          **@
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <div class="accounts">
+        @{
+            /*王耀发 2016-4-16 创建*/
+            if (Model.Order.Status == (int)OrderStatus.销售单状态.待审核 && (ViewBag.IsShowEdit != null && ViewBag.IsShowEdit))
+            {
+                <p class="bold" style="padding:5px;">
+                    商品销售合计金额（¥@Model.ShoppingCart.ProductAmount.ToString(Constant.DecimalFormat)） + 税费(¥@Model.ShoppingCart.TaxFee.ToString(Constant.DecimalFormat)) + 运费（¥@Model.ShoppingCart.FreightAmount.ToString(Constant.DecimalFormat)）
+                    - 优惠劵金额（¥@Model.ShoppingCart.CouponAmount.ToString(Constant.DecimalFormat)）
+                    - 商品优惠金额（¥@Model.ShoppingCart.ProductDiscountAmount.ToString(Constant.DecimalFormat)） - 订单优惠金额（¥@((Model.ShoppingCart.OrderDiscountAmount).ToString(Constant.DecimalFormat))）+ 
+                    调价金额(¥@Model.OrderItems.Sum(p => p.ChangeAmount).ToString(Constant.DecimalFormat))
+                </p>
+
+                <p>获赠积分：@(Convert.ToInt32(Math.Floor(Model.ShoppingCart.SettlementAmount + Model.OrderItems.Sum(p => p.ChangeAmount))))   商品总价 ：<span class="red f16 bold" id="requiredAmount">¥@((Model.ShoppingCart.SettlementAmount + Model.OrderItems.Sum(p => p.ChangeAmount)).ToString(Constant.DecimalFormat))</span></p>
+            }
+            else
+            {
+                <p class="bold" style="padding:5px;">
+                    商品销售合计金额（¥@Model.Order.ProductAmount.ToString(Constant.DecimalFormat)） + 税费(¥@Model.Order.TaxFee.ToString(Constant.DecimalFormat)) + 运费（¥@Model.Order.FreightAmount.ToString(Constant.DecimalFormat)）
+                    - 优惠劵金额（¥@Model.Order.CouponAmount.ToString(Constant.DecimalFormat)）
+                    - 商品优惠金额（¥@Model.Order.ProductDiscountAmount.ToString(Constant.DecimalFormat)） - 订单优惠金额（¥@((Model.Order.OrderDiscountAmount).ToString(Constant.DecimalFormat))）+ 
+                    调价金额(¥@Model.OrderItems.Sum(p => p.ChangeAmount).ToString(Constant.DecimalFormat))
+                </p>
+
+                <p>获赠积分：@(Convert.ToInt32(Math.Floor(Model.Order.CashPay)))   商品总价 ：<span class="red f16 bold" id="requiredAmount">¥@(Model.Order.OrderAmount)</span></p>
+            }           
+        }
+
+    </div>
+
+</div>
+
+
+<div style="display:none" id="divPrice"
+     @*orderamount="@((Model.ShoppingCart.SettlementAmount + Model.OrderItems.Sum(p => p.ChangeAmount)).ToString(Constant.DecimalFormat))"
+     cashpay="@((Model.ShoppingCart.SettlementAmount + Model.OrderItems.Sum(p => p.ChangeAmount) - Model.Order.CoinPay).ToString(Constant.DecimalFormat))"
+     couponamount="@(Model.ShoppingCart.CouponAmount)"
+     freightamount="@(Model.ShoppingCart.FreightAmount)"
+     freightdiscountamount="@(Model.ShoppingCart.FreightDiscountAmount)"
+     cashpay="@(Model.ShoppingCart.SettlementAmount - Model.Order.CoinPay)"
+     couponcode="@(Model.CouponCode)"
+     productamount="@(Model.ShoppingCart.ProductAmount)"
+     productdiscountamount="@(Model.ShoppingCart.ProductDiscountAmount)"
+     orderdiscountamount="@(Model.ShoppingCart.OrderDiscountAmount)"
+     settlementdiscountamount="@(Model.ShoppingCart.SettlementDiscountAmount)"
+     productchangeamount="@(Model.OrderItems.Sum(p => p.ChangeAmount))"
+     discountamount="@((Model.ShoppingCart.ProductDiscountAmount + Model.ShoppingCart.FreightDiscountAmount + Model.ShoppingCart.SettlementDiscountAmount).ToString(Constant.DecimalFormat))"
+     total="¥@(Model.ShoppingCart.SettlementAmount.ToString(Constant.DecimalFormat))">*@
+     productamount="¥@(Model.ShoppingCart.ProductAmount.ToString(Constant.DecimalFormat))"
+     score="@(Convert.ToInt32(Math.Floor(Model.ShoppingCart.SettlementAmount)))"
+     freightamount="¥@Model.ShoppingCart.FreightAmount.ToString(Constant.DecimalFormat)"
+     taxfee="¥@Model.ShoppingCart.TaxFee.ToString(Constant.DecimalFormat)"
+     productchangeamount="@(Model.OrderItems.Sum(p => p.ChangeAmount))"
+     productdiscountamount="¥@((Model.ShoppingCart.ProductDiscountAmount).ToString(Constant.DecimalFormat))"
+     orderdiscountamount="¥@((Model.ShoppingCart.OrderDiscountAmount).ToString(Constant.DecimalFormat))"
+     couponamount="¥@((Model.ShoppingCart.ProductDiscountAmount + Model.ShoppingCart.SettlementDiscountAmount + Model.ShoppingCart.CouponAmount))"
+     cashpay="¥@((Model.ShoppingCart.SettlementAmount).ToString(Constant.DecimalFormat))">
+
+</div>
+<select id="ddlValidCoupon" style="display: none;">
+   @if (!canEdit)
+   {
+       if (currentUseCoupon!=null)
+       {
+          
+            <option   value="@currentUseCoupon.CouponCode" selected >@(currentUseCoupon.Description + "(" + currentUseCoupon.CouponCode + ")")</option>
+       }
+       else
+       {
+            <option value="">请选择</option>
+       }
+   }
+   else
+   {
+       <option value="">请选择</option>
+       if (couponList != null)
+       {
+           foreach (var coupon in couponList)
+           {
+               if (Model.CouponCode == coupon.CouponCode)
+               {
+                   <option value="@coupon.CouponCode"  selected >@(coupon.Description + "(" + coupon.CouponCode + ")")</option>
+               }
+               else
+               {
+                    <option value="@coupon.CouponCode"  >@(coupon.Description + "(" + coupon.CouponCode + ")")</option>
+               }
+           }
+       }
+   }
+</select>
+<div style="display: none" id="divEditOrderModel">@{Model.ShoppingCart = null;} @(Newtonsoft.Json.JsonConvert.SerializeObject(Model))</div>
+@if (currentUseCoupon != null)
+{ 
+    @Html.Hidden("currentusecouponinfo", currentUseCoupon.Description + "(" + currentUseCoupon.CouponCode + ")")
+}
+<script lang="javascript" type="text/javascript">
+    $("#txtEditOrderModel").val($("#divEditOrderModel").text());
+    @if (currentUseCoupon != null)
+    {
+      <text>$("#tdCouponSysName").html($('#currentusecouponinfo').val());</text>
+    }
+
+</script>
+
+
+
+

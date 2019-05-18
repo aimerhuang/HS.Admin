@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "二次销售业务员订单详情";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section FooterJs
+{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript">
+
+        function SearchData()
+        {
+            Utils.MaskStart($(".case"));
+            $.get("/Report/_TwoSaleDetail?r=" + Math.random(), { CreateTime: '@ViewBag.CreateTime', UserID: '@ViewBag.UserID', SelectWarehouseSysNo: '@ViewBag.SelectWarehouseSysNo' }, function (result) {
+                $('#paging').empty();
+                $('#paging').html(result);
+                Utils.MaskStop();
+            }); 
+        }
+        $(document).ready(function () {
+            SearchData();
+        });
+
+    </script>
+ }
+<div class="case" id="divP">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>二次销售业务员订单详情</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="left_tool" style="float: left">
+
+                </div>
+                <div class="right_tool clearfix">
+
+                </div>
+            </div>
+            <!-- 查询结果 -->
+
+            <div id="paging" class="boxs_listtabel">
+            </div>
+ </div>

@@ -1,0 +1,27 @@
+﻿@section HeadCss
+{
+    <style type="text/css">
+    html{
+        padding:10px;
+    }    
+    </style>
+}
+@section HeadJs{
+    <script type="text/javascript" src=" @Url.Content("~/Theme/Plugins/Editor/kindeditor.min.js")"></script>
+    <script type="text/javascript">
+
+        var productDescriptionEditor;
+        $(function () {
+            $("#editor_Content").html(art.dialog.data('description'));
+            productDescriptionEditor = UI.Editor("#editor_Content", {});
+        });
+
+        function CallBack() {
+            return productDescriptionEditor.html();
+        }
+
+    </script>
+}
+
+<textarea id="editor_Content" name="editor_Content" style="width:800px; height:540px">
+</textarea>

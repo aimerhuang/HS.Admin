@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "StockSelector";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section headcss{
+    <link href="/Theme/Plugins/ZTree/skin.css" rel="stylesheet" type="text/css" media="all" />
+    @*<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/flick/jquery-ui.css" />*@
+}
+@section headjs{
+
+    @*  <script type="text/javascript" src="/Theme/scripts/jquery.min.js"></script>*@
+
+    @*<script src="http://code.jquery.com/jquery-1.9.1.js"></script>*@
+    <script type="text/javascript" src="/Theme/Plugins/ZTree/ZTree.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js"></script>
+    @*<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>*@
+
+
+
+    <script type="text/javascript">
+        $(function () {
+            $("#city").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    getAjax();
+                }
+            });
+            $("#search_btn").click(function () {
+                getAjax();
+            });
+            function getAjax() {
+                var _val = $("#city").val();
+                if (_val && _val != "搜索您要的内容...") {
+                    $.ajax({
+                        url: "/Warehouse/WharehouseSelector",
+                        dataType: "json",
+                        data: { keyword: _val },
+                        success: function (result) {
+                            showTree(result)
+                        }
+                    });
+                }
+            }
+
+            function showTree(data) {
+                var chkStyle = $.getUrlParam("chkStyle");
+                var radioType;
+                if (chkStyle == 'radio') {
+                    radioType = 'all';
+                } else {
+                    radioType = 'level';
+                    chkStyle = 'checkbox';
+                };
+                var setting = {
+                    check: {
+                        enable: true,
+                        chkStyle: chkStyle,//default:checkbox,radio
+                        radioType: radioType
+                    },
+                    callback: {//绑定回调函数
+                        onAsyncSuccess: zTreeOnAsyncSuccess//在异步加载完成时调用
+                    }
+                };
+
+                UI.ZTree.init($("#areatree"), setting, data);
+                $("#areatree").show();
+            }
+            //ztree异步加载完成时调用
+            function zTreeOnAsyncSuccess() {
+                //需要实现数据绑定
+            }
+
+            $.getUrlParam = function (name) {
+                var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+                var r = window.location.search.substr(1).match(reg);
+                if (r != null) return unescape(r[2]); return null;
+            }
+            //确认保存
+            $("#save_data").click(function () {
+                GetValue();
+            });
+            function GetValue() {
+                var ids = new Array();
+                //获取所有选中状态的节点
+                var zTree = $.fn.zTree.getZTreeObj("areatree").getCheckedNodes(true);
+                for (var i = 0; i < zTree.length; i++) {
+                    ids[i] = zTree[i].id;
+                }
+                //回调StockSelectorCallback,返回id集合(1,2,3,4)
+                UI.Dialog.opener.StockSelectorCallback(window, ids.join(','));
+                //使用这里表示父窗体 
+                //var Origins = artDialog.open.origin;
+                //赋值父窗体“RUserID”为父窗体对象
+                //Origins.document.getElementById('xxID').value = ids.join(',');
+                //art.dialog.close();//关闭弹出框
+            }
+
+            var aresSource = function (request, response) {
+                $.ajax({
+                    url: "/Basic/Area",
+                    dataType: "json",
+                    data: {
+                        //featureClass: "P",
+                        //style: "full",
+                        //maxRows: 12,
+                        keyword: request.term
+                    },
+                    success: function (data) {
+                        //console.log(data.Data);
+                        response($.map(data.Data, function (item) {
+                            //console.log(item);
+                            return {
+                                label: item.AreaCode + " " + item.NameAcronym + " " + item.AreaName,
+                                value: item.sysno
+                            };
+                        }));
+                    }
+                });
+            };
+
+            //$("#city").autocomplete({
+            //    source: aresSource,
+            //    select: function (event, ui) {
+            //        console.log(event);
+            //        console.log(ui);
+            //    }
+            //});
+        });
+    </script>
+
+}
+<div class="search_btn m5_l">
+    <input name="" type="text" class="input_ht28" id="city" value="搜索您要的内容..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='搜索您要的内容...'" onfocus="this.select()" onclick="if (this.value == '搜索您要的内容...') this.value = ''">
+    <button class="btn btn_ht28 wd28" title="搜索" id="search_btn"><span class="icon_search"></span></button>
+</div>
+<div class='zTreeDemoBackground '>
+    <span style='display: none' id='areatree' class='ztree'></span>
+</div>
+<div>
+    <button class="btn btn_ht28 wd100 m5_l" id="save_data" title="确认保存"><span class="icon_refresh"></span><span class="m5_l">确认保存</span></button>
+</div>

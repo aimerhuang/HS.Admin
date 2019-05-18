@@ -1,0 +1,109 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "取件单选择";
+}
+
+@section HeadJs
+{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+}
+
+<div class="caseout">
+
+    <div class="boxs" id="tabboxs">
+        <div class="head_tab">
+            <ul id="tabNav">
+                <li class="menuon_white">数据列表</li>
+                <li class="">已选择</li>
+
+            </ul>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div id="paging" class="p10_bnone">
+                </div>
+            </div>
+
+            <div class="list">
+
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="batch_cancel"><span class="icon_trash"></span><span class="m5_l">批量取消</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+
+                </div>
+                <!--工具条结束-->
+
+                <div class="boxs_listtabel">
+                    <table id="selected_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                        <thead>
+                            <tr>
+                                <th style="width: 53px;">
+                                    <input name="" type="checkbox" value="" id="selected_select_all" class="checkall" /></th>
+                                <th style="width: 72px">取件单号</th>
+                                <th >取件地址</th>
+                                <th style="width: 120px">电话</th>
+                                <th style="width: 46px">状态</th>
+                                <th style="width: 120px">创建时间</th>
+                                <th style="width: 105px">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="odd_color" id="noitem">
+                                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(function () {
+        //tab选项卡  
+        UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '#tabNav', currentClass: 'menuon_white', tabContentObj: ".boxs_con_c1", tabContent: ".list" });     
+
+        //已选择checkbox
+        UI.CheckAllbox("#selected_list", "#selected_select_all");
+        doSearch();
+
+    });
+    //列表数据显示
+    function doSearch() {    
+        $.get('@Html.Raw(Url.Action("SelectPickUp", "Logistics", new { Status = ViewBag.Status, WarehouseSysNo = ViewBag.WarehouseSysNo, SysNoFilter = ViewBag.SysNoFilter }))',
+            function (data) {
+                $('#paging').html(data);
+            });
+    }
+
+    //调用页面进行回调
+    function CallBack() {
+        if ($.isFunction(parent._ActiveSelectPickUpCallBack)) {
+            var result = new Array();
+            $("#selected_list input[name='sysno']").each(function () {
+                result.push($(this).val());
+            });
+
+            parent._ActiveSelectPickUpCallBack(result);
+            UI.Dialog.close();
+        }
+    }
+
+    //分页完成事件 :
+    function AjaxOnComplete() {
+        AjaxStop();
+        var items = $("#selected_list input[name='sysno']");
+        items.each(function () {
+            var sysno = $(this).val();
+            $("#checkbox_" + sysno).attr("checked", "checked");
+        });
+    }
+
+</script>

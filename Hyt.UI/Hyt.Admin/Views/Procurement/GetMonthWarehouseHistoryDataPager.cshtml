@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "GetMonthWarehouseHistoryDataPager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品月份库存表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--搜索开始-->
+                    <div class="right_tool clearfix">
+
+                        <span class="veralign_t fl">库房</span>
+                        <div class="fl m10_l">
+                            <select id="sel_Warehouse">
+                                @{
+                                    foreach( Hyt.Model.WhWarehouse mod in ViewBag.WarehouseList as List<Hyt.Model.WhWarehouse> )
+                                    {
+                                        <option value="@(mod.SysNo)">@(mod.WarehouseName)</option>
+                                    }
+                                }
+                                
+                            </select>
+                        </div>
+
+                        <span class="veralign_t fl">统计年份</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn">
+                                <input type="text" id="Year" name="Year" class="input_ht26" value="@DateTime.Now.ToString("yyyy")" querypara="Year" onclick="UI.Date({el:'Year',dateFmt:'yyyy'})" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'Year', dateFmt: 'yyyy' })">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="JS_gaoji1" type="button" onclick="doSearch(1)"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+
+                    </div>
+                    <!--搜索结束-->
+                    <!--/工具条-->
+                    <div class="left_tool">
+                        @*<button class="btn btn_blue btn_ht26 " id="createBtn" onclick="CreateProcurement()"><span class="icon icon_white icon_plus"></span><span class="m5_l">新增</span></button>*@
+                    </div>
+                </div>
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function UpdateProcurement(sysNo) {
+        window.location.href = "/Procurement/InsertOrUpdateFnPurchasePaymentOrder?SysNo=" + sysNo;
+    }
+    function CreateProcurement() {
+        window.location.href = "/Procurement/InsertOrUpdateFnPurchasePaymentOrder";
+    }
+    function doSearch(currentPage) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Procurement/GetMonthWarehouseHistoryDataPager?warehouseSysNo=" + $("#sel_Warehouse").val() + "&year=" + $("#Year").val() + "&r=" + Math.random(), "Search", function (p) {
+
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    doSearch(1)
+</script>

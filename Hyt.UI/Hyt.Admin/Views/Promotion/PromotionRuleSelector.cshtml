@@ -1,0 +1,45 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "促销规则选择";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+
+<div class="caseout">
+    <div class="boxs">
+
+        <div class="boxs_con_c1 border_tnone">
+
+            <div id="paging">
+            </div>
+
+
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch();
+    });
+    
+    //查询列表
+    function doSearch() {
+        Ajax.get("/Promotion/DoPromotionRuleSelectorQuery/?r=" + Math.random(), "Search", function () {
+
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+    
+    function doSelect(rule) {
+        UI.DialogOpener()._ActiveSelectPromotionRule(rule);
+        UI.CloseDialog();
+    }
+    
+</script>

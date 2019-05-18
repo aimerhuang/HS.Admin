@@ -1,0 +1,167 @@
+﻿<script src="~/Theme/scripts/jquery.validate.yui.js"></script>
+
+<form id="form">
+    <div class="boxs">
+        <div class="caseout">
+            <div class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>订单编号：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input onclick='pickOrder();' id="txtOrderSysNo" name="OrderSysNo" readonly="readonly" type="text" class="m10_r" />
+                                    <span id="for_txtOrderSysNo" class="hide"></span>
+                                    <button type="button" class="btn btn_ht28 btn_blue" title="选择订单" onclick="pickOrder();"><span class="icon_eye_open icon_white"></span><span class="m5_l">选择订单</span></button>
+                                </td>
+                                <td style="width: 10%" class="nameright border_rnone">订单金额：</td>
+                                <td style="width: 40%" class="red">
+                                    <span id="txtAmount"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票代码：</td>
+                                <td class="border_right">
+                                    <input id="txtInvoiceCode" name="InvoiceCode" type="text" class="m10_r" maxlength="165" />
+                                    <span id="for_txtInvoiceCode" class="hide"></span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票号码：</td>
+                                <td>
+                                    <input id="txtInvoiceNo" name="InvoiceNo" type="text" class="m10_r" maxlength="165" />
+                                    <span id="for_txtInvoiceNo" class="hide"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票抬头：</td>
+                                <td class="border_right">
+                                    <input id="txtInvoiceTitle" name="InvoiceTitle" type="text" class="m10_r" />
+                                    <span id="for_txtInvoiceTitle" class="hide"></span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票类型：</td>
+                                <td>
+                                    @Html.DropDownList("InvoiceType")
+                                    <span id="for_InvoiceType" class="hide m10_l"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票备注：</td>
+                                <td class="border_right" colspan="3">
+                                    <textarea id="txtInvoiceRemarks" name="InvoiceRemarks" maxlength="200" style="width: 96%;"></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#form").validate({
+            rules: {
+                OrderSysNo: { required: true },
+                InvoiceCode: { required: true, maxlength: 165 },
+                InvoiceNo: { required: true, maxlength: 165 },
+                InvoiceTitle: { required: true, maxlength: 100 },
+                InvoiceType: { required: true }
+            },
+            messages: {
+                OrderSysNo: { required: "请选择订单" },
+                InvoiceCode: {
+                    required: "填写发票代码",
+                    maxlength: "最多165个字符"
+                },
+                InvoiceNo: {
+                    required: "填写发票号码",
+                    maxlength: "最多165个字符"
+                },
+                InvoiceTitle: {
+                    required: "填写发票抬头",
+                    maxlength: "最多100个字符"
+                },
+                InvoiceType: {
+                    required: "填选择发票类型"
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#for_' + el.attr('id')).attr('class', 'prompt error');
+                $('#for_' + el.attr('id')).text(error.html());
+            },
+            success: function (label, el) {
+                $('#for_' + el.attr('id')).attr('class', 'prompt success');
+            }
+        });
+
+    });
+    var OrderData;
+
+    function pickOrder() {
+        DAO.SelectOrder({
+            onlinepay: false,
+            callback: function (orderId) {
+                $.ajax({
+                    async: false,
+                    type: "get",
+                    url: "@Url.Action("GetOrder", "Finance")?orderSysNo=" + orderId,
+                    success: function (order) {
+                        if (order != undefined && order.Data != undefined) {
+                            OrderData = order.Data;
+                            $("#txtOrderSysNo").val(order.Data.orderSysNo);
+                            $("#txtAmount").text('¥' + order.Data.cashPay);
+                        }
+                    }
+                });
+
+            }
+        });
+    }
+
+    function getDate() {
+        var data = {};
+        if (OrderData) {
+            data.OrderSysNo = OrderData.orderSysNo;
+            data.TransactionSysNo = OrderData.transactionSysNo;
+            data.InvoiceAmount = OrderData.cashPay;
+            data.InvoiceCode = $("#txtInvoiceCode").val();
+            data.InvoiceNo = $("#txtInvoiceNo").val();
+            data.InvoiceTitle = $("#txtInvoiceTitle").val();
+            data.InvoiceRemarks = $("#txtInvoiceRemarks").val();
+            data.InvoiceTypeSysNo = $("#InvoiceType").val();
+        }
+        return data;
+    }
+    function createInvoice() {
+        var from = $("#form");
+        if ($(from).valid()) {
+            UI.Confirm({
+                content: '确认进行开票操作？',
+                padding: '10px 20px',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("InvoiceCreate", "Warehouse")',
+                        data: getDate(),
+                        chche: false,
+                        success: function (ret) {
+                            if (ret.StatusCode == 0) {
+                                UI.DialogOpener().showTip('新开发票成功');
+                                UI.Dialog.close();
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function () {
+                            UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                        }
+                    });
+                },
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }
+    }
+</script>

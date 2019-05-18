@@ -1,0 +1,114 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "选择出库单";
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        //tab选项卡
+        $(function () {
+            UI.Tab({
+                tabNavBox: '#tabboxs3',
+                tabContentObj: "#tabcon",
+                onActiveTab: function (index, obj) {
+                }
+            });
+
+            getOutStockList();
+
+            //分页完成事件 :
+            $('body').ajaxSuccess(function () {
+                var items = $("#selected_list input[name='sysno']");
+                items.each(function () {
+                    var sysno = $(this).val();
+                    var checkbox = $("input[data-id='" + sysno + "']");
+                    checkbox.attr("checked", "checked");
+                });
+            });
+
+            $("#selected_all").click(function () {
+                if ($(this).attr("checked")) {
+                    $("#selected_list input[name='sysno']").each(function () {
+                        $(this).attr("checked", "checked");
+                    });
+                } else {
+                    $("#selected_list input[name='sysno']").each(function () {
+                        $(this).removeAttr("checked");
+                    });
+                }
+            });
+
+        });
+
+        function getOutStockList() {
+            var data = {};
+            data.WarehouseSysNo = $("#hid_warehouse_sys_no").val();
+            data.DeliveryTypeSysNo = $("#hid_delivery_type_sys_no").val();
+            data.SysNoFilter = $("#hid_sys_no_filter").val();
+            data.r = Math.random();
+
+            $.get('@Url.Action("SelectOutStockList", "Logistics")',
+                data,
+                function (ret) {
+                    $('#paging').html(ret);
+                });
+        }
+    </script>
+
+}
+<div class="caseout">
+    <div class="boxs" id="tabboxs3">
+        <div class="head_tab">
+            <ul class="tabNav">
+                <li><a href="javascript:void(0);">数据列表</a></li>
+                <li class="menuon"><a href="javascript:void(0);">已选择数据</a></li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+                <div class="boxs_listtabel">
+                    <div id="paging">
+                    </div>
+                </div>
+            </div>
+            <div class="list">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="batch_cancel"><span class="icon_minus_sign"></span><span class="m5_l">批量取消</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_listtabel">
+                    <table id="selected_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                        <thead>
+                            <tr>
+                                <th style="width: 3%;">
+                                    <input name="" type="checkbox" value="" id="selected_all" /></th>
+                                <th style="width: 5%">出库单号</th>
+                                <th style="width: 5%">订单编号</th>
+                                <th style="width: 7%">收件地址</th>
+                                <th style="width: 10%">收货人</th>
+                                <th style="width: 5%">金额</th>
+                                <th style="width: 7%">订购时间</th>
+                                <th style="width: 6%">是否开票</th>
+                                <th style="width: 6%">状态</th>
+                                <th style="width: 6%;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="odd_color" id="noitem">
+                                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="hid_warehouse_sys_no" type="hidden" value="@ViewBag.WarehouseSysNo" />
+<input id="hid_delivery_type_sys_no" type="hidden" value="@ViewBag.DeliveryTypeSysNo" />
+<input id="hid_sys_no_filter" type="hidden" value="@ViewBag.SysNoFilter" />

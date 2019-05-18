@@ -1,0 +1,118 @@
+﻿
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@model PagedList<CBDsProductRelation>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "升舱关系维护";
+}
+<link href="~/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all" />
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+<script type="text/javascript">
+    function searchDsProductRelationByEasName() {   
+        Utils.MaskStart($(".case"));
+        var easName = $("#EasName").val().trim();
+        Ajax.get("/Distribution/DsProductRelation?r=" + Math.random(), "Search", function (p) {
+            if (!isNaN(easName)) {
+                p.setParams("EasName", easName);
+            }
+            else if (easName && easName != "请输入Eas名称/商品编号") {
+                p.setParams("EasName", easName);
+            }
+        }, function (data) {
+            Utils.MaskStop();
+            $('#paging').html(data);
+        });
+    }
+
+    var searchNameTxt = "请输入Eas名称/商品编号";
+    $(function () {
+        $("#EasName").focus(function () {
+            if ($("#EasName").val() == searchNameTxt) {
+                $("#EasName").val("");
+            }
+        });
+        $("#EasName").blur(function () {
+            if ($("#EasName").val() == "") {
+                $("#EasName").val(searchNameTxt);
+            }
+        });
+        $("#EasName").keydown(function (e) {
+            var keycode = e.which;
+            if (keycode != 13) {
+                return;
+            }
+            searchDsProductRelationByEasName();
+        });
+    });
+
+</script>
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>升舱商品关系维护</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="right_tool">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <input class="input_ht28" name="EasName" id="EasName" style="width: 220px" maxlength="50" type="text" value="请输入Eas名称/商品编号" />
+                        <button onclick="searchDsProductRelationByEasName()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                    </div>
+                </div>
+                <!--表格列开始-->
+                <div id="paging">
+                    @{Html.RenderPartial("_AjaxDsProductRelationList", Model);}
+                </div>
+                <!--表格列结束-->
+            </div>
+      
+    </div>
+</div>
+    <script type="text/javascript">
+        function Delete(id) {
+            UI.Confirm({
+                content: "确认删除?",
+                ok: function () {
+                    $.post('/Distribution/DeleteDsProductRelation?r=' + Math.random(), { sysNo: id }, function (r) {
+                        if (r.Status) {
+                            SuccessTip();
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+
+                    });
+                },
+                cancel: true
+            });
+        }
+        function SuccessTip() {
+            UI.Prompt.Success("操作成功");
+            Utils.MaskStart($("#paging"));
+            doSearch(1);
+        }
+        function doSearch() {
+            var easName = $("#EasName").val().trim();
+            Ajax.get("/Distribution/DsProductRelation?r=" + Math.random(), "Search", function (p) {
+                if (!isNaN(easName)) {
+                    p.setParams("EasName", easName);
+                }
+                else if (easName && easName != "请输入Eas名称/商品编号") {
+                    p.setParams("EasName", easName);
+                }
+            }, function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+        }
+    </script>

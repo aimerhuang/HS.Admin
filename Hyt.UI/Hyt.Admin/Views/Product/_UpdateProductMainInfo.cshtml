@@ -1,0 +1,1188 @@
+﻿@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+
+}
+@using Hyt.BLL.Authentication;
+@using Hyt.Model.Transfer;
+@using Hyt.Model;
+@using Hyt.Model.SystemPredefined
+@{
+    @Html.PrivilegeControl(PrivilegeCode.DS1002302, ".DS1002302")
+
+    Hyt.Model.InventorySheet.PdProductSpec SpecModel=null;
+    if (ViewBag.ProductSysNo > 0)
+    {
+        SpecModel = Hyt.BLL.InventorySheet.PdProductSpecBo.Instance.IsPdProductSpec(ViewBag.ProductSysNo);
+    }
+
+}
+<style type="text/css">
+    a:hover {
+        text-decoration: underline;
+    }
+
+    .PdProductSpec {
+        padding: 2.5px 5px;
+        float: left;
+        min-width: 20px;
+        border-radius: 3px;
+        background-color: #B5E0FB;
+    }
+
+    .fg {
+        width: 100%;
+        height: 10px;
+        clear: both;
+        display: none;
+    }
+</style>
+<!-- 商品主信息维护 -->
+
+<div class="boxs_detail_dispay" id="div_productMainInof">
+    <div class="tit_con">
+        <form name="tab_PdProduct" id="tab_PdProduct" onsubmit="return false;">
+
+            <input type="hidden" name="hdf_Stamp" id="hdf_Stamp" dn="Stamp" />
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                <tbody>
+                    <tr>
+                        <td width="150" class="nameright">系统编号</td>
+                        <td>
+                            <span>
+                                @if (ViewBag.ProductSysNo != null)
+                                {
+                                    @ViewBag.ProductSysNo
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" valign="top" class="nameright"><span class="v_star">*</span>代理商</td>
+                        <td>
+                            @{
+                                var info = AdminAuthenticationBo.Instance.GetCurrentUserInfo();
+                                string Type; //ZD(总代理),D(代理),F(分销商)
+                                int TypeSysNo; //传入的对应类型系统编号
+                                if (!info.IsBindAllDealer)
+                                {
+                                    //判断是否绑定分销商
+                                    if (!info.IsBindDealer)
+                                    {
+                                        Type = "D";
+                                        TypeSysNo = info.Base.SysNo;
+                                    }
+                                    else
+                                    {
+                                        Type = "F";
+                                        TypeSysNo = info.Dealer.SysNo;
+                                    }
+                                }
+                                else
+                                {
+                                    Type = "ZD";
+                                    TypeSysNo = 0;
+                                }
+                                string dename = "分销商";
+                                <select dn="AgentSysNo" name="AgentSysNo" id="AgentSysNo" class="{required:true,messages:{required:'请选择代理商'}} wd200">
+                                    @{
+                                        IList<CBDsDealer> AgentList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDaiLiShangList(Type, TypeSysNo);
+                                        foreach (CBDsDealer item in AgentList)
+                                        {
+                                            <option value="@item.SysNo">@item.DealerName</option>
+                                        }
+                                    }
+                                </select>
+                                @dename
+                                <select dn="DealerSysNo" name="DealerSysNo" id="DealerSysNo" class="{required:true,messages:{required:'请选择分销商'}} wd200">
+                                    @{
+                                        int AgentSysNo = 1;
+                                        if (ViewBag.ProductSysNo != null)
+                                        {
+                                            AgentSysNo = Hyt.BLL.Web.PdProductBo.Instance.GetProductEntity(ViewBag.ProductSysNo).AgentSysNo;
+                                        }
+
+                                        IList<DsDealer> DealerList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDealersListByCreatedBy(AgentSysNo, Type, TypeSysNo);
+                                        foreach (DsDealer item in DealerList)
+                                        {
+                                            <option value="@item.SysNo">@item.DealerName</option>
+                                        }
+                                    }
+                                </select>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" valign="top" class="nameright"><span class="v_star">*</span>分类</td>
+                        <td valign="top">
+                            <div>
+                                <ul>
+                                    <li class="fl m10_r">
+                                        <select tabindex="1" name="txt_ProductCategory" id="txt_ProductCategory" size=2 style="height: 100px;" class="{required:true,messages:{required:'商品至少需要选择一个分类'}} wd300"></select>
+                                    </li>
+                                    <li class="fl m10_r">
+                                        <button tabindex="2" id="btn_selectCategory" class="btn btn_ht26" title="选择分类"><span class="icon_th_list"></span><span class="m5_l">选择分类</span></button><br />
+                                        <button tabindex="3" id="btn_deleteCategory" class="btn btn_ht26 m5_t" title="删除选中"><span class="icon_trash"></span><span class="m5_l">删除选中</span></button><br />
+                                        <button tabindex="4" id="btn_setTobeMaster" class="btn btn_ht26 m5_t" title="设为主要"><span class="icon_ok_circle"></span><span class="m5_l">设为主要</span></button>
+                                    </li>
+                                    <li class="fl"><span class="c9" id="txt_ProductCategory_error" msg="商品所属分类"></span></li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>品牌</td>
+                        <td>
+                            <input readonly="readonly" dn="BrandName" class="{required:true,messages:{required:'请选择商品所属品牌'}} wd400 m10_r" name="txt_PdBrand" id="txt_PdBrand" type="text">
+                            <button tabindex="5" id="btn_selectPdBrand" class="btn btn_ht26 m10_r" title="选择品牌"><span class="icon_th_list"></span><span class="m5_l">选择品牌</span></button>
+                            <span class="c9" id="txt_PdBrand_error" msg="商品所属品牌"></span>
+                            <input type="hidden" dn="BrandSysNo" id="hdf_BrandSysNo" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>类型</td>
+                        <td>
+                            @Html.DropDownList("select_productType", (IList<SelectListItem>)ViewBag.ProductTypeList, new
+                                    {
+                                        tabindex = "6",
+                                        dn = "ProductType",
+                                        @class = "{select:'-1',messages:{select:'请选择商品类型'}} wd170 m10_r"
+                                    })
+
+                            <span id="select_productType_error" class="c9" msg="请选择商品类型？"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>原产地</td>
+                        <td>
+                            <select dn="OriginSysNo" name="OriginSysNo" id="OriginSysNo" class="{required:true,messages:{required:'请选择原产地'}} wd300">
+                                <option value="">请选择</option>
+                                @{
+                                    List<Hyt.Model.Origin> OriginList = Hyt.BLL.Basic.OriginBo.Instance.GetOrigin();
+                                    foreach (Hyt.Model.Origin item in OriginList)
+                                    {
+                                        <option value="@item.SysNo">@item.Origin_Name</option>
+                                    }
+                                }
+                            </select>
+                            <span class="c9" id="OriginSysNo_error" msg="请选择原产地"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>商品编号</td>
+                        <td>
+                            <input tabindex="7" dn="ErpCode" id="txt_erpCode" name="txt_erpCode" class="{required:true,maxlength:200,messages:{required:'请填写商品在ERP中对应的编号',maxlength:'商品编号只能由1-200个字符组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_erpCode_error" class="c9" msg="商品对应的编号"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>后台显示名称</td>
+                        <td>
+                            <input tabindex="8" dn="EasName" id="txt_easName" name="txt_easName" class="{required:true,maxlength:100,messages:{required:'请填写商品后台显示名称',maxlength:'商品编号只能由1-100个字符组成'}} wd400 m10_r" type="text" maxlength="100" />
+                            <span id="txt_easName_error" class="c9" msg="请填写商品后台显示名称"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>条形码</td>
+                        <td>
+                            <input tabindex="9" dn="Barcode" class="{required:true,maxlength:32,messages:{required:'请填写商品包装上的条形码',maxlength:'条形码由1-32位字母和数字组成'}}  m10_r" id="txt_Barcode" name="txt_Barcode" type="text" style="width:268px" />
+                            <button tabindex="5" id="btn_selectPdBarcode" class="btn btn_ht26 m10_r" title="选择条形码"><span class="icon_th_list"></span><span class="m5_l">选择条形码</span></button>
+                            <span id="txt_Barcode_error" class="c9" msg="商品包装上的条码编号"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">二维码</td>
+                        <td>
+                            <input tabindex="10" dn="QRCode" id="txt_QRCode" name="txt_QRCode" class="{maxlength:250,messages:{maxlength:'二维码只能有250个字符组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_QRCode_error" class="c9" msg="二维码只能有250个字符组成"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>前台显示名称</td>
+                        <td>
+                            <input tabindex="11" dn="ProductName" id="txt_productName" name="txt_productName" class="{required:true,maxlength:100,messages:{required:'请填写商品前台显示名称',maxlength:'商品前台显示名称由1-100个汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_productName_error" class="c9" msg="商品在网站中显示的完整名称"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>前台限购数量</td>
+                        <td>
+                            <input tabindex="7" dn="Purchasing" id="txt_Purchasing" name="txt_Purchasing" value="0" class="{required:true,maxlength:7,messages:{required:'请填写商品前台限购数量',digits:'前台限购数量由整数组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_Purchasing_error" class="c9" msg="商品在网站中每单所能购买的最大数量"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>格格家对应一个规格供货价</td>
+                        <td>
+                            <input tabindex="7" dn="GeGeJiaSupplyPrice" id="txt_GeGeJiaSupplyPrice" name="txt_GeGeJiaSupplyPrice" value="0" class="{required:true,maxlength:7,messages:{required:'请填写商品格格家对应供货价',digits:'价格由整数组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_geGeGeJiaSupplyPrice_error" class="c9" msg="格格家对应一个规格供货价"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>格格家对应两个规格供货价</td>
+                        <td>
+                            <input tabindex="7" dn="GeGeJiaSupplyPriceSpecTwo" id="txt_GeGeJiaSupplyPriceSpecTwo" name="txt_GeGeJiaSupplyPriceSpecTwo" value="0" class="{required:true,maxlength:7,messages:{required:'请填写商品格格家对应供货价',digits:'价格由整数组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_GeGeJiaSupplyPriceSpecTwo_error" class="c9" msg="格格家对应两个规格供货价"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>格格家对应三个规格供货价</td>
+                        <td>
+                            <input tabindex="7" dn="GeGeJiaSupplyPriceSpecThree" id="txt_GeGeJiaSupplyPriceSpecThree" name="txt_GeGeJiaSupplyPriceSpecThree" value="0" class="{required:true,maxlength:7,messages:{required:'请填写商品格格家对应供货价',digits:'价格由整数组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_GeGeJiaSupplyPriceSpecThree_error" class="c9" msg="格格家对应三个规格供货价"></span>
+                        </td>
+                    </tr>
+                    <tr style="display:none">
+                        <td width="150" class="nameright"><span class="v_star">*</span>格格家对应规格</td>
+                        <td>
+                            <input tabindex="7" dn="GeGeJiaSpec" id="txt_GeGeJiaSpec" name="txt_GeGeJiaSpec" value="0" class="{required:true,maxlength:7,messages:{required:'请填写商品格格家对应供货价',digits:'价格由整数组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_GeGeJiaSpec_error" class="c9" msg="格格家对应规格"></span>
+                        </td>
+                    </tr>
+                    <tr class="hide">
+                        <td width="150" class="nameright"><span class="v_star">*</span>名称拼音</td>
+                        <td>
+                            <input tabindex="12" dn="NameAcronymy" id="txt_NameAcronymy" class="{required:true,maxlength:100,messages:{required:'请填写商品名称的中文拼音',maxlength:'名称拼音只能有1-100个字母和空格组成'}} wd400 m10_r" type="text" />
+                            <span id="txt_NameAcronymy_error" class="c9" msg="商品完整名称的全拼"></span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>毛重</td>
+                        <td>
+                            <input tabindex="13" dn="GrosWeight" id="GrosWeight" name="GrosWeight"
+                                   class="{required:true,number:true,minLimitNumber:0,messages:{required:'请填写价格',number:'毛重只能由数字组成',minLimitNumber:'毛重不能小于0'}} wd100 align_r m10_r valid"
+                                   type="text" />
+                            <span id="GrosWeight_error" class="c9" msg="商品的毛重"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>净重</td>
+                        <td>
+                            <input tabindex="13" dn="NetWeight" id="NetWeight" name="NetWeight"
+                                   class="{required:true,number:true,minLimitNumber:0,messages:{required:'请填写价格',number:'净重只能由数字组成',minLimitNumber:'净重不能小于0'}} wd100 align_r m10_r valid"
+                                   type="text" />
+                            <span id="NetWeight_error" class="c9" msg="商品的净重"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">税率</td>
+                        <td>
+                            <input tabindex="10" dn="Tax" id="Tax" name="Tax" class="{number:true,minLimitNumber:0,messages:{number:'税率只能由数字组成',minLimitNumber:'税率不能小于0'}} wd100 m10_r" type="text" />
+                            <span id="Tax_error" class="c9" msg="税率"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">利率</td>
+                        <td>
+                            <input tabindex="10" dn="Rate" id="Rate" name="Rate" class="{number:true,minLimitNumber:0,messages:{number:'利率只能由数字组成',minLimitNumber:'利率不能小于0'}} wd100 m10_r" type="text" />
+                            <span id="Rate_error" class="c9" msg="利率"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>销售计量单位</td>
+                        <td>
+                            <select dn="SalesMeasurementUnit" name="SalesMeasurementUnit" id="SalesMeasurementUnit" class="{required:true,messages:{required:'销售计量单位'}} wd150">
+                                <option value="kg">千克</option>
+                                <option value="g">克</option>
+                                <option value="lb">镑</option>
+                                <option value="oz">盎司</option>
+
+                                <option value="case">盒</option>
+                                <option value="bottle">瓶</option>
+                                <option value="pot">罐</option>
+                                <option value="count">支</option>
+                                <option value="piece">块</option>
+                                <option value="pcs">PCS</option>
+                                <option value="other">其他</option>
+                            </select>
+                            <span id="SalesMeasurementUnit_error" class="c9" msg="商品的销售计量单位"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>货币单位</td>
+                        <td>
+                            <select dn="ValueUnit" name="ValueUnit" id="ValueUnit" class="{required:true,messages:{required:'货币单位'}} wd150">
+                                <option value="USD">美元</option>
+                                <option value="CNY">人民币</option>
+                                <option value="HKD">港元</option>
+                            </select>
+                            <span id="ValueUnit_error" class="c9" msg="货币单位"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">申报要素</td>
+                        <td>
+                            <input tabindex="13" dn="ProductDeclare" id="ProductDeclare" name="ProductDeclare" class="{maxlength:1000,messages:{maxlength:'申报要素由汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" size="100" enablenull="true" />
+                            <span id="ProductDeclare_error" class="c9" msg="商品的申报要素"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">体积</td>
+                        <td>
+                            <input tabindex="10" dn="VolumeValue" id="VolumeValue" name="VolumeValue" class="{number:true,minLimitNumber:0,messages:{number:'体积只能由数字组成',minLimitNumber:'体积不能小于0'}} wd100 m10_r" type="text" />
+                            <span id="VolumeValue_error" class="c9" msg="体积"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">体积规格<br /><span>单件 格式： 长*高*宽</span></td>
+                        <td>
+                            <input tabindex="13" dn="Volume" id="Volume" name="Volume" class="{maxlength:1000,messages:{maxlength:'商品体积规格由汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" size="100" enablenull="true" />
+                            <span id="Volume_error" class="c9" msg="商品体积规格"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">体积单位</td>
+                        <td>
+                            <select dn="VolumeUnit" name="VolumeUnit" id="VolumeUnit" class="wd150">
+                                <option value="cm">厘米</option>
+                                <option value="m">米</option>
+                                <option value="dm">分米</option>
+                                <option value="mm">毫米</option>
+                                <option value="ft">英尺</option>
+                                <option value="in">英寸</option>
+                            </select>
+                            <span id="VolumeUnit_error" class="c9" msg="体积单位"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">销售网址</td>
+                        <td>
+                            <input tabindex="13" dn="SalesAddress" id="SalesAddress" name="SalesAddress" class="{maxlength:200,messages:{maxlength:'销售网址由汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" size="100" enablenull="true" />
+                            <span id="SalesAddress_error" class="c9" msg="商品的销售网址"></span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="150" class="nameright">副标题</td>
+                        <td>
+                            <input tabindex="13" dn="ProductSubName" id="txt_ProductSubName" name="txt_ProductSubName" class="{maxlength:50,messages:{maxlength:'副标题由1-50个汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" size="100" enablenull="true" />
+                            <span id="txt_ProductSubName_error" class="c9" msg="商品的副标题称"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">简称</td>
+                        <td>
+                            <input tabindex="14" dn="ProductShortTitle" id="txt_ProductShortTitle" name="txt_ProductShortTitle" class="{maxlength:100,messages:{maxlength:'简称由1-100个汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" size="100" enablenull="true" />
+                            <span id="txt_ProductShortTitle_error" class="c9" msg="商品的简短名称"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">广告语</td>
+                        <td>
+                            <input tabindex="15" dn="ProductSlogan" id="txt_ProductSlogan" name="txt_ProductSlogan" class="{maxlength:100,messages:{maxlength:'广告用语由1-100个汉字、字母、数字等字符组成'}} wd400 m10_r" type="text" enablenull="true" />
+                            <span id="txt_ProductSlogan_error" class="c9" msg="商品的广告宣传用语"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">是否前台下单</td>
+                        <td>
+                            <input tabindex="16" dn="CanFrontEndOrder" name="ckh_CanFrontEndOrder" id="ckh_CanFrontEndOrder" type="checkbox" value="" class="m5_r" checked="checked" enablenull="true" />
+                            <span class="m10_r">前台下单</span>
+                            <span id="ckh_CanFrontEndOrder_error" class="c9" msg="商品是否能在前台购买"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">是否前台显示</td>
+                        <td>
+                            <input tabindex="16" dn="IsFrontDisplay" name="ckh_IsFrontDisplay" id="ckh_IsFrontDisplay" type="checkbox" value="" class="m5_r" checked="checked" enablenull="true" />
+                            <span class="m10_r">前台显示</span>
+                            <span id="ckh_IsFrontDisplay_error" class="c9" msg="商品是否能在前台显示"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright" valign="top">简介</td>
+                        <td>
+                            <textarea tabindex="17" dn="ProductSummary" name="txt_ProductSummary" id="txt_ProductSummary" class="{maxlength:200,messages:{maxlength:'产品简介由1-100个汉字、字母、数字等字符组成'}}" cols="" rows="" style="width: 450px" enablenull="true" maxlength="100"></textarea>
+                            <span id="txt_ProductSummary_error" class="c9" msg="产品简介由1-100个汉字、字母、数字等字符组成"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright" valign="top">包装清单</td>
+                        <td>
+                            <textarea tabindex="18" dn="PackageDesc" name="txt_PackageDesc" id="txt_PackageDesc" cols="" rows="" style="width: 450px" class="{maxlength:100,messages:{maxlength:'包装清单最多只能输入200个有效字符'}} m10_r" maxlength="200"></textarea>
+                            <span id="txt_PackageDesc_error" class="c9" msg="单个商品包装内所含物品清单（描述最大长度200个字符）"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span><span id="freTitle">运费</span></td>
+                        <td>
+                            <input type="hidden" dn="FreightFlag" id="FreightFlag" />
+                            <input tabindex="19" dn="Freight" id="txt_Freight" name="txt_Freight" style="width: 168px" class="{required:true,number: true,maxlength:20,messages:{required:'请填写商品运费信息',maxlength:'运费由数值组成'}} wd400 m10_r" type="text" /><span id="FreightUnit">元</span>
+                            <button tabindex="20" id="btn_useFreightModule" class="btn btn_ht26 m10_r" title="已使用运费模板" style="background: #ffdb44;display:none;"><span class="m5_l" id="span_useFreightModule" lid="">已使用运费模板</span></button>
+                            <button tabindex="21" id="btn_cancelFreightModule" class="btn btn_ht26 m10_r" title="取消运费模板" style="margin-left: -12px; display: none;"><span class="m5_l">取消运费模板</span></button>
+                            <a href="javascript:void(0);" id="useFreightModule" style="margin-left: 5px; color: #3366CC; ">使用运费模板</a> &nbsp;&nbsp;
+                            <span id="txt_Freight_error" class="c9" msg="商品运费信息"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>直营利润比例</td>
+                        <td>
+                            <input dn="PriceRate" name="txt_PriceRate" type="text" id="txt_PriceRate" value="0" class="{required:true,number:true,minLimitNumber:0,messages:{required:'请填写直营利润比例',number:'直营利润比例只能由数字组成',minLimitNumber:'直营利润比例不能小于0'}} " />%
+                            <span id="txt_PriceRate_error" class="c9" msg="直营利润比例"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">直营分销商利润金额</td>
+                        <td>
+                            <input dn="PriceValue" name="txt_PriceValue" type="text" id="txt_PriceValue" value="0.00" class="{number:true,minLimitNumber:0,messages:{required:'请填写直营分销商利润金额',number:'直营分销商利润金额只能由数字组成'}} " />
+                            <span id="txt_PriceValue_error" class="c9" msg="直营分销商利润金额"></span>
+                        </td>
+                    </tr>
+                    @{
+                        string showflag = "";
+                        //判断是否绑定所有分销商 王耀发 2016-3-5 创建
+                        if (!info.IsBindAllDealer)
+                        {
+                            //判断是否绑定分销商,成本价格对于分销商隐藏
+                            if (info.IsBindDealer)
+                            {
+                                showflag = "display:none;";
+                            }
+                        }
+                        <tr style="@showflag">
+                            <td width="150" class="nameright"><span class="v_star">*</span>成本价格</td>
+                            <td>
+                                <input dn="CostPrice" name="txt_CostPrice" type="text" id="txt_CostPrice" value="0.00" class="{required:true,number:true,minLimitNumber:0,messages:{required:'请填写成本价格',number:'成本价格只能由数字组成'}} " />
+                                <span id="txt_CostPrice_error" class="c9" msg="成本价格"></span>
+                            </td>
+                        </tr>
+                    }
+                    <tr class="DS1002302">
+                        <td width="150" class="nameright"><span class="v_star">*</span>批发价格</td>
+                        <td>
+                            <input dn="TradePrice" name="txt_TradePrice" type="text" id="txt_TradePrice" value="0.00" class="{required:true,number:true,minLimitNumber:0,messages:{required:'请填写批发价格',number:'批发价格只能由数字组成'}} " />
+                            <span id="txt_TradePrice_error" class="c9" msg="批发价格"></span>
+                        </td>
+                    </tr>
+                    <tr style="@showflag">
+                        <td width="150" class="nameright">总部利润金额</td>
+                        <td>
+                            <input dn="DealerPriceValue" name="txt_DealerPriceValue" type="text" id="txt_DealerPriceValue" value="0.00" class="{number:true,minLimitNumber:0,messages:{required:'请填写总部利润金额',number:'总部利润金额只能由数字组成'}} " />
+                            <span id="txt_DealerPriceValue_error" class="c9" msg="总部利润金额"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>包装类型</td>
+                        <td>
+                            @{
+                                if (SpecModel != null)
+                                {
+                                    var mJObj = Newtonsoft.Json.Linq.JObject.Parse(SpecModel.SpecValues);
+                                    <select id="sel_unit" class="valid">
+                                        <option value="罐装" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "罐装" ? "selected" : "")>罐装</option>
+                                        <option value="袋装" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "袋装" ? "selected" : "")>袋装</option>
+                                        <option value="包装" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "包装" ? "selected" : "")>包装</option>
+                                        <option value="盒装" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "盒装" ? "selected" : "")>盒装</option>
+                                        <option value="瓶装" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "瓶装" ? "selected" : "")>瓶装</option>
+                                        <option value="组" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "组" ? "selected" : "")>组</option>
+                                        <option value="箱" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "箱" ? "selected" : "")>箱</option>
+                                        <option value="套装" @(SpecModel != null && mJObj["PdProductSpecValues"][0]["unit"].ToString() == "套装" ? "selected" : "")>套装</option>
+                                    </select>
+                                }
+                                else
+                                {
+                                    <select id="sel_unit" class="valid">
+                                        <option value="罐装">罐装</option>
+                                        <option value="袋装">袋装</option>
+                                        <option value="包装">包装</option>
+                                        <option value="盒装">盒装</option>
+                                        <option value="瓶装">瓶装</option>
+                                        <option value="组">组</option>
+                                        <option value="箱">箱</option>
+                                        <option value="套装">套装</option>
+                                    </select>
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>商品规格</td>
+                        <td>
+                            <button tabindex="21" id="btn_AddPdProductSpec" class="btn btn_ht26 m10_r " title="添加规格">
+                                <span class="m5_l">添加规格</span>
+                            </button>
+                        </td>
+                    </tr>
+                    <tr id="tr_PdProductSpec" style="@(SpecModel==null?"display:none;":string.Empty)">
+                        <td colspan="2">
+                            <div class="boxs_detail line25">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style="overflow: visible;" loaded="true">
+                                    <thead>
+                                        <tr class="">
+                                            <th class="p10_lr" width="300">规格名称</th>
+                                            <th class="p10_lr" width="80">规格价格</th>
+                                            <th class="p10_lr" width="80">操作</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="lbl_PdProductSpec">
+                                        @{
+                                            if (SpecModel != null)
+                                            {
+                                                var mJObj = Newtonsoft.Json.Linq.JObject.Parse(SpecModel.SpecValues);
+                                                for (int i = 0; i < mJObj["PdProductSpecValues"].Count(); i++)
+                                                {
+
+                                                    <tr class="">
+                                                        <td class="center">
+                                                            <input type="text" id="spec" name="spec" required class="txt_spec wd50" value="@(mJObj["PdProductSpecValues"][i]["spec"].ToString())">
+                                                            <text class="lbl_unit m5_l">@(mJObj["PdProductSpecValues"][i]["unit"].ToString())</text>
+                                                        </td>
+                                                        <td align="center">
+                                                            <input type="text" id="price" name="price" required class="txt_price wd50" value="@(mJObj["PdProductSpecValues"][i]["price"].ToString())">
+                                                        </td>
+                                                        <td align="center" width="120">
+                                                            <button class="btn btn_ht26 m5_t" title="删除" onclick="delPdProductSpec(this)">
+                                                                <span class="icon_trash"></span>
+                                                                <span class="m5_l">删除</span>
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+                                        <script type="text/template" id="tmpCity">
+                                            <tr class="">
+                                                <td class="center">
+                                                    <input type="text" id="spec" name="spec" required class="txt_spec wd50" value="">
+                                                    <text class="lbl_unit m5_l">{%=lbl_unit%}</text>
+                                                </td>
+                                                <td align="center">
+                                                    <input type="text" id="price" name="price" required class="txt_price wd50" value="0.00">
+                                                </td>
+                                                <td align="center" width="120">
+                                                    <button class="btn btn_ht26 m5_t" title="删除" onclick="delPdProductSpec(this)">
+                                                        <span class="icon_trash"></span>
+                                                        <span class="m5_l">删除</span>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        </script>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div class="align_c m10_t" id="btn_tab_1">
+        <button id="btn_MainInfo_Save" tabindex="18" class="btn btn_blue btn_ht30 hidden"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;&nbsp;
+        <button id="btn_MainInfo_SaveAndNext" tabindex="19" class="btn btn_green btn_ht30 hidden"><span class="icon_save icon_white"></span><span class="m5_l">保存 进入下一步</span></button>
+    </div>
+    <script>
+
+        $("#btn_cancelFreightModule").live('click', function () {
+            $("#FreightFlag").val("N");
+            $("#txt_Freight").val("");
+            $("#txt_Freight,#FreightUnit,#useFreightModule").show();
+            $("#btn_useFreightModule,#btn_cancelFreightModule").hide();
+            //$("#freTitle").html("运费");
+            //$("#span_useFreightModule").html("已使用运费模板");
+            //$("#span_useFreightModule").attr("lid", "");
+            //$("#txt_Freight,#FreightUnit,#useFreightModule").show();
+            //$("#btn_useFreightModule,#btn_cancelFreightModule").hide();
+        });
+
+
+        var selectedCategory = new Array();    //已选择的商品分类对象列表
+        var deleteCategory = new Array();      //删除的商品分类对象列表
+
+        $(function () {
+            //同过商品系统编号隐藏文本域来判断当前是新增还是修改状态，并设置按钮显示
+            if (!!$("#hdf_ProductSysNo").val() && $("#hdf_ProductSysNo").val() != "") {
+                //修改时显示保存按钮
+                $("#btn_MainInfo_Save").show();
+                $("#btn_MainInfo_SaveAndNext").hide();
+            } else {
+                //添加时显示保存并进入下一步
+                $("#btn_MainInfo_Save").hide();
+                $("#btn_MainInfo_SaveAndNext").show();
+
+                //新增设置代理商和分销商的默认值，默认为总部分销商
+                //$("#AgentSysNo").val(1);
+                //$("#DealerSysNo").val(0);
+            }
+
+            var validatePdProduct;  //商品基本信息
+
+            //获取商品系统编号
+            var productSysNo = ($("#hdf_ProductSysNo").val() == "" ? 0 : $("#hdf_ProductSysNo").val());
+            if (productSysNo > 0) {
+                initFreightModule();
+            }
+
+            $("#useFreightModule").click(function () {
+                $("#FreightFlag").val("Y");
+                $("#txt_Freight").val("");
+                $("#txt_Freight,#FreightUnit,#useFreightModule").hide();
+                $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                @*if (productSysNo > 0) {
+                    var data = { "PdProductSysNo": productSysNo };
+                    $.ajax({
+                        url: "@Url.Action("GetEntityByPdProductSysNo", "Product")",
+                        data: data,
+                        success: function (data) {
+                            if (data != null) {
+                                var mSysNo = data.LgFreightModuleSysNo;
+                                if (mSysNo != null) {
+                                    $.ajax({
+                                        url: '/Logistics/GetEntity',
+                                        type: 'post',
+                                        data: {
+                                            SysNo: mSysNo
+                                        },
+                                        success: function (data) {
+                                            if (data.ValuationStyle == 1) {
+                                                $("#freTitle").html("件数");
+                                            }
+                                            if (data.ValuationStyle == 2) {
+                                                $("#freTitle").html("重量");
+                                            }
+                                            if (data.ValuationStyle == 3) {
+                                                $("#freTitle").html("体积");
+                                            }
+                                            $("#span_useFreightModule").attr("lid", data.SysNo);
+                                            $("#span_useFreightModule").html(data.ModuleName);
+                                        }
+                                    });
+                                    $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                                    $("#txt_Freight").val(data.ValuationValue);
+                                    $("#FreightUnit,#useFreightModule").hide();
+                                } else {
+                                    $("#txt_Freight,#FreightUnit,#useFreightModule").hide();
+                                    $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                                }
+                            } else {
+                                $("#txt_Freight,#FreightUnit,#useFreightModule").hide();
+                                $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                            }
+                        }
+                    });
+                } else {
+                    $("#txt_Freight,#FreightUnit,#useFreightModule").hide();
+                    $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                }*@
+            });
+            //初始化商品运费模板
+            function initFreightModule() {
+                $.ajax({
+                    url: '/Product/GetProduct',
+                    type: 'post',
+                    data: {
+                        SysNo: productSysNo
+                    },
+                    success: function (data) {
+                        //alert(JSON.stringify(data));
+                        if (data.FreightFlag == "Y") {
+                            $("#txt_Freight,#FreightUnit,#useFreightModule").hide();
+                            $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                        }
+                        if (data.FreightFlag == "N") {
+                            $("#txt_Freight,#FreightUnit,#useFreightModule").show();
+                            $("#btn_useFreightModule,#btn_cancelFreightModule").hide();
+                        }
+                    }
+                });
+
+                @*var data = { "PdProductSysNo": productSysNo };
+                $.ajax({
+                    url: "@Url.Action("GetEntityByPdProductSysNo", "Product")",
+                    data: data,
+                    success: function (data) {
+                        if (data != null) {
+                            var mSysNo = data.LgFreightModuleSysNo;
+                            if (mSysNo != null) {
+                                $.ajax({
+                                    url: '/Logistics/GetEntity',
+                                    type: 'post',
+                                    data: {
+                                        SysNo: mSysNo
+                                    },
+                                    success: function (data) {
+                                        if (data.ValuationStyle == 1) {
+                                            $("#freTitle").html("件数");
+                                        }
+                                        if (data.ValuationStyle == 2) {
+                                            $("#freTitle").html("重量");
+                                        }
+                                        if (data.ValuationStyle == 3) {
+                                            $("#freTitle").html("体积");
+                                        }
+                                        $("#span_useFreightModule").attr("lid", data.SysNo);
+                                        $("#span_useFreightModule").html(data.ModuleName);
+                                    }
+                                });
+                                $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                                $("#txt_Freight").val(data.ValuationValue);
+                                $("#FreightUnit,#useFreightModule").hide();
+                            } else {
+                                $("#txt_Freight").val(data.Freigh);
+                            }
+                        } else {
+                            $("#txt_Freight,#FreightUnit,#useFreightModule").hide();
+                            $("#btn_useFreightModule,#btn_cancelFreightModule").show();
+                        }
+                    }
+                });*@
+            }
+            //设置商品信息验证
+            validatePdProduct = $("#tab_PdProduct").validate({
+                rules: {
+                    txt_erpCode: {
+                        remote: {
+                            url: "@Url.Action("CheckERPCode","Product")",
+                            data: { erpCode: function () { enableAjaxLoader = false; return $("#txt_erpCode").val(); }, productSysNo: productSysNo },
+                            type: "GET",
+                            dataType: "json",
+                            cache: false,
+                            contentType: 'application/json; charset=utf-8'
+                        }
+                    },
+                    txt_QRCode: {
+                        remote: {
+                            url: "@Url.Action("CheckQRCode","Product")",
+                            data: { qrCode: function () { enableAjaxLoader = false; return $("#txt_QRCode").val(); }, productSysNo: productSysNo },
+                            type: "GET",
+                            dataType: "json",
+                            cache: false,
+                            contentType: 'application/json; charset=utf-8'
+                        }
+                    }
+                },
+                messages: {
+                    txt_erpCode: {
+                        remote: "商品编号已经被其他商品使用"
+                    },
+                    txt_QRCode: {
+                        remote: "二维码已经被其他商品使用"
+                    }
+                },
+                onsubmit: false,
+                errorPlacement: function (error, element) {
+
+                    //设置错误信息
+                    if (error.html() != "") {
+                        $("#" + $(element).attr("id") + '_error').html(error);
+                        $("#" + $(element).attr("id") + '_error').removeClass("prompt");
+                        $("#" + $(element).attr("id") + '_error').removeClass("success");
+                        $("#" + $(element).attr("id") + '_error').addClass("error");
+                    }
+
+                    enableAjaxLoader = true;
+
+                },
+                success: function (element) {
+                    //设置成功信息
+                    var obj = $("#" + element.attr("for") + "_error");
+                    obj.html(obj.attr("msg"));
+                    $("#" + $(element).attr("for") + '_error').removeClass("error");
+                    $("#" + $(element).attr("for") + '_error').removeClass("prompt");
+                    if ($("#" + $(element).attr("for")).val() != "" && $("#" + $(element).attr("for") + '_error').attr("msg") != "") {
+                        $("#" + $(element).attr("for") + '_error').addClass("success");
+                    }
+                    enableAjaxLoader = true;
+                }
+            });
+
+            //设置该区域的保存按钮来控制能否反映
+            $("#btn_tab_1 button").click(function () {
+                currentPageIsValid = $("#tab_PdProduct").valid();
+                return false;
+            });
+
+            //弹出商品类别
+            //2013-06-26 邵斌 修改：调用真实数据
+            var options = {
+                margin: {
+                    vertical: 14,
+                    horizontal: -14
+                },
+                isMulti: true,
+                zIndex: 5,
+                callBack: function (data) {
+                    //分析被移除的商品分类
+                    $(selectedCategory).each(function (index, element) {
+                        var isRemoved = true;
+                        for (var i = 0; i < data.length; i++) {
+                            if (data[i].id == element.id) {
+                                isRemoved = false;
+                                break;
+                            }
+                        }
+                        if (isRemoved) {
+
+                            if ($("#txt_ProductCategory").attr("mastercategory") != null && $("#txt_ProductCategory").attr("mastercategory").length > 0 && element.id == $("#txt_ProductCategory").attr("mastercategory")) {
+                                $("#txt_ProductCategory").attr("mastercategory", null);
+                            }
+
+                            deleteCategory.push(element.id);
+                        }
+                    });
+
+                    //添加分类到页面
+                    selectedCategory = data;
+                    $("#txt_ProductCategory option:first").attr("selected", "selected");
+
+                    if (!!$("#txt_ProductCategory").attr("mastercategory")) {
+                        if (!!$("#txt_ProductCategory option[value='" + $("#txt_ProductCategory").attr("mastercategory") + "']").length > 0)
+                            setMasterCategory($("#txt_ProductCategory").attr("mastercategory"));
+                    }
+                    validatePdProduct.element($("#txt_ProductCategory"));
+
+                    $("#txt_ProductCategory option:first").attr("selected", "selected");
+                }
+            };
+            DAO.SelectProductCategory($("#btn_selectCategory"), $("#txt_ProductCategory"), options);
+
+            //删除分类
+            $("#btn_deleteCategory").click(function () {
+
+
+                //判断是否有分类
+                if (!!selectedCategory && selectedCategory.length > 0) {
+                    //判断是否有选中的分类，如果有才进行处理
+                    if (!!$("#txt_ProductCategory").val() && $("#txt_ProductCategory").val().length > 0) {
+
+                        var selectlist = (!!$("#txt_ProductCategory").attr("pdcategory")) ? $("#txt_ProductCategory").attr("pdcategory").split(",") : [];
+                        //遍历结果并删除结果
+                        for (var i = 0; i < selectedCategory.length; i++) {
+                            if (selectedCategory[i].id == $("#txt_ProductCategory").val()) {
+
+                                if ($("#txt_ProductCategory").attr("mastercategory") != null && $("#txt_ProductCategory").attr("mastercategory").length > 0 && selectedCategory[i].id == $("#txt_ProductCategory").attr("mastercategory")) {
+                                    $("#txt_ProductCategory").attr("mastercategory", null);
+                                }
+
+                                deleteCategory.push(selectedCategory[i].id);
+                                selectedCategory.splice(i, 1);
+                                selectlist.splice(i, 1);
+                                $("#txt_ProductCategory").attr("pdcategory", selectlist.AsDelimited(","));
+                                $("#txt_ProductCategory option:selected").remove();
+                                $("#txt_ProductCategory option:first").attr("selected", "selected");
+                                return true;
+                            }
+                        }
+                    }
+                }
+            });
+            //设置成为主分类
+            $("#btn_setTobeMaster").click(function () {
+                var selectedItem = $("#txt_ProductCategory").val();
+                UI.BindDataFromZTreeNodes($("#txt_ProductCategory"), selectedCategory);
+                setMasterCategory(selectedItem);
+            });
+
+            function setMasterCategory(selectedItem) {
+                var option = $("#txt_ProductCategory option[value='" + selectedItem + "']");
+                option.html(option.html() + "（主分类）");
+                option.attr("selected", "selected");
+                $("#txt_ProductCategory").attr("mastercategory", selectedItem);
+            }
+
+            //选择品牌
+            $("#btn_selectPdBrand").click(function () {
+                DAO.SelectBrand({
+                    callBack: function (data) {
+                        if (data != null && data.sysno != null) {
+                            $("#txt_PdBrand").val(data.name);
+                            $("#hdf_BrandSysNo").val(data.sysno);
+                            validatePdProduct.element($("#txt_PdBrand"));
+                        }
+                    }
+                });
+            });
+            //选择模板
+            //$("#btn_useFreightModule").click(function () {
+            //    DAO.SelectFreightModule({
+            //        callBack: function (data) {
+            //            if (data != null && data.sysno != null) {
+            //                $("#span_useFreightModule").html(data.name);
+            //                $("#span_useFreightModule").attr("lid", data.sysno);
+            //                $.ajax({
+            //                    url: '/Logistics/GeValuationStyleBySysNo',
+            //                    type: 'post',
+            //                    data: {
+            //                        SysNo: data.sysno
+            //                    },
+            //                    success: function (data) {
+            //                        if (data.Status) {
+            //                            if (data.Message == "1") {
+            //                                $("#freTitle").html("件数");
+            //                            }
+            //                            if (data.Message == "2") {
+            //                                $("#freTitle").html("重量");
+            //                            }
+            //                            if (data.Message == "3") {
+            //                                $("#freTitle").html("体积");
+            //                            }
+            //                        }
+            //                        $("#txt_Freight").show();
+            //                        $("#FreightUnit").hide();
+            //                    }
+            //                });
+            //            }
+            //        }
+            //    });
+            //});
+
+
+            $("#btn_MainInfo_Save").click(function () {
+                SaveMainInfo();
+            });
+
+            $("#btn_MainInfo_SaveAndNext").click(function () {
+                if (SaveMainInfo() == false)
+                    return false;
+                $("#btn_MainInfo_Save").show();
+                $("#btn_MainInfo_SaveAndNext").hide();
+            });
+
+            $("#txt_productName").focus(function () {
+                $("#txt_NameAcronymy").attr("readonly", "readonly");
+            });
+
+            $("#txt_productName").blur(function () {
+                var data = {};
+                data.chinese = $(this).val();
+                $.ajax({
+                    url: "@Url.Action("ChineseToPinYin","Ajax")",
+                    data: data,
+                    success: function (response) {
+                        $("#txt_NameAcronymy").attr("readonly", null);
+                        $("#txt_NameAcronymy").val(response);
+                    }
+                })
+            });
+
+            //验证特殊字段值
+            function checkFields() {
+                var success = true;
+                var msg = "";
+                if (!((!!$("#txt_ProductCategory").attr("mastercategory")) && $("#txt_ProductCategory").attr("mastercategory").length > 0)) {
+                    success = false;
+                    msg += "请为商品指定一个主商品分类？" + "<br/>";
+                }
+                //判断是否选择了模板
+                //if ($("#btn_useFreightModule").is(":visible") && $("#span_useFreightModule").html() == "已使用运费模板") {
+                //    success = false;
+                //    msg += "请为商品指定一个运费模板" + "<br/>";
+                //}
+                if (!success)
+                    UI.Alert({
+                        content: msg,
+                        callback: function () {
+                        },
+                        width: '200px'
+                    });
+                return success;
+            }
+
+            //保存信息
+            function SaveMainInfo() {
+
+
+                //验证特殊字段
+                if (!checkFields())
+                    return false;
+
+                //验证输入
+                if (!validatePdProduct.valid())
+                    return false;
+
+                var productMode = $("#div_productMainInof").JsonBind();        //读取商品模型JSON对象
+
+                //for(var i )
+
+                var categoryAssociationModeList = new Array();                 //商品分类关系
+
+                //读取商品主分类
+                var masterCategory = (!!$("#txt_ProductCategory").attr("mastercategory")) && $("#txt_ProductCategory").attr("mastercategory").length > 0 ? parseInt($("#txt_ProductCategory").attr("mastercategory")) : 0;
+
+                if (productMode.CanFrontEndOrder == true) {
+                    productMode.CanFrontEndOrder = 1;
+                } else {
+                    productMode.CanFrontEndOrder = 0;
+                }
+
+                //遍历选择的商品分类，并生产对象
+                oldCategoryList = (oldProductModel.PdCategory != null && oldProductModel.PdCategory.Value != undefined) ? oldProductModel.PdCategory.Value : new Array();
+                var canAdd = true;
+                $(selectedCategory).each(function (index, element) {
+                    //canAdd = true;
+                    //for (var i = 0; i < oldCategoryList.length; i++) {
+                    //    if (oldCategoryList[i].SysNo == element.id) {
+                    //        canAdd = false;
+                    //        break;
+                    //    }
+                    //}
+
+                    ////如果能添加到列表将添加到列表用于待追加分类关系
+                    //if(canAdd){
+                    categoryAssociationModeList.push({
+                        CategorySysNo: element.id,
+                        IsMaster: masterCategory == element.id
+                    });
+                    //}
+                });
+                //获取商品对应的模板id和对应商品数值信息 2015-08-14 王耀发 创建
+                var moduleList = $("#span_useFreightModule").attr("lid") + "," + $.trim($("#txt_Freight").val());
+
+
+                ////读取规格  2017-09-01 吴琨 创建
+                var PdProductSpecJson = new Array();  //商品规格
+                $("#lbl_PdProductSpec").children("tr").each(function () {
+                    PdProductSpecJson.push({
+                        unit: $("#sel_unit").val(),
+                        spec: $(this).children("td").eq(0).children(".txt_spec").val(),
+                        price: $(this).children("td").eq(1).children(".txt_price").val()
+                    });
+                })
+
+                //设置传递参数
+                var data = {
+                    productModel: productMode,
+                    categoryAssociationList: categoryAssociationModeList,
+                    deleteCategoryAssociationList: deleteCategory,
+                    masterCategorySysNo: masterCategory,
+                    stamp: productMode.Stamp,
+                    PdProductSpec: "",
+                    PdProductSpec: PdProductSpecJson
+                    //,
+                    //moduleList: moduleList
+                };
+
+                productMode.SysNo = $("#hdf_ProductSysNo").val();
+
+                //提交表单
+                $.ajax({
+                    url: "@Url.Action("UpdateProduct","Product")",
+                    data: JSON.stringify(data),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                        if (!response.result.Status) {
+                            UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + response.result.Message);
+                        } else {
+
+                            UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+                            if (oldProductModel != null)
+                                oldProductModel.PdCategory = new Array();
+                            deleteCategory = new Array();
+
+                            oldProductModel = response.product;
+                            $("#hdf_Stamp").val(response.stamp);
+                            $("#hdf_ProductSysNo").val(response.product.SysNo);
+
+                            $("#txt_DealerPriceValue").val(response.product.DealerPriceValue);
+
+                            productSysNo = response.product.SysNo;
+                            if (!editModel)
+                                prodctEditTab.Active('1');
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //默认错误处理
+                        var error = JSON.parse(XMLHttpRequest.responseText);
+                        //alert(error.ErrorMessage);
+                    }
+                });
+
+                return true;
+            }
+            //加载初始分销商
+            GetDealersListByCreatedBy($("#AgentSysNo").val());
+        });
+
+        //当页面加载是绑定已选择的分类列表
+        function BindCategory(data) {
+            var optionTemplate = '<option value="{0}">{1}</option>';            //分类列表html模板
+            var html = "";                                                          //组合Html
+            var category;                                                           //单个分类对象
+            var categorySysNoList = new Array();                                         //已选择的分类id
+
+            $(data).each(function (index, element) {
+                //组合对象
+                category = {};
+                category.id = element.SysNo;
+                category.name = element.CategoryName;
+                category.FullName = element.CategoryName;
+                category.pIdKey = element.ParentSysNo;
+
+                selectedCategory.push(category);
+
+                //格式化html
+                html = optionTemplate;
+                html = html.replace("{0}", category.id);
+
+                //如果是主分类将设置主分类名称
+                if (element.IsMaster) {
+                    category.name = category.name + "（主分类）";
+                    $("#txt_ProductCategory").attr("mastercategory", category.id);
+                }
+                html = html.replace("{1}", category.name);
+                $("#txt_ProductCategory").append(html);
+
+                //添加到已选择的分类编号列表中
+                categorySysNoList.push(category.id);
+            });
+
+            //设置已选择的分类编号到pdcategory属性，以便用于现在分类时选择使用
+            $("#txt_ProductCategory").attr("pdcategory", categorySysNoList.AsDelimited(","));
+            $("#txt_ProductCategory option:first").attr("selected", "selected");
+        }
+
+
+        $("#AgentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#AgentSysNo").val());
+        });
+
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $("#DealerSysNo").html("");
+            if (DealerCreatedBy != -1) {
+                $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                    $.each(data, function (idx, item) {
+                        if (item.SysNo != undefined) {
+                            $("#DealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    });
+                });
+            }
+        }
+        //选择条形码
+        $("#btn_selectPdBarcode").click(function () {
+            DAO.SelectBarcode({
+                callBack: function (data) {
+                    if (data != null && data.sysno != null) {
+                        $("#txt_Barcode").val(data.name);
+                        //validatePdProduct.element($("#txt_Barcode"));
+                    }
+                }
+            });
+        })
+
+        //添加规格
+        $("#btn_AddPdProductSpec").click(function () {
+            $("#tr_PdProductSpec").show();
+            $("#lbl_PdProductSpec").append(myTempl("#tmpCity", { "lbl_unit": $("#sel_unit").val() }));
+        })
+
+        //移除规格
+        function delPdProductSpec(th) {
+            $(th).parent().parent().remove();
+            if ($("#lbl_PdProductSpec").children("tr").length == 0) {
+                $("#tr_PdProductSpec").hide();
+            }
+        }
+        //包装类型改变
+        $("#sel_unit").change(function () {
+            $(".lbl_unit").html($(this).val())
+        });
+    </script>
+</div>
+<!-- 商品主信息维护 END -->

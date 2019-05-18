@@ -1,0 +1,100 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util.Extension
+@using Hyt.Util
+@model PagedList<Hyt.Model.DsReturn>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            @*<th width="53">
+                    <input name="sysNo" id="checkall" type="checkbox" />
+                    <input name="SpecialPriceSysNoList" id="SpecialPriceSysNoList" type="hidden" value="@Model.IdData" />
+                </th>*@
+            <th width="50px" class="align_l p10_lr">系统编号</th>
+            <th width="80px" class="align_l p10_lr">经销商商城编号</th>
+            <th width="90" class="align_l p10_lr">退换货事物编号</th>
+            <th width="90">退换货单号</th>
+            <th width="120">商城订单号</th>
+            <th width="90">买家昵称</th>
+            <th width="90">商城名称</th>
+            <th width="60">RMA类型</th>
+            <th width="70">商城退款金额</th>
+            <th width="100">申请退款时间</th>
+            <th width="100">商城退换单号</th>
+            <th width="200">买家备注</th>
+            <th width="200">退款备注</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count == 0)
+            {
+                <tr class="odd_color trhover">
+                    <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+                return;
+            }
+            int i = 0;
+            string status = "";
+            foreach (var item in Model.TData)
+            {
+                if (i % 2 == 0)
+                {
+                    @Html.Raw("<tr>")
+                }
+                else
+                {
+                    @Html.Raw("<tr class='stag_color'>")
+                }
+                @*<td>
+                        <input name="sysNo" type="checkbox" value="@item.SysNo" spsysno="@item.OrderTransactionSysNo" />
+                    </td>*@
+                var mallName = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetmallName(item.DealerMallSysNo);
+                var dealerSysNo = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetdealerSysNo(item.DealerMallSysNo);
+                var dealerName = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetdealerName(item.DealerMallSysNo);
+                var orderSysNo = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetorderSysNo(item.DealerMallSysNo);
+            <td class="align_l blue p10_lr"><a href="javascript:RMAorderBrowse(@item.SysNo);">@item.SysNo</a></td>
+            <td class="align_l blue p10_lr"><a>@item.DealerMallSysNo</a></td>
+            <td class="align_l p10_lr">@item.ReturnTransactionSysNo</td>
+            <td class="align_l p10_lr">@item.RcReturnSysNo</td>
+            <td class="align_l blue p10_lr"><a onclick="browseDealerInfo(@dealerSysNo)" href="javascript:;">@mallName</a></td>
+            <td class="align_l blue p10_lr"><a onclick="browseDealerInfo(@dealerSysNo)" href="javascript:;">@dealerName</a></td>
+            <td class="align_l p10_lr">@item.MallOrderId</td>
+            <td class="align_l p10_lr">@mallName</td>
+            <td class="align_l p10_lr">@item.BuyerNick</td>
+                if (item.RmaType == 10)
+                {
+                    status = "售后换货";
+                }
+                if (item.RmaType == 20)
+                {
+                    status = "售后退货";
+                }
+                <td class="align_l p10_lr">@status</td>
+                <td class="align_l p10_lr">@item.MallReturnAmount</td>
+                <td class="align_l p10_lr">@item.ApplicationTime</td>
+                <td class="align_l blue p10_lr"><a>@item.MallReturnId</a></td>
+                <td class="align_l blue p10_lr"><a>@item.BuyerRemark</a></td>
+                <td class="align_l blue p10_lr"><a>@item.RmaRemark</a></td>
+                @Html.Raw("</tr>")
+            }
+        }
+        </tbody>
+    </table>
+    @{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    function RMAorderBrowse(sysNo) {
+        UI.DialogOpen('/Distribution/RMADealerInfo?sysNo=' + sysNo, {
+            title: '经销商退换货订单信息',
+            width: '698px',
+            height: '389px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    };
+</script>

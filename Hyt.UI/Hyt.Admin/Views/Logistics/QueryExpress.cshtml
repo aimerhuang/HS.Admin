@@ -1,0 +1,159 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "快递单号查询";
+}
+
+@using Hyt.Infrastructure.Pager;
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.ExpressList.KuaiDiNumQuery>
+
+<div class="boxs_con_c1">
+    <div class="boxs_tool">
+        <button class="btn btn_ht26 m10_r" id="export_excel_btn" title="导出Excel"><span class="icon_download_alt "></span><span class="m5_l">导出Excel</span></button>
+        <div class="right_tool">
+
+            <span class="fl">快递单号</span>
+            <input id="txtKuaidiNo" type="text" class="wd100 fl m10_l m10_r">
+            <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+        </div>
+    </div>
+</div>
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="120">快递单号</th>
+                <th width="120">出库单号</th>
+                <th width="120">订单号</th>
+                <th width="120">收货人</th>
+                <th width="120">金额</th>
+                <th width="120">状态</th>
+                <th width="120">配送方式</th>
+                @*<th width="120">操作</th>*@
+            </tr>
+        </thead>
+        <tbody id="exhibition">
+            @if (Model != null)
+            {
+                foreach (var item in Model.TData)
+                {
+                    <tr>
+                        <td>@item.KuaidiNo</td>
+                        <td>@item.WhStocklnNo</td>
+                        <td>@item.OrderNo</td>
+                        <td>@item.Name</td>
+                        <td>@item.Money</td>
+                        <td>@item.Status</td>
+                        <td>@item.DeliveryTypeName</td>
+                        @*<td><button value='@item.KuaidiNo' name='btnDeleta' onclick='DeleteKuaiDiNum();' title='删除' class='btn btn_ht26 btn_red m10_r' type='button'><span class='icon_cancelAudit icon_white'></span><span class='m5_l'>删除</span></button></td>*@
+                    </tr>
+                }
+            }
+
+        </tbody>
+    </table>
+</div>
+@*导出Excel用表单*@
+<form id="export_excel_form" action="@Url.Action("KuaiDiNumExcel", "Logistics")" method="POST">
+    <input id="hd_KuaidiNo" name="KuaidiNo" type="hidden" />
+    <input id="hd_WhStocklnNo" name="WhStocklnNo" type="hidden" />
+    <input id="hd_OrderNo" name="OrderNo" type="hidden" />
+    <input id="hd_Name" name="Name" type="hidden" />
+    <input id="hd_Money" name="Money" type="hidden" />
+    <input id="hd_Status" name="Status" type="hidden" />
+    <input id="hd_DeliveryTypeName" name="DeliveryTypeName" type="hidden" />
+</form>
+
+<div id="paging">
+
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+
+    $(function () {
+        //GetAll();
+    })
+
+    function GetAll() {
+        $.ajax({
+            url: "@Url.Action("GetAll", "Logistics")",
+            data:{id:"@(Model.CurrentPageIndex)"},
+            dataType: "json",
+            success: function (data) {
+                var str = "";
+                $(data.TData).each(function (i, e) {
+                    str += "<tr> " +
+                            " <td>" + e.KuaidiNo + "</td> " +
+                            " <td>" + e.WhStocklnNo + "</td> " +
+                            " <td>" + e.OrderNo + "</td> " +
+                            " <td>" + e.Name + "</td> " +
+                            " <td>" + e.Money + ".</td> " +
+                            " <td>" + e.Status + "</td> " +
+                            " <td>" + e.DeliveryTypeName + "</td> " +
+                            //" <td><button value='" + e.KuaidiNo + "' name='btnDeleta' onclick='DeleteKuaiDiNum();' title='删除' class='btn btn_ht26 btn_red m10_r' type='button'><span class='icon_cancelAudit icon_white'></span><span class='m5_l'>删除</span></button></td> " +
+                            " </tr>";
+                });
+                $("#exhibition").html(str);
+            }
+        })
+    }
+
+
+    $("#searchBtn").click(function () {
+        var KuaiDiNum = $("#txtKuaidiNo").val();
+        if (KuaiDiNum == null || KuaiDiNum == "") {
+            UI.tips.tip_alert('tips_warning', '请输入要查询的快递单号！！！', true);
+            GetAll();
+        } else {
+            $.ajax({
+                url: "@Url.Action("SelectKuaiDiNum", "Logistics")",
+                data: { KuaiDiNum: KuaiDiNum },
+                dataType: "json",
+                success: function (data) {
+                    var str = "";
+                    $(data).each(function (i, e) {
+                        str += "<tr> " +
+                                " <td>" + e.KuaidiNo + "</td> " +
+                                " <td>" + e.WhStocklnNo + "</td> " +
+                                " <td>" + e.OrderNo + "</td> " +
+                                " <td>" + e.Name + "</td> " +
+                                " <td>" + e.Money + ".</td> " +
+                                " <td>" + e.Status + "</td> " +
+                                " <td>" + e.DeliveryTypeName + "</td> " +
+                                //" <td><button value='" + e.KuaidiNo + "' name='btnDeleta' onclick='DeleteKuaiDiNum();' title='删除' class='btn btn_ht26 btn_red m10_r' type='button'><span class='icon_cancelAudit icon_white'></span><span class='m5_l'>删除</span></button></td> " +
+                                " </tr>";
+                    });
+                    $("#exhibition").html(str);
+
+                }, error: function () {
+                    UI.tips.tip_alert('tips_warning', '网络异常！！！', true);
+                }
+            });
+        }
+    });
+    @* $("[name=btnDeleta]").click(function () {
+
+        var KuaiDiNum = $(this).val();
+        $.ajax({
+            url: "@Url.Action("DeleteKuaiDiNum", "Logistics")",
+            data: { KuaiDiNum: KuaiDiNum, id: "@(Model.CurrentPageIndex)" },
+            success: function (data) {
+                GetAll();
+                window.location.reload();//当前页面刷新
+                UI.tips.tip_alert('tips_warning', '删除成功！！！', true);
+            }, error: function () {
+                UI.tips.tip_alert('tips_warning', '网络异常！！！', true);
+
+            }
+
+        });
+
+    });*@
+
+    //绑定导出Excel按钮事件
+    $("#export_excel_btn").click(function () {
+
+        export_excel_form.submit();
+    });
+</script>

@@ -1,0 +1,1121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://focussend.com/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://focussend.com/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://focussend.com/">
+      <s:element name="HelloWorld">
+        <s:complexType />
+      </s:element>
+      <s:element name="HelloWorldResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="HelloWorldResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BatchSend">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="tns:FocusEmail" />
+            <s:element minOccurs="0" maxOccurs="1" name="task" type="tns:FocusTask" />
+            <s:element minOccurs="0" maxOccurs="1" name="receivers" type="tns:ArrayOfFocusReceiver" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FocusUser">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="FocusEmail">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Body" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="IsBodyHtml" type="s:boolean" />
+          <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="FocusTask">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TaskName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SenderName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SenderEmail" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReplyName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReplyEmail" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="SendDate" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="ArrayOfFocusReceiver">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FocusReceiver" nillable="true" type="tns:FocusReceiver" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="FocusReceiver">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FullName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Company" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="City" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Phone" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reserved1" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reserved2" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reserved3" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="BatchSendResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BatchSendResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BatchSendWithAttach">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="tns:FocusEmail" />
+            <s:element minOccurs="0" maxOccurs="1" name="task" type="tns:FocusTask" />
+            <s:element minOccurs="0" maxOccurs="1" name="receivers" type="tns:ArrayOfFocusReceiver" />
+            <s:element minOccurs="0" maxOccurs="1" name="attaches" type="tns:ArrayOfBase64Binary" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfBase64Binary">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="base64Binary" nillable="true" type="s:base64Binary" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="BatchSendWithAttachResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BatchSendWithAttachResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="tns:FocusEmail" />
+            <s:element minOccurs="0" maxOccurs="1" name="task" type="tns:FocusTask" />
+            <s:element minOccurs="0" maxOccurs="1" name="groupName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SendGroupResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendOne">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="tns:FocusEmail" />
+            <s:element minOccurs="0" maxOccurs="1" name="subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="receiver" type="tns:FocusReceiver" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendOneResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SendOneResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendOneWithSender">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="tns:FocusEmail" />
+            <s:element minOccurs="0" maxOccurs="1" name="subject" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="receiver" type="tns:FocusReceiver" />
+            <s:element minOccurs="0" maxOccurs="1" name="senderName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="senderEmail" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="SendOneWithSenderResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="SendOneWithSenderResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="BatchSendPersonal">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="task" type="tns:FocusTask" />
+            <s:element minOccurs="0" maxOccurs="1" name="emails" type="tns:ArrayOfFocusEmail" />
+            <s:element minOccurs="0" maxOccurs="1" name="receivers" type="tns:ArrayOfFocusReceiver" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfFocusEmail">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FocusEmail" nillable="true" type="tns:FocusEmail" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="BatchSendPersonalResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="BatchSendPersonalResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetReportByName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="taskName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetReportByNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetReportByNameResult" type="tns:FocusReport" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FocusReport">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="TaskName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SenderName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SenderEmail" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReplyName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReplyEmail" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="SendDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="FinishDate" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="Total" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Sent" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="HardBounce" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SoftBounce" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="OpenCount" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="UniqueOpenCount" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="MailClicked" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="LinkClicked" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="AllClicked" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Unsubscribe" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetReceiverAction">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="taskName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetReceiverActionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetReceiverActionResult" type="tns:FocusReceiverAction" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FocusReceiverAction">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="TaskId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Action" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ActionDate" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="IP" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Address" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllReceiverAction">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="taskName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="startIndex" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="endIndex" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllReceiverActionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllReceiverActionResult" type="tns:ArrayOfFocusReceiverAction" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfFocusReceiverAction">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FocusReceiverAction" nillable="true" type="tns:FocusReceiverAction" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetAllReceiverActionByType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="1" maxOccurs="1" name="type" type="tns:FocusReportType" />
+            <s:element minOccurs="0" maxOccurs="1" name="taskName" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="startIndex" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="endIndex" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:simpleType name="FocusReportType">
+        <s:restriction base="s:string">
+          <s:enumeration value="SentSuccess" />
+          <s:enumeration value="Open" />
+          <s:enumeration value="Click" />
+          <s:enumeration value="Unsubscribe" />
+          <s:enumeration value="HardBounce" />
+          <s:enumeration value="SoftBounce" />
+        </s:restriction>
+      </s:simpleType>
+      <s:element name="GetAllReceiverActionByTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllReceiverActionByTypeResult" type="tns:ArrayOfFocusReceiverAction" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddSubscribersToGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="groupName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="receivers" type="tns:ArrayOfFocusReceiver" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddSubscribersToGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddSubscribersToGroupResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddSubUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="adminUser" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="subUser" type="tns:FocusUser" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddSubUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddSubUserResult" type="tns:FocusResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="FocusResult">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Result" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AddCreditToSubUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="adminUser" type="tns:FocusUser" />
+            <s:element minOccurs="1" maxOccurs="1" name="credit" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="subUser" type="tns:FocusUser" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddCreditToSubUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AddCreditToSubUserResult" type="tns:FocusResult" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserLeftCredit">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserLeftCreditResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="GetUserLeftCreditResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserReportUrl">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="taskName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserReportUrlResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetUserReportUrlResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadTemplate">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="zipFile" type="s:base64Binary" />
+            <s:element minOccurs="0" maxOccurs="1" name="templateName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UploadTemplateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="UploadTemplateResult" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllReceiverActionByDescriptionAndType">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="description" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="startIndex" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="endIndex" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="type" type="tns:FocusReportType" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllReceiverActionByDescriptionAndTypeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllReceiverActionByDescriptionAndTypeResult" type="tns:ArrayOfFocusReceiverAction" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllReceiverActionByDescription">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="description" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="startIndex" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="endIndex" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetAllReceiverActionByDescriptionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetAllReceiverActionByDescriptionResult" type="tns:ArrayOfFocusReceiverAction" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetReportByDescription">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="description" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetReportByDescriptionResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetReportByDescriptionResult" type="tns:FocusReport" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLinkTimesByTask">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="user" type="tns:FocusUser" />
+            <s:element minOccurs="0" maxOccurs="1" name="taskName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetLinkTimesByTaskResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetLinkTimesByTaskResult" type="tns:ArrayOfFocusLink" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfFocusLink">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="FocusLink" nillable="true" type="tns:FocusLink" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="FocusLink">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="OuterHtml" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Href" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="AllClickTimes" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="AllClickPercent" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="MailClickTimes" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="MailClickPercent" type="s:decimal" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="string" nillable="true" type="s:string" />
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="HelloWorldSoapIn">
+    <wsdl:part name="parameters" element="tns:HelloWorld" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldSoapOut">
+    <wsdl:part name="parameters" element="tns:HelloWorldResponse" />
+  </wsdl:message>
+  <wsdl:message name="BatchSendSoapIn">
+    <wsdl:part name="parameters" element="tns:BatchSend" />
+  </wsdl:message>
+  <wsdl:message name="BatchSendSoapOut">
+    <wsdl:part name="parameters" element="tns:BatchSendResponse" />
+  </wsdl:message>
+  <wsdl:message name="BatchSendWithAttachSoapIn">
+    <wsdl:part name="parameters" element="tns:BatchSendWithAttach" />
+  </wsdl:message>
+  <wsdl:message name="BatchSendWithAttachSoapOut">
+    <wsdl:part name="parameters" element="tns:BatchSendWithAttachResponse" />
+  </wsdl:message>
+  <wsdl:message name="SendGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:SendGroup" />
+  </wsdl:message>
+  <wsdl:message name="SendGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:SendGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="SendOneSoapIn">
+    <wsdl:part name="parameters" element="tns:SendOne" />
+  </wsdl:message>
+  <wsdl:message name="SendOneSoapOut">
+    <wsdl:part name="parameters" element="tns:SendOneResponse" />
+  </wsdl:message>
+  <wsdl:message name="SendOneWithSenderSoapIn">
+    <wsdl:part name="parameters" element="tns:SendOneWithSender" />
+  </wsdl:message>
+  <wsdl:message name="SendOneWithSenderSoapOut">
+    <wsdl:part name="parameters" element="tns:SendOneWithSenderResponse" />
+  </wsdl:message>
+  <wsdl:message name="BatchSendPersonalSoapIn">
+    <wsdl:part name="parameters" element="tns:BatchSendPersonal" />
+  </wsdl:message>
+  <wsdl:message name="BatchSendPersonalSoapOut">
+    <wsdl:part name="parameters" element="tns:BatchSendPersonalResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetReportByNameSoapIn">
+    <wsdl:part name="parameters" element="tns:GetReportByName" />
+  </wsdl:message>
+  <wsdl:message name="GetReportByNameSoapOut">
+    <wsdl:part name="parameters" element="tns:GetReportByNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetReceiverActionSoapIn">
+    <wsdl:part name="parameters" element="tns:GetReceiverAction" />
+  </wsdl:message>
+  <wsdl:message name="GetReceiverActionSoapOut">
+    <wsdl:part name="parameters" element="tns:GetReceiverActionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverAction" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionByTypeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionByType" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionByTypeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionByTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddSubscribersToGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:AddSubscribersToGroup" />
+  </wsdl:message>
+  <wsdl:message name="AddSubscribersToGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:AddSubscribersToGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddSubUserSoapIn">
+    <wsdl:part name="parameters" element="tns:AddSubUser" />
+  </wsdl:message>
+  <wsdl:message name="AddSubUserSoapOut">
+    <wsdl:part name="parameters" element="tns:AddSubUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddCreditToSubUserSoapIn">
+    <wsdl:part name="parameters" element="tns:AddCreditToSubUser" />
+  </wsdl:message>
+  <wsdl:message name="AddCreditToSubUserSoapOut">
+    <wsdl:part name="parameters" element="tns:AddCreditToSubUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetUserLeftCreditSoapIn">
+    <wsdl:part name="parameters" element="tns:GetUserLeftCredit" />
+  </wsdl:message>
+  <wsdl:message name="GetUserLeftCreditSoapOut">
+    <wsdl:part name="parameters" element="tns:GetUserLeftCreditResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetUserReportUrlSoapIn">
+    <wsdl:part name="parameters" element="tns:GetUserReportUrl" />
+  </wsdl:message>
+  <wsdl:message name="GetUserReportUrlSoapOut">
+    <wsdl:part name="parameters" element="tns:GetUserReportUrlResponse" />
+  </wsdl:message>
+  <wsdl:message name="UploadTemplateSoapIn">
+    <wsdl:part name="parameters" element="tns:UploadTemplate" />
+  </wsdl:message>
+  <wsdl:message name="UploadTemplateSoapOut">
+    <wsdl:part name="parameters" element="tns:UploadTemplateResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionByDescriptionAndTypeSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionByDescriptionAndType" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionByDescriptionAndTypeSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionByDescriptionAndTypeResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionByDescriptionSoapIn">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionByDescription" />
+  </wsdl:message>
+  <wsdl:message name="GetAllReceiverActionByDescriptionSoapOut">
+    <wsdl:part name="parameters" element="tns:GetAllReceiverActionByDescriptionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetReportByDescriptionSoapIn">
+    <wsdl:part name="parameters" element="tns:GetReportByDescription" />
+  </wsdl:message>
+  <wsdl:message name="GetReportByDescriptionSoapOut">
+    <wsdl:part name="parameters" element="tns:GetReportByDescriptionResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetLinkTimesByTaskSoapIn">
+    <wsdl:part name="parameters" element="tns:GetLinkTimesByTask" />
+  </wsdl:message>
+  <wsdl:message name="GetLinkTimesByTaskSoapOut">
+    <wsdl:part name="parameters" element="tns:GetLinkTimesByTaskResponse" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldHttpGetIn" />
+  <wsdl:message name="HelloWorldHttpGetOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:message name="HelloWorldHttpPostIn" />
+  <wsdl:message name="HelloWorldHttpPostOut">
+    <wsdl:part name="Body" element="tns:string" />
+  </wsdl:message>
+  <wsdl:portType name="FocusSendWebServiceSoap">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldSoapIn" />
+      <wsdl:output message="tns:HelloWorldSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BatchSend">
+      <wsdl:input message="tns:BatchSendSoapIn" />
+      <wsdl:output message="tns:BatchSendSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BatchSendWithAttach">
+      <wsdl:input message="tns:BatchSendWithAttachSoapIn" />
+      <wsdl:output message="tns:BatchSendWithAttachSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendGroup">
+      <wsdl:input message="tns:SendGroupSoapIn" />
+      <wsdl:output message="tns:SendGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendOne">
+      <wsdl:input message="tns:SendOneSoapIn" />
+      <wsdl:output message="tns:SendOneSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="SendOneWithSender">
+      <wsdl:input message="tns:SendOneWithSenderSoapIn" />
+      <wsdl:output message="tns:SendOneWithSenderSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="BatchSendPersonal">
+      <wsdl:input message="tns:BatchSendPersonalSoapIn" />
+      <wsdl:output message="tns:BatchSendPersonalSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetReportByName">
+      <wsdl:input message="tns:GetReportByNameSoapIn" />
+      <wsdl:output message="tns:GetReportByNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetReceiverAction">
+      <wsdl:input message="tns:GetReceiverActionSoapIn" />
+      <wsdl:output message="tns:GetReceiverActionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverAction">
+      <wsdl:input message="tns:GetAllReceiverActionSoapIn" />
+      <wsdl:output message="tns:GetAllReceiverActionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByType">
+      <wsdl:input message="tns:GetAllReceiverActionByTypeSoapIn" />
+      <wsdl:output message="tns:GetAllReceiverActionByTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddSubscribersToGroup">
+      <wsdl:input message="tns:AddSubscribersToGroupSoapIn" />
+      <wsdl:output message="tns:AddSubscribersToGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddSubUser">
+      <wsdl:input message="tns:AddSubUserSoapIn" />
+      <wsdl:output message="tns:AddSubUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddCreditToSubUser">
+      <wsdl:input message="tns:AddCreditToSubUserSoapIn" />
+      <wsdl:output message="tns:AddCreditToSubUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetUserLeftCredit">
+      <wsdl:input message="tns:GetUserLeftCreditSoapIn" />
+      <wsdl:output message="tns:GetUserLeftCreditSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetUserReportUrl">
+      <wsdl:input message="tns:GetUserReportUrlSoapIn" />
+      <wsdl:output message="tns:GetUserReportUrlSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UploadTemplate">
+      <wsdl:input message="tns:UploadTemplateSoapIn" />
+      <wsdl:output message="tns:UploadTemplateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByDescriptionAndType">
+      <wsdl:input message="tns:GetAllReceiverActionByDescriptionAndTypeSoapIn" />
+      <wsdl:output message="tns:GetAllReceiverActionByDescriptionAndTypeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByDescription">
+      <wsdl:input message="tns:GetAllReceiverActionByDescriptionSoapIn" />
+      <wsdl:output message="tns:GetAllReceiverActionByDescriptionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetReportByDescription">
+      <wsdl:input message="tns:GetReportByDescriptionSoapIn" />
+      <wsdl:output message="tns:GetReportByDescriptionSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetLinkTimesByTask">
+      <wsdl:input message="tns:GetLinkTimesByTaskSoapIn" />
+      <wsdl:output message="tns:GetLinkTimesByTaskSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="FocusSendWebServiceHttpGet">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldHttpGetIn" />
+      <wsdl:output message="tns:HelloWorldHttpGetOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:portType name="FocusSendWebServiceHttpPost">
+    <wsdl:operation name="HelloWorld">
+      <wsdl:input message="tns:HelloWorldHttpPostIn" />
+      <wsdl:output message="tns:HelloWorldHttpPostOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="FocusSendWebServiceSoap" type="tns:FocusSendWebServiceSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap:operation soapAction="http://focussend.com/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchSend">
+      <soap:operation soapAction="http://focussend.com/BatchSend" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchSendWithAttach">
+      <soap:operation soapAction="http://focussend.com/BatchSendWithAttach" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendGroup">
+      <soap:operation soapAction="http://focussend.com/SendGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendOne">
+      <soap:operation soapAction="http://focussend.com/SendOne" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendOneWithSender">
+      <soap:operation soapAction="http://focussend.com/SendOneWithSender" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchSendPersonal">
+      <soap:operation soapAction="http://focussend.com/BatchSendPersonal" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetReportByName">
+      <soap:operation soapAction="http://focussend.com/GetReportByName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetReceiverAction">
+      <soap:operation soapAction="http://focussend.com/GetReceiverAction" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverAction">
+      <soap:operation soapAction="http://focussend.com/GetAllReceiverAction" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByType">
+      <soap:operation soapAction="http://focussend.com/GetAllReceiverActionByType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddSubscribersToGroup">
+      <soap:operation soapAction="http://focussend.com/AddSubscribersToGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddSubUser">
+      <soap:operation soapAction="http://focussend.com/AddSubUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddCreditToSubUser">
+      <soap:operation soapAction="http://focussend.com/AddCreditToSubUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetUserLeftCredit">
+      <soap:operation soapAction="http://focussend.com/GetUserLeftCredit" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetUserReportUrl">
+      <soap:operation soapAction="http://focussend.com/GetUserReportUrl" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadTemplate">
+      <soap:operation soapAction="http://focussend.com/UploadTemplate" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByDescriptionAndType">
+      <soap:operation soapAction="http://focussend.com/GetAllReceiverActionByDescriptionAndType" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByDescription">
+      <soap:operation soapAction="http://focussend.com/GetAllReceiverActionByDescription" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetReportByDescription">
+      <soap:operation soapAction="http://focussend.com/GetReportByDescription" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLinkTimesByTask">
+      <soap:operation soapAction="http://focussend.com/GetLinkTimesByTask" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="FocusSendWebServiceSoap12" type="tns:FocusSendWebServiceSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="HelloWorld">
+      <soap12:operation soapAction="http://focussend.com/HelloWorld" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchSend">
+      <soap12:operation soapAction="http://focussend.com/BatchSend" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchSendWithAttach">
+      <soap12:operation soapAction="http://focussend.com/BatchSendWithAttach" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendGroup">
+      <soap12:operation soapAction="http://focussend.com/SendGroup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendOne">
+      <soap12:operation soapAction="http://focussend.com/SendOne" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="SendOneWithSender">
+      <soap12:operation soapAction="http://focussend.com/SendOneWithSender" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="BatchSendPersonal">
+      <soap12:operation soapAction="http://focussend.com/BatchSendPersonal" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetReportByName">
+      <soap12:operation soapAction="http://focussend.com/GetReportByName" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetReceiverAction">
+      <soap12:operation soapAction="http://focussend.com/GetReceiverAction" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverAction">
+      <soap12:operation soapAction="http://focussend.com/GetAllReceiverAction" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByType">
+      <soap12:operation soapAction="http://focussend.com/GetAllReceiverActionByType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddSubscribersToGroup">
+      <soap12:operation soapAction="http://focussend.com/AddSubscribersToGroup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddSubUser">
+      <soap12:operation soapAction="http://focussend.com/AddSubUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddCreditToSubUser">
+      <soap12:operation soapAction="http://focussend.com/AddCreditToSubUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetUserLeftCredit">
+      <soap12:operation soapAction="http://focussend.com/GetUserLeftCredit" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetUserReportUrl">
+      <soap12:operation soapAction="http://focussend.com/GetUserReportUrl" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UploadTemplate">
+      <soap12:operation soapAction="http://focussend.com/UploadTemplate" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByDescriptionAndType">
+      <soap12:operation soapAction="http://focussend.com/GetAllReceiverActionByDescriptionAndType" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetAllReceiverActionByDescription">
+      <soap12:operation soapAction="http://focussend.com/GetAllReceiverActionByDescription" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetReportByDescription">
+      <soap12:operation soapAction="http://focussend.com/GetReportByDescription" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetLinkTimesByTask">
+      <soap12:operation soapAction="http://focussend.com/GetLinkTimesByTask" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="FocusSendWebServiceHttpGet" type="tns:FocusSendWebServiceHttpGet">
+    <http:binding verb="GET" />
+    <wsdl:operation name="HelloWorld">
+      <http:operation location="/HelloWorld" />
+      <wsdl:input>
+        <http:urlEncoded />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="FocusSendWebServiceHttpPost" type="tns:FocusSendWebServiceHttpPost">
+    <http:binding verb="POST" />
+    <wsdl:operation name="HelloWorld">
+      <http:operation location="/HelloWorld" />
+      <wsdl:input>
+        <mime:content type="application/x-www-form-urlencoded" />
+      </wsdl:input>
+      <wsdl:output>
+        <mime:mimeXml part="Body" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="FocusSendWebService">
+    <wsdl:port name="FocusSendWebServiceSoap" binding="tns:FocusSendWebServiceSoap">
+      <soap:address location="http://app.focussend.com/Webservice/FocussendWebservice.asmx" />
+    </wsdl:port>
+    <wsdl:port name="FocusSendWebServiceSoap12" binding="tns:FocusSendWebServiceSoap12">
+      <soap12:address location="http://app.focussend.com/Webservice/FocussendWebservice.asmx" />
+    </wsdl:port>
+    <wsdl:port name="FocusSendWebServiceHttpGet" binding="tns:FocusSendWebServiceHttpGet">
+      <http:address location="http://app.focussend.com/Webservice/FocussendWebservice.asmx" />
+    </wsdl:port>
+    <wsdl:port name="FocusSendWebServiceHttpPost" binding="tns:FocusSendWebServiceHttpPost">
+      <http:address location="http://app.focussend.com/Webservice/FocussendWebservice.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

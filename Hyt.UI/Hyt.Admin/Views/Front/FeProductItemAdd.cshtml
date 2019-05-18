@@ -1,0 +1,90 @@
+﻿@model Hyt.Model.FeProductItem
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品展示模块管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/DAO.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    Name: "required",
+                    DisplayOrder: { required: true, number: true },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        function addOrEdit() {
+            var from = $("#form");
+            $(from).submit();
+            if ($(from).valid()) {
+                var ajax = {
+                    url: '/Front/FeProductItemAddOrEdit', data: from.serialize(), type: 'POST', dataType: 'json', cache: false,
+                    success: function (json, statusText) {
+                        if (json.result) {
+                            UI.Dialog.opener.tip_alert('tips_shrot tips_success', json.info);
+                            UI.Dialog.close();
+                        } else {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.close();
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    }
+                };
+                $.ajax(ajax);
+            }
+        }
+        function SelectProduct() {
+            DAO.SelectProduct({id:1,productName:'t'});
+        }
+        function Call(){
+            alert("ddd");
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_detail_dispay">
+          <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+           <tr>
+            <td width="15%" class="nameright">商品名称：</td>
+            <td width="85%" colspan="3">@Html.TextBoxFor(m => m.SysNo, new { @class = "input_xlarge" })</td>
+           </tr>
+           <tr>
+            <td width="15%" class="nameright">商品编号：</td>
+            <td width="85%" colspan="3">@Html.TextBoxFor(m => m.ProductSysNo, new { @class = "input_xlarge" })</td>
+           </tr>
+           <tr>
+            <td width="15%" class="nameright">商品类别：</td>
+            <td width="85%" colspan="3">
+             <select id="status" name="status" class="c9 wid">
+             <option value="">请选择状态</option>
+             @{
+                 foreach (var dict in (IDictionary<int, string>)ViewBag.StatusList)
+                 {
+                     <option value="@dict.Key">@dict.Value</option>
+                 }
+             }
+             </select>
+             <button type="button" title="搜索" class="btn  btn_ht30 bold">搜索</button>
+            </td>
+           </tr>
+          </table>
+          </div>
+        </div>
+    </div>
+</div>
+</form>

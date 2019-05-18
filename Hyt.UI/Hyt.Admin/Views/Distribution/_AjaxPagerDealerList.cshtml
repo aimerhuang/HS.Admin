@@ -1,0 +1,142 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBDsDealer>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.DS1008301, ".Prepaid");
+    @Html.PrivilegeControl(PrivilegeCode.DS1008302, ".Withdraw");
+    @Html.PrivilegeControl(PrivilegeCode.DS1008101, ".DS1008101");
+}
+<table id="item_list" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th class="wd75" style="display:none">系统编号</th>
+            <th class="align_l p10_lr">分销商名称</th>
+            <th width="85">联系人</th>
+            <th width="124">联系电话</th>
+            <th width="100">累计返利金额</th>
+            <th width="110">返利可用金额</th>
+            <th width="110">预计返利金额</th>
+            <th width="50">状态</th>
+            <th width="120">创建时间</th>
+            <th width="240">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TData != null && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td class="blue" style="display:none"><a href="javascript:;" data-id="@item.SysNo" name="detail">@item.SysNo</a></td>
+                <td class="align_l p10_lr">@item.DealerName</td>
+                <td>@item.Contact</td>
+                <td>@item.PhoneNumber</td>
+                <td class="red p10_r align_r">@item.TotalPrestoreAmount.ToString("C")</td>
+                <td class="red p10_r align_r">@item.AvailableAmount.ToString("C")</td>
+                <td class="red p10_r align_r">@item.FrozenAmount.ToString("C")</td>
+                <td>@((DistributionStatus.分销商状态)item.Status)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    
+                    @if (item.Status == (int)DistributionStatus.分销商状态.启用)
+                    {
+                    
+                        if (item.AvailableAmount > 0)
+                        {    <button class="btn btn_ht26 m10_r btn_blue DS1008101" title="查看交易明细" data-id="@item.SysNo" name="detail" type="button"><span class="icon_tosee icon_white"></span><span class="m5_l">交易明细</span>                                           
+                        </button><button class="btn btn_ht26 m10_r btn_red Prepaid" title="充值" data-id="@item.SysNo" name="prepaid" type="button"><span class="icon_tostore icon_white"></span><span class="m5_l">充值</span>                         
+                            </button><button class="btn btn_ht26 btn_red Withdraw" title="提现" data-dealerid="@item.SysNo" data-id="@item.PrePaymentSysNo" name="withdraw" type="button"><span class="icon_exitstore icon_white"></span><span class="m5_l">提现</span></button>
+                        }
+                        else
+                        {    <button class="btn btn_ht26 m10_r btn_blue DS1008101" title="查看交易明细" data-id="@item.SysNo" name="detail" type="button"><span class="icon_tosee icon_white"></span><span class="m5_l">交易明细</span>                                           
+                        </button><button class="btn btn_ht26 m10_r btn_red Prepaid" title="充值" data-id="@item.SysNo" name="prepaid" type="button"><span class="icon_tostore icon_white"></span><span class="m5_l">充值</span>
+    </button>  <button class="btn btn_ht26 disabled Withdraw" title="提现" type="button" disabled="disabled"><span class="icon_exitstore"></span><span class="m5_l">提现</span></button>
+                        }
+                    }
+                    else
+                    {
+                        <button class="btn btn_ht26 m10_r btn_blue DS1008101" title="查看交易明细" data-id="@item.SysNo" name="detail" type="button"><span class="icon_tosee icon_white"></span><span class="m5_l">交易明细</span>                    
+                        </button><button class="btn btn_ht26 m10_r disabled Prepaid" title="充值" type="button" disabled="disabled"><span class="icon_tostore"></span><span class="m5_l">充值</span>
+    </button><button class="btn btn_ht26 disabled Withdraw" title="提现" type="button" disabled="disabled"><span class="icon_exitstore"></span><span class="m5_l">提现</span></button>
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" class="align_l p10_lr">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+        //查看分销商预存款往来账明细
+        $("#item_list").delegate("button[name='detail']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = '/Distribution/DealerHistoricalDetail?id=' + id + '&dealersysno=' + $("#dealerSysNo").val();
+            //window.location.href = url;
+            UI.OpenCreatTab("交易明细:" + id, url);
+        });
+        //查看分销商
+        $("#item_list").delegate("a[name='detail']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = '@Url.Action("DsDealerView", "Distribution")' + '?sysno=' + id;
+            UI.DialogOpen(url, { title: '查看分销商', width: 800, height: 267 }, false);
+        });
+
+        $("#item_list").delegate("button[name='prepaid']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = "/Distribution/Prepaid/" + id;
+            UI.DialogOpen(url,
+                {
+                    title: '分销商充值',
+                    width: 800,
+                    height: 407,
+                    init: function () {
+                        this.button(
+                            {
+                                name: '充值',
+                                callback: function () {
+                                    var iframe = this.iframe.contentWindow;
+                                    if (!iframe.document.body) {
+                                        alert('iframe还没加载完毕呢');
+                                        return false;
+                                    };
+                                    iframe.prepaid();
+                                    return false;
+                                }, focus: true
+                            }, { name: '取消' });
+                    }
+                }, false);
+        });
+        $("#item_list").delegate("button[name='withdraw']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = "/Distribution/Withdraw/" + id;
+            UI.DialogOpen(url,
+                {
+                    title: '分销商提现',
+                    width: 950,
+                    height: 530,
+                    init: function () {
+                        this.button(
+                            {
+                                name: '提现',
+                                callback: function () {
+                                    var iframe = this.iframe.contentWindow;
+                                    if (!iframe.document.body) {
+                                        alert('iframe还没加载完毕呢');
+                                        return false;
+                                    };
+                                    iframe.withdraw();
+                                    return false;
+                                }, focus: true
+                            }, { name: '取消' });
+                    }
+                }, false);
+        });
+    });
+</script>

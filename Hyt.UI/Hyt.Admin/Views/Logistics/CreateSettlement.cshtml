@@ -1,0 +1,1295 @@
+﻿
+@using System.Diagnostics;
+@using System.Security.Policy
+@using Hyt.BLL.Logistics
+@using Hyt.BLL.Order
+@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@model  CBLgSettlement
+
+
+@{
+    ViewBag.Title = "创建结算单";
+}
+@section HeadCss
+{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all">
+}
+
+@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript">
+
+        //#region msg used for tips
+        var msgWrongAmountFormat = '金额格式不正确,请重新输入!';
+        var msgCannotDoPartialSign = '只有到付并且是百城当日达才能部分签收!';
+        var msgVoucher = '请输入凭证号!';
+        var msgSignQtyNotNull = '请输入签收数量!';
+        var msgSignQtyFormat = '签收数量必须是正整数!';
+        var msgSignQtyZero = '部分签收,请修改签收数量并保存!';
+        var msgSignQtyGTQty = '签收数量不能超过订单数量!';
+        var msgSignQtyOutOfRange = '总签收数量大于或等于订单数量,请选择已签收!';
+        //#endregion
+
+        //#region 记录部分签收的商品编号和数量
+        var SignedProductInfos = [];
+        var StockOutInfos = [];
+        var paymentInfo = [];
+        //#endregion
+        var cbRMAOrderInfo;
+//退货订单相关信息
+
+        Function.prototype.getMultiLine = function() {
+            var lines = new String(this);
+            lines = lines.substring(lines.indexOf("/*") + 3, lines.lastIndexOf("*/"));
+            return lines;
+        };
+
+        function doSettlement() {
+            /// <summary>
+            /// to do the settlement
+            /// </summary>
+            //prepare the parms,CBLgSettlementItem
+            /*
+                OrderSysNo SettlementSysNo? DeliverySysNo DeliveryUserSysNo StockOutSysNo CreatedDate SignStatus paymentInfo SignNumber
+            */
+
+            //hide the error
+            $('span[class*=error]').hide();
+            //post to the server
+
+            var str = '@ViewBag.delSysNos';
+            //str.split(',');
+            var deliverySysNos = str.split(',');
+
+            /*出库单基础信息 构建数据(结算单明细)post to server
+                                    一个结算单明细对应一个配送单及一个出库单
+                                    一个配送单明细对应一个出库单
+                                  根据出库单单号构建数据
+                                */
+            StockOutInfos = [];
+            paymentInfo = [];
+            SignedProductInfos = [];
+            $('div[name="divStockOutBasicInfo"] td[name="tdStockOutSysNo"]').each(function() {
+                var divParent = $(this).parents('div[name="divParent"]'); //包含divDataParent及divPayType
+
+                var divDataParent = $(this).parents('div[name="divDataParent"]'); //签收方式,出库单基础信息,部分签收
+                var divPayType = divDataParent.next(); //支付信息
+
+                var divSel = divDataParent.find('div[name="divSel"]'); //签收方式选择
+                var divStockOutBasicInfo = divDataParent.find('div[name="divStockOutBasicInfo"]'); //出库单基础信息
+                var divData = divDataParent.find('div[name="divData"]');
+                //部分签收                    
+
+
+                //该出库单付款信息
+                divPayType.find('input[name="paidAmount"]').each(function() {
+                    var o = $(this);
+                    var payType = o.attr('mark'); //支付方式
+                    var paidAmount = $.trim(o.val()) == '' ? 0 : $.trim(o.val().replace('¥', '').replace(',', '')); //支付金额
+                    //o.parents('tr[name=trSubTotal]').find('input[name=voucher]').val()
+                    var payNo = $.trim(o.parents('tr[name=trSubTotal]').find('input[name="voucher"]').val()); //凭证单号
+                    var posCardNo = $.trim(o.parents('tr[name=trSubTotal]').find('input[name="cardNo"]').val()); //卡号
+
+                    if (paidAmount != 0) {
+                        paymentInfo.push({
+                            PayType: payType,
+                            PayAmount: paidAmount,
+                            PayNo: payNo,
+                            PosCardNo: posCardNo,
+                            EasCode: o.parents('tr[name=trSubTotal]').find('#selEas').children(':selected').val() //huangwei 2013-11-19
+                        });
+                    }
+
+                });
+
+                if ($(this).parents('div[name=divDataParent]').find(':selected').text() == '部分签收') {
+
+                    var confirmed = true;
+
+                    /* 部分签收数量 */
+                    //td签收数量
+                    var tdQtys = divData.find('td[name=tdQty]');
+                    tdQtys.each(function() {
+
+                        //是否已点击确认
+                        confirmed = $(this).children('span[name=spanQty]').css('display') == 'none' ? false : true;
+                        var qtyInput = parseInt($.trim($(this).children('span[name=spanQty]').text()));
+                        var qty = parseInt($.trim($(this).prev().text()));
+                        var productNo = $.trim($(this).siblings('td[name=tdProductSysNo]').text());
+                        var orderItemSysNo = $(this).parent().attr('name');
+                        if (confirmed) {
+                            //部分签收数量值
+
+                            SignedProductInfos.push({
+                                SysNo: orderItemSysNo,
+                                Qty: qtyInput
+                            });
+                        }
+                        //else {--bugid3177
+                        //    //没有签收该商品
+
+                        //    SignedProductInfos.push({
+                        //        SysNo: orderItemSysNo,
+                        //        Qty: 0
+                        //    });
+                        //}
+                    });
+                    /* 部分签收数量 end */
+                }
+
+                //将该出库单号,选择的签收状态,部分签收数量,支付信息添加到出库单信息数组
+                StockOutInfos.push(
+                    {
+                        StockOutSysNo: $.trim($(this).text()), //出库单系统编号
+                        //IsCOD: $(this).parents('div[name=divStockOutBasicInfo]').find('td[name=tdIsCOD]').text().trim()=='是'?1:0,
+                        Status: $(this).parents('div[name=divDataParent]').find('[name=selSign]').val(), //签收状态
+                        SignedProductInfos: SignedProductInfos, //部分签收信息
+                        PayItemList: paymentInfo //付款信息
+                    }
+                );
+                //reset the array
+                paymentInfo = [];
+                SignedProductInfos = [];
+
+            });
+            //construct object
+            var cbCreateSettlement = {
+                DeliverySysNos: deliverySysNos,
+                StockOutInfos: StockOutInfos,
+                Remarks: $('<div/>').text(($.trim($('#txtRemarks').val()))).html(), //jquery will do html-endcode automatically 
+                RMAOrderInfo: cbRMAOrderInfo
+            };
+
+            Utils.MaskStart($('#tabcon')); //$('#imgLoading').show();
+            $.ajax({
+                url: '@Url.Action("ConfirmSettlement")',
+                type: 'post',
+                //transfrom to string-js object,backend use javascript serializer
+                data: { cbCreateSettlement: JSON.stringify(cbCreateSettlement) },
+                //data: { cbCreateSettlement: cbCreateSettlement },
+                success: function(data) {
+                    //reset the vals
+                    SignedProductInfos = [];
+                    paymentInfo = [];
+                    StockOutInfos = [];
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    if (data.Status) {
+                        
+                        if (data.Data != 0) {
+                            //return to page
+                            location.href = '@Url.Action("LgSettlementDetails")' + '/' + data.Data + "?message=" + data.Message;
+                        } else {
+                            UI.tips.tip_alert("tips_success", data.Message);
+                            location.href = '@Url.Action("SettlementDeliveryList")';
+                        }
+
+                    } else
+                        UI.tips.tip_alert("tips_wrong", data.Message);
+
+                    Utils.MaskStop(); //$('#imgLoading').hide();
+                }
+            });
+        }
+
+        //出库单弹出
+
+        function ShowInfo(sysno) {
+            UI.DialogOpen('/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno, {
+                init: function() {
+                    var doc = this.iframe.contentWindow.document;
+                    $(doc).find('div.case').css('padding', '10px');
+                },
+                title: '出库单信息',
+                width: 830,
+                height: 600,
+                resize: false,
+                button: [
+                    {
+                        name: '关闭',
+                    }
+                ]
+            }, false);
+        }
+
+        //#region 金额变动后 重新计算汇总
+
+        function refreshTotal() {
+            /// <summary>
+            /// 金额或状态变动后 重新计算汇总栏
+            /// </summary>
+            $('div[name="divTotal"] tr[name="trTotal"] td[name]').each(function() {
+                //var thePayType = $(this);
+                var paytypeName = $(this).attr('name');
+                var total = 0;
+                $('div[name="divPayType"] tr[name="trSubTotal"] td[name]').each(function() {
+                    var status = $(this).parents('div[name=divPayType]').prev('div[name=divDataParent]').find('select[name=selSign]').children(':selected').text();
+                    //拒收或未送达 该项汇总金额=0
+                    if (status != '签收' && status != '部分签收')
+                        return;
+                    //若未显示更多支付方式,该项汇总金额为出库单金额
+                    var divPayType = $(this).parents('div[name=divPayType]');
+                    /*未显示更多支付方式
+                    1.未显示更多支付方式填写
+                    2.divpaytype未显示,但更多支付方式display!=none,这时只显示了小计
+                    */
+                    var notDisplay = divPayType.find('tr[name=trSubTotal]').first().css('display') == 'none' || (divPayType.css('display') == 'none' && divPayType.find('tr[name=trSubTotal]').first().css('display') != 'none');
+                    if (notDisplay && status == '签收') {
+                        if (paytypeName.indexOf('现金') != -1 && $(this).attr('name').indexOf('现金') != -1) {
+                            var theStockOutAmount = $.trim(divPayType.prev('div[name=divDataParent]').find('div[name=divStockOutBasicInfo] td[name=tdStockOutAmount]').text().replace('¥', '').replace(',', ''));
+                            total += parseFloat(theStockOutAmount);
+                        }
+                        return;
+                    }
+                    //汇总对应金额
+                    if ($(this).attr('name') == paytypeName) {
+                        var amount = $.trim($(this).next().children().first().val().replace('¥', '').replace(',', ''));
+                        if (amount != '' && $.isNumeric(amount))
+                            total += parseFloat(amount);
+                    }
+                });
+
+                //set total
+                $(this).next().text('¥' + parseFloat(total).toFixed(2));
+            });
+        }
+
+        //#endregion
+
+        var flagValidtion = true, objFocus;
+
+        function setFlagAndFocus(flag, obj) {
+            /// <summary>
+            /// set the validation false and the obj to focus
+            /// </summary>
+            /// <param name="flag" type="boolean">boolean</param>
+            /// <param name="obj" type="Object">obj to focus</param>
+            if (objFocus == undefined)
+                objFocus = obj;
+            flagValidtion = flag;
+        }
+
+        $(document).ready(function() {
+
+            //取件单信息显示
+            $('td a[name=item_sysno]').click(function() {
+                var url = '/Logistics/PickupInvoiceDetails/' + $(this).text();
+                UI.DialogOpen(url, {
+                    title: '取件单明细',
+                    width: 1000,
+                    height: 608,
+                    init: function() {
+                        this.button({ name: "取消" });
+                    }
+                }, false);
+            });
+
+
+            //订单tab
+            $('a[class=linkOrder]').click(function() {
+                //UI.OpenCreatTab('订单信息', '/Order/OrderDetail/' + $(this).text());
+                UI.DialogOpen('/Order/OrderDetail/' + $(this).text(),
+                    {
+                        init: function() {
+                            var doc = this.iframe.contentWindow.document;
+                            $(doc).find('div.case').css('padding', '10px');
+                        },
+                        title: '订单信息',
+                        width: 1100,
+                        height: 600,
+                        resize: false,
+                        button: [
+                            {
+                                name: '关闭',
+                            }
+                        ]
+                    }, false);
+                return false;
+            });
+
+            //show total cash first
+            var totalCash = 0;
+            $('div[name=divStockOutBasicInfo] td[name=tdStockOutAmount]').each(function() {
+                totalCash += parseFloat($.trim($(this).text().replace('¥', '').replace(',', '')));
+            });
+            //divTotal trTotal 现金
+            $('div[name=divTotal] tr[name=trTotal]').find('td[name=现金]').first().next().text('¥' + totalCash.toFixed(2));
+
+            $('table tr:odd').addClass('stag_color');
+
+            //#region App Sign
+            /*
+            对
+            */
+            var str = '@ViewBag.delSysNos';
+            //str.split(',');
+            //var deliverySysNos = str.split(',');
+            //Utils.MaskStart($('#tabcon'));
+            $.ajax({
+                url: '@Url.Action("GetAppSignInfo")',
+                data: { delSysNos: str },
+                success: function(data) {
+                    var arr = data.Data;
+                    //该配送单对应app签收中数据
+                    if (arr.length === 0) {
+                        return;
+                    }
+
+                    for (var i = 0; i < arr.length; i++) {
+
+                        var divDataParent; //出库单块
+                        var divDataPickUpParent; //取件单块
+                        if (arr[i].NoteType === 10) {
+
+                            //配送单中所有出库单
+                            $('div[name=divDataParent]').each(function() {
+                                divDataParent = $(this);
+                                var stockSysNo = divDataParent.find('td[name=tdStockOutSysNo]').text();
+
+                                if (stockSysNo === arr[i].NoteSysNo + '') {
+                                    //divDataParent.find('h5').append('<span class="red"> (来源App签收,无法修改)</span>');
+                                    var selStatus = divDataParent.find('select');
+                                    selStatus.attr('title', '来源App签收,无法修改');
+                                    //disable
+                                    //divDataParent.prop('disabled', true);
+                                    divDataParent.find('button').prop('disabled', true).end()
+                                        .find('select').prop('disabled', true).end()
+                                        .find('input').prop('disabled', true).end();
+                                    //部分签收
+                                    if (arr[i].SignedProductInfos.length !== 0) {
+                                        //
+                                        selStatus.children().eq(0).replaceWith('<option value="50">签收</option>');
+                                        selStatus.children().each(function() {
+                                            if ($.trim($(this).text()) === '部分签收') {
+                                                $(this).attr('selected', 'selected');
+                                                return;
+                                            }
+                                        });
+                                        //selStatus.children().eq(1).attr('selected', 'selected');
+                                        //
+                                        selStatus.trigger('change');
+                                        //tr name
+                                        for (var j = 0; j < arr[i].SignedProductInfos.length; j++) {
+                                            var trName = arr[i].SignedProductInfos[j].SysNo;
+                                            var trOrderItem = divDataParent.find('tr[name=' + trName + ']');
+                                            //该出库单明细未做app签收处理:更改签收数量为0
+                                            //if (trOrderItem.length===0) {
+                                            //    trOrderItem.find('input[name=txtQty]').val(0);
+                                            //} else {
+                                            trOrderItem.find('input[name=txtQty]').val(arr[i].SignedProductInfos[j].Qty);
+                                            //}
+
+                                            trOrderItem.find('button[name=btnSave]').trigger('click');
+                                            //Utils.MaskStop();
+
+                                        }
+
+                                    } else {
+                                        //非部分签收,锁定
+                                        //签收
+                                        if (arr[i].SignOption + '' === '@LogisticsStatus.配送单明细状态.已签收.GetHashCode()') {
+                                            selStatus.children().eq(0).attr('selected', 'selected');
+                                        } else {
+                                            selStatus.val(arr[i].SignOption);
+                                            divDataParent.find('span[name="spSignRemark"]').css({ display: "inline-block" });
+                                        }
+
+                                    }
+
+                                }
+
+
+                            }); //dataParent each end
+
+                        } else {
+
+                            //取件单
+                            $('div[name=divDataPickUpParent]').each(function() {
+                                divDataPickUpParent = $(this);
+                                var pickUpSysNo = divDataPickUpParent.find('td[name=tdPickUpSysNo]').text();
+                                if (pickUpSysNo === arr[i].NoteSysNo + '') {
+                                    //disable
+                                    divDataPickUpParent.prop('disabled', true);
+                                    return false;
+                                }
+                                return true;
+                            });
+                        }
+
+                    }
+                    //Utils.MaskStop();
+                }
+            });
+
+            //#endregion appsign
+
+            //数量增减Numbercontrol
+            UI.Numbercontrol({
+                numberinputselect: ".boxs_listtabel input[class*='number_input']", //外层最大的box
+                eventType: "click", //事件的触发方式
+                minNumber: 0, //最小数
+                maxNumber: null, //最大数
+                cutActiveNum: function(obj) {
+                }, //减少时回调函数
+                addActiveNum: function(obj) {
+                    var maxnum = $(obj).attr('num');
+                    var txtnum = $(obj).val();
+                    if (parseInt(txtnum) > parseInt(maxnum))
+                        $(obj).val(maxnum);
+                }, //增加时回调函数
+                step: 1 //一次的增减
+            });
+
+            //#region 部分签收
+            //$('td input[name="txtQty"]').blur(function() {
+
+            //    if ($(this).val().trim() == '') {
+            //        UI.Alert({ content: '请输入或选择签收数量!' });
+            //        $(this).focus();
+            //        return false;
+            //    }
+            //    return true;
+            //}
+            //);
+            //#endregion
+
+            //#region 签收状态
+            $('select[name="selSign"]').bind("change", function() {
+
+                var divDataParent = $(this).parents('[name="divDataParent"]');
+                var option = $(this).children(':selected').text();
+                if (option == '部分签收') {
+                    //逻辑查核:到付,白城当日送
+                    var divData = divDataParent.children('[name="divData"]').first();
+                    if (divData.children().length > 0) {
+                        divData.show();
+                    } else {
+                        UI.Alert({ content: msgCannotDoPartialSign });
+                        return;
+                    }
+                } else {
+                    $(this).parents('[name="divDataParent"]').children('[name="divData"]').hide();
+                }
+                if (option == "签收" || option == "部分签收") {
+
+                    //是到付 divDataParent divStockOutBasicInfo tdIsCOD
+                    var tdisCod = $(this).parents('div[name=divDataParent]').find('div[name=divStockOutBasicInfo] td[name=tdIsCOD]').first();
+                    if ($.trim(tdisCod.text()) == '是') {
+                        //show the checkbox and text
+                        $(this).next().css('visibility', 'visible');
+                        $(this).next().next().css('visibility', 'visible');
+                        //if the paytype is checked,show the corresponding div block
+                        if ($(this).next().is(':checked')) {
+                            $(this).parents('[name="divDataParent"]').next().show();
+                        }
+                    }
+                    //清空cbRMAOrderInfo,paymentInfo
+                    cbRMAOrderInfo = undefined;
+
+                    if (option == "签收") {
+                        //trSubTotal, trTotalPerStockOut, trTotal
+                        //clear the trSubTotal,set the value as the receiveable of stockout
+                        divDataParent.next().find('tr[name=trSubTotal] input[type=text]').val('');
+
+                        //trTotalPerStockOut
+                        var stockoutAmount = divDataParent.find('td[name=tdStockOutAmount]').text();
+                        divDataParent.next().find('tr[name=trSubTotal] input[type=text]').first().val(stockoutAmount);
+                        divDataParent.next().find('tr[name=trTotalPerStockOut] td[name=totalToPay]').text(stockoutAmount);
+                        divDataParent.next().find('tr[name=trTotalPerStockOut] td[name=totalPaidAmount]').text(stockoutAmount);
+                        divDataParent.next().find('tr[name=trTotalPerStockOut] td[name=unSignedAmount]').text('');
+                        //$('div[name=divTotal] tr[name = trTotal]').find('td[name=现金]').next().text('¥' + total.toFixed(2));
+                    } else {
+                        var divDatas = divDataParent.children('[name="divData"]');
+                        divDatas.each(function() {
+                            //('[name="btnEdit"]')
+                            $(this).find('[name=btnEdit]').hide();
+                            $(this).find('[name=btnCancel]').show();
+                            $(this).find('[name=btnSave]').show();
+
+                            //show numbercontorl instead--txtQty,spanQty
+                            $(this).find('div.number_btn').show();
+                            $(this).find('[name=spanQty]').hide();
+
+                        });
+                    }
+
+                } else {
+
+                    $(this).parents('[name="divDataParent"]').next().hide();
+                    //hide the checkbox and text also
+                    $(this).next().css('visibility', 'hidden');
+                    $(this).next().next().css('visibility', 'hidden');
+                }
+                refreshTotal();
+            });
+            //#endregion
+
+            //#region 其他支付方式 click
+            $('input[name="chkPayType"]').bind("click", function() {
+                if ($(this).is(':checked')) {
+                    $(this).parents('[name="divDataParent"]').next().show();
+                    $(this).parents('[name="divDataParent"]').next().find('tr[name=trSubTotal]').show();
+                } else {
+                    $(this).parents('[name="divDataParent"]').next().hide();
+                }
+            });
+            //#endregion
+
+            //#region 支付金额录入blur,计算总金额
+            $('td input[name="paidAmount"]').blur(function() {
+                //amount validition
+                //total computation
+                var val = $.trim($(this).val().replace('¥', '').replace(',', ''));
+                if (val != '' && !$.isNumeric(val)) {
+                    //UI.Alert({ content: '金额格式输入不正确!请重新输入!' });
+                    $(this).next().show();
+                    $(this).focus();
+                    return;
+                }
+                $(this).next().hide();
+
+                var total = 0;
+                $(this).parents('div[name=divPayType]').find('td input[name="paidAmount"]').each(function() {
+                    var theVal = $.trim($(this).val().replace('¥', '').replace(',', ''));
+                    if (theVal != '' && $.isNumeric(theVal)) {
+                        total += parseFloat(theVal.replace('¥', '').replace(',', ''));
+                        //set the format
+                        $(this).val('¥' + parseFloat(theVal).toFixed(2));
+                        //$(this).val(parseFloat(theVal).toFixed(2));
+                    }
+                });
+                $(this).parents('tbody[name="tbodyPayType"]').find('td[name="totalPaidAmount"]').text('¥' + total.toFixed(2));
+                //底部汇总
+                refreshTotal();
+
+            });
+            //#endregion
+
+
+            //#region 确认结算click
+            $('#btnConfirm').click(function() {
+
+                //hide the error
+                $('span[class*=error]').hide();
+
+                //#region 部分签收数量逻辑前台验证
+                $('div[name=divData]').each(function() {
+                    var divData = $(this);
+                    if (divData.css('display') == 'none')
+                        return;
+
+                    //订单总数量,签收总数量
+                    var qtyTotal = 0, qtyTotalInput = 0;
+
+                    divData.find('td[name=tdPdQty]').each(function() {
+                        qtyTotal += parseInt($.trim($(this).text()));
+                    }); //$(this).children('span[name=spanQty]').css('display') == 'none' ? false : true; 
+                    divData.find('span[name=spanQty]').each(function() {
+                        if ($(this).css('display') != 'none') {
+                            qtyTotalInput += parseInt($.trim($(this).text()));
+                        } else {
+                            setFlagAndFocus(false, divData);
+                            flagValidtion = false;
+                        }
+                    });
+                    //必须保存部分签收数量
+                    if (!flagValidtion) {
+                        objFocus.focus();
+                        UI.Alert({ content: '部分签收:,必须保存签收数量后,才能进行结算.' });
+                        //reset the flag and focus object
+                        setFlagAndFocus(false, undefined);
+                        return false;
+                    }
+
+                    //数量=0
+                    if (qtyTotalInput == 0) {
+                        setFlagAndFocus(false, divData);
+                        UI.Alert({ content: msgSignQtyZero });
+                        return false;
+                    }
+                    //总签收数量超过订单总数量
+                    if (qtyTotalInput >= qtyTotal) {
+                        setFlagAndFocus(false, divData);
+                        UI.Alert({ content: msgSignQtyOutOfRange });
+                        return false;
+                    }
+                });
+
+                if (!flagValidtion) {
+                    objFocus.focus();
+                    //reset the flag and focus object
+                    setFlagAndFocus(true, undefined);
+                    return false;
+                }
+                //#endregion
+
+                //#region 凭证和卡号
+                $('tbody[name="tbodyPayType"] input[name="voucher"]').each(function() {
+                    if ($(this).parents('tr[name=trSubTotal]').css('display') !== 'none' && $(this).parents('tr[name=trSubTotal]').css('width') !== '0px') {
+                        //凭证
+                        if ($.trim($(this).val()) == '' && $.trim($(this).parents('tr[name="trSubTotal"]').find('[name=paidAmount]').val()) != '') {
+                            $(this).next().show();
+                            setFlagAndFocus(false, $(this));
+                            //return false;
+                        }
+                    }
+                    //return false;
+                });
+                $('tbody[name="tbodyPayType"] input[name="cardNo"]').each(function() {
+                    if ($(this).parents('tr[name=trSubTotal]').css('display') !== 'none' && $(this).parents('tr[name=trSubTotal]').css('width') !== '0px') {
+                        //卡号
+                        if ($.trim($(this).val()) == '' && $.trim($(this).parents('tr[name="trSubTotal"]').find('[name=paidAmount]').val()) != '') {
+                            $(this).next().show();
+                            setFlagAndFocus(false, $(this));
+                            //return false;
+                        }
+                    }
+                    //return false;
+                });
+                if (!flagValidtion) {
+                    objFocus.focus();
+                    //reset the flag and focus object
+                    setFlagAndFocus(true, undefined);
+                    return false;
+                }
+                //#endregion
+
+                //#region 验证分组总计
+                $('div[name="divPayType"]').each(function() {
+                    if ($(this).css('display') == 'none')
+                        return;
+                    //totalToPay totalPaidAmount
+                    var totalToPay = $.trim($(this).find('td[name="totalToPay"]').text().replace('¥', '').replace(',', ''));
+                    var totalPaidAmount = $.trim($(this).find('td[name="totalPaidAmount"]').text().replace('¥', '').replace(',', ''));
+                    var unSignedAmount = $.trim($(this).find('td[name="unSignedAmount"]').text().replace('¥', '').replace(',', ''));
+                    totalPaidAmount = !$.isNumeric(totalPaidAmount) ? 0 : totalPaidAmount;
+                    unSignedAmount = !$.isNumeric(unSignedAmount) ? 0 : unSignedAmount;
+                    if (parseFloat(totalToPay) != parseFloat(totalPaidAmount) + parseFloat(unSignedAmount)) {
+                        //show err info
+                        $(this).find('span[name="err"]').show();
+                        setFlagAndFocus(false, $(this).find('input[name=paidAmount]').first());
+
+                    } else {
+                        $(this).find('span[name="err"]').hide();
+                    }
+                });
+                if (!flagValidtion) {
+                    objFocus.focus();
+                    //reset the flag and focus object
+                    setFlagAndFocus(true, undefined);
+                    return false;
+                }
+                //#endregion
+
+
+                //#region validation logic for LgPickups
+                var spanRedCounts = $('div[name=divDataPickUpParent]').find('td[name=statusPickUp] span.red').length;
+                if (spanRedCounts > 0) {
+                    UI.Confirm({
+                        content: '存在' + spanRedCounts + '个未入库的取件单,结算会自动将未入库置为待取件.<br>确认结算?',
+                        ok: function() {
+
+                            doSettlement();
+                        },
+                        cancel: function() {
+
+                        }
+                    });
+                }
+                    //#endregion lgpickups
+
+                else {
+                    doSettlement();
+                }
+
+                return false;
+            });
+            //#endregion
+
+            //#region btnEdit click
+            $('[name="btnEdit"]').click(function() {
+
+                //show control and hide spanQty
+                var tdPdQty = $(this).parent().prev();
+                tdPdQty.find('div[class*=number_btn]').show();
+                tdPdQty.find('span[name=spanQty]').hide();
+                //focus
+                $(this).parent().prev().find('.number_input').focus();
+
+                //show btnSave and btnCancel,hide btnEdit
+                $(this).hide();
+                $(this).siblings("[name=btnCancel]").show();
+                $(this).siblings("[name=btnSave]").show();
+
+            });
+            //#endregion
+
+            //#region btnCancel click
+            $('[name="btnCancel"]').click(function() {
+                var tdQty = $(this).parent().prev();
+                //hide control and show spanQty
+                tdQty.find('div[class*=number_btn]').hide();
+                tdQty.find('span[name=spanQty]').show();
+
+                //hide btnSave and btnCancel,show btnEdit
+                $(this).hide();
+                $(this).siblings("[name=btnSave]").hide();
+                $(this).siblings("[name=btnEdit]").show();
+
+            });
+            //#endregion
+
+            //#region btnSaveclick
+            $('[name=btnSave]').click(function() {
+
+                //product price request in process
+                //if ($('#imgLoading').css('display') !== 'none')
+                //    return false;
+
+                var btnSave = $(this);
+
+                var divDataParent = $(this).parents('[name=divDataParent]');
+                var divData = $(this).parents('div[name=divData]');
+                //td签收数量
+                var tdQty = $(this).parent().prev();
+                //签收数量值
+                var val = $.trim(tdQty.find('.number_input').val());
+                var productNo = $.trim(divData.find('td[name=tdProductSysNo]').text());
+                //validation
+                if (val == '') {
+                    UI.Alert({ content: msgSignQtyNotNull });
+                    return false;
+                }
+                //验证格式
+                //var regExp_notNum = /\D/;
+                //var regExp_startsWithZero = /^0/;
+
+
+                //if (regExp_notNum.test(val) || (val.length > 1 && regExp_startsWithZero.test(val))) {
+                //是否数字
+                var zzs = "^\\d+$";//非负整数
+                var re = new RegExp(zzs);
+                if (val.match(re) == null) {
+                    UI.Alert({ content: msgSignQtyFormat });
+                    return false;
+                }
+
+                //数量大小验证
+                //if (val == "0") {
+                //    UI.Alert({ content: msgSignQtyZero });
+                //    return false;
+                //}
+                //#region 部分签收数量验证
+                if (parseFloat(val) > parseFloat($.trim(tdQty.prev().text()))) {
+                    UI.Alert({ content: msgSignQtyGTQty });
+                    return false;
+                }
+                //#endregion
+                //validation end
+
+                //set the controls disabled
+                //divData.find('div[class*="number_btn"]').children().prop('disabled', true);
+
+                //show control and hide spanQty
+                var tdPdQty = btnSave.parent().prev();
+                tdPdQty.find('div[class*=number_btn]').hide();
+                tdPdQty.find('span[name=spanQty]').text(btnSave.parent().prev().find('.number_input').val()).show();
+
+                //hide btnSave and btnCancel,show btnEdit
+                btnSave.hide();
+                btnSave.siblings("[name=btnCancel]").hide();
+                btnSave.siblings("[name=btnEdit]").show();
+
+
+                //get the amount recomputed form server and change the amount of ui
+                var divStockOutBasicInfo = divDataParent.find('div[name=divStockOutBasicInfo]');
+
+                var stockOutSysNo = divStockOutBasicInfo.find('td[name=tdStockOutSysNo]').text();
+                //需重新计算
+                var tdStockOutAmount = divStockOutBasicInfo.find('td[name=tdStockOutAmount]');
+
+
+                var tdPrice = divDataParent.find('td[name=tdPrice]');
+                var tdAmount = $(this).parent().siblings('td[name=tdAmount]');
+                //需重新计算end
+
+                var productSysNo = $(this).parent().siblings('td[name=tdProductSysNo]').text();
+                var signQty = val;
+
+                var orginalStockOutAmount = $.trim(tdStockOutAmount.text().replace('¥', '').replace(',', ''));
+                var orginalAmount = $.trim(tdAmount.text().replace('¥', '').replace(',', ''));
+                //#region construct rmaOrderInfo object
+
+                var lstRMAOrderItemInfo = [];
+                var trs = divData.find('tbody tr');
+
+
+                trs.each(function() {
+                    if ($(this).find('span[name=spanQty]').css('display') == 'none') {
+                        //continue;
+                        return true;
+                    }
+
+                    var spanQty = $.trim($(this).find('span[name=spanQty]').text());
+                    var oriQty = $.trim($(this).find('td[name=tdPdQty]').text());
+                    if (spanQty != ''
+                        && $.isNumeric(spanQty)
+                        && parseFloat(spanQty) < parseFloat(oriQty)) {
+
+                        var orderItemSysNo = $(this).attr('name');
+                        var qty = parseFloat(oriQty) - parseFloat(spanQty); //return qty
+                        //OrderSysNo,lstRMAOrderItemInfo(OrderItemSysNo,Qty)
+                        lstRMAOrderItemInfo.push({
+                            OrderItemSysNo: orderItemSysNo,
+                            Qty: qty
+                        });
+                    }
+                    return true;
+                });
+                var orderSysNo = divData.prev().find('td[name=tdOrderSysNo]').text();
+                cbRMAOrderInfo = {
+                    orderSysNo: orderSysNo,
+                    lstRMAOrderItemInfo: lstRMAOrderItemInfo
+                };
+
+                //#endregion
+
+                /*
+                pseudo code by hefang
+                implemented by huangwei
+                2014-02-21
+                */
+                //如果是app部分签收,全部为已保存才发起ajax请求
+                var isAppPartialSign = divDataParent.find('select').prop('disabled'); //签收状态下拉是否是disable
+                //var isAllSaved = true;
+                if (isAppPartialSign && divData.find('button[name=btnSave]:visible').length > 0) {
+                    return false;
+                }
+
+                Utils.MaskStart($('#tabcon')); //$('#imgLoading').show();
+                $.ajax({
+                    url: '@Url.Action("GetProductPrice")',
+                    //int stockOutSysNo,int productSysNo,int signQty
+                    //data: { stockOutSysNo: stockOutSysNo, productSysNo: productSysNo, signQty: signQty },
+                    data: { cbRMAOrderInfo: JSON.stringify(cbRMAOrderInfo) },
+                    success: function(data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        //返回应退金额
+                        var rtnAmount = data;
+                        var totalAmount = parseFloat(orginalStockOutAmount) - parseFloat(rtnAmount);
+
+                        //change the price,amount values
+                        //tdPrice.text('¥' + parseFloat(data).toFixed(2));
+                        //var newAmount = parseFloat(price) * parseFloat(signQty);
+                        //tdAmount.text('¥' + newAmount.toFixed(2));
+
+                        var unSignedAmount = parseFloat(rtnAmount);
+                        /* 金额逻辑
+                        合计应收,出库单金额都为原来金额.
+                        增加未签收金额=计算后金额-原来金额
+                        逻辑一致验证为 原来金额=实收金额+未签收金额
+                        unSignedAmount
+                        */
+                        var divPayType = divDataParent.next();
+                        divPayType.find('td[name=unSignedAmount]').text('¥' + parseFloat(unSignedAmount).toFixed(2));
+                        divPayType.find('td[name=totalPaidAmount]').text('¥' + parseFloat(totalAmount).toFixed(2));
+                        //tdStockOutAmount.text('¥' + parseFloat(newStockOutAmount).toFixed(2));
+                        //合计应收totalToPay
+                        //divDataParent.next().find('td[name="totalToPay"]').text('¥' + parseFloat(newStockOutAmount).toFixed(2));
+                        //底部汇总
+                        //refreshTotal();
+
+                        /*
+                        若未展开更多支付方式divPayType,则将合计实收金额parseFloat(totalAmount)带入 并显示trTotalPerStockOut
+                        */
+
+                        if (divPayType.css('display') == 'none') {
+                            //show the totalPaidAmount
+                            //var tempVal = $.trim(divPayType.find('td[name=totalPaidAmount]').text().replace('¥', '').replace(',', ''));
+                            //if (parseFloat(tempVal) == 0) {
+                            //divPayType.find('td[name=totalPaidAmount]').text('¥' + parseFloat(totalAmount).toFixed(2));
+                            divPayType.show();
+                            divPayType.find('tr[name=trSubTotal]').hide();
+
+                            //}
+
+                        }
+                        //paidAmount
+                        divPayType.find('td[name=现金]').next().find('input[name=paidAmount]').val('¥' + parseFloat(totalAmount).toFixed(2));
+                        //divPayType.find('tr[name=trSubTotal]').hide();
+                        //divPayType.prev().find('input[name=chkPayType]').prop('checked', false); //divDataParent
+
+                        refreshTotal();
+                        Utils.MaskStop(); //$('#imgLoading').hide();
+
+                    },
+                    error: function(err) {
+                        alert('error:' + err);
+                        Utils.MaskStop(); //$('#imgLoading').hide();
+                    }
+                });
+
+
+                //end done
+                return false;
+            });
+        });
+
+//end document.ready
+        //#endregion
+
+
+        //#region 将数组转换为以数组索引为key的对象集合
+
+        function convertArrayToObject(array) {
+            var convertObj = {};
+            var len = array.length;
+            for (var i = 0; i < len; i++) {
+                convertObj[i] = array[i];
+            }
+
+            return convertObj;
+        }
+    //#endregion
+
+    </script>
+    }
+    <div class="case" id="tabcon">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>结算单</h3>
+                <span class="ra10 c6">
+                    <button onclick=" location.reload() " type="button" class="btn btn_ht26 m5_r">
+                        <span class="icon_refresh"></span><span class="m5_l">刷新内容/列表</span>
+                    </button>
+                    <button class="btn btn_ht26" onclick=" location.href = '/Logistics/SettlementDeliveryList' ">
+                        <span class="icon_share_alt"></span>
+                        <span class="m5_l">返回</span>
+                    </button>
+                </span>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_detail_dispay">
+                    <div class="tit_con">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td width="15%" class="nameright border_bnone">创建人：</td>
+                                <td width="35%" class="border_right border_bnone">
+                                    @SyUserBo.Instance.GetUserName(Model.CreatedBy)
+                                </td>
+                                <td width="15%" class="nameright border_bnone">配送人：</td>
+                                <td width="35%" class="border_bnone">
+                                    @SyUserBo.Instance.GetUserName(Model.DeliveryUserSysNo)
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        
+        <!-- 出库单 -->
+        <div class="boxs m10_t">
+            <div class="boxs_tit head_m">
+                <h3>出库单明细</h3>
+            </div>
+            <div name="divParent" class="boxs_con_c1 p10_lr p10_b">
+                @{
+                    foreach (var mWhStockOut in Model.WhStockOuts)
+                    {
+                        string remarks = "";
+                        // 查找对应的配送单
+                        foreach(var item in Model.LgDeliveryItems)
+                        {
+                            if (item.NoteType == 10 && item.NoteSysNo == mWhStockOut.SysNo)
+                            {
+                                remarks = item.Remarks;
+                                break;
+                            }
+                        }                        
+                        
+                        <!--box开始-->
+                        <div name="divDataParent" class="boxdeliver" >
+                            <!-- 出库单签收方式下拉选择 -->
+                            <div name="divSel" class="head_detail m10_t border_bnone">
+                                <span class="more10r m5_t">
+                                    <select name="selSign">
+                                        <option value="@LogisticsStatus.配送单明细状态.已签收.GetHashCode()" selected="selected">签收</option>
+                                        @*出库单应收金额不为0并且非补单*@
+                                        @if (mWhStockOut.Receivable != 0 && SoOrderBo.Instance.GetEntity(mWhStockOut.OrderSysNO).OrderSource != OrderStatus.销售单来源.业务员补单.GetHashCode())
+                                        {
+                                            <option value="@LogisticsStatus.配送单明细状态.已签收.GetHashCode()">部分签收</option>
+                                        }
+                                        <option value="@LogisticsStatus.配送单明细状态.拒收.GetHashCode()">拒收</option>
+                                        <option value="@LogisticsStatus.配送单明细状态.未送达.GetHashCode()">未送达</option>
+                                    </select>
+                                    <span name="spSignRemark" style="display:none;">
+                                        <i class="icon_info_sign icon_gray m5_l m5_r" style="margin-top:2px;"></i>
+                                        <span style="cursor:pointer;overflow:hidden; white-space: nowrap; text-overflow:ellipsis;display:inline-block;width:80px; vertical-align:middle;" title="@remarks">@remarks</span>
+                                    </span>
+                                    @if (mWhStockOut.IsCOD == 1 && mWhStockOut.Receivable != 0)
+                                    {
+                                        <input type="checkbox" value="更多支付方式" name="chkPayType" class="m10_l m5_r" />
+                                        <span>更多支付方式</span>
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" value="更多支付方式" name="chkPayType" class="m10_l m5_r" style="visibility: hidden"/>
+                                        <span style="visibility: hidden">更多支付方式</span>
+                                    }
+                                    
+                                </span>
+                                <h5>出库单</h5>
+                            </div>
+                            <!-- 出库单签收方式下拉选择 end -->
+
+                            <!-- 出库单基础信息 -->
+                            <div name="divStockOutBasicInfo" class="boxs_detail_dispay">
+                                <div class="tit_con">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_left border_right border_bottom">
+                                        <tbody>
+                                        <tr>
+                                            <td width="65px" class="nameright border_bnone">出库单号：</td>
+                                            <td width="100px" name="tdStockOutSysNo" class="border_bnone" colspan="3"><span class="blue"><a onclick=" ShowInfo(@mWhStockOut.SysNo) ">@mWhStockOut.SysNo</a></span></td>
+                                            <td width="52px" class="nameright border_bnone border_left">订单号：</td>
+                                            <td width="100px" name="tdOrderSysNo" class="border_bnone" colspan="3"><span class="blue"><a class="linkOrder">@mWhStockOut.OrderSysNO</a></span></td>
+                                            <td width="52px" class="nameright border_bnone border_left">收货人：</td>
+                                            <td width="72px" class="border_bnone" colspan="3">@mWhStockOut.ReceiverName</td>
+                                            <td width="65px" class="nameright border_bnone border_left">应收金额：</td>
+                                            <td width="100px" name="tdStockOutAmount" class="border_bnone red" colspan="3">@mWhStockOut.Receivable.ToString("C")</td>
+                                            <td width="39px" class="nameright border_bnone border_left">到付：</td>
+                                            <td width="39px" class="border_bnone" colspan="3" name="tdIsCOD">@(mWhStockOut.IsCOD == 1 ? "是" : "否")</td>
+                                            <td width="65px" class="nameright border_bnone border_left">配送方式：</td>
+                                            <td  class="border_bnone" colspan="3">@mWhStockOut.DeliveryTypeName</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                            <!-- 出库单基础信息 End-->
+
+                            <!-- detais for 部分签收 -->
+                            <div class="boxs_detail" name="divData" style="display: none">
+
+                                @{
+                                    //到付,白城当日送
+                                    if (mWhStockOut.IsCOD == 1 && mWhStockOut.DeliveryTypeName.Contains("百城当日"))
+                                    {
+                                        Html.RenderPartial("pWhStockOutDetails", mWhStockOut.Items);
+                                    }
+                                }
+
+                            </div>
+                            <!-- 部分签收 -->
+                        </div>
+                        <!--box结束-->
+
+                        <!-- 基础信息other 支付方式 BsPaymentTypes-->
+                        <div class="boxs_detail_dispay" name="divPayType" style="display: none">
+                            <div class="tit_con">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_left border_right">
+                                    <tbody name="tbodyPayType">
+                                        @{
+                                            foreach (var p in Model.BsPaymentTypes)
+                                            {
+                                                //非网上支付&&到付
+                                                if (p.IsOnlinePay == 0 && p.PaymentType == 20)
+                                                {
+                                                    <tr name="trSubTotal">
+                                                        <td width="8%" name="@p.PaymentDescription" class="nameright">@p.PaymentDescription:</td>
+                                                        <td width="21%">
+                                                            <input name="paidAmount" mark="@p.SysNo" type="text" value="" maxlength="8" class="wd100 align_r" style="color: #C53927" />
+                                                            <span class="f12 error m5_l" style="display: none">金额输入不正确!</span>
+                                                        </td>
+                                                        <td width="6%" class="nameright">凭证号:</td>
+                                                        <td width="23%">
+                                                            <input name="voucher" type="text" maxlength="20" value="" class="align_r" /><!-- wd200 -->
+                                                            <span class="f12 error m5_l" style="display: none">请输入凭证号!</span>
+                                                        </td>
+                                                        @if (p.RequiredCardNumber == 1)
+                                                        {
+                                                            <td width="6%" class="nameright">卡号:</td>
+                                                            <td width="21%">
+                                                                <input name="cardNo" type="text" maxlength="40" value="" class="align_r" /><!-- wd200 -->
+                                                                <span class="f12 error m5_l" style="display: none">请输入卡号!</span>
+                                                            </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td width="6%"></td>
+                                                            <td width="21%"></td>
+                                                        }
+                                                        
+                                                        <td class="nameright">收款科目:</td>
+                                                        <td>
+                                                            @Html.DropDownList("selEas", LgSettlementBo.Instance.GetEasCodeByWhAndPayType(mWhStockOut.WarehouseSysNo, p.SysNo) as List<SelectListItem>)
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                        }
+
+                                        <!-- 合计 -->
+                                        <tr name="trTotalPerStockOut">
+                                            <td colspan="8">
+                                                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_none border_bnone">
+                                                    <tr>
+                                                        <td width="8%" class="nameright border_bnone">合计应收金额：</td>
+                                                        <td width="8%" class="red border_bnone" name="totalToPay">@mWhStockOut.Receivable.ToString("C")</td>
+                                                        <td width="8%" class="nameright border_bnone">合计实收金额：</td>
+                                                        <td width="8%" class="red border_bnone" name="totalPaidAmount">¥0.00</td>
+                                                        <td width="12%" class="nameright border_bnone">未签收退款金额：</td>
+                                                        <td width="8%" class="red border_bnone" name="unSignedAmount">¥0.00</td>
+                                                        <td class="border_bnone"><span name="err" class="f12 error" style="display: none; margin-left: -6px">应收金额必须等于实收金额与未签收金额之和!</span></td>
+                                                    </tr>
+                                                </table> 
+                                            </td> 
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- 基础信息other End -->
+                    }
+                }
+            </div>
+            <!-- data foreach end-->
+        </div>
+        <!-- end 出库单 -->
+
+        <!-- 取件单 -->
+        @if (Model.LgPickUps != null)
+        {
+            <div class="boxs m10_t">
+                <div class="boxs_tit head_m">
+                    <h3>取件单明细</h3>
+                </div>
+                <div name="divPickUp" class="boxs_con_c1 p10 ">
+                    @{
+
+                        foreach (var lgPickUp in Model.LgPickUps)
+                        {
+                            <!-- 取件单开始 -->
+                            <div name="divDataPickUpParent" class="boxdeliver" >
+                                <!-- detais for 取件单 -->
+                                <div class="boxs_detail border_lnone" name="divDataPickUp" >
+
+                                    <table id="@ViewBag.tableId" width="100%" border="0" cellspacing="0" cellpadding="0" class="">
+                                        <thead>
+                                            <tr>
+                                                <th class="wd75">取件单号</th>
+                                                <th width="120">取件方式</th>
+                                                @*            <th class="wd75">入库单编号</th>*@
+                                                <th class="align_l p10_lr">仓库</th>
+                                                <th class="align_l p10_lr">取件地址</th>
+                                                @*            <th width="92">创建人</th>
+            <th width="120">创建时间</th>*@
+                                                <th width="56">状态</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td class="blue"><a href="#" name="item_sysno" class="blue">@lgPickUp.SysNo</a></td>
+                                                <td name="tdPickUpSysNo">@LgPickUpTypeBo.Instance.GetPickupTypeName(lgPickUp.PickupTypeSysNo)</td>
+                                                @*                <td class="blue"><a href="#" name="item_stockinsysno" class="blue">@item.StockInSysNo</a></td>*@
+                                                <td class="align_l p10_lr">@WhWarehouseBo.Instance.GetWarehouseName(lgPickUp.WarehouseSysNo)</td>
+                                                <td class="align_l p10_lr">
+                                                    @{
+                                                        var address = Hyt.BLL.Order.SoOrderBo.Instance.GetOrderReceiveAddress(lgPickUp.PickupAddressSysNo);
+                                                        if (address != null)
+                                                        {
+                                                            @address.StreetAddress
+                                                        }
+                                                        else
+                                                        {
+                                                            @Html.Raw("无取件地址")
+                                                        }
+                                                    }
+                                                </td>
+                                                @*                <td>@SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>*@
+                                                <td name="statusPickUp">
+                                                    @if (lgPickUp.Status != LogisticsStatus.取件单状态.已入库.GetHashCode())
+                                                    {
+                                                        <span class="red">@((LogisticsStatus.取件单状态) lgPickUp.Status)</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        @((LogisticsStatus.取件单状态) lgPickUp.Status)
+                                                    }
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- end detais for 取件单 -->
+                            </div>
+                            <!-- 取件单结束 -->
+                        }
+
+                    }
+                </div>
+            </div>
+        }
+        <!-- end 取件单 -->
+    
+        <!-- 金额汇总 -->
+        <div class="boxs m10_t">
+            <div class="boxs_tit head_m">
+                <h3>汇总</h3>
+            </div>
+            <div class="boxs_con_c1">
+
+                <div class="boxs_detail_dispay" name="divTotal">
+
+                    <div class="tit_con">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr name="trTotal">
+                                    @{
+                                        foreach (var p in Model.BsPaymentTypes)
+                                        {
+                                            //非网上支付&&到付
+                                            if (p.IsOnlinePay == 0 && p.PaymentType == 20)
+                                            {
+                                                <td width="8%" name="@p.PaymentDescription" class="nameright">@p.PaymentName：</td>
+                                                <td width="25%" class="border_right red">¥0.00</td>
+                                            }
+                                        }
+                                    }
+
+                                </tr>
+                                <tr>
+                                    <td class="nameright">备注：</td>
+                                    <td colspan="5">
+                                        <input id="txtRemarks" style="width: 460px" name="" type="text">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+
+                </div>
+
+                <!--提交按钮-->
+                <div class="pagination align_c clearfix">
+                    <button type="button" id="btnConfirm" class="btn btn_blue btn_ht32 bold f14">确认结算</button>&nbsp;
+                </div>
+            </div>
+        </div>
+        <!-- end 金额汇总 -->
+        @*<img id="imgLoading" src="../../Theme/images/loading.gif" style="display: none; position: absolute; left: 46%; top: 40%"/>*@
+    </div>

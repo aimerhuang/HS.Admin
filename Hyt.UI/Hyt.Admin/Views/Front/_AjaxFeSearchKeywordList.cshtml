@@ -1,0 +1,67 @@
+﻿@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Infrastructure.Pager.PagedList<FeSearchKeyword>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th>关键字</th>
+            <th style="width: 72px;">点击次数</th>
+            <th style="width: 124px;">创建时间</th>
+            <th style="width: 124px;">更新时间</th>
+            <th style="width: 72px;">状态</th>
+            <th style="width: 243px;" class="border_rnone">操作</th>
+        </tr>
+    </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            const int records = (int)ForeStatus.搜索关键字状态.后台记录;
+            const int front = (int)ForeStatus.搜索关键字状态.前台显示;
+            if (Model.TData.Count > 0)
+            {
+                int row = 1;
+                string cs = string.Empty;
+                foreach (FeSearchKeyword item in Model.TData)
+                {
+                    if (row % 2 == 0)
+                    {
+                        cs = "stag_color";
+                    }
+                    else
+                    {
+                        cs = string.Empty;
+                    }
+            <tr class="@cs">
+                <td style="text-indent: 10px; text-align: left;">@HttpUtility.HtmlDecode(item.keyword)</td>
+                <td>@item.HitsCount</td>
+                <td>@(item.CreatedDate.ToString("yyyy-MM-dd HH:mm"))</td>
+                <td>@(item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm"))</td>
+                <td>@EnumUtil.GetDescription(typeof(ForeStatus.搜索关键字状态), item.Status)</td>
+                <td>
+                    @{
+                    if (item.Status == records)
+                    {
+                        <button type="button" class="btn btn_ht26 btn_blue m10_r FE1003601" title="前台显示" onclick=" setStatus(@item.SysNo,@front) "><span class="icon_eye_open icon_white"></span><span class="m5_l">前台显示</span></button><button type="button" class="btn btn_ht26 btn_blue m10_r FE1003201" title="修改" onclick=" addOrEdit(@item.SysNo) "><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button type="button" class="btn btn_ht26 btn_red FE1003401" title="删除" onclick=" deleteOne(@item.SysNo) "><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn_ht26 btn_red m10_r FE1003601" title="取消显示" onclick=" setStatus(@item.SysNo,@records) "><span class="icon_eye_close icon_white"></span><span class="m5_l">取消显示</span></button><button type="button" class="btn btn_ht26 disabled m10_r FE1003201" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button><button type="button" class="btn btn_ht26 disabled FE1003401" title="删除"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+                    }
+                    }
+
+                </td>
+            </tr>
+                    row++;
+                }
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@{ Html.RenderPartial("_UrlPaging", Model); }

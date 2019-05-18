@@ -1,0 +1,54 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Util
+@model PagedList<CBFeArticle>
+@{
+    //公司公告
+    ViewBag.Title = "_CompanyPost";
+}
+<div class="boxs_tit head_m">
+    <span class="ra10 c6 m5_t"><span class="f14 m10_r blue"><a href="javaScript:void(0);" onclick="UI.OpenCreatTab('公司公告', '/Front/Announcement');" target="_blank">更多...</a></span></span>
+    @*    <span class="ra10 c6"><span class="f14 m10_r">@Model.CurrentPageIndex/@Model.TotalPageCount</span>
+        @{
+            if (Model.CurrentPageIndex == 1)
+            {
+                <button class="btn btn_ht26 m5_r disabled"><span class="icon_chevron_left"></span></button>
+            }
+            else
+            {
+                <button class="btn btn_ht26 m5_r" onclick="post(@(Model.CurrentPageIndex - 1))"><span class="icon_chevron_left"></span></button>
+            }
+            if (Model.CurrentPageIndex > Model.TotalPageCount)
+            {
+                <button class="btn btn_ht26 disabled"><span class="icon_chevron_right"></span></button>
+            }
+            else
+            {
+                if (Model.CurrentPageIndex == Model.TotalPageCount)
+                {
+                    <button class="btn btn_ht26 disabled"><span class="icon_chevron_right"></span></button>
+                }
+                else
+                {
+                    <button class="btn btn_ht26" onclick="post(@(Model.CurrentPageIndex + 1))"><span class="icon_chevron_right"></span></button>
+                }
+            }           
+        }
+    </span>*@
+    <h3>公司公告</h3>
+</div>
+<div class="boxs_con_c1" style="height: 340px;">
+    <ul class="msg">
+        @{
+            var row = 1;
+            string cs = string.Empty;
+            foreach (var item in Model.TData)
+            {
+                cs = row % 2 == 0 ? "msg_grayer" : "msg_gray";
+            <li class="@cs border_lnone border_rnone c6 f12 li p0"><i class="icon_envelope m10_r m10_l"></i><a href="javascript:;" onclick="UI.OpenCreatTab('查看公告','/Main/Announcement/@item.SysNo');" title="@item.Title">@item.Title</a></li>
+                row++;
+            }
+        }
+    </ul>
+</div>

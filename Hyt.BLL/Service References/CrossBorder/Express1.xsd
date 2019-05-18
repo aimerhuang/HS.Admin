@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/WMS_Service.Controllers.Express" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/WMS_Service.Controllers.Express" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://wms.lc-shipping.com/WCF/Express.svc?xsd=xsd4" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+  <xs:complexType name="RouteListClass">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ExecuteSuccess" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Msg" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OrderNo" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Route" nillable="true" type="tns:ArrayOfRouteMsgClass" />
+      <xs:element minOccurs="0" name="TrackingNo" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Type" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RouteListClass" nillable="true" type="tns:RouteListClass" />
+  <xs:complexType name="ArrayOfRouteMsgClass">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="RouteMsgClass" nillable="true" type="tns:RouteMsgClass" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfRouteMsgClass" nillable="true" type="tns:ArrayOfRouteMsgClass" />
+  <xs:complexType name="RouteMsgClass">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="DateTime" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Msg" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RouteMsgClass" nillable="true" type="tns:RouteMsgClass" />
+  <xs:complexType name="UploadOrderClass">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="BranchesName" nillable="true" type="xs:string" />
+      <xs:element xmlns:q1="http://schemas.microsoft.com/2003/10/Serialization/Arrays" minOccurs="0" name="lid" nillable="true" type="q1:ArrayOfint" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="UploadOrderClass" nillable="true" type="tns:UploadOrderClass" />
+</xs:schema>

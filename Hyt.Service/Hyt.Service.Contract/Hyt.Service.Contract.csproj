@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C3718184-D933-4570-BC9D-DDB03730AC31}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Hyt.Service.Contract</RootNamespace>
+    <AssemblyName>Hyt.Service.Contract</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>
+    </SccProjectName>
+    <SccLocalPath>
+    </SccLocalPath>
+    <SccAuxPath>
+    </SccAuxPath>
+    <SccProvider>
+    </SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\packages\Microsoft.AspNet.Mvc.4.0.20710.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiPayNotify\IPayNotify.cs" />
+    <Compile Include="ApiPay\IPay.cs" />
+    <Compile Include="B2CApp\IAccount.cs" />
+    <Compile Include="B2CApp\IAddress.cs" />
+    <Compile Include="B2CApp\ICommon.cs" />
+    <Compile Include="B2CApp\IOrders.cs" />
+    <Compile Include="B2CApp\IUserCenter.cs" />
+    <Compile Include="B2CApp\IProduct.cs" />
+    <Compile Include="B2CApp\IShoppingCart.cs" />
+    <Compile Include="Base\ContractToken.cs" />
+    <Compile Include="Base\CustomInvoker.cs" />
+    <Compile Include="Base\CustomOperationBehaviorAtttibute.cs" />
+    <Compile Include="Base\FaultData.cs" />
+    <Compile Include="Base\IBaseServiceContract.cs" />
+    <Compile Include="FileProcessor\IThumbnailService.cs" />
+    <Compile Include="FileProcessor\IUploadService.cs" />
+    <Compile Include="IExpressService.cs" />
+    <Compile Include="Itest.cs" />
+    <Compile Include="ITwoDimensionCode.cs" />
+    <Compile Include="LogisApp\ILogistics.cs" />
+    <Compile Include="MallSeller\IExtendMallOrder.cs" />
+    <Compile Include="MallSeller\IMallAccount.cs" />
+    <Compile Include="MallSeller\IMallOrder.cs" />
+    <Compile Include="MallSeller\IMallProduct.cs" />
+    <Compile Include="MallSeller\IMallRma.cs" />
+    <Compile Include="MallSeller\Model\AuthorizationParameters.cs" />
+    <Compile Include="MallSeller\Model\BaseRequest.cs" />
+    <Compile Include="MallSeller\Model\LogisticsSendRequest.cs" />
+    <Compile Include="MallSeller\Model\UpdateMemoRequest.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Task\ITaskService.cs" />
+    <Compile Include="WeiXin\IWebChatService.cs" />
+    <Compile Include="WeiXin\Model\Menu.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Hyt.Infrastructure\Hyt.Infrastructure.csproj">
+      <Project>{17216f5e-0585-4d11-a869-ad8119604f2a}</Project>
+      <Name>Hyt.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Model\Hyt.Model.csproj">
+      <Project>{AB819FAF-0E0C-4D9B-94AF-DBC5531B47C2}</Project>
+      <Name>Hyt.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Hyt.Util\Hyt.Util.csproj">
+      <Project>{cb555155-5eeb-41fd-ae7b-48f80ded197c}</Project>
+      <Name>Hyt.Util</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

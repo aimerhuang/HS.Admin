@@ -1,0 +1,369 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "配送路径查询";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1008101, ".LG1008101") 
+}
+<script src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+<script type="text/javascript">
+    $().ready(function () {
+        $("#WhWarehouse").bind("click", function () {
+            var obj, obj2;
+            obj = $("#WhWarehouse");
+
+            obj2 = DAO.SelectWhareHouse(obj, {
+                chkStyle: "radio",
+                callback: function (data) {
+                    obj.val(data[0].name);
+                    $("#whSysNo").val(data[0].id);
+                    //移除弹出层
+                    obj2.Remove();
+
+                    ShowDeliveryUser();
+                }
+            });
+        });
+    });
+
+    //仓库下配送员,包括日期作为条件  
+    function ShowDeliveryUser() {
+        var whSysNo = $("#whSysNo").val();
+        var strHtml = '<option value="0" selected="selected">请选择配送人员</option>';
+        if (whSysNo != "") {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetDeliveryUserForMap", "Logistics")',
+                data: { whSysNo: whSysNo, selectDate: $("#selDate").val() },
+                chche: false,
+                success: function (data) {
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    if (data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            strHtml += '<option value="' + data[i].Key + '">' + data[i].Value + '</option>';
+                        }
+                    }
+                    $("#DeliveryUser").html(strHtml);
+                }, error: function () {
+                    UI.Alert({ content: "查询出错,请稍候再试" });
+                },
+            });
+        }
+
+
+    };
+
+    //配送员变化引起配送单变化,包括日期作为条件
+    function DeliveryUserChange() {
+        $("#StartTime").val("00:01");
+        $("#EndTime").val("23:59");
+        var deliveryUserSysNo = $("#DeliveryUser").find("option:selected").val();
+        if (deliveryUserSysNo > 0) {
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetLgDeliveryForMap", "Logistics")',
+                data: { deliveryUserSysNo: deliveryUserSysNo, selectDate: $("#selDate").val() },
+            chche: false,
+            success: function (data) {
+                var strHtml = '<option value="0" selected="selected">可选择配送单</option>';
+                if (data.length > 0) {
+                    for (var i = 0; i < data.length; i++) {
+                        strHtml += '<option value="' + JsonTimeConvert(data[i].CreatedDate) + ',' + JsonTimeConvert(data[i].EndDate) + '">' + data[i].SysNo + '</option>';
+                    }
+                }
+                $("#deliveryInvoice").html(strHtml);
+            }, error: function () {
+                UI.Alert({ content: "查询出错,请稍候再试" });
+            },
+                    });
+        }
+    }
+    //配送单改变，显示起止时间
+    function DeliveryInvoiceChange() {
+        if ($("#deliveryInvoice").find("option:selected").val() != 0) {
+            var dt = $("#deliveryInvoice").val().split(',');
+            $("#StartTime").val(dt[0].substr(11, 5));
+            $("#EndTime").val(dt[1].substr(11, 5));
+        } else {
+            $("#StartTime").val("00:01");
+            $("#EndTime").val("23:59");
+        }
+    }
+</script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool border_bottom">
+                <!--/工具条-->
+                <div class="right_tool">
+                    <span class="fl m10_l">日期</span>
+                    <div class="date_btn120 fl m10_l">
+                        <input class="input_ht26" type="text" value="" id="selDate" name="">
+                        <button title="日历" class="btn btn_ht26 " onclick="UI.Date({el:'selDate',onpicked:ShowDeliveryUser})"><span class="icon_calendar"></span></button>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">仓库</span>
+                    <div class="fl m10_l">
+                        <input type="text" id="WhWarehouse" name="WhWarehouse" value="" readonly="readonly" />
+                        <input type="hidden" id="whSysNo" />
+                    </div>
+
+
+                    <span class="veralign_t fl m10_l">配送员</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="DeliveryUser" name="DeliveryUser" onchange="DeliveryUserChange()">
+                            <option value="0" selected="selected">请选择配送人员</option>
+                        </select>
+                    </div>
+
+                    <span class="fl m10_l">配送单</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="deliveryInvoice" onchange="DeliveryInvoiceChange()">
+                            <option value="0">可选择配送单</option>
+                        </select>
+                    </div>
+
+                    <div class="date_btn120 m10_l m10_r fl" style="display: none">
+                        <input type="text" value="" class="input_ht26 c3" id="StartTime" name="StartTime">
+                        <button title="时间" class="btn btn_ht26" onclick="var max=$('#EndTime').val();UI.Date({ el: 'StartTime',maxDate:max,dateFmt:'HH:mm' });"><span class="icon_time"></span></button>
+                    </div>
+                    <span class="fl" style="display: none">-</span>
+                    <div class="date_btn120 fl m10_l" style="display: none">
+                        <input type="text" value="" class="input_ht26 c3" id="EndTime" name="EndTime">
+                        <button title="时间" class="btn btn_ht26" onclick="var min=$('#StartTime').val();UI.Date({ el: 'EndTime',minDate:min,dateFmt:'HH:mm' });"><span class="icon_time"></span></button>
+                    </div>
+                    <button class="btn btn_ht26 fl m10_l" title="搜索" onclick="ShowPath()"><span class="icon icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+            </div>
+            <!--/百度地图区-->
+            <div class="boxs" style="width: 100%; overflow: hidden;" id="allmap"></div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $("#allmap").css("height", $(window.parent.document).height() - 277 + "px");
+
+
+    //设置仓库 和配送员位置
+
+    var mp = new BMap.Map("allmap");
+    //mp.centerAndZoom("北京市");
+    //ip定位当前城市
+    var myCity = new BMap.LocalCity();
+    myCity.get(myFun);
+    function myFun(result) {
+        mp.centerAndZoom(result.name);
+        mp.enableScrollWheelZoom();
+    }
+
+    $("#selDate").val(GetCurDate());
+    //初始值
+    var startTime = "00:01";
+    var endTime = "23:59";
+    $("#StartTime").val("00:01");
+    $("#EndTime").val("23:59");
+    //请求数据查询
+    function ShowPath() {
+        var userSysNo = $("#DeliveryUser").find("option:selected").val();
+        var selDate = $("#selDate").val();
+
+        if (userSysNo == 0) {
+            UI.Alert({ content: "请先选择配送员" });
+            return false;
+        }
+
+        if (selDate == "") {
+            selDate = GetCurDate();
+        }
+
+        startTime = $("#StartTime").val();
+        endTime = $("#EndTime").val();
+        if (startTime > endTime) {
+            UI.Alert({ content: "开始时间大于结束时间，请重新选择" });
+            return false;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetDeliveryUserHistoryLocation", "Logistics")',
+            data: { deliveryUserNo: userSysNo, selDate: selDate, startTime: startTime, endTime: endTime },
+            chche: false,
+            success: function (data) {
+                DrawLine(data);
+            },
+            error: function () {
+                UI.Alert({ content: "查询出错,请稍候再试" });
+            }
+        });
+    }
+    //获取当前日期 格式yyyy-MM-dd
+    function GetCurDate() {
+        var now = new Date();
+
+        var year = now.getFullYear();       //年
+        var month = now.getMonth() + 1;     //月
+        var day = now.getDate();            //日
+
+        var clock = year + "-";
+
+        if (month < 10)
+            clock += "0";
+
+        clock += month + "-";
+
+        if (day < 10)
+            clock += "0";
+
+        clock += day;
+
+        return (clock);
+    }
+
+    //地图上画线 
+    function DrawLine(data) {
+        var polylinePointsArray = [];
+        if (data.Data != null && data.Data.list != null && data.Data.list.length > 0) {
+            $.each(data.Data.list, function (idx, item) {
+                polylinePointsArray.push(new BMap.Point(item.Longitude, item.Latitude));
+            });
+            //先清除
+            mp.clearOverlays();
+            var point = new BMap.Point(data.Data.list[0].Longitude, data.Data.list[0].Latitude);
+            mp.centerAndZoom(point, 12);
+
+            var driving = new BMap.WalkingRoute(mp, {     //WalkingRoute   DrivingRoute
+                onSearchComplete: function (results) {
+                    if (driving.getStatus() == BMAP_STATUS_SUCCESS) {            // 地图覆盖物 
+                        //var start = results.getStart();
+                        //var end = results.getEnd();
+                        //var viewPoints = [start.point, end.point];
+                        // 获取方案
+                        var plan = results.getPlan(0);    // 获取方案中包含的路线
+                        for (var i = 0; i < plan.getNumRoutes() ; i++) {
+                            addRoute(plan.getRoute(i).getPath());
+                            //viewPoints.concat(plan.getRoute(i).getPath());
+                        }
+                    }
+                }
+            });
+
+            //循环加载线路
+            for (var i = 0; i < polylinePointsArray.length - 1; i++) {
+                if (polylinePointsArray[i] != polylinePointsArray[i + 1]) {
+                    driving.search(polylinePointsArray[i], polylinePointsArray[i + 1]);    //显示线路                     
+                }
+            }
+
+            var len = polylinePointsArray.length - 1;
+            var mouseoverTxt1 = "起 " + JsonTimeConvert(data.Data.list[0].GpsDate);
+            var mouseoverTxt2 = "止 " + JsonTimeConvert(data.Data.list[len].GpsDate);
+
+            AddCompOverlay(polylinePointsArray[0], "起", mouseoverTxt1);
+            AddCompOverlay(polylinePointsArray[len], "止", mouseoverTxt2);
+
+            //  var polyline = new BMap.Polyline(polylinePointsArray, { strokeColor: "blue", strokeWeight: 3, strokeOpacity: 0.5 });
+            //  mp.addOverlay(polyline);
+        }
+    }
+    //添加复杂覆盖物
+    function AddCompOverlay(polyPoint, txt, mouseoverTxt) {
+        var myCompOverlay3 = new ComplexCustomOverlay(polyPoint, txt, mouseoverTxt);
+        mp.addOverlay(myCompOverlay3);
+    }
+
+    // 添加路线
+    function addRoute(path) { mp.addOverlay(new BMap.Polyline(path, { strokeColor: '#0000ff', enableClicking: false })); }
+
+    // 复杂的自定义覆盖物
+    function ComplexCustomOverlay(point, text, mouseoverText) {
+        this._point = point;
+        this._text = text;
+        this._overText = mouseoverText;
+    }
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    ComplexCustomOverlay.prototype.initialize = function (map) {
+        this._map = map;
+        var div = this._div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+        div.style.backgroundColor = "#EE5D5B";
+        div.style.border = "1px solid #BC3B3A";
+        div.style.color = "white";
+        div.style.height = "18px";
+        div.style.padding = "2px";
+        div.style.lineHeight = "18px";
+        div.style.whiteSpace = "nowrap";
+        div.style.MozUserSelect = "none";
+        div.style.fontSize = "12px";
+        var span = this._span = document.createElement("span");
+        div.appendChild(span);
+        span.appendChild(document.createTextNode(this._text));
+        var that = this;
+
+        var arrow = this._arrow = document.createElement("div");
+        arrow.style.background = "url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat";
+        arrow.style.position = "absolute";
+        arrow.style.width = "11px";
+        arrow.style.height = "10px";
+        arrow.style.top = "16px";
+        arrow.style.left = "10px";
+        arrow.style.overflow = "hidden";
+        div.appendChild(arrow);
+
+        div.onmouseover = function () {
+            this.style.backgroundColor = "#6BADCA";
+            this.style.borderColor = "#0000ff";
+            this.getElementsByTagName("span")[0].innerHTML = that._overText;
+            arrow.style.backgroundPosition = "0px -20px";
+        };
+
+        div.onmouseout = function () {
+            this.style.backgroundColor = "#EE5D5B";
+            this.style.borderColor = "#BC3B3A";
+            this.getElementsByTagName("span")[0].innerHTML = that._text;
+            arrow.style.backgroundPosition = "0px 0px";
+        };
+
+        mp.getPanes().labelPane.appendChild(div);
+
+        return div;
+    };
+    ComplexCustomOverlay.prototype.draw = function () {
+        var map = this._map;
+        var pixel = map.pointToOverlayPixel(this._point);
+        this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+        this._div.style.top = pixel.y - 30 + "px";
+    };
+    //JsonTime Example: /Date(1333468581000)/  \\/Date\((\d+)\)\\/
+    function JsonTimeConvert(unixTime) {
+        var unixTimestamp = new Date(parseInt(unixTime.replace("/Date(", "").replace(")/", "")));
+        return formatDate(unixTimestamp, 'yyyy-MM-dd hh:mm:ss');
+    }
+    function formatDate(date, fmt) {
+        var o = {
+            "M+": date.getMonth() + 1,                 //月份 
+            "d+": date.getDate(),                    //日 
+            "h+": date.getHours(),                   //小时 
+            "m+": date.getMinutes(),                 //分 
+            "s+": date.getSeconds(),                 //秒 
+            "q+": Math.floor((date.getMonth() + 3) / 3), //季度 
+            "S": date.getMilliseconds()             //毫秒 
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+</script>

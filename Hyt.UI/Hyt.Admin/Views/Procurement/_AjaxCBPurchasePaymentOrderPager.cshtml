@@ -1,0 +1,110 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<Hyt.Model.Procurement.CBPurchasePaymentOrder>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="50" rowspan="2"></th>
+            <th width="180" rowspan="2">采购付款单编号</th>
+            <th rowspan="2">采购单编号</th>
+            <th width="150" rowspan="2">制单人</th>
+            <th width="150" rowspan="2">制单时间</th>
+            <th colspan="4">收款账号</th>
+            <th width="100" rowspan="2">付款总金额</th>
+            <th width="100" rowspan="2">审核</th>
+            <th width="200" rowspan="2" class="borde_r_none">操作</th>
+        </tr>
+        <tr>
+            <th width="150">收款公司</th>
+            <th width="150">收款银行</th>
+            <th width="150">收款账号</th>
+            <th width="150">收款金额</th>
+        </tr>
+    </thead>
+    <tbody>
+      @{
+           if (Model.TData.Count > 0)
+           {
+               var Index = 0;
+               string cs = string.Empty;
+                foreach (var item in Model.TData)
+                {
+                    cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                    string[] textList=item.BankPaymentInfo.Split('|');
+                    <tr class="@cs">
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">
+                            @*<input type="checkbox" value="@(item.SysNo)" />*@
+                        </td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">@item.OrderNumber</td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)"><a href="javascript:ShowProcuermentProductDetailList(@item.ProcurementSysNo)"> @item.ProcurementNumber</a></td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">@item.CreateName</td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">@(item.CreateTime)</td>
+                        <td>@(textList[0].Split(',')[0])</td>
+                        <td>@(textList[0].Split(',')[1])</td>
+                        <td>@(textList[0].Split(',')[2])</td>
+                        <td>@(textList[0].Split(',')[3])</td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">@(item.TotalAmount)</td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">@(item.Status == 0 ? "未审核" : "已审核")</td>
+                        <td rowspan="@(item.BankPaymentInfo.Split('|').Length)">@Html.Raw((item.Status == 0 ?
+                        "<button class=\"btn btn_blue btn_ht26 \" id=\"createBtn\" onclick=\"UpdateProcurement(" + item.SysNo + ")\"><span class=\"m5_l\">修改</span></button>"
+                        : ""))</td>
+                    </tr>
+                    for (int i = 1; i < textList.Length;i++ )
+                    {
+                        <tr>
+                            <td>@(textList[i].Split(',')[0])</td>
+                            <td>@(textList[i].Split(',')[1])</td>
+                            <td>@(textList[i].Split(',')[2])</td>
+                            <td>@(textList[i].Split(',')[3])</td>
+                        </tr>
+                    }
+                    
+                    <tr>
+                        <td></td>
+                        <td colspan="11">
+                            <div style=" height:130px; overflow:auto; background-color:white;">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" style=" background-color: white;" >
+                                    <thead>
+                                        <tr>
+                                            <th>商品名称</th>
+                                            <th>单位</th>
+                                            <th>规格</th>
+                                            <th>采购数量</th>
+                                        </tr>
+                                        
+                                    </thead>
+                                    <tbody>
+                                        @{
+                                            var itemList=(ViewBag.OrderItemList as List<Hyt.Model.Procurement.CBPmProcurementOrderItem>).Where(p=>p.Poi_PSysNo==item.ProcurementSysNo);
+                                            foreach (Hyt.Model.Procurement.CBPmProcurementOrderItem mod in itemList)
+                                            {
+                                                 <tr>
+                                                     <td style="background-color: white;">@(mod.Cb_ProName)</td>
+                                                     <td style="background-color: white;">@(mod.Cb_Unit)</td>
+                                                     <td style="background-color: white;">@(mod.Cb_Spec)</td>
+                                                     <td style="background-color: white;">@(mod.Poi_ProQuity)</td>
+                                                </tr>
+                                            }
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    Index++;
+                }
+           }
+           else
+           {
+                <tr class="odd_color">
+                     <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                 </tr>
+           }
+      }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+

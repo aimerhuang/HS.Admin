@@ -1,0 +1,265 @@
+﻿@{
+    ViewBag.Title = "添加或者修改集装箱信息";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+<form id="inputForm" name="inputForm" action="">
+    <div class="p10">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>集装箱名称:</td>
+                            <td colspan="3">
+                                <input type="text" id="CName" name="CName" maxlength="50"
+                                       value="@((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CName)" />
+                                <span class="prompt m10_l">集装箱名称</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>集装箱类型:</td>
+                            <td>
+                                <select id="CType">
+                                    <option value="普通集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "普通集装箱" ? "selected" : "")>
+                                        普通集装箱
+                                    </option>
+                                    <option value="冷冻集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "冷冻集装箱" ? "selected" : "")>
+                                        冷冻集装箱
+                                    </option>
+                                    <option value="开顶集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "开顶集装箱" ? "selected" : "")>
+                                        开顶集装箱
+                                    </option>
+                                    <option value="框架集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "框架集装箱" ? "selected" : "")>
+                                        框架集装箱
+                                    </option>
+                                    <option value="牲畜集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "牲畜集装箱" ? "selected" : "")>
+                                        牲畜集装箱
+                                    </option>
+                                    <option value="罐式集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "罐式集装箱" ? "selected" : "")>
+                                        罐式集装箱
+                                    </option>
+                                    <option value="平台集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "平台集装箱" ? "selected" : "")>
+                                        平台集装箱
+                                    </option>
+                                    <option value="通风集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "通风集装箱" ? "selected" : "")>
+                                        通风集装箱
+                                    </option>
+                                    <option value="保温集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "保温集装箱" ? "selected" : "")>
+                                        保温集装箱
+                                    </option>
+                                    <option value="散装货集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "散装货集装箱" ? "selected" : "")>
+                                        散装货集装箱
+                                    </option>
+                                    <option value="散装粉状货集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "散装粉状货集装箱" ? "selected" : "")>
+                                        散装粉状货集装箱
+                                    </option>
+                                    <option value="挂式集装箱"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CType == "挂式集装箱" ? "selected" : "")>
+                                        挂式集装箱
+                                    </option>
+                                </select>
+
+                            </td>
+                            <td width="107" class="nameright"><span class="v_star">*</span>容积类型:</td>
+                            <td>
+                                <select id="CubeType" onchange="SelectCubeTypeData(this)">
+                                    <option value="20尺柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "20尺柜" ? "selected" : "")>
+                                        20尺柜
+                                    </option>
+                                    <option value="40尺柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "40尺柜" ? "selected" : "")>
+                                        40尺柜
+                                    </option>
+                                    <option value="40尺高柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "40尺高柜" ? "selected" : "")>
+                                        40尺高柜
+                                    </option>
+                                    <option value="45尺高柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "45尺高柜" ? "selected" : "")>
+                                        45尺高柜
+                                    </option>
+                                    <option value="20尺开顶柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "20尺开顶柜" ? "selected" : "")>
+                                        20尺开顶柜
+                                    </option>
+                                    <option value="40尺开顶柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "40尺开顶柜" ? "selected" : "")>
+                                        40尺开顶柜
+                                    </option>
+                                    <option value="20尺平底货柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "20尺平底货柜" ? "selected" : "")>
+                                        20尺平底货柜
+                                    </option>
+                                    <option value="40尺平底货柜"
+                                            @((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CubeType == "40尺平底货柜" ? "selected" : "")>
+                                        40尺平底货柜
+                                    </option>
+                                </select>
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>柜长:</td>
+                            <td colspan="3">
+                                <input type="text" id="CSLong" name="CSLong" maxlength="50" style="width:500px;" value="@((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CSLong)" />
+                                <span class="prompt m10_l">柜长</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>柜宽:</td>
+                            <td colspan="3">
+                                <input type="text" id="CSWidth" name="CSWidth" maxlength="50" style="width:500px;" value="@((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CSWidth)" />
+                                <span class="prompt m10_l">柜宽</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>柜高:</td>
+                            <td colspan="3">
+                                <input type="text" id="CSHeight" name="CSHeight" maxlength="50" style="width:500px;" value="@((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CSHeight)" />
+                                <span class="prompt m10_l">柜高</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>备注:</td>
+                            <td colspan="3">
+                                <textarea id="CDis" style="width:95%;" rows="5">@((ViewBag.Container as Hyt.Model.Procurement.PmContainer).CDis)</textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+@*<div class="p10" align="center">
+        <button class="btn btn_blue btn_ht26 agree m10_r " onclick="SaveOrUpdateContainer()"><span class="m5_l">保存</span></button>
+        <button class="btn btn_blue btn_ht26 agree m10_r " onclick="window.location.href = 'BaseProcumentPageList'"><span class="m5_l">返回</span></button>
+    </div>*@
+
+<script>
+    $(function () {
+        SetLoding();
+        initDialog();
+    });
+
+    var Cabinets = [
+        { name: "20尺柜", Long: "5.69", Width: "2.13", Heigth: "2.18" },
+        { name: "40尺柜", Long: "11.8", Width: "2.13", Heigth: "2.18" },
+        { name: "40尺高柜", Long: "11.8", Width: "2.13", Heigth: "2.72" },
+        { name: "45尺高柜", Long: "13.58", Width: "2.34", Heigth: "2.71" },
+        { name: "20尺开顶柜", Long: "5.89", Width: "2.32", Heigth: "2.31" },
+        { name: "40尺开顶柜", Long: "12.01", Width: "2.33", Heigth: "2.15" },
+        { name: "20尺平底货柜", Long: "5.85", Width: "2.23", Heigth: "2.15" },
+        { name: "40尺平底货柜", Long: "12.05", Width: "2.12", Heigth: "1.96" }
+    ];
+    function SelectCubeTypeData(ele) {
+        for (var i = 0; i < Cabinets.length; i++) {
+            if (Cabinets[i].name == $(ele).val()) {
+                $("#CSLong").val(Cabinets[i].Long);
+                $("#CSWidth").val(Cabinets[i].Width);
+                $("#CSHeight").val(Cabinets[i].Heigth);
+                break;
+            }
+        }
+    }
+    SelectCubeTypeData($("#CubeType")[0]);
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+         if (!api) return;
+            // 自定义按钮
+            api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    if ($("#inputForm").valid()) {
+                        $.ajax({
+                            url: '/Procurement/SaveOrUpdateContainer',
+                            type: 'post',
+                            async: false,
+                            data: {
+                                SysNo: "@((ViewBag.Container as Hyt.Model.Procurement.PmContainer).SysNo)",
+                                CName: $("#CName").val(),
+                                CType: $("#CType").val(),
+                                CubeType: $("#CubeType").val(),
+                                CSHeight: $("#CSHeight").val(),
+                                CSWidth: $("#CSWidth").val(),
+                                CSLong: $("#CSLong").val(),
+                                CDis: $("#CDis").val()
+                            },
+                            dataType: 'json',
+                            success: function (json) {
+                                if (json.Status) {
+                                    Utils.alert(json.Msg, function () {
+                                        UI.CloseDialog();
+                                    }, "succeed");
+                                }
+                                else {
+                                    UI.Alert({ content: json.Msg });
+                                }
+                            }
+                        });
+                    }
+                    return false;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+
+
+
+
+
+
+    //加载文本验证规则
+    function SetLoding() {
+        $("#inputForm").validate({
+            rules: {
+                CName: {
+                    required: true,
+                    maxlength: 50
+                },
+                CSLong: {
+                    required: true,
+                    maxlength: 50
+                },
+                CSWidth: {
+                    required: true,
+                    maxlength: 50
+                },
+                CSHeight: {
+                    required: true,
+                    maxlength: 50
+                }
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+    }
+</script>

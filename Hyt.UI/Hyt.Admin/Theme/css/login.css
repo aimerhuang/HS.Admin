@@ -1,0 +1,36 @@
+﻿@charset "utf-8";
+/* CSS Document */
+body{ background:#0A85D7;}
+#header{ width:100%; height:43px; background:url(../images/headtop.png) repeat-x 0 -35px; padding-top:8px;}
+#header .logo{ width:447px; height:32px; background:url(../images/headtop.png) repeat-x; margin-left:20px;}
+#header .add_sc{ position:absolute; top:8px; left:480px; font:normal 30px/30px "微软雅黑"; color:red;}
+#header .headtool{ margin-right:20px; margin-top:7px;}
+
+
+.loginbox{ width:100%; height:698px; border-top:1px solid #3b9ee0; background:#0a85d7 url(../images/login_bg.jpg) center center no-repeat; }
+.loginbox_wx{ width:100%; height:698px; border-top:1px solid #3b9ee0; background:#0a85d7 url(../images/login_bg2.jpg) center center no-repeat;  display:none;}
+.loginbox_wx .content{ width:420px; height:223px; margin:272px auto 0px auto;}
+.loginbox_wx .content .fl{ width:190px;}
+.loginbox_wx .content .fr{ width:220px; text-align:center;}
+.loginbox .content{ width:400px; height:223px; margin:272px auto 0px auto;}
+.loginbox .content .input_box{ width:400px; height:120px;}
+.loginbox .content .input_box .list{ height:40px; line-height:40px;}
+.loginbox .content .input_box .list .l_icon{ width:12px; height:12px; background:url(../images/login_bg.jpg) -321px -421px no-repeat; display:inline-block; vertical-align:top; margin:14px 36px 0px 26px;}
+.loginbox .content .input_box .list .bg1_1{ background-position:-321px -445px;}
+.loginbox .content .input_box .list .bg2{ background-position:-300px -421px;}
+.loginbox .content .input_box .list .bg2_1{ background-position:-300px -445px;}
+.loginbox .content .input_box .list .bg3{ background-position:-343px -421px;}
+.loginbox .content .input_box .list .bg3_1{ background-position:-343px -445px;}
+.loginbox .content .input_box .list input{ border:none; width:320px; height:30px; line-height:30px; padding:0px; background:#eef1f3; margin-top:5px; color:#999;}
+.loginbox .content .input_box .po{ position:relative;}
+.loginbox .content .input_box .po b{ position:absolute; top:0px; left:80px; display:inline-block; font-weight:lighter;}
+.loginbox .content .input_box .list img{ width:60px; height:30px; vertical-align:top; margin-top:5px; margin-right:10px;}
+.loginbox .content .input_box .list a{ font-size:12px; color:#0a85d7; margin-left:5px;}
+.loginbox .content .button_box{ width:322px; height:103px; background:#dee4e8; padding:0px 39px;}
+.loginbox .content .button_box2{  width:auto; padding:0;}
+.loginbox .content .button_box .up{ padding-top:22px;}
+.loginbox .content .button_box .up input{ margin-right:5px;}
+.loginbox .content .button_box .button{ padding-top:13px;}
+.loginbox .content .button_box2 .button{ padding-top:35px;}
+.loginbox .content .button_box .button input{width:321px; height:46px; background:url(../images/login_bg.jpg) -361px -420px no-repeat; display:inline-block; font-size:14px; font-weight:bold; color:#fff; text-align:center; line-height:46px; text-decoration:none!important; border: 0px}
+.loginbox .content .button_box .button input:hover{ background-position:-361px -467px;}

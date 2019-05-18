@@ -1,0 +1,242 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "新增配送员信用额度";
+}
+@section HeadJs{
+    <script src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        //仓库下配送员
+        function GetDeliveryUser(whSysNo) {
+            var strHtml = '<option value="0" selected="selected">请选择配送员</option>';
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetWhDeliveryUserDictForCredit", "Logistics")',
+                data: "whSysNo=" + whSysNo,
+                success: function (data) {
+                    if (data.length > 0) {
+                        for (var i = 0; i < data.length; i++) {
+                            strHtml += '<option value="' + data[i].Key + '">' + data[i].Value + '</option>';
+                        }
+                    }
+                    $("#DeliveryUserSysNo").html(strHtml);
+                    $("#WhWarehouse").focus();//为了激活验证事件，仓库提示变颜色
+                },
+                error: function () {
+                    UI.Alert({ content: "查询出错,请稍候再试" });
+                },
+            });
+        }
+
+        $().ready(function () {
+            $("#WhWarehouse").bind("click", function () {
+                DAO.SelectWhareHouseDialog({
+                    callBack: function (data) {
+                        if (data.length > 0) {
+                            $("#WhWarehouse").val(data[0].name);
+                            $("#WarehouseSysNo").val(data[0].id);
+                            GetDeliveryUser(data[0].id);
+                        }
+                    }
+                });
+
+            });
+        });
+
+    </script>
+}
+<div class="caseout" style="height: 155px;">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 10%" class="nameright border_rnone"><span class="v_star">*</span>仓库</td>
+                            <td style="width: 40%" class="border_right1">
+                                <input type="text" id="WhWarehouse" name="WhWarehouse" readonly="readonly">
+                                <span id="forWhWarehouse" class="prompt m10_l">选择仓库</span>
+                                <input type="hidden" id="WarehouseSysNo" name="WarehouseSysNo">
+                            </td>
+                            <td style="width: 10%" class="nameright border_rnone"><span class="v_star">*</span>配送员</td>
+                            <td style="width: 40%" class="">
+                                <select id="DeliveryUserSysNo" name="DeliveryUserSysNo">
+                                    <option value="0">请选择配送员</option>
+                                </select>
+                                <span id="forDeliveryUserSysNo" class="prompt m10_l">选择配送员</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>配送信用额度</td>
+                            <td class="border_right1">
+                                <input type="text" id="DeliveryCredit" name="DeliveryCredit" maxlength="6">
+                                <span id="forDeliveryCredit" class="prompt m10_l">数字0-999999</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>配送可用额度</td>
+                            <td>
+                                <input type="text" id="RemainingDeliveryCredit" name="RemainingDeliveryCredit" maxlength="6">
+                                <span id="forRemainingDeliveryCredit" class="prompt m10_l">小于等于配送信用额度</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>借货信用额度</td>
+                            <td class="border_right1">
+                                <input type="text" id="BorrowingCredit" name="BorrowingCredit" maxlength="6">
+                                <span id="forBorrowingCredit" class="prompt m10_l">数字0-999999</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>借货可用额度</td>
+                            <td>
+                                <input type="text" id="RemainingBorrowingCredit" name="RemainingBorrowingCredit" maxlength="6">
+                                <span id="forRemainingBorrowingCredit" class="prompt m10_l">小于等于借货信用额度</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>是否允许配送</td>
+                            <td class="border_right1">
+                                <select id="IsAllowDelivery" name="IsAllowDelivery">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许配送)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forIsAllowDelivery" class="prompt m10_l">是否允许配送</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>是否允许借货</td>
+                            <td>
+                                <select id="IsAllowBorrow" name="IsAllowBorrow">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许借货)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forIsAllowBorrow" class="prompt m10_l">是否允许借货</span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+
+        //验证 
+        $().ready(function () {
+
+            $("#form1").validate({
+                rules: {
+                    // 选择框
+                    IsAllowDelivery: {
+                        required: true,
+                    },
+                    IsAllowBorrow: {
+                        required: true,
+                    },
+                    //数字
+                    DeliveryCredit: {
+                        required: true,
+                        number: true,
+                        range: [0, 999999]
+                    },
+                    RemainingDeliveryCredit: {
+                        required: true,
+                        number: true,
+                        lessthan: "#DeliveryCredit"
+                    },
+                    BorrowingCredit: {
+                        required: true,
+                        number: true,
+                        range: [0, 999999]
+                    },
+                    RemainingBorrowingCredit: {
+                        required: true,
+                        number: true,
+                        lessthan: "#BorrowingCredit"
+                    },
+                    DeliveryUserSysNo: {
+                        min: 1
+                    },
+                    WhWarehouse: {
+                        required: true,
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+
+    </script>
+    <script type="text/javascript">
+        (function () {
+            var opener = art.dialog.opener,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('新增配送员信用')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function (win) {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定要增加吗？",
+                                    ok: function () {
+                                        var model = getModel();
+                                        $.ajax({
+                                            url: "@Url.Action("LgDeliveryUserCreditCreate")",
+                                            data: JSON.stringify(model),
+                                            contentType: 'application/json',
+                                            type: "post",
+                                            success: function (ret) {
+                                                if (ret) {
+                                                    UI.DialogOpener().ExecSuccess("新增配送员信用成功");
+                                                    UI.Dialog.close();
+                                                } else {
+                                                    UI.Alert({ content: "新增配送员信用失败" });
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.Alert({ content: "操作出错！" });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                {
+                    name: '关闭'
+                }
+            );
+            function getModel() {
+                var model = {};
+                model.WarehouseSysNo = $("#WarehouseSysNo").val();
+                model.DeliveryUserSysNo = $("#DeliveryUserSysNo").val();
+                model.DeliveryCredit = $("#DeliveryCredit").val();
+                model.RemainingDeliveryCredit = $("#RemainingDeliveryCredit").val();
+                model.BorrowingCredit = $("#BorrowingCredit").val();
+                model.RemainingBorrowingCredit = $("#RemainingBorrowingCredit").val();
+                model.IsAllowDelivery = $("#IsAllowDelivery").val();
+                model.IsAllowBorrow = $("#IsAllowBorrow").val();
+                return model;
+            }
+        })();
+
+    </script>
+}

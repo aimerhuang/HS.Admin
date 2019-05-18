@@ -1,0 +1,188 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBPdProductStockList>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th><input name="sysNo" id="checkall" type="checkbox" /></th>
+                <th width="110">商品编号</th>
+                <th width="300">后台显示名称</th>
+                <th width="110">仓库名称</th>
+                <th>仓库地址</th>
+                <th>条形码</th>
+                @*<th>海关备案号</th>*@
+                @*<th>商品SKU</th>*@
+                <th>日期</th>
+                <th>采购价格</th>
+                <th>备注</th>
+                <th>库存数量</th>
+                <th>待发货</th>
+                <th width="110">Kis库存</th>
+                @*<th>规格/折合总价/销售价/打包费/毛重(kg)/体积(m³)</th>*@
+                <th>状态</th>
+                <th width="110">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CBPdProductStockList>)Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr class='jrow'>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='jrow stag_color'>")
+                    }
+                <td>
+                    <input name="sysNo" @if (item.SysNo == 0) { @Html.Raw("disabled=\"disabled\"")     } type="checkbox" class="checktd" value="@item.SysNo" pid="@item.PdProductSysNo" />
+                </td>
+                <td class="erpCode">@item.ErpCode</td>
+                <td>@item.EasName</td>
+                <td>@item.BackWarehouseName</td>
+                <td>@item.StreetAddress</td>
+
+string _barcode = Hyt.BLL.Product.PdProductBo.Instance.GetProductBarcode(item.PdProductSysNo);
+if (item.SysNo != 0)
+{
+    <td><input name="txtBarcode_@item.SysNo" value="@_barcode" class="hide wd100 " type="text" style="width:100px;"><span>@_barcode</span></td>
+                @*<td><input name="txtCustomsNo_@item.SysNo" value="@item.CustomsNo" class="hide wd100 " type="text" style="width: 100px;"><span>@item.CustomsNo</span></td>*@
+                @*<td><input name="txtProductSku_@item.SysNo" value="@item.ProductSku" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.ProductSku</span></td>*@
+                <td><input name="txtInStockTime_@item.SysNo" value="@item.InStockTime" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.InStockTime</span></td>
+                <td><input name="txtCostPrice_@item.SysNo" value="@item.CostPrice" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.CostPrice</span></td>
+                <td><input name="txtRemark_@item.SysNo" value="@item.Remark" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.Remark</span></td>
+                <td><input name="txtStockQuantity_@item.SysNo" value="@item.StockQuantity" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.StockQuantity</span></td>
+                <td>
+                   @(Hyt.BLL.Product.PdProductBo.Instance.GetPdPending(item.PdProductSysNo, item.WarehouseSysNo))
+                </td>
+                <td class="stock"></td>
+                @*<td>
+                    @{
+                        if (item.SpecPricesList.Count > 0)
+                        {
+                            foreach (var Specitem in item.SpecPricesList)
+                            {
+                                var SpecValue = Newtonsoft.Json.Linq.JObject.Parse(Specitem.SpecValue);
+                                <span>@(SpecValue["PdProductSpecValues"]["spec"])@(SpecValue["PdProductSpecValues"]["unit"])/¥@(Specitem.EquivalentPrice)/¥@(Specitem.SalesPrice)/¥@(Specitem.PackingFee)/@(Specitem.GrossWeight)/@(Specitem.Volume)</span>
+                                            <br />
+                            }
+                        }
+                    }
+
+                </td>*@
+                
+                <td>@item.Status</td>
+                <td>
+                    <button class="btn btn_blue btn_ht26" onclick="EditPdProductSpecPrices('@(item.WarehouseSysNo)','@(item.PdProductSysNo)')" type="button"><span class="icon_pencil icon_white"></span>供货规格</button>
+                    <button class="btn btn_blue btn_ht26" onclick="btnSave(@item.SysNo,this)" type="button" style="display:none;"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    <button class="btn btn_ht26 m10_l" id="btnCancel" onclick="cancel(@item.SysNo,this)" type="button" style="display:none;"><span class="icon_cancelAudit"></span><span class="m5_l">取消</span></button>
+                    @if (item.StockQuantity == 0)
+                    {
+                        <button type="button" class="btn btn_ht26 btn_red FE1003401" title="删除" onclick="deleteStock(@item.SysNo,this) " style="display:none;"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                    }
+                </td>
+
+}
+else
+{
+    <td><input name="txtBarcode_@item.ProductSysNo" value="@_barcode" class="hide wd100 " type="text" style="width: 100px;"><span>@_barcode</span></td>
+                <td><input name="txtCustomsNo_@item.ProductSysNo" value="@item.CustomsNo" class="hide wd100 " type="text" style="width: 100px;"><span>@item.CustomsNo</span></td>
+                <td><input name="txtProductSku_@item.ProductSysNo" value="@item.ProductSku" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.ProductSku</span></td>
+                <td><input name="txtInStockTime_@item.ProductSysNo" value="@item.InStockTime" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.InStockTime</span></td>
+                <td><input name="txtCostPrice_@item.ProductSysNo" value="@item.CostPrice" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.CostPrice</span></td>
+                <td><input name="txtRemark_@item.ProductSysNo" value="@item.Remark" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.Remark</span></td>
+                <td><input name="txtStockQuantity_@item.ProductSysNo" value="@item.StockQuantity" class="hide wd100 number_input" type="text" style="width:80px;"><span>@item.StockQuantity</span></td>
+
+                <td class="stock"></td>
+                <td ></td>
+                <td>@item.Status</td>
+                <td>
+
+                    <button class="btn btn_blue btn_ht26" onclick="btnSaveStock(@item.ProductSysNo,this)" type="button" style="display:none;"><span class="icon_pencil icon_white"></span><span class="m5_l">入库</span></button>
+                    <button class="btn btn_ht26 m10_l" id="btnCancelStock" onclick="cancelStock(this)" type="button" style="display:none;"><span class="icon_cancelAudit"></span><span class="m5_l">取消</span></button>
+                </td>
+}
+
+                @Html.Raw("</tr>")
+i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @{
+        <input type="hidden" id="pageIndex" value="@Model.CurrentPageIndex" />
+    }
+    @{Html.RenderPartial("_UrlPaging", Model); }
+
+    <script type="text/javascript">
+        $(function () {
+
+            GetErpStock();
+
+            if (checkedsysnolist.length > 0) {
+                var flag = true;
+                $("input.checktd").each(function () {
+                    var SysNo = $(this).val();
+                    if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                        $(this).attr("checked", true);
+                    } else {
+                        flag = false;
+                    }
+                });
+                if (flag) {
+                    $("input.checkall").attr("checked", true);
+                }
+            }
+        });
+        $(".clsStockQ").live('dblclick', function () {
+            //alert($(this).attr("sysno"));
+        })
+
+        //删除已入库0库存商品
+        function deleteStock(sysNo, btn) {
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function () {
+                    $.post('@Url.Action("DeleteStock", "Warehouse")', { sysNo: sysNo }, function (data) {
+                        if (data.Status == true) {
+                            $(btn).hide();
+                            UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        //管理商品供货规格
+        function EditPdProductSpecPrices(WarehouseSysNo, PdProductSysNo) {
+            UI.DialogOpen('/Product/EditPdProductSpecPrices?WarehouseSysNo=' + WarehouseSysNo + '&PdProductSysNo=' + PdProductSysNo, {
+                width: 1000,
+                height: 600,
+                title: '管理商品供货规格',
+                button: [{
+                    name: '保存',
+                    callback: function () {
+
+                    },
+                    focus: true
+                },
+                    { name: '取消' }
+                ]
+            }, false);
+        }
+    </script>

@@ -1,0 +1,271 @@
+﻿@using System.Dynamic
+@using Hyt.Model.WorkflowStatus
+<!-- 商品价格维护 -->
+<div class="boxs_detail_dispay">
+    <div class="tit_con">
+        <form name="tab_Price" id="tab_Price" onsubmit="return false;">
+            <div class="div_price">
+                @{
+                    dynamic prevItem = new ExpandoObject();
+                    prevItem.priceType = "";
+                    prevItem.priceName = "";
+                    prevItem.price = 0;
+
+                    var list = (IList<dynamic>)Model.Categorys;
+                    var prices = (IList<dynamic>)Model.Prices;
+                    string newId;
+                }
+                @foreach (var c in list)
+                {
+                    if (c.priceType == "基础价格" || c.priceType == "会员等级价"||c.priceType=="门店销售价")
+                    { 
+                         <div class="tit_con pricebox" title="@c.priceType">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                                <tbody>
+
+                                    @for (int i = 0; i < prices.Count; i++)
+                                    {
+                                        var item = prices[i];
+                                        if (item.priceType == c.priceType && !item.isAdded)
+                                        {
+                                            item.isAdded = true;
+                                            newId = "txt_price_" + item.priceTypeSysNo + "_" + item.priceSourceSysNo;
+                                        <tr class="price">
+                                            <td width="150" class="nameright"><span class="v_star">*</span>@item.priceName</td>
+                                            <td width="300">
+                                                <input type="hidden" id="hdf_priceSysNo_@Html.Raw(newId)" dn="SysNo" value="@item.priceSysNo"/>
+                                                <input type="hidden" id="hdf_priceTypeSysNo_@Html.Raw(newId)" dn="PriceSource" value="@item.priceTypeSysNo"/>
+                                                <input type="hidden" id="hdf_priceSourceSysNo_@Html.Raw(newId)" dn="SourceSysNo" value="@item.priceSourceSysNo"/>
+                                                <input id="@newId" name="@newId" dn="Price" class="{required:true,number:true,minLimitNumber:0,messages:{required:'请填写价格',number:'价格只能由数字组成',minLimitNumber:'价格不能小于0'}} wd100 align_r m10_r" value="@item.price" type="text"><span class="m10_r">元</span><span class="c9" id="@Html.Raw(newId)_error" msg="价格只能由数字组成"></span>
+                                            </td>
+                                            <td class="hide">
+                                                @* 屏蔽价格状态操作，价格只等条件，不能作废价格 *@           
+                                                @if (1==2 && item.status == (int)ProductStatus.产品价格状态.有效)
+                                                {
+                                                    <button class="btnStatus btn btn_ht26 forbid m10_r" onclick="changePriceStatus(this,@item.priceSysNo)" status="1"><span class="icon icon_unlock"></span><span class="m5_l">启用</span></button>}
+                                                else
+                                                {
+                                                    <button class="btnStatus btn btn_ht26 agree m10_r" onclick="changePriceStatus(this,@item.priceSysNo)" status="0"><span class="icon icon_lock"></span><span class="m5_l">禁用</span></button>}
+                                            </td>
+                                        </tr>
+                                        }
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                }
+            </div>
+        </form>
+    </div>
+    <div class="align_c m10_t" id="btn_tab_2">
+        <button id="btnSave_Price" class="btn btn_blue btn_ht30 @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001202.ToString())"><span class="icon_save icon_white hide"></span><span class="m5_l">申请调价</span></button>&nbsp;&nbsp;
+        <button id="btnSave_Price_Next" class="btn btn_green btn_ht30"><span class="icon_save icon_white"></span><span class="m5_l">保存 进入下一步</span></button>
+    </div>
+</div>
+<script>
+    $(function () {
+        //设置折叠卡
+        $(".pricebox").Accordion();
+        
+        //为了适应所有折叠卡顶部上面不出现双重border线，做兼容
+        tables = $("table", ".pricebox");
+        $(tables).each(function (index, table) {
+            if (index == tables.length - 1) {
+                return;
+            }
+            
+            //最后一行不显示下边线
+            $("tr td", $(table)).addClass("border_bnone");
+        });
+
+        //设置保存按钮
+        SaveButtonControl(editModel);
+
+        var validatePdPrice;  //商品基本信息
+
+        //设置商品信息验证
+        validatePdPrice = $("#tab_Price").validate({
+            onsubmit: false,
+            errorPlacement: function (error, element) {
+
+                //设置错误信息
+                if (error.html() != "") {
+                    $("#" + $(element).attr("id") + '_error').html(error);
+                    $("#" + $(element).attr("id") + '_error').removeClass("prompt");
+                    $("#" + $(element).attr("id") + '_error').removeClass("success");
+                    $("#" + $(element).attr("id") + '_error').addClass("error");
+                }
+
+            },
+            success: function (element) {
+                //设置成功信息
+                var obj = $("#" + element.attr("for") + "_error");
+                obj.html(obj.attr("msg"));
+                $("#" + $(element).attr("for") + '_error').removeClass("error");
+                $("#" + $(element).attr("for") + '_error').removeClass("prompt");
+                if ($("#" + $(element).attr("for")).val() != "" && $("#" + $(element).attr("for") + '_error').attr("msg") != "") {
+                    $("#" + $(element).attr("for") + '_error').addClass("success");
+                }
+            }
+        });
+
+        //设置该区域的保存按钮来控制能否反映
+        $("#btnSave_Price").click(savePrice);
+        $("#btnSave_Price_Next").click(function () {
+            savePrice();
+        });
+
+        //保存价格信息
+        function savePrice() {
+
+            if (!$("#tab_Price").valid()) {
+                return false;
+            }
+
+            var prices = new Array();
+
+            //遍历tr的到价格对象
+            $("#tab_Price table tr").each(function (index, element) {
+                prices.push($(element).JsonBind());  //反序列化成Json对象
+            });
+            
+            //核对会员等级价格
+            var tempPrice = null;
+            for (var i = 0; i < prices.length; i++) {
+                //值针对会员等级价格进行校对
+                if (prices[i].PriceSource == "@((int)Hyt.Model.WorkflowStatus.ProductStatus.产品价格来源.会员等级价)") {
+                    if (tempPrice != null && parseFloat(prices[i].Price) > parseFloat(tempPrice.Price)) {
+                        UI.Alert({
+                            content: "会员等级价设置不正确，价格必须从高到底设置",
+                            width: 250
+                        });
+                        return null;
+                    }
+                    tempPrice = prices[i];
+                }
+            }
+
+            //设置传递参数
+            var data = {
+                sysNo: $("#hdf_ProductSysNo").val(),
+                prices: prices
+            };
+
+
+            //提交表单
+            $.ajax({
+                url: "@Url.Action("UpdateProductPrice", "Product")",
+                data: JSON.stringify(data),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (!response.Result.Status) {
+                        UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + response.Result.Message);
+                    } else {
+
+                        UI.tips.tip_alert('tips_shrot tips_success', '商品调价申请已提交！');
+
+                        //回写生产后的数据，主在新增时将数据会写到页面，以防止再次修改生产重复价格
+                        if (response.Prices != null) {
+                            $("#tab_Price table tr").each(function (index, element) {
+                                for (var i = 0; i < response.Prices.length; i++) {
+                                    if (response.Prices[i].PriceSource == data.prices[index].PriceSource && response.Prices[i].SourceSysNo == data.prices[index].SourceSysNo) {
+                                        $(element).JsonBind(response.Prices[i]);
+                                        break;
+                                    }
+                                }
+                            });
+                        }
+
+                        //设置保存按钮
+                        SaveButtonControl(true);
+                        
+                        //如果不是编辑模式，将激活下一个页卡
+                        if (!editModel) {
+                            prodctEditTab.Active('2');
+                        }
+                    }
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    //默认错误处理
+                    var error = JSON.parse(XMLHttpRequest.responseText);
+                    alert(error.ErrorMessage);
+                }
+            });
+            return true;
+        }
+
+        //保存按钮状态控制
+        function SaveButtonControl(isEdit) {
+            if (isEdit) {
+                $("#btnSave_Price").show();
+                $("#btnSave_Price_Next").hide();
+            } else {
+                $("#btnSave_Price").hide();
+                $("#btnSave_Price_Next").show();
+            }
+        }
+
+    });
+    
+    //修改价格状态
+    function changePriceStatus(obj, priceSysNo) {
+
+        obj = $(obj);
+
+        var statusList = [{
+            value:0,
+            text:"无效",
+            icon: "icon_lock"
+        }, {
+            value: 1,
+            text: "有效",
+            icon: "icon_unlock"
+        }];
+
+        var data = {
+            priceSysNo: priceSysNo,
+            status: (obj.attr("status") == 1)?0:1
+        };
+
+        //提交表单
+        $.ajax({
+            url: "@Url.Action("UpdatePriceStatus", "Product")",
+            data: JSON.stringify(data),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (response) {
+                if (!response.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + response.Result.Message);
+                } else {
+
+                    UI.tips.tip_alert('tips_shrot tips_success', '状态已更新！');
+                    if (obj.attr("status") == 1){
+                        obj.attr("status", statusList[0].value);
+                        obj.children("span:first").removeClass(statusList[1].icon);
+                        obj.children("span:first").addClass(statusList[0].icon);
+                        obj.children("span:last").html(statusList[0].text);
+                    } else{
+                        obj.attr("status", statusList[1].value);
+                        obj.children("span:first").removeClass(statusList[0].icon);
+                        obj.children("span:first").addClass(statusList[1].icon);
+                        obj.children("span:last").html(statusList[1].text);
+                    }
+                }
+            },
+            error: function (XMLHttpRequest, textStatus, errorThrown) {
+                //默认错误处理
+                var error = JSON.parse(XMLHttpRequest.responseText);
+                alert(error.ErrorMessage);
+            }
+        });
+    }
+
+</script>
+
+<!-- 商品价格维护 END -->

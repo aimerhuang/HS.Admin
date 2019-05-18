@@ -1,0 +1,67 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Util;
+@using Hyt.Model.WorkflowStatus;
+@model PagedList<Hyt.Model.Transfer.CBSpCoupon>
+<style type="text/css">
+    .hzypd table td{ padding: 0 10px;}
+</style>
+<div class="boxs_list">
+    <div class="boxs_listtabel hzypd">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+            <thead>
+                <tr>
+                    <th width="90">优惠劵代码</th>
+                    <th width="80">优惠劵金额</th>
+                    <th width="90">所需消费金额</th>
+                    <th width="150">有效时间</th>
+                    <th width="90">优惠劵类型</th>
+                    <th>优惠劵描述</th>
+                    <th width="80">使用次数</th>
+                    <th width="80">客户姓名</th>
+                    <th>促销名称</th>
+                    <th width="110">使用平台</th>
+                    <th width="60">状态</th>
+                </tr>
+            </thead>
+	        <tbody>
+	            @{
+	                if (!Model.TData.Any())
+	                {
+	                    <tr>
+	                        <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+	                    </tr>
+	                }
+	                else
+	                {
+                        int i = 0;
+	                    foreach (var item in (List<Hyt.Model.Transfer.CBSpCoupon>) Model.TData)
+	                    {
+	                        if (i%2 == 0)
+	                        {
+	                            @Html.Raw("<tr>")
+	                        }
+	                        else
+	                        {
+	                            @Html.Raw("<tr class='stag_color'>")
+	                        }
+	                        <td class="blue"><a href="javascript:editCoupon(@item.SysNo);">@item.CouponCode</a></td>
+	                        <td>@item.CouponAmount</td>
+	                        <td>@item.RequirementAmount</td>
+	                        <td style="text-align:left">@item.StartTime.ToString("yyyy-MM-dd HH:mm:ss") ~ @item.EndTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+	                        <td>@EnumUtil.GetDescription(typeof(PromotionStatus.优惠券类型),item.Type)</td>
+	                        <td style="text-align:left">@item.Description</td>
+	                        <td>@item.UsedQuantity/@item.UseQuantity</td>
+	                        <td>@item.CustomerName</td>
+	                        <td style="text-align:left">@item.PromotionName</td>
+                            <td>@Hyt.Admin.Controllers.PromotionController.GetUserPlatText(new Dictionary<int,int>{{(int)PromotionStatus.促销使用平台.PC商城,item.WebPlatform},{(int)PromotionStatus.促销使用平台.门店,item.ShopPlatform},{(int)PromotionStatus.促销使用平台.手机商城,item.MallAppPlatform},{(int)PromotionStatus.促销使用平台.物流App,item.LogisticsAppPlatform}})</td>
+	                        <td>@EnumUtil.GetDescription(typeof(PromotionStatus.优惠券状态),item.Status)</td>
+	                        @Html.Raw("</tr>")
+	                        i++;
+	                    }
+	                }
+	            }
+	        </tbody>
+        </table>
+     </div>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }

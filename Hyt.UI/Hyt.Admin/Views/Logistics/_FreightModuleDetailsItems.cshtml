@@ -1,0 +1,117 @@
+﻿@model Hyt.Model.LgFreightModuleDetails
+@using Hyt.Model
+<tr data-id="@Model.SysNo">
+    <td>
+        <div style='position:relative; float: left; width: 92%;text-align:left;'>
+            <div><input type='checkbox' class='chkPL' style='display:none;' /></div>
+            <div class='areacls' id="area_@(Model.SysNo+100)">
+                @if (Model.SysNo>0) { 
+                    string[] ssArray =Model.DeliveryArea.Split(',');                   
+                    foreach (string sArray in ssArray)
+                    {
+                        if (sArray == "")
+                        {
+                            continue; 
+                        }
+                        Hyt.Model.BsArea BasicArea = Hyt.BLL.Basic.BasicAreaBo.Instance.GetArea(int.Parse(sArray));
+                        if (BasicArea != null)
+                        {
+                            <a href="javascript:void(0);" id="@BasicArea.SysNo" class="pro areacls">
+                                @BasicArea.AreaName
+                                <span class="icon-btn-x"></span>
+                            </a>  
+                        }                     
+                    }
+                }
+            </div>
+        </div>
+        <div style='position:relative; float: left;  margin-top:4px;'>
+            <button class="btn btn_ht26 btn_blue areaEdit"><span class="icon_pencil icon_white"></span><span class="m5_l">选择城市</span></button>
+        </div>
+    </td>
+    <td colspan="5">
+
+        <table style="width:100%; border:1px solid #E1E1E1;">
+            <thead>
+                <tr>
+                    <th style='width:30px;'>最低费用</th>
+                    <th style='width:30px;'>服务费</th>
+                    <th style='width:30px;'>首重</th>
+                    <th style='width:30px;'>首费</th>
+                    <th style='width:30px;'>续重</th>
+                    <th style='width:30px;'>续费</th>
+                    <th style='width:30px;'>重量下限</th>
+                    <th style='width:30px;'>重量上限</th>
+                    <th style='width:30px;'>偏差</th>
+                    <th style='width:74px;'>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="9" style=" width:270px;">
+                    </td>
+                    <td style="width:74px;"><button type="button" class="btn btn_blue btn_ht26 newPriceItem"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增</span></button></td>
+                </tr>
+                @if (Model.SysNo>0)
+                {
+                    var lgFreightModuleItemPrices = Hyt.BLL.FreightModule.FreightModuleItemPricesBo.Instance.GetFreightModuleItemPricesList(Model.SysNo, -1);
+                    foreach (var fmi in lgFreightModuleItemPrices)
+                    {
+                        <tr class="trPriceItme" data-id="@fmi.SysNo">
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemLowest' value='@fmi.LowestCost' style='width:30px;' /></td>
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemService' value='@fmi.ServiceCost' style='width:30px;' /></td>
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirst' value='@fmi.FirstWeight' style='width:30px;' /></td>
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirstFee' value='@fmi.FirstCost' style='width:30px;' /></td>
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinue' value='@fmi.ContinuousWeight' style='width:30px;' /></td>
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinueFee' value='@fmi.ContinuousCost' style='width:30px;' /></td>
+
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMinWeight' value='@fmi.MinWeight' style='width:30px;' /></td>
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMaxWeight' value='@fmi.MaxWeight' style='width:30px;' /></td>
+
+                            <td style="border:none;"><input type='text' class="priceOrWeight" name='itemDeviation' value='@fmi.Offset' style='width:30px;' /></td>
+                            <td style="border:none;"><button  class="btn btn_ht26 m10_l btn_red delPriceItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                        </tr>
+                    }
+                    if (lgFreightModuleItemPrices.Count <= 0)
+                    {
+                           <tr class="trPriceItme" data-id="0">
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemLowest' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemService' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirst' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirstFee' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinue' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinueFee' value='0' style='width:30px;' /></td>
+
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMinWeight' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMaxWeight' value='0' style='width:30px;' /></td>
+
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemDeviation' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><button onclick="" class="btn btn_ht26 m10_l btn_red delPriceItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr class="trPriceItme" data-id="0">
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemLowest' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemService' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirst' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemFirstFee' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinue' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemContinueFee' value='0' style='width:30px;' /></td>
+
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMinWeight' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemMaxWeight' value='0' style='width:30px;' /></td>
+
+                        <td style="border:none;"><input type='text' class="priceOrWeight" name='itemDeviation' value='0' style='width:30px;' /></td>
+                        <td style="border:none;"><button onclick="" class="btn btn_ht26 m10_l btn_red delPriceItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </td>
+
+    <td>
+        <button class="btn btn_ht26 m10_l btn_red delAreaItem"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+    </td>
+</tr>    

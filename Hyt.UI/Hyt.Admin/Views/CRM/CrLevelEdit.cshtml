@@ -1,0 +1,159 @@
+﻿@model Hyt.Model.CrCustomerLevel
+@{
+    ViewBag.Title = "_CrLevelEdit";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //积分下限/上限比较
+            jQuery.validator.methods.compareInt = function (value, element, param) {
+                var Lowe = parseInt(jQuery(param).val());
+                var Upper = value;
+                return Lowe < Upper;
+            };
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    LevelName: "required",
+                    LowerLimit: { required: true, number: true, min:0 },
+                    UpperLimit: { required: true, number: true, compareInt: "#LowerLimit" },
+                    CanPayForProduct: { required: true},
+                    ProductPaymentUpperLimit: { required: true, number: true, min: 1 },
+                    ProductPaymentPercentage: { required: true },
+                    CanPayForService: { required: true},
+                    ServicePaymentUpperLimit: { required: true, number: true, min: 1 },
+                    ServicePaymentPercentage: { required: true },
+                    LevelDescription: { required: true },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });     
+        });
+        function addOrEdit() {
+            var from = $("#form");
+            $(from).submit();
+            if ($(from).valid()) {
+                $.post('/CRM/CrLevelAddOrEdit/', from.serialize(), function (data) {
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    if (data.result) {
+                        UI.Dialog.opener.dialog(data.info);
+                        UI.Dialog.opener.doSearch()
+                        UI.Dialog.close();
+                    } else {
+                        UI.Dialog.opener.dialog(data.info);
+                    }
+                });
+            }
+        }
+    </script>
+}
+<form id="form" method="Get" action="@Url.Action("CrLevel")">
+<div class="caseout">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="160" class="nameright border_rnone"><span class="v_star">*</span>等级名称</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="LevelName" name="LevelName" value="@Model.LevelName">
+                            <span id="forLevelName" class="prompt m10_l">等级名称</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>等级积分下限</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="LowerLimit" name="LowerLimit" value="@Model.LowerLimit">
+                            <span id="forLowerLimit" class="prompt m10_l">此等级对积分最低要求</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>等级积分上限</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="UpperLimit" name="UpperLimit" value="@if (Model.UpperLimit > 0){ @Model.UpperLimit;}">
+                            <span id="forUpperLimit" class="prompt m10_l">此等级的最高积分</span>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="nameright border_rnone"><span class="v_star">*</span>惠源币是否可用于支付货款</td>
+                        <td class="border_right">
+                            <select class="select_ht28" style="width:213px;" id="CanPayForProduct" name="CanPayForProduct">
+                                <option value="">请选择</option>
+                         @{
+                             string sel;
+                             foreach (var dict in (IDictionary<int, string>)ViewBag.dictPayForProduct)
+                             {
+                                 sel = dict.Key == @Model.CanPayForProduct ? "selected='selected'" : string.Empty;
+                                 <option value="@dict.Key" @sel>@dict.Value</option>
+                             }
+                         }
+                            </select>
+                            <span id="forCanPayForProduct" class="prompt m10_l">惠源币是否可用于支付货款</span>
+                        </td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="nameright border_rnone"><span class="v_star">*</span>惠源币支付货款上限</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="ProductPaymentUpperLimit" name="ProductPaymentUpperLimit" value="@if(Model.ProductPaymentUpperLimit>0){@Model.ProductPaymentUpperLimit}">
+                            <span id="forProductPaymentUpperLimit" class="prompt m10_l">惠源币支付货款上限</span>
+                        </td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="nameright border_rnone"><span class="v_star">*</span>惠源币支付货款比例</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="ProductPaymentPercentage" name="ProductPaymentPercentage" value="@if(Model.ProductPaymentPercentage>0){@Model.ProductPaymentPercentage}">
+                            <span id="forProductPaymentPercentage" class="prompt m10_l">惠源币支付货款比例</span>
+                        </td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="nameright border_rnone"><span class="v_star">*</span>惠源币是否可用于支付服务</td>
+                        <td class="border_right">
+                            <select class="select_ht28" style="width:213px;" id="CanPayForService" name="CanPayForService">
+                                <option value="">请选择</option>
+                                @{
+                                    foreach (var dict in (IDictionary<int, string>)ViewBag.dictPayForService)
+                                    {
+                                        sel = dict.Key == @Model.CanPayForService ? "selected='selected'" : string.Empty;
+                                        <option value="@dict.Key" @sel>@dict.Value</option>
+                                    }
+                                }
+                            </select>
+                            <span id="forCanPayForService" class="prompt m10_l">惠源币是否可用于支付服务</span>
+                        </td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="nameright border_rnone"><span class="v_star">*</span>惠源币支付服务上限</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="ServicePaymentUpperLimit" name="ServicePaymentUpperLimit" value="@if(Model.ServicePaymentUpperLimit>0){@Model.ServicePaymentUpperLimit}">
+                            <span id="forServicePaymentUpperLimit" class="prompt m10_l">惠源币支付服务上限</span>
+                        </td>
+                    </tr>
+                    <tr style="display:none;">
+                        <td class="nameright border_rnone"><span class="v_star">*</span>惠源币支付服务比例</td>
+                        <td class="border_right">
+                            <input type="text" class="wd200" id="ServicePaymentPercentage" name="ServicePaymentPercentage" value="@if(Model.ServicePaymentPercentage>0){@Model.ServicePaymentPercentage}">
+                            <span id="forServicePaymentPercentage" class="prompt m10_l">惠源币支付服务比例</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>等级描述</td>
+                        <td class="border_right">
+                            <textarea class="wd200" style="height:50px;" name="LevelDescription" id="LevelDescription">@Model.LevelDescription</textarea>
+                            <span id="forLevelDescription" class="prompt m10_l">等级描述</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</form>

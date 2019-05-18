@@ -1,0 +1,107 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<FeSoftCategory>
+
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.FE1011601,".FE1011601")
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.FE1011201,".FE1011201")
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="0%" style="display: none">
+                <input name="sysNo"  type="checkbox" /></th>
+            <th width="" class="align_l p10_lr">分类名称</th>
+            <th width="" class="align_l p10_lr">显示序号</th>
+            <th width="60">状态</th>
+            <th width="148" class="borde_rnone">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+             if(Model.TData.Count == 0)
+            {
+               <tr class="odd_color trhover">
+                <td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td>
+              </tr>
+                return;
+            }
+             int i = 0;
+             foreach (var item in Model.TData)
+             {
+                 if (i % 2 == 0)
+                 {
+            @Html.Raw("<tr>")
+                 }
+                 else
+                 {
+            @Html.Raw("<tr class='stag_color'>")
+                 }
+                 i++;
+            <td width="0%" style="display: none">
+                <input name="sysNo" type="checkbox" value="@item.SysNo" /></td>
+            <td width="" class="align_l p10_lr">@item.Name</td>
+           <td width="" class="align_l p10_lr">@item.DisplayOrder</td>
+            <td width="60px">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ForeStatus.软件分类状态), item.Status)</td>
+            <td>
+                
+                @if (item.Status == 1)
+                {<button class="btn btn_ht26 forbid FE1011601 m10_r"><span class="icon  icon_lock"></span><span class="m5_l">禁用</span></button><button class="btn btn_ht26 disabled FE1011201"><span class="icon icon_pencil"></span><span class="m5_l">修改</span></button>}
+                else
+                {<button class="btn btn_ht26 btn_blue FE1011601 agree m10_r"><span class="icon icon_white icon_unlock"></span><span class="m5_l">启用</span></button><button class="btn btn_ht26 btn_blue FE1011201 showDetail"><span class="icon icon_white icon_pencil"></span><span class="m5_l">修改</span></button>}
+            </td>
+            @Html.Raw("</tr>")
+             }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    function changeStatus(obj, status) {
+        var no = $(obj).closest("tr").find("input:checkbox").val();
+        var jsonData = { status: status, sysno: no };
+        $.ajax({
+            url: "/Front/UpdateFeSoftCategoryStatus",
+            type: "post",
+            dataType: 'json',
+            data: jsonData,
+            success: function (result) {
+                if (result.result > 0) {
+                    UI.Prompt.Success('操作成功');                  
+                    doSearch(@Model.CurrentPageIndex);
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.message) {
+                        message = result.message;
+                    }
+                    UI.Prompt.Error(message);
+                }
+            }
+        });
+    }
+
+    $(".forbid, .agree").click(function () {
+        var status = $(this).hasClass("forbid") ? 0 : 1;
+        var obj = this;
+        if (status == 0) {
+            UI.Confirm({
+                content: '确定要禁用吗?',
+                ok: function () {
+                    changeStatus(obj, status);
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+        } else {
+            UI.Confirm({
+                content: '确定要启用吗?',
+                ok: function () {
+                    changeStatus(obj, status);
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+        }
+
+    });
+</script>

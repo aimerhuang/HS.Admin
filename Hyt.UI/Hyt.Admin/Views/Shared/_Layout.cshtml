@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link href="/Theme/css/base.chirp.css?v=20160804" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/frame.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/common.css?1" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/icon.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/form.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/tips.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/btn.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/boxandtable.css?v=5" rel="stylesheet" type="text/css"/>
+    <link href="/Theme/css/search.css" rel="stylesheet" type="text/css" media="all" />
+
+    <script type="text/javascript" src="/Theme/scripts/jquery.min.js?v=1"></script>
+    <script type="text/javascript" src="/Theme/scripts/common.yui.js?v=2"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js?8"></script>
+    <script type="text/javascript" src="/Theme/scripts/DAO.yui.js?v=0.125"></script>
+    @RenderSection("HeadCss", required: false)
+    @RenderSection("HeadJs", required: false)
+</head>
+<body>
+    @RenderBody()
+    @RenderSection("FooterJs", required: false)
+    @{
+        //MiniProfiler性能分析
+        var isStart = bool.Parse(System.Configuration.ConfigurationManager.AppSettings["MiniProfiler"]);
+        if (isStart)
+        {
+            var isMain = !string.IsNullOrEmpty(ViewBag.StartHiddenMiniProfiler);
+            @StackExchange.Profiling.MiniProfiler.RenderIncludes(startHidden: isMain, showControls: true, useExistingjQuery: true)
+        }
+    }
+</body>
+</html>

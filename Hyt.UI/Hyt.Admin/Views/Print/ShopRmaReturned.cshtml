@@ -1,0 +1,194 @@
+﻿@{
+    Layout = "~/Views/Shared/_Print.cshtml";
+    ViewBag.Title = "门店退货单打印";
+
+    var refundTotal = ViewBag.RefundTotal;
+    var warehouseName = ViewBag.WarehouseName;
+    var receiveAddress = ViewBag.ReceiveAddress;
+    var receiveMobile = ViewBag.ReceiveMobile;
+    var refundType = ViewBag.RefundType;
+    var receiveName = ViewBag.ReceiveName;
+}
+@using Hyt.BLL.Product
+@model Hyt.Model.CBRcReturn
+<style type="text/css" id="style1">
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    table, td {
+        border: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .tbbigbox {
+        text-align: left;
+        font-size: 12px;
+    }
+
+    .tablebox {
+        width: 100%;
+        border-collapse: collapse;
+        border: none;
+        text-align: left;
+        font-size: 12px;
+    }
+
+        .tablebox td {
+            font-size: 10px;
+            padding: 2px;
+        }
+        .tablebox th{font-size: 12px;padding: 2px;font-weight: normal;text-align: left;}
+</style>
+<div id="div1" style="display: none;">
+    <table class="tbbigbox">
+        <tr>
+            <td><p style="font-weight:bold;height:50px;line-height:50px;text-align:center;">订单-商城门店退货</p></td>
+        </tr>
+        <tr>
+            <td>门店：@warehouseName</td>
+        </tr>
+        <tr>
+            <td>退货单号：@Model.SysNo</td>
+        </tr>
+        <tr>
+            <td>原订单号：@Model.OrderSysNo</td>
+        </tr>
+        
+        @{
+            if (!string.IsNullOrWhiteSpace(ViewBag.mallOrderId))
+            {
+                <tr>
+                    <td>店铺名称：@ViewBag.mallShopName</td>
+                </tr>
+                <tr>
+                    <td>第三方订单号：@ViewBag.mallOrderId</td>
+                </tr>
+            }
+        }
+
+        <tr>
+            <td>收货人：@receiveName</td>
+        </tr>
+        <tr>
+            <td >收货地址：@receiveAddress</td>
+        </tr>
+        <tr>
+            <td>电话：@receiveMobile</td>
+        </tr>
+        <tr>
+            <td>退款方式：@refundType</td>
+        </tr>
+        <tr>
+            <td>退货时间：@Model.CreateDate</td>
+        </tr>
+        <tr>
+            <td>
+                <table class="tablebox">
+                    <tr>
+                        <th>后台显示名称</th>
+                        <th>数量</th>
+                        <th width="60">退款金额</th>
+                    </tr>
+                    @if (Model != null && Model.RMAItems != null && Model.RMAItems.Count > 0)
+                    {
+                        foreach (var item in Model.RMAItems)
+                        { 
+                            <tr>
+                                <td width="150">(@item.ProductSysNo) @PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                                <td>@item.RmaQuantity</td>
+                                <td>@Hyt.Util.FormatUtil.FormatCurrency(-@item.RefundProductAmount, 2,"￥")</td>
+                            </tr>
+                        }
+                    }
+                </table>
+            </td>
+        </tr>
+        <tr>
+            <td>发票扣款：@Hyt.Util.FormatUtil.FormatCurrency(Model.DeductedInvoiceAmount, 2,"￥")
+            </td>
+        </tr>
+        <tr>
+            <td>积分现金补偿金额：@Hyt.Util.FormatUtil.FormatCurrency(Model.RedeemAmount, 2,"￥")
+            </td>
+        </tr>
+        <tr>
+            <td>实退金额：@Hyt.Util.FormatUtil.FormatCurrency(-Model.RefundTotalAmount, 2,"￥")
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <br />
+                签名：<span style="text-decoration: underline">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            </td>
+        </tr>
+
+
+    </table>
+</div>
+<br />
+<input type="button" onclick="myPreview()" value="打印预览" />
+<input type="button" onclick="mySetup()" value="打印维护" />
+<input type="button" onclick="myDesign()" value="打印设计" />
+<input type="button" onclick="myPrint()" value="直接打印" />
+<input type="button" onclick="myPrintA()" value="选择打印机" />
+<script type="text/javascript">
+    var LODOP; //声明为全局变量  
+    //直接加载打印预览
+    window.onload = function myPreviewLoad() {
+        CreatePrintPage();
+        LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+        LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+        LODOP.PREVIEW();
+    };
+    //直接打印
+    function myPrint() {
+        CreatePrintPage();
+        LODOP.PRINT();
+    };
+    //选择打印机打印
+    function myPrintA() {
+        CreatePrintPage();
+        LODOP.PRINTA();
+    };
+    //打印预览
+    function myPreview() {
+        CreatePrintPage();
+        LODOP.PREVIEW();
+    };
+    //打印维护
+    function mySetup() {
+        CreatePrintPage();
+        LODOP.PRINT_SETUP();
+    };
+    //打印设计
+    function myDesign() {
+        CreatePrintPage();
+        LODOP.PRINT_DESIGN();
+    };
+
+    function CreatePrintPage() {
+        LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        LODOP.PRINT_INIT("门店退货单打印");
+        LODOP.SET_PRINT_PAGESIZE(3, 750, 150, '');
+        @*//LODOP.ADD_PRINT_TEXT(10, 330, 100, 25, '配送单(@Model.SysNo)');
+        LODOP.SET_PRINT_STYLEA(1, "FontSize", 20);
+        LODOP.SET_PRINT_STYLEA(1, "Bold", 1);
+        LODOP.ADD_PRINT_TEXT(40, 80, 100, 25, '配送员：');
+        LODOP.SET_PRINT_STYLEA(0, "FontSize", 12);
+        //LODOP.ADD_PRINT_TEXT(40, 180, 100, 25, '@Model.DeliveryUserSysNo');
+        LODOP.SET_PRINT_STYLEA(0, "FontSize", 12);
+        LODOP.ADD_PRINT_TEXT(40, 480, 100, 25, '配送时间：');
+        LODOP.SET_PRINT_STYLEA(0, "FontSize", 12);
+        //LODOP.ADD_PRINT_TEXT(40, 580, 100, 25, '@Model.CreatedDate');
+        LODOP.SET_PRINT_STYLEA(0, "FontSize", 12);*@
+        var strBodyStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+        var strFormHtml = strBodyStyle + "<body>" + document.getElementById("div1").innerHTML + "</body>";
+        LODOP.ADD_PRINT_HTM("0mm", "0mm", "70mm", "200mm", strFormHtml);
+        LODOP.SET_PRINT_STYLEA(0, "FontName", "隶书");
+        LODOP.SET_PRINT_STYLEA(0, "FontSize", 20);
+
+    };
+</script>

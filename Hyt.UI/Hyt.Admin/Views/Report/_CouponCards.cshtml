@@ -1,0 +1,41 @@
+﻿@model System.Collections.Generic.List<Hyt.Model.Transfer.CBRptCouponCard>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+      <thead>
+          <tr>
+              <th width="53">优惠卡类型编号</th>
+              <th width="120">优惠卡类型名称</th>
+              <th width="110">数量</th>
+              <th width="76">使用次数</th>
+          </tr>
+      </thead>
+      <tbody>
+          @{
+              if (!Model.Any())
+              {
+                  <tr>
+                      <td colspan="4" class="align_l p10_l bgr_eb">暂无数据。</td>
+                  </tr>
+              }
+              var i = 0;
+              foreach (var item in Model)
+              {
+
+                  if (i%2 == 0)
+                  {
+                      @Html.Raw("<tr>")
+                  }
+                  else
+                  {
+                      @Html.Raw("<tr class='stag_color'>")
+                  }
+                  <td class="blue">@item.CardTypeSysNo</td>
+                  <td class="align_l"><span class="p10_lr">@item.CardTypeName</span></td>
+                  <td>@item.TotalNumber</td>
+                  <td>@item.UsedNumber</td>
+                  @Html.Raw("</tr>")
+                  i++;
+              }
+          }
+      </tbody>
+  </table>

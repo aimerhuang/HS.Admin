@@ -1,0 +1,226 @@
+﻿
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>登录 - 电子商务管理系统</title>
+    <link href="/Theme/css/base.chirp.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/frame.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/common.css?1" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/icon.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/form.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/tips.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/btn.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/boxandtable.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/search.css" rel="stylesheet" type="text/css" media="all" />
+
+    <script type="text/javascript" src="/Theme/scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/common.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js?5"></script>
+    <script type="text/javascript" src="/Theme/scripts/DAO.yui.js"></script>
+
+    <link href="/Theme/css/login.css" rel="stylesheet" />
+    <style>
+        .red {
+            color: red;
+        }
+    </style>
+
+
+    <script type="text/javascript" src="/Theme/scripts/jquery.validate.min.js"></script>
+
+</head>
+<body>
+
+
+
+
+    <div id="header">
+        <div class="headtool fr">
+
+        </div>
+        <div class="logo" title="电子商务管理系统"></div>
+    </div>
+
+    <form method="post" id="Login" action="/Account/Login" onsubmit="return LoginSubmit()">
+        <div class="loginbox">
+            <div class="content">
+                <div class="input_box">
+                    <div class="list">
+                        <span class="l_icon bg1"></span>
+                        <input type="text" value="" name="account" id="account" onfocus="init($(this),'用户名','bg1_1')" onblur="outit($(this),'用户名','bg1_1')" />
+                    </div>
+                    <div class="list po">
+                        <b class="f12 c9" onclick="$(this).css('display','none');$(this).next('.bg2').next('input').focus();">密码</b>
+                        <span class="l_icon bg2"></span><input type="password" id="password" name="password" onfocus="init($(this),'','bg2_1')" onblur="outit($(this),'','bg2_1')" />
+                    </div>
+                    <div class="list">
+                        <span class="l_icon bg3"></span>
+                        <input type="text" id="verify" name="verify" value="验证码" maxlength="4" style="width:125px; vertical-align:top;" onfocus="init($(this),'验证码','bg3_1')" onblur="outit($(this),'验证码','bg3_1')" />
+                        <span id="verifycode" class="span45 wd110"></span>
+                        <span class="span45 wd100 f12" style="cursor:pointer;" onclick="javascript:VerifyCode($('#verifycode'));">看不清？换一张</span>
+                    </div>
+                </div>
+
+                <div class="button_box">
+                    <div class="up clearfix">
+
+                        <span style="color:red" id="msg_box" class="fl">
+                        </span>
+                        <span class="fr c6 f12" style="cursor: pointer;" onclick="return FindPassword();">忘记密码？</span>
+                    </div>
+                    <div class="button">
+                        <input id="login" type="button" onclick="return LoginSubmit();" value="登 录" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+
+        var VerifyCode = function(obj, imgurl) {
+            //默认验证码路径
+            var defaultImgUrl = "/Security/verifycode";
+            //没有输入验证码路径时，用默认路径
+            var url = imgurl || defaultImgUrl;
+            var verifycode = '<img src="' + url + '?' + Math.random() + '"  alt="验证码"/>';
+            $(obj).html(verifycode);
+
+            //清除原有click事件，重新绑定验证码刷新事件
+            $(obj).unbind('click');
+            $(obj).click(function() {
+                VerifyCode(obj, imgurl);
+            });
+        };
+        //重置密码
+
+        function FindPassword() {
+            UI.DialogOpen('/Account/FindUserPassword', {
+                title: '找回密码',
+                width: '500px',
+                height: '140px',
+                init: function() {
+                    this.button({
+                            name: '确认',
+                            callback: function() {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+                                iframe.edit();
+                                return false;
+                            },
+                            focus: true
+                        }, {
+                            name: '关闭'
+                        });
+                }
+            }, false);
+        }
+
+        function CheckVerifyCode() {
+            $.ajax({
+                url: "/Account/CheckVerifyCode",
+                data: { verifyCode: function () { return $("#verify").val(); } },
+                type:
+                    "POST",
+                dataType:
+                    "json",
+                success:
+                    function(response) {
+                        if (response.Status != true) {
+                            VerifyCode($('#verifycode'));
+                            $("#msg_box").html(response.Message);
+                        } else {
+                            $("#login").attr("disabled");
+                        }
+                    }
+            });
+        }
+
+        function LoginSubmit() {
+            if ($("form").valid()) {
+                var param = {
+                    account: $("#account").val(),
+                    password: $("#password").val(),
+                    verifycode: $("#verify").val()
+                };
+                $.ajax({
+                    url: "/Account/Login/",
+                    data: param,
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    success: function (data) {
+                        if (data.Status) {
+                            window.location.href = "/Main/Index";
+                        } else {
+                            VerifyCode($('#verifycode'));
+                            $("#msg_box").html(data.Message);
+                        }
+                    }
+                });
+            }
+            return false;
+        }
+
+        function test(response) {
+            if (response.Status != true) {
+                VerifyCode($('#verifycode'));
+                $("#msg_box").html(response.Message);
+            } else {
+                $("#login").attr("disabled");
+            }
+        }
+
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        LoginSubmit();
+                        break;
+                }
+            });
+
+            if ($.trim($('#account').val()) == '') {
+                $('#account').focus();
+            } else {
+                $('#password').focus();
+            }
+            VerifyCode($('#verifycode'));
+        });
+
+        function init(obj, str, Changebg) {
+            if (obj.prev(".l_icon").prev(".f12")) {
+                obj.prev(".l_icon").prev(".f12").css("display", "none");
+            }
+            obj.css("color", "#333");
+            if (obj.attr('value') == str) {
+                obj.attr({ value: '' });
+            }
+            obj.prev(".l_icon").addClass(Changebg);
+        }
+
+        function outit(obj, str, Changebg) {
+
+            if (obj.attr('value') == '') {
+                if (obj.prev(".l_icon").prev(".f12")) {
+                    obj.prev(".l_icon").prev(".f12").css("display", "inline-block");
+                }
+                obj.css("color", "#999");
+                obj.attr({ value: str });
+            }
+            obj.prev(".l_icon").removeClass(Changebg);
+        }
+    </script>
+
+
+</body>
+</html>

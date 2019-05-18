@@ -1,0 +1,104 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "帮助分类";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#feHelpClassForm").validate({
+                debug: true,
+                rules: {
+                    txtRealName: {
+                        required: true,
+
+                        maxlength: 50,
+                        remote: {
+                            url: "/Front/FeArticleCategoryVerify",
+                            type: "post",
+                            data: {
+                                txtRealName: function () {
+                                    return $("#txtRealName").val();
+                                },
+                                hidSysNo: function () {
+                                    return 0;
+                                },
+                                type: function() {
+                                    return 20;
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#fortxtRealName').text('字数限制,1-50个字符');
+                                } else {
+                                    $('#fortxtRealName').text('帮助中心文章分类名称已存在');
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    txtDisplayOrder: { required: true, number: true },
+                    txtDescription: {
+                        required: true,
+
+                        maxlength: 200
+                    }
+                },
+              
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function addOrEdit() {
+            $("#feHelpClassForm").submit();
+            if ($("#feHelpClassForm").valid()) {
+                $.post('/Front/FeHelpClassAddOrEdit/', $("#feHelpClassForm").serialize(), function (data) {
+                    if (data.IsPass) {
+                        UI.Dialog.opener.dialog();
+                        UI.Dialog.opener.searchHelpClass();
+                        UI.Dialog.close();
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+
+<form id="feHelpClassForm" name="feHelpClassForm" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+    <div class="tit_con">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td width="65" class="nameright border_rnone">
+                    <input type="hidden" id="hidSysNo" name="hidSysNo" value="" /><span class="v_star">*</span>分类名称</td>
+                 <td>
+                    <input type="text" id="txtRealName" name="txtRealName" style="width: 300px;" value="" class="c3" /><span id="fortxtRealName" class="prompt m10_l">字数限制,1-50个字符</span>
+                </td>
+            </tr>
+            <tr>
+                <td width="65" class="nameright border_rnone"><span class="v_star">*</span>排序</td>
+                 <td>
+                    <input type="text" id="txtDisplayOrder" name="txtDisplayOrder" value="" class="c3" /><span id="fortxtDisplayOrder" class="prompt m10_l">前台显示排序的数字(按数字大小降序排列)</span>
+                </td>
+            </tr>
+            <tr>
+                <td width="65" class="nameright border_rnone"><span class="v_star">*</span>描述</td>
+                <td>
+                    <textarea id="txtDescription" name="txtDescription"></textarea><span id="fortxtDescription" class="prompt m10_l">字数限制,1-200个字符</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+     </div>
+    </div>
+</form>

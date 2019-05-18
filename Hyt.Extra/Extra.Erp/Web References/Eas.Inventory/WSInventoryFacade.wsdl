@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:intf="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:tns1="urn:client.inventoryfacade" xmlns:impl="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" targetNamespace="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade">
+      <xsd:import namespace="urn:client.inventoryfacade" />
+      <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <xsd:complexType name="ArrayOf_xsd_string">
+        <xsd:complexContent mixed="false">
+          <xsd:restriction base="soapenc:Array">
+            <xsd:attribute wsdl:arrayType="xsd:string[]" ref="soapenc:arrayType" />
+          </xsd:restriction>
+        </xsd:complexContent>
+      </xsd:complexType>
+    </xsd:schema>
+    <xsd:schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:client.inventoryfacade">
+      <xsd:import namespace="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" />
+      <xsd:import namespace="http://schemas.xmlsoap.org/soap/encoding/" />
+      <xsd:complexType name="Result">
+        <xsd:sequence>
+          <xsd:element name="status" type="xsd:boolean" />
+          <xsd:element name="statusCode" nillable="true" type="xsd:string" />
+          <xsd:element name="message" nillable="true" type="xsd:string" />
+          <xsd:element name="data" nillable="true" type="xsd:anyType" />
+        </xsd:sequence>
+      </xsd:complexType>
+      <xsd:complexType name="WSInvokeException">
+        <xsd:sequence />
+      </xsd:complexType>
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="WSInvokeException">
+    <wsdl:part name="fault" type="tns1:WSInvokeException" />
+  </wsdl:message>
+  <wsdl:message name="getInventoryRequest">
+    <wsdl:part name="storageOrgNumber" type="xsd:string" />
+    <wsdl:part name="materialNumbers" type="impl:ArrayOf_xsd_string" />
+    <wsdl:part name="warehouseNumber" type="xsd:string" />
+  </wsdl:message>
+  <wsdl:message name="getInventoryResponse">
+    <wsdl:part name="getInventoryReturn" type="tns1:Result" />
+  </wsdl:message>
+  <wsdl:portType name="WSInventoryFacadeSrvProxy">
+    <wsdl:operation name="getInventory" parameterOrder="storageOrgNumber materialNumbers warehouseNumber">
+      <wsdl:input name="getInventoryRequest" message="impl:getInventoryRequest" />
+      <wsdl:output name="getInventoryResponse" message="impl:getInventoryResponse" />
+      <wsdl:fault name="WSInvokeException" message="impl:WSInvokeException" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="WSInventoryFacadeSoapBinding" type="impl:WSInventoryFacadeSrvProxy">
+    <wsdlsoap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc" />
+    <wsdl:operation name="getInventory">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="getInventoryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://webservice.app.custom.eas.kingdee.com" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="getInventoryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+      <wsdl:fault name="WSInvokeException">
+        <wsdlsoap:fault use="encoded" name="WSInvokeException" namespace="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:fault>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSInventoryFacadeSrvProxyService">
+    <wsdl:port name="WSInventoryFacade" binding="impl:WSInventoryFacadeSoapBinding">
+      <wsdlsoap:address location="http://192.168.8.8:6888/ormrpc/services/WSInventoryFacade" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

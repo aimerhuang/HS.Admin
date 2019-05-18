@@ -1,0 +1,194 @@
+﻿@{
+
+    ViewBag.Title = "分销商关系图";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.SB1003, ".SB1003")
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript">
+        <!--
+    var ppp = '@ViewBag.HighPower';
+        var highpower = false;
+        if (ppp == "True" || ppp == "true")
+            highpower = true;
+        //字符串转换true false
+        var settingWarehouse = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomWarehouse,
+                selectedMulti: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: TreeNodeOnClickCrCustomer
+            }
+        };
+
+        var curSelectId = -1;
+        var isSave = false;
+        //避免多余的保存操作
+        //点击节点事件
+
+        Date.prototype.format = function (format) //author: meizz
+        {
+            var o = {
+                "M+": this.getMonth() + 1, //month
+                "d+": this.getDate(),    //day
+                "h+": this.getHours(),   //hour
+                "m+": this.getMinutes(), //minute
+                "s+": this.getSeconds(), //second
+                "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+                "S": this.getMilliseconds() //millisecond
+            }
+            if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+            (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o) if (new RegExp("(" + k + ")").test(format))
+                format = format.replace(RegExp.$1,
+              RegExp.$1.length == 1 ? o[k] :
+                ("00" + o[k]).substr(("" + o[k]).length));
+            return format;
+        }
+        function formatTime(val) {
+            var re = /-?\d+/;
+            var m = re.exec(val);
+            var d = new Date(parseInt(m[0]));
+            return d.format("yyyy-MM-dd hh:mm:ss");
+        }
+        function TreeNodeOnClickCrCustomer(event, treeId, treeNode) {
+            $.get('@Url.Action("GetModel", "CRM")',
+                { CrCustomerSysNo: treeNode.id },
+                function (data) {
+                    var html = "<table style='width:100%;'><tbody>";  
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding-bottom:5px; display:block;'>";
+                    html += "<td><img style='border-radius:3px;' src='" + data.HeadImage + "' height='65' width='65'></td>";
+                    html += "<td><dl style='padding-left:10px;'><dt><b style='font-size:14px;'>" + data.Name + "</b>&nbsp;(" + (data.IsSellBusiness == 1 ? '分销商' : '普通会员') + ")</dt><dd>编号：" + data.SysNo + "</dd><dd>账号：" + data.Account + "</dd></dl></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td style='width:220px;'><dl><dd>是否关注微信："+(data.Subscribe=='1'?'已关注':'未关注')+"</dd><dd>冻结余额：￥" + data.BrokerageFreeze + "</dd></dl></td><td><dl><dd>累计佣金：￥" + data.BrokerageTotal + "</dd><dd>可用佣金：￥" + data.Brokerage + "</dd></dl></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td style='width:220px;'><dl><dt>姓名：" + data.Name + "</dt><dd>性别：" + (data.Gender == "0" ? "女" : "男") + "</dd><dd>生日：" + formatTime(data.Birthday) + "</dd></dl></td><td><dl><dd>地区：</dd><dd>电话：" + (data.MobilePhoneNumber == null ? "" : data.MobilePhoneNumber) + "</dd><dd>QQ：-&nbsp;&nbsp;邮箱：-" + (data.EmailAddress == null ? "" : data.EmailAddress) + "</dd></dl></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td style='width:220px;'>注册时间：" + formatTime(data.RegisterDate) + "</td><td>登录时间：" + formatTime(data.LastLoginDate) + "</td></tr>";
+                    html += "</tbody></table>";
+                    $("#CustomerDetail").html(html);
+
+                });
+        }
+
+        var myZTreeCrCustomer;
+
+        //初始化ZTree
+
+        function InitZTreeCrCustomer() {
+            markObject = $("#divall");
+            $.ajax({
+                url: '@Url.Action("GetCrCustomerZTreeList", "CRM")',
+                data: {
+                    all: true
+                },
+                success:
+                    function (response) {
+                        if (response != null) {
+
+                            //更具返回结果初始化zTree
+                            myZTreeCrCustomer = $.fn.zTree.init($("#customerTree"),
+                                settingWarehouse,
+                                response);
+                        }
+
+                    },
+
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+
+            });
+
+        }
+        
+        var markObject;
+        //AjaxLoader的mark对象
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //自举函数
+        $(document).ready(function () {
+            $("#CustomerDetail").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treeCustomer").css("height", $(window.parent.document).height() - 286 + "px");
+            InitAjaxLoading();
+
+            //初始化树
+            InitZTreeCrCustomer();
+        });
+
+    </script>
+
+}
+
+
+
+<div class="case commodity_sortmanage" id="divall">
+    @*<div><img src="~/Theme/images/icons/user.png" />：分销商<img src="~/Theme/images/icons/user_green.png" /> ：普通会员 </div>*@
+    <!--divleft-->
+    <div class="clearfix" style="position: relative; padding-right: 660px; overflow: hidden;">
+        <div class="" id="divleft" style="float: left; width: 50%;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleWarehouse" class="boxs_tit head_m">
+                    <h3>
+                        会员图谱
+                    </h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treeCustomer" class="left p5" style="overflow: auto;">
+                        <ul id="customerTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--divmid-->
+        <div class="m5_l" id="divmid" style="width: 100%; float: left; margin-right: -660px;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleDelivery" class="boxs_tit head_m">
+                    <h3>会员明细</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="CustomerDetail" class="left p5" style="overflow: auto;">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+

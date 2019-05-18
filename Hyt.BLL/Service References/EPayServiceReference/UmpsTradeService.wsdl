@@ -1,0 +1,1686 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:intf="http://14.23.90.101/webservice/services/UmpsTradeService" xmlns:apachesoap="http://xml.apache.org/xml-soap" xmlns:wsdlsoap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:impl="http://14.23.90.101/webservice/services/UmpsTradeService" targetNamespace="http://14.23.90.101/webservice/services/UmpsTradeService" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types />
+  <wsdl:message name="masterCardInfoRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="findCardDetailResponse">
+    <wsdl:part name="findCardDetailReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="phoneReaderCheckResponse">
+    <wsdl:part name="phoneReaderCheckReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeQueryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobMerchantCheckRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="bankBindInfoQryResponse">
+    <wsdl:part name="bankBindInfoQryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="manageCreCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnCardApplyStatusResponse">
+    <wsdl:part name="vcnCardApplyStatusReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryTradeDetailRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="accSharedRevenueResponse">
+    <wsdl:part name="accSharedRevenueReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="wsdActivityRegisterResponse">
+    <wsdl:part name="wsdActivityRegisterReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="sendValidationCodeResponse">
+    <wsdl:part name="sendValidationCodeReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctActiveNewResponse">
+    <wsdl:part name="acctActiveNewReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalance1Response">
+    <wsdl:part name="queryBalance1Return" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="easyPayRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="sendEmailRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="payCommRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fillValueResponse">
+    <wsdl:part name="fillValueReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="dyInsertMemberCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="registerResponse">
+    <wsdl:part name="registerReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsFreezeRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnObtainResponse">
+    <wsdl:part name="vcnObtainReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnMListQueryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="RecommendEarningsQueryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="retrievePwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="loginRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="setRetrievePwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="virementResponse">
+    <wsdl:part name="virementReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalanceRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctCheckRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="phoneReaderBindResponse">
+    <wsdl:part name="phoneReaderBindReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="modBasicInfoResponse">
+    <wsdl:part name="modBasicInfoReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryAcctResponse">
+    <wsdl:part name="queryAcctReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobMerchantCheckResponse">
+    <wsdl:part name="mobMerchantCheckReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="changeCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryCheckCardQueryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="accSharedRevenueRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="cardInfoResponse">
+    <wsdl:part name="cardInfoReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryTradeDetail1Request">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryAcctRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnModInfoResponse">
+    <wsdl:part name="vcnModInfoReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="modifyPwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnCardApplyStatusRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="retrievePwdResponse">
+    <wsdl:part name="retrievePwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="modBasicInfoRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobCardClearRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctActiveNewRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnMListQueryResponse">
+    <wsdl:part name="vcnMListQueryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="wsdActivityQueryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnQueryTranRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="chkPayPwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="payToVcnResponse">
+    <wsdl:part name="payToVcnReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transRateQueryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="easyPayResponse">
+    <wsdl:part name="easyPayReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="RecommendEarningsQueryResponse">
+    <wsdl:part name="RecommendEarningsQueryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsInResponse">
+    <wsdl:part name="fundsInReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryCardTradeDetailResponse">
+    <wsdl:part name="queryCardTradeDetailReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryTradeDetailResponse">
+    <wsdl:part name="queryTradeDetailReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobCardRecordRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="sendMasterValidationCodeResponse">
+    <wsdl:part name="sendMasterValidationCodeReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="phoneReaderBindRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnLoginResponse">
+    <wsdl:part name="vcnLoginReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="genPayBarcodeResponse">
+    <wsdl:part name="genPayBarcodeReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="chkPayPwdResponse">
+    <wsdl:part name="chkPayPwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobCardClearResponse">
+    <wsdl:part name="mobCardClearReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobCardRecordResponse">
+    <wsdl:part name="mobCardRecordReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="procServiceResponse">
+    <wsdl:part name="procServiceReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="changeCardStatusResponse">
+    <wsdl:part name="changeCardStatusReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="easyPaySignResponse">
+    <wsdl:part name="easyPaySignReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeQryOrderRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnObtainRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalanceIntegralResponse">
+    <wsdl:part name="queryBalanceIntegralReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="MacChangeRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsInRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="dyUpdateMemberCardResponse">
+    <wsdl:part name="dyUpdateMemberCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeApplyResponse">
+    <wsdl:part name="transExchangeApplyReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsOutResponse">
+    <wsdl:part name="fundsOutReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="genPayBarcodeRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="barcodePayResponse">
+    <wsdl:part name="barcodePayReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryAcctExRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="umpsPasswdCheckResponse">
+    <wsdl:part name="umpsPasswdCheckReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="wsdActivityRegisterRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobCardCheckRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="mobCardCheckResponse">
+    <wsdl:part name="mobCardCheckReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="procServiceRequest">
+    <wsdl:part name="msg" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnCardActivateResponse">
+    <wsdl:part name="vcnCardActivateReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="openCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryCardTradeDetailRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="rechargeOutIntegralResponse">
+    <wsdl:part name="rechargeOutIntegralReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="payToVcnRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="validationCodeVResponse">
+    <wsdl:part name="validationCodeVReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fillValueRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnQueryCardNewRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="cardInfoRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="payResponse">
+    <wsdl:part name="payReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="sendEmailResponse">
+    <wsdl:part name="sendEmailReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="validatePwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="modifyPwdResponse">
+    <wsdl:part name="modifyPwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctBindRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctBindResponse">
+    <wsdl:part name="acctBindReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalanceNoPwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsFreezeResponse">
+    <wsdl:part name="fundsFreezeReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="barcodePayRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="easyPaySignRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnQueryCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="rechargeInIntegralResponse">
+    <wsdl:part name="rechargeInIntegralReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnLoginRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeQryOrderResponse">
+    <wsdl:part name="transExchangeQryOrderReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryAreaInfoRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsToBankResponse">
+    <wsdl:part name="fundsToBankReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="masterCardInfoResponse">
+    <wsdl:part name="masterCardInfoReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="validationCodeVRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnQueryCardNewResponse">
+    <wsdl:part name="vcnQueryCardNewReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="regNewResponse">
+    <wsdl:part name="regNewReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="umpsPasswdCheckRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryCreCardResponse">
+    <wsdl:part name="queryCreCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="payCommResponse">
+    <wsdl:part name="payCommReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="dyInsertMemberCardResponse">
+    <wsdl:part name="dyInsertMemberCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="modifyPayPwdResponse">
+    <wsdl:part name="modifyPayPwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnQueryCardResponse">
+    <wsdl:part name="vcnQueryCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnQueryTranResponse">
+    <wsdl:part name="vcnQueryTranReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalanceNoPwdResponse">
+    <wsdl:part name="queryBalanceNoPwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="manageCreCardResponse">
+    <wsdl:part name="manageCreCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryTradeDetail1Response">
+    <wsdl:part name="queryTradeDetail1Return" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="modifyPayPwdRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsToBankRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="bankBindInfoQryRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryVcnListRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="openCardResponse">
+    <wsdl:part name="openCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnCardApplyRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="PwdMD5ChangeResponse">
+    <wsdl:part name="PwdMD5ChangeReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transRateQueryResponse">
+    <wsdl:part name="transRateQueryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryCheckCardQueryResponse">
+    <wsdl:part name="queryCheckCardQueryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnCardApplyResponse">
+    <wsdl:part name="vcnCardApplyReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctActiveResponse">
+    <wsdl:part name="acctActiveReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="rechargeOutIntegralRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeSignupResponse">
+    <wsdl:part name="transExchangeSignupReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="fundsOutRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryCreCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalanceResponse">
+    <wsdl:part name="queryBalanceReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBasicInfoResponse">
+    <wsdl:part name="queryBasicInfoReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeQueryResponse">
+    <wsdl:part name="transExchangeQueryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="wsdActivityQueryResponse">
+    <wsdl:part name="wsdActivityQueryReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalance1Request">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="dyUpdateMemberCardRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="rechargeInIntegralRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBalanceIntegralRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="changeCardStatusRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="PwdMD5ChangeRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryBasicInfoRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="validatePwdResponse">
+    <wsdl:part name="validatePwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="loginResponse">
+    <wsdl:part name="loginReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="findCardDetailRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctActiveRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="registerRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="phoneReaderCheckRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryEasyPayOrderResponse">
+    <wsdl:part name="qryEasyPayOrderReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnModInfoRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeApplyRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="acctCheckResponse">
+    <wsdl:part name="acctCheckReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryAreaInfoResponse">
+    <wsdl:part name="qryAreaInfoReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryVcnListResponse">
+    <wsdl:part name="qryVcnListReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="sendValidationCodeRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="changeCardResponse">
+    <wsdl:part name="changeCardReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryPwdQuestionRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryPwdQuestionResponse">
+    <wsdl:part name="qryPwdQuestionReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="qryEasyPayOrderRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="queryAcctExResponse">
+    <wsdl:part name="queryAcctExReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="payRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="MacChangeResponse">
+    <wsdl:part name="MacChangeReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="vcnCardActivateRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="virementRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="setRetrievePwdResponse">
+    <wsdl:part name="setRetrievePwdReturn" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="sendMasterValidationCodeRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="transExchangeSignupRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:message name="regNewRequest">
+    <wsdl:part name="req" type="soapenc:string" />
+  </wsdl:message>
+  <wsdl:portType name="UmpsTradeService">
+    <wsdl:operation name="register" parameterOrder="req">
+      <wsdl:input name="registerRequest" message="impl:registerRequest" />
+      <wsdl:output name="registerResponse" message="impl:registerResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="login" parameterOrder="req">
+      <wsdl:input name="loginRequest" message="impl:loginRequest" />
+      <wsdl:output name="loginResponse" message="impl:loginResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryTradeDetail" parameterOrder="req">
+      <wsdl:input name="queryTradeDetailRequest" message="impl:queryTradeDetailRequest" />
+      <wsdl:output name="queryTradeDetailResponse" message="impl:queryTradeDetailResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="sendEmail" parameterOrder="req">
+      <wsdl:input name="sendEmailRequest" message="impl:sendEmailRequest" />
+      <wsdl:output name="sendEmailResponse" message="impl:sendEmailResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="pay" parameterOrder="req">
+      <wsdl:input name="payRequest" message="impl:payRequest" />
+      <wsdl:output name="payResponse" message="impl:payResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="procService" parameterOrder="msg">
+      <wsdl:input name="procServiceRequest" message="impl:procServiceRequest" />
+      <wsdl:output name="procServiceResponse" message="impl:procServiceResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="changeCard" parameterOrder="req">
+      <wsdl:input name="changeCardRequest" message="impl:changeCardRequest" />
+      <wsdl:output name="changeCardResponse" message="impl:changeCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="easyPay" parameterOrder="req">
+      <wsdl:input name="easyPayRequest" message="impl:easyPayRequest" />
+      <wsdl:output name="easyPayResponse" message="impl:easyPayResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="cardInfo" parameterOrder="req">
+      <wsdl:input name="cardInfoRequest" message="impl:cardInfoRequest" />
+      <wsdl:output name="cardInfoResponse" message="impl:cardInfoResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="changeCardStatus" parameterOrder="req">
+      <wsdl:input name="changeCardStatusRequest" message="impl:changeCardStatusRequest" />
+      <wsdl:output name="changeCardStatusResponse" message="impl:changeCardStatusResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryBalance" parameterOrder="req">
+      <wsdl:input name="queryBalanceRequest" message="impl:queryBalanceRequest" />
+      <wsdl:output name="queryBalanceResponse" message="impl:queryBalanceResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryBalanceNoPwd" parameterOrder="req">
+      <wsdl:input name="queryBalanceNoPwdRequest" message="impl:queryBalanceNoPwdRequest" />
+      <wsdl:output name="queryBalanceNoPwdResponse" message="impl:queryBalanceNoPwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="payComm" parameterOrder="req">
+      <wsdl:input name="payCommRequest" message="impl:payCommRequest" />
+      <wsdl:output name="payCommResponse" message="impl:payCommResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="fillValue" parameterOrder="req">
+      <wsdl:input name="fillValueRequest" message="impl:fillValueRequest" />
+      <wsdl:output name="fillValueResponse" message="impl:fillValueResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="virement" parameterOrder="req">
+      <wsdl:input name="virementRequest" message="impl:virementRequest" />
+      <wsdl:output name="virementResponse" message="impl:virementResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="accSharedRevenue" parameterOrder="req">
+      <wsdl:input name="accSharedRevenueRequest" message="impl:accSharedRevenueRequest" />
+      <wsdl:output name="accSharedRevenueResponse" message="impl:accSharedRevenueResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="acctCheck" parameterOrder="req">
+      <wsdl:input name="acctCheckRequest" message="impl:acctCheckRequest" />
+      <wsdl:output name="acctCheckResponse" message="impl:acctCheckResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="acctBind" parameterOrder="req">
+      <wsdl:input name="acctBindRequest" message="impl:acctBindRequest" />
+      <wsdl:output name="acctBindResponse" message="impl:acctBindResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="acctActive" parameterOrder="req">
+      <wsdl:input name="acctActiveRequest" message="impl:acctActiveRequest" />
+      <wsdl:output name="acctActiveResponse" message="impl:acctActiveResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryAcct" parameterOrder="req">
+      <wsdl:input name="queryAcctRequest" message="impl:queryAcctRequest" />
+      <wsdl:output name="queryAcctResponse" message="impl:queryAcctResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryBasicInfo" parameterOrder="req">
+      <wsdl:input name="queryBasicInfoRequest" message="impl:queryBasicInfoRequest" />
+      <wsdl:output name="queryBasicInfoResponse" message="impl:queryBasicInfoResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="modBasicInfo" parameterOrder="req">
+      <wsdl:input name="modBasicInfoRequest" message="impl:modBasicInfoRequest" />
+      <wsdl:output name="modBasicInfoResponse" message="impl:modBasicInfoResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="modifyPwd" parameterOrder="req">
+      <wsdl:input name="modifyPwdRequest" message="impl:modifyPwdRequest" />
+      <wsdl:output name="modifyPwdResponse" message="impl:modifyPwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="modifyPayPwd" parameterOrder="req">
+      <wsdl:input name="modifyPayPwdRequest" message="impl:modifyPayPwdRequest" />
+      <wsdl:output name="modifyPayPwdResponse" message="impl:modifyPayPwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="chkPayPwd" parameterOrder="req">
+      <wsdl:input name="chkPayPwdRequest" message="impl:chkPayPwdRequest" />
+      <wsdl:output name="chkPayPwdResponse" message="impl:chkPayPwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="fundsIn" parameterOrder="req">
+      <wsdl:input name="fundsInRequest" message="impl:fundsInRequest" />
+      <wsdl:output name="fundsInResponse" message="impl:fundsInResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="fundsOut" parameterOrder="req">
+      <wsdl:input name="fundsOutRequest" message="impl:fundsOutRequest" />
+      <wsdl:output name="fundsOutResponse" message="impl:fundsOutResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="fundsToBank" parameterOrder="req">
+      <wsdl:input name="fundsToBankRequest" message="impl:fundsToBankRequest" />
+      <wsdl:output name="fundsToBankResponse" message="impl:fundsToBankResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="fundsFreeze" parameterOrder="req">
+      <wsdl:input name="fundsFreezeRequest" message="impl:fundsFreezeRequest" />
+      <wsdl:output name="fundsFreezeResponse" message="impl:fundsFreezeResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="bankBindInfoQry" parameterOrder="req">
+      <wsdl:input name="bankBindInfoQryRequest" message="impl:bankBindInfoQryRequest" />
+      <wsdl:output name="bankBindInfoQryResponse" message="impl:bankBindInfoQryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="qryAreaInfo" parameterOrder="req">
+      <wsdl:input name="qryAreaInfoRequest" message="impl:qryAreaInfoRequest" />
+      <wsdl:output name="qryAreaInfoResponse" message="impl:qryAreaInfoResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="manageCreCard" parameterOrder="req">
+      <wsdl:input name="manageCreCardRequest" message="impl:manageCreCardRequest" />
+      <wsdl:output name="manageCreCardResponse" message="impl:manageCreCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryCreCard" parameterOrder="req">
+      <wsdl:input name="queryCreCardRequest" message="impl:queryCreCardRequest" />
+      <wsdl:output name="queryCreCardResponse" message="impl:queryCreCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="genPayBarcode" parameterOrder="req">
+      <wsdl:input name="genPayBarcodeRequest" message="impl:genPayBarcodeRequest" />
+      <wsdl:output name="genPayBarcodeResponse" message="impl:genPayBarcodeResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="barcodePay" parameterOrder="req">
+      <wsdl:input name="barcodePayRequest" message="impl:barcodePayRequest" />
+      <wsdl:output name="barcodePayResponse" message="impl:barcodePayResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="qryEasyPayOrder" parameterOrder="req">
+      <wsdl:input name="qryEasyPayOrderRequest" message="impl:qryEasyPayOrderRequest" />
+      <wsdl:output name="qryEasyPayOrderResponse" message="impl:qryEasyPayOrderResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="qryPwdQuestion" parameterOrder="req">
+      <wsdl:input name="qryPwdQuestionRequest" message="impl:qryPwdQuestionRequest" />
+      <wsdl:output name="qryPwdQuestionResponse" message="impl:qryPwdQuestionResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="retrievePwd" parameterOrder="req">
+      <wsdl:input name="retrievePwdRequest" message="impl:retrievePwdRequest" />
+      <wsdl:output name="retrievePwdResponse" message="impl:retrievePwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="setRetrievePwd" parameterOrder="req">
+      <wsdl:input name="setRetrievePwdRequest" message="impl:setRetrievePwdRequest" />
+      <wsdl:output name="setRetrievePwdResponse" message="impl:setRetrievePwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="regNew" parameterOrder="req">
+      <wsdl:input name="regNewRequest" message="impl:regNewRequest" />
+      <wsdl:output name="regNewResponse" message="impl:regNewResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="acctActiveNew" parameterOrder="req">
+      <wsdl:input name="acctActiveNewRequest" message="impl:acctActiveNewRequest" />
+      <wsdl:output name="acctActiveNewResponse" message="impl:acctActiveNewResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="phoneReaderBind" parameterOrder="req">
+      <wsdl:input name="phoneReaderBindRequest" message="impl:phoneReaderBindRequest" />
+      <wsdl:output name="phoneReaderBindResponse" message="impl:phoneReaderBindResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="phoneReaderCheck" parameterOrder="req">
+      <wsdl:input name="phoneReaderCheckRequest" message="impl:phoneReaderCheckRequest" />
+      <wsdl:output name="phoneReaderCheckResponse" message="impl:phoneReaderCheckResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryBalance1" parameterOrder="req">
+      <wsdl:input name="queryBalance1Request" message="impl:queryBalance1Request" />
+      <wsdl:output name="queryBalance1Response" message="impl:queryBalance1Response" />
+    </wsdl:operation>
+    <wsdl:operation name="queryTradeDetail1" parameterOrder="req">
+      <wsdl:input name="queryTradeDetail1Request" message="impl:queryTradeDetail1Request" />
+      <wsdl:output name="queryTradeDetail1Response" message="impl:queryTradeDetail1Response" />
+    </wsdl:operation>
+    <wsdl:operation name="queryAcctEx" parameterOrder="req">
+      <wsdl:input name="queryAcctExRequest" message="impl:queryAcctExRequest" />
+      <wsdl:output name="queryAcctExResponse" message="impl:queryAcctExResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="qryVcnList" parameterOrder="req">
+      <wsdl:input name="qryVcnListRequest" message="impl:qryVcnListRequest" />
+      <wsdl:output name="qryVcnListResponse" message="impl:qryVcnListResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnObtain" parameterOrder="req">
+      <wsdl:input name="vcnObtainRequest" message="impl:vcnObtainRequest" />
+      <wsdl:output name="vcnObtainResponse" message="impl:vcnObtainResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnModInfo" parameterOrder="req">
+      <wsdl:input name="vcnModInfoRequest" message="impl:vcnModInfoRequest" />
+      <wsdl:output name="vcnModInfoResponse" message="impl:vcnModInfoResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="payToVcn" parameterOrder="req">
+      <wsdl:input name="payToVcnRequest" message="impl:payToVcnRequest" />
+      <wsdl:output name="payToVcnResponse" message="impl:payToVcnResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="dyInsertMemberCard" parameterOrder="req">
+      <wsdl:input name="dyInsertMemberCardRequest" message="impl:dyInsertMemberCardRequest" />
+      <wsdl:output name="dyInsertMemberCardResponse" message="impl:dyInsertMemberCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="dyUpdateMemberCard" parameterOrder="req">
+      <wsdl:input name="dyUpdateMemberCardRequest" message="impl:dyUpdateMemberCardRequest" />
+      <wsdl:output name="dyUpdateMemberCardResponse" message="impl:dyUpdateMemberCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryCardTradeDetail" parameterOrder="req">
+      <wsdl:input name="queryCardTradeDetailRequest" message="impl:queryCardTradeDetailRequest" />
+      <wsdl:output name="queryCardTradeDetailResponse" message="impl:queryCardTradeDetailResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="openCard" parameterOrder="req">
+      <wsdl:input name="openCardRequest" message="impl:openCardRequest" />
+      <wsdl:output name="openCardResponse" message="impl:openCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryCheckCardQuery" parameterOrder="req">
+      <wsdl:input name="queryCheckCardQueryRequest" message="impl:queryCheckCardQueryRequest" />
+      <wsdl:output name="queryCheckCardQueryResponse" message="impl:queryCheckCardQueryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="easyPaySign" parameterOrder="req">
+      <wsdl:input name="easyPaySignRequest" message="impl:easyPaySignRequest" />
+      <wsdl:output name="easyPaySignResponse" message="impl:easyPaySignResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="sendValidationCode" parameterOrder="req">
+      <wsdl:input name="sendValidationCodeRequest" message="impl:sendValidationCodeRequest" />
+      <wsdl:output name="sendValidationCodeResponse" message="impl:sendValidationCodeResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="validationCodeV" parameterOrder="req">
+      <wsdl:input name="validationCodeVRequest" message="impl:validationCodeVRequest" />
+      <wsdl:output name="validationCodeVResponse" message="impl:validationCodeVResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="findCardDetail" parameterOrder="req">
+      <wsdl:input name="findCardDetailRequest" message="impl:findCardDetailRequest" />
+      <wsdl:output name="findCardDetailResponse" message="impl:findCardDetailResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnLogin" parameterOrder="req">
+      <wsdl:input name="vcnLoginRequest" message="impl:vcnLoginRequest" />
+      <wsdl:output name="vcnLoginResponse" message="impl:vcnLoginResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnQueryTran" parameterOrder="req">
+      <wsdl:input name="vcnQueryTranRequest" message="impl:vcnQueryTranRequest" />
+      <wsdl:output name="vcnQueryTranResponse" message="impl:vcnQueryTranResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnMListQuery" parameterOrder="req">
+      <wsdl:input name="vcnMListQueryRequest" message="impl:vcnMListQueryRequest" />
+      <wsdl:output name="vcnMListQueryResponse" message="impl:vcnMListQueryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="queryBalanceIntegral" parameterOrder="req">
+      <wsdl:input name="queryBalanceIntegralRequest" message="impl:queryBalanceIntegralRequest" />
+      <wsdl:output name="queryBalanceIntegralResponse" message="impl:queryBalanceIntegralResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeApply" parameterOrder="req">
+      <wsdl:input name="transExchangeApplyRequest" message="impl:transExchangeApplyRequest" />
+      <wsdl:output name="transExchangeApplyResponse" message="impl:transExchangeApplyResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeQryOrder" parameterOrder="req">
+      <wsdl:input name="transExchangeQryOrderRequest" message="impl:transExchangeQryOrderRequest" />
+      <wsdl:output name="transExchangeQryOrderResponse" message="impl:transExchangeQryOrderResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="transRateQuery" parameterOrder="req">
+      <wsdl:input name="transRateQueryRequest" message="impl:transRateQueryRequest" />
+      <wsdl:output name="transRateQueryResponse" message="impl:transRateQueryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeSignup" parameterOrder="req">
+      <wsdl:input name="transExchangeSignupRequest" message="impl:transExchangeSignupRequest" />
+      <wsdl:output name="transExchangeSignupResponse" message="impl:transExchangeSignupResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeQuery" parameterOrder="req">
+      <wsdl:input name="transExchangeQueryRequest" message="impl:transExchangeQueryRequest" />
+      <wsdl:output name="transExchangeQueryResponse" message="impl:transExchangeQueryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="rechargeInIntegral" parameterOrder="req">
+      <wsdl:input name="rechargeInIntegralRequest" message="impl:rechargeInIntegralRequest" />
+      <wsdl:output name="rechargeInIntegralResponse" message="impl:rechargeInIntegralResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="rechargeOutIntegral" parameterOrder="req">
+      <wsdl:input name="rechargeOutIntegralRequest" message="impl:rechargeOutIntegralRequest" />
+      <wsdl:output name="rechargeOutIntegralResponse" message="impl:rechargeOutIntegralResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="validatePwd" parameterOrder="req">
+      <wsdl:input name="validatePwdRequest" message="impl:validatePwdRequest" />
+      <wsdl:output name="validatePwdResponse" message="impl:validatePwdResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnQueryCard" parameterOrder="req">
+      <wsdl:input name="vcnQueryCardRequest" message="impl:vcnQueryCardRequest" />
+      <wsdl:output name="vcnQueryCardResponse" message="impl:vcnQueryCardResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnQueryCardNew" parameterOrder="req">
+      <wsdl:input name="vcnQueryCardNewRequest" message="impl:vcnQueryCardNewRequest" />
+      <wsdl:output name="vcnQueryCardNewResponse" message="impl:vcnQueryCardNewResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnCardApply" parameterOrder="req">
+      <wsdl:input name="vcnCardApplyRequest" message="impl:vcnCardApplyRequest" />
+      <wsdl:output name="vcnCardApplyResponse" message="impl:vcnCardApplyResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnCardApplyStatus" parameterOrder="req">
+      <wsdl:input name="vcnCardApplyStatusRequest" message="impl:vcnCardApplyStatusRequest" />
+      <wsdl:output name="vcnCardApplyStatusResponse" message="impl:vcnCardApplyStatusResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="sendMasterValidationCode" parameterOrder="req">
+      <wsdl:input name="sendMasterValidationCodeRequest" message="impl:sendMasterValidationCodeRequest" />
+      <wsdl:output name="sendMasterValidationCodeResponse" message="impl:sendMasterValidationCodeResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="vcnCardActivate" parameterOrder="req">
+      <wsdl:input name="vcnCardActivateRequest" message="impl:vcnCardActivateRequest" />
+      <wsdl:output name="vcnCardActivateResponse" message="impl:vcnCardActivateResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="masterCardInfo" parameterOrder="req">
+      <wsdl:input name="masterCardInfoRequest" message="impl:masterCardInfoRequest" />
+      <wsdl:output name="masterCardInfoResponse" message="impl:masterCardInfoResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="wsdActivityRegister" parameterOrder="req">
+      <wsdl:input name="wsdActivityRegisterRequest" message="impl:wsdActivityRegisterRequest" />
+      <wsdl:output name="wsdActivityRegisterResponse" message="impl:wsdActivityRegisterResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="wsdActivityQuery" parameterOrder="req">
+      <wsdl:input name="wsdActivityQueryRequest" message="impl:wsdActivityQueryRequest" />
+      <wsdl:output name="wsdActivityQueryResponse" message="impl:wsdActivityQueryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="RecommendEarningsQuery" parameterOrder="req">
+      <wsdl:input name="RecommendEarningsQueryRequest" message="impl:RecommendEarningsQueryRequest" />
+      <wsdl:output name="RecommendEarningsQueryResponse" message="impl:RecommendEarningsQueryResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="MacChange" parameterOrder="req">
+      <wsdl:input name="MacChangeRequest" message="impl:MacChangeRequest" />
+      <wsdl:output name="MacChangeResponse" message="impl:MacChangeResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="PwdMD5Change" parameterOrder="req">
+      <wsdl:input name="PwdMD5ChangeRequest" message="impl:PwdMD5ChangeRequest" />
+      <wsdl:output name="PwdMD5ChangeResponse" message="impl:PwdMD5ChangeResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="mobCardRecord" parameterOrder="req">
+      <wsdl:input name="mobCardRecordRequest" message="impl:mobCardRecordRequest" />
+      <wsdl:output name="mobCardRecordResponse" message="impl:mobCardRecordResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="mobCardCheck" parameterOrder="req">
+      <wsdl:input name="mobCardCheckRequest" message="impl:mobCardCheckRequest" />
+      <wsdl:output name="mobCardCheckResponse" message="impl:mobCardCheckResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="mobCardClear" parameterOrder="req">
+      <wsdl:input name="mobCardClearRequest" message="impl:mobCardClearRequest" />
+      <wsdl:output name="mobCardClearResponse" message="impl:mobCardClearResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="mobMerchantCheck" parameterOrder="req">
+      <wsdl:input name="mobMerchantCheckRequest" message="impl:mobMerchantCheckRequest" />
+      <wsdl:output name="mobMerchantCheckResponse" message="impl:mobMerchantCheckResponse" />
+    </wsdl:operation>
+    <wsdl:operation name="umpsPasswdCheck" parameterOrder="req">
+      <wsdl:input name="umpsPasswdCheckRequest" message="impl:umpsPasswdCheckRequest" />
+      <wsdl:output name="umpsPasswdCheckResponse" message="impl:umpsPasswdCheckResponse" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="UmpsTradeServiceSoapBinding" type="impl:UmpsTradeService">
+    <wsdlsoap:binding transport="http://schemas.xmlsoap.org/soap/http" style="rpc" />
+    <wsdl:operation name="register">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="registerRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="registerResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="login">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="loginRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="loginResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryTradeDetail">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryTradeDetailRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryTradeDetailResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendEmail">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="sendEmailRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="sendEmailResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="pay">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="payRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="payResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="procService">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="procServiceRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="procServiceResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="changeCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="changeCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="changeCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="easyPay">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="easyPayRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="easyPayResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="cardInfo">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="cardInfoRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="cardInfoResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="changeCardStatus">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="changeCardStatusRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="changeCardStatusResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryBalance">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryBalanceRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryBalanceResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryBalanceNoPwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryBalanceNoPwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryBalanceNoPwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="payComm">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="payCommRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="payCommResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="fillValue">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="fillValueRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="fillValueResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="virement">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="virementRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="virementResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="accSharedRevenue">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="accSharedRevenueRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="accSharedRevenueResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="acctCheck">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="acctCheckRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="acctCheckResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="acctBind">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="acctBindRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="acctBindResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="acctActive">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="acctActiveRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="acctActiveResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryAcct">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryAcctRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryAcctResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryBasicInfo">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryBasicInfoRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryBasicInfoResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="modBasicInfo">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="modBasicInfoRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="modBasicInfoResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="modifyPwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="modifyPwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="modifyPwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="modifyPayPwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="modifyPayPwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="modifyPayPwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="chkPayPwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="chkPayPwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="chkPayPwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="fundsIn">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="fundsInRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="fundsInResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="fundsOut">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="fundsOutRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="fundsOutResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="fundsToBank">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="fundsToBankRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="fundsToBankResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="fundsFreeze">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="fundsFreezeRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="fundsFreezeResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="bankBindInfoQry">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="bankBindInfoQryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="bankBindInfoQryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="qryAreaInfo">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="qryAreaInfoRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="qryAreaInfoResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="manageCreCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="manageCreCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="manageCreCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryCreCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryCreCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryCreCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="genPayBarcode">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="genPayBarcodeRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="genPayBarcodeResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="barcodePay">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="barcodePayRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="barcodePayResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="qryEasyPayOrder">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="qryEasyPayOrderRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="qryEasyPayOrderResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="qryPwdQuestion">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="qryPwdQuestionRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="qryPwdQuestionResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="retrievePwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="retrievePwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="retrievePwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="setRetrievePwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="setRetrievePwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="setRetrievePwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="regNew">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="regNewRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="regNewResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="acctActiveNew">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="acctActiveNewRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="acctActiveNewResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="phoneReaderBind">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="phoneReaderBindRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="phoneReaderBindResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="phoneReaderCheck">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="phoneReaderCheckRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="phoneReaderCheckResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryBalance1">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryBalance1Request">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryBalance1Response">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryTradeDetail1">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryTradeDetail1Request">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryTradeDetail1Response">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryAcctEx">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryAcctExRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryAcctExResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="qryVcnList">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="qryVcnListRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="qryVcnListResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnObtain">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnObtainRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnObtainResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnModInfo">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnModInfoRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnModInfoResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="payToVcn">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="payToVcnRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="payToVcnResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="dyInsertMemberCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="dyInsertMemberCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="dyInsertMemberCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="dyUpdateMemberCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="dyUpdateMemberCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="dyUpdateMemberCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryCardTradeDetail">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryCardTradeDetailRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryCardTradeDetailResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="openCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="openCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="openCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryCheckCardQuery">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryCheckCardQueryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryCheckCardQueryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="easyPaySign">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="easyPaySignRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="easyPaySignResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendValidationCode">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="sendValidationCodeRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="sendValidationCodeResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="validationCodeV">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="validationCodeVRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="validationCodeVResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="findCardDetail">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="findCardDetailRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="findCardDetailResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnLogin">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnLoginRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnLoginResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnQueryTran">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnQueryTranRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnQueryTranResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnMListQuery">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnMListQueryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnMListQueryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="queryBalanceIntegral">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="queryBalanceIntegralRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="queryBalanceIntegralResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeApply">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="transExchangeApplyRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="transExchangeApplyResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeQryOrder">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="transExchangeQryOrderRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="transExchangeQryOrderResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="transRateQuery">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="transRateQueryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="transRateQueryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeSignup">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="transExchangeSignupRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="transExchangeSignupResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="transExchangeQuery">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="transExchangeQueryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="transExchangeQueryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechargeInIntegral">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="rechargeInIntegralRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="rechargeInIntegralResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="rechargeOutIntegral">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="rechargeOutIntegralRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="rechargeOutIntegralResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="validatePwd">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="validatePwdRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="validatePwdResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnQueryCard">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnQueryCardRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnQueryCardResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnQueryCardNew">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnQueryCardNewRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnQueryCardNewResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnCardApply">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnCardApplyRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnCardApplyResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnCardApplyStatus">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnCardApplyStatusRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnCardApplyStatusResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="sendMasterValidationCode">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="sendMasterValidationCodeRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="sendMasterValidationCodeResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="vcnCardActivate">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="vcnCardActivateRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="vcnCardActivateResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="masterCardInfo">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="masterCardInfoRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="masterCardInfoResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="wsdActivityRegister">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="wsdActivityRegisterRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="wsdActivityRegisterResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="wsdActivityQuery">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="wsdActivityQueryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="wsdActivityQueryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RecommendEarningsQuery">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="RecommendEarningsQueryRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="RecommendEarningsQueryResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="MacChange">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="MacChangeRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="MacChangeResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="PwdMD5Change">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="PwdMD5ChangeRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="PwdMD5ChangeResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="mobCardRecord">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="mobCardRecordRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="mobCardRecordResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="mobCardCheck">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="mobCardCheckRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="mobCardCheckResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="mobCardClear">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="mobCardClearRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="mobCardClearResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="mobMerchantCheck">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="mobMerchantCheckRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="mobMerchantCheckResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="umpsPasswdCheck">
+      <wsdlsoap:operation soapAction="" />
+      <wsdl:input name="umpsPasswdCheckRequest">
+        <wsdlsoap:body use="encoded" namespace="http://service.ws.epaylinks.cn" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:input>
+      <wsdl:output name="umpsPasswdCheckResponse">
+        <wsdlsoap:body use="encoded" namespace="http://14.23.90.101/webservice/services/UmpsTradeService" encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="UmpsTradeServiceService">
+    <wsdl:port name="UmpsTradeService" binding="impl:UmpsTradeServiceSoapBinding">
+      <wsdlsoap:address location="http://14.23.90.101/webservice/services/UmpsTradeService" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

@@ -1,0 +1,446 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@model PagedList<PdAttribute>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品基础属性选择";
+}
+<style type="text/css">
+    .pagination { position: absolute; bottom: 0; width: 100%; padding: 0; }
+</style>
+<script type="text/javascript">
+    function ScrollTable(config) {
+
+        var options = $.extend({
+            inRuleHeight: 0
+            , outRuleHeight: 0
+            , width: '100%'
+        }, config);
+
+        //表格的容器对象(JQ对象)
+        var $tableWrap = $(options.tableWrap);
+        //头部高度  
+        //需要此高度辅助计算内容table的top值和scroll区域的top值
+        var headerHeight = options.headerHeight;
+        //表格高度
+        //需要此高度辅助计算内容table的高度
+        var tableHeight = options.tableHeight;
+        //为容器添加滑动区域
+        $('<div class="scrollwrap"><div class="scrollcontent"></div></div>')
+            .css({
+                'position': 'absolute',
+                'top': headerHeight + 'px',
+                'right': '0',
+                'zIndex': '1',
+                'overflowX': 'hidden',
+                'overflowY': 'scroll'
+            })
+            .prependTo($tableWrap);
+
+        var $scrollWrap = $tableWrap.find('.scrollwrap'),
+            $scrollContent = $tableWrap.find('.scrollcontent'),
+            $tableBodyWrap = $tableWrap.find('.table-body'),
+            $tableConent = $tableWrap.find('.table-body table');
+
+        //table容器样式设置
+        $tableWrap.css({ 'position': 'relative', width: options.width });
+        //table BODY容器样式设置
+        $tableBodyWrap.css({ 'position': 'absolute', 'width': '100%', 'overflow': 'hidden' });
+
+        //设置延时是为了兼容iframe显示时table高度异常问题
+        setTimeout(function () {
+            ////滑动区域高度设置
+            //$scroll.css('height', (tableHeight - headerHeight) + 'px');
+            ////滑动伪内容设置
+            //$scrollContent.css({ 'height': $tableConent.height() + 'px', 'lineHeight': $tableConent.height() + 'px', 'width': '1px' });
+            setHeight();
+        }, 50);
+
+        var setHeight = function () {
+            //计算table高度  table高度等于浏览器可是区域高度减去外部排除高度与内部排除高度
+            tableHeight = $(window).height() - options.outRuleHeight - options.inRuleHeight;;
+            $tableWrap.css({ 'height': tableHeight + 'px' });
+            $tableBodyWrap.css({ 'top': headerHeight + 'px', 'height': (tableHeight - headerHeight - options.inRuleHeight) + 'px' });
+            $scrollWrap.css('height', (tableHeight - headerHeight - options.inRuleHeight) + 'px');
+            $scrollContent.css({ 'height': $tableConent.height() + 'px', 'lineHeight': $tableConent.height() + 'px', 'width': '1px' });
+        };
+
+        //监听滚动事件
+        $tableWrap.mousewheel(function (event, delta) {
+            if (delta > 0) {
+                $tableBodyWrap.scrollTop($tableBodyWrap.scrollTop() - 100);
+            } else {
+                $tableBodyWrap.scrollTop($tableBodyWrap.scrollTop() + 100);
+            }
+            $scrollWrap.scrollTop($tableBodyWrap.scrollTop());
+        });
+        $scrollWrap.scroll(function () {
+            $tableBodyWrap.scrollTop($(this).scrollTop());
+        });
+        $(window).resize(function () {
+            setHeight();
+        });
+    }
+    ScrollTable.prototype.InsertRow = function (row) {
+
+    };
+    ScrollTable.prototype.Resize = function () {
+
+    };
+    $(function () {
+        //var table = new ScrollTable({ tableWrap: $('.boxs_listtabel'), headerHeight: '32', inRuleHeight: 49, outRuleHeight: 22 });
+    });
+
+
+    (function (jQuery, window, undefined) {
+
+        var DataTableScroll = window.DTS = function (tableWrap, options) {
+            return new DTS.fn.Init(tableWrap, options);
+        }
+
+        DTS.fn = DTS.prototype = {
+            Init: function (tableWrap, options) {
+                this.options = $.extend(DTS.defaultOptions, options);
+                this.tableWrap = $(tableWrap);
+                this.objects = {
+                    $scrollWrap: null
+                    , $scrollContent: null
+                    , $tableBodyWrap: null
+                    , $tableConent: null
+                };
+
+                this.Init();
+            }
+        };
+
+        DTS.fn.Init.prototype = {
+            Init: function () {
+                this.ScrollWrap();//添加滑动区域
+
+                this.objects = {
+                    $scrollWrap: this.tableWrap.find('.scrollwrap')
+                    , $scrollContent: this.tableWrap.find('.scrollcontent')
+                    , $tableBodyWrap: this.tableWrap.find('.table-body')
+                    , $tableConent: this.tableWrap.find('.table-body table')
+                }
+                
+                //table容器样式设置
+                this.tableWrap.css({ 'position': 'relative', 'width': this.options.width });
+                //table BODY容器样式设置
+                this.objects.$tableBodyWrap.css({ 'position': 'absolute', 'width': '100%', 'overflow': 'hidden' });
+
+                var tableWrap = this.tableWrap,
+                    objects = this.objects,
+                    options = this.options;
+
+                setTimeout(function () {
+                    DTS.SetHeight(tableWrap, objects, options);
+                }, 50);
+
+                this.RegEvent();
+            }
+            , ScrollWrap: function () {
+                if (this.tableWrap.find(".scrollwrap .tablescrollwrap").length == 0) {
+                    $('<div class="scrollwrap tablescrollwrap"><div class="scrollcontent"></div></div>')
+                    .css({
+                        'position': 'absolute',
+                        'top': this.options.headerHeight + 'px',
+                        'right': '0',
+                        'zIndex': '1',
+                        'overflowX': 'hidden',
+                        'overflowY': 'scroll'
+                    })
+                    .prependTo(this.tableWrap);
+                }
+            }
+            , Height: function () { }
+            , InRuleHeight: function () { }
+            , OutRuleHeight: function () { }
+            , ReSize: function () { }
+            , ReSet: function () { }
+            , RegEvent: function () {
+                var tableWrap = this.tableWrap,
+                    objects = this.objects,
+                    options = this.options;
+
+                tableWrap.mousewheel(function (event, delta) {
+                    if (delta > 0) {
+                        objects.$tableBodyWrap.scrollTop(objects.$tableBodyWrap.scrollTop() - 100);
+                    } else {
+                        objects.$tableBodyWrap.scrollTop(objects.$tableBodyWrap.scrollTop() + 100);
+                    }
+                    objects.$scrollWrap.scrollTop(objects.$tableBodyWrap.scrollTop());
+                });
+                objects.$scrollWrap.scroll(function () {
+                    objects.$tableBodyWrap.scrollTop($(this).scrollTop());
+                });
+                $(window).resize(function () {
+                    DTS.SetHeight(tableWrap, objects, options);
+                });
+            }
+        };
+
+        DTS.SetHeight = function (tableWrap, objects, options) {
+            var tableHeight = $(window).height() - options.outRuleHeight - options.inRuleHeight;
+            tableWrap.css({ 'height': tableHeight + 'px' });
+            objects.$tableBodyWrap.css({ 'top': options.headerHeight + 'px', 'height': (tableHeight - options.headerHeight - options.inRuleHeight) + 'px' });
+            objects.$scrollWrap.css('height', (tableHeight - options.headerHeight - options.inRuleHeight) + 'px');
+            objects.$scrollContent.css({ 'height': objects.$tableConent.height() + 'px', 'lineHeight': objects.$tableConent.height() + 'px', 'width': '1px' });
+        }
+
+        DTS.defOptions = {
+            headerHeight: 0
+            , inRuleHeight: 0
+            , outRuleHeight: 0
+            , width: '100%'
+        }
+    })($, this);
+
+    $(function () {
+        var dts = DTS('.boxs_listtabel', { headerHeight: '32', inRuleHeight: 49, outRuleHeight: 22 })
+        dts.Init();
+    });
+</script>
+@using (Html.BeginForm("", "Product", FormMethod.Get, new { id = "form" }))
+{
+    <div class="caseout">
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">关联属性</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28">
+                            <option>全部</option>
+                            <option>是</option>
+                            <option>否</option>
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">属性类型</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28">
+                            <option>全部</option>
+                            <option>文本</option>
+                            <option>图片</option>
+                            <option>选项</option>
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">搜索条件</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28">
+                            <option>全部</option>
+                            <option>是</option>
+                            <option>否</option>
+                        </select>
+                    </div>
+                    <div class="search_btn m10_l fl">
+                        <input name="" type="text" class="input_ht28" value="搜索属性名称(后台)...">
+                        <button class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                </div>
+                <!--功能按钮结束-->
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div class="boxs_listtabel">
+                <div class="table-head">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+                        <thead>
+                            <tr class="even_color">
+                                <th width="180">属性名称（前台）</th>
+                                <th>属性名称（后台）</th>
+                                <th width="80">关联属性</th>
+                                <th width="80">属性类型</th>
+                                <th width="80">搜索条件</th>
+                                <th width="100">操作</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="table-body">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                        <tbody>
+
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>1选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>2选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>3选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>4选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>5选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>6选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>7选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>8选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>9选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>10选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>11选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>12选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>13选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>14选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="even_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>15选择</span></button>
+                                </td>
+                            </tr>
+                            <tr class="odd_color">
+                                <td width="180" style="text-align: left; text-indent: 10px;"><span class="blue"><a href="#">DEW458899-445</a></span></td>
+                                <td style="text-align: left; text-indent: 10px;">已发货</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="80">是</td>
+                                <td width="100">
+                                    <button class="btn btn_ht26 m5_r"><span class="icon_pencil"></span><span>16选择</span></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination clearfix" style="z-index: 100;">
+                    <b class="fl m10_l"><span class="f12 c6 bold4">共</span><span class=" m5_r m5_l f12 c3">15</span><span class="f12 c6 bold4">页</span><span class="f12 c6 m5_r m5_l bold4">|</span><span class="f12 c6 bold4">每页显示</span><span class=" m5_r m5_l f12 c3">30</span><span class="f12 c6 m5_l bold4">条</span></b>
+                    <div class="page_con fr m10_r clearfix"><a href="javascript:;" class="disabled m10_r">上一页</a> <a href="javascript:;" class="hover">1</a> <a href="javascript:;">2</a> <a href="javascript:;">3</a> ... <a href="javascript:;" class="m5_l">13</a> <a href="javascript:;">14</a> <a href="javascript:;">15</a> <a href="javascript:;" class="m5_l m0_r">下一页</a> </div>
+                </div>
+            </div>
+            <!--表格列结束-->
+
+        </div>
+
+    </div>
+}

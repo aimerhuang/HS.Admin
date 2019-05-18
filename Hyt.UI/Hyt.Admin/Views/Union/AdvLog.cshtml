@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "联盟广告日志";
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Plugins/Dialog/Dialog.yui.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+            $("#btn_search").click(function () {
+                doSearch();
+            });
+            $("#IsValid,#AdvertisementType,#UnionSiteSysNo").change(function () {
+                doSearch();
+            });
+        });
+
+        function doSearch() {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            var data = {};
+            data.UnionSiteSysNo = $("#UnionSiteSysNo").val();
+            data.AdvertisementType = $("#AdvertisementType").val();
+            data.IsValid = $("#IsValid").val();
+            data.StartTime = $("#StartTime").val();
+            data.EndTime = $("#EndTime").val();
+            $.get('@Url.Action("AdvLog", "Union")', data,
+               function (ret) {
+                   $('#paging').html(ret);
+                   mask.Remove();
+               });
+        }
+        function exportExcel() {
+            var form = $("#advlog_form");
+            form.attr('action', '@Url.Action("ExportExcel", "Union")');
+            form.submit();
+            return false;
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            @using ((Html.BeginForm("AdvLog", "Union", FormMethod.Post, new { id = "advlog_form" })))
+            {
+                <div class="boxs_tool">
+                    <div class="right_tool clearfix">
+                        <span class="fl m10_r">状态</span>
+                        @Html.DropDownList("IsValid", ViewBag.IsValid as SelectList, htmlAttributes: new { @class = "select_ht28 wd100 m10_r fl" })
+                        <span class="fl m10_r">广告类型</span>
+                        @Html.DropDownList("AdvertisementType", ViewBag.AdvertisementType as SelectList, htmlAttributes: new { @class = "select_ht28 wd100 m10_r fl" })
+                        <span class="fl m10_r">联盟</span>
+                        @Html.DropDownList("UnionSiteSysNo", ViewBag.UnionSiteSysNo as SelectList, htmlAttributes: new { @class = "select_ht28 wd100 m10_r fl" })
+                        <div class="m10_r fl">
+                            <span class="veralign_t fl">访问日期范围</span>
+                            <div class="date_btn120 fl m10_l m10_r">
+                                <input type="text" class="Wdate" id="StartTime" onfocus="WdatePicker({maxDate:'#F{$dp.$D(\'EndTime\',{d:0});}'})" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="var max=$('#EndTime').val();UI.Date({ el: 'StartTime',maxDate:max });"><span class="icon_calendar"></span></button>
+                            </div>
+                            <span class="veralign_t fl">-</span>
+                            <div class="date_btn120 fl m10_l">
+                                <input type="text" class="Wdate" id="EndTime" onfocus="WdatePicker({minDate:'#F{$dp.$D(\'StartTime\',{d:0});}'})" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="var min=$('#StartTime').val();UI.Date({ el: 'EndTime',minDate:min });"><span class="icon_calendar"></span></button>
+                            </div>
+                        </div>
+                        <button type="button" title="搜索" class="btn btn_ht28 fl btn_blue" id="btn_search"><span class="icon_search icon_white"></span><span class="m5_l">搜索</span></button>
+                    </div>
+                    <div>
+                        <button class="btn btn_ht26 btn_blue" type="button" onclick=" exportExcel() "><span class="icon_share icon_white"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                </div>
+            }
+            <div class="boxs_list">
+                <div id="paging" class="boxs_listtabel">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

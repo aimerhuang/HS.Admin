@@ -1,0 +1,585 @@
+﻿@model Hyt.Model.PdPackaged.PdPackagedGoods
+<link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+<link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+
+<script src="~/Theme/scripts/jquery.validate.yui.js"></script>
+<script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+<script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+@*导入Excel*@
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+<link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+
+<script src="~/Theme/scripts/UtilLike.js"></script>
+<style>
+    .isli {
+        width: 176px;
+        font-size: 12px;
+        border-radius: 4px;
+    }
+
+    .search_btn input {
+        width: 176px;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnExport').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });
+
+        $('#btnImport').click(function () {
+            if (window.frames["ifrmImport"].chooseFile) {
+                window.frames["ifrmImport"].chooseFile();
+            }
+        });
+
+        //修改下拉列表框为select2
+        UI.SelectWhareHouse($("#CollectWarehouseSysNo"), 0, null, "");
+    });
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+
+    //导入excel回调方法
+    function importCallBack(res) {
+        res = JSON.parse(res);
+        if (res.Status) {//成功
+            UI.tips.tip_alert("tips_success", res.Message);
+            for (var i = 0; i < res.listModel.length; i++) {
+                var count = $("#v_tboody").children("tr").length;
+                if (count == 1)
+                {
+                    var productCode = $("#v_tboody").children("tr").children().siblings().eq(1).children().children().siblings().eq(0).val();
+                    if (productCode == "")
+                    {
+                        $("#v_tboody").children("tr").eq(0).remove();
+                        count = 0;
+                    }
+                }
+            var html = "";
+            if (count % 2 == 0) {
+                html += "<tr class='stag_color'>";
+            } else {
+                html += "<tr>";
+            }
+            html += "<td class='hh' >" + (count + 1) + "</td>";
+            html += '<td><div class="search_btn fl m5_r" style="width: 218px;">';
+            html += '<input type="text" value="' + res.listModel[i].PdCode + '" id="PdCode" name="PdCode" class="input_ht26 isli ProductCode valid" style="width: 176px;" readonly="" onclick="SelectProduct(this)">';
+            html += '<input type="hidden" value="' + res.listModel[i].PdSysNo + '" class="ProductSysNo">';
+            html += '<button id="search_customer" class="btn btn_ht26" title="搜索" type="button" onclick="SelectProduct(this)"><div class="icon_search"></div></button></td>';
+            html += '<td class="ProductName">' + res.listModel[i].PdName + '</td>';
+            html += '<td><input type="text" value="' + res.listModel[i].Company + '" class="Company wd50 valid"></td>';
+            html += '<td><input type="text" class="UnitPrice wd50 valid" value="' + res.listModel[i].UnitPrice + '"></td>';
+            html += '<td><input type="text" class="Count wd50 valid" value="' + res.listModel[i].Count + '"></td>';
+            html += '<td><select class="WarehouseSysNo wd150 valid">';
+            html += '<option value="' + res.listModel[i].WarehouseSysNo + '">' + res.listModel[i].WarehouseName + '</option>';
+            html += '</select></td>';
+            html += '<td><input type="text" value="' + res.listModel[i].Remarks + '" class="Remarks valid"></td>';
+            html += '<td><button type="button" onclick="AddDt()">';
+            html += '<span class="icon icon_plus"></span>';
+            html += '</button>';
+            html += '<button type="button" onclick="DeleteDy(this)" class="m10_l">';
+            html += '<span class="icon_forbidden"></span>';
+            html += '</button>';
+            html += '</td>';
+            html += '</tr>';
+            $("#v_tboody").append(html);
+           }
+        } else {//失败
+            UI.tips.tip_alert("tips_wrong", res.Message);
+        }
+    }
+</script>
+
+<form id="inputForm">
+    <div class="boxs case">
+        <div class="caseout" style="margin-bottom:50px;">
+            <div class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                @Html.HiddenFor(p=>p.SysNo)
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>单据编号：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input type="text" value="@(Model.Code)" id="Code"  name="Code" readonly  />
+                                    <span class="prompt m10_l">单据编号,唯一值,不允许重复存在</span>
+                                </td>
+                               
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>套装代码：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input type="text" value="@(Model.SetCode)" id="SetCode" required name="SetCode" @(Model.SysNo > 0 ? "readonly" : string.Empty) />
+                                    <span class="prompt m10_l">套装代码,唯一值,不允许重复存在</span>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>套装名称：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input type="text" value="@(Model.SetName)" id="SetName" required name="SetName" @(Model.SysNo > 0 ? "readonly" : string.Empty) />
+                                    <span class="prompt m10_l">套装名称</span>
+                                </td>
+
+                                <td style="width: 10%;" class="nameright border_rnone"><span class="v_star">*</span>套装数量：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <input type="text" value="@(Model.SetCount == 0 ? 1 : Model.SetCount)" required id="SetCount" name="SetCount" @(Model.SysNo > 0 ? "readonly" : string.Empty) />
+                                    <span class="prompt m10_l">套装数量</span>
+                                </td>
+                            </tr>
+
+
+                            <tr>
+                                <td style="width: 10%;" class="nameright border_rnone">备注：</td>
+                                <td style="width: 40%" class="border_right">
+                                    <textarea id="Remarks" name="Remarks">@(Model.Remarks)</textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="tit_dispay tit_dispay_2 m10_t" onclick="yc(this)" style="border-left: #c9c9c9 solid 1px; border-right: #c9c9c9 solid 1px; border-bottom: #c9c9c9 solid 1px; ">
+                    <div class="more10r m5_t">
+                        <span class="btn_arrow btn_tableup"></span>
+                    </div>
+                    <h5 class="accordingtitle">
+                        <span class=""></span>
+                        套装商品
+                    </h5>
+                </div>
+                <div class="boxs_listtabel " style="border-bottom: 1px solid #c1c1c1; max-height: 450px; overflow-y: scroll; ">
+                    <div class="boxs_tool" style="border-left: #c9c9c9 solid 1px; border-right: #c9c9c9 solid 1px; ">
+                        <!--搜索开始-->
+                        <div class="right_tool clearfix" style="@(Model.SysNo>0?"display:none;":string.Empty)">
+                            <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m5_l btn_blue">
+                                <span class="icon_importing icon_white m5_r"></span><span>导入</span>
+                            </button>
+                            <iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("ImportWhInventoryExcel")" class="hide"></iframe>
+                            <button type="button" class="btn btn_ht26 m10_l" id="btnExport" title="下载模板">
+                                <span class="icon_download_alt"></span>
+                                <span class="m5_l">下载模板</span>
+                            </button>
+                        </div>
+                        <!--搜索结束-->
+                    </div>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone">
+                        <thead>
+                            <tr>
+                                <th width="50">行号</th>
+                                <th width="200">商品代码</th>
+                                <th width="150">商品名称</th>
+                                <th width="150">单位</th>
+                                <th width="150">单价</th>
+                                <th width="150">用量</th>
+                                <th width="150">发料仓库</th>
+                                <th width="150">备注</th>
+                                <th width="150" style="@(Model.SysNo>0?"display:none;":string.Empty)">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="v_tboody">
+                            @{
+                                if (Model.PdList != null && Model.PdList.Count > 0)
+                                {
+                                    foreach (var item in Model.PdList)
+                                    {
+                                        <tr @(Model.PdList.IndexOf(item) % 2 == 0 ? "class=stag_color" : "")>
+                                            <td>@(Model.PdList.IndexOf(item) + 1)</td>
+                                            <td>@item.PdCode</td>
+                                            <td>@item.PdName</td>
+                                            <td>@(item.Company=="null"?string.Empty:item.Company)</td>
+                                            <td>@item.UnitPrice</td>
+                                            <td>@item.Count</td>
+                                            <td>@item.WarehouseName</td>
+                                            <td>@(item.Remarks == "无" ? string.Empty : item.Remarks)</td>
+                                        </tr>
+                                    }
+                                }
+
+                                if (Model.SysNo == null)
+                                {
+                                    <tr class='stag_color'>
+                                        <td class="hh">1</td>
+                                        <td>
+                                            <div class="search_btn fl m5_r" style="width: 218px;">
+                                                <input type="text" value="" id="PdCode" name="PdCode" class="input_ht26 isli ProductCode" style="width: 176px;" readonly onclick="SelectProduct(this)" />
+                                                <input type="hidden" value="" class="ProductSysNo" />
+                                                <button id="search_customer" class="btn btn_ht26" title="搜索" type="button" onclick="SelectProduct(this)">
+                                                    <div class="icon_search"></div>
+                                                </button>
+                                            </div>
+                                        </td>
+                                        <td class="ProductName"></td>
+                                        <td><input type="text" class="Company wd50" /></td>
+                                        <td><input type="text" class="UnitPrice wd50" value="0.00" /></td>
+                                        <td><input type="text" class="Count wd50" value="0.00" /></td>
+                                        <td><select class="WarehouseSysNo wd150"></select></td>
+                                        <td><input type="text" value="" class="Remarks" /></td>
+                                        <td>
+                                            <button type="button" onclick="AddDt()">
+                                                <span class="icon icon_plus"></span>
+                                            </button>
+                                            <button type="button" onclick="DeleteDy(this)" class="m10_l">
+                                                <span class="icon_forbidden"></span>
+                                            </button>
+
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+
+                <div class="tit_con m10_t ">
+                    <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>创建人：</td>
+                                <td>
+                                    <input type="text" id="CreatedName" name="CreatedName" value="@(Model.SysNo>0 ? Model.CreatedName:ViewBag.AdminName)" readonly>
+                                    <input type="hidden" id="CreatedBy" name="CreatedBy" value="@(Model.SysNo > 0 ? Model.CreatedBy : ViewBag.AdminSysNo)" />
+                                    <span class="prompt m10_l">创建人名称</span>
+                                </td>
+
+                                <td style="width: 10%" class="nameright border_rnone">创建日期：</td>
+                                <td style="width: 40%">
+                                    <input type="text" id="CreatedDate" name="CreatedDate" readonly value="@(Model.SysNo > 0 ? Model.CreatedDate :DateTime.Now)" />
+                                    <span class="prompt m10_l">创建日期</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">审核人员：</td>
+                                <td class="border_right">
+                                   <input type="text" id="AuditorName" name="AuditorName"  value="@Model.AuditorName" readonly>
+                                   @Html.HiddenFor(p => p.Auditor)
+                                   <span class="prompt m10_l">审核人员名称</span>
+                                </td>
+                                <td class="nameright border_rnone">审核人员日期：</td>
+                                <td>
+                                    <input type="text" id="AuditorDate" name="AuditorDate" readonly   value="@Model.AuditorDate" />
+                                    <span class="prompt m10_l">审核人员日期</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <table style="  position:fixed;bottom:0; _position:absolute;_margin-top:expression(this.style.pixelHeight+document.documentElement.scrollTop); width:100%; ">
+            <tr>
+                <td colspan="2" class="aui_footer">
+                    <div class="aui_buttons">
+                        <button class="aui_state_highlight" id="btnSubmit" type="button" style="@(Model.SysNo>0 ? "display:none;" : "")">
+                            <span class="icon_pencil icon_white"></span>
+                            提交
+                        </button>
+                        <button type="button" onclick="document.location.href = '/Product/PdPackagedGoodsList?id=@(ViewBag.PageIndex)'">
+                            <span class="icon_share_alt"></span>
+                            返回套装商品管理
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#inputForm").validate({
+            errorPlacement: function (error, element) {
+                if (jQuery('#' + element.attr("id")).parent().find('span').length == 0) {
+                    jQuery('#' + element.attr("id")).parent().parent().find('span').attr('class', 'error m10_l');
+                } else
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                if (jQuery('#' + element.attr("id")).parent().find('span').length == 0) {
+                    jQuery('#' + element.attr("id")).parent().parent().find('span').attr('class', 'success m10_l');
+                } else
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+
+
+
+    });
+
+    function yc() {
+        if ($(".boxs_listtabel").is(":hidden")) {
+            $(".boxs_listtabel").show();
+            $(".btn_tabledown").removeClass("btn_tabledown").addClass("btn_tableup");
+        } else {
+            $(".boxs_listtabel").hide();
+            $(".btn_tableup").removeClass("btn_tableup").addClass("btn_tabledown");
+        }
+    }
+
+    ///提交
+    $("#btnSubmit").click(function () {
+        if ($("#inputForm").valid()) {
+            UI.Confirm({
+                content: '确认提交？',
+                ok: function () {
+                    AddWhInventoryReporList();
+                },
+                cancel: true
+            });
+        }
+    })
+
+
+    //提交
+    function AddWhInventoryReporList() {
+        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+        //商品代码
+        var ProductCode = "";
+        $(".ProductCode ").each(function () {
+            ProductCode += $(this).val() + ",";
+        });
+
+        //商品系统编号
+        var ProductSysNo = "";
+        $(".ProductSysNo ").each(function () {
+            ProductSysNo += $(this).val() + ",";
+        });
+
+
+        //商品名称
+        var ProductName = "";
+        $(".ProductName").each(function () {
+            ProductName += $(this).html() + ",";
+        });
+
+        //单位
+        var Company = "";
+        $(".Company ").each(function () {
+            if ($(this).val() == "") {
+                Company += "null,";
+            } else {
+                Company += $(this).val() + ",";
+            }
+        });
+
+        //单价
+        var UnitPrice = "";
+        $(".UnitPrice").each(function () {
+            UnitPrice += $(this).val() + ",";
+        });
+
+        //用量
+        var Count = "";
+        $(".Count").each(function () {
+            Count+= $(this).val() + ",";
+        });
+
+        //	发料仓库编号
+        var WarehouseSysNo = "";
+        $(".WarehouseSysNo").each(function () {
+            WarehouseSysNo += $(this).val() + ",";
+        });
+
+
+        //	发料仓库名称
+        var WarehouseName = "";
+        $(".WarehouseSysNo").each(function () {
+            WarehouseName += $(this).find("option:selected").text() + ",";
+        });
+
+        //备注
+        var Remarks = "";
+        $(".Remarks").each(function () {
+            if ($(this).val() == "") {
+                Remarks +="无^";
+            } else {
+                Remarks += $(this).val() + "^";
+            }
+        });
+        if (ProductCode == "" || ProductCode == ",")
+        {
+            UI.tips.tip_alert('tips_wrong', "请选择商品!");
+            mask.Remove();
+            return;
+        }
+        var json = {
+            "Code": $("#Code").val(),//单据编号
+            "SetCode": $("#SetCode").val(),//套装代码
+            "SetName": $("#SetName").val(),//套装名称
+            "SetCount": $("#SetCount").val(),//套装数量
+            "Remarks": $("#Remarks").val(),//备注
+            "CreatedBy": $("#CreatedBy").val(),//创建人
+            "CreatedName": $("#CreatedName").val(),//创建人名称
+            "CreatedDate": $("#CreatedDate").val(),//创建时间
+            "Auditor": $("#Auditor").val(),//审核人员
+            "AuditorName": $("#AuditorName").val(),//审核人员名称
+            "AuditorDate": $("#AuditorDate").val(),//审核日期
+            "PdCode": ProductCode,//商品代码
+            "PdSysNo": ProductSysNo,//商品系统编号
+            "PdName": ProductName,//商品名称
+            "Company": Company,//单位
+            "UnitPrice": UnitPrice,//单价
+            "Count": Count,//用量
+            "WarehouseSysNo": WarehouseSysNo,//发料仓库系统编号
+            "WarehouseName": WarehouseName,//发料仓库名称
+            "RemarksTo": Remarks//备注
+        }
+        $.post("/Product/EditPdPackagedGoods", json, function (data) {
+            if (data.Message != "成功!") {
+                UI.tips.tip_alert('tips_wrong', data.Message);
+            } else {
+                UI.tips.tip_alert('tips_success', data.Message);
+                document.location.href = '/Product/PdPackagedGoodsList??id=@(ViewBag.PageIndex)';
+            }
+            mask.Remove();
+        });
+
+    }
+
+    ///增加商品信息
+    function AddDt() {
+        var count = $("#v_tboody").children("tr").length;
+        var html = "";
+        if (count % 2 == 0) {
+            html += "<tr class='stag_color'>";
+        } else {
+            html += "<tr>";
+        }
+        html += "<td class='hh' >" + (count + 1) + "</td>";
+        html += '<td><div class="search_btn fl m5_r" style="width: 218px;">';
+        html += '<input type="text" value="" id="PdCode" name="PdCode" class="input_ht26 isli ProductCode valid" style="width: 176px;" readonly="" onclick="SelectProduct(this)">';
+        html+='<input type="hidden" value="" class="ProductSysNo" />';
+        html+='<button id="search_customer" class="btn btn_ht26" title="搜索" type="button" onclick="SelectProduct(this)">';
+        html+='<div class="icon_search"></div>';
+        html+='</button>';
+        html+='</div></td>';
+        html += '<td class="ProductName"></td>';
+        html += '<td><input type="text" class="Company wd50 valid"></td>';
+        html += '<td><input type="text" class="UnitPrice wd50 valid" value="0.00"></td>';
+        html += '<td><input type="text" class="Count wd50 valid" value="0.00"></td>';
+        html += '<td><select class="WarehouseSysNo wd150 valid"></select></td>';
+        html += '<td><input type="text" value="" class="Remarks valid"></td>';
+        html+='<td><button type="button" onclick="AddDt()">';
+        html+='<span class="icon icon_plus"></span>';
+        html+='</button>';
+        html+='<button type="button" onclick="DeleteDy(this)" class="m10_l">';
+        html+='<span class="icon_forbidden"></span>';
+        html+='</button>';
+        html+='</td>';
+        html += '</tr>';
+        $("#v_tboody").append(html);
+    }
+
+    ///删除商品信息
+    function DeleteDy(th) {
+        var count = $("#v_tboody").children("tr").length;
+        if (count > 1) {
+            $(th).parent().parent().remove();
+            for (var i = 0; i < (count - 1) ; i++) {
+                $(".hh").eq(i).html(i + 1);
+            }
+        } else {
+            UI.tips.tip_alert("tips_wrong", "至少需要一件商品!");
+        }
+    }
+
+
+
+    function SelectProduct(th) {
+        var selectproduct = [];
+        DAO.SelectProduct({
+            selectStockProduct: 1,
+            selectedProducts: selectproduct,
+            selectedIsReadOnly: true,
+            syncWebFront: true,
+            onselect: function (data) {
+                var cw = "";
+                for (var i = 0; i < data.length; i++) {
+                    var rtn = GetWhWarehouse(data[i].pid);
+                    if (rtn.Data.length == 0) {
+                        cw += data[i].name + ",";
+                        continue;
+                    }
+                    if (i == 0) {
+                        $(th).parent().parent().parent().children().siblings().eq(1).children().children(".ProductCode").val(data[i].erp); //商品代码
+                        $(th).parent().parent().parent().children().siblings().eq(1).children().children(".ProductSysNo ").val(rtn.Data[0].PrSysNo); //商品编号
+                        $(th).parent().parent().parent().children(".ProductName").html(data[0].name);
+                        for (var ii = 0; ii < rtn.Data.length; ii++) {
+                            $(th).parent().parent().parent().children().siblings().eq(6).children(".WarehouseSysNo").append('<option value="' + rtn.Data[ii].WhSysId + '">' + rtn.Data[ii].WhBackWarehouseName + '</option>');
+                        }
+                        $(th).parent().parent().parent().children().siblings().eq(4).children(".UnitPrice").val(data[i].price[0].price); //商品价格
+                    } else {
+                        var count = $("#v_tboody").children("tr").length;
+                        var html = "";
+                        if (count % 2 == 0) {
+                            html += "<tr class='stag_color'>";
+                        } else {
+                            html += "<tr>";
+                        }
+                        html += "<td class='hh' >" + (count + 1) + "</td>";
+                        html += '<td><div class="search_btn fl m5_r" style="width: 218px;">';
+                        html += '<input type="text" value="' + data[i].erp + '" id="PdCode" name="PdCode" class="input_ht26 isli ProductCode valid" style="width: 176px;" readonly="" onclick="SelectProduct(this)">';
+                        html += '<input type="hidden" value="' + rtn.Data[0].PrSysNo + '" class="ProductSysNo">';
+                        html += '<button id="search_customer" class="btn btn_ht26" title="搜索" type="button" onclick="SelectProduct(this)">';
+                        html += '<div class="icon_search"></div>';
+                        html += '</button>';
+                        html += '</div></td>';
+                        html += '<td class="ProductName">' + data[i].name + '</td>';
+                        html += '<td><input type="text" value="" class="Company wd50 valid"></td>';
+                        html += '<td><input type="text" value=' + data[i].price[0].price + ' class="UnitPrice wd50 valid" value="0.00"></td>';
+                        html += '<td><input type="text" class="Count wd50 valid" value="0.00"></td>';
+                        html += '<td><select class="WarehouseSysNo wd150 valid">';
+                        for (var ii = 0; ii < rtn.Data.length; ii++) {
+                            html += '<option value="' + rtn.Data[ii].WhSysId + '">' + rtn.Data[ii].WhBackWarehouseName + '</option>';
+                        }
+                        html += '</select></td>';
+                        html += '<td><input type="text" value="" class="Remarks valid"></td>';
+                        html += '<td><button type="button" onclick="AddDt()">';
+                        html += '<span class="icon icon_plus"></span>';
+                        html += '</button>';
+                        html += '<button type="button" onclick="DeleteDy(this)" class="m10_l">';
+                        html += '<span class="icon_forbidden"></span>';
+                        html += '</button>';
+                        html += '</td>';
+                        html += '</tr>';
+                        $("#v_tboody").append(html);
+                    }
+                }
+                if (cw != "") {
+                    UI.tips.tip_alert('tips_wrong', '商品名称：' + cw + '未入库,无法使用此商品！');
+                }
+            }
+        });
+    }
+
+    //商品仓库信息
+    function GetWhWarehouse(sysNo) {
+        var rtn;
+        $.ajax({
+            cache: true,
+            type: "POST",
+            url: "/InventorySheet/GetWhWarehouse",
+            data: { "sysNo": sysNo},
+            async: false,
+            success: function (data) {
+                rtn = data;
+            }
+        });
+        return rtn;
+    }
+</script>

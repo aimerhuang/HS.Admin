@@ -1,0 +1,91 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBRcReturn>
+@{
+    var printStyle = "";
+    var shopPrintStyle = "";
+    if (ViewBag.ActionFrom == "Shop")
+    {
+        printStyle = "style=display:none";
+        shopPrintStyle = "";
+    }
+    else
+    {
+        printStyle = "";
+        shopPrintStyle = "style=display:none";
+    }
+
+}
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="90">RMA单号</th>
+                <th width="8%">RMA类型</th>
+                <th width="90">销售单号</th>
+                <th width="100">会员帐号</th>
+                <th width="9%">退还金额</th>
+
+                <th width="8%">申请单来源</th>
+                <th width="8%">处理部门</th>
+                <th>入库仓库</th>
+                <th width="120">创建时间</th>
+                <th width="100">退换货单状态</th>
+                <th width="81">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                <tr>
+                    <td colspan="11" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CBRcReturn>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    }
+
+                    if (ViewBag.ActionFrom != "Shop" && item.RmaType == (int) Hyt.Model.WorkflowStatus.RmaStatus.RMA类型.售后换货)
+                    {
+                        printStyle = "style=display:none";
+                    }
+                    else
+                    {
+                        printStyle = "";
+                    }
+
+                    <td class="blue"><a href="javascript:navigateTo(@item.SysNo, @item.RmaType, @item.Status);">@item.SysNo</a></td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.RmaStatus.RMA类型), item.RmaType)</td>
+                <td class="blue"><a href="javascript:OpenOrderView(@item.OrderSysNo)">@item.OrderSysNo</a></td>
+                <td class="blue"><a href="javascript:void(0)" onclick="browseUserInfo(@item.CustomerSysNo)">@item.CustomerAccount</a></td>
+                <td align="right" class="red p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.RefundTotalAmount, 2))</td>
+                    
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.RmaStatus.退换货申请单来源), item.Source)</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.RmaStatus.退换货处理部门), item.HandleDepartment)</td>
+                <td>@item.BackWarehouseName</td>
+                <td>@item.CreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.RmaStatus.退换货状态), item.Status)</td>
+                    <td>
+                    <button class="btn btn_ht26" onclick="Print(@item.SysNo)" @printStyle><span class="icon_print"></span><span class="m5_l">打印</span></button></td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+

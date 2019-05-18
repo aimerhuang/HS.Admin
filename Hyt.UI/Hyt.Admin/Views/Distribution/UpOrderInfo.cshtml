@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "UpOrderInfo";
+    //var canAudit = (bool)ViewBag.canAudit;
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.Transfer.CBDsOrder
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>升舱订单详细</title>
+</head>
+<body>
+    <div class="p10">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="80" class="nameright">店铺账号:</td>
+                            <td width="134" class="border_right">@Model.ShopAccount</td>
+
+                            <td width="80" class="nameright">店铺名称:</td>
+                            <td class="border_right">@Model.ShopName</td>
+                            <td width="120" rowspan="4">
+                                <div style="width:118px; height:147px; border:1px solid #d6d6d6;">
+                                    <img src="" onerror="javascript:this.src='/Theme/images/defaultpic.gif'" width="118" height="147" alt="" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">订单号:</td>
+                            <td class="border_right" colspan="3"><a style="color:blue;" href="javascript:OrderBrowse(@Model.OrderSysNo);">@Model.OrderSysNo</a></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">购买人:</td>
+                            <td class="border_right">@Model.CustomerName</td>
+                            <td class="nameright">联系电话:</td>
+                            <td class="border_right">@Model.MobilePhoneNumber</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">购买数量:</td>
+                            <td class="border_right">@Model.Quantity</td>
+                            <td class="nameright">状态:</td>
+                            <td class="border_right">@Model.OnlineStatus</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">商品名称:</td>
+                                <td colspan="4">@Model.ProductName</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+<script type="text/javascript">
+    //订单详情
+    function OrderBrowse(orderSysNo) {
+        @{
+           @:OpenOrderView(orderSysNo);
+               // @:UI.OpenCreatTab("订单:" + orderSysNo, "/Order/OrderDetail/" + orderSysNo);
+            }
+                
+    }
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 1250, height: 850 }, false);
+    }
+</script>

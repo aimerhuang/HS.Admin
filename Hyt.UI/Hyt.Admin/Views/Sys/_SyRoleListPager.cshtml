@@ -1,0 +1,124 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.SyRole>
+<style type="text/css">
+    td{ word-break: break-all;}
+</style>
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="100"  style="display:none">角色系统编号</th>
+                <th  width="200">角色名称</th>
+                <th>角色描述</th>
+                <th width="60">状态</th>
+                <th width="220">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var mode = Model.TData as List<Hyt.Model.SyRole>;
+                if (mode != null)
+                {
+                    foreach (var item in mode)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }else{
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                        <td style="display:none">@item.SysNo<input type="hidden" value="@item.SysNo" /></td>
+                        <td>@item.RoleName</td>
+                        <td align="left" class="p10_l p10_r">@item.Description
+                        </td>
+                        <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.角色状态), item.Status)</td>
+                        <td>@if (item.Status == 0)
+                            {
+                                <button class="changeStatus btn_blue btn btn_ht26 SY1004701"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button>
+                            }
+                            else
+                            {
+                                <button class="changeStatus btn_red btn btn_ht26 SY1004701"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button>
+                            }<button class="editRole btn btn_ht26 btn_blue m10_l SY1004201"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button class="deleteRole btn btn_ht26 m10_l btn_red SY1004401"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                        @Html.Raw("</tr>")
+                                                                      i++;
+                    }
+                }
+                else
+                {
+                    <td colspan="4">暂无数据</td>
+                }
+                
+            }
+        </tbody>
+    </table>
+</div>
+<!--表格列结束-->
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        //修改弹出
+        $(".editRole").click(function() {
+            var sysNo = $(this).closest("tr").find("input:hidden").val();
+            UI.DialogOpen('/Sys/SyRoleCreate/' + sysNo, {
+                width: 600,
+                height: 558,
+                title: '编辑角色'
+            }, false);
+        });
+        //启用（禁用）
+        $(".changeStatus").click(function() {
+            var sysNo = $(this).closest("tr").find("input:hidden").val();
+            var title = $(this).find(".m5_l").text();
+            UI.Confirm({
+                content: '您确定要' + title + '该角色？', ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Sys/ChangeRoleStatus",
+                        data: "sysNo=" + sysNo,
+                        success: function (ret) {
+                            if (ret.Status) {
+                                doSearch();
+                                //Utils.alert(title+"成功", function () {
+                                //    doSearch();
+                                //});
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+           
+        });
+        //删除
+        $(".deleteRole").click(function() {
+            var sysNo = $(this).closest("tr").find("input:hidden").val();
+            UI.Confirm({
+                content: '您确定要删除该角色？', ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Sys/RemoveRole",
+                        data: "sysNo=" + sysNo,
+                        success: function (ret) {
+                            if (ret.Status) {
+                                Utils.alert("删除成功", function () {
+                                    doSearch();
+                                }, "succeed");
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+           
+        });
+    })
+</script>

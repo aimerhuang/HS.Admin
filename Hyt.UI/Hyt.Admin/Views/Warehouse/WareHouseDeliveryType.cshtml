@@ -1,0 +1,111 @@
+﻿@model IList<Hyt.Model.WhWarehouse>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "仓库快递方式维护";   
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.WH1007201, ".WH1007201")  
+}
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <div>
+                    <span class="veralign_t fl">仓库</span>
+                    <div class="m10_l fl">
+                        <select class="select_ht28 wd150" id="WareHouse" name="WareHouse">
+                            @foreach (var item in Model)
+                            {
+                                <option value="@item.SysNo" class="wd120">@item.WarehouseName</option> 
+                            }
+                        </select>
+                    </div>
+
+                    <button class="btn btn_ht26 m10_l WH1007201" onclick="AddWareHouseDeliveryType()"><span class="icon icon_plus"></span><span class="m5_l">添加常用快递</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        $(function () {
+            $("#WareHouse").change(function () {
+                LoadWareHouseDeliveryType();
+                //  setDefaultValue();
+            });
+            //初始加载
+            LoadWareHouseDeliveryType();
+
+        });
+
+        //加载选择的仓库的仓库快递方式信息列表
+        function LoadWareHouseDeliveryType() {
+            $.get('@Url.Action("WareHouseDeliveryTypeList", "Warehouse")',
+                 { WarehouseSysNo: $("#WareHouse").val() },
+                 function (data) {                     
+                     $('#paging').html(data);
+                 });
+        }
+        //查看弹出窗
+        function LookDeliveryType(sysno) {
+            var url = '@Url.Action("DeliveryTypeView", "Logistics")' + '?sysno=' + sysno;
+            UI.DialogOpen(url, { title: '查看配送方式', width: 800, height: 310 }, false);
+        }
+        //新增弹出窗
+
+        function AddWareHouseDeliveryType() {
+            //var whSysNoFilter = [];
+            //$("#item_list input[name='sysno']").each(function () {
+            //    whSysNoFilter.push($(this).val());
+            //});
+
+            DAO.SelectDeliveryType({
+                // sysNoFilter: whSysNoFilter,
+                WareHouseSysNo: $("#WareHouse").val(),
+                callBack: function (data) {
+                    $.post('@Url.Action("AddWareHouseDeliveryType")', { whSysNo: $("#WareHouse").val(), deliveryTypeSysNo: data.AsDelimited(",") }, function () {
+                        LoadWareHouseDeliveryType(); //刷新列表
+                        UI.Alert({
+                            content: "添加成功",
+                            icon: "succeed",
+                        });
+                    }
+                    );
+                }
+            });
+            }
+
+            //删除仓库快递方式
+
+            function DelWareHouseDeliveryType(sysno) {
+                UI.Confirm({
+                    content: "您确定删除吗？",
+                    ok: function () {
+                        $.post('@Url.Action("DeleteWareHouseDeliveryType")', { sysno: sysno }, function (data, status) {
+                            LoadWareHouseDeliveryType(); //刷新列表
+                            UI.tips.tip_alert('tips_shrot tips_success', '删除成功！');
+                            //UI.Alert({
+                            //    content: "删除成功",
+                            //    icon: "succeed",
+                            //});
+                        }
+                        );
+                    },
+                }
+            );
+            }
+
+    </script>
+}

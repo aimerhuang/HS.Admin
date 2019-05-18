@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "GetPosReturnSellManageViewData";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p10">
+    <div class="boxs_detail_dispay boxs_con_c1">
+        <div class="tit_con">
+            <form method="POST" id="form1" name="form1">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone border_bnone">
+                    <tbody>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">销售单号:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).SellOrderNumber)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">退货单号:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).SerialNumber)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">营业员:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).Clerker)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">退货时间:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).ReturnTime.ToString("yyyy-MM-dd"))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">退货数量:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).TotalNum)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">退款金额:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).TotalReturnValue)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">实退金额:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).TotalMayReturnValue)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">抵消积分:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsPosReturnOrder).ReturnPoint)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="boxs_con_c1 m5_t border_tnone">
+        <div class="boxs_listtabel">
+            <!--/表格列表区-->
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                <thead>
+                    <tr>
+                        <th width="20%">商品编号</th>
+                        <th width="30%">商品名称</th>
+                        <th width="10%">商品条码</th>
+                        <th width="8%">退货数量</th>
+                        <th width="8%">需退金额</th>
+                        <th width="8%">实退金额</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var indx = 0;
+                        foreach (var item in ViewBag.ItemList as List<Hyt.Model.Pos.CBDsPosReturnOrderItem>)
+                        {
+                            <tr @(indx % 2 == 0 ? "" : "class = stag_color")>
+                                <td>
+                                    @item.SysNo
+                                </td>
+                                <td>@item.ProductName</td>
+                                <td>@item.CodeBar</td>
+                                <td>@item.ReturnNum</td>
+                                <td>@item.ReturnValue</td>
+                                <td>@item.ReturnTotalValue</td>
+                            </tr>
+                            indx++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="padding:20px;" align="center">
+        <button type="button" id="btnBack" title="返回" class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href = '/DsPosManage/GetPosReturnSellManagePage'">
+            <span>返回</span>
+        </button>
+    </div>
+</div>

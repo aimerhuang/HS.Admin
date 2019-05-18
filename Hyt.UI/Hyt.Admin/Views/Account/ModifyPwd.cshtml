@@ -1,0 +1,159 @@
+﻿@{
+    ViewBag.Title = "修改密码";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Hyt.Model.SyUser 
+<link href="/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all"/>
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+}
+<div class="case"> 
+  <!--用户提示-->
+  <div class="box_dis m20_b">
+    <div class="box_con3">
+      <div class="bold f14">个人信息:</div>
+      
+      <div class="m10_t c6 editpw_pwbox">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80" align="right"><span class="v_star">*</span>姓名：</td>
+            <td width="200">
+                <input type="text" value="@Model.UserName" maxlength="20" id="txtUserName" name="txtUserName" class="m5_l wd160 m10_r">
+            </td>
+          <td width="80" align="right">帐号：</td>
+          <td><span class="m5_l c6">@Model.Account</span></td>
+        </tr>
+          <tr>
+              <td width="80" align="right"><span class="v_star">*</span>手机：</td>
+              <td width="200">
+                  <input type="text" value="@Model.MobilePhoneNumber" class="m5_l wd160 m10_r" name="txtMobilePhoneNumber" maxlength="11" id="txtMobilePhoneNumber">
+              </td>
+              <td width="80" align="right">邮件：</td>
+              <td>
+                  <input type="text" value="@Model.EmailAddress" name="txtEmailAddress" maxlength="100" id="txtEmailAddress" class="wd160 m10_r m5_l">
+              </td>
+          </tr>
+          <tr>
+          <td width="80" align="right">&nbsp;</td>
+              <td width="200"><button id="saveInfo" class="btn btn_ht30 btn_blue m5_l">
+                                  <span class="icon_save icon_white"></span>
+                                  <span>保存</span>
+                              </button></td>
+              <td>&nbsp;</td>
+        </tr>
+      </table>
+      </div>      
+      
+    </div>
+
+  </div>
+  <!--修改密码-->
+  <div class="box_dis m20_b">
+    <div class="box_con3">
+      <div class="bold f14">修改密码:</div>
+      
+      <div class="editpw_pwbox m10_t c6">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80" align="right"><span class="v_star">*</span>旧密码</td>
+          <td width="200"><span class="m5_l c9"><input name=""  type="password" class="wd160" id="oldPassword" /></span></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td width="80" align="right"><span class="v_star">*</span>新密码</td>
+          <td width="200"><span class="m5_l c9"><input name=""  type="password" class="wd160" id="newPassword" /></span></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td width="80" align="right"><span class="v_star">*</span>再次输入</td>
+          <td width="200"><span class="m5_l c9"><input name=""  type="password" class="wd160" id="newPassword2" /></span></td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td width="80" align="right">&nbsp;</td>
+            <td width="200">
+                <button class="btn btn_ht30 btn_blue m5_l" id="savePwd">
+                    <span class="icon_save icon_white"></span>
+                    <span>保存</span>
+                </button>
+            </td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+      </div>      
+      
+    </div>
+
+  </div>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#savePwd").click(function () {
+            if (checkPwdForm()) {
+                Ajax.post("/Account/ModifyPassword/", "",
+                    function(p) {
+                        p.setParams("oldPassword", $('#oldPassword').val());
+                        p.setParams("newPassword", $('#newPassword').val());
+                    }, function(data) {
+                        if (data.Status) {
+                            tips('tips_success', '密码修改成功');
+                        } else {
+                            tips('tips_warning', data.Message);
+                        }
+                    });
+                $('input[type="password"]').val('');
+            }
+        });
+        $("#saveInfo").click(function () {
+            if (checkInfoForm()) {
+                Ajax.post("/Account/ModifyUserInfo/", "",
+                    function (p) {
+                        p.setParams("userName", $('#txtUserName').val());
+                        p.setParams("MobilePhoneNumber", $('#txtMobilePhoneNumber').val());
+                        p.setParams("EmailAddress", $('#txtEmailAddress').val());
+                    }, function (data) {
+                        if (data.Status) {
+                            tips('tips_success', '用户信息修改成功');
+                        } else {
+                            tips('tips_warning', data.Message);
+                        }
+                    });
+            }
+        });
+    });
+    function checkPwdForm() {
+        if ($("#oldPassword").val() == '') {
+            tips('tips_warning', '旧密码不能为空');
+            return false;
+        }
+        if ($("#newPassword").val() == '') {
+            tips('tips_warning', '新密码不能为空');
+            return false;
+        }
+        if ($("#newPassword").val() != $("#newPassword2").val()) {
+            tips('tips_warning', '新密码两次输入不一致');
+            return false;
+        }
+        return true;
+    }
+    function checkInfoForm() {
+        var mobile = /^(((13[0-9]{1})|(14[0-9]{1})|(15[0-9]{1})|(18[0-9]{1}))+\d{8})$/;
+        var emial = /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/i;
+        if ($.trim($('#txtUserName').val()) == ''){
+            tips('tips_warning', '请填写用户姓名');
+            return false;
+        }
+        if (!mobile.test($('#txtMobilePhoneNumber').val())) {
+            tips('tips_warning', ' 请填写正确的手机号');
+            return false;
+        }
+        if ($.trim($('#txtEmailAddress').val()) != '' && !emial.test($('#txtEmailAddress').val())) {
+            tips('tips_warning', '请填写正确的用户邮箱');
+            return false;
+        }
+        return true;
+    }
+</script>

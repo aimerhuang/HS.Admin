@@ -1,0 +1,105 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.Transfer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "Default";
+}
+
+<div class="case">
+    <!--用户提示-->
+    <div class="box_dis m20_b">
+        <div class="box_con3">您好，<span class="bold blue">@Hyt.BLL.Authentication.AdminAuthenticationBo.Instance.Current.Base.UserName</span>，欢迎您登录跨境电子商务管理系统！</span></div>
+    </div> 
+    @{
+        var CBDefaultPageCountInfo = (CBDefaultPageCountInfo)ViewBag.TotalInfo;
+    }
+    <!--运营总览-->
+    <div class="box_dis Operations m20_b">
+        <div class="box_con3">
+            <div class="bold f14">运营总览:</div>
+            <ul class="m10_t clearfix">
+                <li><span class="Oper_icon Oper_icon01"></span><span class="m2_t"><div class="f18 bold">@string.Format("{0:N0}",CBDefaultPageCountInfo.OrderCount)</div><div class="c9">订单总数</div></span></li>
+    	        <li><span class="Oper_icon Oper_icon02"></span><span class="m2_t"><div class="f18 bold">@string.Format("{0:N2}",CBDefaultPageCountInfo.OrderAmount)</div><div class="c9">销售总额</div></span></li>
+    	        <li><span class="Oper_icon Oper_icon03"></span><span class="m2_t"><div class="f18 bold">@string.Format("{0:N2}",CBDefaultPageCountInfo.RMACount)</div><div class="c9">退换货总数</div></span></li>
+    	        <li><span class="Oper_icon Oper_icon04"></span><span class="m2_t"><div class="f18 bold">@string.Format("{0:N2}",CBDefaultPageCountInfo.RMAAmount)</div><div class="c9">退款总额</div></span></li>
+    	        <li><span class="Oper_icon Oper_icon05"></span><span class="m2_t"><div class="f18 bold">@string.Format("{0:N2}",CBDefaultPageCountInfo.NetSalesAmount)</div><div class="c9">净销售总额</div></span></li>
+            </ul>
+        </div>
+    </div>
+    <!--运营实时数据-->
+    <div class="box_dis Opera_data m20_b">
+        <div class="box_con3">
+            <div class="bold f14">运营实时数据:</div>
+            <ul class="m10_t clearfix">
+                <li><span class="Oper_sign"></span><span class="c9 m5_l">待审核订单总数：</span><span class="red f18 bold">@string.Format("{0:N0}",CBDefaultPageCountInfo.RequiredAuditOrderCount)</span></li>
+                <li><span class="Oper_sign"></span><span class="c9 m5_l">待审核退换货总数：</span><span class="red f18 bold">@string.Format("{0:N0}",CBDefaultPageCountInfo.RequiredAuidtRMAOrderCount)</span></li>
+                <li><span class="Oper_sign"></span><span class="c9 m5_l">待出库总数：</span><span class="red f18 bold">@string.Format("{0:N0}",CBDefaultPageCountInfo.WaitingForDeliveryOrderCount)</span></li>
+                <li><span class="Oper_sign"></span><span class="c9 m5_l">缺货订单总数总数：</span><span class="red f18 bold">@string.Format("{0:N0}",CBDefaultPageCountInfo.OutOfStockOrderCount)</span></li>
+            </ul>
+        </div>
+    </div>
+
+    <!--box1开始-->
+    <!--box2开始-->
+    <div class="def_box2 clearfix m20_t">
+        <!--公司公告-->
+        <div class="def_box2_lf company">
+            <!--{ Html.RenderPartial("_CompanyPost"); }-->
+        </div>
+        <!--系统消息-->
+        <div class="def_box2_rf messages">
+            <!--{ Html.RenderPartial("_SyMessages"); }-->
+        </div>
+        <!--box3开始-->
+
+        <div class="def_outInfor"> </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    post(0);
+    function post(id) {
+        //AjaxStart();
+        var json = {};
+        json.id = (id == 0 ? "1" : id);
+
+        $.get('/Main/CompanyPostSeach/', json, function (data) {
+            if (data.IsLogout) {
+                eval(data.Callback);
+                return;
+            }
+            $('.company').html(data);
+            //AjaxStop();
+        });
+    }
+
+    Message(0);
+
+    function Message(id) {
+
+        //AjaxStart();
+        var json = {};
+        json.id = (id == 0 ? "1" : id);
+
+        $.get('/Main/JobPooSearch/', json, function (data) {
+            if (data.IsLogout) {
+                eval(data.Callback);
+                return;
+            }
+            $('.messages').html(data);
+            //AjaxStop();
+        });
+    }
+    
+    /*========================
+        消息弹出结束
+    ==========================*/
+    function AjaxStart() {
+        window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+    }
+
+    function AjaxStop() {
+        cover.Remove();
+    }
+</script>

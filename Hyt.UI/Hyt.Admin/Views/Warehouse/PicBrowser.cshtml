@@ -1,0 +1,129 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "签收图片";
+}
+
+<style type="text/css">
+    .rot_box {
+ 
+        margin: 0 auto;
+    }
+    .image_box {
+        text-align: center;
+    }
+
+    .image_box img {
+        margin-top: -150px;
+    }
+</style>
+
+<div class="caseout">
+            
+            <div class="rot_box">
+                <div class="image_box">
+                    <canvas id="canvas"></canvas>
+                    <img id="rotImg" src="@ViewBag.path" />
+                </div>
+            </div>
+
+</div>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function() {
+
+        var param = {
+            img: document.getElementById("rotImg"),
+            cv: document.getElementById("canvas"),
+            rot: 0
+        };
+        var rotate = function(canvas, img, rot) {
+            //获取图片的高宽
+            var w = img.width;
+            var h = img.height;
+            //角度转为弧度
+            if (!rot) {
+                rot = 0;
+            }
+            var rotation = Math.PI * rot / 180;
+            var c = Math.round(Math.cos(rotation) * 1000) / 1000;
+            var s = Math.round(Math.sin(rotation) * 1000) / 1000;
+            //旋转后canvas标签的大小
+            canvas.height = Math.abs(c * h) + Math.abs(s * w);
+            canvas.width = Math.abs(c * w) + Math.abs(s * h);
+            //绘图开始
+            var context = canvas.getContext("2d");
+            context.save();
+            //改变中心点
+            if (rotation <= Math.PI / 2) {
+                context.translate(s * h, 0);
+            } else if (rotation <= Math.PI) {
+                context.translate(canvas.width, -c * h);
+            } else if (rotation <= 1.5 * Math.PI) {
+                context.translate(-c * w, canvas.height);
+            } else {
+                context.translate(0, -s * w);
+            }
+            //旋转90°
+            context.rotate(rotation);
+            //绘制
+            context.drawImage(img, 0, 0, w, h);
+            context.restore();
+            img.style.display = "none";
+        }
+        var fun = {
+            right: function() {
+                param.rot += 90;
+                rotate(param.cv, param.img, param.rot);
+                if (param.rot === 270) {
+                    param.rot = -90;
+                }
+            },
+            left: function() {
+                param.rot -= 90;
+                if (param.rot === -90) {
+                    param.rot = 270;
+                }
+                rotate(param.cv, param.img, param.rot);
+            }
+        };
+
+        function initDialog() {
+            var   api = art.dialog.open.api; // 			art.dialog.open扩展方法
+            if (!api) return;
+            // 自定义按钮
+            api.button(
+                {
+                    name: '向左转',
+                    callback: function() {
+                        fun.left();
+                        return false;
+                    }
+                },
+                {
+                    name: '向右转',
+                    callback: function() {
+                        fun.right();
+                        return false;
+                    }
+                },
+                {
+                    name: '关闭'
+                }
+            );
+        }
+
+        initDialog();
+    });
+
+
+
+
+
+
+
+
+
+
+</script>

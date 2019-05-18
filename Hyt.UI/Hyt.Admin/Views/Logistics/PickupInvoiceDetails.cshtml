@@ -1,0 +1,100 @@
+﻿@using Hyt.BLL.CRM
+@using Hyt.BLL.Logistics
+@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.LgPickUp
+@section headjs{
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+        });
+        //查询列表
+        function doSearch() {
+            $.get('@Url.Action("PickupInvoiceDetails", "Logistics")',
+                { SysNo: $("#hid_sysno").val() },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+@if (null != Model)
+{
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="head_detail border_bnone">
+                <h5>取件单明细</h5>
+            </div>
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">取件单编号：</td>
+                            <td width="30%" class="border_right">@Model.SysNo</td>
+                            <td width="20%" class="nameright border_rnone">取件方式:：</td>
+                            <td width="30%" class="border_right">@LgPickUpTypeBo.Instance.GetPickupTypeName(Model.PickupTypeSysNo)</td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">仓库：</td>
+                            <td width="30%" class="border_right">@WhWarehouseBo.Instance.GetWarehouseName(Model.WarehouseSysNo)</td>
+                            <td width="20%" class="nameright border_rnone">入库单系统编号：</td>
+                            <td width="30%" class="border_right">@Model.StockInSysNo</td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">取件地址：</td>
+                            <td width="30%" class="border_right">
+                                @{
+    var address = Hyt.BLL.Order.SoOrderBo.Instance.GetOrderReceiveAddress(Model.PickupAddressSysNo);
+    if (address != null)
+    {
+                                    @address.StreetAddress
+    }
+    else
+    {
+                                    @Html.Raw("无取件地址")
+    }
+                                }
+                            </td>
+                            <td width="20%" class="nameright border_rnone">状态:：</td>
+                            <td width="30%" class="border_right">@((LogisticsStatus.取件单状态)Model.Status)</td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">创建人：</td>
+                            <td width="30%" class="border_right">@SyUserBo.Instance.GetUserName(Model.CreatedBy)</td>
+                            <td width="20%" class="nameright border_rnone">创建时间：</td>
+                            <td width="30%" class="border_right">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">最后更新人：</td>
+                            <td width="30%" class="border_right">@SyUserBo.Instance.GetUserName(Model.LastUpdateBy)</td>
+                            <td width="20%" class="nameright border_rnone">最后更新时间：</td>
+                            <td width="30%" class="border_right">@Model.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">备注：</td>
+                            <td colspan="3">
+                                @if (!string.IsNullOrWhiteSpace(Model.Remarks))
+                                {
+                                    @Model.Remarks
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="head_detail m10_t">
+                <h5>取件单商品明细</h5>
+            </div>
+            <div class="boxs_detail m10_t">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+        <input id="hid_sysno" type="hidden" value="@Model.SysNo" />
+    </div>
+}
+else
+{
+    <div class="align_l p10_l bgr_eb">未找到取件单,请重试！</div>
+}
