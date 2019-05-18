@@ -1,0 +1,37 @@
+﻿@model IList<Hyt.Model.MkExpressLog>
+
+<div class="list" style="width: 698px; height: 400px;">
+
+@*<div id="logPaging">*@
+    <div class="boxs_listtabel">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+            <thead>
+                <tr><th width="120px">操作时间</th>
+                <th width="150px">操作人姓名</th>
+                <th align="left" class="p10_l">日志内容</th>
+            </tr></thead>
+            <tbody>
+                @{
+                bool alter = false;
+            }
+            @foreach (Hyt.Model.MkExpressLog item in Model)
+            {
+                <tr @(alter ? "" : "class = stag_color")>
+                    <td>
+                        @item.OperateDate.ToString("yyyy-MM-dd HH:mm")
+                    </td>
+                    <td>
+                        @item.OperatorName
+                    </td>
+                    <td align="left" class="p10_l">@Html.Raw(item.LogContent)</td>
+                </tr>
+                
+                alter = !alter;
+            }
+            </tbody>
+        </table>
+    </div>
+@*</div>*@
+
+        </div>
+

@@ -1,0 +1,266 @@
+﻿@using Hyt.Model.Transfer
+@model Hyt.Infrastructure.Pager.PagedList<object[]>
+
+@{
+    ViewBag.Title = "配送单明细";
+
+    object[] objs = Model.TData[0];
+    
+    //配送单主表信息
+    Hyt.Model.CBLgDelivery cbLgDelivery = (Hyt.Model.CBLgDelivery)objs[0];
+    //配送单明细子表信息
+    IList<Hyt.Model.CBLgDeliveryItem> lgDeliveryItems = (IList<Hyt.Model.CBLgDeliveryItem>)objs[1];
+    //所有支付方式类型
+    List<Hyt.Model.BsPaymentType> bsPaymentType = (List<Hyt.Model.BsPaymentType>)objs[2];
+    if (lgDeliveryItems == null)
+    {
+        lgDeliveryItems = new List<Hyt.Model.CBLgDeliveryItem>();
+    }
+    //配送方式信息
+    Hyt.Model.Transfer.CBLgDeliveryType cbLgDeliveryType = (Hyt.Model.Transfer.CBLgDeliveryType)objs[3];
+    
+    //是否显示快递单号
+    string displayExpressNo = "";
+    
+    //是否为三方快递
+    string isThirdParty = "";    
+    if (cbLgDeliveryType != null && cbLgDeliveryType.IsThirdPartyExpress == 0)
+    {
+        displayExpressNo = "style=display:none";
+    }
+    if (cbLgDeliveryType != null)
+    {
+        isThirdParty = cbLgDeliveryType.IsThirdPartyExpress == 1 ? "是" : "否";
+    }
+    if (cbLgDeliveryType == null)
+    {
+        cbLgDeliveryType = new CBLgDeliveryType();
+        cbLgDeliveryType.DeliveryTypeName = "找不到名称:" + cbLgDelivery.DeliveryTypeSysNo;
+        displayExpressNo = "style=display:none";
+        isThirdParty = "找不到状态:" + cbLgDelivery.DeliveryTypeSysNo;
+    }
+
+}
+
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+}
+@section headjs{
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script type="text/javascript">
+
+        //用于提交加载
+        var loading_img;
+
+        $(function() {
+
+            loading_img = $("#loading_img").clone().show();
+
+            //打印配送单
+            $("#print_delivery_btn").bind('click', function(e) {
+                var self = $(e.target);
+                var url = "@Url.Action("Delivery", "Print")" + "/" + self.attr("sysno");
+                UI.DialogOpen(url, { title: '配送单打印', width: 900, height: 500, init: function() {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        this.iframe.contentWindow.location.href = url + "?isRefresh=" + Math.random();
+                    }
+                } }, false);
+            });
+
+            //绑定单据编号弹窗事件
+            $("#main_table_body").find("a").click(function(e) {
+                var self = $(this);
+                var notetype = self.attr("notetype");
+                var sysno = self.text();
+                @{
+                    int outstock = (int) Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型.出库单;
+                    int pickup = (int) Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型.取件单;
+                }
+
+                if (notetype == "@outstock") { //出库单弹出层
+                    UI.DialogOpen('/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno, {
+                        title: '出库单信息',
+                        width: 830,
+                        height: 600,
+                        resize: false,
+                        init: function() {
+                            this.button({ name: '关闭' });
+                        }
+                    }, false);
+                }
+
+                if (notetype == "@pickup") { //取件单弹出层
+                    var url = '/Logistics/PickupInvoiceDetails/' + sysno;
+                    UI.DialogOpen(url, {
+                        title: '取件单明细',
+                        width: 1000,
+                        height: 608,
+                        init: function () {
+                            this.button({ name: "取消" });
+                        }
+                    }, false);
+                }
+            });
+
+            if ('@ViewBag.backToList' == 'false') {
+                $('#spanReturn').hide();
+            }
+
+            //added by huangwei
+            $('#btnRtn').click(function() {
+                //back to the page according to the soure page
+                if ('@ViewBag.source' === 'settlement') {
+                    location.href = '@Url.Action("SettlementDeliveryList")';
+                } else {
+                    //default
+                    location.href = '@Url.Action("DeliveryNoteMaintain")';
+                }
+            });
+
+            $("#main_table_body").find("td[name='paytype']").each(function() {
+                if ($.trim($(this).text()) == "0") {
+                    $(this).text("无");
+                }
+            });
+        });
+
+    </script>    
+}
+<img src="~/Theme/images/icons/loading.gif" style="border:0;display:none;" id="loading_img" />
+<div class="case">
+    <div class="boxs" id="show_div">
+        <div class="boxs_tit head_m">
+            <span id="spanReturn" class="ra10 c6"><button type="button" id="btnRtn" class="btn btn_ht26 m10_r" ><span class="icon_share_alt"></span><span class="m5_l">返回</span></button></span>
+            <h3>配送单详细信息</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m5_r" id="print_delivery_btn"  title="打印配送单" sysno="@cbLgDelivery.SysNo"><span class="icon icon_print" sysno="@cbLgDelivery.SysNo"></span><span class="m5_l" sysno="@cbLgDelivery.SysNo">打印配送单</span></button>
+                </div>
+            </div>
+
+            <div class="boxs_detail_dispay">
+                <div class="tit_dispay">
+                  <h5>配送单信息</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                        
+                            <tr>
+                                <td width="90" class="nameright" >配送单号：</td>
+                                <td width="160">
+                                    @cbLgDelivery.SysNo
+                                </td>
+                                <td width="90" class="nameright">配&nbsp; 送 人：</td>
+                                <td width="160">
+                                    @cbLgDelivery.DeliveryManName
+                                </td>
+                                <td width="90" class="nameright">状&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;态：</td>
+                                <td>
+                                    @(((Hyt.Model.WorkflowStatus.LogisticsStatus.配送单状态)cbLgDelivery.Status).ToString())
+                                </td>
+                            </tr>
+                            <tr>
+                                <td  class="nameright">创&nbsp; 建 人：</td>
+                                <td>@cbLgDelivery.CreatedName
+                                </td>
+                                <td  class="nameright">创建时间：</td>
+                                <td>@cbLgDelivery.CreatedDate.ToString("yyyy-MM-dd HH:mm")
+                                </td>
+                                <td  class="nameright">是否放行：</td>
+                                <td>
+                                    @(cbLgDelivery.IsEnforceAllow == 1 ? "是" : "否")
+                                </td>
+                            </tr>
+                            <tr>
+                                <td  class="nameright border_bnone">配送方式：</td>
+                                <td class="border_bnone">@cbLgDeliveryType.DeliveryTypeName
+                                </td>
+                                <td  class="nameright border_bnone">第三方快递：</td>
+                                <td class="border_bnone">
+                                    @isThirdParty
+                                </td>
+                                <td  class="nameright border_bnone">仓库：</td>
+                                <td class="border_bnone">
+                                    @{
+                                        var warehouse = Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetWarehouseEntity(cbLgDelivery.StockSysNo);
+                                        var warehouseName = warehouse != null ? warehouse.WarehouseName : "找不到仓库编号为：" + cbLgDelivery.StockSysNo+"的仓库";
+                                    }
+                                    @warehouseName
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tit_dispay">
+                        <h5>配送单明细</h5>
+                    </div>
+                <div class="boxs_listtabel">
+                     <table class="border_bnone border_rnone" width="100%" border="0" cellspacing="0" cellpadding="0">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:44px;">序号</th>
+                                                    <th class="wd75">单据编号</th>
+                                                    <th style="width:68px;">单据类型</th>
+                                                    <th @displayExpressNo class="wd110">快递单号</th>
+                                                    <th class="align_l p10_lr">收货地址</th>
+                                                    <th style="width:85px;">收货人</th>
+                                                    <th style="width:116px;">出库日期</th>
+                                                    <th style="width:92px;">收货人手机号</th>
+                                                    <th class="wd100">代收金额</th>
+                                                    <th style="width:68px;">支付方式</th>
+                                                    <th style="width:68px;">签收状态</th>
+                                                </tr>
+                                            </thead>
+                                        
+                                            <tbody id="main_table_body">
+                                                    
+                                                @{
+                                                    bool alter = false;
+                                                 }
+                                                    
+                                                    @for (int i = 0; i < lgDeliveryItems.Count; i++)
+                                                    {
+                                                        int num = i + 1;
+                                                        Hyt.Model.CBLgDeliveryItem item = lgDeliveryItems[i];
+
+                                                       <tr @(alter ? "" : "class = stag_color")>
+                                                       
+                                                                    <td>@num</td>
+                                                                   <td>
+                                                                     <a href="javascript:void(0)" style="color:#2592DB;text-decoration: underline;" notetype="@item.NoteType">@item.NoteSysNo</a>  
+                                                                   </td>
+                                                                   <td>
+                                                                       @(((Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型)item.NoteType).ToString())
+                                                                   </td>
+                                                                   <td class="wd110 p10_lr" @displayExpressNo>
+                                                                       @item.ExpressNo
+                                                                   </td>
+                                                                   <td class="align_l p10_lr" style="word-break:break-all;word-wrap:break-word;">
+                                                                    @item.StreetAddress  
+                                                                   </td>
+                                                                    <td>@item.Name</td>
+                                                                    <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                                                    <td>@item.MobilePhoneNumber</td>
+                                                                    <td class="red p10_r align_r">@item.Receivable.ToString("C")</td>
+                                                    
+                                                                    <td name="paytype">
+                                                                        
+                                                                        @(((Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型)item.PaymentType).ToString())
+                                                                    </td>
+                                                                    <td>
+                                                                        @(((Hyt.Model.WorkflowStatus.LogisticsStatus.配送单明细状态)item.Status).ToString())
+                                                                    </td>
+                                                                    
+                                                                </tr>
+                                                        alter = !alter;   
+                                                    }
+                                            </tbody>
+                                        </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,66 @@
+﻿@{
+    Layout = null;
+}
+
+@model int
+
+@{   
+    string dename = "分销商";
+    <select dn="AgentSysNo" name="AgentSysNo" id="AgentSysNo" class="{required:true,messages:{required:'请选择代理商'}} wd200">
+   
+    </select>
+    @dename
+    <select dn="DealerSysNo" name="DealerSysNo" id="DealerSysNo" class="{required:true,messages:{required:'请选择分销商'}} wd200">
+    </select>
+}
+@*<script src="~/Theme/scripts/jquery.min.js"></script>*@
+<script type="text/javascript">
+    $(function () {
+
+        var dealerSysNo = '@(Model)';
+
+        function GetDealerList(agentSysNo, dealerSysNo)
+        {
+            $.getJSON("/Ajax/GetDealer", { agentSysNo: agentSysNo }, function (result) {
+                if (result.Status) {                 
+                    var optionStr = '';
+                    for (var i = 0; i < result.Data.length; i++) {
+                        if (dealerSysNo==result.Data[i].SysNo)
+                            optionStr += '<option selected="selected" value="' + result.Data[i].SysNo + '">' + result.Data[i].Name + '</option>';
+                        else
+                            optionStr += '<option value="' + result.Data[i].SysNo + '">' + result.Data[i].Name + '</option>';
+                    }
+                    $("#DealerSysNo").html(optionStr);
+                }
+            });
+        }
+
+       
+        $.getJSON("/Ajax/GetAgent", { dealerSysNo: dealerSysNo }, function (result) {
+            if (result.Status) {
+                var optionStr = '';
+                for (var i = 0; i < result.Data.length; i++) {                
+                    if (result.StatusCode == result.Data[i].SysNo) {
+                        optionStr += '<option selected="selected" value="' + result.Data[i].SysNo + '">' + result.Data[i].Name + '</option>';                                        
+                    }                     
+                    else
+                        optionStr += '<option value="' + result.Data[i].SysNo + '">' + result.Data[i].Name + '</option>';
+                }
+                $("#AgentSysNo").html("").append(optionStr);
+               //获取经销商
+               GetDealerList($("#AgentSysNo").val(),dealerSysNo);       
+            }
+        });
+        $("#AgentSysNo").change(function () {
+            var agentSysNo = $(this).val();          
+            if (agentSysNo == null || agentSysNo == undefined)
+            {
+                alert('请选择代理商');
+                return false;
+            }
+            GetDealerList(agentSysNo,-1);
+        });
+
+
+    });
+</script>

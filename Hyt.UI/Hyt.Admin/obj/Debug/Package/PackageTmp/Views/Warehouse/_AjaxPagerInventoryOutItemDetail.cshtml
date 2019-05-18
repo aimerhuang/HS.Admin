@@ -1,0 +1,74 @@
+﻿@using Hyt.BLL.Product
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.WhInventoryOutItem>
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th class="border_lnone wd75">序号</th>
+            <th class="align_l p10_lr">商品编号</th>
+            <th class="align_l p10_lr">条形码</th>
+            <th class="align_l p10_lr">后台显示名称</th>
+            <th width="72">出库数量</th>
+            <th width="85">已出库数量</th>
+            <th width="122">最后更新时间</th>
+            <th width="122">库位</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TData != null && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {                   
+            <tr>
+                <td class="align_c p10_lr">@(Model.TData.IndexOf(item)+1)</td>
+                <td class="align_l p10_lr">@PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                <td class="align_l p10_lr">@PdProductBo.Instance.GetProductBarcode(item.ProductSysNo)</td>
+                <td class="align_l p10_lr">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                <td>@item.StockOutQuantity</td>
+                <td>@item.RealStockOutQuantity </td>
+                <td>
+                    @if (item.LastUpdateDate > DateTime.MinValue)
+                    {
+                        @item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")
+                    }
+                </td>
+                <td class="kuwei" id="td_@item.ProductSysNo" data-prosysno="@item.ProductSysNo"></td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(function () {
+
+        var productSysNoList = "";
+        $("td.kuwei").each(function () {
+
+            var prosysno = $(this).attr("data-prosysno");
+            if (productSysNoList != "")
+                productSysNoList += ",";
+
+            productSysNoList += prosysno;
+        });
+
+        $.get('@Url.Action("GetWarehousePositions", "Ajax")',
+             { warehouseSysno: warehouseSysNo, productSysNoList: productSysNoList },
+             function (data) {
+                 
+                 var prolist = eval("(" + data.Message + ")");
+                 
+                 var _productSysNoList=productSysNoList.split(',');
+                 for (var i = 0; i < _productSysNoList.length; i++) {
+
+                     if (prolist[_productSysNoList[i]])
+                         $("#td_" + _productSysNoList[i]).text(prolist[_productSysNoList[i]]);
+                 }
+             });
+    });
+</script>

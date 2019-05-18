@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "短信查询";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case">
+  <div class="boxs">
+  
+    <div class="boxs_tit head_m">
+      <h3>短信查询</h3>
+    </div>
+    
+    <div class="boxs_con_c1">    
+    
+      <!--工具条开始-->
+      <div class="boxs_tool"> 
+      
+        <!--搜索开始-->
+        
+      <div class="right_tool clearfix">
+            <span class="veralign_t fl">类型选择</span>
+          	<div class="fl m10_l">
+            <select class="select_ht28" id="SearchType" Search="SearchType">
+              <option value="2">验证码</option>
+              <option value="1">提货码</option>
+            </select>
+            </div>
+            <div class="search_btn wd200 m10_l fl">
+              <input type="text"  placeholder="手机号"  Search="MobilePhoneNumber" class="input_ht28" name="">
+              <button class="btn btn_ht28 wd28" onclick="doSearch(1)" title="搜索"><span class="icon_search"></span></button>
+            </div>
+        </div>        
+          <!--搜索结束-->
+          
+        <!--功能按钮开始-->
+            <div class="left_tool">
+                <span class="veralign_t fl">短信剩余条数:</span>
+                <span class="veralign_t fl m10_l" id="SmsBalance"></span>
+            </div>
+            <!--功能按钮结束-->
+      </div>
+      <!--工具条结束-->
+<script type="text/javascript">
+var comobj=$(".right_tool");
+var seleObj=$(comobj,$(".select_ht28"));
+var inputObj=comobj.find("input[class='input_ht28']");
+seleObj.change(function(){
+	if($(this).find('option:selected').text()=="验证码")	{
+		inputObj.attr("placeholder","手机号");
+	}else{
+		inputObj.attr("placeholder","手机号/出库单号");
+	}
+});
+</script>
+      <!--表格列开始-->
+      <div class="boxs_listtabel" id="paging">
+        </div>
+        <!--表格列结束-->
+
+    </div>
+  </div>
+    
+</div>
+
+
+
+  
+
+<script type="text/javascript">
+//新增弹出
+    $(document).ready(function(e) {
+        doSearch(1);
+        querySmsBalance();
+        $("#SearchType").change(function () { doSearch(); });
+    });
+     
+    //查询剩余短信
+    function querySmsBalance() {
+        $.ajax({
+            type: "POST",
+            url: "/Warehouse/QuerySmsBalance",
+            success: function (content) {
+                if (content != null && content != "") {
+                    $("#SmsBalance").html(content);
+                }
+            }
+        });
+    }
+    
+    //查询列表
+    function doSearch(currentPage) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Warehouse/GetPickUpSmsList?r=" + Math.random(), "Search", function (p) {
+            p.setParams("CurrentPage", currentPage);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+</script>

@@ -1,0 +1,57 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CIcp>
+
+      <!--表格列开始-->
+<div class="boxs_listtabel">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="70">系统编号</th>
+                                <th width="140">商检类型</th>
+                                <th width="140">报文类型</th>
+                                <th width="140">报文编号</th>
+                                <th width="140">备案时间</th>
+                                <th width="50">状态</th>
+                                <th class="borde_r_none" width="90">接收回执</th>
+                                <th class="borde_r_none" width="90">审核回执</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="4" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CIcp>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    } 
+
+                    <td><a href="javascript:void();" style="text-decoration: underline; color: #2592DB" onclick="openTab(@item.SysNo)">@item.SysNo</a></td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.CommonEnum.商检), item.IcpType)</td>
+                    <td>@item.MessageType</td>                
+                    <td>@item.MessageID</td>
+                    <td >@item.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(IcpStatus.商品商检推送状态), item.Status)</td>
+                    <td><a href="javascript:void();" style="text-decoration: underline; color: #2592DB" onclick="viewPlatRec(@item.SysNo)">查看</a></td>
+                    <td><a href="javascript:void();" style="text-decoration: underline; color: #2592DB" onclick="viewCiqRec(@item.SysNo)">查看</a></td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

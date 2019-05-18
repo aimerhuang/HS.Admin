@@ -1,0 +1,68 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBIcpGoodsItem>
+
+      <!--表格列开始-->
+<div class="boxs_listtabel">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="53">
+                                    <input name="sysNo" id="checkall" type="checkbox" />
+                                </th>
+                                <th width="150px" class="align_l p10_lr">商品编号</th>
+                                <th width="550px" class="align_l p10_lr">后台显示名称</th>
+                                @*<th width="150px" class="align_l p10_lr">海关类型</th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="3" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBIcpGoodsItem>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    } 
+
+                    <td>
+                        <input name="sysNo" type="checkbox" value="@item.SysNo" gsitemsno="@item.GoodsItemSysNo" />
+
+                    </td>
+                    <td class="align_l p10_lr">@item.ErpCode</td>
+                    <td class="align_l p10_lr">@item.ProductName</td>
+                    @*<td class="align_l p10_lr">
+                        @(item.IcpType != null ? Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.CommonEnum.商检), item.IcpType) : "")                       
+                    </td>*@
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        //查找已被选中项，checkedsysnolist,checkedsysnopricelist(SpecialPriceProductList.cshtml中全局变量) 王耀发 2015-11-03
+        if (checkedsysnolist.length > 0) {
+            $("#paging table tbody input:checkbox").each(function () {
+                var SysNo = $(this).val();
+                if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                    $(this).attr("checked", true);
+                }
+            });
+        }
+    });</script>

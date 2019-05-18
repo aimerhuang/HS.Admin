@@ -1,0 +1,43 @@
+﻿@model Hyt.Model.CBRmaRelations
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = ViewBag.Prompt;
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+}
+<div id="tabboxs" class="case">
+    <div class="head_tab">
+        <!--/大选项卡-->
+        <ul class="tabNav">
+            <li id="liBase" class="menuon" ><a href="javascript:void(0);">@ViewBag.Prompt</a></li>
+            <li id="liRelatedCertificate" class=""><a href="javascript:void(0);">相关凭证</a></li>
+            <li id="liLog" class=""><a href="javascript:void(0);">操作日志</a></li>
+        </ul>
+    </div>
+    <div id="tabcon" class="boxs_con_c1">
+        <!--@ViewBag.Prompt-->
+        <div class="list">
+            @{Html.RenderAction((string)ViewBag.RMAUrl, new { id = ViewBag.SysNo });}
+        </div>
+        <!--相关凭证-->
+        <div class="list">
+            @{Html.RenderPartial("_AssociatedCredentials", Model);}
+        </div>
+        <!--操作日志-->
+        <div class="list">
+            @{Html.RenderPartial("_RMALog", Model);}
+        </div>
+    </div>
+    <!--数据分页-->
+</div>
+
+@section FooterJs{
+    <script type="text/javascript">
+        //tab选项卡
+        $(document).ready(function (e) {
+            UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '.tabNav', tabContentObj: ".boxs_con_c1", tabContent: ".list" });
+        });
+    </script>
+}

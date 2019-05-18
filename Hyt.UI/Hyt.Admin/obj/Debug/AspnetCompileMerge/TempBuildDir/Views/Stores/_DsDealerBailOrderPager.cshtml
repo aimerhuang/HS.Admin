@@ -1,0 +1,114 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBDsDealerBailOrder>
+
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.ST100102, ".ST100102")
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="110">会员编号</th>
+                <th width="60">联系人</th>
+                <th width="110">联系方式</th>
+                <th width="60">金额</th>
+                <th width="60">支付状态</th>
+                <th width="60">收款单编号</th>
+                <th width="60">申请时间</th>
+                <th width="110">分销商</th>
+                <th width="60">状态</th>
+                <th width="110">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBDsDealerBailOrder>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td class="ft_underl"><span class="blue"><a href="#" onclick="Detail(@item.CustomerSysNo); ">@item.CustomerSysNo</a></span></td>
+                <td>@item.ContactName</td>
+                <td>@item.ContactWay</td>
+                <td>@item.Money</td>
+                <td>@EnumUtil.GetDescription(typeof(StoresStatus.保证金订单支付状态), item.PayStatus)</td>
+                <td class="blue"><a href="javascript:openTab(@item.FnReceiptVoucherSysNo)">@item.FnReceiptVoucherSysNo</a></td>
+                <td>@item.CreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.DealerName</td>
+                <td>@EnumUtil.GetDescription(typeof(StoresStatus.保证金订单状态), item.Status)</td>
+                <td> 
+                    @{
+                    if (item.Status == (int)Hyt.Model.WorkflowStatus.StoresStatus.保证金订单状态.已审核)
+                    {
+                        <button type="button" class="btn btn_ht26 btn_red m10_r ST100102" title="取消审核" onclick="Audit('@item.SysNo','@StoresStatus.保证金订单状态.待审核.GetHashCode()') "><span class="icon_cancelAudit icon_white"></span><span class="m5_l">取消审核</span></button><button type="button" class="btn btn_ht26 disabled ST100102" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    else if (item.Status == (int)Hyt.Model.WorkflowStatus.StoresStatus.保证金订单状态.作废)
+                    {
+                        <button type="button" class="btn btn_ht26 disabled m10_r ST100102" title="审核"><span class="icon_audit"></span><span class="m5_l">审核</span></button><button type="button" class="btn btn_ht26 disabled ST100102" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn_ht26 btn_blue m10_r ST100102" title="审核" onclick="Audit('@item.SysNo','@StoresStatus.保证金订单状态.已审核.GetHashCode()') "><span class=" icon_audit icon_white"></span><span class="m5_l">审核</span></button><button type="button" class="btn btn_ht26 btn_red ST100102" title="作废" onclick="Audit('@item.SysNo','@StoresStatus.保证金订单状态.作废.GetHashCode()') "><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                    }
+                    }                         
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+<script>
+    //收款单
+    function openTab(id) {
+        UI.DialogOpen('/Finance/ViewReceiptVoucherDetail/' + id, {
+            init: function () {
+                var doc = this.iframe.contentWindow.document;
+                $(doc).find('div.case').css('padding', '10px');
+                var leftTool = $(doc).find('.left_tool');
+                if (leftTool.length == 0) {
+                    this.size(960, 658);
+                }
+            },
+            width: 960,
+            height: 658,
+            resize: false,
+            title: '收款单:' + id,
+            button: [{ name: '关闭' }],
+            footerClass: ''
+        }, true);
+    }
+
+    function Detail(sysNo) {
+        UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+            title: '查看会员详细信息',
+            width: '698px',
+            height: '489px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    }
+</script>
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

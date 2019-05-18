@@ -1,0 +1,1133 @@
+﻿@{
+    ViewBag.Title = "订单查询";
+    var canAudit = (bool)ViewBag.canAudit;
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js?v=1"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<script src="~/Theme/scripts/layer/layer.js"></script>
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">下单时间</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd HH:mm")" class="input_ht26" onclick="UI.Date({ el: 'txtBDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtBDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtBDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" class="input_ht26" onclick="UI.Date({ el: 'txtEDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtEDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtEDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">支付时间</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd HH:mm")" class="input_ht26" onclick="UI.Date({ el: 'txtPayBDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtPayBDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtPayBDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" class="input_ht26" onclick="UI.Date({ el: 'txtPayEDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtPayEDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtPayEDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            @*<tr>
+                    <td width="28%" align="right">订单号</td>
+                    <td width="72%">
+                        <input type="text" value="" id="txtSoId" class="wd156">
+                    </td>
+                </tr>*@
+            @*<tr>
+                    <td width="28%" align="right">创建人</td>
+                    <td width="72%">
+                        <input type="text" value="" id="txtCreator" maxlength="20" class="wd156">
+                    </td>
+                </tr>*@
+            <tr>
+                <td align="right">分销商</td>
+                <td>
+                    <select name="complexDealerSysNo" id="complexDealerSysNo" class="wd170"></select>
+                </td>
+            </tr>
+            @*<tr>
+                    <td width="28%" align="right">商品名称</td>
+                    <td width="72">
+                        <input type="text" value="" id="txtProductName" maxlength="20" class="wd156">
+                    </td>
+                </tr>*@
+            <tr>
+                <td width="28%" align="right">订单来源</td>
+                <td width="72%">
+                    <select id="txtOrderSource" class="wd170"></select>
+                </td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">订单状态</td>
+                <td width="72%">
+                    <select id="txtOrderStatus" class="wd170"></select>
+                </td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">支付方式</td>
+                <td width="72%">
+                    <select id="txtPayTypeSysNo" class="wd170"></select>
+                </td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">配送方式</td>
+                <td width="72%">
+                    <select id="txtDeliveryTypeSysNo" class="wd170"></select>
+                </td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">收货人</td>
+                <td width="72%">
+                    <input type="text" value="" class="wd156" id="txtReceiveName" maxlength="20">
+                </td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">收货电话</td>
+                <td width="72%">
+                    <input type="text" value="" class="wd156" id="txtReceiveTel" maxlength="20">
+                </td>
+            </tr>
+            @*<tr>
+                    <td width="28%" align="right">出库单号</td>
+                    <td width="72">
+                        <input type="text" value="" class="wd156" id="txtWhStockOutSysNo" maxlength="20">
+                    </td>
+                </tr>*@
+
+            <tr>
+                <td width="28%" align="right">审核人</td>
+                <td width="72%">
+                    <input type="text" value="" class="wd156" id="txtAuditor" maxlength="20">
+                </td>
+            </tr>
+
+            <tr>
+                <td width="28%" align="right">订单总额</td>
+                <td width="72%">
+                    <input type="text" class="wd60 m5_r" value="" id="txtMin" name="" maxlength="10">
+                    -
+                    <input type="text" class="wd60 m5_l" value="" id="txtMax" name="" maxlength="10">
+                </td>
+            </tr>
+            <tr>
+                <td align="right" class="c3">商品ERP号</td>
+                <td>
+                    <input type="text" class=" wd156 m5_r" id="erpcode" />
+                    <input id="erpcode" type="hidden" />
+                </td>
+            </tr>
+            @*<tr>
+                    <td width="28%" align="right">运单号</td>
+                    <td width="72%">
+                        <input type="text" value="" class="wd156" id="txtExpressNo" maxlength="20">
+                    </td>
+                </tr>*@
+            @*<tr>
+                    <td width="28%" align="right">商城订单号</td>
+                    <td width="72%">
+                        <input type="text" value="" class="wd156" id="MallOrderId">
+                    </td>
+                </tr>*@
+            @*<tr>
+                    <td width="28%" align="right">商城店铺名</td>
+                    <td width="72%">
+                        <input type="text" value="" class="wd156" id="MallShopName">
+                    </td>
+                </tr>*@
+            <tr>
+                <td align="right" class="c3">仓库</td>
+                <td>
+                    <input type="text" onclick=" selectWharehouse() " class=" wd156 m5_r" id="warehouse_sysno" />
+                    <input id="WarehouseSysNo" type="hidden" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="btnComplexSearch">开始查询</button>
+        <button title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+<div class="case" id="divCase">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <span class="more10r c6" style="display: none">更多>></span><h3>订单查询</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="left_tool" style="float: left;width:100%;">
+                    <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m10_r m10_b btn_blue"><span class="icon_importing icon_white m5_r"></span><span>Excel订单导入</span></button>
+                    <iframe id="pifrmImport" name="pifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnExportOrder" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载订单导入模板</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnExport" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnConfirmation" title="确认收货"><span class="icon icon_share"></span><span class="m5_l">确认收货</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnCancelCBOrder" title="取消物流订单"><span class="icon icon_share"></span><span class="m5_l">取消物流订单</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnBatchAudit" title="批量审核"><span class="icon icon_share"></span><span class="m5_l">批量审核</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnBatchBeizhu" title="批量备注"><span class="icon icon_share"></span><span class="m5_l">批量备注</span></button>
+
+                    @*<button class="btn btn_ht26 m10_r m10_b" id="btnGetHaiDai" title="批量备注"><span class="icon icon_share"></span><span class="m5_l">获取第三方订单</span></button>*@
+
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnBatchYiBao" title="易宝批量推海关"><span class="icon icon_share"></span><span class="m5_l">易宝批量推海关</span></button>
+
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnUpdateAllOrderPayDte" title="同步订单支付时间"><span class="icon icon_share"></span><span class="m5_l">同步订单支付时间</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnHuiFuPay" title="汇付批量支付" style="display:none;"><span class="icon icon_share"></span><span class="m5_l">汇付批量支付</span></button>
+                    <button class="btn btn_ht26 m10_r m10_b" id="btnGetGeGeJia" title="获取格格家订单"><span class="icon icon_share"></span><span class="m5_l">获取格格家订单</span></button>
+                </div>  
+                <div style="clear:both;"></div>
+                <div class="right_tool clearfix" style="width: 860px; float: right;">
+                    <span class="veralign_t fl">代理商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="agentSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl">分销商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="dealerSysNo"></select>
+                    </div>
+                    <span class="veralign_t fl">查询条件</span>
+                    <div class="fl m10_l">
+                        <select name="status" id="status" search="Status" class="fl select_ht28">
+                            <option value="0" selected="selected">全部</option>
+                            <option value="1">待审核订单</option>
+                            <option value="2">待出库订单</option>
+                            <option value="3">今日订单</option>
+                            <option value="4">缺货订单</option>
+                            <option value="5">未支付订单</option>
+                            <option value="6">已支付订单</option>
+                        </select>
+                    </div>
+                    <div class="search_btn m10_l fl wd270">
+                        <input name="" type="text" class="input_ht28 wd240" id="Condition" value="搜索订单号、订单编号、会员账号、收货人手机..." title="搜索订单号、订单编号、会员账号、收货人手机..." maxlength="25" />
+                        <button class="btn btn_ht28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="outbtn2"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+            </div>
+            <div id="paging">
+            </div>
+
+        </div>
+    </div>
+    <div style="z-index: 9; background-color: White; position: absolute;" id="divMsg">
+    </div>
+    <input type="hidden" id="CustomerSysNo" value="@ViewBag.CustomerSysNo" search="CustomerSysNo" />
+</div>
+<script type="text/JavaScript">
+    // 订单导出参数
+    var searchParameters = null;
+    //选中的记录SysNo列项
+    var checkedsysnolist = '';
+    //普通查询
+    var isSearch = true;
+    //搜索类型
+    var SearchType = 'doSearch';
+
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.indexOf('成功') !== -1) {
+            UI.tips.tip_alert("tips_success", res);
+            setTimeout(function () {
+                doSearch();
+            }, 1000);
+        } else {
+            UI.Alert({ content: res, icon: '', width: '600px' });
+        }
+        //UI.tips.tip_alert("tips_wrong", res);
+
+    }
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+
+    $(function () {
+        $('#btnExportOrder').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });
+
+        $('#btnImport').click(function () {
+            if (window.frames["pifrmImport"].chooseFile) {
+                window.frames["pifrmImport"].chooseFile();
+            }
+        });
+
+        $("#btnBatchYiBao").click(function () {
+            SendPay();
+        });
+        //高级查询框
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        // doSearch();
+
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $("#agentSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined && item.Status == 1) {
+                    // alert(item.Status);item.DealerName
+                    $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+
+        $("#dealerSysNo").change(function () {
+            doSearch();
+        });
+
+        //查询条件变化时执行
+        $("[Search]").filter("[Search='Status']").change(function () { doSearch(); });
+
+        //查询订单
+        $("#searchBtn").click(function () {
+            SearchType = "doSearch";
+            doSearch();
+        });
+
+        //绑定高级查询按钮事件
+        $("#btnComplexSearch").click(function () {
+            SearchType = "doComplexSearch";
+            doComplexSearch(1);
+        });
+
+        //加载支付方式
+        loadAllShipType();
+
+        //加载配送方式
+        loadAllPayType();
+
+        //加载订单来源
+        loadOrderSource();
+
+        //加载订单状态
+        loadOrderStatus();
+
+        $("#Condition").defaultValue("搜索订单号、订单编号、会员账号、收货人手机...");
+
+        //确认收货
+        $('#btnConfirmation').click(function () {
+            Utils.MaskStart($('#divCase'));
+            if (checkedsysnolist != '') {
+                Ajax.post("/Ajax/ConfirmationOfReceipt", "none", function (params) {
+                    params.setParams("sysNos", checkedsysnolist);
+
+                }, function (result) {
+                    Utils.MaskStop();
+                    if (!result.Status) {
+                        UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+                    }
+                    RefreshCurrentPage();
+                });
+            }
+        });
+
+        // 删除跨境物流订单
+        $('#btnCancelCBOrder').click(function () {
+            var data = {};
+            if (checkedsysnolist != '') {
+                Utils.MaskStart($('#divCase'));
+                $.post("/Order/CancelCBOrder", { sysNos: checkedsysnolist }, function (result) {
+                    Utils.MaskStop();
+                    UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+                    RefreshCurrentPage();
+                });
+            }
+        });
+
+        //2015-11-03 王耀发 创建
+        $('#btnExport').click(function () {
+            Utils.MaskStart($('#divCase'));
+            if (checkedsysnolist == '') {
+                //点击搜索（导出普通搜索）
+                if (SearchType == "doSearch") {
+                    //alert("普通");
+                    var Condition = "";
+                    if ($("#Condition").val() != "搜索订单号、订单编号、会员账号、收货人手机...") {
+                        Condition = $.trim($("#Condition").val());
+                    }
+                    var SelectedAgentSysNo = $("#agentSysNo").val();
+                    var SelectedDealerSysNo = $("#dealerSysNo").val();
+                    window.location = '@Url.Action("ExportOrdersByDoSearch")' + "?r=" + Math.random() +
+                        "&Status=" + $("#status").val() + //状态
+                        "&Condition=" + Condition +//关键字
+                        "&SelectedAgentSysNo=" + SelectedAgentSysNo +//分销商编号
+                        "&SelectedDealerSysNo=" + SelectedDealerSysNo;//代理商编号
+                }
+                //点击高级搜索（导出高级搜索）
+                if (SearchType == "doComplexSearch") {
+                    //alert("高级");
+                    var BeginDate = $("#txtBDate").val();//开始时间
+                    var EndDate = $("#txtEDate").val();//结束时间
+                    var ErpCode = $("#erpcode").val();//商品Erp编号
+               
+                    var PayBeginDate = $("#txtPayBDate").val();//支付开始时间
+                    var PayEndDate = $("#txtPayEDate").val();//支付结束时间
+                    var SelectedAgentSysNo = $("#agentSysNo").val();//代理商编号
+                    var SelectedDealerSysNo = $("#complexDealerSysNo").val();//分销商编号
+                    var OrderSource = $("#txtOrderSource").val();//订单来源
+                    var OrderStatus = $("#txtOrderStatus").val();//订单状态
+                    var PayTypeSysNo = $("#txtPayTypeSysNo").val();//支付状态
+                    var DeliveryTypeSysNo = $("#txtDeliveryTypeSysNo").val();//配送方式
+                    var ReceiveName = $("#txtReceiveName").val();//收货人
+                    var ReceiveTel = $("#txtReceiveTel").val();//收货电话
+                    var Auditor = $("#txtAuditor").val();//审核人
+                    var MinOrderAmount = $("#txtMin").val();//订单总额最小值
+                    var MaxOrderAmount = $("#txtMax").val();//订单总额最大值
+                    var WarehouseSysNo = $("#WarehouseSysNo").val();//仓库编号
+                    window.location = '@Url.Action("ExportOrdersByDoComplexSearch")' + "?r=" + Math.random() + "&BeginDate=" + BeginDate + "&EndDate=" + EndDate +
+                    "&PayBeginDate=" + PayBeginDate + "&PayEndDate=" + PayEndDate + "&SelectedAgentSysNo=" + SelectedAgentSysNo + "&SelectedDealerSysNo=" + SelectedDealerSysNo +
+                    "&OrderSource=" + OrderSource + "&OrderStatus=" + OrderStatus + "&PayTypeSysNo=" + PayTypeSysNo + "&DeliveryTypeSysNo=" + DeliveryTypeSysNo +
+                    "&ReceiveName=" + ReceiveName + "&ReceiveTel=" + ReceiveTel + "&Auditor=" + Auditor + "&MinOrderAmount=" + MinOrderAmount + "&MaxOrderAmount=" + MaxOrderAmount +
+                    "&WarehouseSysNo=" + WarehouseSysNo + "&ErpCode=" + ErpCode;
+                }
+            }
+            else {//（导出选择搜索）
+                //alert("选中");
+                var orderSysNos = checkedsysnolist.split(',');
+                //$.post('/Order/ExportOrders', { orderSysNos: JSON.stringify(orderSysNos) }, function (data) {
+                //    //if (data.Status) {
+                //    //    UI.tips.tip_alert("tips_success", '操作成功！');
+                //    //    doSearch()
+                //    //}
+                //    //else {
+                //    //    UI.tips.tip_alert("tips_warning", data.Message);
+                //    //}
+                //});
+                window.location = '@Url.Action("ExportOrders")' + "?orderSysNos=" + JSON.stringify(orderSysNos);
+            }
+            Utils.MaskStop();
+        });
+    });
+    $("#btnBatchAudit").click(function () {
+        var orderSysNos = checkedsysnolist.split(',');
+        UI.Confirm({
+            content: "确认批量审核通过?",
+            ok: function () {
+                if (orderSysNos.length > 0) {
+                    $.post('/Order/BatchAuditOrder', { orderSysNos: JSON.stringify(orderSysNos) }, function (data) {
+                        if (data.Status) {
+                            UI.tips.tip_alert("tips_success", '操作成功！');
+                            doSearch()
+                        }
+                        else {
+                            UI.tips.tip_alert("tips_warning", data.Message);
+                        }
+                    });
+                }
+                else {
+                    UI.tips.tip_alert("tips_warning", "请选择需要审核的订单！");
+                }
+
+            },
+            cancel: true
+        });
+    });
+    $("#btnBatchBeizhu").click(function () {
+        var orderSysNos = checkedsysnolist.split(',');
+        //alert(orderSysNos);
+        if (orderSysNos.length > 0 && orderSysNos != "") {
+            layer.prompt({ title: '请输入备注信息，并确认', formType: 2 }, function (pass, index) {
+                layer.close(index);
+
+                $.post('/Order/BatchBeizhuOrder', { orderSysNos: JSON.stringify(orderSysNos), pass: pass }, function (data) {
+                    if (data.Status) {
+                        UI.tips.tip_alert("tips_success", '操作成功！');
+                        doSearch()
+                    }
+                    else {
+                        UI.tips.tip_alert("tips_warning", data.Message);
+                    }
+                });
+            });
+        } else {
+            UI.tips.tip_alert("tips_warning", "请选择需要备注的订单！");
+        }
+        //UI.Confirm({
+        //    content: "确认批量备注?",
+        //    ok: function () {
+        //        if (orderSysNos.length > 0) {
+
+        //        }
+        //        else {
+        //            UI.tips.tip_alert("tips_warning", "请选择需要审核的订单！");
+        //        }
+
+        //    },
+        //    cancel: true
+        //});
+    });
+    //获取海带订单
+    $("#btnGetHaiDai").click(function () {
+        var url = '@Url.Action("GetHaiDaiOrder", "Order")';
+        //var url = '/Promotion/CouponCardTypeCreate';
+        UI.DialogOpen(url, {
+            title: '同步订单设置',
+            width: '1000px',
+            height: '400px'
+        }, false);
+        doSearch();
+    });
+    //获取格格家订单
+    $("#btnGetGeGeJia").click(function () {
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/GetGegeJia",
+            success: function (rows) {
+                UI.Alert({
+                    content: rows.Message
+                });
+                doSearch();
+            }
+        });
+        
+    });
+    //同步订单支付时间
+    $("#btnUpdateAllOrderPayDte").click(function () {
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/UpdateAllOrderPayDte",
+            success: function (rows) {
+                UI.Alert({
+                    content: rows.Message
+                });
+            }
+        });
+    });
+    
+    function GetDealersListByCreatedBy(DealerCreatedBy) {
+        $("#dealerSysNo,#complexDealerSysNo").html("");
+        if (DealerCreatedBy != -1) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#dealerSysNo,#complexDealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                doSearch();
+            });
+        } else {
+            $("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+            doSearch();
+        }
+    }
+    //查询列表
+    function doSearch() {
+        checkedsysnolist = '';
+        isSearch = true;
+        searchParameters = {};
+        searchParameters.type = 'doSearch';
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Order/DoQuery/?r=" + Math.random(), "Search", function (p) {
+            if ($("#Condition").val() != "搜索订单号、订单编号、会员账号、收货人手机...") {
+                p.setParams("Condition", $("#Condition").val());
+            }
+            p.setParams("SelectedAgentSysNo", $("#agentSysNo").val());
+            p.setParams("SelectedDealerSysNo", $("#dealerSysNo").val());
+            searchParameters.params = p;
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    
+    //高级查询
+    function doComplexSearch(currentPage) {
+        checkedsysnolist = '';
+        isdSearch = false;
+        searchParameters = {};
+        searchParameters.type = 'doComplexSearch';
+        Utils.MaskStart($('#paging'));
+        //DoComplexQueryNew  新方法
+        //DoComplexQuery  旧方法
+        Ajax.get("/Order/DoComplexQueryNew/?r=" + Math.random(), "none", function (p) {
+            p.setParams("BeginDate", $("#txtBDate").val());
+            p.setParams("EndDate", $("#txtEDate").val());
+            p.setParams("PayBeginDate", $("#txtPayBDate").val());
+            p.setParams("ErpCode", $("#erpcode").val());
+            p.setParams("PayEndDate", $("#txtPayEDate").val());
+            //p.setParams("OrderSysNo", $("#txtSoId").val());
+            //p.setParams("OrderCreator", $("#txtCreator").val());
+            //p.setParams("ProductName", $("#txtProductName").val());
+            p.setParams("OrderSource", $("#txtOrderSource").val());
+            p.setParams("OrderStatus", $("#txtOrderStatus").val());
+            p.setParams("PayTypeSysNo", $("#txtPayTypeSysNo").val());
+            p.setParams("DeliveryTypeSysNo", $("#txtDeliveryTypeSysNo").val());
+            p.setParams("ReceiveName", $("#txtReceiveName").val());
+            p.setParams("ReceiveTel", $("#txtReceiveTel").val());
+            //p.setParams("WhStockOutSysNo", $("#txtWhStockOutSysNo").val());
+            p.setParams("Auditor", $("#txtAuditor").val());
+            p.setParams("MinOrderAmount", $("#txtMin").val());
+            p.setParams("MaxOrderAmount", $("#txtMax").val());
+            p.setParams("CustomerSysNo", $("#CustomerSysNo").val());
+            //p.setParams("ExpressNo", $("#txtExpressNo").val());
+            //p.setParams("MallOrderId", $("#MallOrderId").val());
+            // p.setParams("MallShopName", $("#MallShopName").val());
+            p.setParams("WarehouseSysNo", $("#WarehouseSysNo").val());
+            p.setParams("SelectedAgentSysNo", $("#agentSysNo").val());
+            p.setParams("SelectedDealerSysNo", $("#complexDealerSysNo").val());
+            searchParameters.params = p;
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            $("#JS_search_nav").click();
+            Utils.MaskStop();
+        });
+    }
+
+
+
+    //取得选中的订单号
+    function getSelectedIds() {
+        //var ids = '';
+        //$('input.checktd').each(function () {
+        //    if ($(this).attr("checked")) {
+        //        if (ids == '')
+        //            ids += $(this).val();
+        //        else
+        //            ids += ("," + $(this).val());
+        //    }
+        //});
+        //return ids;
+        return checkedsysnolist;
+    }
+
+    //本页全选 王耀发 2015-11-03
+    $("input.checkall").live('click', function () {
+        var state = $(this).attr("checked");
+        if (state) { state = true; } else { state = false; }
+        $("input.checktd").each(function () {
+            $(this).attr("checked", state);
+            var SysNo = $(this).val();
+            if (state) {
+                if (checkedsysnolist == '') {
+                    checkedsysnolist += SysNo;
+                }
+                else {
+                    if (checkedsysnolist.indexOf(SysNo) == '-1') {
+                        checkedsysnolist += (',' + SysNo);
+                    }
+                }
+            } else {
+                if (checkedsysnolist != '') {
+                    if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                        if (checkedsysnolist.indexOf(SysNo) == '0') {
+                            if (checkedsysnolist.indexOf(',') != '-1') {
+                                checkedsysnolist = checkedsysnolist.replace(SysNo + ',', '');
+                            } else {
+                                checkedsysnolist = checkedsysnolist.replace(SysNo, '');
+                            }
+                        } else {
+                            checkedsysnolist = checkedsysnolist.replace(',' + SysNo, '');
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    //所有页全选 罗勤尧 2017-5-15
+    $("input.sysNolist").live('click', function () {
+        //alert("全选");
+        var state = $(this).attr("checked");
+        if (state) { state = true; } else { state = false; }
+        $("input.checktd").each(function () {
+            $(this).attr("checked", state);
+            var SysNo = $("#IdList").val();
+            if (state) {
+               
+                checkedsysnolist = SysNo;
+                $("input.checkall").attr("checked", state);               
+            } else {
+                checkedsysnolist = "";
+                $("input.checkall").attr("checked", state);
+            }
+        });
+    });
+    //点击单个复选按钮 王耀发 2015-11-03
+    //点击单个复选按钮 罗勤尧修改 2017-5-13
+    $('input.checktd').live('click', function () {
+        var SysNo = $(this).val();       
+        var count = $("#Count").val();
+        if ($(this).attr("checked")) {
+            if (checkedsysnolist == '')
+                checkedsysnolist = SysNo;
+            else
+                checkedsysnolist += ("," + SysNo);
+
+            var orderSysNos = checkedsysnolist.split(',');
+            if (orderSysNos.length == count) {
+                $("input.sysNolist").attr("checked", true);
+            } else {
+                $("input.sysNolist").attr("checked", false);
+            }
+        } else {
+            //alert(checkedsysnolist.indexOf(SysNo));
+            if (checkedsysnolist.indexOf(SysNo) == '0') {
+                //alert();
+                if (checkedsysnolist.indexOf(',') == '-1') {
+                    checkedsysnolist = checkedsysnolist.replace(SysNo , '');
+                } else {
+                    checkedsysnolist = checkedsysnolist.replace(SysNo + ',', '');
+                }
+
+            } else {
+                checkedsysnolist = checkedsysnolist.replace(',' + SysNo, '');
+            }
+           
+            var orderSysNos = checkedsysnolist.split(',');
+            if (orderSysNos.length == count) {
+                $("input.sysNolist").attr("checked", true);
+            } else {
+                $("input.sysNolist").attr("checked", false);
+            }
+          
+        }
+    });
+    //加载配送方式
+    function loadAllShipType() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadAllShipType",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                });
+                $('#txtDeliveryTypeSysNo').html(content);
+            }
+        });
+    }
+    //加载支付方式
+    function loadAllPayType() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadAllPayType",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                });
+                $('#txtPayTypeSysNo').html(content);
+            }
+        });
+    }
+
+    //加载订单来源
+    function loadOrderSource() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadOrderSourceList",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                });
+                $('#txtOrderSource').html(content);
+            }
+        });
+    }
+
+    //加载订单状态
+    function loadOrderStatus() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadOrderStatusList",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                });
+                $('#txtOrderStatus').html(content);
+            }
+        });
+    }
+    //取得订单日志
+    function GetOrderLogs(soSysno, obj) {
+        $.ajax({
+            type: "POST",
+            url: "/Order/GetOrderLogs",
+            data: "soSysNo=" + soSysno,
+            success: function (content) {
+                if (content != null && content != "") {
+                    $("#divMsg").html(content);
+                    $("#divMsg").css("display", "inline");
+                    var offset = $(obj).position();
+                    $("#divMsg").css("top", offset.top - 10);
+                    $("#divMsg").css("left", offset.left + 40);
+                    $(document).one("click", function () { HidOrderStatus(); });
+                }
+            }
+        });
+    }
+    //取得备注信息罗勤尧添加
+    function GetBeizhuLogs(soSysno, obj) {
+        var Beizhu = $(obj).attr("data-beizhu");
+        layer.tips(Beizhu, obj, {
+            tips: [4, '#3595CC'],
+            time: 0
+        });
+        //$.ajax({
+        //    type: "POST",
+        //    url: "/Order/GetBeizhuLogs",
+        //    data: "soSysNo=" + soSysno,
+        //    success: function (content) {
+        //        if (content != null && content != "") {
+        //            layer.tips(content, obj, {
+        //                tips: [4, '#3595CC'],
+        //                time: 0
+        //            });
+        //            //$("#divMsg").html(content);
+        //            //$("#divMsg").css("display", "inline");
+        //            //var offset = $(obj).position();
+
+        //            //$("#divMsg").css("top", offset.top - 10);
+        //            //$("#divMsg").css("left", offset.left - 440);
+        //            //$(document).one("click", function () { HidOrderStatus(); });
+        //        }
+        //    }
+        //});
+    }
+    function HidOrderStatus() {
+        $("#divMsg").hide();
+        layer.closeAll('tips');
+    }
+    //订单详情
+    function OrderBrowse(orderSysNo) {
+        @{
+            if (canAudit)
+            {
+                @:UI.OpenCreatTab("订单:" + orderSysNo, "/Order/OrderDetail/" + orderSysNo);
+                                                                            }
+            else
+            {
+                @:OpenOrderView(orderSysNo);
+                                                                    }
+        }
+    }
+    //修改备注罗勤尧添加
+    function EditBeizhu(orderSysNo, obj) {
+        var offset = $(obj).position();
+        //alert(offset)
+        var Beizhu = $(obj).attr("data-beizhu");
+        layer.prompt({ title: '请输入订单' + orderSysNo + '的备注信息，并确认', value: Beizhu, formType: 2, offset: 'r' }, function (pass, index) {
+            layer.close(index);
+            //layer.confirm('您的备注信息：' + pass + '，是否确认？',
+            //    {
+            //    btn: ['确认', '取消'] //按钮
+            //}, function () {
+            //    alert();
+            //}, function () {
+
+            //});
+            //$("div[type=page]").css("top", offset.top - 10);
+            //$("div[type=page]").css("left", offset.left - 140);
+            //alert('您的备注信息：' + pass + "");
+            $.ajax({
+                type: "POST",
+                url: "/Order/EditBeizhuLogs",
+                data: { soSysNo: orderSysNo, pass: pass },
+                success: function (result) {
+                    //alert(result.Message);
+                }
+            });
+        });
+        //$("div[type=page]").css("top", offset.top - 10);
+        //$("div[type=page]").css("left", offset.left - 240);
+
+    }
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+
+    function selectWharehouse() {
+        DAO.SelectWhareHouseDialog({
+            chkStyle: 'radio',
+            callBack: function (data) {
+                if (data) {
+                    $('#warehouse_sysno').val(data[0].name);
+                    $('#WarehouseSysNo').val(data[0].id);
+                }
+            }
+        });
+    }
+    //function SendOrder(soOrderSysNo, OverseaCarrier) {
+    //    UI.DialogOpen('/Order/SendOrderDialog?soOrderSysNo=' + soOrderSysNo + '&OverseaCarrier=' + OverseaCarrier, {
+    //        width: 550,
+    //        height: 202,
+    //        title: '运单'
+    //    }, false);
+    //}
+
+    //推送物流
+    function SendLogistics(SysNo, Logistics) {
+        $.ajax({
+            type: "POST",
+            url: "/Ajax/GetOrderLogs",
+            data: "soSysNo=" + soSysno,
+            success: function (content) {
+                RefreshCurrentPage();
+            }
+        });
+    }
+    //推送海关
+    function PushOrderToCustoms(obj, orderId, warehouseSysNo, isCancel) {
+        Utils.MaskStart($('#paging'));
+
+        if (arguments.length >= 4)
+            isCancel = 1;
+
+        Ajax.post("/Ajax/PushOrderToCustoms", "none", function (params) {
+            params.setParams("orderId", orderId);
+            params.setParams("warehouseSysNo", warehouseSysNo);
+            params.setParams("isCancel", isCancel);
+        }, function (result) {
+            Utils.MaskStop();
+            //if (!result.Status)
+            //{
+            UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            //}
+            RefreshCurrentPage();
+        }
+        );
+    }
+    //推送商检 2016-4-1 王耀发 创建
+    function PushOrderToIcp(obj, orderId, icpType) {
+        Utils.MaskStart($('#paging'));
+
+        Ajax.post("/Ajax/PushOrderToIcp", "none", function (params) {
+            params.setParams("orderId", orderId);
+            params.setParams("icpType", icpType);
+        }, function (result) {
+            Utils.MaskStop();
+            if (!result.Status) {
+                UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            }
+            RefreshCurrentPage();
+        }
+        );
+    }
+
+    //查询海关
+    function SearchStatusInCustoms(obj, orderId, warehouseSysNo) {
+        Utils.MaskStart($('#paging'));
+        Ajax.post("/Ajax/SearchStatusInCustoms", "none", function (params) {
+            params.setParams("orderId", orderId);
+            params.setParams("warehouseSysNo", warehouseSysNo);
+        }, function (result) {
+            Utils.MaskStop();
+            //if (!result.Status)
+            //{
+            UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            //}
+            RefreshCurrentPage();
+        }
+        );
+    }
+    //推送商检
+    function SendInspection(SysNo, Inspection) {
+        $.ajax({
+            type: "POST",
+            url: "/Ajax/GetOrderLogs",
+            data: "soSysNo=" + soSysno,
+            success: function (content) {
+                RefreshCurrentPage();
+            }
+        });
+    }
+    function SearchPay(obj, SysNo, PayTypeSysNo) {
+        Utils.MaskStart($('#paging'));
+        Ajax.post("/Ajax/SearchCustomsPay", "none", function (params) {
+            params.setParams("orderId", SysNo);
+            params.setParams("payCode", PayTypeSysNo);
+        }, function (result) {
+            Utils.MaskStop();
+            if (!result.Status) {
+                UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            }
+            var page = $("#pager div").children("a.hover").text();
+            RefreshCurrentPage();
+        }
+     );
+    }
+    //推送支付
+    function SendPay() {
+        Utils.MaskStart($('#paging'));
+        var orderIds = "";
+        $(".checktd").each(function () {
+            if (this.checked) {
+                if (orderIds != "")
+                    orderIds += ",";
+                orderIds += $(this).val();
+            }
+        });
+
+        Ajax.post("/Ajax/PayApplyToCustoms", "none", function (params) {
+            params.setParams("orderIds", orderIds);
+        }, function (result) {
+            Utils.MaskStop();
+            if (!result.Status) {
+                UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            }
+            RefreshCurrentPage();
+        }
+      );
+    }
+
+    //异步刷新当前页，不适用于删除功能使用后刷新
+    function RefreshCurrentPage() {
+        try {
+            $(window).data('CurrentPageFuc')();
+        } catch (e) {
+            if (isSearch)
+                doSearch();
+            else
+                doComplexSearch(1);
+        }
+    }
+
+    $("button.suc_btn").live("mouseover", function () {
+
+        $(this).removeClass("disabled").children("span").eq(0).attr("class", "icon_remove icon_white");
+        $(this).children("span").eq(1).text("取消");
+    });
+
+    $("button.suc_btn").live("mouseout", function () {
+        $(this).addClass("disabled").children("span").eq(0).attr("class", "icon_ok icon_white");
+        $(this).children("span").eq(1).text("成功");
+    });
+
+    // 推送给物流公司
+    function PushOrderToLogistics(obj, orderId, warehouseId, logistics) {
+        Utils.MaskStart($('#paging'));
+        Ajax.post("/Ajax/PushOrderToLogistics", "none", function (params) {
+            params.setParams("orderId", orderId);
+            params.setParams("warehouseId", warehouseId);
+        }, function (result) {
+            Utils.MaskStop();
+            if (!result.Status) {
+                UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            }
+            RefreshCurrentPage();
+        });
+    }
+    // 查看物流公司订单物流跟踪
+    function GetLogisticsTracking(obj, orderId, warehouseId, logistics) {
+        UI.DialogOpen('/Order/LogisticsTracking?orderId=' + orderId + '&warehouseId=' + warehouseId, {
+            width: 600,
+            height: 300,
+            title: '订单物流追踪'
+        }, false);
+    }
+    //查询物流订单状态
+    function SearchLogisticsStatus(obj, orderId, warehouseId) {
+        Utils.MaskStart($('#paging'));
+        Ajax.post("/Ajax/SearchLogisticsStatus", "none", function (params) {
+            params.setParams("orderId", orderId);
+            params.setParams("warehouseId", warehouseId);
+        }, function (result) {
+            Utils.MaskStop();
+            if (!result.Status) {
+                UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            }
+            RefreshCurrentPage();
+        });
+    }
+
+
+    //查看物流情况
+    function QueryLogistics(soSysno) {
+        UI.DialogOpen('/Order/QueryLogistics?soSysNo=' + soSysno, {
+            width: 800,
+            height: 500,
+            title: '物流查询'
+        }, false);
+    }
+    //发货操作
+    function Ship(soOrderSysNo, DeliveryTypeName) {
+        UI.DialogOpen('/Order/OrderShipDialog?soOrderSysNo=' + soOrderSysNo + '&deliveryTypeName=' + DeliveryTypeName, {
+            width: 550,
+            height: 202,
+            title: '订单发货'
+        }, false);
+    }
+    // 推送给高捷物流公司
+    function PushOrderToLog(orderId, code) {
+        UI.DialogOpen('/Order/OrderLogDialog?orderId=' + orderId + '&code=' + code, {
+            width: 600,
+            height: 350,
+            title: '订单高捷物流'
+        }, false);
+    }
+
+    // 查询高捷订单物流
+    function SelOrderToLog(orderId, code) {
+        UI.DialogOpen('/Order/QueryGaoJieLogistics?orderId=' + orderId + '&code=' + code, {
+            width: 800,
+            height: 500,
+            title: '高捷物流查询'
+        }, false);
+    }
+
+    //汇付批量支付  lx
+    $("#btnHuiFuPay").click(function () {
+        var orderSysNos = checkedsysnolist.split(',');
+        //alert(orderSysNos);
+        $("#btnHuiFuPay").attr("disabled", "disabled").addClass("disabled").find("span").next().html("等待");
+        if (orderSysNos.length > 0 && orderSysNos != "") {
+            $.post('/Order/HuiFuPay', { orderSysNos: JSON.stringify(orderSysNos) }, function (data) {
+                if (data.Status) {
+                    UI.tips.tip_alert("tips_success", data.Message);
+                    $("#btnHuiFuPay").removeAttr("disabled").removeClass("disabled").find("span").next().html("汇付批量支付");
+                    doSearch()
+                }
+                else {
+                    UI.tips.tip_alert("tips_warning", data.Message);
+                    $("#btnHuiFuPay").removeAttr("disabled").removeClass("disabled").find("span").next().html("汇付批量支付");
+                }
+                doSearch()
+            });
+        } else {
+            UI.tips.tip_alert("tips_warning", "请选择需要支付的订单！");
+            $("#btnHuiFuPay").removeAttr("disabled").removeClass("disabled").find("span").next().html("汇付批量支付");
+        }
+    });
+</script>

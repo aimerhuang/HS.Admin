@@ -1,0 +1,122 @@
+﻿@model Hyt.Model.FeNews
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "添加、修改新闻";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var er;
+        $(function() {
+            er = UI.Editor("#Content", {});
+            $("#form").validate({
+                rules: {
+                    Title: { required: true, rangelength: [1, 50] },
+                    HeadLine: { required: true, rangelength: [1, 150] },
+                    Source: { required: true, rangelength: [1, 200] },
+                    Author: { required: true, rangelength: [1, 20] },
+                    DisplayOrder: { required: true, number: true },
+                    SourceUri: { required: true, url: true, rangelength: [1, 50] }
+                },
+                errorPlacement: function(error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function(label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function addOrEdit() {
+            er.sync();
+            var from = $("#form");
+
+            if ($.trim(er.text()) == "") {
+                $("#forContent").attr('class', 'error');
+                return;
+            } else {
+                $("#forContent").attr('class', 'success');
+            }
+
+
+            if ($(from).valid()) {
+                var json = {
+                    SysNo: $("#hidSysNo").val(),
+                    Title: $("#Title").val(),
+                    HeadLine: $("#HeadLine").val(),
+                    Content: $("#Content").val(),
+                    Source: $("#Source").val(),
+                    Author: $("#Author").val(),
+                    DisplayOrder: $("#DisplayOrder").val(),
+                    SourceUri: $("#SourceUri").val()
+                };
+                $.ajax({
+                    url: "/Front/FeNewsSubmit",
+                    data: JSON.stringify(json),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data.Status) {
+                            UI.Dialog.opener.tip_alert('tips_shrot tips_success', data.Message);
+                            UI.Dialog.opener.doSearch();
+                            UI.Dialog.close();
+                        } else {
+                            if (data.StatusCode == "-1") {
+                                UI.tips.tip_alert("tips_wrong", data.Message);
+                            } else {
+                                UI.tips.tip_alert("tips_wrong", data.Message);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+  <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>新闻标题</td>
+              <td>@Html.TextBoxFor(m => m.Title, new { @class = "input_xlarge" })<span id="forTitle" class="prompt m10_l">新闻标题,1-150字符</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>新闻摘要</td>
+              <td>@Html.TextAreaFor(m => m.HeadLine, new { @class = "input_large",@style="width: 490px; height: 54px;" })  <span id="forHeadLine" class="prompt m10_l">新闻摘要,1-500字符</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>新闻内容</td>
+              <td>@Html.TextAreaFor(m => m.Content, new { @style="width: 675px;; height: 250px; visibility: hidden;" })  <span id="forContent" class="prompt">新闻内容</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>新闻来源</td>
+              <td>@Html.TextBoxFor(m => m.Source, new { @class = "input_large" })<span id="forSource" class="prompt m10_l">新闻来源,1-200字符</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>新闻作者</td>
+              <td>@Html.TextBoxFor(m => m.Author, new { @class = "input_large" })<span id="forAuthor" class="prompt m10_l">新闻作者,1-20字符</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>排序号</td>
+              <td>@Html.TextBoxFor(m => m.DisplayOrder, new { @class = "input_large" })<span id="forDisplayOrder" class="prompt m10_l">用于显示排序的数字编号</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>来源网址</td>
+              <td>@Html.TextBoxFor(m => m.SourceUri, new { @class = "input_large" })<span id="forSourceUri" class="prompt m10_l">来源网址,1-50字符</span></td>
+          </tr>
+      </tbody>
+   </table>
+   </div>
+  </div>  
+</div>
+</form>
+
+

@@ -1,0 +1,290 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.CIcp
+@{
+    ViewBag.Title = "新建商品商检";
+}
+<link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all" />
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+<script type="text/javascript" src=" @Url.Content("~/Theme/Plugins/Editor/kindeditor.min.js") "></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/numbercontrol.js")"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+<style type="text/css">
+    .basebox1 {
+        padding: 10px 0;
+    }
+
+        .basebox1 table tr td {
+            border-right: none !important;
+            border-bottom: none !important;
+        }
+
+    .usergroup {
+        background-color: #f5f5f5;
+        padding: 10px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: 200px;
+    }
+
+        .usergroup dl {
+            float: left;
+        }
+
+            .usergroup dl dt {
+                margin-bottom: 5px;
+            }
+
+            .usergroup dl.operate {
+                padding: 10px 36px 0 36px;
+            }
+
+                .usergroup dl.operate dd {
+                    margin-top: 40px;
+                }
+
+    .zTreeDemoBackground {
+        padding-left: 100px;
+        padding-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .usermenu {
+        background-color: #f5f5f5;
+        padding: 5px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="case">
+    @*<form id="form" method="POST" name="form">*@
+        <div class="boxs" id="tabboxs" style="overflow: visible;">
+            <div class="head_tab">
+                <ul class="tabNav2">
+                    <li class="long menuon" id="liIcpGoods"><a href="javascript:void(0);">商品商检信息</a></li>
+                    <li class="" id="liIcpGoodsItems"><a href="javascript:void(0);">商品商检明细</a></li>
+                </ul>
+            </div>
+                 <div id="tabcon" class="boxs_con_c1" id="tabcon">
+
+                     <div class="list2" id="DivIcpGoods">
+                         <div class="boxs_tool">
+                             <div class="right_tool">
+                                 <span class="fl">海关类型</span>
+                                 <select id="IcpType" class="select_ht28 fl wd150 m5_l  m10_r" searchitem="IcpTypes">
+                                     @ViewBag.IcpTypes
+                                 </select>
+
+                                 <div class="search_btn wd200 m10_l fl">
+                                     <input name="" type="text" id="name" class="input_ht28" value="后台显示名称/商品编号..." onclick="$(this).select()" />
+                                     <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                                 </div>
+                             </div>
+                             <!--功能按钮开始-->
+                             <div class="left_tool">
+                                 <button class="btn btn_ht26 btn_blue m10_r DS1011503" id="btnIcpGoods" title="商品备案"><span class="icon icon_white icon_pencil"></span><span class="m5_l">商品备案</span></button>
+                             </div>
+                         </div>
+                         <div class="boxs_list" id="paging">
+                         </div>
+                     </div>
+
+                     <div class="list2" style="display: none;" id="DivIcpGoodsItems">
+                         <div class="boxs_tool">
+                <div class="left_tool">
+                    @*<button class="btn btn_ht28" onclick="selectProducts(); return false;"><span class="icon_search"></span><span class="m5_l">挑选商品</span></button>*@
+                </div>
+            </div>
+                         <div class="boxs_listtabel">
+                             <table id="tbProductList" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_bnone">
+                                 <thead>
+                                     <tr>
+                                         <th class="align_l p10_lr" width="30">商品编号</th>
+                                         <th class="align_l p10_lr" width="200">商品名称</th>
+                                         <th class="borde_r_none" width="90">国检回执</th>
+                                         @*<th class="borde_r_none" width="90">海关回执</th>*@
+                                     </tr>
+                                 </thead>
+                                 <tbody id="product_list">
+                                     @{
+                                         if (ViewBag.IcpGoodsItemList != null)
+                                         {
+                                             int i = 0;
+                                             foreach (Hyt.Model.Transfer.CBIcpGoodsItem item in ViewBag.IcpGoodsItemList)
+                                             {
+                                                 if (i % 2 == 0)
+                                                 {
+                                                     @Html.Raw("<tr>")
+                                                 }
+                                                 else
+                                                 {
+                                                     @Html.Raw("<tr class='stag_color'>")
+                                                 }
+
+                                                <td class="align_l p10_lr">@item.ErpCode</td>
+                                                <td class="align_l p10_lr">@item.ProductName</td>
+                                                <td>@item.CIQNotes</td>
+                                                @*<td>@item.CustomsNotes</td>*@
+                                             <td style="display: none">@item.ProductSysNo</td>
+                                             @Html.Raw("</tr>")
+                                                 i++;
+                                             }
+                                         }
+                                         else
+                                         {
+                                             <tr>
+                                                 <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                             </tr>
+                                         }
+                                     }
+                                     </tbody>
+                                 </table>
+                             </div>
+                         </div>
+
+                </div>
+            </div>
+        <input type="hidden" id="SysNo" name="SysNo" save="SysNo" value="@Model.SysNo" />
+        <input type="hidden" id="OpType" name="OpType" save="OpType" value="@ViewBag.OpType" />
+    @*</form>*@
+</div>
+
+    <script type="text/javascript">
+        //选中的记录SysNo列项
+        var checkedsysnolist = [];
+
+        var curl = '/Icp/IcpGoodsList';
+        $("#name").defaultValue("后台显示名称/商品编号...");
+        $(function () {
+            UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_c1", tabContent: ".list2" });
+
+            doSearch(1);
+            if ($("#OpType").val() == "Add") {
+                $("#liIcpGoods").show();
+                $("#DivIcpGoods").show();
+                $("#liIcpGoodsItems").hide();
+                $("#DivIcpGoodsItems").hide();
+            } else {
+                $("#liIcpGoods").hide();
+                $("#DivIcpGoods").hide();
+                $("#liIcpGoodsItems").show();
+                $("#DivIcpGoodsItems").show();
+            }
+        });
+
+        //查询按钮
+        $("#btnSearch").click(function () {
+            doSearch(1);
+        });
+
+        function doSearch(id) {
+            checkedsysnolist = [];
+            var name;
+            if ($("#name").val() != "后台显示名称/商品编号...") {
+                name = $.trim($("#name").val());
+            }
+            var icptype = $("#IcpType").val();
+            Ajax.get("/Icp/DoIcpProductListPaging/?r=" + Math.random(), "searchItem", function (p) {
+                p.setParams("id", id);
+                p.setParams("IcpType", icptype);
+                p.setParams("name", name);
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+            });
+        }
+
+        jQuery.validator.methods.compareDate = function (value, element, param) {
+            var startDate = jQuery(param).val();
+            var date1 = new Date(Date.parse(startDate.replace(new RegExp("-", "g"), "/")));
+            var date2 = new Date(Date.parse(value.replace(new RegExp("-", "g"), "/")));
+            return date1 < date2;
+        };
+
+        Array.prototype.indexOf = function (val) {
+            for (var i = 0; i < this.length; i++) {
+                if ($.trim(this[i]) == $.trim(val)) return i;
+            }
+            return -1;
+        };
+        Array.prototype.remove = function (val) {
+            var index = this.indexOf(val);
+            if (index > -1) {
+                this.splice(index, 1);
+            }
+        };
+
+        $("#checkall").live("click", function () {
+            if ($(this).attr("checked") == "checked") {
+                $("#paging table tbody input:checkbox").each(function () {
+                    var obj = $(this);
+                    if (obj.attr("disabled") != "disabled" && obj.attr("checked") != "checked") {
+                        obj.attr("checked", "checked");
+                        checkedsysnolist.push(obj.val());
+                    }
+                });
+            } else {
+                $("#paging table tbody input:checkbox").each(function () {
+                    var obj = $(this);
+                    if (obj.attr("checked") == "checked") {
+                        obj.removeAttr("checked");
+                        checkedsysnolist.remove(obj.val());
+                    }
+                });
+            }
+        });
+
+
+
+        $("#paging table tbody input:checkbox").live('click', function () {
+            var obj = $(this);
+            if (obj.attr("checked")) {
+                checkedsysnolist.push(obj.val());
+            } else {
+                checkedsysnolist.remove(obj.val());
+            }
+        });
+
+        //商品备案
+        $("#btnIcpGoods").click(function () {
+            if (checkedsysnolist.length == 0) {
+                UI.Alert({ content: '请勾选要备案的商品' });
+                return;
+            }
+            var productSysNoList = "";
+            for (var i = 0 ; i < checkedsysnolist.length; i++) {
+                if (productSysNoList == "") {
+                    productSysNoList = checkedsysnolist[i];
+                } else {
+                    productSysNoList += ',' + checkedsysnolist[i];
+                }
+            }
+            //推送商品备案
+            PushIcpGoods($("#IcpType").val(), productSysNoList)
+        });
+        function PushIcpGoods(IcpType, ProductSysNoList) {
+            $.ajax({
+                url: '@Url.Action("PushIcpGoods")',
+                type: 'post',
+                data: { "IcpType": IcpType, "ProductSysNoList": ProductSysNoList },
+                success: function (data) {
+                    if (data.Status) {
+                        UI.CloseTab(null, curl, null, true);
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_warning', data.Message);
+                    }
+                }
+            });
+        }
+
+        $("#IcpType").change(function () {
+            doSearch(1);
+        });
+    </script>

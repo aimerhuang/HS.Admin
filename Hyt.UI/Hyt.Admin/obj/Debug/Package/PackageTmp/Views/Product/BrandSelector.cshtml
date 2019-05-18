@@ -1,0 +1,73 @@
+﻿@{
+    ViewBag.Title = "Brand";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <style type="text/css">
+        #paging td {
+            text-align: center;
+        }
+    </style>
+
+}
+
+@using Hyt.Infrastructure.Pager
+@model PagedList
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="caseout">
+    <div class="boxs_con_c1">
+        <div class="list">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">查询条件</span>
+                    <div class="search_btn m10_l fl">
+                        <input name="Name" type="text" class="input_ht28" id="name" value="搜索品牌名称..." />
+                        <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="boxs_listtabel" id="paging">
+                <!--/表格列表区-->
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/JavaScript">
+
+    //查询列表
+    function doSearch(id) {
+        var name;
+        if ($("#name").val() != "搜索品牌名称...") {
+            name = $("#name").val();
+        }
+        $.get('@Url.Action("Brand","Product")',
+            { id: id, name: name, selector:"selector" },
+            function (data) {
+                $('#paging').html(data);
+            });
+    }
+
+    function CallBack() {
+        var obj = $("#paging input:radio:checked");
+        var sysno = obj.val();
+        var name = $.trim(obj.parent().next().html());
+        var data = { sysno: sysno, name: name }
+        parent && parent._ActiveBrandSelectorCallBack(data);
+    }
+
+    $(function () {
+        $("#name").defaultValue("搜索品牌名称...");
+        doSearch(1);
+        //查询订单
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+    });
+</script>

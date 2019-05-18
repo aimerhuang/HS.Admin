@@ -1,0 +1,127 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.ReportDsorderDetail>
+@{
+    ViewBag.Title = "UpgradeDetails";
+}
+
+@section FooterJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+
+    <script type="text/javascript">
+    var paras;
+
+    function ajaxAction(url, type, vals, async) {
+        $.ajax({
+            url: url,
+            type: type === undefined ? 'get' : type,
+            async: type === undefined ? false : async,
+            data: vals,
+            success: function (data) {
+                //login time out handling
+                /*CustomActionFilter
+
+                */
+                if (data.IsLogout) {
+                    eval(data.Callback);
+                    return;
+                }
+                $('#divSearchResult').html(data);
+            }
+        });
+    }
+
+    function doSearch() {
+        paras = {
+            OrderBeginDate: $('#BeginDate').val(),
+            OrderEndDate: $('#EndDate').val(),
+            MallType: $('#selMallType').val()
+        };
+        ajaxAction('@Url.Action("UpgradeDetails")', undefined, paras, undefined);
+        }
+
+    $(document).ready(function() {
+
+        paras = {
+            OrderBeginDate: $('#BeginDate').val(),
+            OrderEndDate: $('#EndDate').val(),
+            MallType: $('#selMallType').val()
+        };
+        $('#btnSearch').click(function() {
+            doSearch();
+        });
+
+        @*            $('#selMallType').change(function() {
+                ajaxAction('@Url.Action("UpgradeDetails")', undefined, { MallType: $('#selMallType').val() });
+            });*@
+
+        $('#btnExport').click(function() {
+            if ($('#tableResult tbody tr').length == 0) {
+                UI.Alert({ content: '没有数据!' });
+                return;
+            }
+            //ajaxAction('@Url.Action("UpgradeDetailsToExcel")', undefined,paras,true);
+            window.location = '@Url.Action("UpgradeDetailsToExcel")'
+                + '?OrderBeginDate=' + paras.OrderBeginDate
+                + '&OrderEndDate=' + paras.OrderEndDate
+                + '&MallType=' + paras.MallType;
+        });
+
+        doSearch();
+    });
+
+    </script>
+}
+
+<body>
+
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>升舱明细</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <div class="left_tool" style="float: left">
+                        <button class="btn btn_ht26 m10_r" id="btnExport" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                    <div class="right_tool clearfix">
+                        <span class="fl">升舱开始日期</span>
+                        <div class="date_btn fl m10_r m10_l">
+                            <input type="text" value="@DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd")" id="BeginDate" name="" class="input_ht26">
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate',maxDate:$(EndDate).val()})"><span class="icon_calendar"></span></button>
+                        </div>
+                        
+                        <span class="fl">升舱结束日期</span>
+                        <div class="date_btn fl m10_r m10_l">
+                            <input type="text" value="@DateTime.Now.AddDays(-1).ToString("yyyy-MM-dd")" id="EndDate" name="" class="input_ht26">
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate',minDate:$(BeginDate).val()})"><span class="icon_calendar"></span></button>
+                        </div>
+                        
+                        <span class="veralign_t fl">商城类型</span>
+                        @Html.DropDownList("selMallType",ViewBag.lstMallType as List<SelectListItem>,new{@class="fl m10_r m10_l"})
+                        <button type="button" id="btnSearch" class="btn btn_ht28 fl" title="搜索"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+                </div>
+            
+                
+
+      
+                <!-- 查询结果 -->
+                <div id="divSearchResult" class="boxs_listtabel">
+             
+                    @{Html.RenderPartial("pAjaxPager_UpgradeDetails", Model);}
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+    
+</body>
+

@@ -1,0 +1,129 @@
+﻿@model Hyt.Model.FeAdvertGroup
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "广告展示模块管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            jQuery.validator.addMethod("stringCheck", function (value, element) {
+                var reg = /^[a-zA-Z][a-zA-Z0-9_]*$/;
+                return this.optional(element) || (reg.test(value));
+            }, "只能包括英文字母、数字和下划线");
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    Name: {
+                        required: true, rangelength: [1, 50],
+                        remote: {
+                            url: "/Front/FeAdvertGroupKeyChk",
+                            type: "post",
+                            data: { email: function () { return jQuery("#user").val(); } }
+                        }
+                    },
+                    Type: "required",
+                    Code: { required: true, stringCheck: true, rangelength: [1, 20] },
+                    DisplayOrder: { required: true, number: true },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+            
+            //平台类型 huangwei
+            $('#selPlatformType').change(function () {
+                if ($(this).val() != '-1') {
+                    //success m10_l
+                    $('#for_PlatformType').removeClass().addClass('success m10_l');
+                } else {
+                    $('#for_PlatformType').removeClass().addClass('prompt m10_l');
+                }
+            });
+        });
+        
+        function checkPlatformType() {
+        	/// <summary>
+            /// 平台类型需要选择 huangwei
+        	/// </summary>
+            if ($('#selPlatformType').val() == -1) {
+                //UI.Alert({ content: '请选择平台类型' });
+                $('#selPlatformType').focus();
+                $('#for_PlatformType').removeClass().addClass('error m10_l');
+            }
+        }
+        
+        function addOrEdit() {
+            checkPlatformType();
+            var from = $("#form");
+            $(from).submit();
+            if ($(from).valid()) {
+                
+                var ajax = {
+                    url: '/Front/FeAdvertGroupAddOrEdit', data: from.serialize(), type: 'POST', dataType: 'json', cache: false,
+                    success: function (json, statusText) {
+                        if (json.result) {
+                            UI.Dialog.opener.tip_alert('tips_shrot tips_success', json.info);
+                            UI.Dialog.opener.RefreshCurrentPage();
+                            UI.Dialog.close();
+                        } else {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.close();
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    }
+                };
+                $.ajax(ajax);
+            }
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+  <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>平台类型</td>
+              <td>@Html.DropDownList("selPlatformType",ViewBag.lstPlatformType as List<SelectListItem>)<span id="for_PlatformType" class="prompt m10_l">请选择平台类型</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>广告组名称</td>
+              <td>@Html.TextBoxFor(m => m.Name, new { @class = "input_mlarge" })<span id="for_Name" class="prompt m10_l">广告组名称,1-50字符</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>广告组类型</td>
+              <td>
+                  <select id="Type" name="Type" class="select_ht28">
+                      <option value="">请选择</option>
+                      @{
+                          foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                          {
+                              <option value="@dict.Key">@dict.Value</option>
+                          }
+                      }
+                  </select>
+                  <span id="for_Type" class="prompt m10_l">广告类型</span>
+              </td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>广告组代码</td>
+              <td>@Html.TextBoxFor(m => m.Code, new { @class = "input_mlarge" })<span id="for_Code" class="prompt m10_l">广告组代码,1-20英文、数字和下划线</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>排序号</td>
+              <td>@Html.TextBoxFor(m => m.DisplayOrder, new { @class = "input_mlarge" })<span id="for_DisplayOrder" class="prompt m10_l">用于显示排序的数字编号</span></td>
+          </tr>
+      </tbody>
+   </table>
+   </div>
+  </div>  
+</div>
+</form>

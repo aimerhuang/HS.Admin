@@ -1,0 +1,71 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBBsDeliveryPayment>
+
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+
+            <th width="53">
+                <input name="" type="checkbox" value="" id="select_all" class="checkall" /></th>
+            <th class="align_l p10_lr">配送方式</th>
+            <th width="85">配送类型</th>
+            <th width="72">支付方式</th>
+            <th width="72">支付类型</th>
+            <th width="98">是否在线支付</th>
+            <th width="85">创建人</th>
+            <th width="120">创建时间</th>
+
+            <th width="79">操作</th>
+
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBBsDeliveryPayment item in Model.TData)
+            {
+            <tr>
+                <td>
+                    <input name="sysno" type="checkbox" id="checkbox_@item.SysNo" value="@item.SysNo" /></td>
+                <td class="align_l p10_lr">@item.DeliveryTypeName</td>
+                <td>@item.ParentName</td>
+                <td>@item.PaymentName</td>
+                <td>@((Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型)item.PaymentType)</td>
+                <td>@((Hyt.Model.WorkflowStatus.BasicStatus.支付方式是否网上支付)item.IsOnlinePay)</td>
+                <td>@(Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.CreatedBy))</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")  </td>
+                <td>
+                    <button class="btn btn_red btn_ht26 BS1002401" onclick="DeleteDeliveryPayment(@item.SysNo)" title="删除"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                </td>
+            </tr>                      
+                       
+            }
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+    //全选事件
+    $("#select_all").click(function () {
+        if ($(this).attr("checked")) {
+            $("#item_list input[name='sysno']").attr("checked", "checked");
+        } else {
+            $("#item_list input[name='sysno']").removeAttr("checked");
+        }
+    });
+</script>
+

@@ -1,0 +1,156 @@
+﻿@{
+    ViewBag.Title = "流量统计报表";
+}
+@section HeadJs{
+    <script language="javascript" type="text/javascript" src="/Theme/Plugins/ichart/ichart.1.2.min.js"></script>
+    <script language="javascript" type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+    <script type="text/javascript" language="javascript">
+        function init() {
+            
+            //快捷日期选择按钮事件
+            $("#dateArea button").click(function () {
+                var btn = $(this);
+                var startDate = $("#d121");
+                var endDate = $("#d122");
+                var now = new Date();
+                var end = new Date(); // 获取今天时
+
+                if (btn.hasClass("disabled")) {
+                    return;
+                }
+
+                switch (btn.attr("value")) {
+                    case "2":
+                        now.setDate(now.getDate() - 1);
+                        end.setDate(end.getDate() - 1);
+                        break;
+                    case "3":
+                        end.setDate(end.getDate() - 7);
+                        break;
+                    case "4":
+                        end.setDate(end.getDate() - 30);
+                        break;
+                    default:
+                        break;
+                }
+               
+                startDate.val(FormatDateToString(now,"yyyy-MM-dd"));
+                endDate.val(FormatDateToString(end, "yyyy-MM-dd"));
+
+
+                $("#dateArea .disabled").attr("disabled", null);
+                $("#dateArea .disabled").removeClass("disabled").removeClass("white");
+
+                $(this).attr("disabled", "disabled");
+                $(this).addClass("disabled").addClass("white");
+
+                report();
+            });
+        }
+
+        //生产报表 
+        function report() {
+
+        }
+
+        //页面跳转
+        function directorTo(url) {
+            window.location.href = url;
+        }
+        
+
+        //自举函数
+        $(function () {
+            
+
+            init();
+        });
+
+
+       
+
+    </script>
+}
+<div class="case">
+
+    <div class="boxs">
+
+        <div class="boxs_con_c1 m20_b">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">指定时间</span>
+                    <div class="fl m10_l">
+                        <div class="date_btn120 fl">
+                            <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="input_ht26" id="d121" name="">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d121'})"><span class="icon_calendar"></span></button>
+                        </div>
+                    </div>
+                    <div class="fl m10_l">
+                        -
+                    </div>
+                    <div class="fl m10_l">
+                        <div class="date_btn120 fl">
+                            <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="input_ht26" id="d122" name="">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d122'})"><span class="icon_calendar"></span></button>
+                        </div>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl" title="生产报告" id="btn_report"><span class="icon_search"></span><span class="m5_l">生产报告</span></button>
+                    <button class="btn btn_ht28 m10_l fl" title="返回" onclick="directorTo('/Report/MkTrafficStatistics')"><span class="icon_search"></span><span class="m5_l">返回</span></button>
+                </div>
+                <!--功能按钮开始-->
+                <div class="left_tool m20_b" id="dateArea">
+                    <button class="btn btn_ht26 m10_r disabled white" value="1"><span>今天</span></button>
+                    <button class="btn btn_ht26 m10_r" value="2"><span>昨天</span></button>
+                    <button class="btn btn_ht26 m10_r" value="3"><span>最近7天</span></button>
+                    <button class="btn btn_ht26 m10_r" value="4"><span>最近30天</span></button>
+                </div>
+                <!--功能按钮结束-->
+            </div>
+            <!--搜索结束-->
+
+        </div>
+        <!--工具条结束-->
+    </div>
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>趋势分析</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+            <!--表格列开始-->
+            <div class="boxs_listtabel">
+                <table width="100%" height="140">
+                    <tr>
+                        <td width="20%">
+                            <div class="f14 m10_b">浏览量</div>
+                            <div class="f24 bold clearfix">1</div>
+                        </td>
+                        <td width="20%">
+                            <div class="f14 m10_b">访客量</div>
+                            <div class="f24 bold clearfix">2</div>
+                        </td>
+                        <td width="20%">
+                            <div class="f14 m10_b">IP量</div>
+                            <div class="f24 bold clearfix">3</div>
+                        </td>
+                        <td width="20%">
+                            <div class="f14 m10_b">新访客</div>
+                            <div class="f24 bold clearfix">4</div>
+                        </td>
+                        <td width="20%">
+                            <div class="f14 m10_b">评价浏览页数</div>
+                            <div class="f24 bold clearfix">5</div>
+                        </td>
+                    </tr>
+                </table>    
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>

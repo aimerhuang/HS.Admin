@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "任务池优先级管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>任务池优先级管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 btn_blue" id="createBtn"><span class="icon icon_white icon_plus"></span><span class="m5_l">添加</span></button>
+                    </div>
+                </div>
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch();
+        $("#createBtn").click(function () {
+            var url = '/JobPool/JobPriorityCreate';
+            UI.DialogOpen(url, {
+                title: '新增任务池优先级',
+                width: '550px',
+                height: '202px'
+            }, false);
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        $.get("/JobPool/SearchJobPriority?r=" + Math.random(), null,
+            function (data) {
+                $('#paging').html(data);
+            });
+    }
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        doSearch();
+
+    }
+    function Edit(id) {
+        UI.DialogOpen('/JobPool/JobPriorityCreate?id=' + id, {
+            width: 550,
+            height: 202,
+            title: '任务池优先级编辑'
+        }, false);
+    }
+
+    function Delete(myid, btn) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+                $.post('/JobPool/DeleteJobPriority', { id: myid }, function (r) {
+                    if (r.Status) {
+                        SuccessTip();
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+
+                });
+            },
+            cancel: true
+        });
+    }
+</script>

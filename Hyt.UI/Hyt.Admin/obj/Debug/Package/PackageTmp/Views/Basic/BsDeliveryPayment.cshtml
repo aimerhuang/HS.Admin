@@ -1,0 +1,181 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "配送支付管理";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.BS1002201, ".BS1002201") 
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.BS1002401, ".BS1002401") 
+}
+<link href="~/Theme/Plugins/ZTree/skin.css" rel="stylesheet" type="text/css" media="all" />
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            //查询录入框点击事件
+
+            doSearch();
+            //快捷状态查询
+            $("#DeliveryTypeSysNo").change(function () {
+                doSearch();
+            });
+            //父级下配送方式
+            $("#ParentSysNo").change(function () {
+                var strHtml = '<option value="" selected="selected">全部</option>';
+
+                $.ajax({
+                    datatype:"json",
+                    type: "get",
+                    url: '@Url.Action("GetSubLgDeliveryType", "Logistics")',
+                    data: { parSysNo: $("#ParentSysNo").val() },
+                    success: function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                strHtml += '<option value="' + data[i].SysNo + '">' + data[i].DeliveryTypeName + '</option>';
+                            }
+                        }
+                        $("#DeliveryTypeSysNo").html(strHtml);
+                        doSearch();
+                    },
+                    error: function () {
+                        UI.Alert({ content: "查询出错,请稍候再试" });
+                    },
+                });
+            });
+
+            $("#PaymentSysNo").change(function () {
+                doSearch();
+            });
+
+
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+            });
+        });
+
+        //查询列表
+
+        function doSearch() {
+            $.get('@Url.Action("BsDeliveryPayment", "Basic")',
+                { PaymentSysNo: $("#PaymentSysNo").val(), DeliverySysNo: $("#DeliveryTypeSysNo").val(), ParentSysNo: $("#ParentSysNo").val() },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">配送类型</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="ParentSysNo" name="ParentSysNo">
+                            <option value="">全部</option>
+                            @foreach (var item in (IList<Hyt.Model.LgDeliveryType>)ViewBag.FirstType)
+                            {
+                                <option value="@item.SysNo">@item.DeliveryTypeName</option>
+                            }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">配送方式</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 wd120" id="DeliveryTypeSysNo" name="DeliveryTypeSysNo">
+                            <option value="">全部</option>
+
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">支付方式</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="PaymentSysNo" name="PaymentSysNo">
+                            <option value="">全部</option>
+                            @foreach (var item in (IList<Hyt.Model.Transfer.CBBsPaymentType>)ViewBag.BsPaymentType)
+                            {
+                                <option value="@item.SysNo">@item.PaymentName</option>
+                            }
+                        </select>
+                    </div>
+
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m5_r BS1002201" onclick="window.location.href='/Basic/BsDeliveryPaymentSet'"><span class="icon_cog "></span><span class="m5_l">设置</span></button>
+                    <button class="btn btn_ht26 m5_r BS1002401" onclick="DeleteBatch()"><span class="icon_trash "></span><span class="m5_l">批量删除</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+
+        //批量删除 后重新加载
+        function DeleteBatch() {
+            var sysno = "";
+            $("#item_list input[name='sysno']").each(function () {
+                if ($(this).attr("checked")) {
+                    sysno += $(this).val() + ",";
+                }
+            });
+            if (sysno == "") {
+                UI.Alert({ content: "请先选择要删除的内容" });
+                return;
+            }
+            UI.Confirm({
+                content: "您确定删除吗？",
+                ok: function () {
+                    sysno = sysno.substr(0, sysno.length - 1);
+                    $.ajax({
+                        type: "get",
+                        data: { sysno: sysno },
+                        url: '@Url.Action("DeleteDeliveryPayment", "Basic")',
+                        cache: false,
+                        success: function (data) {
+                            doSearch();
+                            UI.tips.tip_alert("tips_shrot tips_success", "删除成功!");
+                        },
+                        error: function () {
+                            UI.Alert({ content: "删除出错" });
+                        }
+                    });
+                }
+            });
+        }
+
+        //删除配送支付关联
+
+        function DeleteDeliveryPayment(sysno) {
+            UI.Confirm({
+                content: "您确定删除吗？",
+                ok: function () {
+                    $.post('@Url.Action("DeleteDeliveryPayment")', { sysno: sysno }, function (data, status) {
+                        doSearch();
+                        UI.tips.tip_alert("tips_shrot tips_success", "删除成功!");
+                    }
+                    );
+                },
+            }
+            );
+        }
+
+    </script>
+}

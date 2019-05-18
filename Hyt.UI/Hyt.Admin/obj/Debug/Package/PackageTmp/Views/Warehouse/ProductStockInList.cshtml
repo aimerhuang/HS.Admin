@@ -1,0 +1,111 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品入库";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品入库</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl">入库单号</span>
+                    <input id="StockInNo" type="text" class="wd100 fl m10_l m10_r" value="">
+                    <span class="fl">状态</span>
+                    <select id="dpdStatus" class="select_ht28 fl wd80 m10_r m10_l">
+                        <option selected="selected">全部</option>
+                        @foreach (KeyValuePair<int, string> item in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.WarehouseStatus.入库单状态)))
+                        {
+                            <option value="@item.Key">@item.Value</option>
+                        }
+                    </select>
+                    <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+                <div class="left_tool">
+                        <button class="btn btn_blue btn_ht26" onclick="openTab()" type="button"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增入库单</span></button>
+                    </div>
+            </div>
+            <div id="paging">
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<input type="hidden" id="WarehouseSysNo" value=@ViewData["WarehouseSysNo"] />
+<script type="text/javascript">
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+
+    $("#dpdStatus").change(function () {
+        doSearch();
+    });
+
+
+    doSearch();
+
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Warehouse/DoPdProductStockInDetailQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("WarehouseSysNo", $("#WarehouseSysNo").val());
+            p.setParams("StockInNo", $("#StockInNo").val());
+            p.setParams("Status", $("#dpdStatus").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+
+    function openTab(sysNo) {
+        var url = "/Warehouse/ProductStockInCreate";
+        var text = "";
+        if (sysNo != undefined) {
+            url += "?id=" + sysNo + "&WarehouseSysNo=" + $("#WarehouseSysNo").val();
+            text = "修改入库：" + sysNo;
+        } else {
+            url += "?id=0" + "&WarehouseSysNo=" + $("#WarehouseSysNo").val();
+            text = "新建入库";
+        }
+        UI.OpenCreatTab(text, url);
+    }
+    /*StockInFlag 入库标示 1 部分入库，2 全部入库*/
+    function openTabAudit(sysNo) {
+        var url = "/Warehouse/ProductStockInAudit";
+        var text = "";
+        if (sysNo != undefined) {
+            url += "?id=" + sysNo + "&WarehouseSysNo=" + $("#WarehouseSysNo").val();
+            text = "商品入库：" + sysNo;
+        } 
+        UI.OpenCreatTab(text, url);
+    }
+    function openTabView(sysNo) {
+        var url = "/Warehouse/ProductStockInView";
+        var text = "";
+        if (sysNo != undefined) {
+            url += "?id=" + sysNo + "&WarehouseSysNo=" + $("#WarehouseSysNo").val();
+            text = "商品入库：" + sysNo;
+        }
+        UI.OpenCreatTab(text, url);
+    }
+
+    function InboundCreate(ProductStockInSysNo) {
+        UI.DialogOpen('/Warehouse/SendProductStockInDialog?ProductStockInSysNo=' + ProductStockInSysNo + "&WarehouseSysNo=" + $("#WarehouseSysNo").val(), {
+            width: 550,
+            height: 202,
+            title: '包裹单'
+        }, false);
+    }
+
+</script>

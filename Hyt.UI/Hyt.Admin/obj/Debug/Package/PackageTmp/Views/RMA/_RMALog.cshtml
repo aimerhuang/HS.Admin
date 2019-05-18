@@ -1,0 +1,40 @@
+﻿@model Hyt.Model.CBRmaRelations
+
+
+    <div class="boxs_listtabel border_none p10 bg_f5 m0">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0"  class="">
+            <thead>
+                <th width="15%">操作时间</th>
+                <th width="10%">操作人姓名</th>
+                <th align="left" class="p10_l">日志内容</th>
+            </thead>
+            @{
+                if (Model.RmaLogs == null || Model.RmaLogs.Count < 1)
+                {
+                     <tr>
+                        <td colspan="3" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                else
+                {
+                    int row = 0;
+                    foreach (var item in Model.RmaLogs)
+                    {
+                        row++;
+                        <tr @{if (row % 2 == 0){<text>class='stag_color'</text>}}>
+                            <td width="15%">
+
+                                @item.OperateDate.ToString("yyyy-MM-dd HH:mm:ss")
+                            </td>
+                            <td width="10%">
+
+                                @item.UserName
+                            </td>
+                            <td   align="left" class="p10_l" >@item.LogContent</td>
+                        </tr>
+                    }
+  
+                }
+            }
+        </table>
+    </div>

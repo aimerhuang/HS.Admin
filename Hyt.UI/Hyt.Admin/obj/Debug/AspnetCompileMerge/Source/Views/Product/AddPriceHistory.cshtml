@@ -1,0 +1,539 @@
+﻿@*
+
+商品调价申请组件
+ProductSysNoList:将杯调价的商品
+
+2013-06-24 邵斌 创建
+
+*@
+
+@{
+    ViewBag.Title = "添加商品调价申请";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" type="text/css" media="all"/>
+    <style type="text/css">
+        #ChangePricePanel div, #expressPricePanel div {
+            margin: 0 0;
+        }
+
+        .number_btn {
+            float: left;
+        }
+
+        .priceheadtitle thead tr th {
+            height: 30px;
+            border-bottom: #c1c1c1 solid 1px;
+        }
+
+        .priceheadtitle thead {
+            background-color: #e1e1e1;
+        }
+    </style>
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+
+
+    <script type="text/javascript">
+
+        var isMultiChange = false;
+        //是否是批量价格修改
+        var productSysNoList = @ViewBag.Products;
+        //申请调价的商品编号数组
+        var showPrice = "@ViewBag.ShowPrice";
+
+        $(function() {
+
+            //验证数据输入参数数据
+            if (productSysNoList.length == 0 || productSysNoList[0] == 0) {
+                UI.tips.tip_alert("tips_warning", "请选择您想调整价格的商品！");
+                return false;
+            }
+
+
+            //判读是否是单一调价还是联合调价（多商品调价）
+            isMultiChange = (productSysNoList.length > 1);
+
+            //初始化环境
+            Init();
+
+
+            //如果是单个商品调价，就通过Ajax方式读取该商品的价格信息
+            if (!isMultiChange) {
+
+                $("#express").hide(); //隐藏快速调节
+
+                //读取数据
+                LoadProductPrice(productSysNoList);
+
+            } else {
+
+                $("#express").show(); //显示快速调节
+                $("#td_o_p").html("");
+
+                LoadUserLevelToShow(); //读取多商品调价是用于显示的用户等级
+            }
+
+
+            UI.Numbercontrol({
+                numberinputselect: "#expressPricePanel input",
+                minNumber: 0,
+                change: function(obj) {
+                    if ($(obj).attr("id") == "multi") {
+                        $("#ChangePricePanel input").val($(obj).val());
+                    }
+                }
+            });
+        });
+
+        //页面环境初始化
+
+        function Init() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function() {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(".boxs"),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function() {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+
+
+            //保存按钮事件
+            $("#btnSave").bind("click", SaveCallback);
+
+
+            //统一调价改变事件
+            $("#multi").bind("change", OnChangeMultiNumber);
+            $("#multi_select").bind("change", function() {
+                $("#ChangePricePanel select").children(":selected").attr("selected", null);
+                $("#ChangePricePanel select option[value='" + $(this).val() + "']").attr("selected", "selected");
+            });
+
+        }
+
+        /*******************************
+        * 读取商品价格 -- 单商品调价
+        *******************************/
+
+        function LoadProductPrice(productSysNoList) {
+            //Ajax请求读取数据
+            $.ajax({
+                url: "@Url.Action("GetProductPrice", "Ajax")",
+                data: { sysNo: productSysNoList[0], showPrice: "@ViewBag.PriceType" },
+                success: function(response) {
+                    //成功后的数据处理逻辑
+                    //Json数据格式为{result:[价格数组],status=[状态对象(后台枚举转换而成)]}
+                    BindProductPriceData(response, productSysNoList.length > 1);
+                },
+                error: function(httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    alert(error);
+                }
+            });
+        }
+
+        /*******************************
+            * 读取用户等级 -- 多商品调价
+            *******************************/
+
+        function LoadUserLevelToShow() {
+            //Ajax请求读取数据
+            $.ajax({
+                url: "@Url.Action("GetUserLevelShowList", "Ajax")",
+                data: { showPrice: "@ViewBag.PriceType" },
+                success: function(response) {
+                    //成功后的数据处理逻辑
+                    //Json数据格式为{result:[价格数组],status=[状态对象(后台枚举转换而成)]}
+                    BindProductPriceData(response);
+                },
+                error: function(httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    alert(error);
+                }
+            });
+        }
+
+
+        /*******************************
+            * 价格绑定显示
+            * response：绑定数据源
+            * isMulti：是否是联合调价
+            *******************************/
+
+        function BindProductPriceData(response, isMulti) {
+
+            //商品分项调价模板
+            var expectTemplate = '<tr>'
+                + '<td widt="160" align="right" class="noborder">'
+                + '  <span>{0}</span></td>'
+                + '<td width="60" align="' + (isMultiChange ? "center" : "right") + '" class="noborder red ">'
+                + (isMultiChange ? " " : '&yen;{oprice}')
+                + '<SELECT id="{7}_select" class="' + (isMultiChange ? "" : "hide") + '">'
+                + (isMultiChange ? '' : '<OPTION selected value="0">修改价格</OPTION> ')
+                + '<OPTION value="1">提高</OPTION> '
+                + '<OPTION value="-1">降低</OPTION>'
+                + '</SELECT>'
+                + '</td>'
+                + '<td width="100" align="center" class="noborder">'
+                + '<input id="{1}" class="{number:true,messages:{number:\'价格必须是大于0的数字\'}} wd24" name="{2}" type="text" value="{3}" data="{4}" sourcesysno="{5}" pricesource={6}></td>'
+                + '<td width="54" align="left" class="noborder">元</td>'
+                + '</tr>';
+
+
+            var expectHtml = ""; //预期价格Html
+            var price = null; //数据库价格
+
+            //绑定价格到商品原价格
+            for (var i = 0; i < response.length; i++) {
+
+                //提取价格对象
+                price = response[i];
+
+
+                //格式化预期价格
+                expectHtml = expectTemplate;
+                expectHtml = expectHtml.replace("{0}", price.PriceName); //绑定表单想名称（字段名）
+                expectHtml = expectHtml.replace("{oprice}", price.Price); //绑定原价（字段名）
+                expectHtml = expectHtml.replace("{1}", price.SysNo); //input控件ID就是价格的系统编号
+                expectHtml = expectHtml.replace("{2}", price.SysNo); //input控件name就是价格的系统编号
+                expectHtml = expectHtml.replace("{3}", price.Price); //input控件value
+                expectHtml = expectHtml.replace("{4}", price.Price); //input控件缓存原价格
+                expectHtml = expectHtml.replace("{5}", price.SourceSysNo); //用户等级系统编号
+                expectHtml = expectHtml.replace("{6}", price.PriceSource); //价格来源类型
+                expectHtml = expectHtml.replace("{7}", price.SysNo); //选择控件ID
+
+                if (i == (response.length - 1)) {
+                    expectHtml = expectHtml.replace(/noborder/g, "bd_none");
+                }
+
+                //添加html
+
+                $("#ChangePricePanel").append(expectHtml);
+            }
+
+
+            //如果是单选调价时 选择修操作时，对修改价格（直接修改价格）时要还原原价格
+            if (!isMulti) {
+                $('select', $("#ChangePricePanel")).bind("change", function() {
+                    OnSelectChangeType($(this));
+                });
+            }
+
+            //创建数组按钮
+            UI.Numbercontrol({
+                numberinputselect: "#ChangePricePanel input",
+                minNumber: 0
+            });
+
+            $("#formAddPriceHistory").validate({
+                errorPlacement: function(error, element) {
+                    if (error.html() != "")
+                        $(element).parent().parent().next().next().append(error);
+                }
+            });
+        }
+
+        /*******************************
+            * 修改方式改变处理业务事件
+            *******************************/
+
+        function OnSelectChangeType(element) {
+            var objInput = $("input", element.parent().prev());
+
+            //当前选择项不是“修改价格”
+            if (element.val() != 0) {
+
+                //判断是否存有原价
+                if (objInput.attr("data") == null)
+                    objInput.attr("data", objInput.val());
+
+                //对不是"修改价格"的操作将价格框基数设置成0.
+                objInput.val(0);
+
+            } else {
+
+                //对是"修改价格"的操作将价格框基数设置成原价格.
+                if (objInput.attr("data") != null)
+                    objInput.val(objInput.attr("data"));
+            }
+        }
+
+        /*******************************
+            * 生产调价结果申请数字
+            *******************************/
+        
+        function BuildPdPriceHistoryList(inputArray) {
+
+
+            var expectPriceArray = new Array(); //预期结果集
+            var tempPrice = null; //价格缓存，用于价格验证
+
+            var tempObj; //结果对象
+            var inputObj; //输入框对象
+            var basePrice = (inputArray != null && inputArray.length>0?$(inputArray[0]).val():0);
+            var levelNumber = @((int)Hyt.Model.WorkflowStatus.ProductStatus.产品价格来源.会员等级价);
+            var msg = "";
+            for (var i = 0; i < inputArray.length; i++) {
+                inputObj = $(inputArray[i]);
+                //对象为空将跳过
+                if (inputObj.length == 0) {
+                    continue;
+                }  
+                
+                //判断是否有值或是否值为0
+                if (inputObj.val().length == 0)
+                    continue;
+
+                //生成申请调价明细对象
+                tempObj = CreatePdPriceItems(inputObj); 
+                //价格检查，
+               // 规则为：任何价格不得高于基础价格，会员等级价格应该按等级区分，等级越高价格越低
+                //任何价格不得高于基础价格
+                if (tempObj.ApplyPrice < 0) {
+                    msg = $("td:first span",inputObj.closest("tr")).text()+ "商品价格不能为负数";
+                } else if (basePrice < tempObj.ApplyPrice) {
+                    msg = "任何价格不得高于商品基础价格";
+                }else if (tempObj.PriceSource == levelNumber) {     //验证会员等级价格 
+                    //价格对比，只能从第二个价格开始
+                    if (tempPrice != null && tempObj.ApplyPrice > tempPrice.ApplyPrice) {
+                        msg ="会员等级价设置不正确，价格必须从高到底设置";
+                    }
+                    tempPrice = tempObj;
+                }
+                
+                //错误提示
+                if (msg.length > 0 && !isMultiChange) {
+                    UI.Alert({
+                        content:msg,
+                        width:250
+                    });
+                    return new Array();
+                }
+
+                //如果价格有改动才添加到预期调价列表中
+                if (tempObj.OriginalPrice != tempObj.ApplyPrice)
+                    expectPriceArray.push(tempObj);
+            }
+           
+            return expectPriceArray;
+        }
+        
+
+        /*============================
+            生产调价申请明细对象
+        ============================*/
+        function CreatePdPriceItems(inputObj) {
+            //组合调价申请对象(PdPriceHistory)
+           var tempObj = {
+                SysNo: 0,
+                PriceSysNo: 0,
+                OriginalPrice: 0,
+                ApplyPrice: 0,
+                ApplySysNo: 0,
+                ApplyDate: "@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")",
+                    Opinion: "",
+                    Auditor: 0,
+                    AuditDate: "@((new DateTime()).ToString("yyyy-MM-dd HH:mm:ss"))",
+                    Status: 1
+                };
+                tempObj.OriginalPrice = inputObj.attr("data"); //获取原价
+                tempObj.PriceSysNo = inputObj.attr("id"); //获取系统编号（input控件ID就是价格的系统编号）
+                tempObj.SourceSysNo = inputObj.attr("sourcesysno"); //来源编号
+                tempObj.PriceSource = inputObj.attr("pricesource"); //来源编号类型
+
+            //更具不同的价格调价设置（select控件）来计算申请价格
+                switch ($(inputObj).parent().parent().prev().children("select").val()) {
+                    case "0":
+                        tempObj.ApplyPrice = parseFloat(inputObj.val());
+                        break;
+                    case "1":
+                        tempObj.ApplyPrice = parseFloat(tempObj.OriginalPrice) + parseFloat(inputObj.val());
+                        break;
+                    case "-1":
+                        tempObj.ApplyPrice = parseFloat(tempObj.OriginalPrice) - parseFloat(inputObj.val());
+                        break;
+                }
+
+            return tempObj;
+        }
+        
+        /*******************************
+            * 保存商品调价申请回调
+            *******************************/
+
+        function SaveCallback() {
+            //验证数据
+            if (!$("#formAddPriceHistory").valid()) return false;
+
+            //查找所有预期修改的价格申请，并组合成结果数组
+            var inputItems;
+
+            inputItems = $("input", $("#ChangePricePanel")); //价格输入值
+            var expectPriceArray = BuildPdPriceHistoryList(inputItems);
+
+            //如果结果集长度是0者不做任何操作
+            if (expectPriceArray.length == 0) {
+                UI.tips.tip_alert("tips_warning", "没有要更新或保存的数据！");
+                return false;
+            }
+
+
+            if (isMultiChange) {
+                SaveMultiPdPriceHistory(expectPriceArray, productSysNoList);
+            } else {
+                SaveSinglePdPriceHistory(expectPriceArray);
+            }
+
+        }
+
+        /*******************************
+            * 保存多个商品调价
+            *******************************/
+
+        function SaveMultiPdPriceHistory(expectPriceArray, productSysNoList) {
+
+            $.ajax({
+                url: '@Url.Action("SaveProductPrice","Ajax")',
+                data: { priceHistories: JSON.stringify(expectPriceArray), productSysNoList: JSON.stringify(productSysNoList) },
+                dataType: "json",
+                type: "POST",
+                success: function(response) {
+
+                    if (!response.success) {
+                        UI.tips.tip_alert('tips_wrong', response.message);
+                    } else {
+                        //回调方法
+                        if ($.isFunction(parent._ActivePriceHistoryCallBack))
+                            parent._ActivePriceHistoryCallBack(response.success);
+                    }
+
+
+                },
+                error: function(httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    UI.tips.tip_alert('tips_wrong', error);
+                }
+            });
+        }
+
+        /*******************************
+            * 保存单个商品调价
+            *******************************/
+
+        function SaveSinglePdPriceHistory(expectPriceArray) {
+
+            $.ajax({
+                url: '@Url.Action("SaveProductPrice","Ajax")',
+                data: { priceHistories: JSON.stringify(expectPriceArray) },
+                dataType: "json",
+                type: "POST",
+                success: function(response) {
+                    if (!response.success) {
+                        UI.tips.tip_alert('tips_wrong', response.message)
+                    } else {
+                        //回调方法
+                        if ($.isFunction(parent._ActivePriceHistoryCallBack))
+                            parent._ActivePriceHistoryCallBack(response.success)
+                    }
+
+                },
+                error: function(httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    UI.tips.tip_alert('tips_wrong', error);
+                }
+            });
+        }
+
+
+        /*******************************
+            * 联合调价是快捷调价改变
+            *******************************/
+
+        function OnChangeMultiNumber() {
+            $("#ChangePricePanel input").val($(this).val());
+        }
+
+
+        function Close() {
+            //关闭对话框
+            UI.Dialog.close();
+        }
+
+    </script>
+}
+<form id="formAddPriceHistory" name="formAddPriceHistory" action="" onsubmit="return false;">
+    <div class="boxs p10" style="width: 440px;">
+        <div class="boxs_con_c1">
+
+            <div class="boxs_detail_dispay">
+                <div id="express" style="display: none;">
+                    <div class="tit_dispay border_tnone">
+                        <div class="more10r m5_t"></div>
+                        <h5>快捷调价</h5>
+                    </div>
+                    <div class="tit_con">
+
+                        <table id="expressPricePanel" width="438" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td widt="160" align="right" class="noborder"><span>统一调价</span></td>
+                                    <td width="60" align="center" class="noborder red">
+                                        <select id="multi_select">
+                                        <option value="1">提高</option>
+                                        <option value="-1">降低</option>
+                                    </select>
+                                    </td>
+                                    <td width="100" align="center" class="noborder">
+                                        <input id="multi" name="multi" class="{number:true,messages:{number:'价格必须是大于0的数字'}} wd24" name="0" type="text" value="0" data="0">
+                                    </td>
+                                    <td width="54" align="left" class="noborder">元</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div>
+                    @* <div class="tit_dispay border_tnone">
+                        <div class="more10r m5_t"></div>
+                        <h5>分项调价</h5>
+                    </div>*@
+                    <div class="tit_con">
+
+                        <table class="priceheadtitle" width="438" border="0" cellspacing="0" cellpadding="0">
+                            <thead>
+                                <tr class="ht35">
+                                    <th width="160" align="center" class="noborder">价格名称</th>
+                                    <th id="td_o_p" width="60" align="center" class="noborder">商品原价</th>
+                                    <th width="100" align="center" class="noborder">调整价格
+                                    </th>
+                                    <th width="54">&nbsp;</th>
+                                </tr>
+                            </thead>
+                        </table>
+                        <div style="overflow-y: auto; overflow-x: hidden; height: 250px;">
+                            <table id="ChangePricePanel" width="438" border="0" cellspacing="0" cellpadding="0" class="border_tnone">
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--提交按钮-->
+            <div class="pagination align_c clearfix hide">
+                <button id="btnSave" class="btn btn_blue btn_ht32 bold f14">保存</button>&nbsp;
+                <button class="btn btn_ht32 bold f14">取消</button>
+            </div>
+        </div>
+    </div>
+</form>

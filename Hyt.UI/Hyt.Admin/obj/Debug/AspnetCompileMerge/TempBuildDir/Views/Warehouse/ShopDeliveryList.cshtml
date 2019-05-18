@@ -1,0 +1,275 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "门店自提";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+</head>
+<body>
+@*高级搜索*@
+<div class="search_box" id="JS_search">
+	<div class="search_title clearfix"> 
+    	<span class="f14 bold cf fl">高级查询</span><a id="JS_search_nav" class="fr" href="javascript:;">×</a> 
+    </div>
+    <div class="search_body">
+    	<table width="100%">
+        <tbody>
+        	<tr>
+            	<td width="28%" align="right">门店</td>
+                <td width="72%">
+                	<select class="wd170" id="StoreSysNo" name="StoreSysNo">
+	                    <option value="0" selected="selected">全部</option>
+                        @foreach (var shop in ViewBag.Shops)
+                        {
+                            <option value="@shop.SysNo">@shop.WarehouseName</option>
+                        }
+                        @*<option value="">成都门店</option>
+                        <option value="">北京门店</option>*@
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">下单时间</td>
+                <td>
+                  <div class="date_btn">
+                      <input type="text" searchex="OrderBeginDate" name="OrderBeginDate" id="OrderBeginDate" onclick="UI.Date({ el: 'OrderBeginDate' })" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" />
+                  <button onclick="UI.Date({el:'OrderBeginDate'})" class="btn btn_ht26" title="日历" type="button"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">&nbsp;</td>
+                <td>
+                  <div class="date_btn">
+                      <input type="text" searchex="OrderEndDate" name="OrderEndDate" id="OrderEndDate" class="input_ht26" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                  <button onclick="UI.Date({el:'OrderEndDate'})" class="btn btn_ht26" title="日历" type="button"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">销售单号</td>
+                <td>
+               		<input type="text" class="wd156" value="" id="OrderSysNo" name="OrderSysNo" searchEx="OrderSysNo">
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">出库单号</td>
+                <td>
+               		<input type="text" class="wd156" value="" id="WhStockOutSysNo" name="WhStockOutSysNo" searchEx="WhStockOutSysNo">
+                </td>
+            </tr>
+            <tr>
+                <td align="right">延迟时间</td>
+                <td>
+                  <div class="date_btn">
+                  <input type="text" searchEx="PickUpBeginDate" name="PickUpBeginDate" id="PickUpBeginDate" onclick="UI.Date({ el: 'PickUpBeginDate' })" value="">
+                  <button onclick="UI.Date({el:'PickUpBeginDate'})" class="btn btn_ht26" title="日历" type="button"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">&nbsp;</td>
+                <td>
+                  <div class="date_btn">
+                  <input type="text" searchEx="PickUpEndDate" name="PickUpEndDate" id="PickUpEndDate" class="input_ht26" value="">
+                  <button onclick="UI.Date({el:'PickUpEndDate'})" class="btn btn_ht26" title="日历" type="button"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">会员帐号</td>
+                <td>
+               		<input type="text" class="wd156" value="" id="CustomerAccount" name="CustomerAccount" searchEx="CustomerAccount">
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">收货手机</td>
+                <td>
+               		<input type="text" class="wd156" value="" id="ReceiverTel" name="ReceiverTel" searchEx="ReceiverTel">
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">收货人姓名</td>
+                <td>
+               		<input type="text" class="wd156" value="" id="ReceiverName" name="ReceiverName" searchEx="ReceiverName">
+                </td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+    <div class="search_foot">
+    	<button  class="btn btn_blue btn_ht30 bold" title="开始查询" id="btnComplexSearch">开始查询</button><button id="JS_delete" class="btn btn_ht30 bold m10_l" title="清除条件" type="reset">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+          <h3>门店自提</h3>
+        </div>
+        <div class="boxs_con_c1">
+        	<div class="boxs_tool">
+            <!--/工具条-->
+                <div class="right_tool clearfix">
+                         <select class="fl select_ht28" name="StoreSysNoList" id="StoreSysNoList">
+                                <option selected="selected" value="0">所有门店</option> 
+                                 @foreach (var shop in ViewBag.Shops)
+                                {
+                                    <option value="@shop.SysNo">@shop.WarehouseName</option>
+                                }
+                          </select>
+                         <select class="fl m10_l select_ht28"   name="QueryType" id="QueryType">
+                                <option value="0">全部</option>
+                                <option  value="1" selected="selected">待确认</option> 
+                                <option  value="2">待提货</option> 
+                                <option  value="3">延时已到期</option> 
+                                <option  value="4">今日已提货</option>  
+                          </select>
+                         <div class="search_btn m10_l fl wd270">
+                              <input type="text" maxlength="25" value="" style="width:227px" class="input_ht28" name="Keyword" id="Keyword">
+                                    <button title="搜索" id="searchBtn" class="btn btn_ht28"><span class="icon_search"></span></button>
+                          </div>
+                          <button id="outbtn2" title="高级搜索" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+        	</div>
+            
+            <div id="paging">
+            </div>
+            
+            
+        </div>
+        
+    </div>
+</div>
+
+<script type="text/javascript">
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id+'&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+    $(document).ready(function (e) {
+        $("#Keyword").defaultValue("请输入订单号、收货手机、收货人...");
+        //高级查询
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        doSearch();
+        
+        //查询条件变化时执行
+        $("#QueryType").change(function () { doSearch(); }); 
+        $("#StoreSysNoList").change(function () { doSearch(); });
+        
+        //绑定简单查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+        
+        //绑定高级查询按钮事件
+        $("#btnComplexSearch").click(function () {
+            doComplexSearch(1);
+        });
+        
+     
+
+        //查询列表
+        function doSearch() {
+            Utils.MaskStart($('#paging'));
+            Ajax.get("/Warehouse/SearchShopDelivery?r=" + Math.random(), "Search", function (p) {
+                if ($("#Keyword").val() == "请输入订单号、收货手机、收货人...") {
+                    p.setParams("Keyword", '');
+                } else {
+                    p.setParams("Keyword", $("#Keyword").val());
+                }
+                if ($("#QueryType").val() != "0") {
+                    p.setParams("QueryType", $("#QueryType").val());
+                }
+                if ($("#StoreSysNoList").val() != "0") {
+                    p.setParams("StoreSysNoList", $("#StoreSysNoList").val());
+                }
+
+                if ($("#QueryType").val() == 0 && ($("#Keyword").val() == "" || $("#Keyword").val() == "请输入订单号、收货手机、收货人...")) {
+                    p.setParams("OrderBeginDate", '@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")');
+                    p.setParams("OrderEndDate", '@DateTime.Now.ToString("yyyy-MM-dd")');
+                }
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+                $("table button.disabled").find("span.icon_white").removeClass("icon_white");
+            });
+        }
+        
+        //高级查询
+        function doComplexSearch(currentPage) {
+            Utils.MaskStart($('#paging'));
+            Ajax.get("/Warehouse/SearchShopDelivery", "searchEx", function (p) {
+                if ($("#StoreSysNo").val() != "0") {
+                    p.setParams("StoreSysNoList", $("#StoreSysNo").val());
+                }
+                //p.setParams("StoreSysNoList", [$("#StoreSysNoList").val()]);
+                //p.setParams("OrderBeginDate", $("#OrderBeginDate").val());
+                //p.setParams("OrderEndDate", $("#OrderEndDate").val());
+                //p.setParams("OrderSysNo", $("#OrderSysNo").val());
+                //p.setParams("WhStockOutSysNo", $("#WhStockOutSysNo").val());
+                //p.setParams("PickUpBeginDate", $("#PickUpBeginDate").val());
+                //p.setParams("PickUpEndDate", $("#PickUpEndDate").val());
+                //p.setParams("CustomerAccount", $("#CustomerAccount").val());
+                //p.setParams("ReceiverTel", $("#ReceiverTel").val());
+                //p.setParams("ReceiverName", $("#ReceiverName").val());
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                $("#JS_search_nav").click();
+                Utils.MaskStop();
+                $("table button.disabled").find("span.icon_white").removeClass("icon_white");
+            });
+        }
+
+    });
+    
+    //打印
+    function Print(sysNo) {
+        var url = '/Print/ShopInvoice/?whStockOutSysNo=' + sysNo;
+        UI.DialogOpen(url, {
+            title: '小票打印:' + sysNo, width: 1024, height: 680, init: function () {
+                //if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                //    this.iframe.contentWindow.location.reload();
+                //}
+            }
+        }, false);
+    }
+    
+    function browseStockOut(sysno) {
+        var url = '/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno;
+        UI.DialogOpen(url, {
+            title: '出库单信息',
+            width: 830,
+            height: 600,
+            init: function () {
+                this.button({ name: '关闭' });
+            }
+        }, false);
+    }
+    
+    function browseUserInfo(sysNo) {
+        UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+            title: '会员信息',
+            width: '698px',
+            height: '489px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    }
+
+
+</script>
+</body>
+</html>

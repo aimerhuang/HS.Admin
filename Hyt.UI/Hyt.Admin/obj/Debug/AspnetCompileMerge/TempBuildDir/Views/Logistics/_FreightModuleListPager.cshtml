@@ -1,0 +1,74 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.LgFreightModule>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="240">模板名称</th>
+                <th width="110">模板代码</th>
+           
+                <th>发货时间</th>
+                <th>状态</th>
+                <th width="220">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.LgFreightModule>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+
+                <td>@item.ModuleName</td>
+                <td>@item.ModuleCode</td>
+          
+                <td>@item.DeliveryTime</td>
+
+                <td>
+                    @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态), item.Status)
+                </td>
+                <td>
+
+                    @if(item.Status == Convert.ToInt32(Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态.作废))
+                    {
+                         <button type="button" class="btn btn_ht26 btn_blue" title="查看" onclick="openTab(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">查看</span></button>
+                    }
+                    else if (item.Status == Convert.ToInt32(Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态.待审核))
+                    {
+                        <button onclick="audit(@item.SysNo,20)" title="审核" class="btn btn_ht26 btn_blue m10_r" type="button"><span class="icon_audit icon_white"></span><span class="m5_l">审核通过</span></button>
+                        <button type="button" class="btn btn_ht26 btn_blue e" title="修改" onclick="openTab(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    }
+                    else
+                    {
+                        <button onclick="audit(@item.SysNo,10)" title="取消审核" class="btn btn_ht26 btn_red m10_r" type="button"><span class="icon_cancelAudit icon_white"></span><span class="m5_l">取消审核</span></button>
+                        <button type="button" class="btn btn_ht26 btn_blue" title="查看" onclick="openTab(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">查看</span></button>
+                    }
+
+                                        
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

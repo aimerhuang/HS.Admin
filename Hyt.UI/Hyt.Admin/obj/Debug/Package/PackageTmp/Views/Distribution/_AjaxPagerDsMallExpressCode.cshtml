@@ -1,0 +1,50 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@model PagedList<CBDsMallExpressCode>
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th class="p10_lr" style="display:none">系统编号</th>
+                <th class="align_l p10_lr" style="width:20%;">商城代号</th>
+                <th class="align_l p10_lr" style="width:20%;">商城名称</th>
+                <th class="align_l p10_lr" style="width:20%;">配送方式名称</th>
+                <th class="align_c p10_lr" style="width:20%;">第三方快递代码</th>
+                <th style="width:20%;">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var list = Model.TData as List<CBDsMallExpressCode>;
+                if (list == null || list.Count == 0)
+                {
+                    <tr>
+                        <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                else
+                {
+                    var i = 1;
+                    foreach (var item in list)
+                    {
+                        var rowStyle = i % 2 == 0 ? "class='stag_color'" : "class=''";
+                        <tr @Html.Raw(rowStyle)>
+                            <td style="display:none">@item.SysNo</td>
+                            <td class="align_l p10_lr">@item.MallCode</td>
+                            <td class="align_l p10_lr">@item.MallName</td>
+                            <td class="align_l p10_lr">@item.DeliveryTypeName</td>
+                            <td class="align_c p10_lr">@item.ExpressCode</td>
+                            <td class="p10_lr">
+                                <button class="btn btn_blue btn_ht26 m10_l DS1012301" onclick="UpdateMallExpressCode(@item.SysNo)" title="修改"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                                <button class="btn btn_red btn_ht26 m10_l DS1012401" onclick="DeleteMallExpressCode(@item.SysNo)"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>收银机管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    @{
+                        
+                        if (Hyt.BLL.Authentication.AdminAuthenticationBo.Instance.Current.IsBindDealer && Convert.ToInt32(Hyt.BLL.Authentication.AdminAuthenticationBo.Instance.Current.Dealer.SysNo) > 0)
+                        {
+                            
+                            <button type="button" id="btnAdd" title="添加" class="btn btn_ht26 m10_r btn_blue" onclick="AddPosManageControl()" ><span class="icon_importing icon_white m5_r"></span><span>添加</span></button>
+                        }
+                    }
+                    
+                </div>
+            </div>
+            <div id="paging" class="boxs_listtabel">
+                <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            <th class="align_l p10_lr">经销商名称</th>
+                            <th class="align_l p10_lr">Pos机器名</th>
+                            <th>密Key</th>
+                            <th>MAC</th>
+                            <th width="122">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.dsList != null && (ViewBag.dsList as List<Hyt.Model.Pos.CBDsPosManage>).Count > 0)
+                        {
+                            foreach (var item in (ViewBag.dsList as List<Hyt.Model.Pos.CBDsPosManage>))
+                            {
+                                //Hyt.BLL.Pos.DsPosManageBo.Instance.Delete(@item.SysNo);
+                                <tr>
+                                    <td class="border_lnone wd75">@item.DealerName</td>
+                                    <td class="border_lnone wd75">@item.pos_posName</td>
+                                    <td class="align_l p10_lr">@item.pos_KeyData</td>
+                                    <td>@item.pos_MacData</td>
+                                    <td>
+                                        <button style="display:@(ViewBag.dsSysNo == "0" ? "none" : "")" type="button" id="btnAdd" title="修改" class="btn btn_ht26 m10_r btn_blue" onclick="AddPosManageControl(@item.SysNo)"><span class="icon_importing icon_white m5_r"></span><span>修改</span></button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<script type="text/javascript">
+    function AddPosManageControl(id)
+    {
+       // var myDialog = art.dialog();// 初始化一个带有loading图标的空对话框
+        var pastUser = "AddOrUpdateDsManage?dsSysNo=@(Hyt.BLL.Authentication.AdminAuthenticationBo.Instance.Current.Dealer.SysNo)";
+        if (id != null)
+        {
+            pastUser += "&sysNo=" + id
+        }
+        art.dialog({ title: '收银机管理', content: "<iframe width=\"350px\" height=\"250px\" src=\"" + pastUser + "\" style=\" width: 350, height: 500; \" ></iframe>" }, null, function () { window.location.reload(); });//url参数其实就是iframe
+
+        $(".aui_footer").hide();
+    }
+</script>
+

@@ -1,0 +1,85 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "@ViewBag.Prompt";
+    @Html.PrivilegeControl(PrivilegeCode.RC1001201, ".RC1001201")
+    string loacationUrl = ViewBag.department == (int)RmaStatus.退换货处理部门.门店 ? "/RMA/ShopRmaNewList" : "/RMA/RmaNewList"; 
+}
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Admin.Models.ReturnEdit
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/scripts/selectcontrol.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/Utils.yui.js?1"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/RMA/rma.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#btnSave").click(function () {
+                saveExchanges("/RMA/InsertRmaExchanges", "@loacationUrl",false);
+            });
+            //点击强制执行，移除复选框禁用属性
+            $("#enforce").click(function () {
+                if ($("#enforce").attr("checked")) {
+                    $("#btnSave").removeClass("hide");
+                } else {
+                    $("#btnSave").addClass("hide");
+                }
+            });
+            $("#bd").ajaxLoadingMask();
+        })
+
+    </script>
+}
+<div class="case" id="bd">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Prompt</h3>
+        </div>
+    </div>
+    <div class="boxs_detail_dispay boxs_con_c1 border_tnone p10 bg_f5">
+        @if (!string.IsNullOrWhiteSpace(Model.Title))
+        { 
+            <div class="red_bg">
+                <ul>
+                    @Html.Raw(Model.Title)
+                </ul>
+            </div>
+        }
+        @if (Model.ReturnAble && ViewBag.HasExpireOutStore)
+        { 
+            <div class="boxs_tool border_right border_top border_bottom border_left m10_t">
+                <div class="left_tool">
+                    <input type="checkbox" name="enforce" class="m10_r" id="enforce" /><label for="enforce"> 强制执行</label>
+                </div>
+            </div>
+        }
+        <div class="tit_dispay  border_left border_right">
+            <h5>换货订单信息</h5>
+        </div>
+        @{Html.RenderAction("ExchangesEdit", new { id = ViewBag.OrderSysNo, department = ViewBag.department });}
+    </div>
+    <div class="boxs_con_c1 border_tnone">
+        <div class="pagination align_c clearfix boxs_con_c1 border_lnone border_rnone border_bnone">
+            @if (ViewBag.CannotSave == null)
+            {
+                if (ViewBag.HasExpireOutStore)
+                {
+                    if (Model.ReturnAble)
+                    {
+                <button class="btn btn_blue btn_ht30 hide RC1001201" id="btnSave"><span class="icon_save icon_white"></span>
+<span>保存</span></button>
+                    }
+                }
+                else
+                {
+                <button class="btn btn_blue btn_ht30 RC1001201" id="btnSave"><span class="icon_save icon_white"></span>
+<span>保存</span></button>
+                }
+            }&nbsp;
+
+        </div>
+    </div>
+
+</div>

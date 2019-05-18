@@ -1,0 +1,183 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBCrBrowseHistory>
+@{
+    ViewBag.Title = "商品浏览记录";
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+    <script type="text/javascript">
+     
+        function delHis(vals) {
+            /// <summary>
+            /// del operation
+            /// </summary>
+            /// <param name="vals">data to post</param>
+            $.ajax({
+                url: '@Url.Action("DeleteBrowseHistory")',
+                type: 'post',
+                data: { arrDelSysnos: vals },
+                //async: false,//for refresh later judgement
+                success: function(data) {
+
+                    if (data.IsLogout) {
+                        eval(data.callback);
+                        return;
+                    }
+                    if (data.Status) {
+
+                        UI.tips.tip_alert('tips_success', data.Message);
+                        setTimeout(location.reload(),6000);
+                    } else {
+                        
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    }
+                }
+            });
+        }
+
+        $(document).ready(function() {
+            
+            //btnDelMulti删除多个
+            $('#btnDelMulti').click(function() {
+
+                if (!$('input[type=checkbox]').is(':checked')) {
+                    UI.Alert({ content: '请至少选择一条记录!' });
+                    return;
+                }
+
+                UI.Confirm({
+                        content: '确定要删除吗?',
+                        ok: function () {
+                            
+                            var sysNos = [], flag = false;
+                            $('input[type=checkbox]:checked').each(function () {
+                                if ($(this).attr('name') != undefined)
+                                    sysNos.push($(this).attr('name'));
+                            });
+
+                            //post to server to delete the data checked
+                            delHis(sysNos.join(','));
+                        }
+                    }
+                );
+
+            });
+
+        });
+    </script>
+}
+
+<body>
+
+   
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>商品浏览记录</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <div class="left_tool" style="float: left">
+                        <button type="button" id="btnDelMulti" class="btn btn_ht26"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+                    </div>
+                    <div class="right_tool clearfix">
+
+                        <span class="veralign_t fl">客户账号</span>
+                        <div class=" m10_l fl">
+                            <input id="txtCusAccountInput" type="text" class="wd100" class="input_ht28" placeholder="搜索客户账号...">
+                         @*   <button id="btnCusSearch" type="button" class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>*@
+                        </div>
+                        <span class="m5_l m5_r fl" style="visibility:hidden">&nbsp;</span>@*text to expand*@
+                        <span class="veralign_t fl">后台显示名称</span>
+                        <div class="search_btn m10_l fl">
+                            <input id="txtProNameInput" type="text" class="input_ht28" placeholder="搜索后台显示名称...">
+                            <button id="btnProSearch" type="button" class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+
+                    </div>
+                </div>
+      
+                <!-- 查询结果 -->
+                <div id="divSearchResult" class="boxs_listtabel">
+             
+                    @{Html.RenderPartial("pAjaxPager_ProBrowseHis", Model);}
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        
+        $(document).ready(function() {
+
+            //#region 客户账号输入查找
+
+            //$('#btnCusSearch').click(function () {
+
+            //    ajaxAction({ CustomerAccount: $('#txtCusAccountInput').val() });
+
+            //    return false;
+
+            //});
+            //#endregion
+            
+            //#region 商品名称输入查找
+            $('#btnProSearch').click(function () {
+
+                ajaxAction({ ProductName: $('#txtProNameInput').val(), CustomerAccount: $('#txtCusAccountInput').val() });
+
+                return false;
+
+            });
+            //#endregion
+            $("#txtCusAccountInput").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    ajaxAction("account");
+                    return ;
+                }
+            });
+            $("#txtProNameInput").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    ajaxAction("proName");
+
+                    return ;
+                }
+            });
+           
+            function ajaxAction(vals) {
+          
+                var proName = $('#txtProNameInput').val();
+                var account = $('#txtCusAccountInput').val();
+
+                //if (vals == "proName") account = "";
+                //if (vals == "account") proName = "";
+                $.ajax({
+                    url: '@Url.Action("ProductBrowseHistory")',
+                    type: 'get',
+                    //async: false,             
+                    data: { CustomerAccount: account, ProductName: proName },
+                    success: function (data) {
+                        //login time out handling
+                        /*CustomActionFilter
+                        
+                        */
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        $('#divSearchResult').html(data);
+                    }
+                });
+            }
+        
+        });
+
+    </script>
+</body>

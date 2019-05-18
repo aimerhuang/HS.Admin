@@ -1,0 +1,56 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBLgExpressDetail>
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+        <thead>
+            <tr>
+                <th width="70">订单编号</th>
+                <th width="70">出库单号</th>
+                <th>快递公司名称</th>
+                <th width="140">物流单号</th>
+                <th width="140">出发城市</th>
+                <th width="140">目的城市</th>
+                <th width="70">快递状态</th>
+                <th width="100">提交时间</th>
+                <th width="100">回调状态</th>
+                <th width="100">签名字符</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                var i = 0;
+                foreach (var item in Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    <td class="align_l"><span class="p10_lr">@item.OrderSysNo</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.OutStockNo</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.CompanyName</span></td>
+                    <td class="align_r"><span class="p10_lr">@item.ExpressNo</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.FromCity</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.ToCity</span></td>
+                    <td class="align_r"><span class="p10_lr">@(item.ExpressStatus==1?"已签收":"未签收")</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.PostTime.ToString("yyyy-MM-dd")</span></td>
+                    <td class="align_l"><span class="p10_lr">@item.CallBackStatus</span></td>
+                    <td class="align_r"><span class="p10_lr">@item.Salt</span></td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

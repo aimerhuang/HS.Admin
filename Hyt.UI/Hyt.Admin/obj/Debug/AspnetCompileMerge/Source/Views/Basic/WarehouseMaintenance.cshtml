@@ -1,0 +1,289 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.WhWarehouse>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "仓库信息管理";
+    @Html.PrivilegeControl(PrivilegeCode.WH1002101, ".WH1002101")
+    @Html.PrivilegeControl(PrivilegeCode.WH1002201, ".WH1002201")
+    @Html.PrivilegeControl(PrivilegeCode.WH1002301, ".WH1002301")
+}
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"> </script>
+<script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+
+<script type="text/javascript">
+    $(function () {
+        //搜索框默认提示
+        setDefaultValue();
+        quickSearch();
+        //快速搜索栏省市区三级联动
+        Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), {
+            callback: function (type) {
+            }
+        });
+        quickSearch();
+        $("#dpdArea").change(function () {
+            var areaSysNo = $("#dpdArea").val();
+            if (areaSysNo < 1)
+                areaSysNo = $("#dpdCity").val();
+            quickSearch(areaSysNo);
+        });
+        $("#dpdCity").change(function () {
+            var areaSysNo = $("#dpdCity").val();
+            if (areaSysNo < 1)
+                areaSysNo = $("#dpdProvince").val();
+            quickSearch(areaSysNo);
+        });
+        $("#dpdProvince").change(function () {
+            var areaSysNo = $("#dpdProvince").val();
+            if (areaSysNo < 1)
+                areaSysNo = $("#dpdCountry").val();
+            quickSearch(areaSysNo);
+        });
+        $("#dpdCountry").change(function () {
+            quickSearch($("#dpdCountry").val());
+        });
+        $("#statusList").change(function () {
+            quickSearch();
+        });
+        $("#search_btn").click(function () {
+            quickSearch();
+        });
+        $("#txtCondition").keydown(function (e) {
+            if (13 == e.keyCode) {
+                quickSearch();
+            }
+        });
+        $("#warehouseType").change(function () {
+            quickSearch();
+        });
+
+        //设置页面默认值
+        function setDefaultValue() {
+            $("#txtCondition").defaultValue("搜索仓库ERP编号、后台仓库名称...");
+        }
+    });
+    function quickSearch(areaSysNo) {
+        var condition = null;
+        var searchValue = $("#txtCondition").val();
+        if (searchValue && searchValue != "搜索仓库ERP编号、后台仓库名称...") {
+            condition = $("#txtCondition").val();
+        }
+        if (areaSysNo == null) {
+            areaSysNo = $("#dpdArea").val();
+            if (areaSysNo < 1)
+                areaSysNo = $("#dpdCity").val();
+            if (areaSysNo < 1)
+                areaSysNo = $("#dpdProvince").val();
+            if (areaSysNo < 1)
+                areaSysNo = $("#dpdCountry").val();
+        }
+        var wtype = $("#warehouseType").val();
+        
+        areaSysNo = areaSysNo < 1 ? null : areaSysNo;
+       
+        $.get('@Url.Action("WarehouseMaintenance", "Basic")' + '?o=' + Math.random(),
+            { Status: $("#statusList").val(), AreaSysNo: areaSysNo, BackWarehouseName: condition, WarehouseType: wtype },
+            function (data) {
+                $('#paging').html(data);
+            }
+        );
+    }
+</script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">仓库类型</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="warehouseType">
+                            <option>全部</option>
+                            @{
+                                var array = Enum.GetValues(typeof (Hyt.Model.WorkflowStatus.WarehouseStatus.仓库类型));
+                                foreach (Hyt.Model.WorkflowStatus.WarehouseStatus.仓库类型 item in array)
+                                {
+                                    <option value="@item.GetHashCode()">@item.ToString()</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl">状态</span>
+                    <div class="fl m10_l">@Html.DropDownList("statusList")</div>
+                    <span class="veralign_t fl m10_l">区域</span>
+                    <div class="fl m10_l">
+                        <select style="width: 120px; margin-right: 10px;" class="c3" id="dpdCountry">
+                        </select><span class="c6">国家</span>
+                        <select style="width: 120px; margin-right: 10px;" class="c3" id="dpdProvince">
+                        </select><span class="c6">省</span>
+                        <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="dpdCity">
+                        </select><span class="c6">市/地区</span>
+                        <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="dpdArea" name="dpdArea">
+                        </select><span class="c6">区/县</span>
+                    </div>
+                    <div class="search_btn fl m10_l wd270">
+                        <input type="text" id="txtCondition" class="input_ht28 wd240" />
+                        <button class="btn btn_ht28" id="search_btn" type="button" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <div>
+                    <button onclick="insert() " type="button" class="btn btn_ht26 WH1002201"><span class="icon icon_plus"></span><span class="m5_l">新增仓库</span></button>
+                </div>
+            </div>
+             <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    //用于控制弹出层中的控件显示，无其他意义，请不要删除
+    function isNewWarehouse() {
+        return true;
+    }
+
+    //表格加入隔行样式
+    DAO.InterlineStyle();
+    //新增
+    function insert() {
+        var url = '@Url.Action("WarehouseEdit", "Basic")';
+        UI.DialogOpen(url,
+            {
+                title: '新增仓库',
+                width: 1000,
+                height: 575,
+                close: function () { quickSearch(); },
+                resize: false,
+                init: function () {
+                    this.button(
+                        {
+                            name: "确认",
+                            focus: true,
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+
+                                if (!iframe.document.body) {
+                                    UI.Alert({
+                                        content: '数据加载中,请稍等.'
+                                    });
+                                    return false;
+                                }
+
+                                //iframe.insert();
+                                iframe.insertOrUpdate();
+                                return false;
+                            }
+                        },
+                        { name: "关闭" });
+                },
+            },
+            false);
+    }
+    //入库
+    function stockin(sysno) {
+        UI.OpenCreatTab("商品入库", "/Warehouse/ProductStockInList?WarehouseSysNo=" + sysno);
+    }
+    //库存
+    function stock(sysno) {
+        UI.OpenCreatTab("商品库存", "/Warehouse/ProductStockList?WarehouseSysNo=" + sysno);
+    }
+    //编辑
+    function edit(sysno) {
+        var url = '@Url.Action("WarehouseEdit", "Basic")' + '?sysNo=' + sysno;
+        UI.DialogOpen(url, {
+            title: '仓库信息修改',
+            width: 1000,
+            height: 575,
+            resize: false,
+            close: function () { quickSearch(); },
+            init: function () {
+                this.button(
+                        {
+                    name: "保存",
+                    focus: true,
+                    callback: function () {
+                        var iframe = this.iframe.contentWindow;
+                        if (!iframe.document.body) {
+                            UI.Alert({
+                                content: '数据加载中,请稍等.'
+                            });
+                            return false;
+                        }
+                        //iframe.update(sysno);
+                        iframe.insertOrUpdate();
+                        return false;
+                    }
+                },
+                    { name: "关闭" });
+            }
+        }, false);
+    }
+    //显示仓库信息
+    function ShowInfo(sysno) {
+        UI.DialogOpen('@Url.Action("WarehouseInfo", "Basic")' + '?sysNo=' + sysno, {
+            title: '仓库信息',
+            width: 900,
+            height: 600,
+            resize: false,
+            init: function () {
+                this.button({ name: '关闭' });
+            }
+        }, false);
+    }
+
+    //状态改变
+    function SetReverseStatus(sysno) {
+        var status, statusText;
+        if ($("#status" + sysno).text().indexOf("启用") >= 0)//状态取反
+        {
+            statusText = "禁用";
+            status = 0;
+        } else {
+            statusText = "启用";
+            status = 1;
+        }
+        UI.Confirm({
+            content: "您确定" + statusText + "吗？",
+            ok: function () {
+                $.ajax({
+                    type: "Get",
+                    url: '@Url.Action("WarehouseUpdateStatus", "Basic")',
+                    data: { SysNo: sysno, Status: status },
+                    success: function (data) {
+                        //页面显示变化
+                        if (data) {
+                            PageStatusChange(sysno, status);
+                            UI.tips.tip_alert('tips_shrot tips_success', statusText + '成功!');
+                        } else {
+                            UI.Alert({ content: "操作失败" });
+                        }
+                    },
+                    error: function () {
+                        UI.Alert({ content: "查询出错,请稍候再试" });
+                    }
+                });
+            }
+        });
+    }
+
+    //页面显示变化,status为处理后要显示的
+
+    function PageStatusChange(sysno, status) {
+        if (status == 1) {
+            $("#status" + sysno).text("启用");
+            $("#btnStatus" + sysno).html("<span class=\"icon_ban_circle m5_r\"></span><span>禁用</span>");
+        } else {
+            $("#status" + sysno).text("禁用");
+            $("#btnStatus" + sysno).html("<span class=\"icon_check m5_r\"></span><span>启用</span>");
+        }
+    }
+</script>

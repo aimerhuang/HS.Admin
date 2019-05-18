@@ -1,0 +1,234 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<Hyt.Model.Procurement.CBPmProcurementOrder>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="80">编号</th>
+            <th>采购分货单编号</th>
+            <th width="150">制单人</th>
+            <th width="150">制单时间</th>
+            <th width="150">生产厂家</th>
+            <th width="100">订单状态</th>
+            <th width="200" class="borde_r_none">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count == 0)
+            {
+                <tr class="odd_color trhover">
+                    <td colspan="10" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+                return;
+            }
+            int i = 0;
+            foreach (var pitem in Model.TData)
+            {
+                 if (i % 2 == 0)
+                 {
+                     @Html.Raw("<tr  class='stag_color' >")
+                 }
+                 else
+                 {
+                     @Html.Raw("<tr>")
+                 }
+                 @Html.Raw("<td colspan=\"6\" align=\"left\" style=\"padding:5px; border: #c9c9c9 solid 1px;\"> 采购订单编号：<a href=\"/Procurement/CreateOrUpdateProcuremen?SysNo=" + pitem.SysNo + "\" >" + pitem.Po_Number + "</a></td>")
+                
+                 @Html.Raw("<td  style=\"padding:5px; border: #c9c9c9 solid 1px;\"> ");
+                 if (pitem.Po_Status == (int)Hyt.Model.WorkflowStatus.ProcurementStatus.采购申请单状态.已推至机构)
+                 { 
+                    @Html.Raw(" <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"CreateProcurement(" + pitem.SysNo + ")\"><span class=\"m5_l\">创建分货单</span></button>")
+                 }   
+                 @Html.Raw("</td>")
+                 @Html.Raw("</tr>")
+                List<Hyt.Model.Procurement.CBPmPointsOrder> tempOrderList=(ViewBag.OrderList as List<Hyt.Model.Procurement.CBPmPointsOrder>).FindAll(p=>p.Po_ProcurementSysNo==pitem.SysNo);
+                foreach (var item in tempOrderList)
+                { 
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr  class='stag_color' >")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    
+                    @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\">" + item.SysNo + "</td>")
+                    @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\"><a href='/Procurement/CreateUpdatePointsOrder?SysNo=" + item.SysNo + "'>" + item.Po_Number + "</a></td>")
+                    @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\">" + item.CreateName + "</td>")
+
+                    @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\">" + item.Po_CreateTime.ToString("yyyy-MM-dd") + "</td>")
+                    @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\">" + item.Po_FactoryName + "</td>")
+                    @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\"> " + ((Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态)item.Po_Status) + " </td>")
+               
+                    if ((Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态)item.Po_Status == Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态.保存)
+                    {
+                        @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\"> ")
+                        @Html.Raw("   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"EditProcurementOrder(" + item.SysNo + ")\"><span class=\"m5_l\">修改</span></button> ")
+                        @Html.Raw("   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"UpdataPointsOrderStatus(" + item.SysNo + ",1)\"><span class=\"m5_l\">厂家生产</span></button> ")
+                        @Html.Raw("</td>")
+                    }
+                    else if ((Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态)item.Po_Status == Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态.厂家生产||
+                            (Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态)item.Po_Status == Hyt.Model.WorkflowStatus.ProcurementStatus.采购分货单状态.产品配送)
+                    {
+                        @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\"> ")
+                        @Html.Raw("   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"CreatePackOrder(" + item.SysNo + ")\"><span class=\"m5_l\">产品装箱配送</span></button> ")
+                        @Html.Raw("</td>")
+                    }
+                    else
+                    { 
+                        @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;\"> ")
+                  
+                        @Html.Raw("</td>")
+                    }
+                    @Html.Raw("</tr>")
+                    
+                    List<Hyt.Model.Procurement.PmGoodsDelivery> deliveryList = (ViewBag.DeliveryOrderList as List<Hyt.Model.Procurement.PmGoodsDelivery>).FindAll(p=>p.gd_PSysNo==item.SysNo);
+                     @Html.Raw("<tr>");
+                     @Html.Raw("<td  style=\" border-bottom: #c9c9c9 solid 1px;background-color:#EBEBEB\"></td>");
+                     @Html.Raw("<td  colspan=\"6\"  style=\" border-bottom: #c9c9c9 solid 1px;\">");
+                     @Html.Raw("<table width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\" class=\"border_bnone border_rnone\">"); 
+                     @Html.Raw(" <thead>");
+                     @Html.Raw("<tr>");
+                     @Html.Raw("<th>包裹编号</th>");
+                     @Html.Raw("<th>物流公司</th>");
+                     @Html.Raw("<th>物流配送号</th>");
+                     @Html.Raw("<th>创建时间</th>");
+                     @Html.Raw("<th>状态</th>");
+                     @Html.Raw("<th>操作</th>");
+                     @Html.Raw("<tr>");
+                     @Html.Raw(" </thead>");
+                     @Html.Raw(" <tbody>");
+                    foreach(var dlMod in deliveryList)
+                    {
+                        @Html.Raw("<tr>");
+                        @Html.Raw("<td><a href='/Procurement/CreateUpdateProcurementPackOrder?SysNo=" + dlMod.SysNo + "'>" + dlMod.gd_PaketNumber + "</a></td>");
+                        @Html.Raw("<td>" + dlMod.gd_DeliveryCompanyName + "</td>");
+                        @Html.Raw("<td>" + dlMod.gd_DeliveryNumber + "</td>");
+                        @Html.Raw("<td>" + dlMod.gd_DeliveryTime + "</td>");
+                        @Html.Raw("<td onclick=\"SetDeliveryInfo(" + dlMod.SysNo + ",false)\">" + ((Hyt.Model.WorkflowStatus.ProcurementStatus.商品配送状态)dlMod.gd_Status) + "</td>");
+                         if (dlMod.gd_Status == (int)Hyt.Model.WorkflowStatus.ProcurementStatus.商品配送状态.未配送
+                             ||
+                           dlMod.gd_Status == (int)Hyt.Model.WorkflowStatus.ProcurementStatus.商品配送状态.配送中)
+                         { 
+                                @Html.Raw("<td>   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"SetDeliveryInfo(" + dlMod.SysNo + ",true)\"><span class=\"m5_l\">物流信息</span></button> ")
+                                @Html.Raw("   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"SetDeliveryCompleteStatus(" + dlMod.SysNo + ")\"><span class=\"m5_l\">完成配送</span></button> </td>")
+                         }
+                         else
+                         {
+                           @Html.Raw("<td></td>");                                                                                       
+                         }
+                        @Html.Raw("<tr>");
+                    }
+                    if (deliveryList.Count == 0)
+                    { 
+                        @Html.Raw("<tr>");
+                        @Html.Raw("<td  colspan=\"6\">还未配送发货</td>");
+                        @Html.Raw("<tr>");
+                    }
+                    @Html.Raw(" </tbody>");
+                    @Html.Raw("</table>");
+                    @Html.Raw("</td>");
+                    @Html.Raw("</tr>");
+                }
+                i++;
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    function SetDeliveryInfo(dlSysNo,bipt)
+    {
+        var txt = "";
+        $.ajax({
+            url: '/Procurement/GetDeliveryInfoData',
+            type: 'post',
+            async: false,
+            data: {
+                SysNo: dlSysNo
+            },
+            dataType: 'json',
+            success: function (json) {
+                var txt = "";
+                txt += "<table>";
+                if (bipt) {
+                    txt += "<tr><td><input type=\"text\" id=\"txt_InputValue\" style=\"width:450px;\" value=\"@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")  \" />  <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"SaveDeliveryInfo($('#txt_InputValue').val()," + dlSysNo + ")\"  >保存物流信息</button></td></tr>";
+                }
+                txt += "<tr><td>" + json.gd_DeliveryInfo + "</td></tr>";
+                txt += "</table>";
+                art.dialog({ content: txt, title: "物流信息" });
+            }
+        });
+    }
+    function SetDeliveryCompleteStatus(sysNo)
+    {
+        UI.Confirm({
+            content: '确定货已收到了吗?',
+            ok: function () {
+                $.ajax({
+                    url: '/Procurement/SetDeliveryCompleteStatus',
+                    type: 'post',
+                    async: false,
+                    data: {
+                        SysNo: sysNo
+                    },
+                    dataType: 'json',
+                    success: function (json) {
+                        window.location.reload();
+                    }
+                });
+            }
+        });
+        
+    }
+    function SaveDeliveryInfo(txt, sysNo)
+    {
+        $.ajax({
+            url: '/Procurement/SaveDeliveryInfoData',
+            type: 'post',
+            async: false,
+            data: {
+                SysNo: sysNo,
+                txt: txt
+            },
+            dataType: 'json',
+            success: function (json) {
+                window.location.reload();
+            }
+        });
+    }
+
+    function EditProcurementOrder(sysNo) {
+        window.location.href = "/Procurement/CreateUpdatePointsOrder?SysNo=" + sysNo;
+    }
+    function CreatePackOrder(sysNo)
+    {
+        window.location.href = "/Procurement/CreateUpdateProcurementPackOrder?pSysNo=" + sysNo;
+    }
+    function UpdataPointsOrderStatus(sysNo, status) {
+        UI.Confirm({
+            content: '确定要修改分货单状态吗?',
+            ok: function () {
+                $.ajax({
+                    url: '/Procurement/UpdataPointsOrderStatus',
+                    type: 'post',
+                    async: false,
+                    data: {
+                        SysNo: sysNo,
+                        Status: status
+                    },
+                    dataType: 'json',
+                    success: function (json) {
+                        window.location.href = "/Procurement/GetPointsOrderPager";
+                    }
+                });
+            }
+        });
+        
+    }
+</script>

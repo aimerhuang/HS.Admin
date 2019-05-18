@@ -1,0 +1,20 @@
+﻿
+@using Hyt.Infrastructure.Pager
+@model PagedList
+
+
+
+<div id="paging">
+    
+    @{
+        foreach (var item in (List<Hyt.Admin.Models.PageTest>)Model.Data)
+        {
+            <li>Name:@item.Name  -  ID:@item.ID</li>
+        }
+    }
+
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+    
+</div>

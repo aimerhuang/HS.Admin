@@ -1,0 +1,258 @@
+﻿@{
+    ViewBag.Title = "ProductAttributeGroupSelector";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        Array.prototype.removeValue = function (value) {
+            for (var i = 0; i < this.length; i++) {
+                if (this[i] == value) {
+                    this.splice(i, 1);
+                    return this;
+                }
+            }
+        }
+        var arrInit = [];
+        var arrSelected = [];
+        var arrSelectedObject = [];
+        
+        if (parent && parent._ArrAttributeGroupIds) {
+            var length = parent._ArrAttributeGroupIds.length;
+            for (var i = 0; i < length; i++) {
+                arrSelected.push(parent._ArrAttributeGroupIds[i]);
+                arrInit.push(parent._ArrAttributeGroupIds[i]);
+            }
+
+        }
+
+        function setInitDisabled()
+        {          
+            if (parent && parent._initDisabled) {
+                $.each(arrInit, function (index, value) {
+                    $("#paging input:checkbox").each(function () {                       
+                        if ($(this).val() == value) {
+                            $(this).attr("disabled", "disabled");
+                            return;
+                        }
+                    });
+                    $("#pagingSelected input:checkbox").each(function () {
+                        if ($(this).val() == value) {
+                            $(this).attr("disabled", "disabled");
+                            return;
+                        }
+                    });
+                });
+            }
+        }
+        
+        
+
+        function CallBack() {
+            parent && parent._ActiveAttributeGroupSelectorCallBack(arrSelectedObject);
+        }
+
+        function removeValueFromArr(value)
+        {
+           
+            for (var i = 0; i < arrSelected.length; i++) {
+                if (arrSelected[i] == value) {
+                    arrSelected.splice(i, 1);
+                    i--;//break;
+                }
+            }
+            for (var i = 0; i < arrSelectedObject.length; i++) {
+                if (arrSelectedObject[i].SysNo == value)
+                {
+                    arrSelectedObject.splice(i, 1);
+                    i--;//break;
+                }
+            }
+        }
+        //查询列表
+        function doSearch(id) {
+            var name;
+            if ($("#name").val() != "搜索属性名称...") {
+                name = $("#name").val();
+            }           
+            $.get('@Url.Action("ProductAttributeGroup", "Product")',
+            { id: id, name: name, selector: "selector" },
+            function (data) {
+                $('#paging').html(data);
+                setInitDisabled();
+            });
+        }
+
+       
+
+        //查询已选
+        function doSelectSearch() {
+            var data = [{ name: 'listSysno', value: JSON.stringify(arrSelected) }];
+            $.post('@Url.Action("SelectedProductAttributeGroup", "Product")',
+            data,
+           function (result) {
+               $('#pagingSelected').html(result);
+               resetArrSelectedObject();
+               setInitDisabled();
+           });
+        }
+
+        function resetArrSelectedObject() {
+            arrSelectedObject = [];
+            $("#pagingSelected input:checkbox").each(function () {
+                arrSelectedObject.push({ SysNo: $(this).val(), AttributeName: $.trim($(this).closest("tr").find("td").eq(1).html()), BackEndName: $.trim($(this).closest("tr").find("td").eq(2).html()) });
+            });
+        }
+
+        function checkSelectedChanged()
+        {
+            var isChanged = false;
+            if ($("#pagingSelected input:checkbox").length != arrSelected.length) {
+                return true;
+            }
+            $("#pagingSelected input:checkbox").each(function () {
+                var mark = false;
+                var ckvalue = $(this).val();
+                $.each(arrSelected, function (index, value) {
+                    if (value == ckvalue)
+                    {
+                        mark = true;
+                        return false;
+                    }
+                });
+                if (!mark) {
+                    isChanged = true;
+                    return false;
+                }
+            });
+            return isChanged;
+        }
+        
+
+        //设置已选
+        function setSelectedChecked() {
+            $("#paging input:checkbox").removeAttr("checked");            
+            $.each(arrSelected, function (index, value) {
+                $("#paging input:checkbox").each(function () {
+                    if ($(this).val() == value) {
+                        $(this).attr("checked", "checked");
+                        return;
+                    }
+                });
+            });
+        }
+       
+       
+
+
+        $(function () {
+
+            $("#name").defaultValue("搜索属性名称...");
+            //查询按钮
+            $("#searchBtn").click(function () {
+                doSearch();
+            });
+
+            $("#btnRemove").click(function () {
+                if ($("#pagingSelected input:checkbox:checked").length == 0) {
+                    UI.Alert({ content: '请选择要删除的项' });
+                    return;
+                }
+                UI.Confirm({
+                    content: '确定要删除吗?',
+                    ok: function () {
+                        $("#pagingSelected input:checkbox:checked").each(function () {                            
+                            var value = $(this).val();
+                            removeValueFromArr(value);
+                            $(this).closest("tr").remove();
+                        });
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+            $("#paging input:checkbox").live("click", function () {
+                var value = $(this).val();
+                if (!!$(this).attr("checked")) {
+                    arrSelected.push(value);
+                    arrSelectedObject.push({ SysNo: value, AttributeName: $.trim($(this).closest("tr").find("td").eq(1).html()), BackEndName: $.trim($(this).closest("tr").find("td").eq(2).html()) });
+                } else {
+                    removeValueFromArr(value);
+                }
+            });
+            //页面初始化函数
+            var initPage = function () {
+                UI.Tab({
+                    tabNavBox: '#tabboxs3', tabContentObj: "#tabcon", onActiveTab: function (index, obj) {
+                        if (index == 0)
+                        {
+                            setSelectedChecked();
+                        }
+                        if (index == 1) {
+                            if (checkSelectedChanged()) {
+                                doSelectSearch();
+                            }
+                        }
+                    }
+                });
+                doSearch();
+                doSelectSearch();
+            }
+
+            initPage();
+        });
+    </script>
+}
+<div class="caseout">
+
+    <div class="boxs" id="tabboxs3">
+        <div class="head_tab">
+            <ul class="tabNav">
+                <li><a href="javascript:void(0);">属性组列表</a></li>
+                <li class="menuon"><a href="javascript:void(0);">已选属性组</a></li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                    <!--搜索开始-->
+                    <div class="right_tool clearfix">
+                        <div class="search_btn m10_l fl">
+                            <input name="Name" type="text" id="name" class="input_ht28" value="搜索属性名称...">
+                            <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <!--搜索结束-->
+                </div>
+                <!--工具条结束-->
+
+
+                <div class="boxs_listtabel" id="paging">
+                </div>
+            </div>
+            <div class="list">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="btnRemove"><span class="icon icon_trash"></span><span class="m5_l">删除</span></button>                        
+                    </div>
+                    <!--功能按钮结束-->
+
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_listtabel" id="pagingSelected">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

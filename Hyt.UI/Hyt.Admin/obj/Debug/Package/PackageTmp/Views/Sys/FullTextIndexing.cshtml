@@ -1,0 +1,332 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "全文索引管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    @Html.PrivilegeControl(PrivilegeCode.SY1001301,".SY1001301")
+    @Html.PrivilegeControl(PrivilegeCode.SY1001401,".SY1001401")
+}
+@section HeadCss{
+
+
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+}
+<!--下面是弹出部分-->
+<div id="JS_tanch" class="boxs_detail_dispay" style="display: none;width:800px">
+    <div class="tit_con">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+            <tbody>
+                <tr>
+                    <td class="nameright" width="15%">SysNo:</td>
+                    <td class="border_right" width="35%">
+                        <span id="spanSysNo"></span>
+                    </td>
+                    <td class="nameright" width="15%">ProductName:</td>
+                    <td  width="35%">
+                        <span id="spanProductName"></span>
+                    </td>
+                </tr>
+                <tr>
+                   <td class="nameright">Category:</td>
+                    <td class="border_right">
+                        <span id="spanCategory"></span>
+                    </td>
+                    <td class="nameright">Barcode:</td>
+                    <td>
+                        <span id="spanBarcode"></span>
+                    </td>
+                </tr>
+                  <tr>
+                   <td class="nameright">BrandSysNo:</td>
+                    <td class="border_right">
+                        <span id="spanBrandSysNo"></span>
+                    </td>
+                    <td class="nameright">AssociationCategory:</td>
+                    <td>
+                        <span id="spanAssociationCategory"></span>
+                    </td>
+                </tr>
+                 <tr>
+                   <td class="nameright">Attributes:</td>
+                    <td class="border_right">
+                        <span id="spanAttributes"></span>
+                    </td>
+                    <td class="nameright">DisplayOrder:</td>
+                    <td>
+                        <span id="spanDisplayOrder"></span>
+                    </td>
+                </tr>
+                 <tr>
+                   <td class="nameright">NameAcronymy:</td>
+                    <td class="border_right">
+                        <span id="spanNameAcronymy"></span>
+                    </td>
+                    <td class="nameright">Prices:</td>
+                    <td>
+                        <span id="spanPrices"></span>
+                    </td>
+                </tr>
+                  <tr>
+                   <td class="nameright">QRCode:</td>
+                    <td class="border_right">
+                        <span id="spanQRCode"></span>
+                    </td>
+                    <td class="nameright">BasicPrice:</td>
+                    <td>
+                        <span id="spanBasicPrice"></span>
+                    </td>
+                </tr>
+                  <tr>
+                   <td class="nameright">Status:</td>
+                    <td class="border_right">
+                        <span id="spanStatus"></span>
+                    </td>
+                    <td class="nameright">ProductImage:</td>
+                    <td style=" word-break:break-all">
+                    
+                        <span id="spanProductImage"></span>
+                           
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+<!--弹出部分end-->
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>全文索引管理</h3>
+        </div>
+        <div class="boxs_con_p10">
+            <div class="boxs_detail_dispay">
+                <div class="head_detail border_bnone">
+                    <h5>索引信息</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1" style="border-right:1px solid #DDD">
+                        <tbody>
+                            <tr>
+                                <td width="150" class="nameright">索引目录:</td>
+                                <td colspan="3" >@ViewBag.IndexDir </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">Document数量:</td>
+                                <td id="tdCount" class="border_right" width="43%">@ViewBag.DocCount</td>
+                                <td width="150" class="nameright">更新日期:</td>
+                                <td id="tdLastUpdateTime">@ViewBag.LastUpdateTime</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination align_c clearfix explain border_tnone m0">
+                    <button id="btnGenerate" class="btn btn_blue btn_ht32 btn_blue bold f14 m10_r SY1001301">批量生成索引</button>
+                    <button   id="btnOptimization" class="btn btn_orange btn_ht32  btn_blue bold f14 SY1001301">索引优化</button>&nbsp;
+                </div>
+
+                <div class="head_detail m10_t">
+                    <h5>索引列表</h5>
+                </div>
+                <div class="boxs_detail border_none align_c">
+                    <div id="mainDiv" class="boxs_tool bgr_eb border_left border_right border_bottom">
+                        <div class="right_tool clearfix">
+                            <div class="fl m10_l">
+
+                                <select id="selFields" class="select_ht28 wd150">
+
+                                    @foreach (string s in ViewBag.Fields)
+                                    {
+                                        <option value="@s">@s</option>
+                                    }
+                                </select>
+                            </div>
+                            <div class="m10_l fl">
+                                <input id="txtKey" type="text" class="wd130">
+                            </div>
+                            <button id="btnSearch" title="查询" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                        </div>
+
+                        <div class="left_tool align_l">
+                            <button id="btnUpdate" class="btn btn_ht26  btn_blue m10_r SY1001301"><span class="icon icon_refresh icon_white"></span><span class="m5_l">更新索引</span></button>
+                            <button id="btnDelete" class="btn btn_ht26  btn_red m10_r SY1001401"><span class="icon icon_trash icon_white"></span><span class="m5_l">删除索引</span></button>
+                        </div>
+
+                    </div>
+                    <div id="paging" style="border:1px solid #C1C1C1;border-top: none;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+@section FooterJs{
+
+    <script type="text/javascript">
+        //索引查看
+        function View(item) {
+            $("#spanSysNo").text(item.SysNo);
+            $("#spanBarcode").text(item.Barcode);
+            $("#spanProductName").text(item.ProductName);
+            $("#spanCategory").text(item.Category);
+            $("#spanBrandSysNo").text(item.BrandSysNo);
+            $("#spanAssociationCategory").text(item.AssociationCategory);
+            $("#spanAttributes").text(item.Attributes);
+            $("#spanDisplayOrder").text(item.DisplayOrder);
+            $("#spanProductImage").text(item.ProductImage);
+            $("#spanNameAcronymy").text(item.NameAcronymy);
+            $("#spanPrices").text(item.Prices);
+            $("#spanQRCode").text(item.QRCode);
+            $("#spanBasicPrice").text(item.BasicPrice);
+            $("#spanStatus").text(item.Status);
+            UI.DialogBox({ content: document.getElementById('JS_tanch'), title: '索引详情', padding: '10px', footerClass: 'aui_none' });
+        }
+
+        //更新索引值
+        function UpdateIndexing() {
+            var ids = new Array();
+            $('input[name="checkedList"]:checked').each(function () {
+                var mSysNo = $(this).val();
+                ids.push(mSysNo);
+            });
+            if (ids.length > 0) {
+                var postdata = { sysNos: ids };
+                var json = JSON.stringify(postdata);
+                $.ajax({
+                    url: '/Sys/IndexingUpdate',
+                    type: 'POST',
+                    cache: false,
+                    data: json,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (r) {
+                        if (r.Status) {
+                            UI.Prompt.Success("操作成功");
+                            $("#tdLastUpdateTime").text(r.Message);
+                            dSearch();
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+                    }
+                });
+            }
+            else {
+                UI.Alert({
+                    content: "选中列表不能为空"
+                });
+            }
+        }
+        //删除索引
+        function DeleteIndexing() {
+            var ids = new Array();
+            $('input[name="checkedList"]:checked').each(function () {
+                var mSysNo = $(this).val();
+                ids.push(mSysNo);
+            });
+            if (ids.length > 0) {
+                var postdata = { sysNos: ids };
+                var json = JSON.stringify(postdata);
+                UI.Confirm({
+                    content: "确认删除?",
+                    ok: function () {
+                        $.ajax({
+                            url: '/Sys/IndexingDelete',
+                            type: 'POST',
+                            cache: false,
+                            data: json,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (r) {
+                                if (r.Status) {
+                                    $("#tdCount").text(parseInt($("#tdCount").text()) - ids.length);
+                                    $("#tdLastUpdateTime").text(r.Message);
+                                    UI.Prompt.Success("操作成功");
+                                    window.setTimeout(function () { dSearch(); }, 1000);
+                                }
+                                else {
+                                    UI.Alert({
+                                        content: r.Message
+                                    });
+                                }
+                            }
+                        });
+                    },
+                    cancel: true
+                });
+            }
+            else {
+                UI.Alert({
+                    content: "选中列表不能为空"
+                });
+            }
+        }
+        //设置选中
+        function SetChecked(flg) {
+            $("input[name='checkedList']").each(function () { this.checked = flg; });
+        }
+        $(document).ready(function (e) {
+            $("#mainDiv").ajaxLoadingMask(true);
+            //重建索引
+            $("#btnGenerate").click(function () {
+                $.post('/Sys/CreateAllProductIndex', null, function (r) {
+                    if (r.Status) {
+                        UI.Prompt.Success("索引生成成功");
+                        $("#tdCount").text(r.StatusCode);
+                        $("#tdLastUpdateTime").text(r.Message);
+
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+                });
+            });
+            $("#btnSearch").click(function () {
+                dSearch();
+            });
+            $("#btnDelete").click(function () {
+                DeleteIndexing();
+            });
+            $("#btnUpdate").click(function () {
+                UpdateIndexing();
+            });
+            $("#btnOptimization").click(function () {
+                $.post('/Sys/IndexingOptimization', null, function (r) {
+                    if (r.Status) {
+                        UI.Prompt.Success("操作成功");
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+                });
+            });
+            dSearch();
+        });
+
+        //高级查询
+        function dSearch() {
+            Ajax.get("/Sys/_FullTextIndexing/", "none", function (p) {
+                p.setParams("fieldName", $("#selFields").val());
+                p.setParams("keywords", $("#txtKey").val());
+            }, function (data) {
+
+                $('#paging').empty();
+                $('#paging').html(data);
+
+
+
+            });
+        }
+    </script>
+
+}

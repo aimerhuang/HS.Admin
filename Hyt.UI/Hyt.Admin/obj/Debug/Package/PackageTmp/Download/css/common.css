@@ -1,0 +1,124 @@
+﻿/*=================
+陈建2013.8.6创建：变量
+==================*/
+/*=================
+陈建2013.8.6创建：方法
+==================*/
+.clearfix {
+  *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.clearfix:after {
+  clear: both;
+}
+.fl {
+  float: left;
+}
+.fr {
+  float: right;
+}
+/*具体内容*/
+body {
+  font: normal 14px/20px "宋体","微软雅黑", Arial;
+  background:url(../images/backbg2.png) repeat-x #fcfcfc;
+  margin: 0;
+  padding: 0;
+}
+.cursor {cursor: pointer;}
+/*=固定宽度容器=*/
+.container {
+  width: 100%;
+  margin: 0 auto;
+  /* 侧边的自动值与宽度结合使用，可以将布局居中对齐 */
+
+}
+
+/*共用*/
+.btn01{border:#bbbbbb solid 1px;  background-color:#fff; height:20px; line-height:20px; padding:3px 10px; font-size:12px;  display:inline-block; cursor:pointer;
+border-radius:15px;
+-moz-border-radius:15px;
+-ms-border-radius:15px;
+-webkit-border-radius:15px;
+transition:all 0.3s; 
+-moz-transition:all 0.3s;
+-ms-transition:all 0.3s;
+-webkit-transition:all 0.3s;
+}
+.btn01:hover{ border:#fb8c59 solid 1px; background-color:#fb8c59; color:#fff; text-decoration:none;}
+
+.btn02{border:#fb8c59 solid 1px; height:20px; line-height:20px; padding:3px 10px; font-size:12px;  display:inline-block; cursor:pointer;
+border-radius:15px;
+-moz-border-radius:15px;
+-ms-border-radius:15px;
+-webkit-border-radius:15px;
+transition:all 0.3s; 
+-moz-transition:all 0.3s;
+-ms-transition:all 0.3s;
+-webkit-transition:all 0.3s;
+}
+.btn02_red{border:#fb8c59 solid 1px; color:#fb8c59;}
+.btn02_red a{color:#fb8c59;text-decoration:none;}
+.btn02_red:hover{border:#e4662d solid 1px; color:#e4662d; background-color:#ffe6da;}
+.btn02_green{border:#a9cb37 solid 1px; color:#a9cb37;}
+.btn02_green a{color:#a9cb37;text-decoration:none;}
+.btn02_green:hover{border:#93ba12 solid 1px; color:#93ba12; background-color:#f7ffdd;}
+
+.icon01{ background:url(../images/backbg1.png) no-repeat -192px -36px; width:15px; height:17px; display:inline-block; vertical-align:middle;}
+.icon02{ background:url(../images/backbg1.png) no-repeat -217px -36px; width:15px; height:17px; display:inline-block; vertical-align:middle;}
+.icon03{ background:url(../images/backbg1.png) no-repeat -242px -36px; width:15px; height:17px; display:inline-block; vertical-align:middle;}
+
+.content {width: 1100px; margin: 0 auto;}
+
+header h2{ height:25px; line-height:25px; padding:25px 0 20px 0; font-weight:normal; text-shadow:0 1px 2px #c35b2b;}
+header .banner{ width:1100px; overflow:hidden;}
+header .banner .picbox{ height:366px; width:100%; overflow:hidden; position:relative;}
+header .banner .picbox ul{ position:absolute; z-index:-1}
+header .banner .picbox ul li{height:366px; float:left;}
+header .banner .picbox .arrow_box{ width:100%; height:366px; position:absolute; top:0px; left:0px;}
+header .banner .picbox .arrow_box .fl{ height:366px; width:49%;}
+header .banner .picbox .arrow_box .fl:hover .arrow_fl{ display:block;}
+header .banner .picbox .arrow_box .fr{ height:366px; width:49%; text-align:right;}
+header .banner .picbox .arrow_box .fr:hover .arrow_fr{ display:block;}
+header .banner .picbox .arrow_fl{ background:url(../images/backbg1.png) no-repeat -29px -69px; width:24px; height:36px; margin-top:150px; margin-left:30px; cursor:pointer; display:none; float:left;}
+header .banner .picbox .arrow_fl:hover{ background-position: 0 -69px;}
+
+header .banner .picbox .arrow_fr{ background:url(../images/backbg1.png) no-repeat -57px -69px; width:24px; height:36px;  margin-top:150px; margin-right:30px; cursor:pointer; display:none; float:right;}
+header .banner .picbox .arrow_fr:hover{ background-position: -86px -69px;}
+
+header .banner .navm{ height:11px; padding:15px 0 15px 580px;}
+header .banner .navm ul li{ float:left; background:url(../images/backbg1.png) no-repeat -132px -36px; width:11px; height:11px; margin:0 5px; cursor:pointer;}
+header .banner .navm ul li.active{ background:url(../images/backbg1.png) no-repeat -153px -36px;}
+
+#paymain{ width:100%; margin-top:10px;}
+.py_tit{ text-indent:2em; color:#666; line-height:26px;}
+.py_com{ width:900px; background:url(../images/line01.png) repeat-y 5px 0; margin-left:100px; padding:20px 0; position:relative;}
+.py_com_t{ background:url(../images/backbg1.png) no-repeat -175px -36px; width:7px; height:7px; position:absolute; top:0px; left:5px;}
+.py_com dl dt{ float:left; background:url(../images/backbg1.png) no-repeat -66px 0; width:56px; height:59px; cursor:pointer}
+.py_com dl dt.close{ background-position:0px 0px;}
+.py_com dl dd{ float:right; border:#dddddd solid 1px; background-color:#fff; width:790px; min-height:30px; padding:15px 20px; color:#666;
+border-radius:4px;
+-moz-border-radius:4px;
+-ms-border-radius:4px;
+-webkit-border-radius:4px;
+box-shadow:1px 1px 5px 0 #ddd;
+
+}
+.py_com dl dd .dttit{ color:#666; height:30px; line-height:30px;}
+.py_com dl dd .downbox{height:30px; line-height:30px;}
+.py_com dl{*zoom: 1; padding:10px 0;}
+.py_com dl:before,
+.py_com dl:after {
+  display: table;
+  content: "";
+  line-height: 0;
+}
+.py_com dl:after {
+  clear: both;
+}
+.hide {display:none}
+footer{ background-color:#222222; padding:20px 0 30px; text-align:center; font-family:Arial; font-size:12px; color:#bbbbbb;}

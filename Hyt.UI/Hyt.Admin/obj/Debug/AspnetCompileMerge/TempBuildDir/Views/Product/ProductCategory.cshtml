@@ -1,0 +1,1391 @@
+﻿@{
+    ViewBag.Title = "商品分类管理";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+    <style type="text/css">
+        .ztree li a.curSelectedNode {
+            width: 95%;
+            border: solid 1px #ffb951;
+            padding-top: 1px;
+            padding-bottom: 0;
+        }
+
+        #productCatetoryTree a {
+            width: 95%;
+            *width: 85%;
+            border: solid 1px #fff;
+            height: 17px;
+            line-height: 17px;
+        }
+
+            #productCatetoryTree a.curSelectedNode {
+                border: solid 1px #ffb951;
+            }
+
+        .ztree li a:hover {
+            background-color: #FFE6B0;
+            border: solid 1px #FFE6B0;
+        }
+
+
+
+        tr.selected {
+            background-color: #FFE6B0;
+        }
+
+        .ztree li span.button {
+            float: left;
+        }
+
+        .bordergary {
+            border: 1px solid #ccc;
+        }
+    </style>
+}
+
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007601, "." + Hyt.Model.SystemPredefined.PrivilegeCode.PD1007601.ToString())
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201, "." + Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/TableBind/TableBind.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript">
+		<!--
+        var setting = {
+            view: {
+                addDiyDom: OnAddDiyTreeNodeDom,
+                selectedMulti: false
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: TreeNodeOnClick,
+                onExpand: TreeNodeOnExpand
+            }
+        };
+        //自定义节点样式
+
+        function OnAddDiyTreeNodeDom(treeId, treeNode) {
+            //的到节点文字部分的容器（a标签）
+            var aObj = $("#" + treeNode.tId + "_a");
+
+            //判断是否有fl样式（左浮动），因为右边需要排按钮，所以要左样式兼容。
+            if (!aObj.children(1).hasClass("fl")) {
+                aObj.children(1).addClass("fl"); //添加浮动效果
+            }
+
+            //格式化数据成新的node的HTML
+            aObj.html(aObj.html() + "<div class='treetool' style='visibility:hidden'><span  class='icon icon_eye_close icon_gray' title='隐藏'></span><span class='icon icon_pencil icon_gray @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())' title='编辑'></span><span class='icon icon_ban_circle icon_gray @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007601.ToString())' title='禁用'></span></div>");
+
+            //为按钮设置事件
+            $(".treetool .icon_pencil", aObj).bind("click", editTreeNode); //点击编辑节点按钮（笔icon）
+
+            //经验图标按钮事件
+            $(".treetool .icon_ban_circle", aObj).bind("click", function() {
+
+                var that = this;
+
+                //通过向上追溯的到当前节点的Id用着个ID来取得当前节点的Json数据
+                var node = myZTree.getNodeByTId("#" + $(that).parent().parent().parent().attr("id"));
+
+                //判断父级状态，如果是禁用将不执行操作
+                if (node.getParentNode() != null) {
+                    if (treeNode.getParentNode().status == 0) {
+
+                        UI.Alert({
+                            content: '不能执行该操作，上级节点为禁用状态！',
+                            callback: function() {
+                            },
+                            width: '200px'
+                        });
+
+                        return false;
+                    }
+                }
+
+                //获取节点名称拼接提示字符串
+                var title = node.name;
+                title = ($(that).hasClass("icon_ban_circle") ? "[<span class='red'>禁用</span>]" : "[<span class='green'>启用</span>]") + "“" + title + "”";
+
+                //提示用户
+                UI.Confirm({
+                    content: '您是否要' + title + '？',
+                    ok: function() {
+                        disabledNode(that);
+                    },
+                    cancel: function() {
+                        return true;
+                    },
+                    width: '200px'
+                });
+                return false;
+            });
+
+            //绑定前台展示功能按钮点击事件
+            $(".treetool .icon_eye_close", aObj).bind("click", function() {
+                var that = this;
+
+                //追溯上级标签（a标签）Id来找到当前节点数据
+                var node = myZTree.getNodeByTId("#" + $(that).parent().parent().parent().attr("id"));
+
+                //设置Title
+                var title = node.name;
+                title = ($(that).hasClass("icon_eye_close") ? "[<span class='red'>前台隐藏</span>]" : "[<span class='green'>前台显示</span>]") + "“" + title + "”";
+
+                //提示用户是否执行操作
+                UI.Confirm({
+                    content: '你是否要在' + title + '？',
+                    ok: function() {
+                        enableFontShow(that);
+                    },
+                    cancel: function() {
+                        return true;
+                    },
+                    width: '200px'
+                });
+
+                return false;
+            });
+
+
+            //当前上滑过样式
+            //鼠标进入是显示操作按钮
+            aObj.mouseenter(function() {
+                if ($(this).hasClass("curSelectedNode"))
+                    return true;
+                $(this).children("div").css("visibility", "visible");
+                return true;
+            });
+            //鼠标移除时隐藏操作按钮
+            aObj.mouseleave(function() {
+                if ($(this).hasClass("curSelectedNode"))
+                    return true;
+
+                $(this).children("div").css("visibility", "hidden");
+                return true;
+            });
+
+
+            var parentNode = treeNode.getParentNode(); //父节点
+            //如果文字有ft_lt样式表示父节点是禁用状态
+            if (parentNode) {
+                if ($("#" + parentNode.tId).children("a").children("span").hasClass("ft_lt"))
+                    treeNode.status = 0;
+
+                if ($("#" + parentNode.tId).children("a").children("span").hasClass("icon_eye_open")) {
+                    treeNode.isOnlien = 0;
+                }
+            }
+
+            //如果当行状态是禁用状态就切换可用样式
+            if (treeNode.status == 0) {
+                ChanageTreeNodeStatus($(".treetool .icon_ban_circle", aObj), false); //切换状态
+            }
+
+            //如果当前是前台不显示状态就切换为显示状态
+            if (treeNode.isOnline == 0) {
+                ChanageTreeNodeIsOnline($(".treetool .icon_eye_close", aObj), false); //切换前台显示样式
+            }
+
+        }
+
+        ;
+
+        function enableFontShow(obj) {
+            //去顶所以的下级节点的span标签
+            var enabled = true;
+            var treeNode = myZTree.getNodeByTId($(obj).parent().parent().parent().attr("id"));
+            var sysNo = treeNode.id;
+
+            //如果样式是“icon_ban_circle”表示是要禁用，否则就是启用
+            if ($(obj).hasClass("icon_eye_close")) {
+                enabled = false;
+                treeNode.isOnline = 0;
+            } else {
+                enabled = true;
+                treeNode.isOnline = 1;
+            }
+
+            $(treeNode.children, function(i, e) {
+                e.isOnline = treeNode.isOnline;
+            });
+
+            //修改商品分类前台显示状态
+            $.ajax({
+                url: "@Url.Action("SetProdcutCateogryIsOnline", "Product")",
+                data: { sysNo: sysNo, isOnline: enabled ? "@((int) Hyt.Model.WorkflowStatus.ProductStatus.是否前端展示.是)" : "@((int) Hyt.Model.WorkflowStatus.ProductStatus.是否前端展示.否)" },
+                success: function(data) {
+                    if (data == true) {
+                        UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                        setChildNodeOnlineState(treeNode, enabled);
+                        ChanageTreeNodeIsOnline(obj, enabled);
+
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败！');
+                    }
+
+                }
+            });
+
+        }
+
+        //切换节点是否为前台显示
+
+        function ChanageTreeNodeIsOnline(obj, enable) {
+            //去顶所以的下级节点的span标签
+            enable = enable == null ? true : enable;
+
+            var wordSpanOdd = $("a", "#" + $(obj).parent().parent().parent().attr("id")).children("span:odd");
+            var wordSpan;
+
+            //如果样式是“icon_eye_close”表示是要禁用，否则就是启用 $(obj).hasClass("icon_eye_close")
+            if (!enable) {
+                //找到眼睛icon按钮
+                wordSpan = $("#" + $(obj).parent().parent().parent().attr("id") + " .icon_eye_close");
+
+                //将眼睛icon设成睁开
+                wordSpan.removeClass("icon_eye_close");
+                wordSpan.addClass("icon_eye_open");
+                wordSpan.attr("title", "显示");
+
+                //在标题后面添加闭眼icon
+                wordSpanOdd.append('<span class="icon_eye_close" title="隐藏"></span>');
+
+
+            } else {
+
+                //移除所有的闭眼icon
+                wordSpanOdd.children(".icon_eye_close").remove();
+
+                //找到眼睛icon按钮
+                wordSpan = $("#" + $(obj).parent().parent().parent().attr("id") + " .icon_eye_open");
+
+                //将眼睛icon设成闭眼
+                wordSpan.removeClass("icon_eye_open");
+                wordSpan.addClass("icon_eye_close");
+                wordSpan.attr("title", "隐藏");
+            }
+        }
+
+        function setChildNodeOnlineState(node, onlineStatues) {
+            node.isOnline = onlineStatues;
+            if (node.children != null && node.children.length > 0) {
+                $.each(node.children, function (i, e) {
+                    setChildNodeOnlineState(e, onlineStatues);
+                });
+            }
+        }
+
+        function TreeNodeOnExpand(event, treeId, treeNode) {
+
+            $.each(treeNode.children, function(i, e) {
+                if (e.isOnline == 0 || treeNode.isOnline == 0) {
+                    var e = $("#" + e.tId + "_span");
+                    if ($(".icon_eye_close", e).length == 0) {
+                        e.append('<span class="icon_eye_close" title="隐藏"></span>');
+                    }
+                } else {
+                    var e = $("#" + e.tId + "_span");
+                    if ($(".icon_eye_close", e).length == 1) {
+                        $(".icon_eye_close", e).remove();
+                    }
+                }
+            });
+        }
+
+
+        function disabledNode(obj) {
+
+            //去顶所以的下级节点的span标签
+            var enabled = true;
+            var treeNode = myZTree.getNodeByTId($(obj).parent().parent().parent().attr("id"));
+            var sysNo = treeNode.id;
+
+            //如果样式是“icon_ban_circle”表示是要禁用，否则就是启用
+            if ($(obj).hasClass("icon_ban_circle")) {
+                enabled = false;
+                treeNode.status = 0;
+            } else {
+                enabled = true;
+                treeNode.status = 1;
+            }
+
+            $.ajax({
+                url: "@Url.Action("ChangeProductCategoryStatus", "Product")",
+                data: { sysNo: sysNo, enabled: enabled },
+                cache: false,
+                success: function(data) {
+                    if (data == true) {
+                        UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                        ChanageTreeNodeStatus(obj, enabled);
+                        var selectNodes = myZTree.getSelectedNodes();
+                        if (selectNodes.length > 0) {
+                            if (selectNodes[0].id == treeNode.id)
+                                EnableEdit(enabled);
+                        }
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败！');
+                    }
+                }
+            });
+
+
+        }
+
+        ;
+
+        function ChanageTreeNodeStatus(obj, enabled) {
+
+            //找到按钮
+            var wordSpanOdd = $("a", "#" + $(obj).parent().parent().parent().attr("id")).children("span:odd");
+            var wordSpan;
+            //如果样式是“icon_ban_circle”表示是要禁用，否则就是启用
+            if (!enabled) {
+
+                //禁用时隐藏铅笔样式
+                $(".icon_pencil", wordSpanOdd).hide();
+
+                //设置状态icon
+                wordSpan = $("#" + $(obj).parent().parent().parent().attr("id") + " .icon_ban_circle");
+                wordSpan.removeClass("icon_ban_circle");
+                wordSpan.addClass("icon_ok");
+                wordSpan.attr("title", "启用");
+
+                //显示标题后的状态icon
+                wordSpanOdd.addClass("ft_lt red status");
+                wordSpanOdd.append('<span class="icon_ban_circle" title="禁用"></span>');
+
+            } else {
+
+                //设置状态icon
+                wordSpan = $("#" + $(obj).parent().parent().parent().attr("id") + " .icon_ok");
+                wordSpan.removeClass("icon_ok");
+                wordSpan.addClass("icon_ban_circle");
+                wordSpan.attr("title", "禁用");
+
+                //显示编辑按钮
+                $(".icon_pencil", wordSpanOdd).show();
+
+                //隐藏标题后的状态
+                wordSpanOdd.removeClass("ft_lt red status");
+                wordSpanOdd.children(".icon_ban_circle").remove();
+            }
+        }
+
+        ;
+
+        //删除节点
+
+        function removeTreeNode(e) {
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Alert({
+                    content: '请先选择一个节点！',
+                    callback: function() {
+                    },
+                    width: '200px'
+                });
+                return;
+            }
+
+            var parentNode = treeNode.getParentNode();
+            myZTree.removeNode(treeNode, false);
+            if (parentNode && parentNode.children.length == 0)
+                $("#" + parentNode.tId + "_ul").remove();
+        }
+
+        ;
+
+        //编辑节点
+
+        function editTreeNode() {
+
+            //更具点击按钮找到节点容器（Li标签），然后再获取id来查找Node数据
+            var treeNode = myZTree.getNodeByTId($(this).parent().parent().parent().attr("id"));
+
+            if (treeNode == null) {
+                UI.Alert({
+                    content: '请先选择一个节点！',
+                    callback: function() {
+                    },
+                    width: '200px'
+                });
+                return false;
+            }
+
+            return true;
+
+        }
+
+        ;
+
+        //点击节点事件
+
+        function TreeNodeOnClick(event, treeId, treeNode) {
+
+            //如果节点编号为-1表示是新增的节点。否则执行选择选择节点事件
+            if (myZTree.getNodeByParam("id", "-1")) {
+
+                //如果当前点击的节点就是这个新增的节点将不做任何操作，否则提示用户接下来的操作
+                if (treeNode.id == -1) {
+                    return;
+                } else {
+
+                    //询问用户是否要放弃前面选择的节点
+                    UI.Confirm({
+                        content: '是否要放弃新添加的商品分类？',
+                        ok: function() {
+
+                            //放弃之前新添加的节点
+                            myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                            removeTreeNode();
+
+                            //清除选择
+                            myZTree.selectNode(treeNode, false);
+                            UI.tips.tip_alert('tips_shrot tips_success', '数据已清除！');
+
+                            //选择新节点
+                            SelectedTreeNode(event, treeId, treeNode);
+                        },
+                        cancel: function() {
+                            myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                        },
+                        width: '200px'
+                    });
+                }
+
+            } else {
+                //执行选择节点
+                SelectedTreeNode(event, treeId, treeNode);
+            }
+
+            //检查当前节点是否是禁用，如果是禁用就不能保存
+            if (!checkCurrentTreeNodeIsDisabled()) {
+                EnableEdit(true);
+            } else {
+                UI.tips.tip_alert('tips_shrot tips_warning', '分类当前状态为[禁用],所以不能修改！');
+                EnableEdit(false);
+
+            }
+        }
+
+        ;
+
+        //执行选择节点事件
+
+        function SelectedTreeNode(event, treeId, treeNode) {
+
+            //获取当前节点
+            var selectNodes = myZTree.getSelectedNodes();
+
+            //如果当前节点不为空这显示后面的编辑按钮
+            if (selectNodes != null && selectNodes.length == 1) {
+                //判断当前选择的LI标签不为空
+                if (myZTree.selectNodeTId != null) {
+                    //
+                    $("#" + myZTree.selectNodeTId).children("a").children(".treetool").children("span").addClass("icon_gray");
+                }
+
+                $(".treetool").css("visibility", "hidden");
+                $("#" + selectNodes[0].tId).children("a").children(".treetool").children(".icon_gray").removeClass("icon_gray");
+                $(".treetool:first", $("#" + treeNode.tId)).css("visibility", "visible");
+
+                myZTree.selectNodeTId = selectNodes[0].tId;
+            }
+
+            //更具选择的分类节点读取数据库并绑定到右侧数据区域
+            if (selectNodes[0].id > 0) {
+                markObject = $(".sortmanage_fr");
+                $.ajax({
+                        url: '@Url.Action("GetProductCategory", "Ajax")',
+                        data: { id: selectNodes[0].id },
+                        success: function(data) {
+
+                            if (data != null && data.CategoryImage == null) {
+                                data.CategoryImage = "/Theme/images/addpic.png";
+                            }
+
+                            //绑定到表单
+                            $(".sortmanage_fr").JsonBind(data);
+                            if (data.ParentCategory != null) {
+                                $("#txt_aprentProductCategory").val(data.ParentCategory.CategoryName);
+                                $("#txt_aprentProductCategory").attr("pdcategory", data.ParentCategory.SysNo);
+                            } else {
+                                $("#txt_aprentProductCategory").val("主分类/无上级分类");
+                                $("#txt_aprentProductCategory").attr("pdcategory", 0);
+                            }
+
+                            //读取分类下的属性组并绑定到table
+                            tableSetting.ajaxOptons = {
+                                url: '@Url.Content("~/Ajax/GetProductCategoryAttributeGroupList/")',
+                                cache: false,
+                                data: { id: selectNodes[0].id }
+                            };
+                            myTableBinder = UI.TableBind(tableSetting);
+                        }
+                    }
+                );
+
+            } else {
+                //清除数据
+                $(".sortmanage_fr").JsonBind(null);
+                $("#txt_aprentProductCategory").val("选择上级分类");
+                $("#txt_aprentProductCategory").attr("pdcategory", 0);
+            }
+        }
+
+        var log, className = "dark";
+
+        //添加根节点
+        var newCount = 1;
+
+        //添加父级节点
+
+        function AddParentTreeNode(e) {
+            //节点的位置是由当前节点的父级节点来决定的，默认添加的节点和当前节点同级
+
+            //获取当前选择节点
+            var nodes = myZTree.getSelectedNodes();
+
+            //获取当前节点部分信息
+            isParent = e.data.isParent;
+            var treeNode = nodes[0];
+
+            //如果当前节点没有就默认添加的是根节点
+            if (treeNode) {
+                //添加一个新节点到分类树,位置就在当前节点同级
+                treeNode = myZTree.addNodes(myZTree.getNodeByParam("id", treeNode.pId, null), { id: -1, pId: treeNode.pId, isParent: isParent, name: "添加的新同级" });
+            } else {
+                //添加一个新节点到分类树的根节点
+                treeNode = myZTree.addNodes(null, { id: -1, pId: 0, isParent: isParent, name: "添加的新同级" });
+            }
+
+            //设置新添加的节点为当前选择节点
+            myZTree.selectNode(treeNode[0], false);
+            TreeNodeOnClick(null, "", treeNode[0]);
+            EnableEdit(true);
+
+            if (treeNode[0].getParentNode() != null) {
+
+                //初始化编辑区分类初始化数据,默认选择的为当前节点
+                $("#txt_aprentProductCategory").val(treeNode[0].getParentNode().name);
+                $("#txt_aprentProductCategory").attr("pdcategory", treeNode[0].getParentNode().id);
+            } else {
+                //初始化编辑区分类初始化数据
+                $("#txt_aprentProductCategory").val("主分类/无上级分类");
+                $("#txt_aprentProductCategory").attr("pdcategory", 0);
+            }
+
+
+            //清空数据
+            $(".sortmanage_fr").JsonBind(null);
+            $("#categoryImage").attr("src", "/Theme/images/addpic.png");
+            myTableBinder.Clear();
+        }
+
+        ;
+
+        //添加叶子节点
+
+        function AddLeafTreeNode(e) {
+
+            //当前选择节点
+            var nodes = myZTree.getSelectedNodes();
+            isParent = e.data.isParent;
+
+            //获取当前节点部分信息
+            var treeNode = nodes[0];
+
+
+            //如果当前节点没有就默认添加的是根节点
+            if (treeNode) {
+                //设置新添加节点的父节点为当前节点
+                var parentNode = treeNode;
+
+                //添加一个新节点到分类树,位置在当前节点下
+                treeNode = myZTree.addNodes(treeNode, { id: -1, pId: treeNode.id, isParent: isParent, name: "添加的新子级" });
+
+                //设置新添加的节点为当前选择节点
+                myZTree.selectNode(treeNode[0], false);
+                SelectedTreeNode(null, "", treeNode[0]);
+
+                //初始化编辑区分类初始化数据,默认选择的为当前节点
+                $("#txt_aprentProductCategory").val(parentNode.name);
+                $("#txt_aprentProductCategory").attr("pdcategory", parentNode.id);
+                myTableBinder.Clear();
+            } else {
+                UI.Alert({
+                    content: '请选择您需要增加子级的商品分类项！',
+                    callback: function() {
+                    },
+                    width: '200px'
+                });
+            }
+
+
+            EnableEdit(true);
+
+            $(".sortmanage_fr").JsonBind(null);
+            $("#categoryImage").attr("src", "/Theme/images/addpic.png");
+            myTableBinder.Clear();
+        }
+
+        ;
+
+        //节点上移
+
+        function TreeNodeMoveUp() {
+            TreeControlButtonEnabled(false);
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Alert({
+                    content: '请先选择一个节点',
+                    callback: function() {
+                    },
+                    width: '200px'
+                });
+                return;
+            }
+
+            var prevNode = myZTree.getNodesByParam("tId", $("#" + treeNode.tId).prev().attr("id"));
+            if (prevNode.length == 0)
+                return;
+
+
+            //如果当前节点和他要对换位置的节点还在同一个父节点则进行位置调换操作
+            //否则将视为改变父节操作
+            if (prevNode[0].pId == treeNode.pId) {
+
+                var data = { originalSysNo: prevNode[0].id, objectiveSysNo: treeNode.id };
+
+                $.ajax({
+                    url: "@Url.Action("CategorySwapDisplayOrder", "Product")",
+                    data: JSON.stringify(data),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data != null && data.success) {
+                            TableRowMove($("#" + treeNode.tId), true);
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + data.msg);
+                        }
+                        TreeControlButtonEnabled(true);
+                    },
+                    error: function() {
+                        TreeControlButtonEnabled(true);
+                    }
+                });
+            }
+            return false;
+        }
+
+        ;
+
+        //节点下移
+
+        function TreeNodeMoveDown(e) {
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Alert({
+                    content: '请先选择一个节点',
+                    callback: function() {
+                    },
+                    width: '200px'
+                });
+                return;
+            }
+
+            //如果当前节点和他要对换位置的节点还在同一个父节点则进行位置调换操作
+            //否则将视为改变父节操作
+            var nextNode = myZTree.getNodesByParam("tId", $("#" + treeNode.tId).next().attr("id"));
+
+            if (nextNode.length == 0)
+                return;
+
+            if (nextNode[0].pId == treeNode.pId) {
+
+                var data = { originalSysNo: nextNode[0].id, objectiveSysNo: treeNode.id };
+
+                $.ajax({
+                    url: "@Url.Action("CategorySwapDisplayOrder", "Product")",
+                    data: JSON.stringify(data),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data != null && data.success) {
+                            TableRowMove($("#" + treeNode.tId), false);
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + data.msg);
+                        }
+                        TreeControlButtonEnabled(true);
+                    },
+                    error: function() {
+                        TreeControlButtonEnabled(true);
+                    }
+                });
+            }
+            return false;
+
+        }
+
+        ;
+
+        //全部展开
+
+        function TreeExpandAll(obj) {
+            if (myZTree.ExpandAllStatus == false) {
+                $(obj).children("span:last").text("折叠");
+                myZTree.ExpandAllStatus = !myZTree.ExpandAllStatus;
+                myZTree.expandAll(myZTree.ExpandAllStatus);
+            } else {
+                $(obj).children("span:last").text("展开");
+                myZTree.ExpandAllStatus = !myZTree.ExpandAllStatus;
+                myZTree.expandAll(myZTree.ExpandAllStatus);
+            }
+            return false;
+        }
+
+        ;
+
+        //重置左右容器高度
+
+        function resizeCalBack() {
+            var height = $(document).height() - 64 - $("#treeTitle").height() - $("#treeControlPanel").height();
+            $("#treePanel").css("height", height);
+
+            //计算属性组高度
+            //$("#attributePanel").css("height", $(document).height()-573);
+        }
+
+
+        //删除选择的行
+
+        function TableRowDeleteSelected(tr) {
+            $(tr).each(function(index, element) {
+                $(element).remove();
+            });
+        }
+
+        //移动tr
+
+        function TableRowMove(tr, isUp) {
+            if ($(tr).length == 0)
+                return false;
+
+            //是否是上移
+            if (isUp) {
+
+                //上移操作
+                //如果tr以上没有节点将不做任何操作
+                if ($(tr).prev().length == 0)
+                    return false;
+
+                //上移节点
+                $(tr).prev().before($(tr));
+
+            } else {
+
+                //下移操作
+                //如果tr以下没有节点将不做任何操作
+                if ($(tr).next().length == 0)
+                    return false;
+
+                //下移节点
+                $(tr).next().after($(tr));
+
+            }
+
+            return true;
+        }
+
+
+        var myZTree;
+
+        //检查当前节点是否是禁用状态
+
+        function checkCurrentTreeNodeIsDisabled() {
+            var node = myZTree.getSelectedNodes();
+            if (node.length == 0)
+                return false;
+            node = node[0];
+            //根据当前选择节点是否有 ft_lt样式来标准是否是禁用
+            if (node.status == "@((int) Hyt.Model.WorkflowStatus.ProductStatus.商品分类状态.无效)")
+                return true;
+            return false;
+        }
+
+        //启用编辑，将所要button和input设我启用或停用
+
+        function EnableEdit(status) {
+
+            if (status) {
+                $("#btn_Panel button").show();
+                $("#btn_attr_panel button").show();
+                $(".sortmanage_fr input").attr("disabled", null);
+            } else {
+                $("#btn_Panel button").hide();
+                $("#btn_attr_panel button").hide();
+                $(".sortmanage_fr input").attr("disabled", "disabled");
+            }
+        }
+
+
+        //初始化ZTree
+
+        function InitZTree() {
+            markObject = $(".sortmanage_fl");
+            var isShowDisable = $('#j_showdisable').is(':checked');
+            $.ajax({
+                url: '@Url.Action("GetProductCategoryZTreeList", "Ajax")',
+                data: { all: true, isShowDisable: isShowDisable },
+                cache: false,
+                success: function (response) {
+
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTree = $.fn.zTree.init($("#productCatetoryTree"),
+                            setting,
+                            response);
+
+                        //默认为收起所以节点
+                        myZTree.ExpandAllStatus = true;
+                        myZTree.expandAll(myZTree.ExpandAllStatus);
+                    }
+
+                },
+                error:
+                    function(httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+            });
+
+
+        }
+
+        //AjaxLoader的mark对象
+        var markObject;
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function() {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function() {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //设置属性组列表TableBinder对象
+        var myTableBinder;
+        var tableSetting = {
+            table:
+                "#attributeTalbe",
+            key: "SysNo",
+            selectedCss: "selected",
+            showMask: false
+        };
+
+        //自举函数
+        $(document).ready(function() {
+
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+
+            //设置验证
+            $("form").validate({
+                onsubmit: false,
+                errorPlacement: function(error, el) {
+
+                    $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function(label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+
+            //初始化商品分类树
+            InitZTree();
+
+            //初始化删除按钮事件
+            $("#btn_attr_del").click(function() {
+                //获取属性组中选中的属性组
+                var items = myTableBinder.GetSelectItems();
+
+                //如果有选中的将进行删除操作,如果没有表示是当前行被删除
+                if (items.length > 0)
+                    myTableBinder.DelRow(items); //从列表中删除
+
+            });
+
+            //上移按钮
+            $("#btn_attr_moveup").click(function() {
+                myTableBinder.Move(true);
+            });
+
+            //下移按钮
+            $("#btn_attr_movedown").click(function() {
+                myTableBinder.Move(false);
+            });
+
+            //弹出商品类别
+            //2013-06-26 邵斌 修改：调用真实数据
+            var options = {
+                onlyLeaftSelect: false,
+                margin: {
+                    vertical: 0,
+                    horizontal: 0
+                },
+                zIndex: 5
+            };
+            DAO.SelectProductCategory($("#JS_outbox"), $("#txt_aprentProductCategory"), options);
+            //btn_selectCategory
+            myTableBinder = UI.TableBind(tableSetting);
+
+            //添加属性组
+            $("#btn_attr_add").click(function() {
+                DAO.SelectAttributeGroup({
+                    callBack: function(data) {
+                        for (var i = 0; i < data.length; i++) {
+                            data[i].Name = data[i].AttributeName;
+                            myTableBinder.InsertRow(data[i]);
+                        }
+                    }
+                });
+            });
+
+            //设置为顶级分类
+            $("#btn_setTopLevel").click(function() {
+                $("#txt_aprentProductCategory").val("主分类/无上级分类");
+                $("#txt_aprentProductCategory").attr("pdcategory", 0);
+            });
+
+            //页面大小改变是要从新计算布局，应为要在第一屏时左右两边都是自适应高度到最大化
+            $(window).resize(resizeCalBack);
+            resizeCalBack();
+
+
+            //设置添加同级节点按钮点击事件
+            $("#addParent").click(
+                function() {
+                    if (myZTree.getNodeByParam("id", "-1") != null) {
+
+                        UI.Confirm({
+                            content: '是否要放弃新添加的商品分类？',
+                            ok: function() {
+                                removeTreeNode(null);
+                                UI.tips.tip_alert('tips_shrot tips_success', '数据已清除！');
+                                AddParentTreeNode($("#addParent"));
+                            },
+                            cancel: function() {
+                                myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                            },
+                            width: '200px'
+                        });
+
+                    } else {
+                        AddParentTreeNode($("#addParent"));
+                    }
+
+                    return false;
+                }
+            );
+
+            //设置添加子级节点按钮点击事件
+            $("#addLeaf").bind("click", { isParent: false }, function() {
+
+                if (checkCurrentTreeNodeIsDisabled()) {
+                    UI.Alert({
+                        content: '父级分类当前为禁止状态，所以暂时不能添加子商品分类？'
+                    });
+                    return false;
+                }
+
+
+                if (myZTree.getNodeByParam("id", "-1") != null) {
+                    UI.Confirm({
+                        content: '是否要放弃新添加的商品分类？',
+                        ok: function() {
+                            removeTreeNode(null);
+                            UI.tips.tip_alert('tips_shrot tips_success', '数据已清除！');
+                            AddLeafTreeNode($("#addLeaf"));
+                        },
+                        cancel: function() {
+                            myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                        },
+                        width: '200px'
+                    });
+                } else {
+                    AddLeafTreeNode($("#addLeaf"));
+                }
+
+            });
+
+            //生产折叠卡
+            $(".according").Accordion();
+
+
+            //用于过滤登录超时
+            $(document).ajaxComplete(function(event, request, settings) {
+                //数据样本 "{"IsLogout":true,"Message":"登录超时，请重新登录","Callback":"UI.Dialog.close();DAO.LoginBox()"}"
+                try {
+                    if (request.responseText.indexOf("登录超时，请重新登录") > 0) {
+                        UI.Dialog.close();
+                        DAO.LoginBox();
+                    }
+                } catch(e) {
+                    ;
+                }
+            });
+        });
+
+        //保存分类
+
+        function Save() {
+            //当前分类不能和父级相同 王耀发 2016-1-20 创建
+            if ($("#hddSysNo").val() == $("#txt_aprentProductCategory").attr("pdcategory"))
+            {
+                UI.tips.tip_alert('tips_shrot tips_warning', '子父级不能相同！');
+                return false;
+            }
+
+            //判断验证表单，如果不通过就返回
+            if (!$("form").valid()) return false;
+
+            //用于所以按钮，以防止重复提交
+            EnableEdit(false);
+
+            //初始化分类对象
+            var model = $(".sortmanage_fr").JsonBind(); //获取分类JSON模型
+            var attributeGroups = myTableBinder.GetOptions().data; //商品分类下挂的属性分组对象列表
+
+            model.ParentSysNo = $("#txt_aprentProductCategory").attr("pdcategory"); //获取父级节点分类系统编号
+
+            //根据商品分类系统编号判断是否是新增商品分类，如果没有系统编号或系统编号为0表示是新增的分类
+            if ($("#hddSysNo").val() != null && $("#hddSysNo").val() > 0) {
+                EditCategory(model, attributeGroups); //编辑分类
+            } else {
+                AddCategory(model, attributeGroups); //添加分类
+            }
+        }
+
+        //保存修改商品分类信息
+
+        function EditCategory(model, attributeGroups) {
+
+            //Ajax提交修改内容
+            $.ajax({
+                url: "@Url.Action("EditProductCategory", "Product")",
+                data: JSON.stringify({ model: model, attributeGroups: attributeGroups }),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function(data) {
+
+                    //如果成功就Tips提示成功，并更新商品分类树
+                    if (data.success == true) {
+
+                        //成功提示
+                        UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+
+                        //更新zTree节点值,如果变更了父级节点将从新生产商品分类树
+                        var selectNodes = myZTree.getSelectedNodes(); //从分类树中获取当前现在的分类
+
+                        //如果有选择节点将进行逻辑处理
+                        if (selectNodes.length > 0) {
+                            //判断是否修改了父级节点，修改了将更新整棵商品分类树，否则只功能性当节点
+                            if (selectNodes[0].pId != model.ParentSysNo) {
+                                InitZTree(); //更新分类树
+                            } else {
+                                //只更新当前选择的分类节点
+                                //设置节点新值
+                                selectNodes[0].pId = model.ParentSysNo;
+                                selectNodes[0].name = model.CategoryName;
+                                //调用ZTree更新方法更新节点
+                                myZTree.updateNode(selectNodes[0], false);
+                            }
+                        }
+
+                    } else {
+                        //失败提示
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败！' + data.msg);
+                    }
+
+                    //恢复按钮状态为可用
+                    EnableEdit(true);
+                },
+                error: function() {
+                    //恢复按钮状态为可用
+                    EnableEdit(true);
+                }
+            });
+        }
+
+
+        //添加商品分类
+        //model:商品分类JSON对象
+        //attributeGroups:属性组对象列表
+
+        function AddCategory(model, attributeGroups) {
+            //设置新增商品分类系统编号为0(默认值)
+            model.SysNo = 0;
+
+            //Ajax提交数据
+            $.ajax({
+                url: "@Url.Action("CreateProductCategory", "Product")",
+                data: JSON.stringify({ category: model, attributeGroups: attributeGroups }),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function(data) {
+
+                    //判断是否成功，成功就更新整棵商品分类树
+                    if (data.success == true) {
+
+                        //成功提示
+                        UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+
+                        $("#hddSysNo").val(data.newid);
+
+                        //更新zTree节点值
+                        var selectNodes = myZTree.getSelectedNodes(); //获取当前节点，应为默认情况下新增时，想添加的节点为当前节点
+
+                        //节点正确将更新商品分类树
+                        if (selectNodes.length > 0) {
+                            //设置节点新值
+                            selectNodes[0].name = model.CategoryName;
+                            selectNodes[0].id = data.newid;
+
+                            //更新分类树
+                            InitZTree();
+                        }
+
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败！' + data.msg);
+                    }
+                    EnableEdit(true);
+                },
+                error: function() {
+                    EnableEdit(true);
+                }
+            });
+
+        }
+
+        //分类树操作按按钮控制
+        //enabled: true-启用按钮  false-停用按钮
+
+        function TreeControlButtonEnabled(enabled) {
+
+            //判断是启用还是停用
+            if (enabled)
+                $("button", "#treeControlPanel").attr("disabled", null);
+            else
+                $("button", "#treeControlPanel").attr("disabled", enabled);
+        }
+
+        //取消编辑内容，将编辑区域回执为空
+
+        function Cancel() {
+            //更新zTree节点值
+            var selectNodes = myZTree.getSelectedNodes();
+
+            //将编辑区域表单置空
+            $(".sortmanage_fr").JsonBind(null);
+
+            //判断当前节点是否为新增，如果id<=0 表示新增节点
+            if (selectNodes[0].id <= 0) {
+                //清空属性组列表
+                myTableBinder.Clear();
+                //删除新添加的节点
+                myZTree.removeNode(selectNodes[0]);
+            }
+
+            //经验编辑功能按钮
+            EnableEdit(false);
+        }
+
+        //-->
+
+        //用于初始化--产品类别图片按钮--事件
+        $(function() {
+            $("#btnProductImg").click(function(e) {
+
+                DAO.Upload({
+                    config: 'productcategory',
+                    callback: function(data) {
+                        $("#categoryImage").attr("src", "@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer" + data[0].url);
+                    },
+                    cancel: $.noop()
+                });
+            });
+
+            $('#j_showdisable').click(function () {
+                //alert($(this).is(':checked'));
+                InitZTree();
+            });
+        });
+    </script>
+
+}
+
+<div class="case commodity_sortmanage">
+    <!--sortmanage_fl-->
+    <div class="sortmanage_fl">
+        <div class="boxs">
+            <!--有导航条时-->
+            <div id="treeTitle" class="boxs_tit head_m">
+                <h3>
+                    商品分类
+                    <label style="display: inline-block;padding-left: 20px;font-size: 10px;font-weight: normal;"><input type="checkbox" id="j_showdisable" />&nbsp;显示禁用</label>
+                </h3>
+            </div>
+            <div class="comp5" style="padding: 0;">
+                <div id="treeControlPanel" class="btntooldiv boxs_tool">
+                    <button id="addParent" onclick="return false;" class="btn btn_ht26 btn_blue @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())" title="增加同级"><span class="icon icon_plus icon_white "></span><span>增加同级</span></button><button id="addLeaf" onclick="return false;" class="btn btn_ht26 btn_blue @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())"><span class="icon icon_plus_sign icon_white "></span><span>增加子级</span></button><button id="upmove" onclick="TreeNodeMoveUp(this)" class="btn btn_ht26 btn_green @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())" title="上移"><span class="icon icon_circle_arrow_up icon_white"></span><span>上移</span></button><button id="downmove" class="btn btn_ht26 btn_green @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())" onclick="TreeNodeMoveDown(this)" title="下移"><span class="icon icon_circle_arrow_down icon_white"></span><span>下移</span></button><button id="expandAll" onclick="TreeExpandAll(this)" class="btn btn_ht26 btn_orange "><span class="icon icon_briefcase icon_white"></span><span>展开</span></button>
+                </div>
+                <div id="treePanel" class="zTreeDemoBackground left p5" style="overflow: auto;">
+                    <ul id="productCatetoryTree" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- test -->
+    <!--sortmanage_fr-->
+    <div class="sortmanage_fr">
+        <div class="boxs_tit head_m">
+            <h3>商品分类信息</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <form id="formAddProductCatetgory" name="formAddProductCatetgory" onsubmit="return false;">
+                <div class="boxs boxs_detail_dispay">
+                    <div class="according tit_con" title="基本信息">
+                        <input type="hidden" dn="SysNo" id="hddSysNo" />
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone">
+                            <tr>
+                                <td width="100" class="nameright">上级分类</td>
+                                <td>
+                                    <div class="search_btn fl" id="JS_outbox">
+                                        <input id="txt_aprentProductCategory" name="txt_aprentProductCategory" type="text" value="选择上级分类" class="input_ht28 wd150" name="" readonly="readonly" />
+                                        <button title="选择分类" class="btn btn_ht28" id="btn_selectCategory">
+                                            <span class="icon_th_list"></span>
+                                        </button>
+                                    </div>
+                                    <button id="btn_setTopLevel" class="btn btn_ht28 m10_l" title="转为顶级"><span class="icon_toTop"></span><span class="m5_l">转为顶级</span></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="100" class="nameright"><span class="v_star">*</span>分类名称</td>
+                                <td>
+                                    <input dn="CategoryName" name="txt_CategoryName" id="txt_CategoryName" class="{required:true,maxlength:50} wd150" type="text" />
+                                    <span id="c_txt_CategoryName" class="prompt m10_l">分类名称只能由1-50个可视字符组成</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="100" class="nameright border_bnone">产品类别图片</td>
+                                <td class="border_bnone">
+                                    <a id="btnProductImg" href="javascript:;"><img id="categoryImage" src="/Theme/images/addpic.png" dn="CategoryImage" width="50" height="50" class="bordergary" /></a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="according" title="分类属性组">
+                        <div class="boxs_tool" id="btn_attr_panel">
+                            <!--/工具条-->
+                            <button id="btn_attr_add" class="btn btn_ht26 @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())"><span class="icon icon_plus"></span><span class="m5_l">新增</span></button>
+                            <button id="btn_attr_del" class="m10_l btn btn_ht26 @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())"><span class="icon icon_trash"></span><span class="m5_l">删除</span></button>
+                            <button id="btn_attr_moveup" class="m10_l btn btn_ht26 @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())"><span class="icon icon_arrow_up"></span><span class="m5_l">上移</span></button>
+                            <button id="btn_attr_movedown" class="m10_l btn btn_ht26 @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())"><span class="icon icon_arrow_down"></span><span class="m5_l">下移</span></button>
+                        </div>
+                        <div id="attributePanel" class="border_lnone boxs_detail" style="overflow: auto;">
+                            <table id="attributeTalbe" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+                                <thead>
+                                    <tr class="ht32">
+                                        <th class="border_lnone border_rnone p10_lr" width="33">
+                                            <input name="" class="checkall" type="checkbox" value="">
+                                        </th>
+                                        @*<th width="84" class="p10_lr">属性组编号</th>*@
+                                        <th class="p10_lr" align="left" width="240">属性组名称</th>
+                                        <th width="320" align="left" class="p10_lr">页面展示名称</th>
+                                    </tr>
+                                    <tr template="true" class="ht32 p10_lr" style="display: none;">
+                                        <td class="border_lnone align_c p10_lr">
+                                            <input name="" type="checkbox" value="">
+                                        </td>
+                                        @*<td class="align_c p10_lr">{SysNo}</td>*@
+                                        <td class="align_l p10_lr">{BackEndName}</td>
+                                        <td class="align_l p10_lr">{Name}</td>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="according tit_con" title="SEO 设置">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone">
+                            <tr>
+                                <td width="65" class="nameright">SEO标题</td>
+                                <td>
+                                    <input id="txt_SeoTitle" name="txt_SeoTitle" dn="SeoTitle" class="{maxlength:100} wd440" type="text" />
+                                    <span id="c_txt_SeoTitle" class="prompt m10_l">SEO标题不能超过100个字符</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">SEO关键字</td>
+                                <td>
+                                    <input name="txt_SeoKeyword" id="txt_SeoKeyword" dn="SeoKeyword" class="{maxlength:150} wd440" type="text" />
+                                    <span id="c_txt_SeoKeyword" class="prompt m10_l">SEO关键字不能超过150个字符</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td valign="top" class="nameright">SEO描述</td>
+                                <td>
+                                    <textarea id="txt_SeoDescription" name="txt_SeoDescription" dn="SeoDescription" class="{maxlength:200} wd440"></textarea>
+                                    <span id="c_txt_SeoDescription" class="prompt m10_l">SEO描述字不能超过200个字符</span>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </div>
+
+                </div>
+
+                <!--提交按钮-->
+                <div class="pagination align_c clearfix" id="btn_Panel">
+                    <button id="btn_Save" class="btn btn_blue btn_ht28 wd70 bold f14 @(Hyt.Model.SystemPredefined.PrivilegeCode.PD1007201.ToString())" style="display: none;" onclick="Save()">保存</button>&nbsp;
+                    <button id="btn_cancelcreate" onclick="Cancel()" class="btn btn_ht28 bold f14 wd70" style="display: none;">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- test end -->
+</div>

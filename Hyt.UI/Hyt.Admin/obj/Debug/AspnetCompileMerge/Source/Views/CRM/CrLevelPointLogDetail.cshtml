@@ -1,0 +1,58 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Model.Transfer.CBCrLevelPointLog
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户惠源币变更详情";
+}
+<form id="form" name="form" action="">
+<body class="bodynone">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="Model.SysNo"/>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tbody>
+                  <tr>
+                      <td width="60"  class="nameright border_rnone">客户帐号:</td>
+                      <td class="border_right" colspan="3">@Model.CustomerAccount</td>
+                  </tr>
+                  @{
+                      if (Model.Increased==0)
+                      {
+                      <tr>
+                          <td width="60"  class="nameright border_rnone">减少积分:</td>
+                          <td class="border_right" colspan="3">@Model.Decreased</td>
+                      </tr>
+                      }
+                      else
+                      {
+                      <tr>
+                       <td width="60"  class="nameright border_rnone">增加积分:</td>
+                       <td class="border_right" colspan="3">@Model.Increased</td>
+                      </tr>
+                      }
+                  }
+                  <tr>
+                      <td width="60"  class="nameright border_rnone">变更类型:</td>
+                      <td class="border_right" colspan="3">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.等级积分日志变更类型), Model.ChangeType)</td>
+                  </tr>
+                  <tr>
+                      <td width="60"  class="nameright border_rnone">变更人:</td>
+                      <td class="border_right">@Model.UserName &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                      <td width="60" class="nameright border_rnone">变更时间:</td>
+                      <td>@Model.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                  </tr>
+                  <tr>
+                      <td width="20%"  class="nameright border_rnone">变更描述:</td>
+                      <td width="30%" class="border_right" colspan="3">
+                          <textarea id="answer" class="input_xlarge" rows="2" name="answer" cols="20" style="width: 320px; height: 50px;" disabled="disabled">@Model.ChangeDescription</textarea>
+                      </td>
+                  </tr>
+             </tbody>
+           </table>  
+   </div>
+  </div>  
+</div>
+</body>
+</form>

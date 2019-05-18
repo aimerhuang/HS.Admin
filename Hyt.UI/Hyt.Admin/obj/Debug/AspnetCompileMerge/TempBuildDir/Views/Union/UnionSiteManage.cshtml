@@ -1,0 +1,91 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "联盟网站管理";
+    @Html.PrivilegeControl(PrivilegeCode.UN1001201, ".UN1001201");
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Plugins/Dialog/Dialog.yui.js")"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+            //注册页面回车事件为查询操作
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+            $("#btn_search").click(function () {
+                doSearch();
+            });
+            $("#Status").change(function () {
+                doSearch();
+            });
+            $("#btnCreate").click(function () {
+                var url = "@Url.Action("UnionSiteCreate", "Union")";
+                UI.DialogOpen(url, {
+                    title: '新增联盟网站',
+                    width: 613,
+                    height: 349,
+                    init: function () {
+                        this.button({
+                            name: '确认',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                if (!iframe.document.body) {
+                                    UI.Alert('页面还没加载完毕呢');
+                                    return false;
+                                };
+                                iframe.submitUnionSite();
+                                return false;
+                            }, focus: true
+                        }, {
+                            name: "取消"
+                        });
+                    }
+                }, false);
+            });
+        });
+        function showTip(tip) {
+            UI.tips.tip_alert('tips_success', tip);
+            doSearch();
+        }
+        function doSearch() {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            var data = {};
+            var siteName = $("#SiteName_Parameter").val();
+            if (siteName && siteName != "请输入联盟网站名称...") data.SiteName = siteName;
+            data.Status = $("#Status").val();
+            $.get('@Url.Action("UnionSiteManage", "Union")', data,
+               function (ret) {
+                   $('#paging').html(ret);
+                   mask.Remove();
+               });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool clearfix">
+                    <span class="fl m10_r">状态</span>
+                    @Html.DropDownList("Status", ViewBag.Status as SelectList, htmlAttributes: new { @class = "select_ht28 wd100 m10_r fl" })
+                    <input id="SiteName_Parameter" name="SiteName_Parameter" type="text" class="input_ht28 fl m10_r" maxlength="20" value="请输入联盟网站名称..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入联盟网站名称...'" onclick="if (this.value == '请输入联盟网站名称...') this.value = ''">
+                    <button title="搜索" class="btn btn_ht28 fl btn_blue" id="btn_search"><span class="icon_search icon_white"></span><span class="m5_l">搜索</span></button>
+                </div>
+                <div class="left_tool">
+                    <button class="btn btn_ht26 btn_blue UN1001201" id="btnCreate"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增联盟网站</span></button>
+                </div>
+            </div>
+            <div class="boxs_list">
+                <div id="paging" class="boxs_listtabel">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

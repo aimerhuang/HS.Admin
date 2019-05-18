@@ -1,0 +1,239 @@
+﻿@model IList<Hyt.Model.Transfer.CBSoOrderItem>
+@{
+    ViewBag.Title = "升舱赠品";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+@section headjs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script language="javascript" type="text/javascript">
+        //加载事件
+        $(function () {
+            var initPage = function () {
+                UI.Tab({
+                    tabNavBox: '#tabboxs3',
+                    tabContentObj: "#tabcon",
+                    currentClass: "menuon_white",
+                    onActiveTab: function (index, obj) {
+
+                    }
+                });
+            };
+            initPage();
+            Setnumbercontrol();
+            $("#txtkeyword").keyup(function (event) {
+                if (event.keyCode == 13) return;
+                if ($(this).attr("keyword") != $(this).val()) {
+                    searchProduct($(this).val());
+                    $(this).attr("keyword", $(this).val())
+                }
+            });
+        });
+        function Setnumbercontrol()
+        {
+            UI.Numbercontrol({
+                numberinputselect: "input[class='number_input']",
+                minNumber: 1,
+                step: 1,
+                eventType: "click",
+                cutActiveNum: function (obj) {
+
+                },
+                addActiveNum: function (obj) {
+
+                }
+            });
+        }
+        function searchProduct(word)
+        {
+            $.getJSON('/Order/SearchMallGift', { keyword: word }, function (data) {
+                $("#tbProduct").html("");
+                $.each(data, function (i, item) {
+                    var td1 = $("<td></td>").text(item.HytProductCode);
+                    var td2 = $("<td></td>").html("<span>" + item.HytProductName + "</span>");
+                    var td3 = $("<td></td>").html('&yen;' + item.HytPrice);
+                    var td4 = $("<td></td>").html('<button class="btn btn_ht26 m10_r" id="btnRemove"><span class="m5_l">选择</span></button>');
+                    td4.bind("click", function () {
+                        AddGift(item);//添加赠品
+                    });
+                    var tr = $("<tr></tr>");
+                    tr.append(td1);
+                    tr.append(td2);
+                    tr.append(td3);
+                    tr.append(td4);
+                    if (i % 2 == 0)
+                    {
+                        tr.addClass("stag_color");
+                    }
+                    tr.appendTo($("#tbProduct"));
+                });
+            });
+        }
+        function AddGift(item)
+        {
+            if ($("#trempt")!=null)
+            {
+                $("#trempt").hide();
+            }
+            var isexists = false;
+            $("input[name='mallgift']").each(function () {
+                if (!isexists&&$(this).attr("productid") == item.HytProductSysNo)
+                {
+                    var val = Number($(this).val()) || 0;
+                    $(this).val(val + 1);
+                    isexists = true;
+                }
+            });
+            if (!isexists) {
+                var td1 = $("<td></td>").text(item.HytProductCode);
+                var td2 = $("<td></td>").html(item.HytProductName);
+                var td3 = $("<td></td>").html('&yen;' + item.HytPrice);
+                var td4 = $("<td></td>").html('<input type="text" name="mallgift" class="number_input" value="1" maxlength="5" itemid="0" erpcode="' + item.HytProductCode + '" productid="' + item.HytProductSysNo + '" productname="' + item.HytProductName + '" originalprice="' + item.HytPrice + '" digits="true" required="true" min="1"/>');
+                var td5 = $("<td></td>").html('&yen;0.00');
+                var td6 = $("<td></td>").html('<button class="btn btn_ht26" type="button" onclick="javascript: $(this).parent().parent().remove();"><span class="icon_trash"></span></button>');
+                var tr = $("<tr></tr>");
+                tr.append(td1);
+                tr.append(td2);
+                tr.append(td3);
+                tr.append(td4);
+                tr.append(td5);
+                tr.append(td6);
+                tr.appendTo($("#havelst"));
+                Setnumbercontrol();
+            }
+            UI.Prompt.Success("成功加入赠品列表!");
+        }
+        function Save(win)
+        {
+            UI.Confirm({
+                content: "确认保存修改?",
+                ok: function () {
+                    if ($("#form1").valid()) {
+                        var myitems = [];
+                        $("input[name='mallgift']").each(function () {
+                            myitems.push(
+                               {
+                                   SysNo: $(this).attr('itemid'),
+                                   ProductName: $(this).attr('productname'),
+                                   Quantity: $(this).val(),
+                                   OriginalPrice: $(this).attr('originalprice'),
+                                   ProductSysNo: $(this).attr('productid'),
+                                   GroupName: '淘宝赠品',
+                                   OrderSysNo: $("#hidOrderId").val(),
+                                   TransactionSysNo: $("#hidTransactionSysNo").val(),
+                                   ErpCode: $(this).attr("erpcode")
+                               }
+                            );
+                        });
+                        var json = JSON.stringify({ orderid: $("#hidOrderId").val(), transactionSysNo: $("#hidTransactionSysNo").val(), items: myitems });
+                        $.ajax({
+                            url: '/Order/SaveMallGift',
+                            type: 'POST',
+                            cache: false,
+                            data: json,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data.Status) {
+                                    UI.CloseDialog();
+                                    win.successandrefresh();
+                                   
+                                }
+                                else {
+                                    UI.Alert({
+                                        content: data.Message
+
+                                    });
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+
+        }
+    </script>
+}
+<div class="caseout">
+    <div class="boxs" id="tabboxs3">
+        <div class="head_tab">
+            <ul class="tabNav">
+                <li class="menuon_white"><a href="javascript:void(0);">当前赠品</a></li>
+                <li><a href="javascript:void(0);">挑选赠品</a></li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_listtabel">
+                    <form id="form1">
+                     <input type="hidden" id="hidOrderId" value="@ViewBag.OrderID" />
+                      <input type="hidden" id="hidTransactionSysNo" value="@ViewBag.TransactionSysNo" />
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                            <thead>
+                                <tr>
+                                    <th width="15%" class="p10_lr">商品编号</th>
+                                    <th width="30%" class="p10_lr">商品名称</th>
+                                    <th width="15%" class="p10_lr">原单价</th>
+                                    <th width="20%" class="p10_lr">订购数量	</th>
+                                    <th width="13%" class="p10_lr">购买总价</th>
+                                    <th width="13%" class="p10_lr">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="havelst">
+                            @if (Model == null || Model.Count < 1)
+                            {
+                                    <tr id="trempt"><td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td></tr>
+                            }
+                            else
+                            {
+                                foreach (var item in Model)
+                                {
+                                    <tr>
+                                        <td>@item.ErpCode</td>
+                                        <td>@item.ProductName</td>
+                                        <td>@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.OriginalPrice, 2))</td>
+                                        <td>
+                                            <input type="text" name="mallgift" class="number_input" value="@item.Quantity" maxlength="5" erpcode="@item.ErpCode" itemid="@item.SysNo" productid="@item.ProductSysNo" productname='@item.ProductName' originalprice="@item.OriginalPrice" digits="true" required="true" min="1" />
+                                        </td>
+                                        <td>@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.SalesAmount, 2))</td>
+                                        <td><button class="btn btn_ht26" type="button" onclick="javascript: $(this).parent().parent().remove();"><span class="icon_trash"></span></button></td>
+                                    </tr>
+                                }
+                            }
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+            <div class="list">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+                    <div class="search_btn m10_l fr">
+                        <input name="keyword" type="text" id="txtkeyword" class="input_ht28  wd200" placeholder="商品编号/商品名称">
+                        <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_listtabel">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <thead>
+                            <tr>
+                                <th width="100">商品编号</th>
+                                <th>商品名称</th>
+                                <th width="70">基础价格</th>
+                                <th width="70">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbProduct"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

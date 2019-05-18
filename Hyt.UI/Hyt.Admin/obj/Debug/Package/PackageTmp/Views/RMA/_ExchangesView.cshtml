@@ -1,0 +1,108 @@
+﻿@*换货查看公共控件*@
+@using Hyt.BLL.Product
+@model Hyt.Admin.Models.ReturnView 
+<div class="tit_con">
+  
+    @{Html.RenderAction("RmaOrderInfo", new { id = Model.OrderSysNo, rmaid=Model.SysNo });}
+</div>
+
+<div class="border_left border_right border_bottom">
+    <div class="tit_dispay m10_t border_bottom">
+        <h5>换货明细数据</h5>
+    </div>
+    @foreach (var list in Model.ReturnEditOutStore)
+    {
+        <div class="boxs_tool">
+            <div class="left_tool line30">
+                <span class=" m10_r">出库单编号:</span>@list.SysNo<span class="m10_l m10_r">出库单金额:</span><span class="red">&yen;@list.StockOutAmount.ToString("0.00")</span><span class="m10_l m10_r">出库单状态:</span><span class="red">@list.StatusName</span><span class="m10_l"></span>@list.SignTime.ToString("yyyy-MM-dd HH:mm")
+            </div>
+        </div>
+        
+        <div class="boxs_listtabel">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+                <thead>
+                    <tr>
+                        <th width="110">商品编号</th>
+                        <th>后台显示名称</th>
+                        <th width="90">商品原单价</th>
+                        <th width="70">购买数量</th>
+                        <th width="90">实际销售金额</th>
+                        <th width="70">可换数量</th>
+                        <th width="70">换货数量</th>
+                        <th width="160">换货原因</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in list.ReturnWhStockOutItemEx)
+                    {
+                        <tr>
+                            <td>@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                            <td>@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                            <td align="right" class="red p10_r">&yen;@item.OriginalPrice.ToString("0.00")</td>
+                            <td>@item.ProductQuantity</td>
+                            <td align="right" class="red p10_r">&yen;@item.RealSalesAmount.ToString("0.00")</td>
+                            <td>@item.ProductQuantityAble</td>
+                            <td>@item.RmaQuantity</td>
+                            <td>@item.RmaReason</td>
+                        </tr> 
+        }
+                </tbody>
+            </table>
+        </div>
+    }
+   <div class="tit_con">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+            <tbody>
+                <tr>
+                    <td  width="10%" class="nameright">商品入库仓库:</td>
+                    <td >@Model.WhStockInName</td>
+                </tr>
+                <tr>
+                    <td  width="10%" class="nameright">会员取件方式:</td>
+                    <td >@Model.LgPickupTypeName</td>
+                </tr>
+                <tr>
+                    <td class="nameright">取件预约时间:</td>
+                    <td >@Model.PickUpTime</td>
+                </tr>
+                <tr>
+                    <td class="nameright">取件联系人:</td>
+                    <td >@if (Model.PickUpAddress != null)
+                                    {@Model.PickUpAddress.Name}</td>
+                </tr>
+                <tr>
+                    <td class="nameright">取件联系电话:</td>
+                    <td >@if (Model.PickUpAddress != null)
+                                    {@Model.PickUpAddress.MobilePhoneNumber}</td>
+                </tr>
+                <tr>
+                    <td class="nameright">取件地址:</td>
+                    <td >@if (Model.PickUpAddress != null)
+                                    {@Model.PickUpAddressFullName}</td>
+                </tr>
+                <tr>
+                    <td class="nameright">收货联系人:</td>
+                    <td >@if (Model.SoReceiveAddress != null)
+                                    {@Model.SoReceiveAddress.Name}</td>
+                </tr>
+                <tr>
+                    <td class="nameright">收货联系电话:</td>
+                    <td >@if (Model.SoReceiveAddress != null)
+                                    {@Model.SoReceiveAddress.MobilePhoneNumber}</td>
+                </tr>
+                <tr>
+                    <td class="nameright">收货地址:</td>
+                    <td >@Model.ReceiveAddressFullName</td>
+                </tr>
+                <tr>
+                    <td class="nameright">会员备注:</td>
+                    <td >@Model.RMARemark</td>
+                </tr>
+                <tr>
+                    <td class="nameright border_bnone">对内备注:</td>
+                    <td class="border_bnone" >@Model.InternalRemark</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

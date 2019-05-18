@@ -1,0 +1,363 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.Transfer.CBFnReceiptVoucher
+@{
+    ViewBag.Title = "收款单详情";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool IsCanEdit = false;
+    if (ViewBag.IsCanEdit != null)
+    {
+        IsCanEdit = ViewBag.IsCanEdit;
+    }
+    if (ViewBag.IsView != null)
+    {
+        IsCanEdit = false;
+    }
+    @Html.PrivilegeControl(PrivilegeCode.FN1002201, ".FN1002201")
+}
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="~/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"></script>
+
+<!--以下是弹出框内容-->
+<div class="outbox6" id="JS_combox" style="display: none; width: 650px;">
+    <div class="boxs p10">
+        <div class="boxs_detail_dispay boxs_con_c1">
+            <div class="tit_con">
+                <form id="form1" name="form1" action="">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="bd_none">
+                        <tbody>
+                            <tr>
+                                <td width="80" class="nameright bd_none p10_r"><span class="v_star">*</span>支付方式</td>
+                                <td class="bd_none">
+                                    <select class="wd165" id="PaymentTypeSysNo" name="PaymentTypeSysNo" save="PaymentTypeSysNo">
+                                        <option value="0">--请选择--</option>
+                                        @foreach (var item in Hyt.BLL.Order.SoOrderBo.Instance.LoadAllPayType())
+                                        {
+                                            <option value="@item.SysNo">@item.PaymentName</option>
+                                        }
+                                    </select><span id="c_PaymentTypeSysNo" class="prompt m10_l">选择支付方式</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>支付金额</td>
+                                <td class="bd_none">
+                                    <input id="Amount" name="Amount" save="Amount" type="text" class="wd150" maxlength="10">
+                                    <span id="c_Amount" class="prompt m10_l">输入支付金额</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>交易凭证号</td>
+                                <td class="bd_none">
+                                    <input id="VoucherNo" name="VoucherNo" save="VoucherNo" type="text" class="wd150" maxlength="200">
+                                    <span id="c_VoucherNo" class="prompt m10_l">填写交易凭证号</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>交易卡号</td>
+                                <td class="bd_none">
+                                    <input id="CreditCardNumber" name="CreditCardNumber" save="CreditCardNumber" type="text" class="wd150" maxlength="200">
+                                    <span id="c_CreditCardNumber" class="prompt m10_l">填写交易卡号</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--弹出内容end-->
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>收款单</h3>
+        </div>
+        <div class="boxs_con_p10">
+            @if (IsCanEdit)
+            {
+                <div class="boxs_tool boxs_toolbgnone p0_l" style="padding: 5px 10px 10px 10px;">
+                    <div class="left_tool">
+                        <button class="btn btn_blue btn_ht26 m10_r FN1002201" onclick=" SaveDetail(); "><span class="icon icon_plus icon_white"></span><span class="m5_l">新增明细</span></button>
+                    </div>
+                </div>
+            }
+            <div class="boxs_detail_dispay">
+                <div class="head_detail border_bnone">
+                    <h5>收款单详情</h5>
+                </div>
+                <div class="tit_con">
+                    <form id="form1">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_right1">
+                            <tbody>
+                                <tr>
+                                    <td width="150" class="nameright">收款单编号：</td>
+                                    <td width="40%" class="border_right1">@Model.SysNo</td>
+                                    <td width="150" class="nameright">收款单来源编号：</td>
+                                    <td>@Model.SourceSysNo</td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">状态：</td>
+                                    <td class="border_right1">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款单状态), Model.Status)</td>
+                                    <td class="nameright">收款单来源：</td>
+                                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款来源类型), Model.Source)</td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">收入类型：</td>
+                                    <td class="border_right1">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款单收入类型), Model.IncomeType)</td>
+                                    <td class="nameright">备注：</td>
+                                    <td>@Model.Remark</td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">应收金额：</td>
+                                    <td class="border_right1">&yen;@Model.IncomeAmount.ToString("N")</td>
+                                    <td class="nameright">确认人：</td>
+                                    <td>
+                                        @if (Model.ConfirmedDate.Year != 1)
+                                        {
+                                            @Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(Model.ConfirmedBy)
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">实收金额：</td>
+                                    <td class="border_right1 red" id="totalSum">&yen;@Model.ReceivedAmount.ToString("N")</td>
+                                    <td class="nameright">确认时间：</td>
+                                    <td>
+                                        @if (Model.ConfirmedDate.Year != 1)
+                                        {
+                                            @Model.ConfirmedDate.ToString("yyyy-MM-dd HH:mm")
+                                        }
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">待收金额：</td>
+                                    <td class="border_right1 red" id="NeedTotalSum">&yen;@((Model.IncomeAmount - Model.ReceivedAmount).ToString("N"))</td>
+                                    <td class="nameright"></td>
+                                    <td></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+                <div class="head_detail m10_t">
+                    <h5>收款单明细</h5>
+                </div>
+                <div class="boxs_detail border_lnone align_c">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1">
+                        <thead>
+                            <tr>
+                                <th width="70" class="border_lnone">支付方式</th>
+                                <th width="80">金额</th>
+                                <th class="align_l p10_lr">交易凭证号</th>
+                                <th width="180">交易卡号</th>
+                                <th width="80">收款方类型</th>
+                                <th width="100">收款方编号</th>
+                                <th width="100">创建人</th>
+                                <th width="120">创建时间</th>
+                                <th width="81">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="voucherItems"></tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        @if (ViewBag.IsView == null)
+        {
+            <div class="pagination align_c clearfix boxs_con_c1 m0 border_tnone">
+                &nbsp;
+                @if (Model.Status == (int)Hyt.Model.WorkflowStatus.FinanceStatus.收款单状态.待确认)
+                {
+                    <button name="Sure" class="btn btn_blue btn_ht30 m10_r FN1002201" type="button" onclick="Sure(@Model.SysNo)">
+                        <span class="icon_ok icon_white"></span>
+                        <span>确认</span>
+                    </button>
+                }
+                else if (Model.Status == (int)Hyt.Model.WorkflowStatus.FinanceStatus.收款单状态.已确认)
+                {
+                    <button name="UnSure" class="btn btn_blue btn_ht30 m10_r disabled FN1002201" type="button">
+                        <span class="icon_ok icon_white"></span>
+                        <span>已确认</span>
+                    </button>
+                }
+            </div>
+        }
+    </div>
+</div>
+<script type="text/javascript">
+    var setting;
+    $(document).ready(function (e) {
+        //限制小数点后面数字的位数最大为两位
+        jQuery.validator.addMethod("radixPointLength", function (value, element, param) {
+            var re = /^\d+[.]?\d{1,2}$/;
+            return this.optional(element) || re.test(value) == param;
+        }, "小数点后面限制为两位");
+        LoadList();
+        LoadRule();
+        $("#PaymentType").bind("change", function () {
+            var flg = this.value == $("#hidZZ").val();
+            if (flg) {
+                $("#tbBank").css("display", "block");
+                $('#txtRefundAccountName').rules('add', {
+                    required: true
+
+                });
+                $('#txtRefundBank').rules('add', {
+                    required: true
+
+                });
+                $('#txtRefundAccount').rules('add', {
+                    required: true
+                });
+            }
+            else {
+                $("#tbBank").css("display", "none");
+                $('#txtRefundAccount').rules('remove');
+                $('#txtRefundBank').rules('remove');
+                $('#txtRefundAccountName').rules('remove');
+            }
+        });
+        $(".case").ajaxLoadingMask(true);
+    });
+    //加载明细列表
+    function LoadList() {
+        $.ajax({
+            url: '/Finance/ReceiptVoucherDetailList/@Model.SysNo',
+            type: 'POST',
+            success: function (data) {
+                $('#voucherItems').empty();
+                $('#voucherItems').html(data);
+                @if (ViewBag.IsView != null)
+                {
+                   @:$(".forbidden").addClass("disabled").attr("disabled", true);
+                                }
+            }
+        });
+    }
+    //加载验证规则
+    function LoadRule() {
+        setting = $("#form1").validate({
+            rules: {
+                Amount: {
+                    required: true,
+                    number: true,
+                    radixPointLength: true,
+                    min: 0
+                },
+                VoucherNo: {
+                    required: true
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+                $('#c_' + el.attr('id')).text(error.text());
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+            },
+            ignore: "",
+            debug: true
+        });
+    }
+    function SaveDetail() {
+        UI.DialogBox({
+            title: '新增收款单明细', content: document.getElementById('JS_combox'), padding: '0px', parent: false, drag: false,
+            button: [{
+                name: '保存',
+                callback: function () {
+                    $('#PaymentTypeSysNo').rules('add', {
+                        required: true,
+                        min: 1
+                    });
+                    //当支付方式不为现金
+                    if ($("#PaymentTypeSysNo").val() != "1") {
+                        $('#CreditCardNumber').rules('add', {
+                            required: true,
+                            number: true,
+                            min: 0
+                        });
+                    } else {
+                        $('#CreditCardNumber').rules('remove');
+                    }
+                    if (!setting.form()) {
+                        return false;
+                    }
+                    Ajax.post("/Finance/AddReceiptVoucherItem", "save", function (p) {
+                        p.setParams("ReceiptVoucherSysNo", "@Model.SysNo");
+                    }, function (ret) {
+                        if (ret.StatusCode == 0) {
+                            location.reload();
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    });
+                    return true;
+                },
+                focus: true
+            }, {
+                name: '取消'
+            }]
+        });
+    }
+    //确认收款
+    function Sure(id) {
+        UI.Confirm({
+            content: "确认已收款?",
+            ok: function () {
+                $.ajax({
+                    url: '/Finance/ConfirmReceiptVoucher/' + id,
+                    type: 'POST',
+                    success: function (ret) {
+                        if (ret.StatusCode == 0) {
+                            //$('#newPay')[0].reset();
+                            location.reload();
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    //作废收款单明细
+    function Delete(id) {
+        UI.Confirm({
+            content: "您确定要作废此收款单明细?",
+            ok: function () {
+                $.ajax({
+                    url: '/Finance/InvalidReceiptVoucherItem/' + id + "?sysNo=@Model.SysNo",
+                    type: 'POST',
+                    success: function (ret) {
+                        if (ret.StatusCode == 0) {
+                            location.reload();
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+    //取消确认
+    function UnSure(id) {
+        UI.Confirm({
+            content: "您确定要取消确认?",
+            ok: function () {
+                $.ajax({
+                    url: '/Finance/CancelConfirmReceiptVoucher/' + id,
+                    type: 'POST',
+                    success: function (ret) {
+                        if (ret.StatusCode == 0) {
+                            location.reload();
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+</script>

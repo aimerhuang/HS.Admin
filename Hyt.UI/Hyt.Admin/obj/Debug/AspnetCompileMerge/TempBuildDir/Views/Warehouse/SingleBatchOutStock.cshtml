@@ -1,0 +1,271 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model IList<Hyt.Model.CBWhStockOut>
+
+<!DOCTYPE html>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link href="~/Theme/css/base.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/frame.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/common.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/icon.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/form.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/btn.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/boxandtable.css" rel="stylesheet" type="text/css" />
+        <link href="~/Theme/css/search.css" rel="stylesheet" type="text/css" media="all"/>
+        <link href="~/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all"/>
+        <title>批量拣货出库</title>
+        <script type="text/javascript" src="~/Theme/scripts/jquery.min.js"  > </script>
+        <script type="text/javascript" src="~/Theme/scripts/tab.js" > </script>
+        <script type="text/javascript" src="~/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"> </script>
+        <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"> </script> 
+    </head>
+
+    <body>
+        <div class="search_box" id="JS_search">
+            <div class="search_title clearfix">
+                <span class="f14 bold cf fl" >高级搜索</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a>
+            </div>
+            <div class="search_body">
+                <table style="width: 100%">
+                    <tr>
+                        <td style="width: 25%" align="right">开始日期:</td>
+                        <td style="width: 75%"><input type="text" value=""/></td>
+                    </tr>
+                    <tr>
+                        <td align="right">结束日期:</td>
+                        <td><select><option>请选择</option></select></td>
+                    </tr>
+                    <tr>
+                        <td align="right">订单编号:</td>
+                        <td><input type="text" value=""/></td>
+                    </tr>
+                    <tr>
+                        <td align="right">商品编号:</td>
+                        <td><input type="text" value=""/></td>
+                    </tr>
+                    <tr>
+                        <td align="right">出库单号:</td>
+                        <td><input type="text" value=""/></td>
+                    </tr>
+                    <tr>
+                        <td align="right">省:</td>
+                        <td><select><option>请选择</option></select></td>
+                    </tr>
+                    <tr>
+                        <td align="right">市:</td>
+                        <td><select><option>请选择</option></select></td>
+                    </tr>
+                    <tr>
+                        <td align="right">区:</td>
+                        <td><select><option>请选择</option></select></td>
+                    </tr>
+                    <tr>
+                        <td align="right">仓库:</td>
+                        <td><select><option>请选择</option></select></td>
+                    </tr>
+                    <tr>
+                        <td align="right">是否开票:</td>
+                        <td><select><option>请选择</option></select></td>
+                    </tr>
+                    <tr>
+                        <td align="right">配送要求:</td>
+                        <td>
+                            <input type="checkbox" name="checkbox" id="checkbox" /> 一周之内全天可送达<br />
+                            <input type="checkbox" name="checkbox" id="checkbox" /> 周一至周五送货<br />
+                            <input type="checkbox" name="checkbox" id="checkbox" /> 双休日及公众假期送货<br />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="search_foot">
+                <button title="查询" class="btn btn_blue btn_ht30 bold">查询</button> <button title="清除" class="btn btn_ht30 bold">清除</button>
+            </div>
+        </div>
+        <div class="case">
+            <div class="boxs">
+                <div class="boxs_tit head_m"><h3>批量拣货出库</h3></div>
+                <div class="boxs_con_c1">
+                    <div class="boxs_tool">
+                        <!--/工具条-->
+                        <div>
+                            <button class="btn btn_ht26 m5_l" id="btnRefresh" onclick=" refresh() "><span class="icon icon_refresh"></span><span class="m5_l">刷新</span></button>
+                            <button class="btn btn_blue btn_ht26 m5_l" type="button" id="btnPrintPicking" onclick=" PrintPicking() "><span class="icon icon_search icon_white"></span><span class="m5_l">打印拣货单</span></button>
+                            <button class="btn btn_blue btn_ht26 m5_l" type="button" id="btnPrintPackage" onclick=" PrintWayBill() "><span class="icon icon_search icon_white"></span><span class="m5_l">打印运单</span></button>
+                            <button class="btn btn_blue btn_ht26 m5_l" type="button" id="btnPrintInvoice" onclick=" PrintInvoice() "><span class="icon icon_search icon_white"></span><span class="m5_l">打印发票</span></button>
+                            <button class="btn btn_blue btn_ht26 m5_l" type="button" id="btnOutStock" onclick=" OutStock() "><span class="icon icon_search icon_white"></span><span class="m5_l">出库</span></button>
+                        </div>
+                    </div>
+    
+  	
+                    <div class="boxs_listtabel">
+                        <!--/表格列表区-->
+                        <table id="item_list" style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 2%"></th>
+                                    <th style="width: 10%">出库单号</th>
+                                    <th style="width: 10%">订单编号</th>
+                                    <th style="width: 5%">收货人</th>
+                                    <th style="width: 5%">金额</th>
+                                    <th style="width: 10%">订购时间</th>
+                                    <th style="width: 6%">是否开票</th>
+                                    <th style="width: 6%">是否已打印拣货单</th>
+                                    <th style="width: 6%">是否已打印包裹单</th>
+                                    <th style="width: 5%">状态</th>
+                                </tr>
+                            </thead>
+          
+                            @{
+                                foreach (var master in Model)
+                                {
+                                    <tr>
+                                        <td><input name="" onclick=" selectTheSameOrder(@master.GroupId, @master.SysNo) " data-id="@master.GroupId" type="checkbox" value="@master.SysNo" /></td>
+                                        <td><a onclick=" ShowInfo(@master.SysNo) ">@master.SysNo</a></td>
+                                        <td>@master.OrderSysNO</td>
+                                        <td>@master.ReceiverName</td>
+                                        <td>@master.StockOutAmount.ToString("C")</td>
+                                        <td>@master.SoCreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                                        <td>@(master.InvoiceSysNo > 0 ? "是" : "否")</td>
+                                        <td>@((WarehouseStatus.是否已经打印拣货单) master.IsPrintedPickupCover)</td>
+                                        <td>@((WarehouseStatus.是否已经打印包裹单) master.IsPrintedPackageCover)</td>
+                                        <td>@((WarehouseStatus.出库单状态) master.Status)</td>
+                                    </tr>
+                                }
+                            }
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <script type="text/javascript">
+
+            $(function() {
+                //表格加入隔行样式
+                DAO.InterlineStyle();
+                $(":checked").attr("checked", false);
+            });
+
+            function ShowInfo(sysno) {
+                UI.DialogOpen('/Warehouse/StockOutInfo?sysno=' + sysno, { title: '出库单信息', width: 830, height: 600, resize: false }, false);
+            }
+            function selectTheSameOrder(data, sysno) {
+                var chk = $("input[value=" + sysno + "]");
+                if (chk.attr("checked") != "checked") {
+                    $(":checked").attr("checked", false);
+                    return;
+                }
+
+                $(":checkbox").each(function() {
+                    if ($(this).attr("data-id") == data) {
+                        $(this).attr("checked", true);
+                    } else {
+                        $(this).attr("checked", false);
+                    }
+                });
+            }
+
+            function showDialogBox(msg) {
+                UI.DialogBox({
+                    title: '提示',
+                    content: msg,
+                    button: [{ name: '确认' }],
+                    cancel: false,
+                    close: function() {
+                        window.location.reload();
+                    }
+                });
+            }
+
+            var checkedValues = new Array();
+
+            function check() {
+                checkedValues = [];
+                $(":checkbox").each(function() {
+                    if ($(this).attr("checked") == "checked") {
+                        checkedValues.push($(this).val());
+                    }
+                });
+                if (checkedValues.length == 0) {
+                    UI.tips.tip_alert('tips_warning', '请先选择出库单，然后再点击按钮。');
+                    return false;
+                }
+                return true;
+            }
+
+            //打印拣货单
+
+            function PrintPicking() {
+                if (check()) {
+                    $(checkedValues).each(function() {
+                        var url = '/Print/Picking/' + this;
+                        UI.DialogOpen(url, { title: '打印拣货单', time: 2, init: function() {
+                            if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                                this.iframe.contentWindow.location.reload();
+                            }
+                        } }, false);
+                    });
+                }
+            }
+
+            //打印运单
+
+            function PrintWayBill() {
+                if (check()) {
+                    $(checkedValues).each(function() {
+                        var url = '/Print/PrintWayBill/' + this;
+                        UI.DialogOpen(url, { title: '打印运单', time: 2, init: function() {
+                            if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                                this.iframe.contentWindow.location.reload();
+                            }
+                        } }, false);
+                    });
+                }
+            }
+
+            //打印发票
+
+            function PrintInvoice() {
+                if (check()) {
+                    $(checkedValues).each(function() {
+                        var url = '/Print/PrintInvoice/' + this;
+                        UI.DialogOpen(url, { title: '打印发票', time: 2, init: function() {
+                            if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                                this.iframe.contentWindow.location.reload();
+                            }
+                        } }, false);
+                    });
+                }
+            }
+
+            function OutStock() {
+                if (check()) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Warehouse/StockOutBatch/",
+                        data: { checkedStockOutSysNo: checkedValues },
+                        chche: false,
+                        success: function(ret) {
+                            if (ret.StatusCode == 0) {
+                                showDialogBox(ret.Message);
+                            } else {
+                                showDialogBox(ret.Message);
+                            }
+                        },
+                        error: function() {
+                            showDialogBox('操作出错,请稍候再试!');
+                        }
+                    });
+                }
+            }
+
+            function refresh() {
+                window.location.reload();
+            }
+        </script>
+    </body>
+</html>

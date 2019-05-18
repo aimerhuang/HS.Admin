@@ -1,0 +1,72 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Generated.SyKingdeeUser>
+<!--/表格列表区-->
+<table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th class="wd40">系统编号</th>
+            <th class="wd40">第三方</th>
+            <th class="wd40">系统账号</th>
+            <th class="wd40">系统用户名</th>
+            <th class="wd100">第三方编号</th>
+            <th width="330">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+
+            if (!Model.TData.Any())
+            {
+                <tr>
+                    <td colspan="12" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+            }
+            foreach (var item in Model.TData)
+            {
+                <tr>
+                    <td class="blue">@item.SysNo</td>
+                    <td>@(Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.Generated.第三方用户类别), item.Type))</td>
+                    <td>@item.Account</td>
+                    <td>@item.SyUserName</td>
+                    <td>@item.KingdeeUserCode</td>
+                    <td>
+                        <button onclick="add(@item.SysNo)" type="button" class="btn btn_ht26 m10_r btn_blue m10_l">
+                            <span class="icon_pencil icon_white"></span>
+                            <span>修改</span>
+                        </button>
+                        <button onclick="Cancel(@item.SysNo)" type="button" class="btn btn_ht26 m10_r btn_red m10_l"><span class="icon_forbidden m5_r icon_white"></span><span>删除</span></button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    function Cancel(sysno) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DelThirdPartyUser", "sys")",
+            data: { "SysNo": sysno },
+            chche: false,
+            success: function (ret) {
+
+                if (ret.Status) {
+                    UI.tips.tip_alert('tips_success', '操作成功。');
+                    doSearch();
+                }
+                else {
+                    UI.tips.tip_alert('tips_wrong', "操作失败");
+                    doSearch();
+                }
+            },
+            error: function () {
+                showDialogBox('操作出错,请稍候再试!');
+            }
+        });
+    }
+
+
+
+</script>

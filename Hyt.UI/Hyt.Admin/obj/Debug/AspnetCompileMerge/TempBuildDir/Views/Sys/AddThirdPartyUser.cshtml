@@ -1,0 +1,150 @@
+﻿@{
+    ViewBag.Title = "创建第三方用户关联";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@model Hyt.Model.Generated.SyKingdeeUser
+<link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+<link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+<link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+
+
+
+<form id="inputForm" name="inputForm" action="">
+    <div class="p10">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>类别:</td>
+                            <td colspan="3">
+                                <select id="Type" name="Type" style="min-width:180px;">
+                                    @(ViewBag.Status)
+                                </select>
+                                <span id="c_RoleName" class="prompt m10_l">类别</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>系统用户:</td>
+                            <td colspan="3">
+                                <select id="SyUserSysNo" name="SyUserSysNo" style="min-width:180px;">
+                                    @{
+                                        var userlist = Hyt.DataAccess.Sys.ISyKingdeeUserDao.Instance.GetSyUser();
+                                        foreach (var item1 in userlist)
+                                        {
+                                            if (Model.SyUserSysNo == item1.SysNo)
+                                            { 
+                                                <option value="@item1.SysNo" selected>@(item1.UserName)_@(item1.Account)</option> 
+                                            }
+                                            else { 
+                                                <option value="@item1.SysNo">@(item1.UserName)_@(item1.Account)</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <span id="c_RoleName" class="prompt m10_l">系统用户</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>第三方编码:</td>
+                            <td colspan="3">
+                                <input type="text" id="KingdeeUserCode" name="KingdeeUserCode" style="min-width:167px;" value="@Model.KingdeeUserCode" />
+                                <span id="c_RoleName" class="prompt m10_l">输入1-20个字符</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+@*<div class="p10" align="center">
+        <button class="btn btn_blue btn_ht26 agree m10_r " onclick="SaveOrUpdateContainer()"><span class="m5_l">保存</span></button>
+        <button class="btn btn_blue btn_ht26 agree m10_r " onclick="window.location.href = 'BaseProcumentPageList'"><span class="m5_l">返回</span></button>
+    </div>*@
+<input type="hidden" id="SysNo" name="SysNo" value="@(Model.SysNo)" />
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+<script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+<script>
+    $(function () {
+        $("#Type").val('@Model.Type');
+        $("select").select2();
+        SetLoding();
+        initDialog();
+    });
+
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+         if (!api) return;
+            // 自定义按钮
+            api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    if ($("#inputForm").valid()) {
+                        $.ajax({
+                            url: '/sys/AddThirdPartyUser',
+                            type: 'post',
+                            async: false,
+                            data: {
+                                SyUserSysNo: $("#SyUserSysNo").select2("val"),
+                                KingdeeUserCode: $("#KingdeeUserCode").val(),
+                                Type: $("#Type").select2("val"),
+                                SysNo: $("#SysNo").val()
+                            },
+                            dataType: 'json',
+                            success: function (json) {
+                                if (json.Status) {
+                                    Utils.alert(json.Message, function () {
+                                        UI.DialogOpener().doSearch();
+                                        UI.CloseDialog();
+                                    }, "succeed");
+                                }
+                                else {
+                                    UI.Alert({ content: json.Message });
+                                }
+                            }
+                        });
+                    }
+                    return false;
+                    
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+
+
+
+
+
+
+    //加载文本验证规则
+    function SetLoding() {
+        $("#inputForm").validate({
+            rules: {
+                KingdeeUserCode: {
+                    required: true,
+                    maxlength: 20
+                }
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+    }
+</script>

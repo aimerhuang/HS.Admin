@@ -1,0 +1,25 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+<h2>标准分页</h2>
+
+<form method="Get" action="@Url.Action("UrlPage")">
+    <input name="name" value="yhy" type="text" />
+    <input type="submit" value="查询" />
+</form>
+
+<div style="margin-left:150px;">
+@{
+    foreach (var item in (List<Hyt.Admin.Models.PageTest>) Model.Data)
+    {
+        <li>Name:@item.Name  -  ID:@item.ID</li>
+    }
+}
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+
+
+@Html.ActionLink("保持Url参数示例", "UrlPage", "PageTest", new RouteValueDictionary { { "id", "" }, { "Name", "yhy" }, { "Age", 12 }}, null)

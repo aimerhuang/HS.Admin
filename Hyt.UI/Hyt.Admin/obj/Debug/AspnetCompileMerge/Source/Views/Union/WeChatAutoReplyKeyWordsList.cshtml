@@ -1,0 +1,373 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBMkWeixinKeywords>
+@{
+    ViewBag.Title = "微信关键词回复管理";//微信回复关键词列表
+    @Html.PrivilegeControl(PrivilegeCode.UN1006101, "button[name=btnView]");//view
+    @Html.PrivilegeControl(PrivilegeCode.UN1005301, "button[name=btnEdit],button[name=btnEnable],button[name=btnDisable]");//update
+    @Html.PrivilegeControl(PrivilegeCode.UN1005401, "button[name=btnDel]");//delete
+}
+@section FooterJs
+{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+    
+    <script type="text/javascript">
+
+        function doFormValidation(form) {
+            /// <summary>
+            ///     form validation
+            /// </summary>
+            /// <param name="form">form Element</param>
+            //#region form validate setup
+            $(form).validate({
+                rules: {
+                    //文本内容/描述
+                    Content: {
+                        required: true,
+                        maxlength: 1000
+                    },
+                    //图片
+                    Image: {
+                        required: true,
+                        maxlength: 150
+                    },
+                    //标题
+                    Title: {
+                        required: true,
+                        maxlength: 200
+                    },
+                    //原文链接
+                    Hyperlink: {
+                        required: true,
+                        maxlength: 150
+                    }
+                },
+                messages: {
+                    //文本内容/描述
+                    Content: {
+                        required: '请输入回复内容',
+                        maxlength: '最大长度为100个字符'
+                    },
+                    //图片
+                    Image: {
+                        required: true,
+                        maxlength: '最大长度为150个字符'
+                    },
+                    //标题
+                    Title: {
+                        required: true,
+                        maxlength: '最大长度为200个字符'
+                    },
+                    //原文链接
+                    Hyperlink: {
+                        required: true,
+                        maxlength: '最大长度为150个字符'
+                    }
+                },
+                errorPlacement: function(error, el) {
+                    $(form).find('#for' + el.attr('id')).attr('class', 'error m10_l');
+                    $(form).find('#for' + el.attr('id')).text(error.text());
+                },
+                success: function(label, el) {
+                    $(form).find('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+            //#endregion
+            return $(form).valid();
+        }
+
+        //#region 新增修改
+
+        function createOrUpdate(id,mode,keyWords) {
+            /// <summary>
+            ///     create/update
+            /// </summary>
+            /// <param name="id">sysno optional</param>
+            /// <param name="mode">mode-add,edit,view</param>
+            //450
+            var width = '800px', height = '400px'; //automatic does not work
+            if (id === undefined&&mode==='add') {
+                //#region 新增
+                UI.DialogOpen('@Url.Action("CreateOrUpdateKeyWords")', {
+                    title: '新增关键词',
+                    width: width,
+                    height: height,
+                    button: [
+                        {
+                            name: '关闭',
+                            callback: function () {
+                                //refresh
+                                ajaxAction();
+                            }
+                        }
+                    ]
+                }, false);
+            }
+                //#endregion
+            else if (mode === 'view') {
+                //#region 查看
+                UI.DialogOpen('@Url.Action("CreateOrUpdateKeyWords")' + '?sysNo=' + id, {
+                                title: '查看关键词',
+                                width: width,
+                                height: height,
+                    init: function () {
+                        //set the form ini value
+                        var win = this.iframe.contentWindow,
+                            form = win.document.getElementById('formPost');
+
+                        $(form).find('#txtKeyWords').val(keyWords);
+                        $(form).find('#txtKeyWords').prop('disabled', true);
+                        $(form).find('#AgentSysNo').prop('disabled', true);
+                        $(form).find('#DealerSysNo').prop('disabled', true);
+                        $(form).find('button').hide();
+                        //$(form).find('#btnSave,#btnAddText,#btnAddMix,#btnDelMulti').hide();
+
+
+                    },
+                                button: [
+                                    {
+                                        name: '关闭',
+                                        callback: function () {
+                                            //refresh
+                                            ajaxAction();
+                                        }
+                                    }
+                                ]
+                            }, false);
+                        }
+                            //#endregion
+            else {
+                //#region 修改
+                UI.DialogOpen('@Url.Action("CreateOrUpdateKeyWords")' + '?sysNo=' + id, {
+                        title: '更新关键词',
+                        width: width,
+                        height: height,
+                        init: function () {
+                            //set the form ini value
+                            var win = this.iframe.contentWindow,
+                                form = win.document.getElementById('formPost');
+
+                            $(form).find('#txtKeyWords').val(keyWords).prop('disabled', true).attr('sysno', id);
+                            $(form).find('#AgentSysNo').prop('disabled', true);
+                            $(form).find('#DealerSysNo').prop('disabled', true);
+                            $(form).find('#btnSave').hide();
+
+                        },
+                        button: [
+                            {
+                                name: '关闭',
+                                callback: function() {
+                                    //refresh
+                                    ajaxAction();
+                                }
+                            }
+                        ]
+                    },
+                    false);
+            }
+
+            //#endregion
+        }
+
+        //#endregion
+
+        //#region  function del
+
+        function del(vals) {
+            /// <summary>
+            ///     del operation
+            /// </summary>
+            /// <param name="vals">data to post</param>
+            $.ajax({
+                url: '@Url.Action("DeleteKeyWords")',
+                type: 'post',
+                data: { arrDelSysnos: vals },
+                //async: false,//for refresh later judgement
+                success: function (data) {
+                    
+                    if (data.Status) {
+
+                        UI.tips.tip_alert('tips_success', data.Message);
+                        //setTimeout(location.reload(), 6000);
+                        ajaxAction(getFilterVals());
+                    } else {
+
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    }
+                }
+            });
+        }
+
+        //#endregion
+
+        function getFilterVals() {
+            /// <summary>
+            ///     get the filter vals
+            /// </summary>
+            /// <returns type=""></returns>
+            return {
+                KeyWords: $('#txtKeyWordsInput').val() == '请输入关键词..' ? undefined : $('#txtKeyWordsInput').val(), SelectedAgentSysNo: $("#agentSysNo").val(), SelectedDealerSysNo: $("#dealerSysNo").val()
+            };
+        }
+
+        function ajaxAction(vals, url, type) {
+            /// <summary>
+            ///     ajax function
+            /// </summary>
+            /// <param name="vals"></param>
+            /// <param name="url"></param>
+            $.ajax({
+                url: url === undefined ? '@Url.Action("WeChatAutoReplyKeyWordsList")' : url,
+                type: type === undefined ? 'get' : type,
+                //async: false,             
+                data: vals,
+                success: function(data) {
+                    $('#divSearchResult').html(data);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+
+            //#region btnAdd
+            $('#btnAdd').click(function() {
+                createOrUpdate(undefined,'add');
+            });
+            //#endregion
+
+            //#region btnDelMulti删除多个
+            $('#btnDelMulti').click(function() {
+
+                if (!$('input[type=checkbox]').is(':checked')) {
+                    UI.Alert({ content: '请至少选择一条记录!' });
+                    return;
+                }
+
+                UI.Confirm({
+                        content: '确定要删除吗?',
+                        ok: function() {
+
+                            var sysNos = [];
+                            $('input[type=checkbox]:checked').each(function() {
+                                if ($(this).attr('name') != undefined)
+                                    sysNos.push($(this).attr('name'));
+                            });
+
+                            //post to server to delete the data checked
+                            del(sysNos.join(','));
+                        }
+                    }
+                );
+
+            });
+            //#endregion
+
+
+            //#region 关键词输入查找
+            $('#txtKeyWordsInput').defaultValue("请输入关键词..");
+            $('#btnKeyWordsSearch').click(function () {
+                
+                //ajaxAction({KeyWords: $('#txtKeyWordsInput').val(),SelectedAgentSysNo: $("#agentSysNo").val(),SelectedDealerSysNo: $("#dealerSysNo").val()});
+                doSearch();
+            });
+
+            //#endregion
+
+            $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+                $("#agentSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#agentSysNo").change(function () {
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+
+            $("#dealerSysNo").change(function () {
+                doSearch();
+            });
+        });
+
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $("#dealerSysNo").html("");
+            if (DealerCreatedBy != -1) {
+                $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                    $("#dealerSysNo").append("<option value='-1'>全部</option>");
+                    $.each(data, function (idx, item) {
+                        if (item.SysNo != undefined) {
+                            $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    });
+                    doSearch();
+                });
+            } else {
+                $("#dealerSysNo").append("<option value='-1'>全部</option>");
+                doSearch();
+            }
+        }
+
+        function doSearch() {
+            ajaxAction(getFilterVals());
+        };
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!-- left tool bar-->
+                <div class="left_tool" style="float: left">
+                    <!-- single row to fix the button margin style problem -->
+                    <button class="btn btn_ht26 m5_r" type="button" title="添加规则" id="btnAdd"><span class="icon icon_plus"></span><span class="m5_l">新增</span></button><button type="button" id="btnDelMulti" class="btn btn_ht26 m5_l  m5_r"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+                    <!-- single row end -->
+                    @*<button type="button" id="btnImport" class="btn btn_ht26"><span class="m5_l">导入</span></button>*@
+                    @*<iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                            *@
+                    <!-- '/Order/Query' -->
+                           
+
+                    @*<form id="frmImport" action="@Url.Action("ImportExcel")" method="POST" enctype="multipart/form-data">
+                                <input type="file" id="txtUpload" name="txtUpload" class="hide" accept=".csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+                            </form>*@
+                </div>
+                <!-- right tool bar-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">代理商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="agentSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl">分销商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="dealerSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl">关键词</span>
+                    <div class="search_btn m10_l fl">
+                        <input id="txtKeyWordsInput" type="text" class="input_ht28" value="请输入关键词.." title="请输入关键词..">
+                        <button id="btnKeyWordsSearch" type="button" class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+
+            </div>
+      
+            <!-- 查询结果 -->
+            <div id="divSearchResult" class="boxs_listtabel">
+             
+                @{ Html.RenderPartial("pAjaxPager_WeChatAutoReplyWordsList", Model); }
+
+            </div>
+
+        </div>
+    </div>
+</div>

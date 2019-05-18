@@ -1,0 +1,66 @@
+﻿@using Hyt.BLL.Warehouse
+@using Hyt.Infrastructure.Pager;
+@using Hyt.Model;
+@model Hyt.Infrastructure.Pager.PagedList<CBLgDelivery>
+
+@{
+   var cbLgDelivery = Model.TData ?? new List<CBLgDelivery>();
+   Model.OnComplete = "tableOnload";
+}
+
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table class="border_bnone border_rnone" width="100%" border="0" cellspacing="0" cellpadding="0" >
+        <thead>
+            <tr>
+                <th style="width:53px;">
+                    <input type="checkbox" id="select_all_checkbox" /></th>
+                <th class="align_l p10_l">配送单号</th>
+                <th width="85px">配送人</th>
+                <th width="150px">仓库</th>
+                <th width="85px">创建人</th>
+                <th style="width:114px;" >创建日期</th>
+                <th width="85px">已付款单量</th>
+                <th class="wd100" >已付款金额</th>
+                <th  width="85px">货到付款单量</th>
+                <th  class="wd100">货到付款金额</th>
+                <th width="72px">状态</th>
+            </tr>
+        </thead>
+    
+        <tbody id="delivery_note_main_table">
+            @{
+                bool alter = false;
+            }
+            @foreach (Hyt.Model.CBLgDelivery item in cbLgDelivery)
+            {
+                <tr @(alter ? "" : "class = stag_color")>
+                    <td  >
+                        <input type="checkbox" name="delivery_note_box" value="@item.SysNo" usersysno="@item.DeliveryUserSysNo" whsysno="@item.StockSysNo"/></td>
+                    <td class="align_l p10_l">
+                        <a href="javascript:void(0)" style="color:#2592DB;text-decoration: underline;" name="delivery">@item.SysNo</a>
+                    </td>
+                    <td>@item.DeliveryManName</td>
+                    <td>@WhWarehouseBo.Instance.GetWarehouseName(item.StockSysNo)</td>
+                    <td>@item.CreatedName</td>
+                    <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@item.PaidNoteCount</td>
+                    <td class="red p10_r align_r">@item.PaidAmount.ToString("C")</td>
+                    <td>@item.CODNoteCount</td>
+                    <td class="red p10_r align_r">@item.CODAmount.ToString("C")</td>
+                    <td>
+                        @(((Hyt.Model.WorkflowStatus.LogisticsStatus.配送单状态)item.Status).ToString())
+                    </td>
+                </tr>
+                
+                alter = !alter;
+            }
+
+        </tbody>
+    </table>
+
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+

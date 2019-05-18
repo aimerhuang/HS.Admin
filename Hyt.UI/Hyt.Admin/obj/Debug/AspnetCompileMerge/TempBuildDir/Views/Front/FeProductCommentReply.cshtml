@@ -1,0 +1,156 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBFeProductCommentReply>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "查看回复";
+    const int audit = (int)ForeStatus.商品评论回复状态.已审;
+    const int invalid = (int)ForeStatus.商品评论回复状态.作废;
+    const int pending = (int)ForeStatus.商品评论回复状态.待审;
+    @Html.PrivilegeControl(PrivilegeCode.FE1001603, "button.FE1001603")
+    @Html.PrivilegeControl(PrivilegeCode.FE1001401, "button.FE1001401")
+}
+<style type="text/css">
+    .pagination {
+        margin-left: 0;
+    }
+</style>
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+        var audit = @audit;
+        var invalid = @invalid;
+        var pending = @pending;
+        $(function() {
+            UI.CheckAllbox(".boxs_detail", ".checkall");
+        });
+        
+        function setReplyAudit(sysNo, status) {
+            var str;
+            if (status == invalid) {
+                str = "确定要作废该评论回复吗?";
+            }
+            else if (status == audit) {
+                str = "确定要审核通过吗?";
+            } else {
+                str = "确定要取消审核吗?";
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeProductCommentReplyAudit", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchProductCommentReply();
+                        } else {
+                            UI.Alert({
+                                content: data.Message
+                            });
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function auditAll(type) {
+            var str;
+            if (type == 0) {
+                str = "确定要审核通过所选项吗?";
+            } else {
+                str = "确定要取消审核所选项吗?";
+            }
+            var s = "";
+            $("[name='chedReply']").each(function () {
+                if (($(this).attr("checked")))
+                    s += $(this).val() + ",";
+            });
+            if (s == "") {
+                UI.Alert({
+                    content: "请选择要操作的数据!"
+                });
+                return;
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.ajax({
+                        url: "/Front/FeProductCommentReplyAuditAll",
+                        cache: true,
+                        async: false,
+                        type: "post",
+                        data: { sysNos: s, type: type },
+                        dataType: "json",
+                        success: function (data) {
+                            if (data.IsLogout) {
+                                eval(data.Callback);
+                                return;
+                            }
+                            if (data.IsPass) {
+                                searchProductCommentReply();
+                            } else {
+                                UI.Alert({
+                                    content: data.Message
+                                });
+                            }
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function searchProductCommentReply() {
+            var searchStaus = $("#searchStaus").val();
+          
+            $.get('/Front/FeProductCommentReply/', { id: 1, searchStaus: searchStaus }, function (data) {
+                $('#paging').html(data);
+            });
+        }
+    </script>
+}
+<form id="feProductCommentReplyForm" name="feProductCommentReplyForm" action="">
+    <div class="caseout">
+
+        <!--工具条开始-->
+        <div class="boxs_tool boxs_toolbgnone p0">
+
+            <!--搜索开始-->
+            <div class="right_tool clearfix">
+                <span class="fl m3_t veralign_t">状态</span>
+
+                <select class="select_ht28 fl m10_l m10_r" id="searchStaus" name="searchStaus" onchange="searchProductCommentReply()">
+                    <option value="0">全部</option>
+                    @{
+                        foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                        {
+                        <option value="@dict.Key">@dict.Value</option>
+                        }
+                    }
+
+                </select>
+            </div>
+            <!--搜索结束-->
+
+
+            <!--功能按钮开始-->
+            <div class="left_tool">
+                <button class="btn btn_ht26 m10_r FE1001603" onclick="auditAll(0)" type="button"><span class="icon_audit"></span><span class="m5_l">批量审核</span></button>
+                <button class="btn btn_ht26 m10_r FE1001603" onclick="auditAll(1)" type="button"><span class="icon_cancelAudit"></span><span class="m5_l">批量取消审核</span></button>
+            </div>
+            <!--功能按钮结束-->
+
+        </div>
+        <!--工具条结束-->
+
+        <div class="boxs_detail border_lnone" id="paging">
+            @{Html.RenderPartial("_AjaxFeProductCommentReplyAll", Model); }
+        </div>
+    </div>
+</form>

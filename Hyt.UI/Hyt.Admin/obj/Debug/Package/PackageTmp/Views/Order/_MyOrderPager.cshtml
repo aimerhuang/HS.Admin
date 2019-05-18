@@ -1,0 +1,101 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBSoOrder>
+<div class="boxs_listtabel">
+    <table class="list_tit border_rnone border_bnone" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+              @* <th width="53">
+                    <input name="" type="checkbox" class="checkall" value="" /></th>*@
+                <th width="70">订单号</th>
+                <th width="">仓库</th>
+                @*<th width="7%">出库单</th>*@
+                <th width="">会员账号</th>
+                <th width="70">收货人</th>
+                <th width="100">收货电话</th>
+                <th width="105">配送方式</th>
+                <th width="70">支付方式</th>
+                <th width="">支付金额</th>
+                <th width="50">积分</th>
+                <th width="8%">来源</th>
+                <th width="110">下单时间</th>
+                <th width="70">支付状态</th>
+               <th width="70">分配人</th>
+                        @*<th width="4%">申领人</th>*@
+                <th width="70">审核人</th>
+                <th width="60">状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 1;
+                 if (!Model.TData.Any())
+                        {
+                            <tr>
+                                <td colspan="13" class="align_l p10_l bgr_eb">暂无数据。</td>
+                            </tr>
+                        }
+                 foreach (var item in Model.TData)
+                 {
+                     if (i % 2 == 0)
+                     {
+                @Html.Raw("<tr class='stag_color'>")
+                     }
+                     else
+                     {
+                @Html.Raw("<tr >")
+                     }
+                @*<td>
+                    <input name="" type="checkbox" class="checktd"  value="@item.SysNo" job="@item.JobSysNo"/></td>*@
+                <td class="blue"><a onmouseover="GetOrderLogs('@item.SysNo',this)" onmouseout="HidOrderLogs()" href="javascript:OrderBrowse(@item.SysNo);">@item.SysNo</a></td>
+                
+                <td>@item.BackWarehouseName</td>
+                @*<td width="7%">@item.WhStockOutSysNo</td>*@
+                    <td class="blue"><a href="javascript:" onclick="browseUserInfo(@item.CustomerId)">@item.CustomerAccount</a></td>
+                <td>@item.ReceiveName</td>
+                <td>@item.ReceiveTel</td>
+                <td>@item.DeliveryTypeName</td>
+                <td>@item.PaymentName</td>
+                <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.OrderAmount, 2))</td>
+                <td>@item.Point</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单来源), item.OrderSource)</td>
+                    <td >@item.CreateDate.ToString("yyyy-MM-dd  HH:mm")</td>     
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(OrderStatus.销售单支付状态), item.PayStatus)</td>
+                    <td>@item.AssignName</td>
+                    @*<td width="4%">申领人</td>*@
+                    <td>@item.AuditorName</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单状态), item.Status)</td>
+                @Html.Raw("</tr>")
+                     i++;
+                 }
+            }
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        //全选
+        $("input.checkall").click(function () {
+            var state = $(this).attr("checked");
+            if (state) { state = true; } else {
+                state = false;
+            }
+            $("input.checktd").each(function () { $(this).attr("checked", state); });
+        });
+    })
+    
+    function browseUserInfo(sysNo) {
+        UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+            title: '会员信息',
+            width: '698px',
+            height: '489px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    }
+
+</script>

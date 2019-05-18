@@ -1,0 +1,197 @@
+﻿@using Hyt.BLL.Logistics
+@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@model PagedList<CBLgSettlement>
+
+
+@{
+
+    <div id="paging" >
+        @*<div class="title30 f14">查询结果（<span class="red bold">@Model.TotalItemCount</span>条）</div>*@
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th width="53px"><input class="checkall" type="checkbox" value=""></th>
+                    <th class="align_l p10_l">结算单号</th>
+                    <th width="150px">仓库</th>
+                    <th width="85px">配送人</th>
+                    <th width="85px">创建人</th>
+                    @*<th class="wd100">应缴货款</th>*@
+                    <th class="wd100">实缴货款</th>
+                    <th width="114px">创建时间</th>
+                    <th width="59px">状态</th>
+                    <th width="79px">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                @{
+                    if (Model.TData == null)
+                    {
+                        <tr>
+                            <td colspan="20" class="align_l">&nbsp;暂无数据.</td>
+                        </tr>
+                        return;
+                    }
+
+                    var count = 1;
+
+                    foreach (var m in Model.TData)
+                    {
+                        if (count%2 == 0)
+                        {
+                            @: <tr class="stag_color">
+                        }
+                        else
+                        {
+                            @: <tr>
+                        }
+
+                        <td><input name="@m.SysNo" type="checkbox" value=""></td>
+                        <td class="align_l p10_l"><span class="blue"><a href="@Url.Action("LgSettlementDetails", new {id = m.SysNo})">@m.SysNo</a></span></td>
+                        <!-- 结算单号 -->
+                        <td>@WhWarehouseBo.Instance.GetWarehouseName(m.WareHouseSysNo)</td>
+                        <td>                            @{
+                                                            if (m.DeliveryUserSysNo != -1)
+                                                            {
+                                                                @SyUserBo.Instance.GetUserName(m.DeliveryUserSysNo)
+                                                                ;
+                                                            }
+                                                            else
+                                                            {
+                                                                @LgSettlementBo.Instance.GetDelTypeName(m.SysNo)
+                                                                ;
+                                                            }
+                                                        }</td>
+
+                        <!-- 配送人姓名 -->
+                        <td>@SyUserBo.Instance.GetUserName(m.CreatedBy)</td>
+                        <!-- 创建人姓名 -->
+                        @*<td class="align_r red "><span class="p10_r">@m.TotalAmount.ToString("C")</span></td>*@
+                        <!-- 应缴 -->
+                        <td class="align_r red "><span class="p10_r">@m.TotalAmount.ToString("C")</span></td>
+                        <!--总金额 11.18-->
+                        <!-- 实缴 -->
+                        <td>@m.CreatedDate.ToString("yyyy-MM-dd HH:mm") </td>
+                        <!-- 创建时间 -->
+                        <!-- 状态 -->
+                        <td name="@m.SysNo">
+                            @Enum.Parse(typeof (LogisticsStatus.结算单状态), m.Status + "")
+                        </td>
+                        <!-- 操作 -->
+                        <td class="align_center">
+                            <button name="print" data="@m.SysNo" class="btn btn_blue btn_ht26 m10_l m10_r"><span class="icon_print icon_white"></span><span class="m5_l">打印</span></button>
+
+                            @if (m.Status == (int) LogisticsStatus.结算单状态.作废)
+                            {
+                                <button id="@m.SysNo" name="cancel" class="btn btn_ht26 disabled hide" disabled="disabled"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                            }
+                            else
+                            {
+                                <button id="@m.SysNo" name="cancel" class="btn btn_ht26 hide"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                            }
+                                                                                                                                                                         
+                        </td>
+                        @:</tr>
+
+                        count++;
+                    }
+                }
+            
+            </tbody>
+        </table>
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+    </div>
+}  
+
+
+<script type="text/javascript">
+
+    var log;
+    $(document).ready(function() {
+        //结算单作废
+
+        //$('a[name=fnLink]').on('click',function () {
+        //    alert('test');
+        //    UI.DialogOpen($(this).attr('linkRef'),undefined,false);
+
+        //});
+
+        $('[name="cancel"]').click(function() {
+            var btn = $(this);
+            var settlementSysNo = $(this).attr('id');
+
+            var lstSettlementSysNo = [];
+            lstSettlementSysNo.push($(this).attr('id'));
+            //console.log(JSON.stringify(lstSettlementSysNo));
+            log = JSON.stringify(lstSettlementSysNo);
+
+            UI.Confirm({
+                content: '确定作废?',
+                ok: function() {
+
+                    $.ajax({
+                        url: '@Url.Action("UpdateStatus")',
+                        type: 'post',
+                        data: { lstSettlementSysNo: settlementSysNo, updateType: 'cancel' },
+                        success: function(data) {
+                            if (data.IsLogout) {
+                                eval(data.callback);
+                                return;
+                            }
+                            //Status = true, StatusCode = 0, Message = strMsgSuccess
+                            //console.log('void');
+                            //console.log(data.Status);
+                            if (data.Status) {
+                                UI.tips.tip_alert('tips_success', data.Message);
+                                //refresh the data or just set the data
+                                btn.parent().prev().text('作废');
+
+                            } else {
+
+                                if (data.Data != undefined) {
+                                    //结算单中存在关联收款单已确认,无法作废
+                                    UI.Alert({
+                                        content: data.Data.join(''),
+                                        width: '330px'
+                                    });
+                                    $('a[name=fnLink]').click(function() {
+
+                                        UI.DialogOpen($(this).attr('linkRef'), { width: '1000px', height: '550px', button: [{ name: '关闭' }] }, false);
+
+                                    });
+
+                                } else {
+                                    UI.tips.tip_alert('tips_wrong', data.Message);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            return false;
+
+
+        });
+        //btnPrint
+        $('button[name=print]').click(function() {
+            var id = $(this).attr("data");
+            var url = '@Url.Action("settlement", "Print")' + '/' + id;
+            UI.DialogOpen(url, {
+                title: '打印结算单', width: 960, height: 730, init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        this.iframe.contentWindow.location.href = url + "?isRefresh=" + Math.random();
+                    }
+                }
+            }, false);
+        });
+
+        UI.CheckAllbox(".boxs_listtabel", ".checkall");
+
+
+    });
+</script>

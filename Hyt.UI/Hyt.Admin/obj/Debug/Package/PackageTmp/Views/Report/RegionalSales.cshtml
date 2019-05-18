@@ -1,0 +1,169 @@
+﻿@using Hyt.Model.WorkflowStatus;
+@using Hyt.Model.SystemPredefined
+@using Hyt.Util;
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBRptRegionalSales>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>区域销售统计报表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <form id="form1">
+                <div class="right_tool clearfix">
+                    <div class="fl m10_l">
+                        <span class="fl m10_r">地区</span>
+                        <div class="fl m10_r" id="JS_outbox" style="margin-right: 10px;">
+                            <div class="date_btn">
+                                <input type="text" class="input_ht26" id="txtMulWh"  name="txtMulWh" readonly="readonly" />
+                                <input type="hidden" id="Area" name="Area" search="Area" />
+                                <button type="button" title="选择地区" class="btn btn_ht26" id="btnWareHouseSel">
+                                    <span class="icon_th_list"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <span class="veralign_t fl">统计月份</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn">
+                                <input type="text" id="Month" name="Month" class="input_ht26" value="@DateTime.Now.ToString("yyyy-MM")" search="Month" onclick="UI.Date({el:'Month',dateFmt:'yyyy-MM'})" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'Month',dateFmt:'yyyy-MM'})">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="searchBtn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+                    </div>
+                </div>
+                </form>
+                <!--搜索结束-->
+
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r RP1001801" id="btnExport"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div id="paging">
+                @{Html.RenderPartial("_RegionalSales", Model);}
+            </div>
+            <!--表格列结束-->
+
+        </div>
+    </div>
+</div>
+<div id="divWh" style="width: 282px; vertical-align:top; position: absolute; display: none; z-index: 1000">
+    @{
+        Html.RenderAction("AreaTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+            return false;
+        });
+        //查询列表
+        function doSearch() {
+            Utils.MaskStart($(".case"));
+            Ajax.get("/Report/RegionalSales", "search", function (p) {
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+            });
+        }
+
+        $('#btnExport').click(function () {
+            if ($('#trNodata').length > 0) {
+                UI.Alert({ content: '没有数据!' });
+                return;
+            }
+             var form = $("#form1");
+            form.attr('action', '@Url.Action("ExportRegionalSales", "Report")');
+            form.attr('method', 'post');
+            form.submit();
+            return false;
+        });
+
+        //弹出地区 
+        var options = {
+            onlyLeaftSelect: true,
+            isAll: true,
+            margin: {
+                vertical: 0,
+                horizontal: 0
+            },
+            zIndex: 5
+        };
+        $("#btnOk").click(function () {
+            var warehouses = getCheckedWarehouses(), msgRtn;
+            var nameArr= getCheckedWarehouseNames();
+            var whNames = nameArr.join();
+            var nameGroup;
+            var notSameGroup=false;
+            $.each(nameArr, function (i, obj) {
+                if (nameGroup) {
+                    if (obj.split('-').length != nameGroup) {
+                        notSameGroup = true;
+                        return;
+                    }
+                } else {
+                    nameGroup = obj.split('-').length;
+                }
+            });
+            if (notSameGroup) {
+                Utils.alert("多选地区应为同一级地区！");
+                return;
+            }
+            if (warehouses.length > 2) {
+                msgRtn = '你选择了' + warehouses.length + '个地区';
+            } else {
+                msgRtn = whNames;
+            }
+            $('#txtMulWh').val(msgRtn);
+            $('#Area').val(whNames);
+            $("#divWh").hide();
+        });
+
+        $("#btnCancel").click(function () {
+            $("#divWh").hide();
+        });
+
+
+        $('#txtMulWh,#btnWareHouseSel').bind('click', function (e) {
+
+            var position = $('#txtMulWh').offset();
+            $("#divWh").css({ top: position.top + 25, left: position.left }).show();
+            e.stopPropagation();
+
+        });
+    });
+</script>
+
+
+

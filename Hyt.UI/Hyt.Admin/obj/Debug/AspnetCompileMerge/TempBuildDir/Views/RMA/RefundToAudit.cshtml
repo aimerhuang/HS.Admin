@@ -1,0 +1,113 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    string auditUrl = "/RMA/AuditRefundReturn";
+    string loacationUrl = "/RMA/RefundEditList/";
+    //bool isShop = false;
+    //if (Request.QueryString["from"] != null && Request.QueryString["from"] == "shop")
+    //{
+    //    isShop = true;
+    //    auditUrl += "?from=shop";
+    //    loacationUrl = "/RMA/ShopRmaEditList";
+    //}
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/scripts/selectcontrol.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/RMA/rma.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //保存
+            $("#btnSave").click(function () {
+                saveReturn("/RMA/SaveRefundReturn", "@loacationUrl", true);
+            });
+
+            //审核
+            $("#btnAudit").click(function () {
+                UI.Confirm({
+                    content: "确定要审核该退货单吗?",
+                    ok: function () {
+                        saveReturn("@auditUrl", "@loacationUrl", true);
+                    },
+                    cancel: function () {
+                    }
+                });
+            });
+            //作废
+            $("#btnAbandon").click(function () {
+                UI.Confirm({
+                    content: "确定要作废该退款单吗?",
+                    ok: function () {
+                        $.ajax({
+                            url: '/RMA/CancelRefundReturn?sysNo=@ViewBag.SysNo',
+                            type: 'POST',
+                            success: function (ret) {
+                                if (ret.StatusCode == 0) {
+                                    UI.CloseTab(null, "@loacationUrl");
+                                    Utils.alert("提交成功！", null, "succeed");
+                                } else {
+                                    Utils.alert(ret.Message);
+                                }
+                            }
+                        });
+                    },
+                    cancel: function () {
+                    }
+                });
+            });
+            $("#bd").ajaxLoadingMask();
+        });
+    </script>
+}
+<div class="boxs_detail_dispay border_none p10 bg_f5" id="bd">
+    <div class="boxs_tool border_right border_top border_left">
+        <div class="left_tool">
+            @if (ViewBag.Status != 0 && ViewBag.Status != (int)Hyt.Model.WorkflowStatus.RmaStatus.退款状态.待审核)
+            {
+                string prompt = "";
+                if (ViewBag.Status == (int)Hyt.Model.WorkflowStatus.RmaStatus.退款状态.待退款)
+                {
+                    prompt = "提示消息：该退货单的付款单正在处理，跳转到处理页面？【<a href='/Finance/PaymentDetail/" + ViewBag.payment + "'><span class='blue'>跳转</span></a>】";
+                }
+                else if (ViewBag.Status == (int)Hyt.Model.WorkflowStatus.RmaStatus.退款状态.已完成)
+                {
+                    prompt = "提示消息：该退货单已处理";
+                }
+                else if (ViewBag.Status == (int)Hyt.Model.WorkflowStatus.RmaStatus.退款状态.作废)
+                {
+                    prompt = "提示消息：该退货单已作废";
+                }
+                <div @if (!string.IsNullOrWhiteSpace(prompt)) { @: style="margin-bottom:10px;"
+                                                           }
+                     class="red_bg">
+                    <ul>
+                        <li>
+                            @MvcHtmlString.Create(prompt)
+                        </li>
+                    </ul>
+                </div>
+            }
+            else
+            {
+                if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.RC1005101))
+                {<button class="btn btn_blue btn_ht26 m10_r " id="btnSave"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>
+                }
+                if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.RC1005101))
+                {<button class="btn btn_blue btn_ht26 m10_r" id="btnAudit"><span class="icon_audit icon_white"></span><span class="m5_l">审核通过</span></button>
+                }
+                if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.RC1005101))
+                {<button class="btn btn_red btn_ht26 m10_r RC1002201" id="btnAbandon"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                }
+            }
+        </div>
+    </div>
+    <div class="tit_dispay  border_left border_right">
+        <h5>退款订单信息</h5>
+    </div>
+    @{Html.RenderAction("RefundEditAudit", new { id = ViewBag.SysNo });}
+</div>

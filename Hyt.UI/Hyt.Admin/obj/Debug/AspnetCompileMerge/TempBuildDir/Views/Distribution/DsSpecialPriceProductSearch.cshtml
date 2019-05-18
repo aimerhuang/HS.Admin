@@ -1,0 +1,100 @@
+﻿<script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"> </script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+
+<!--弹出选择商品-->
+
+<div class="caseout">
+    <div class="boxs" id="tabboxs3">
+        <div class="boxs_con_c1" id="tabcon">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">快速查询</span>
+                    <input id="txtProductAddSysNo" type="text" class="input_ht28 m10_l fl" value="商品编号..." />
+                    <div class="search_btn m10_l fl">
+                        <input id="txtProductAddName" type="text" class="input_ht28" value="商品名称..." />
+                        <button id="search_btn" class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+            </div>
+            <!--工具条结束-->
+            <div class="boxs_listtabel">
+                <div id="paging"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //搜索框默认提示
+        $("#txtProductAddSysNo").defaultValue("商品编号...");
+        $("#txtProductAddName").defaultValue("商品名称...");
+
+        productSearch();
+    });
+    $("#search_btn").click(function () {
+        productSearch();
+    });
+    $("#txtProductAddSysNo").keydown(function (e) {
+        var keycode = e.which;
+        if (keycode != 13) {
+            return;
+        }
+        productSearch();
+    });
+    $("#txtProductAddName").keydown(function (e) {
+        var keycode = e.which;
+        if (keycode != 13) {
+            return;
+        }
+        productSearch();
+    });
+    function productSearch() {
+        var sysno = $('#txtProductAddSysNo').val();
+        if (isNaN(sysno) && sysno != "商品编号...") {
+            $("#txtProductAddSysNo").val('');
+            return;
+        }
+        var name = $("#txtProductAddName").val();
+        Ajax.get('@Url.Action("DsSpecialPriceProductList")', "Search", function (p) {
+            if (sysno && sysno != "商品编号...") {
+                p.setParams("SysNo", sysno);
+            }
+            if (name && name != "商品名称...") {
+                p.setParams("ProductName", name);
+            }
+        }, function (data) {
+            $("#paging").html(data);
+        });
+    }
+
+    function productSelect() {
+        var productSysNo;
+        var productName;
+        var productCategory;
+        var productType;
+        var productImage;
+        var productPrice;
+        var returnValue = '';
+
+        $('#tr_list tr').each(function (trindex) {
+            if ($("#tr_list tr:eq(" + trindex + ") :radio").attr("checked") == "checked") {
+
+                productSysNo = $("#tr_list tr:eq(" + trindex + ") td:eq(1)").html();
+                if (isNaN(productSysNo)) {
+                    UI.tips.tip_alert('tips_warning', '请选择一个商品。');
+                }
+                productName = $("#tr_list tr:eq(" + trindex + ") td:eq(3)").html();
+                productCategory = $("#tr_list tr:eq(" + trindex + ") td:eq(4)").html();
+                productType = $("#tr_list tr:eq(" + trindex + ") td:eq(5)").html();
+                productPrice = $("#tr_list tr:eq(" + trindex + ") td:eq(6)").html();
+                productImage = $("#tr_list tr:eq(" + trindex + ") td:eq(7)").html();
+                returnValue = productSysNo + ',' + productName + ',' + productCategory + ',' + productType + ',' + productPrice + ',' + productImage;
+            }
+        });
+        return returnValue;
+    }
+</script>

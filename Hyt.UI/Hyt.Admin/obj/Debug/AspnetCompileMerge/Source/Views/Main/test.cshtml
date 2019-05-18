@@ -1,0 +1,329 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "test";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" type="text/css" media="all"/>
+    <style>
+        .according_dao, .according {
+            padding: 40px;
+            border: solid 1px gray;
+        }
+    </style>
+}
+
+@section HeadJs{
+
+
+}
+<script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js"></script>
+<script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+@{
+    Html.RenderAction("WarehouseTree", "Basic", new { keyword = string.Empty });
+}
+<fieldset style="width: 45%; float: right; margin: 10px;">
+    <legend>JS 插件</legend>
+    <div class="boxs_detail_dispay">
+        <div class="according tit_con" title="表格测试（黄波）">
+            <button onclick="DAO.SelectAttributeTest();">选择商品基础属性</button>
+        </div>
+        <div class="according tit_con" title="模式对话框、Alert和Confirm">
+            <button onclick="UI.Alert({content:'取消操作成功取消操作成功作成功!',callback:function(){},width:'200px'})">弹出提示</button>
+            <button onclick="UI.Confirm({content:'取消操作成功取消操作成功作成功!',ok:function(){alert('ok')},cancel:function(){alert('cancel')},width:'200px'})">弹出确认</button>
+        </div>
+        <div class="according tit_con" title="设置table 选择(checkbox) 插件">
+            <button id="mySelectTr" onclick="alert(tableCheckboxSelector.GetCheckboxSelectedItem().length)">我选择的TR</button>
+            <table id="attributeTalbe" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+                <thead>
+                    <tr class="ht32">
+                        <th class="border_lnone border_rnone" width="80">
+                            <input name="" class="checkall" type="checkbox" value="">
+                        </th>
+                        <th width="80">属性组编号</th>
+                        <th>属性组名称</th>
+                        <th width="160">页面展示名称</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="ht32">
+                        <td class="border_lnone align_c">
+                            <input name="" type="checkbox" value="">
+                        </td>
+                        <td class="align_c">100001</td>
+                        <td class="align_l">IPhone外壳基础属性基础属性</td>
+                        <td class="align_c">基本属性</td>
+
+                    </tr>
+                    <tr class="ht32">
+                        <td class="border_lnone align_c">
+                            <input name="" type="checkbox" value="">
+                        </td>
+                        <td class="align_c">100002</td>
+                        <td class="align_l">IPhone外壳技术参数</td>
+                        <td class="align_c">技术参数</td>
+                    </tr>
+                </tbody>
+            </table>
+            <script type="text/javascript">
+                var tableCheckboxSelector = UI.CheckAllbox("#attributeTalbe", ".checkall");
+            </script>
+        </div>
+        <div class="according tit_con" title="JsonBind插件绑值取值">
+            数据源：
+        <textarea id="jsonbind_data">{username:"您猜",pwd:"123"}</textarea><br />
+            表单：
+        <div id="jsonbindDiv">
+            用户名称：<input dn="username" type="text" value="请填写用户名" />
+            密码：<input dn="pwd" type="text" value="请填写密码" />
+            <input id="btn_jsonbind_bind" type="button" value="绑值" />
+            <input id="btn_jsonbind_get" type="button" value="取值" />
+            <input id="btn_jsonbind_clear" type="button" value="清空" />
+        </div>
+            <script>
+
+                $(function () {
+                    $("#btn_jsonbind_bind").click(function () {
+                        var json;
+                        eval("json =" + $("#jsonbind_data").val() + ";");
+                        $('#jsonbindDiv').JsonBind(json);
+                    });
+
+                    $("#btn_jsonbind_get").click(function () {
+                        var json = $('#jsonbindDiv').JsonBind();
+                        alert("username:" + json.username + "       " + "pwd:" + json.pwd);
+                    });
+                    $("#btn_jsonbind_clear").click(function () {
+                        $('#jsonbindDiv').JsonBind(null);
+                    });
+
+
+                });
+            </script>
+        </div>
+        <div class="according tit_con" title="Mask组件">
+            <div id="asd" style="width: 200px; height: 200px; overflow: scroll;">123123</div>
+            <div id="asdf" style="width: 200px; height: 200px;">123123</div>
+            <button onclick="b.Remove();">关闭遮罩</button>
+            <script type="text/javascript">
+                var a = UI.Mask({ obj: $('#asd'), opacity: 0.2 });
+                var b = UI.Mask({ obj: $('#asdf'), opacity: 0.2 });
+            </script>
+        </div>
+        <div class="according tit_con" title="文件上传">
+            <button onclick="DAO.Upload({config:'@(Hyt.Model.SystemPredefined.UploadConfigAlias.ProductImageConfigAlias)',callback:function(data){alert(data[0].url); },cancel:function(){alert('')}})">上传文件</button>
+        </div>
+        <div class="according tit_con" title="AJAX局部操作提示">
+            <button id="runing" onclick="UI.Prompt.Runing('数据处理中！');">Runing</button>
+            <button onclick="UI.Prompt.Success('删除成功！');">Success</button>
+            <button onclick="UI.Prompt.Error('删除失败,远端主机无响应！');">Error</button>
+        </div>
+    </div>
+</fieldset>
+<fieldset style="width: 45%; float: left; margin: 10px;">
+    <legend>DAO 项目组件</legend>
+    <div class="boxs_detail_dispay">
+        <div class="according_dao tit_con" title="选择商品描述模板">
+            <button onclick="DAO.SelectPdTemplate(function(data){  alert(data.content); });">选择商品描述模板</button>
+        </div>
+        <div class="according_dao tit_con" title="跳转到补单页面">
+            <button onclick="window.location.href='@Url.Action("AdditionalOrders", "Logistics")'">跳转到补单页面</button>
+        </div>
+        <div class="according_dao tit_con" title="选择品牌">
+            <button onclick="DAO.SelectBrand({ callBack: function (data) { alert(data.sysno + '/'+data.name); } });">选择品牌</button>
+        </div>
+        <div class="according_dao tit_con" title="选择商品">
+            <button onclick="DAO.SelectProduct({selectedProducts:[1,2,3],onselect:function(a){alert(a[0].name); }})">选择商品</button>
+        </div>
+        <div class="according_dao tit_con" title="选择分销商">
+            <button onclick="DAO.SelectDsDealer({pdSysNo:1,callBack:function(a){alert(a);} })">选择分销商</button>
+        </div>
+        <div class="according_dao tit_con" title="选择取件单">
+            <button onclick="DAO.SelectPickUp({whSysNo:1078,sysNoFilter:[2,9],callBack:function(a){alert(a);} })">选择取件单</button>
+        </div>
+
+        <div class="according_dao tit_con" title="选择配送方式">
+            <button onclick="DAO.SelectDeliveryType({WareHouseSysNo:1078,sysNoFilter:[2,3,4],callBack:function(a){console.log(a);} })">选择配送方式</button>
+        </div>
+        <div class="according_dao tit_con" title="选择出库单">
+            <button onclick="DAO.SelectOutStocks({WarehouseSysNo:1078,DeliveryTypeSysNo:1,SysNoFilter:'',callBack:function(a){console.log(a);} })">选择出库单</button>
+        </div>
+        <div class="according_dao tit_con" title="选择仓库">
+            <button onclick="DAO.SelectWhareHouseDialog({chkStyle:'checkbox',callBack:function(a){console.log(a);} })">选择仓库</button>
+        </div>
+        <div class="according_dao tit_con" id="JS_outbox" title="选择地区">
+            <input id="txt_aprentArea" name="txt_aprentArea" type="text" value="选择地区" class="input_ht28 wd150 fl" name="" readonly="readonly" />
+            <button title="选择地区" class="btn btn_ht28 fl" style="left: 123px;" id="btn_selectCategory">
+                <span class="icon_th_list"></span>
+            </button>
+        </div>
+
+
+
+
+
+        <div class="according_dao tit_con" title="登录窗口">
+            <button onclick="DAO.LoginBox({})">登录窗口</button>
+        </div>
+        <div class="according_dao tit_con" title="选择仓库组件">
+            <div id="div_wharehouse">
+                <input type="checkbox" id="is_single_wharehouse" />是否是单选
+                <button onclick="SelectWhareHouse()" type="button" id="wharehouse_btn">选择仓库</button>
+                <select id="warehouse_sysno" name="warehouse_sysno" style="width: 200px;">
+                </select>
+            </div>
+
+            <script type="text/javascript">
+
+                function SelectWhareHouse() {
+                    var btn = $("#wharehouse_btn");
+                    var style;
+                    if ($("#is_single_wharehouse").attr("checked") == "checked") {
+                        style = 'radio';
+                    } else {
+                        style = 'checkbox';
+                    }
+
+                    var obj = DAO.SelectWhareHouse(btn, {
+                        chkStyle: style,
+                        callback: function (data) {
+                            var select = $('#warehouse_sysno');
+                            $(select).html('');
+                            for (var i = 0; i < data.length; i++) {
+                                $(select).append("<option value='" + data[i].id + "'>" + data[i].name + "</option>");
+                            }
+                            //移除弹出层
+                            obj.Remove();
+                        }
+                    });
+                }
+            </script>
+        </div>
+        <div class="according_dao tit_con" title="商品分类选择组件">
+            <input type="checkbox" id="selectProductCategoryIsMulti" />多选
+            <button onclick="bindCategorySelector()">选择商品分类</button>
+            <div id="divCategory" style="display: none;">
+                <input type="text" name="" class="input_xlarge" id="productCategory">
+                <button class="btn btn_ht26" id="selectProductCategory"><span class=" icon_list"></span></button>
+            </div>
+            <script type="text/javascript">
+
+                function bindCategorySelector() {
+                    //弹出商品类别 
+                    //2013-06-26 邵斌 修改：调用真实数据
+                    var options = {
+                        margin: {
+                            vertical: 14,
+                            horizontal: -14
+                        },
+                        isMulti: ($("#selectProductCategoryIsMulti").attr("checked") == "checked"),
+                        zIndex: 5,
+                        callBack: function (data) {
+                            alert(data[0].FullName);
+                        }
+                    }
+                    DAO.SelectProductCategory($("#selectProductCategory"), $("#productCategory"), options);
+                    $("#divCategory").show();
+                }
+
+            </script>
+        </div>
+        <div class="according_dao tit_con" title="商品调价申请组件">
+            商品ID URL参数<input type="text" name="" class="input_xlarge" id="productList" value="1,2" />参数接收数组参数<br />
+            商品价格来源<input type="text" name="" class="input_xlarge" id="priceSourceType" value="0,10" />基础价格 = 0, 会员等级价 = 10, 分销商等级价 = 40, 配送员进货价 = 70<br />
+            <button onclick="bindPriceAdjustmentRequest()">商品调价组件</button>
+
+            <script type="text/javascript">
+
+                function bindPriceAdjustmentRequest() {
+                    DAO.PriceAdjustmentRequest({
+                        productSysNoList: $("#productList").val().split(","),
+                        priceType: $("#priceSourceType").val().split(","),
+                        success: function () {
+                            UI.tips.tip_alert("tips_warning", "保存成功！");
+                        }
+                    });
+                }
+
+            </script>
+        </div>
+        <div class="according_dao tit_con" title="选择商品基础属性">
+            <button onclick="DAO.SelectAttribute({arrAttributeIds:[274,271,278,279] , callBack:function(data){  alert(JSON.stringify(data)); }});">选择商品基础属性</button>
+        </div>
+        <div class="according_dao tit_con" title="选择商品属性组">
+            <button onclick="DAO.SelectAttributeGroup({arrAttributeGroupIds:[23,25] , callBack:function(data){  alert(JSON.stringify(data)); }});">选择商品属性组</button>
+        </div>
+        <div class="according_dao tit_con" title="订单选择">
+            <input type="text" class="wd150 m10_r" id="txtOrderSysNo" name="txtOrderSysNo">
+            <button onclick="pickOrder()">订单选择</button>
+            <script>
+
+                function pickOrder() {
+
+                    //DAO.SelectPromotionRule(function (rule) {
+                    //    alert(rule.name);
+                    //});
+                }
+            </script>
+        </div>
+
+        <div class="according_dao tit_con" title="选择促销">
+            <button onclick="DAO.SelectPromotion({promotionType:0,multiple:true,callBack:function(a){console.log(a);} })">选择促销</button>
+        </div>
+
+        <div class="according_dao tit_con" title="选择促销规则">
+            <button onclick="pickPromotion()">选择促销规则</button>
+            <script>
+                function pickPromotion() {
+                    DAO.SelectPromotionRule(function (rule) {
+                        alert(rule.sysNo + ":  " + rule.name + " >>>>> " + rule.description);
+                    });
+                }
+            </script>
+        </div>
+
+    </div>
+</fieldset>
+
+<fieldset style="width: 45%; float: right; margin: 10px;">
+    <!-- used for test -huangwei  -->
+    <legend>Views</legend>
+    <div title="呼叫中心" class="boxs_detail_dispay">
+        <div title="呼叫中心-客户信息" class="according_dao tit_con">
+            @Html.ActionLink("呼叫中心-客户信息", "Index", "CallCenter", null, new { id = "linkCallCenter" })
+        </div>
+    </div>
+
+</fieldset>
+
+<script>
+    $(".according").Accordion({ collapsible: true });
+    $(".according_dao").Accordion({ collapsible: true });
+    $(document).ready(function () {
+        //used for test -huangwei
+        /*
+        'phone=18965017897&sso_auth=79d9cfc395bb99f05dad903eb8b55366&sso_data=%257B%2522clgNumber%2522%253A%25228001%2522%252C%2522company%2522%253A%2522pskj%2522%252C%2522crmaccount%2522%253Anull%252C%2522crmpwd%2522%253Anull%252C%2522groupid%2522%253A%25221%2522%252C%2522name%2522%253A%25228011%2522%252C%2522operatorid%2522%253A%25228011%2522%252C%2522password%2522%253A%25228011%2522%252C%2522ts%2522%253A%25221376040781%2522%257D'
+        */
+        var vals = {
+            phone: '13683459249',
+            sso_auth: '8475b4ac93a5cd4000a25c6fa5a75208',
+            sso_data: { operatorId: 1, name: 'admin' }
+        };
+
+        $('#linkCallCenter').attr('href', $('#linkCallCenter').attr('href') + '?phone=18965017897&sso_auth=79d9cfc395bb99f05dad903eb8b55366&sso_data=%257B%2522clgNumber%2522%253A%25228010%2522%252C%2522company%2522%253A%2522pskj%2522%252C%2522crmaccount%2522%253Anull%252C%2522crmpwd%2522%253Anull%252C%2522groupid%2522%253A%25221%2522%252C%2522name%2522%253A%25228017%2522%252C%2522operatorid%2522%253A%25228017%2522%252C%2522password%2522%253A%25228017%2522%252C%2522ts%2522%253A%25221376361153%2522%257D&callrecid=00018629416751546&calloutid=0&area=%E7%A6%8F%E5%BB%BA%E7%9C%81%E7%A6%8F%E5%B7%9E%E5%B8%82&accnum=888888&ivrnode=1&websid= 7777');
+        //$('#linkCallCenter').attr('href', $('#linkCallCenter').attr('href') + '?para=' + JSON.stringify(vals));
+    });
+
+    //弹出地区 
+    var options = {
+        onlyLeaftSelect: true,
+        isAll: true,
+        margin: {
+            vertical: 0,
+            horizontal: 0
+        },
+        zIndex: 5
+    };
+    DAO.SelectArea($("#JS_outbox"), $("#txt_aprentArea"), options);
+</script>
+

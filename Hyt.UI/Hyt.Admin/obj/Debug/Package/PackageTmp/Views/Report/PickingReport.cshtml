@@ -1,0 +1,53 @@
+﻿@model List<System.IO.FileInfo>
+@{
+    ViewBag.Title = "配送单报表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    int row = 0;
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"></span>
+            <h3>配送单报表</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <div class="boxs_listtabel">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                    <thead>
+                        <tr>
+                            <th align="left" class="p10_l">名称</th>
+                            <th align="left" class="p10_l">大小</th>
+                            <th width="220">创建时间</th>
+                            <th width="85">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="align_l p10_l bgr_eb ">暂无数据。</td>
+                            </tr>
+                        }
+                        @foreach (var item in Model)
+                        {
+                            row++;
+                            <tr @{if (row % 2 == 0)
+                                  {<text>class='stag_color'</text>}}>
+                                <td align="left" class="p10_l"><a href="@Url.Action("DownloadPickingReport", new { filename = item.Name })"  target="_blank">@item.Name</a></td>
+                                <td align="left" class="p10_l">@(item.Length / 1024 / 1024) M</td>
+                                <td>@item.LastWriteTime.ToString("yyyy-MM-dd HH:mm")</td>
+                                <td>
+                                    <button class="btn btn_ht26" onclick="javascript:window.location.href='@Url.Action("DownloadPickingReport", new { filename = item.Name })';"><span class="icon_outtoStore"></span><span class="m5_l">下载</span></button></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

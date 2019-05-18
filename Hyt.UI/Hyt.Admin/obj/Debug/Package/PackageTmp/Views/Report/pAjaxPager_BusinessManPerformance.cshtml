@@ -1,0 +1,81 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.RP_绩效_业务员>
+
+@{
+    Model.OnBegin = "setWhData";
+    <style type="text/css">
+        td { word-break: break-all; }
+    </style>
+
+    <div id="paging"><!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th rowspan="2" width="72px">姓名</th>
+                    <th rowspan="2">仓库</th>
+                    <th colspan="2" class="wd200 border_bnone">配送次数</th>
+                    <th colspan="2" class="wd200 border_bnone">配送单量</th>
+                    <th colspan="2" class="wd100 border_bnone">配送金额</th>
+                    <th rowspan="2" class="wd100 ">自销金额</th>
+                </tr>
+                <tr>
+                    <th class="wd100">白班</th>
+                    <th class="wd100">夜班</th>
+                    <th class="wd100">白班</th>
+                    <th class="wd100">夜班</th>
+                    @*<th class="wd100">升舱</th>*@
+                    <th class="wd100">商城</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                @{
+                    if (Model.TData == null || !Model.TData.Any())
+                    {
+                        <tr id='trNodata'>
+                            <td colspan="99" class="align_l">&nbsp;暂无数据.</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        var count = 1;
+
+                        foreach (var m in Model.TData)
+                        {
+                            if (count%2 == 0)
+                            {
+                                @: <tr class="stag_color">
+                            }
+                            else
+                            {
+                                @: <tr>
+                            }
+
+                            <td >@m.姓名</td>
+                            <td >@m.仓库</td>
+                            <td class="p10_r">@m.配送次数_白班</td>
+                            <td class="p10_r">@m.配送次数_夜班</td>
+                            <td class="p10_r">@m.配送单量_白班</td>
+                            <td class="p10_r">@m.配送单量_夜班</td>
+                            @*<td class="red align_r p10_r">@m.配送金额_升舱.ToString("C")</td>*@
+                            <td class="red align_r p10_r">@m.配送金额_商城.ToString("C")</td>
+                            <td class="red align_r p10_r">@m.自销金额.ToString("C")</td>
+
+                            @:</tr>
+
+                            count++;
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+        <!-- end content -->
+        
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+            -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+}

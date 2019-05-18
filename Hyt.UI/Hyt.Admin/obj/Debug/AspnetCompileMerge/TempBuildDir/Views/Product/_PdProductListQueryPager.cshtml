@@ -1,0 +1,51 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@model PagedList<PdProduct>
+
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="80">选择</th>
+                <th width="78">系统编号</th>
+                <th style="text-align:left;">后台显示名称</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<PdProduct>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td width="30px">
+                    <input name="sysNo" type="radio" value="@item.SysNo" />
+                </td>
+                <td>@item.SysNo</td>
+                <td style="text-align:left;">@item.ProductName</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+
+        </table>
+    </div>
+    @{Html.RenderPartial("_UrlPaging", Model); }

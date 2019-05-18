@@ -1,0 +1,79 @@
+﻿@using Hyt.Admin.Controllers;
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "公共文本选择";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="caseout">
+    <div class="boxs">
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+           @* <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="StatusList" search="Status">
+                            <option>全部</option>
+                        </select>
+                    </div>
+                                       <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="StatusList" search="Status">
+                            <option>全部</option>
+                            @LoadSyUserStatus()
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">用户组</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="GroupSysNoList" search="GroupSysNo">
+                            <option>全部</option>
+                            @LoadSyUserGroup()
+                        </select>
+                    </div>
+                    <div class="search_btn wd200 m10_l fl">
+                        <button class="btn btn_ht28 wd28 " title="搜索" id="searchBtn"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+            </div>*@
+            <!--工具条结束-->
+
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    //页面刷新
+    function Refresh(msg) {
+        doSearch();
+    }
+
+    //高级搜索
+    $(document).ready(function () {
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+        doSearch();
+    });
+    //查询列表
+    function doSearch() {
+        Ajax.get("@ViewBag.DataUrl", "Search", function (p) {
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+    function doSelect(bsText) {
+        UI.DialogOpener()._ActiveSelectBsText(bsText);
+        UI.CloseDialog();
+    }
+</script>

@@ -1,0 +1,188 @@
+﻿@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+
+}
+@using Hyt.BLL.Authentication;
+@using Hyt.Model.Transfer;
+@using Hyt.Model;
+<style type="text/css">
+    a:hover {
+        text-decoration: underline;
+    }
+</style>
+<!-- 商品主信息维护 -->
+
+<div class="boxs_detail_dispay" id="div_productGjMainInof">
+    <div class="tit_con">
+        <form name="tab_GjPdProduct" id="tab_GjPdProduct" onsubmit="return false;">
+
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                <tbody>
+                    <tr>
+                        <td width="150" class="nameright">商品编号</td>
+                        <td>
+                            <span>
+                                @if (ViewBag.ProductSysNo != null)
+                                {
+                                    @ViewBag.ProductSysNo
+                                }
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>税号</td>
+                        <td>
+                            <input tabindex="1" dn="goods_ptcode" id="txt_goods_ptcode" name="txt_goods_ptcode" class="{required:true,maxlength:30,messages:{required:'请填写税号',maxlength:'税号只能由1-50个字符组成'}} wd400 m10_r" type="text" maxlength="50" />
+                            <span id="txt_goods_ptcode_error" class="c9" msg="请填写税号"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>物品名称</td>
+                        <td>
+                            <input tabindex="2" dn="goods_name" id="txt_goods_name" name="txt_goods_name" class="{required:true,maxlength:100,messages:{required:'请填写物品名称',maxlength:'物品名称只能由1-100个字符组成'}} wd400 m10_r" type="text" maxlength="100" />
+                            <span id="txt_goods_name_error" class="c9" msg="请填写物品名称"></span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>品牌</td>
+                        <td>
+                            <input tabindex="3" dn="brand" id="txt_brand" name="txt_brand" class="{required:true,maxlength:50,messages:{required:'请填写品牌',maxlength:'品牌由1-50位字母和数字组成'}}  wd400 m10_r" type="text" maxlength="50" />
+                            <span id="txt_brand_error" class="c9" msg="请填写品牌"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>规格型号</td>
+                        <td>
+                            <input tabindex="4" dn="goods_spec" id="txt_goods_spec" name="txt_goods_spec" class="{required:true,maxlength:50,messages:{required:'请填写规格型号',maxlength:'规格型号只能由1-50个字符组成'}} wd400 m10_r" type="text" maxlength="50" />
+                            <span id="txt_goods_spec_error" class="c9" msg="请填写规格型号"></span>
+                        </td>
+                    </tr>
+                   <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>原产国代码</td>
+                        <td>
+                            <input tabindex="5" dn="ycg_code" id="txt_ycg_code" name="txt_ycg_code" class="{required:true,maxlength:3,messages:{required:'请填写原产国代码',maxlength:'原产国代码由1-3位字母和数字组成'}}  wd100 m10_r" type="text" maxlength="3" />
+                            <span id="txt_ycg_code_error" class="c9" msg="请填写原产国代码"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright">HS编码</td>
+                        <td>
+                            <input tabindex="6" dn="hs_code" id="txt_hs_code" name="txt_hs_code" class="{maxlength:50,messages:{maxlength:'HS编码由1-50位字母和数字组成'}}  wd400 m10_r" type="text" maxlength="50" />
+                            <span id="txt_hs_code_error" class="c9" msg="请填写HS编码"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>条形码</td>
+                        <td>
+                            <input tabindex="7" dn="goods_barcode" id="txt_goods_barcode" name="txt_goods_barcode" class="{required:true,maxlength:50,messages:{required:'请填写条形码',maxlength:'条形码由1-50位字母和数字组成'}}  wd400 m10_r" type="text" maxlength="50" />
+                            <span id="txt_goods_barcode_error" class="c9" msg="请填写条形码"></span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+
+    </div>
+    <div class="align_c m10_t" id="btn_tab_1">
+        <button id="btn_GjMainInfo_Save" tabindex="18" class="btn btn_blue btn_ht30 hidden"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;&nbsp;
+    </div>
+    <script>
+
+        $(function () {
+            var validatePdProduct;  //商品基本信息
+
+            //获取商品系统编号
+            var productSysNo = ($("#hdf_ProductSysNo").val() == "" ? 0 : $("#hdf_ProductSysNo").val());
+
+            //设置商品信息验证
+            validatePdProduct = $("#tab_GjPdProduct").validate({
+                onsubmit: false,
+                errorPlacement: function (error, element) {
+
+                    //设置错误信息
+                    if (error.html() != "") {
+                        $("#" + $(element).attr("id") + '_error').html(error);
+                        $("#" + $(element).attr("id") + '_error').removeClass("prompt");
+                        $("#" + $(element).attr("id") + '_error').removeClass("success");
+                        $("#" + $(element).attr("id") + '_error').addClass("error");
+                    }
+
+                   // enableAjaxLoader = true;
+
+                },
+                success: function (element) {
+                    //设置成功信息
+                    var obj = $("#" + element.attr("for") + "_error");
+                    obj.html(obj.attr("msg"));
+                    $("#" + $(element).attr("for") + '_error').removeClass("error");
+                    $("#" + $(element).attr("for") + '_error').removeClass("prompt");
+                    if ($("#" + $(element).attr("for")).val() != "" && $("#" + $(element).attr("for") + '_error').attr("msg") != "") {
+                        $("#" + $(element).attr("for") + '_error').addClass("success");
+                    }
+                    //enableAjaxLoader = true;
+                }
+            });
+
+            //设置该区域的保存按钮来控制能否反映
+            $("#btn_tab_1 button").click(function () {
+                currentPageIsValid = $("#tab_GjPdProduct").valid();
+                return false;
+            });
+
+            $("#btn_GjMainInfo_Save").click(function () {
+                SaveMainInfo();
+            });
+
+
+            //保存信息
+            function SaveMainInfo() {
+
+                //验证输入
+                if (!validatePdProduct.valid())
+                    return false;
+
+
+                var lgInfoModel = $("#div_productGjMainInof").JsonBind();        //读取商品模型JSON对象
+
+                //设置传递参数
+                var data = {
+                    lgInfoModel: lgInfoModel
+                };
+
+                lgInfoModel.ProductSysNo = $("#hdf_ProductSysNo").val();
+
+
+                //提交表单
+                $.ajax({
+                    url: "@Url.Action("UpdateLgGaoJieGoodsInfo", "Product")",
+                    data: JSON.stringify(data),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                        if (!response.Status) {
+                            UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + response.result.Message);
+                        } else {
+
+                            UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        //默认错误处理
+                        var error = JSON.parse(XMLHttpRequest.responseText);
+                        alert(error.ErrorMessage);
+                    }
+                });
+
+                return true;
+            }
+
+        });
+    </script>
+
+
+</div>
+<!-- 商品主信息维护 END -->

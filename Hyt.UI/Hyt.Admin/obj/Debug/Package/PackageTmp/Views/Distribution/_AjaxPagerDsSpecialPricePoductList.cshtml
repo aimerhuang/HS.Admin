@@ -1,0 +1,49 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBPdProductDetail>
+
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="53" height="190"></th>
+            <th width="72">商品编号</th>
+            <th width="110">商品编号</th>
+            <th class="align_l p10_lr">商品名称</th>
+            <th width="100">商品类型</th>
+            <th width="72">商品分类</th>
+            <th width="72">基础价格</th>
+            <th style="display: none;"></th>
+        </tr>
+    </thead>
+    <tbody id="tr_list">
+        @{
+            if (!Model.TData.Any())
+            {
+            <tr>
+                <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+            </tr>
+            }
+            foreach (var master in (List<Hyt.Model.CBPdProductDetail>)Model.TData)
+            {
+            <tr>
+                <td>
+                    <input type="radio" name="rad" /></td>
+                <td>@master.SysNo</td>
+                <td>@master.ErpCode</td>
+                <td class="align_l p10_lr">@master.ProductName</td>
+                <td class="p10_lr">@master.ProductCategoryName</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), master.ProductType)</td>
+                <td class="red p10_r align_r">@master.BasicPrice.ToString("C")</td>
+                <td style="display: none;">@master.ProductImage</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    $(document).ready(function() {        
+        //表格加入隔行样式
+        DAO.InterlineStyle();
+    });
+</script>

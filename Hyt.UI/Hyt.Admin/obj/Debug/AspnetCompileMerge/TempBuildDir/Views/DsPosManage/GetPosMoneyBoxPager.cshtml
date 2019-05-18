@@ -1,0 +1,43 @@
+﻿@{
+    ViewBag.Title = "GetPosMoneyBoxPager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>门店初始金额列表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div align="right" style="padding:5px;">
+                
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function AddPosSellOrder()
+    {
+        window.location.href = "/DsPosManage/AddOrUpdatePosSellManageData";
+    }
+    function doSearch() {
+        //Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("GetPosMoneyBoxPager", "DsPosManage")',
+            { id: 1, dsSysNo: "@ViewBag.dsSysNo" },
+            function (data) {
+               // Utils.MaskStop();
+                $('#paging').html(data);
+
+            });
+    }
+    doSearch();
+</script>

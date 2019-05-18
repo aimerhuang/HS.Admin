@@ -1,0 +1,144 @@
+﻿@{
+    ViewBag.Title = "GetPosSellManageViewData";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p10">
+    <div class="boxs_detail_dispay boxs_con_c1">
+        <div class="tit_con">
+            <form method="POST" id="form1" name="form1">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone border_bnone">
+                    <tbody>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">流水号:</td>
+                            <td class="border_right" colspan="3">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).SerialNumber)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">营业员:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).Clerker)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">销售时间:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).SaleTime)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">销售总数:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalNum)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">销售金额:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalSellValue)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">原价金额:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalOrigValue)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">优惠金额:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalDisValue)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">付款金额:</td>
+                            <td width="42%" class="border_right">
+                               @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalPayValue)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">找零金额:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalGetValue)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">会员卡号:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).CardNumber)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">会员名称:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).CardName)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">订单折扣:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).HavePrivilege)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">订单返利积分:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).OrderPoint)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">消费积分:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).UsePoint)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">积分消费金额:</td>
+                            <td width="40%">
+                               @((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).PointMoney)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="boxs_con_c1 m5_t border_tnone">
+        <div class="boxs_listtabel">
+            <!--/表格列表区-->
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                <thead>
+                    <tr>
+                        <th width="20%">商品编号</th>
+                        <th width="30%">商品名称</th>
+                        <th width="10%">商品条码</th>
+                        <th width="8%">商品价格</th>
+                        <th width="8%">实售价格</th>
+                        <th width="8%">折扣</th>
+                        <th width="8%">商品数量</th>
+                        <th width="8%">总金额</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var indx=0;
+                        foreach (var item in ViewBag.ItemList as List<Hyt.Model.Pos.DsPosOrderItem>)
+                        {
+                           <tr @(indx%2==0 ? "" : "class = stag_color")>
+                                <td>
+                                   @item.SysNo
+                                </td>
+                            <td>@item.ProName</td>
+                            <td>@item.ProBarCode</td>
+                            <td>@item.ProPrice.ToString("0.00")</td>
+                            <td>@(( item.ProPrice == 0 ? item.ProPrice : item.ProPrice * item.ProDiscount / 10m).ToString("0.00"))</td>
+                            <td>@(item.ProDiscount)</td>
+                            <td>@(item.ProNum)</td>
+                            <td>@(((item.ProPrice == 0 ? item.ProPrice : item.ProPrice * item.ProDiscount / 10m) 
+                                * item.ProNum).ToString("0.00"))
+                            </td>
+                          </tr>
+                            indx++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="padding:20px;" align="center">
+        <button type="button" id="btnBack" title="保存" class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href = '/DsPosManage/GetPosSellManagePage'">
+            <span>保存</span>
+        </button>
+        <button type="button" id="btnBack" title="返回" class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href = '/DsPosManage/GetPosSellManagePage'">
+            <span>返回</span>
+        </button>
+    </div>
+</div>

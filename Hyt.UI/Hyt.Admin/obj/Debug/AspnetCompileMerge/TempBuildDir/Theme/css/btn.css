@@ -1,0 +1,64 @@
+﻿@charset "utf-8";
+/*=author:陈建 date:2013.5.30=*/
+label, select, button, input[type="button"], input[type="reset"], input[type="submit"], input[type="radio"], input[type="checkbox"] {cursor: pointer;}
+button, input[type="reset"], input[type="button"], input[type="submit"] {line-height: normal !important;}
+.btn{background-image:url(../images/btnbg.png); line-height:20px; display:inline-block; *display:inline; background-repeat:repeat-x; vertical-align:middle;border:#c1c1c1 solid 1px; *border:0; border-radius:4px; -moz-border-radius:4px;-webkit-border-radius:4px; outline:none; overflow:visible;}
+span{margin:0px; padding:0px;}
+.btn span{ vertical-align:text-top;}
+
+
+
+*html #example {} /* IE6 */
+*+html button, input[type="button"]{line-height:20px;} /* IE7 */
+.btn .fr{ float:right\0; margin-top:1px\0;}/* IE8 */
+
+/*=点击有阴隐=*/
+.btn:hover{ background-position:0 -34px;}
+.btn.active, .btn:active {outline: 0;-webkit-box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05);-moz-box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05);box-shadow: inset 0 2px 4px rgba(0,0,0,0.15), 0 1px 2px rgba(0,0,0,0.05)}
+
+.btn_blue{ background-position:0 -68px; border-color:#0D86D7; color:#fff;}
+.btn_blue:hover{ background-position:0 -102px;}
+
+.btn_red{ background-position:0 -136px; border-color:#BD1E09; color:#fff;}
+.btn_red:hover{ background-position:0 -170px;}
+
+.btn_orange{ background-position:0 -204px; border-color:#BA6407; color:#fff;}
+.btn_orange:hover{ background-position:0 -238px;}
+
+.btn_green{ background-position:0 -272px; border-color:#148914; color:#fff;}
+.btn_green:hover{ background-position:0 -306px;}
+
+/*=禁用按钮=*/
+.disabled{ background:#ebebeb;}
+.disabled.active, .disabled:active {box-shadow:none;}
+button.disabled,input[type="button"].disabled{ background:#c1c1c1; border-color:#c1c1c1;}
+
+.btn_ht22{padding:2px 4px; height:22px;}
+.btn_ht26{padding:4px 6px; height:26px;}
+.btn_ht28{padding:5px 8px; height:28px;}
+.btn_ht30{padding:6px 9px; height:30px;}
+.btn_ht32{padding:7px 10px; height:32px;}
+.btn_ht34{padding:8px 10px; height:34px;}
+
+/*=解决firefox样试----IE兼容问题=*/
+button::-moz-focus-inner, input::-moz-focus-inner {
+padding:0;
+border:0
+}
+/*
+@-moz-document url-prefix(){
+.btn{}
+.btn_ht22{padding:1px 1px;}
+.btn_ht26{padding:3px 4px;}
+.btn_ht28{padding:4px 5px;}
+.btn_ht30{padding:5px 6px;}
+.btn_ht32{padding:6px 7px;}
+}
+*/
+
+
+
+/*=方向按钮=*/
+.btn_arrow{ background:url(../images/tips_icon.png) no-repeat; width:20px; height:21px; display:inline-block;  cursor:pointer;}
+.btn_tableup{ background-position:-72px -2px;}
+.btn_tabledown{ background-position:-92px -2px;}

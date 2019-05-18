@@ -1,0 +1,160 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "选择出库单";
+}
+@using Hyt.Model.WorkflowStatus
+@using Hyt.BLL.Order;
+
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBWhStockOut>
+
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_tnone">
+    <thead>
+        <tr>
+            <th style="width: 3%;">
+                <input name="sysno" type="checkbox" value="" id="select_all_main" /></th>
+            <th class="wd75">出库单号</th>
+            <th class="wd75">订单编号</th>
+            <th class="align_l p10_lr">收件地址</th>
+            <th width="80px">收货人</th>
+            <th class="wd100">应收金额</th>
+            <th width="116px">订购时间</th>
+            <th width="68px">是否开票</th>
+            <th width="68px">状态</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model != null && Model.TData != null && Model.TData.Any())
+            {
+                foreach (var item in Model.TData)
+                {
+            <tr id="tr_@item.SysNo">
+                <td style="width: 3%;">
+                    <input name="sysno" type="checkbox" data-id="@item.SysNo" value="@item.SysNo" /></td>
+                <td>@item.SysNo</td>
+                <td>@item.OrderSysNO</td>
+                <td class="align_l p10_lr">@SoOrderBo.Instance.GetCustomerAddress(item.ReceiveAddressSysNo)</td>
+                <td>@item.ReceiverName</td>
+                <td class="red p10_r align_r">@item.Receivable.ToString("C")</td>
+                <td>@item.SoCreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@(item.InvoiceSysNo > 0 ? "是" : "否")</td>
+                <td>@((WarehouseStatus.出库单状态)item.Status)</td>
+            </tr>
+                }
+            }
+            else
+            {
+            <tr>
+                <td colspan="9">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+
+    $(function () {
+        //隔行样式
+        DAO.InterlineStyle();
+        //全选事件
+        $("#select_all_main").click(function () {
+            if ($(this).attr("checked")) {
+                $("#item_list input[name='sysno']").each(function () {
+                    $(this).attr("checked", "checked");
+                    var sysno = $(this).val();
+                    if (sysno) { addItem(sysno); }
+                });
+            } else {
+                //$("#item_list input[name='sysno']").each(function () {
+                //    $(this).removeAttr("checked");
+                //    var sysno = $(this).val();
+                //    if (sysno) { removeItem(sysno); }
+                //});
+                $("#item_list input[name='sysno']").attr("checked", false);
+                $("#selected_list tbody").empty();
+            }
+        });
+        //单项点事件
+        $("#item_list input[name='sysno']").bind("click", function () {
+            var sysno = $(this).val();
+            if (sysno) {
+                if ($(this).attr("checked") == "checked") {
+                    addItem(sysno);
+                } else {
+                    removeItem(sysno);
+                }
+            }
+        });
+        //批量事件
+        $("#batch_cancel").click(function () {
+            var items = $("#selected_list input:checked");
+            if (items.length <= 0) {
+                UI.Alert({
+                    content: '请选择需要取消的出库单!'
+                });
+            } else {
+                UI.Confirm({
+                    content: '是否确认取消选中的出库单？',
+                    ok: function () {
+                        items.each(function () {
+                            var sysno = $(this).val();
+                            if (sysno) {
+                                $("#selected_tr_" + sysno).remove();
+                                $("input[data-id='" + sysno + "']").removeAttr("checked");
+                                checkItems();
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+
+    function checkItems() {
+        if (!$("#selected_list input[name='sysno']").length) {
+            $("#noitem").show();
+            $("#selected_all").removeAttr("checked");
+        }
+        if (!$("#item_list input[name='sysno']:checked").length <= 1) {
+            $("#select_all").removeAttr("checked");
+        }
+    }
+    //添加新项
+    function addItem(sysno) {
+        var item = $("#selected_tr_" + sysno);
+        if (item.length <= 0) {
+            var tr = $("#tr_" + sysno);
+            var value = "<tr id='selected_tr_" + sysno + "'>" + tr.html() + "<td><button class='btn btn_ht26' title='作废' type='button' onclick=removeItem('" + sysno + "') ><span class='icon_trash'></span><span class='m5_l'>删除</span></button></td></tr>";
+            $("#selected_list tbody").append(value);
+            $("#noitem").hide();
+        }
+    }
+    //移除已有项
+    function removeItem(sysno) {
+        UI.Confirm({
+            content: '是否确认取消选中的出库单？',
+            ok: function () {
+                $("#selected_tr_" + sysno).remove();
+                $("input[data-id='" + sysno + "']").removeAttr("checked");
+                checkItems();
+            }
+        });
+    }
+
+    //调用页面进行回调
+    function CallBack() {
+        if ($.isFunction(parent._ActiveSelectOutStocksCallBack)) {
+            var result = new Array();
+            $("#selected_list input[name='sysno']").each(function () {
+                result.push($(this).val());
+            });
+
+            parent._ActiveSelectOutStocksCallBack(result);
+            UI.Dialog.close();
+        }
+    }
+
+</script>

@@ -1,0 +1,311 @@
+﻿@using Hyt.BLL.Product
+@model IEnumerable<Hyt.Model.Transfer.CBSoOrderItem>
+@{
+    int row = 0;
+    bool IsDisabled = ViewBag.TaskType != 0 && ((ViewBag.ExecutorSysNo == null || ViewBag.ExecutorSysNo == 0) || (ViewBag.ExecutorSysNo != ViewBag.CurrentSysNo));  //当前用户不是任务执行者，需禁用
+    //是否允许分批出库
+    bool IsAllowSplits = true;
+}
+<script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"></script>
+<form id="formOutStock">
+    <div class="boxs_detail_dispay m10_t">
+        <div class="tit_dispay">
+            <h5>出库分配</h5>
+        </div>
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+                <tbody>
+                    <tr>
+                        <td width="90" class="nameright">
+                            出库配送方式
+                        </td>
+                        <td  width="150">
+                            <select id="outstockdeliveryTypeSysNo" onchange="changeOutDelivery()">
+  
+                            </select>
+                        </td>
+                        <td width="80" class="nameright">出库仓库</td>
+                        <td>
+                            @Html.Hidden("OutWarehouseSysNo", ViewData["DefaultWarehouseSyo"])
+                            <input id="OutWarehouseName" name="OutWarehouseName" type="text" class="input" contenteditable="false" value="@ViewBag.DefaultWarehouseName" onfocus="this.blur()" >
+                            <button class="btn btn_ht26" type="button" onclick="SelectOutWarehouse()"><span class="icon_search"></span></button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+<div class="boxs_listtabel m10_t">
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+            <thead>
+                <tr>
+                    <th width="53"  @if(!IsAllowSplits){<text>style="display:none"</text>}>
+                        <input type="checkbox" value="" onclick="SetChecked(this.checked)" class="checkall" checked="checked" >
+                    </th>
+                    <th width="10%">商品编号</th>
+                    <th width="35%"  align="left" class="p10_l">后台显示名称</th>
+                    <th width="10%">原单价</th>
+                    <th width="10%">订购数量</th>
+                    <th width="10%">已分配出库数量</th>
+                    <th width="82">分配出库数量</th>
+                    <th>销售金额</th>
+                    <th width="82">仓库库存</th>
+                    <th width="82">库存</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (Hyt.Model.Transfer.CBSoOrderItem item in Model)
+                {
+                    var StockQuantity = Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetStockQuantity(item.ProductSysNo,ViewBag.DefaultWarehouseSyo);  
+                    row++;
+                    string trID = "trOrderItem" + item.SysNo.ToString();
+                    string inptID = "txtOrderItem" + item.SysNo.ToString();
+                    string spanProductName = "spanProductName" + item.SysNo.ToString();
+                    <tr id="@trID" class='jrow @{if (row % 2 == 0){<text>stag_color</text>}}'>
+                        <td   @if(!IsAllowSplits){<text>style="display:none"</text>}>
+                            @if (item.RealStockOutQuantity < item.Quantity)
+                            {
+                                <input type="checkbox" value="@item.SysNo" name="chkOutStockList" checked="checked">
+                            }
+                        </td>
+                        <td class="erpCode">@item.ErpCode</td>
+                        <td align="left" class="p10_l">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)<span id="@spanProductName"  style="display:none">@item.ProductName</span></td>
+                        <td    align="right">
+                            <span id='@MvcHtmlString.Create("spanSalesUnitPrice_" + item.SysNo)' class="red p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.OriginalPrice,2))</span>
+                            <span id='@MvcHtmlString.Create("hidOriginalPrice_" + item.SysNo)' style="display:none">@item.OriginalPrice</span>
+                        </td>
+                        <td ><span id='@MvcHtmlString.Create("spanQuantity_" + item.SysNo)'>@item.Quantity</span></td>
+                        <td ><span id='@MvcHtmlString.Create("spanRealStockOutQuantity_" + item.SysNo)'>@item.RealStockOutQuantity</span></td>
+                                <td >
+                                    <input id='@MvcHtmlString.Create("hidRealSalesAmount" + item.SysNo)' type="hidden" value="@item.SalesAmount" />
+                                    @if (item.RealStockOutQuantity < item.Quantity)
+                                    {
+                                        int OutStockQuantity = item.Quantity - item.RealStockOutQuantity;
+                                        <input id="@inptID" type="text" name="txtQ" value="@OutStockQuantity"   maxlength="8" productSysNo="@item.ProductSysNo"   style="width:50px"  min="0" max="@OutStockQuantity"  @if(!IsAllowSplits){<text>readonly="true" class="disabled"</text>}/>
+                                    }
+                                </td>
+                        <td>@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.SalesAmount+item.ChangeAmount-item.DiscountAmount,2))</td>
+                        @*<td>@item.StockQuantity</td>*@
+                        <td class="p10_l">@StockQuantity</td>
+                        <td class="stock"></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+</div>
+<div class="boxs_detail_dispay bd_ts bd_c">
+    <div class="pagination align_center clearfix">
+        &nbsp; &nbsp;
+        @*直邮类型不显示按钮*@
+@*@if(Hyt.BLL.Warehouse.WhWarehouseBo.GetEntity((int)ViewData["DefaultWarehouseSyo"]).WarehouseType != 40)
+        {*@
+        <button class='btn btn_orange btn_ht32  bold f14 @if (IsDisabled)
+                                                         {
+                                                             @:hide
+                                                         } ' type="button" id="btnCreateOustStock" onclick="PostOutStock()">创建出库单</button>
+        
+            <button class="btn btn_blue btn_ht32 bold" type="button" onclick="PostOutStock()" style="display: none">全部创建出库单</button>
+        @*}*@
+    </div>
+</div>
+</form>
+<script lang="javascript" type="text/javascript">
+    $(function () {
+
+        if ($("#OutWarehouseSysNo").val() != "") {
+            GetErpStock();
+        }
+    });
+    //设置选中
+    function SetChecked(flg) {
+        $("input[name='chkOutStockList']").each(function () { this.checked = flg; });
+    }
+    function SelectOutWarehouse() {
+        UI.DialogOpen('/Order/SelectWarehouse?defaultWarehouse=' + $("#OutWarehouseSysNo").val() + '&DeliveryTypeSysNo=' + $("#outstockdeliveryTypeSysNo").val() + "&CityID=" + $("#dpdCity").val(), {
+            title: '选择仓库',
+            ok: function () {
+                var iframe = this.iframe.contentWindow;
+                if (!iframe.document.body) {
+                    alert('iframe还没加载完毕呢')
+                    return false;
+                };
+                $("#OutWarehouseName").val(iframe.document.getElementById('WarehouseName').value);
+                $("#OutWarehouseSysNo").val(iframe.document.getElementById('SysNo').value);
+                GetErpStock();
+                return true;
+            },
+            cancel: true
+        });
+    }
+    function PostOutStock() {
+        var dataArray = [];
+        var flg = true
+        if ($("#outstockdeliveryTypeSysNo").val() == null || $("#outstockdeliveryTypeSysNo").val() == "" || $("#outstockdeliveryTypeSysNo").val() == "0") {
+            tips('tips_warning', "请选择出库配送方式");
+            flg = false;
+            return;
+        }
+        if ($("#OutWarehouseSysNo").val() == "" || $("#OutWarehouseSysNo").val() == "0") {
+            tips('tips_warning', "请选择出库仓库");
+            flg = false;
+            return;
+        }
+       
+        //获取选中的元素
+        $('input[name="chkOutStockList"]:checked').each(function () {
+            var mSysNo = $(this).val();
+            var txtid = "txtOrderItem" + mSysNo;
+            var obj = $("#" + txtid);
+            var rex = /^[1-9]\d*$/;
+            if (!rex.test(obj.val())) {
+                tips('tips_warning', "请输入正整数");
+                flg = false;
+                return;
+            }
+            if (parseInt(obj.val()) > parseInt(obj.attr("max"))) {
+                tips('tips_warning', "出库商品数量不能大于订购数量");
+                flg = false;
+                return;
+            }
+            var item = {
+                SysNo: mSysNo,
+                OrderSysNo: $("#SysNo").val(),
+                ProductSysNo: obj.attr("productSysNo"),
+                ProductName: $("#spanProductName" + mSysNo).text(),
+                Quantity: obj.val(),
+                OriginalPrice: $("#hidOriginalPrice_" + mSysNo).text(),
+                RealSalesAmount: $("#hidRealSalesAmount" + mSysNo).val(),
+                RealStockOutQuantity: obj.val()
+            }
+            dataArray.push(item);
+        });
+        //数据验证错误
+        if (!flg) return;
+        if (dataArray.length > 0) {
+            UI.Confirm({
+                content: "确认创建出库单?",
+                ok: function () {
+                    var postdata = { data: dataArray, WarehouseSysNo: $("#OutWarehouseSysNo").val(), deliveryTypeSysNo: $("#outstockdeliveryTypeSysNo").val() };
+                    var json = JSON.stringify(postdata);
+                    $.ajax({
+                        url: '/Order/CreateOutStock',
+                        type: 'POST',
+                        cache: false,
+                        data: json,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.Status) {
+                                tips('tips_success', '操作成功！');
+                                window.setTimeout(function () { window.location.href = "/Order/OrderDetail?id=" + $("#SysNo").val() }, 1000);
+                            }
+                            else {
+                                tips('tips_warning', data.Message);
+                            }
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+        else {
+            tips('tips_warning', '请选择出库商品！')
+        }
+    }
+
+
+    //获取并设置erp仓库库存
+    function GetErpStock() {
+        var erpCode = [];
+        $(".erpCode").each(function (i) {
+            erpCode.push($(this).text());
+        });
+        var erpWarehouseSysNo = $("#OutWarehouseSysNo").val();
+        if (erpCode.length > 0 && erpWarehouseSysNo != '') {
+            $.ajax({
+                global: false,
+                url: '/Order/GetInventory',
+                data: JSON.stringify({ erpCode: erpCode, erpWarehouseSysNo: erpWarehouseSysNo }),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                cache: false,
+                success: function (data, textStatus, jqXhr) {
+                    if (textStatus == "success") {
+                        if ($(data).length > 0) {
+                            $(".jrow").each(function (i) {
+                                var This = $(this);
+                                var number = "<font style='color:red'>无数据</font>";
+                                $(data).each(function (i) {
+                                    var That = this;
+                                    if (That.MaterialNumber == This.find(".erpCode").text()) {
+                                        number = "<font style='color:" + (That.Quantity <= 0 ? "red" : "green") + "'>" + That.Quantity + "</font>";
+                                    }
+                                });
+                                This.find(".stock").html(number);
+                            });
+                        } else {
+                            SetAllErpStock("无数据");
+                        }
+                    } else {
+                        SetAllErpStock(textStatus);
+                    }
+                },
+                error: function (httpRequest, txtStatus, error) {
+                    SetAllErpStock(txtStatus);
+                    //UI.tips.tip_alert('tips_warning', "获取erp库存出错：" + txtStatus);
+                },
+                timeout: 3000
+
+            });
+        }
+    }
+    function SetAllErpStock(content) {
+        $(".stock").html("<font style='color:red'>" + content + "</font>");
+    }
+    //加载出库单配送方式
+    function addOutStockDeliveryTypeOption(item, defaultvalue, ispay) {
+        //alert(item.Text);
+        var text = item.Text;
+        var val = item.Value;
+        if (val == "@Hyt.Model.SystemPredefined.DeliveryType.第三方快递.ToString()" && !ispay) {
+            return;
+        }
+        if (item.optgroup) {
+            $("<optgroup></optgroup>").attr("label", item.label)
+             .appendTo($("#outstockdeliveryTypeSysNo"));
+        }
+        else {
+            if (defaultvalue != null && val == defaultvalue) {
+                $("<option></option>")
+                .val(val)
+                .html(text).attr("selected", "selected")
+                .appendTo($("#outstockdeliveryTypeSysNo"));
+                //绑定配送方式
+            }
+            else {
+                $("<option></option>")
+               .val(val)
+               .html(text)
+               .appendTo($("#outstockdeliveryTypeSysNo"));
+            }
+        }
+    }
+    //出库配送方式发生改变
+    function changeOutDelivery() {
+        $("#OutWarehouseName").val("");
+        $("#OutWarehouseSysNo").val("");
+        var m_deliveryTypeSysNo = $("#outstockdeliveryTypeSysNo").val();
+        if (m_deliveryTypeSysNo != "0") {
+            $.getJSON('@Url.Content("/Ajax/GetDefaultWarehouse")' + '?i=' + new Date(), { areaSysNo: $('#dpdArea').val(), deliveryTypeSysNo: m_deliveryTypeSysNo }, function (result) {
+                if (result.Status) {
+                    $("#OutWarehouseName").val(result.Message);
+                    $("#OutWarehouseSysNo").val(result.StatusCode);
+                    GetErpStock();
+                }
+            });
+        }
+    }
+
+</script>

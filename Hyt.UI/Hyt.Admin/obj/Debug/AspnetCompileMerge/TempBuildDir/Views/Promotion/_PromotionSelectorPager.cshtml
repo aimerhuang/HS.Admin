@@ -1,0 +1,132 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.SpPromotion>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone"  id="item_list">
+        <thead>
+            <tr>
+                <th width="53">
+                    <input name="" type="checkbox" value="" id="select_all" class="checkall" /></th>
+                            	<th>促销名称</th>
+                                <th width="90">促销代码</th>
+                                <th width="100">促销类型</th>
+                                <th width="270">起止时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.SpPromotion>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr id=\"tr_"+item.SysNo+"\">")
+                    }else{
+                        @Html.Raw("<tr id=\"tr_"+item.SysNo+"\">")
+                    }
+                    <td>
+                        <input name="sysno" type="checkbox" id="checkbox_@item.SysNo" value="@item.SysNo" /></td>
+                    <td>@item.Name</td>
+                    
+                    <td>@item.PromotionCode</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销应用类型), item.PromotionType)</td>
+                    <td>@item.StartTime ～ @item.EndTime</td>    
+
+
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+
+    //隔行子页TABLE样式
+    DAO.InterlineStyle();
+    //隔行parent样式
+    noItemDisplay();
+
+    //批量事件
+    $("#batch_cancel").click(function () {
+        var items = $("#selected_list input:checked");
+        items.each(function () {
+            var sysno = $(this).val();
+            if (sysno) { removeItem(sysno); }
+        });
+    });
+    //全选事件
+    $("#select_all").click(function () {
+        if ($(this).attr("checked")) {
+            $("#item_list input[name='sysno']").each(function () {
+                $(this).attr("checked", "checked");
+                var sysno = $(this).val();
+                if (sysno) { addItem(sysno); }
+            });
+        } else {
+            $("#item_list input[name='sysno']").each(function () {
+                $(this).removeAttr("checked");
+                var sysno = $(this).val();
+                if (sysno) { removeItem(sysno); }
+            });
+        }
+    });
+    //单项点事件
+    $("#item_list input[name='sysno']").bind("click", function () {
+        var sysno = $(this).val();
+        if (sysno) {
+            if ($(this).attr("checked") == "checked") {
+                addItem(sysno);
+            } else {
+                removeItem(sysno);
+            }
+        }
+    });
+    //添加新项
+    function addItem(sysno) {
+        var item = $("#selected_tr_" + sysno);
+        if (item.length <= 0) {
+            var tr = $("#tr_" + sysno);
+            var value = "<tr id='selected_tr_" + sysno + "'>" + tr.html().replace("checkbox_", "sel_checkbox_") + "<td><button class='btn btn_ht26' title='取消选择' type='button' onclick=removeItem('" + sysno + "') ><span class='icon_trash'></span><span class='m5_l'>取消选择</span></button></td></tr>";
+            $("#selected_list tbody").append(value);
+        }
+        noItemDisplay();
+    }
+    //移除已有项
+    function removeItem(sysno) {
+        $("#selected_tr_" + sysno).remove();
+        $("#checkbox_" + sysno).removeAttr("checked");
+        noItemDisplay();
+    }
+    //当没有选择数据时 默认tr的显示状态
+    function noItemDisplay() {
+        var item = $("#selected_list input[name='sysno']");
+        if (item.length <= 0) {
+            $("#selected_list #noitem").show();
+        }
+        else {
+            $("#selected_list #noitem").hide();
+        }
+        //隔行样式
+        DAO.InterlineStyle({ tableid: 'selected_list' });
+    }
+
+    $(function () {
+        if (!mutiple) {
+            singleMode();
+        }
+    });
+
+</script>

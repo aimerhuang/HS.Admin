@@ -1,0 +1,143 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<Hyt.Model.Transfer.CBFnReceiptVoucher>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="50"></th>
+            <th width="180">销售单号</th>
+            <th>支付方式</th>
+            <th>单据时间</th>
+            <th>制单人</th>
+            <th>付款人</th>
+            <th>开户卡号</th>
+            <th>交易凭证</th>
+            <th>应收金额</th>
+            <th>已收金额</th>
+            <th>仓库/店铺</th>
+            <th>确认人员</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count > 0)
+            {
+                var Index = 0;
+                string cs = string.Empty;
+                int productSysNo = 0;
+                foreach (var item in Model.TData)
+                {
+                        <tr>
+                            <td><input type="checkbox" id="ipt_@(item.SysNo)" onclick="GetSelectFnReceiptData(@(item.SysNo))" value="@(item.SysNo)" /></td>
+                            <td>@item.SysNo</td>
+                            <td>@item.PaymentName</td>
+                            <td>@item.CreateDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                            <td>@(string.IsNullOrEmpty(item.CreatorName) ? item.CustomerName : item.CreatorName)</td>
+                            <td>@(item.CustomerName)</td>
+                            <td>@item.CreditCardNumber</td>
+                            <td>@item.VoucherNo</td>
+                            <td>@(item.IncomeAmount)</td>
+                            <td>@(item.ReceivedAmount)</td>
+                            <td>@(item.WarehouseName)</td>
+                            <td>@(item.ConfirmeName)</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td colspan="11">
+                                <div style=" height:90px; overflow:auto; background-color:white;">
+                                    <table width="100%" border="0" cellspacing="0" cellpadding="0" style=" background-color: white;" >
+                                        <thead>
+                                            <tr>
+                                                <th>商品名称</th>
+                                                <th>规格描述</th>
+                                                <th>销售数量</th>
+                                                <th>原始单价</th>
+                                                <th>销售金额</th>
+                                                <th>调价金额</th>
+                                                <th>总金额</th>
+                                            </tr>
+                                        
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                var itemList=(ViewBag.itemList as List<Hyt.Model.Transfer.CBSoOrderItem>).Where(p=>p.OrderSysNo==item.SysNo);
+                                                foreach(Hyt.Model.Transfer.CBSoOrderItem itemMod in itemList)
+                                                {
+                                                    <tr>
+                                                        <td style="background-color: white;">@(itemMod.ProductName)</td>
+                                                        <td style="background-color: white;">@(itemMod.Spec)</td>
+                                                        <td style="background-color: white;">@(itemMod.Quantity)</td>
+                                                        <td style="background-color: white;">@(itemMod.OriginalPrice)</td>
+                                                        <td style="background-color: white;">@(itemMod.SalesAmount)</td>
+                                                        <td style="background-color: white;">@(itemMod.ChangeAmount)</td>
+                                                        <td style="background-color: white;">@(itemMod.SalesAmount + itemMod.ChangeAmount)</td>
+                                                    </tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                }
+                
+            }
+            else
+            {
+                <tr class="odd_color">
+                    <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    
+    function GetSelectFnReceiptData(sysno)
+    {
+        if($("#ipt_"+sysno).attr("checked"))
+        {
+            if((","+exportSysNoDataList+",").indexOf(","+sysno+",")==-1)
+            {
+                if(exportSysNoDataList!="")
+                {
+                    exportSysNoDataList += ",";
+                }
+                exportSysNoDataList += sysno
+            }
+        }
+        else
+        {
+            var sysNoList=exportSysNoDataList.split(',');
+            exportSysNoDataList="";
+            for(var i=0;i<sysNoList.length;i++)
+            {
+                if(sysNoList[i]!=sysno)
+                {
+                    if(exportSysNoDataList!="")
+                    {
+                        exportSysNoDataList += ",";
+                    }
+                    exportSysNoDataList += sysNoList[i]
+                }
+            }
+        }
+        
+        $("#span_ExprotSysNo").text(exportSysNoDataList);
+    }
+
+    function CheckSelectCheckBoxReceiptData()
+    {
+        var sysNoList=exportSysNoDataList.split(',');
+        for(var i=0;i<sysNoList.length;i++)
+        {
+            $("#ipt_"+sysNoList[i]).attr("checked",true);
+        }
+    }
+    CheckSelectCheckBoxReceiptData();
+</script>

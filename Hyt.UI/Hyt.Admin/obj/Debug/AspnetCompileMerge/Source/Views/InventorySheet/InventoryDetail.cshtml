@@ -1,0 +1,409 @@
+﻿@model Hyt.Model.InventorySheet.WhInventoryDetail
+<script src="~/Theme/scripts/jquery.validate.yui.js"></script>
+<script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+<script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+
+
+@*导入Excel*@
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+
+
+<script src="~/Theme/Plugins/Editor/plugins/template/template.js"></script>
+<style>
+    .yc {
+        display: none;
+    }
+
+    .w_2300 {
+        width: 2300px;
+    }
+
+    .w_auto {
+        width: auto;
+    }
+</style>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#btnExport').click(function () {
+            window.location = '/InventorySheet/ExportPurchaseData?id=@(ViewBag.SysNo)';
+        });
+
+
+        //导入Excel
+        $('#btnImport').click(function () {
+            if (window.frames["ifrmImport"].chooseFile) {
+                window.frames["ifrmImport"].chooseFile();
+            }
+        });
+    });
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+
+    //导入excel回调方法
+    function importCallBack(res) {
+        res = JSON.parse(res);
+        if (res.Status) {//成功
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            var cgSum = 0;
+            var sb = "";
+            var sbSum = 0;
+            for (var i = 0; i < res.listModel.length; i++) {
+                var prcode = res.listModel[i].PrCode;
+                if (prcode != "") {
+                    cgSum++;
+                    var th = document.getElementById("tr_" + prcode);
+                    $(th).children().siblings().eq(16).children(".pdCount ").val(res.listModel[i].ZhangCunQuantity);
+                    $(th).children().siblings().eq(17).children(".TZCount ").val(res.listModel[i].InventoryQuantity);
+                } else {
+                    sbSum++;
+                    sb += (i + 1) + "、";
+                }
+                var rtnStr = "成功：" + cgSum + "条,失败：" + sbSum + "条";
+                if (sbSum > 0) {
+                    rtnStr += ",失败条数为：第" + sb + "条";
+                }
+                UI.tips.tip_alert("tips_success", rtnStr);
+            }
+            mask.Remove();
+        } else {//失败
+            UI.tips.tip_alert("tips_wrong", res.Message);
+        }
+    }
+</script>
+<form id="inputForm">
+    <div class="case w_2300">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                @*<span class="ra10 c6">
+                        <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l" onclick="history.go(-1)">返回</span></button>
+                    </span>*@
+                <h3>
+                    盘点作业详情
+                    <span style="margin-left:30px; font-size:6px; color:#808080; ">
+                        <input type="checkbox" checked id="cheXX" />&nbsp;&nbsp;展示详细信息
+                    </span>
+                    @{
+                        if (ViewBag.PageStatus == 3)
+                        {
+                            if (Model.dataList.Where(p => p.InventoryQuantity > p.ZhangCunQuantity).Count() > 0)
+                            {
+                                <button onclick="AddWhInventoryRepor(@(Model.SysNo), 1)" title="生成盘盈报告" class="btn btn_ht26 btn_blue m10_l" type="button">
+                                    <span class="icon_white icon icon_audit"></span>
+                                    <span class="m5_l">生成盘盈报告</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button title="生成盘盈报告" class="btn btn_ht26 btn_blue m10_l disabled" type="button">
+                                    <span class="icon_white icon icon_audit"></span>
+                                    <span class="m5_l">生成盘盈报告</span>
+                                </button>
+                            }
+
+                            if (Model.dataList.Where(p => p.InventoryQuantity < p.ZhangCunQuantity).Count() > 0)
+                            {
+                                <button onclick="AddWhInventoryRepor(@(Model.SysNo), 2)" title="生成盘亏报告" class="btn btn_ht26 btn_blue m10_l" type="button">
+                                    <span class="icon_white icon icon_audit"></span>
+                                    <span class="m5_l">生成盘亏报告</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button title="生成盘亏报告" class="btn btn_ht26 btn_blue m10_l disabled " type="button">
+                                    <span class="icon_white icon icon_audit"></span>
+                                    <span class="m5_l">生成盘亏报告</span>
+                                </button>
+                            }
+                        }
+                        else if (ViewBag.PageStatus == 2)
+                        {
+                            <button type="button" id="btnExport" title="支持类型为.xls" class="btn btn_ht26 m10_lr btn_blue">
+                                <span class="icon icon_share icon_white"></span>
+                                <span class="m5_l">Excel导出</span>
+                            </button>
+
+                            <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m5_l btn_blue">
+                                <span class="icon_importing icon_white m5_r"></span><span>导入</span>
+                            </button>
+                            <iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("ImportWhInventoryExcel")" class="hide"></iframe>
+                        }
+                    }
+                </h3>
+            </div>
+
+            <div class="boxs_con_c1">
+                <div id="paging">
+                    <!--表格列开始-->
+                    <div class="boxs_listtabel">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                            <thead>
+                                <tr>
+                                    <th width="50">序号</th>
+                                    <th width="100">仓库名称</th>
+                                    <th width="100">商品代码</th>
+                                    <th width="300">商品名称</th>
+                                    <th width="105">品牌</th>
+                                    <th width="105">条形码</th>
+                                    <th width="105">商品类别</th>
+                                    <th width="70" class="xs">商品批次</th>
+                                    <th width="105" class="xs">生产/采购日期</th>
+                                    <th width="80" class="xs">保质期(天)</th>
+                                    <th width="105" class="xs">基本单位账存数量</th>
+                                    <th width="105" class="xs">基本单位实存数量</th>
+                                    <th width="105" class="xs">基本单位盘盈数量</th>
+                                    <th width="105" class="xs">基本单位盘亏数量</th>
+                                    <th width="90" class="xs">账存数量</th>
+                                    <th width="90" class="xs">实存数量</th>
+                                    @{
+                                        if (ViewBag.PageStatus == 1)
+                                        {
+                                            <th width="105" class="xs">盘盈数量</th>
+                                            <th width="105" class="xs">盘亏数量</th>
+                                        }
+
+                                        if (ViewBag.PageStatus == 2)
+                                        {
+                                            <th width="105">盘点数量</th>
+                                            <th width="105">调整数量</th>
+                                        }
+                                    }
+
+                                    <th width="105" class="xs">备注</th>
+                                    <th width="105" class="xs">辅助计量单位账存数量</th>
+                                    <th width="105" class="xs">辅助计量单位实存数量</th>
+                                    <th width="105" class="xs">辅助计量单位盘盈数量</th>
+                                    <th width="105" class="xs">辅助计量单位盘亏数量</th>
+                                    <th width="105" class="xs">辅助计量单位</th>
+                                    <th width="70" class="xs">换算率</th>
+                                </tr>
+                            </thead>
+                            <tbody id="v_tbody">
+                                @{
+                                    foreach (var item in Model.dataList)
+                                    {
+                                        <tr id="tr_@(item.ErpCode)" @(Model.dataList.IndexOf(item) % 2 == 0 ? "" : "class='stag_color'") class='stag_color'>
+                                            <td>@(Model.dataList.IndexOf(item) + 1)</td>
+                                            <td>@item.WarehouseNameDate</td>
+                                            <td>@item.ErpCode</td>
+                                            <td>@(item.ProductName)</td>
+                                            <td>@item.BrandName</td>
+                                            <td>@item.Barcode</td>
+                                            <td>
+                                                @(item.ProductType == 10 ? "普通商品":string.Empty)
+                                                @(item.ProductType == 20 ? "虚拟商品" : string.Empty)
+                                                @(item.ProductType == 30 ? "保税商品" : string.Empty)
+                                                @(item.ProductType == 40 ? "直邮商品" : string.Empty)
+                                                @(item.ProductType == 50 ? "完税商品" : string.Empty)
+                                            </td>
+                                            <td class="xs"></td>
+                                            <td class="xs"></td>
+                                            <td class="xs"></td>
+                                            <td class="xs">@item.InventoryQuantity</td>
+                                            <td class="xs">@item.InventoryQuantity</td>
+                                            <td class="xs"></td>
+                                            <td class="xs"></td>
+                                            <td class="xs">@(item.ZhangCunQuantity)</td>
+                                            <td class="xs">@item.InventoryQuantity</td>
+                                            @{
+                                        if (ViewBag.PageStatus == 1)
+                                        {
+                                            <td class="xs">0</td>
+                                                <td class="xs">0</td>
+                                        }
+
+                                        if (ViewBag.PageStatus == 2)
+                                        {
+                                            <td>
+                                                <input type="text" value="@(item.InventoryQuantity)" style="width:50px;" class="pdCount" onblur="UploadZC(this,'@item.SysNo','@(item.ZhangCunQuantity)')" />
+                                                <input type="hidden" value="@(item.InventoryQuantity)" />
+                                            </td>
+                                                <td>
+                                                    <input type="text" value="@(item.adjustmenQuantity)" style="width:50px;" class="TZCount" onblur="UploadSJ(this,'@item.SysNo')" />
+                                                    <input type="hidden" value="@(item.adjustmenQuantity)" />
+                                                </td>
+                                        }
+                                            }
+                                            <td class="xs">@item.Remarks</td>
+                                            <td class="xs">0</td>
+                                            <td class="xs">0</td>
+                                            <td class="xs"></td>
+                                            <td class="xs"></td>
+                                            <td class="xs"></td>
+                                            <td class="xs">0</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <!--表格列结束-->
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/template" id="tmpCity">
+        <tr id="tr_{%=ErpCode%}"   class='stag_color'>
+            <td>{%=xh%}</td>
+            <td>{%=WarehouseNameDate%}</td>
+            <td>{%=ErpCode%}</td>
+            <td>{%=ProductName%}</td>
+            <td>{%=BrandName%}</td>
+            <td>{%=Barcode%}</td>
+            <td>{% if(ProductType==10){ ProductType="普通商品" }else if(ProductType==20){ ProductType="虚拟商品" }else if(ProductType==30){ ProductType="保税商品" }else if(ProductType==40){ ProductType="直邮商品" }else{ ProductType="完税商品" }%}{%=ProductType%}</td>
+            <td class="xs"></td>
+            <td class="xs"></td>
+            <td class="xs"></td>
+            <td class="xs">{%=InventoryQuantity%}</td>
+            <td class="xs">{%=InventoryQuantity%}</td>
+            <td class="xs"></td>
+            <td class="xs"></td>
+            <td class="xs">{%=ZhangCunQuantity%}</td>
+            <td class="xs">{%=InventoryQuantity%}</td>
+            <td>
+                <input type="text" value="{%=InventoryQuantity%}" style="width:50px;" class="pdCount" onblur="UploadZC(this,'{%=SysNo%}','{%=ZhangCunQuantity%}')" />
+                <input type="hidden" value="{%=InventoryQuantity%}" />
+            </td>
+            <td>
+                <input type="text" value="{%=adjustmenQuantity%}" style="width:50px;" class="TZCount" onblur="UploadSJ(this,'{%=SysNo%}')" />
+                <input type="hidden" value="{%=adjustmenQuantity%}" />
+            </td>
+            <td class="xs"></td>
+            <td class="xs">0</td>
+            <td class="xs">0</td>
+            <td class="xs"></td>
+            <td class="xs"></td>
+            <td class="xs"></td>
+            <td class="xs">0</td>
+        </tr>
+    </script>
+</form>
+<script>
+    $(":checkbox").change(function () {
+        if ($(this).is(':checked')) {
+            $(".yc").removeClass("yc").addClass("xs");
+            $(".w_auto").removeClass("w_auto").addClass("w_2300");
+        } else {
+            $(".xs").removeClass("xs").addClass("yc");
+            $(".w_2300").removeClass("w_2300").addClass("w_auto");
+
+        }
+    });
+
+    ///更改盘点数量
+    function UploadZC(th, id, zcQuantity) {
+        var tVal = $(th).next().val();//获取原始库存
+        var val = $(th).val(); //获取更新后库存
+        if (val == "") {
+            $(th).val(tVal);
+            return;
+        }
+        if (tVal == val) {
+            return;
+        }
+        $.post("/InventorySheet/UploadPDQuantity", { "id": id, "Quantity": val, "ZhangCunQuantity": zcQuantity }, function (data) {
+            if (data.Message != "修改成功!") {
+                UI.tips.tip_alert('tips_wrong', data.Message);
+            } else {
+                $(th).next().val(val); //更新原始库存
+                UI.tips.tip_alert('tips_success', data.Message);
+            }
+        });
+    }
+
+
+
+    ///更改实存数量
+    function UploadSJ(th, id) {
+        var tVal = $(th).next().val();//获取原始实存库存
+        var val = $(th).val(); //获取更新后实存库存
+        if (val == "") {
+            $(th).val(tVal);
+            return;
+        }
+        if (tVal == val) {
+            return;
+        }
+        $.post("/InventorySheet/UploadSJQuantity", { "id": id, "Quantity": val }, function (data) {
+            if (data.Message != "修改成功!") {
+                UI.tips.tip_alert('tips_wrong', data.Message);
+            } else {
+                $(th).next().val(val); //更新原始实存库存
+                UI.tips.tip_alert('tips_success', data.Message);
+            }
+        });
+    }
+
+    ///生成盘点报告单
+    function AddWhInventoryRepor(id, status) {
+        UI.Confirm({
+            content: '确认生成吗？',
+            ok: function () {
+                var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                $.post("/InventorySheet/AddWhInventoryRepor", { "id": id, "pdStatus": status }, function (data) {
+                    if (data.Message != "成功!") {
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    } else {
+                        UI.tips.tip_alert('tips_success', data.Message);
+                    }
+                    mask.Remove();
+                });
+            },
+            cancel: true
+        });
+    }
+
+    var PageIndex = 1;
+    var lock = true;
+    //监听滚动
+    $(window).scroll(function () {
+        if(!lock) return;
+        var rate = $(window).scrollTop() / ($(document).height() - $(window).height());
+        //alert(rate);
+        if (rate >= 0.85) {
+            GetPagerList();
+            
+        
+        }
+    })
+    var xh = 30;
+    //瀑布流获取数据
+    function GetPagerList()
+    {
+        PageIndex++;
+        lock = false;
+        $.post("/InventorySheet/InventoryDetail", { "id": '@(ViewBag.SysNo)', "PageStatus": '@(ViewBag.PageStatus)', "PageIndex": PageIndex }, function (data) {
+            if (data.StatusCode == 1) {
+               // lock = true;
+                var html = "";
+                for (var i = 0; i < data.Data.length; i++) {
+                    xh++;
+                    var obj = $.extend({}, data.Data[i], { "xh": xh });
+                    html+= myTempl("#tmpCity", data.Data[i]);
+                }
+                $("#v_tbody").append(html);
+                lock = true;
+            } else {
+                lock = false;
+            }
+        });
+    }
+
+</script>
+

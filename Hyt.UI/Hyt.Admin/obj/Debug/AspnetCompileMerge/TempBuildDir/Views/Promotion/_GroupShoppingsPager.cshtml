@@ -1,0 +1,61 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.GsGroupShopping>
+
+      <!--表格列开始-->
+<div class="boxs_listtabel">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="70">系统编号</th>
+                                <th>团购标题</th>
+                                <th width="140">起始时间</th>
+                                <th width="140">截止时间</th>
+                                <th width="70">团购价</th>
+                                <th width="80">支持类型</th>
+                                <th width="50">折扣</th>
+                                <th width="50">状态</th>
+                                <th class="borde_r_none" width="79">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.GsGroupShopping>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    } 
+
+                    <td>@item.SysNo</td>
+                    <td>@item.Title</td>
+                    <td>@item.StartTime</td>
+                    <td>@item.EndTime</td>
+                    <td class="red align_r p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.GroupPrice,2))</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof (GroupShoppingStatus.团购类型), item.GroupType)</td>
+                <td>@item.Discount</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof (GroupShoppingStatus.团购状态), item.Status)</td>
+                    <td>
+                    <button title="修改" class="btn btn_ht26 btn_blue" type="button" onclick="openTab(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    </td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

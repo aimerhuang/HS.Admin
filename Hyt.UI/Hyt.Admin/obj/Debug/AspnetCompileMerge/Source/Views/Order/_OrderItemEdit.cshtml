@@ -1,0 +1,315 @@
+﻿@using Hyt.BLL.Product
+@model IEnumerable<Hyt.Model.Transfer.CBSoOrderItem>
+@{
+    int row = 0;
+    bool IsCanEdit = ViewBag.IsCanEdit == null ? false : ViewBag.IsCanEdit;//可操作视图(已付款的订单不能编辑商品信息)
+    if (ViewBag.IsPay != null && ViewBag.IsPay == true)//已付款的订单不能够更新订购商品信息
+    {
+        IsCanEdit = false;
+    }
+    if (ViewBag.EditOrderItem != null && ViewBag.EditOrderItem == false)//
+    {
+        IsCanEdit = false;
+    }
+    bool isMallSeller = ViewBag.IsMallSeller;
+}
+<div class="boxs_listtabel m10_t">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+        <thead>
+            <tr>
+
+                <th width="100">商品编号</th>
+                <th>后台显示名称</th>
+                <th width="80">购买价格</th>
+                <th width="82">订购数量</th>
+                <th width="82">调价</th>
+                @if (IsCanEdit && (Convert.ToInt16(ViewData["Status"]) == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待审核))
+                {
+                    <th width="182" class="border_rnone">操作</th>
+                }
+            </tr>
+        </thead>
+        <tbody id="tbItems">
+            @foreach (Hyt.Model.Transfer.CBSoOrderItem item in Model)
+            {
+                row++;
+                string btnItemEdit = "btnItemEdit" + item.SysNo;
+                string btnItemSave = "btnItemSave" + item.SysNo;
+                string btnItemBack = "btnItemBack" + item.SysNo;
+                <tr id='@MvcHtmlString.Create("trItem_" + item.SysNo)' @{if (row % 2 == 0)
+                                                                         {<text>class='stag_color'</text>}}>
+                    <td>@item.ErpCode</td>
+                    <td class="p10_l">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                    <td class="red p10_r" align="right">
+                        <input type="hidden" id="@MvcHtmlString.Create("originalPrice_" + item.SysNo)" value="@item.OriginalPrice" />
+                        @MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.OriginalPrice, 2))
+                    </td>
+                    <td>
+                        <div id='@MvcHtmlString.Create("divItemView" + item.SysNo)'>@item.Quantity</div>
+                        <div id='@MvcHtmlString.Create("divItemEdit" + item.SysNo)' style="display:none">
+                            <input id='@MvcHtmlString.Create("inputQuantity_" + item.SysNo)' type="text"   name="ItemQuantity"   value="@item.Quantity"  maxlength="5" style="width:50px"/>
+                        </div>
+                    </td>
+                    <td>
+                        <div id='@MvcHtmlString.Create("divChangeAmountView" + item.SysNo)'>@item.ChangeAmount</div>
+                        <div id='@MvcHtmlString.Create("divChangeAmountEdit" + item.SysNo)' style="display:none">
+                            <input id='@MvcHtmlString.Create("inputChangeAmount_" + item.SysNo)' type="text"   name="ItemChangeAmount" value="@item.ChangeAmount" style="width:50px"  @if(isMallSeller){                                                                                                                                                                                         @:readonly="readonly" 
+                                                                                                                                                                                     }  />
+                        </div>
+                    </td>
+                    @if(IsCanEdit && (Convert.ToInt16(ViewData["Status"]) == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待审核))
+                    {
+                        <td>
+                            <button  id="@btnItemEdit" class="btn btn_ht26 m10_r" type="button" onclick="SetItemView(true,@item.SysNo)"><span class="icon_pencil"></span></button><button  id="@btnItemSave" class="btn btn_ht26 m10_r " type="button" style="display:none" onclick="SaveOrderItem(@item.SysNo)"><span class="icon icon_ok"></span><span class="fr m5_l">保存</span></button><button  id="@btnItemBack" class="btn btn_ht26 m10_r " type="button" style="display:none" onclick="SetItemView(false,@item.SysNo)"><span class="icon icon_share_alt"></span><span class="fr m5_l">取消</span></button><button class="btn btn_ht26 " type="button" onclick="DeleteOrderItem(@item.SysNo)"><span class="icon_trash"></span></button>
+                        </td>
+                    }
+                </tr>
+            }
+            @if (row < 1)
+            {
+                if (IsCanEdit)
+                {
+                <tr>
+                    <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                else
+                { <tr>
+                    <td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+
+            }
+        </tbody>
+    </table>
+</div>
+@if (IsCanEdit && (Convert.ToInt16(ViewData["Status"]) == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待审核))
+{
+    <div class="boxs_detail_dispay bd_ts bd_c">
+        <div class="pagination align_center clearfix">
+            &nbsp;
+        &nbsp;<button type="button" onclick='DAO.SelectProduct({onselect:function(a){AddOrderItem(a)}})' class="btn btn_ht28 wd100 " title="挑选商品"><span class="icon_search"></span><span class="m5_l">挑选商品</span></button>
+        </div>
+    </div>
+}
+<script lang="javascript" type="text/javascript">
+    function SetItemView(isEdit, id) {
+        if (isEdit) {
+            $("#divItemView" + id).hide();
+            $("#divItemEdit" + id).show();
+            $("#divChangeAmountView" + id).hide();
+            $("#divChangeAmountEdit" + id).show();
+            $("#btnItemEdit" + id).hide();
+            $("#btnItemSave" + id).show();
+            $("#btnItemBack" + id).show();
+            $("#inputQuantity_" + id).val($("#divItemView" + id).text());
+            $("#inputChangeAmount_" + id).val($("#divChangeAmountView" + id).text());
+        }
+        else {
+            $("#divItemView" + id).show();
+            $("#divItemEdit" + id).hide();
+            $("#divChangeAmountView" + id).show();
+            $("#divChangeAmountEdit" + id).hide();
+            $("#btnItemEdit" + id).show();
+            $("#btnItemSave" + id).hide();
+            $("#btnItemBack" + id).hide();
+        }
+    }
+    //删除商品明细
+    function DeleteOrderItem(id) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+
+                $.post('/Order/OrderItemDelete', { sysNo: id, orderID: $("#SysNo").val() }, function (data) {
+                    if (data.success) {
+                        $("#trItem_" + id).remove();
+                        //更新总价格
+                        if (data.orderData != null) {
+                            $("#OrderAmount").val(data.orderData.OrderAmount);
+                            $("#CashPay").val(data.orderData.CashPay);
+                            $("#spanCashPay").html(data.orderData.CashPay.toPrice());
+                            $("#spanOrderAmount").html(data.orderData.OrderAmount.toPrice());
+                            $("#Ticks").val(data.ticks);
+                        }
+                    }
+                    else {
+                        tips('tips_warning', data.message);
+                    }
+                });
+
+            },
+            cancel: true
+        });
+    }
+    //修改商品明细
+    function SaveOrderItem(id) {
+        var num = $("#inputQuantity_" + id).val();
+        var changeAmount = $("#inputChangeAmount_" + id).val();
+        var rex = /^[1-9]\d*$/;
+        if (!rex.test(num)) {
+            //alert("请输入正整数");
+            tips('tips_warning', '请输入正整数！')
+            return;
+        }
+        var value = Number(changeAmount);  //调价金额
+        var originalPrice = Number($("#originalPrice_"+id).val());  //购买价格
+        if (isNaN(value)) {
+            tips('tips_warning', '请输入数字！')
+            return;
+        } else if (Math.abs(value) > Math.abs(originalPrice)) {
+            tips('tips_warning', '调价不能超过购买价格！')
+            return;
+        }
+        $.post('/Order/OrderItemEdit', { sysNo: id, quantity: num, orderID: $("#SysNo").val(), changeAmount: changeAmount }, function (data) {
+            if (data.success) {
+                $("#divItemView" + id).text(num);
+                $("#divChangeAmountView" + id).text(changeAmount);
+                SetItemView(false, id);
+                //更新总价格
+                if (data.orderData != null) {
+                    $("#OrderAmount").val(data.orderData.OrderAmount);
+                    $("#CashPay").val(data.orderData.CashPay);
+                    $("#spanCashPay").html(data.orderData.CashPay.toPrice());
+                    $("#spanOrderAmount").html(data.orderData.OrderAmount.toPrice());
+                    $("#Ticks").val(data.ticks);
+                }
+            }
+            else {
+                tips('tips_warning', data.message);
+
+            }
+        });
+    }
+    function AddOrderItem(json) {
+        if (json != null) {
+            var dataArray = [];
+            var level = $("#Customer_LevelSysNo").val();
+            $.each(json, function (i, item) {
+                var price;
+                $.each(item.price, function (j, xx) {
+                    if (xx.leave == level) {
+                        price = xx.price;
+                        return false;
+                    }
+                });
+                var dd = {
+                    SysNo: 0,
+                    OrderSysNo: $("#SysNo").val(),
+                    ProductSysNo: item.pid,
+                    ProductName: item.name,
+                    Quantity: 1,
+                    OriginalPrice: price,
+                    SalesUnitPrice:price,
+                    SalesAmount: price,
+                    RealStockOutQuantity: 0,
+                    TransactionSysNo: $("#TransactionSysNo").val()
+                }
+                dataArray.push(dd);
+            });
+            if (dataArray.length > 0) {
+                var postdata = { data: dataArray };
+                var sendjson = JSON.stringify(postdata);
+                $.ajax({
+                    url: '/Order/InsertOrderItem',
+                    type: 'POST',
+                    cache: false,
+                    data: sendjson,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        UpdateOrderList(result.data);
+                        $("#OrderAmount").val(result.order.OrderAmount);
+                        $("#CashPay").val(result.order.CashPay);
+                        $("#spanCashPay").html(result.order.CashPay.toPrice());
+                        $("#spanOrderAmount").html(result.order.OrderAmount.toPrice());
+                        $("#Ticks").val(result.ticks);
+                    }
+                });
+            }
+        }
+    }
+    function UpdateOrderList(data) {
+     
+        $("#tbItems").html("");
+        $.each(data, function (i, item) {
+            var td1 = $("<td></td>").text(item.ErpCode);
+            var td2 = $("<td></td>").text(item.ProductName);
+            var td3 = $("<td class='red p10_r' align='right'></td>").html(item.OriginalPrice.toPrice());
+            var divView = $("<div></div").attr("id", "divItemView" + item.SysNo).text(item.Quantity);
+            var divEdit = $("<div></div").attr("id", "divItemEdit" + item.SysNo).css('display', 'none');
+            var ipt = $("<input>", {
+                type: 'text',
+                val: item.Quantity,
+                name: 'ItemQuantity',
+                id: "inputQuantity_" + item.SysNo,
+                maxlength: 5
+            }).css("width", "50px");
+            divEdit.append(ipt);
+            var td4 = $("<td></td>");
+            td4.append(divView);
+            td4.append(divEdit);
+            
+            var divChangeAmountView = $("<div></div").attr("id", "divChangeAmountView" + item.SysNo).text(item.ChangeAmount);
+            var divChangeAmountEdit = $("<div></div").attr("id", "divChangeAmountEdit" + item.SysNo).css('display', 'none');
+            var ipt2 = $("<input>", {
+                type: 'text',
+                val: item.ChangeAmount,
+                name: 'ItemChangeAmount',
+                id: "inputChangeAmount_" + item.SysNo,
+            }).css("width", "50px");
+            divChangeAmountEdit.append(ipt2);
+            var td5 = $("<td></td>");
+            td5.append(divChangeAmountView);
+            td5.append(divChangeAmountEdit);
+            
+            //编辑
+            var btnItemEdit = $("<button></button>").addClass("btn btn_ht26 m10_r")
+                .attr("ID", "btnItemEdit" + item.SysNo)
+                .attr("type", "button")
+                .html("<span class='icon_pencil'></span>")
+                 .bind("click", function () {
+                     SetItemView(true, item.SysNo);
+                 });
+            //保存
+            var btnItemSave = $("<button></button>").addClass("btn btn_ht26  m10_r")
+                             .attr("ID", "btnItemSave" + item.SysNo)
+                             .attr("type", "button").css("display", "none")
+                             .html("<span class='icon icon_ok'></span><span class='fr m5_l'>保存</span>")
+                            .bind("click", function () {
+                                SaveOrderItem(item.SysNo);
+                            });
+            //取消
+            var btnItemBack = $("<button></button>").addClass("btn btn_ht26  m10_r")
+                               .attr("ID", "btnItemBack" + item.SysNo)
+                               .attr("type", "button").css("display", "none")
+                               .html("<span class='icon icon_share_alt'></span><span class='fr m5_l'>取消</span>")
+                               .bind("click", function () {
+                                   SetItemView(false, item.SysNo);
+                               });
+            //删除
+            var btnDelete = $("<button></button>").addClass("btn btn_ht26")
+                            .attr("type", "button")
+                            .html("<span class='icon_trash'></span>")
+                            .bind("click", function () {
+                                DeleteOrderItem(item.SysNo);
+                            });
+            ;
+            var td6 = $("<td></td>");
+            td6.append(btnItemEdit);
+            td6.append(btnItemSave);
+            td6.append(btnItemBack);
+            td6.append(btnDelete);
+            var tr = $("<tr></tr>").attr("id", "trItem_" + item.SysNo);
+            if (i % 2 != 0) {
+                tr.addClass("stag_color")
+            }
+            tr.append(td1);
+            tr.append(td2);
+            tr.append(td3);
+            tr.append(td4);
+            tr.append(td5);
+            tr.append(td6);
+            tr.appendTo($("#tbItems"));
+        });
+    }
+</script>

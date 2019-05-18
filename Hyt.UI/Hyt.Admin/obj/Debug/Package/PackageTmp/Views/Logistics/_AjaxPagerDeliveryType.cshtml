@@ -1,0 +1,74 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBLgDeliveryType>
+
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">编号</th>
+            <th class="align_l p10_lr">名称</th>
+            <th width="72">配送级别</th>
+            <th width="98">父级配送方式</th>
+            <th class="wd100">运费</th>
+            <th width="72">配送耗时</th>
+            <th width="72">显示顺序</th>
+            <th width="85">是否第三方</th>
+            <th width="98">前台是否可见</th>
+
+            <th width="46">状态</th>
+
+            <th width="243">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBLgDeliveryType item in Model.TData)
+            {
+            <tr>
+                <td class="blue align_l p10_lr">
+                    <a href="javascript:LookDeliveryType('@item.SysNo');">@item.SysNo</a>
+                </td>
+                <td class="blue align_l p10_lr">
+                    <a href="javascript:LookDeliveryType('@item.SysNo');">@item.DeliveryTypeName</a>
+                </td>
+                <td>@((Hyt.Model.WorkflowStatus.LogisticsStatus.配送响应优先级别)item.DeliveryLevel) </td>
+                <td>@item.ParentName</td>
+
+                <td class="red align_r p10_r">@item.Freight.ToString("C")</td>
+                <td>@item.DeliveryTime</td>
+                <td>@item.DisplayOrder</td>
+                <td>
+                    @((Hyt.Model.WorkflowStatus.LogisticsStatus.是否第三方快递)item.IsThirdPartyExpress)
+                </td>
+                <td>
+                    @((Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式前台是否可见)item.IsOnlineVisible)
+                </td>
+
+                <td>@((Hyt.Model.WorkflowStatus.LogisticsStatus.配送方式状态)item.Status)
+                </td>
+                <td>
+                    <button class="btn btn_blue btn_ht26 LG1001901" onclick="PrintTemplateSet(@item.SysNo)" title="打印模板"><span class="icon_print icon_white"></span><span class="m5_l">打印模板</span></button><button class="btn btn_blue btn_ht26 m10_l LG1001301" onclick="UpdateDeliveryType(@item.SysNo)" title="修改"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button class="btn btn_red btn_ht26 m10_l LG1001401" onclick="DelDeliveryType(@item.SysNo)" title="删除"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                </td>
+            </tr>                                            
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+
+</script>

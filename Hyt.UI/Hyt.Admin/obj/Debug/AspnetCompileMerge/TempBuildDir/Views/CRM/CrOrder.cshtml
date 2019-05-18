@@ -1,0 +1,98 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客服订单";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript">
+        var searchOrderTxt = "请输入订单号...";
+        var customerAccount = '@ViewBag.customerAccount';
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+        function AjaxStop() {
+            cover.Remove();
+        }
+        //查看订单详情
+        function CrOrderDetail(sysNo) {
+            UI.OpenCreatTab("订单详情:", "/Order/OrderDetail/" + sysNo);
+        }
+        function ChkDate(str) {
+            var pattern = /^(\d{4})(\-)(\d{1,2})(\-)(\d{1,2})$/;
+            return pattern.test(str);
+        }
+        function doSearch() {
+            var seachOrderNo = $("#seachOrderNo").val();
+            var searchBeginDate = $("#beginDate").val();
+            var searchEndDate = $("#endDate").val();
+
+
+
+            AjaxStart();
+            var json = {};
+            json.id = 1;
+            json.customerAccount = customerAccount;
+            if ($.trim(seachOrderNo) != "" && seachOrderNo != searchOrderTxt) {
+                json.orderNo = seachOrderNo;
+            }
+            if (ChkDate(searchBeginDate) && ChkDate(searchEndDate)) {
+                json.beginDate = searchBeginDate;
+                json.endDate = searchEndDate;
+            }
+            $.get('/CRM/CrOrder/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+@model PagedList<CBSoOrder>
+<form id="form" method="Get" action="@Url.Action("CrOrder")">
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6">
+                <button type="button" class="btn btn_ht26" onclick="document.location.href='/CRM/CrCustomer'"><span class="icon_share_alt"></span><span class="m5_l">返回会员管理</span></button>
+            </span>
+            <h3>客服订单</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl m10_l veralign_t">订单号</span>
+                    <div class="m10_l fl">
+                        <input name="seachOrderNo" type="text" maxlength="20" id="seachOrderNo" class="input_ht28" value="请输入订单号..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入订单号...'" onfocus="this.select()" onclick="if (this.value == '请输入订单号...') this.value = ''" />
+                    </div>
+                    <span class="fl m10_l veralign_t">订单时间</span>
+                    <div class="date_btn120 m10_l fl">
+                        <input type="text" class="input_small input_ht28" name="beginDate" id="beginDate">
+                        <button type="button" onclick="UI.Date({el:'beginDate'})" class="btn btn_ht28" title="日历"><span class="icon_calendar"></span></button>
+                    </div>
+                    <div class="date_btn120 m10_l fl">
+                        <input id="endDate" class="input_small input_ht28" type="text" name="endDate">
+                        <button type="button" onclick="UI.Date({el:'endDate'})" class="btn btn_ht28" title="日历"><span class="icon_calendar"></span></button>
+                    </div>
+                    <button type="button" title="搜索" class="btn btn_ht28 m10_l fl" onclick="doSearch()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+            </div>
+            <!--工具条结束-->
+            <!--列表开始-->
+            <div class="boxs_list">
+                <div class="boxs_listtabel">
+                    @{Html.RenderPartial("_AjaxCrOrder", Model); }
+                </div>
+            </div>
+            <!--列表结束-->
+        </div>
+    </div>
+</div>
+</form>

@@ -1,0 +1,124 @@
+﻿@model List<string>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "意见反馈管理";
+}
+@section headjs{
+    <script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            update();
+
+            //绑定意见类型下拉框查询事件
+            $("#select_suggest_type").change(function(e) {
+                var searchData = {
+                    suggestType: $(this).val(),
+                    soucre: $("#select_source").val()
+                };
+                update(searchData);
+            });
+
+            //绑定来源下拉框查询事件
+            $("#select_source").change(function() {
+                var searchData = {
+                    suggestType: $("#select_suggest_type").val(),
+                    soucre: $(this).val()
+                };
+                update(searchData);
+            });
+
+            //绑定快捷查询按钮事件
+            $("#easy_search_btn").click(function(e) {
+                var searchData = {
+                    account: $("#sysno").val()
+                };
+                update(searchData);
+            });
+        });
+
+
+        function initTableBtnEvent() {
+            $("#feedback_main_table").find("button[name='view_btn']").click(function (e) {
+                var values = $(this).next("input").val();
+                UI.DialogBox({
+                    title: "意见反馈详细",
+                    width: 400,
+                    height: 250,
+                    content: "<div style='vertical-align:top;height:249px'><p style='font-size:15px;margin:20px'>" + values + "</p></div>",
+                    cancel: true,
+                    ok:false
+                });
+            });
+        }
+
+
+        //表格呈现
+        function update(searchData) {
+            $.get('@Url.Action("FeedbackManage", "CRM")',
+                searchData,
+                function(data) {
+                    $('#paging').empty().append(data);
+                    //初始化表格按钮事件
+                    initTableBtnEvent();
+                });
+        }
+
+        //表格加载完成后执行
+        function tableOnload() {
+            AjaxStop();
+            initTableBtnEvent();
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>意见反馈管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                
+               
+                <div class="right_tool clearfix"  >
+                  
+                    <span class="veralign_t fl">意见类型</span>
+                                    <div class="fl m10_l">
+                                        <select class="select_ht28" style="width: 80px" id="select_suggest_type"  name="status">
+                                            <option value="0">--全部--</option>
+                                            @foreach (var item in Model)
+                                            {
+                                                <option value="@item">@item</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <span class="veralign_t fl">&nbsp;&nbsp;&nbsp;来源</span>
+                                    <div class="fl m10_l">
+                                        <select class="select_ht28" style="width: 80px" id="select_source"  name="status">
+                                            <option value="0">--全部--</option>
+                                            @foreach (var source in typeof(Hyt.Model.WorkflowStatus.CustomerStatus.意见反馈类型来源).GetEnumValues())
+                                            {
+                                                int tmp = (int)source;
+                                                <option value="@tmp">@source.ToString()</option>
+                                            }
+                                        </select>
+                                    </div>
+                                    <div class="search_btn m10_l fl">
+                                        <input type="text" maxlength="20" class="input_ht28" id="sysno" name="sysno"  onkeydown="$('#hd_save_sysno').val(this.value)" value="请输入客户帐号" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入客户帐号'" onfocus="this.select()" onclick="if (this.value == '请输入客户帐号') this.value = ''"/>
+                                        <button class="btn btn_ht28 wd28" title="搜索" id="easy_search_btn">
+                                            <span class="icon_search"></span>
+                                        </button>
+                                    </div>
+                </div>
+            </div>
+
+            <!--反馈信息列表-->
+         <div class="boxs_list" id="paging">
+                
+         </div>
+
+        </div>
+
+        
+    </div>
+</div>
+

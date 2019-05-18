@@ -1,0 +1,155 @@
+﻿@{
+    ViewBag.Title = "仓库选择";
+}
+
+<link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+<style type="text/css">
+    .wrap {
+        background: #eee;
+        position: absolute;
+    }
+
+    .module_tree {
+        width: 282px;
+        height: 383px;
+    }
+
+    .search_btn {
+        width: 260px;
+    }
+
+        .search_btn input {
+            width: 216px;
+        }
+
+    .comp5 {
+        background-color: #f5f5f5;
+        height: 335px;
+        overflow-y: auto;
+    }
+
+    .pagination {
+        border: #c1c1c1 solid 1px;
+        margin-left: 0px;
+    }
+</style>
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript">
+    var setting = {
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        check: {
+            enable: true
+        }
+    };
+
+    $(function () {
+        $("#city").keydown(function (e) {
+            if (13 == e.keyCode) {
+                var val = $("#city").val();
+                if (val && val != "搜索您要的地区...") {
+                    doSearch(val);
+                } else {
+                    doSearch(null);
+                }
+            }
+        });
+
+        $("#search_btn").click(function () {
+            var val = $("#city").val();
+            if (val && val != "搜索您要的地区...") {
+                doSearch(val);
+            } else {
+                doSearch(null);
+            }
+        });
+
+        //重置树
+        $("#reset_btn").click(function () {
+            doSearch(null);
+        });
+
+        doSearch(null);
+    });
+    var myZTree;
+    function doSearch(val) {
+        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+        $.ajax({
+            url: '@Url.Action("SearchWarehouse", "Basic")',
+            dataType: "json",
+            data: { keyword: val, isSelfSupport:'@(ViewBag.isSelfSupport!=null?ViewBag.isSelfSupport:"")'},
+            async: false,
+            success: function (response) {
+                mask.Remove();
+                if (response) {
+                    //更具返回结果初始化zTree
+                    myZTree = $.fn.zTree.init($("#warehouse_tree"), setting, response);
+                    //默认为收起所以节点
+                    myZTree.ExpandAllStatus = false;
+                    myZTree.setting.check.chkboxType = { "Y": "ps", "N": "ps" };;
+                } else {
+                    UI.Prompt.Error(response.Message);
+                }
+            },
+            error: function () {
+                mask.Remove();
+            }
+        });
+    }
+
+    function getCheckedWarehouses() {
+        var warehouses = [];
+        if (myZTree) {
+            var nodes = myZTree.getCheckedNodes(true);
+            if (nodes.length > 0) {
+                for (var i = 0; i < nodes.length; i++) {
+                    var item = nodes[i];
+                    if (item.nodetype == 1) {
+                        warehouses.push(-item.id);
+                    }
+                }
+            }
+
+        } else {
+            UI.Prompt.Error("仓库树未初始化或未读取到数据，请检查！");
+        }
+        return warehouses;
+    }
+    //added by huangwei
+    function getCheckedWarehouseNames() {
+        var warehouses = [];
+        if (myZTree) {
+            var nodes = myZTree.getCheckedNodes(true);
+            if (nodes.length > 0) {
+                for (var i = 0; i < nodes.length; i++) {
+                    var item = nodes[i];
+                    if (item.nodetype == 1) {
+                        warehouses.push(item.name);
+                    }
+                }
+            }
+
+        } else {
+            UI.Prompt.Error("仓库树未初始化或未读取到数据，请检查！");
+        }
+        return warehouses;
+    }
+</script>
+
+<div class="module_tree" id="treePanel">
+    <!--导航-->
+    <div class="boxs_tit head_m">
+        <div class='search_btn m5_t'>
+            <input name='' type='text' class='input_ht28' id='city' value='搜索您要的地区...' onmouseover='this.focus()' onblur="if (this.value =='') this.value='搜索您要的地区...'; " onfocus='this.select()' onclick="if (this.value == '搜索您要的地区...') this.value = ''; ">
+            <button class='btn btn_ht28 wd28' title='搜索' id='search_btn' type="button"><span class='icon_search'></span></button>
+        </div>
+    </div>
+    <!--导航-->
+    <div class="comp5">
+        <ul id="warehouse_tree" class="ztree"></ul>
+    </div>
+</div>

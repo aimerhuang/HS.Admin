@@ -1,0 +1,59 @@
+﻿@using Hyt.BLL.Sys
+@using Hyt.Util.Extension
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.DsForbidProduct>
+@functions{
+    /// <summary>
+    /// 显示商品名称或者后台显示名称
+    /// </summary>
+    /// <param name="productSysNo"></param>
+    /// <returns></returns>
+    System.Web.IHtmlString GetName(int productSysNo)
+    {
+        return Html.Raw(Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(productSysNo).HtmlEncode());
+    }
+}
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="120">商品编号</th>
+                <th align="left" class="p10_l">后台显示名称</th>
+                <th width="100" class="border_rnone">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                <tr>
+                    <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.DsForbidProduct>)Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    } 
+                <td>
+                    <!--商品编号-->
+                    @item.ProductErpCode
+                </td>
+                <td class="align_l p10_lr">@GetName(item.ProductSysNo)</td>
+                <td><button class="btn btn_ht26 btn_red" onclick="Delete(@item.SysNo) "><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,85 @@
+﻿@{
+    ViewBag.Title = "ProcurementGoodsSelector";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadCss{
+    <style type="text/css">
+        #paging td {
+            text-align: center;
+        }
+    </style>
+
+}
+
+@using Hyt.Infrastructure.Pager
+@model PagedList
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="caseout">
+    <div class="boxs_con_c1">
+        <div class="list">
+            
+            <div class="boxs_listtabel" id="paging">
+                <!--/表格列表区-->
+
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function CallBack() {
+        //var data;
+        var jsonSysNo = "";
+        // var json = '[';
+        var i = 0, j = 0;
+        $("#paging input:checkbox:checked").each(function () {
+            i++;
+        });
+        $("#paging input:checkbox:checked").each(function () {
+            var obj = $(this);
+            if (jsonSysNo != "") {
+                jsonSysNo += ",";
+            }
+            jsonSysNo += obj.val();
+            //jsonSysNo.push(obj.val());
+            /*j = j + 1;
+            json += '{';
+            var obj = $(this);
+            var sysno = obj.val();
+            json += '"SysNo":' + sysno;
+            var ErpCode = $.trim(obj.parent().next().html());
+            json += ',"ErpCode":"' + ErpCode + '"';
+            var EasName = $.trim(obj.parent().next().next().html());
+            json += ',"EasName":"' + EasName + '"}';
+            if (j < i) {
+                json += ',';
+            }*/
+        });
+        $.ajax({
+            url: '/Procurement/GetProcurementGoodsList',
+            type: 'post',
+            async: false,
+            data: { idList: jsonSysNo },
+            dataType: 'json',
+            success: function (json) {
+
+                parent && parent._ActivePdProductSelectorCallBack(json);
+            }
+        });
+        //json += ']';
+        //eval("data=" + json);
+
+    }
+    function Search()
+    {
+        $.get('@Url.Action("ProcurementGoodsSelector", "Procurement")',
+           { id: 1 },
+           function (data) {
+               $('#paging').html(data);
+           });
+    }
+    Search();
+</script>

@@ -1,0 +1,137 @@
+﻿@{
+    ViewBag.Title = "当日达订单批量出库";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadJs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+}
+@section FooterJs
+{
+    <script language="javascript" type="text/javascript">
+        function loaddata()
+        {
+            $.get('@Url.Action("DRDOutStockPrint")?r=' + Math.random(), function (result) {
+
+                $("#paging").html(result);
+            });
+        }
+        function showinfo(sysno) {
+            var url = '/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno;
+            UI.DialogOpen(url, {
+                title: '出库单信息',
+                width: 830,
+                height: 600,
+                init: function () {
+                    this.button({ name: '关闭' });
+                }
+            }, false);
+        }
+
+        //提交数据
+        function postdata(type)
+        {
+            var DefaultDeliveryNo = @Hyt.Model.SystemPredefined.DeliveryType.普通百城当日达;//默认普通百城当日达
+            var arrlst = new Array();//出库单编号
+            $("input[name='checkinfo']:checked").each(
+                    function () {
+                       
+                        arrlst.push($(this).val());
+                    }
+            );
+            if(arrlst<1)
+            {
+                UI.Alert({
+                    content: "请先选择出库单"
+
+                });
+                return;
+            }
+       
+            var url = '/Print/PrintMultiOutStock?ids=' + arrlst.join(",") + '&type=' + type + '&tsysno=' + DefaultDeliveryNo;
+            if(type==1)
+            {
+                UI.DialogOpen(url, {
+                    title: '打印拣货单',
+                    width: 1000,
+                    height: 700,
+
+                });
+            }
+            else if(type==2)
+            {
+                UI.DialogOpen(url, {
+                    title: '打印包裹单',
+                    width: 1000,
+                    height: 700,
+
+                });
+            }
+            else if(type==3)
+            {
+                UI.Confirm({
+                    content: "确认完成出库？",
+                    ok: function () {
+                        var json = JSON.stringify({ ids: arrlst });
+                        $.ajax({
+                            url: '@Url.Action("MultiStockOut")',
+                            type: 'POST',
+                            cache: false,
+                            data: json,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (ret) {
+                                if(ret.Status)
+                                {
+                                    loaddata();
+                                    UI.Prompt.Success("操作成功");
+                                }
+                                else
+                                {
+                                    alert(ret.Message);
+                                }
+                            }
+                        });
+                      
+                    }
+                });
+            }
+        }
+        //订单详情
+        function OrderBrowse(orderSysNo) {
+            UI.DialogOpen('/Order/OrderView?id=' + orderSysNo + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+        }
+        $(document).ready(function () {
+            loaddata();
+            UI.CheckAllbox(".boxs_listtabel", ".checkall");
+            $(".case").ajaxLoadingMask(true);
+        });
+    </script>
+}
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"></span>
+            <h3>当日达订单批量出库</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="left_tool clearfix" >   
+                    <button class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="postdata(1)"><span class="icon_print m5_r "></span><span>打印拣货单</span></button>
+                    <!--<button class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="postdata(2)"><span class="icon_print m5_r "></span><span>打印包裹单</span></button>-->
+                    <button class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="postdata(3)"><span class="icon_ok_sign m5_r "></span><span>更新数据</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div id="paging" class="boxs_listtabel">
+
+            </div>
+        </div>
+    </div>
+</div>

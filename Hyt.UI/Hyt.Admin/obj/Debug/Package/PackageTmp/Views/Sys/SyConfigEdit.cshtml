@@ -1,0 +1,105 @@
+﻿@model Hyt.Model.SyConfig
+@{
+    ViewBag.Title = "修改系统配置功能";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/TableBind/TableBind.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#SyConfig_form").validate({
+                rules: {
+                    Key: { required: true, maxlength: 25 },
+                    CategoryId: { required: true }
+                },
+                messages: {
+                    Key: {
+                        required: "Key必填",
+                        maxlength: "长度超出25个字"
+                    },
+                    CategoryId: { required: "请选择分类" }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+        });
+
+        function submitSyConfig() {
+            if ($("#SyConfig_form").valid()) {
+                UI.Confirm({
+                    content: '您确定要修改系统配置功能吗？',
+                    ok: function () {
+                        var model = $("#SyConfig_form").JsonBind();
+                        if (model) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("SyConfigEdit", "Sys")",
+                                data: JSON.stringify(model),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function (ret) {
+                                    mask.Remove();
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('修改系统配置功能成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function () {
+                                    mask.Remove();
+                                }
+                            });
+                        } else {
+                            UI.Alert({ content: '数据错据,请检查重试!' });
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+<form id="SyConfig_form" action="@Url.Action("SyConfigEdit")" method="post">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>分类</td>
+                        <td>
+                            @Html.DropDownList("CategoryId", ViewBag.Category as SelectList, htmlAttributes: new { @class = "", @dn = "CategoryId" })
+                            <span id="CategoryIdVerifyResult" class="prompt m10_l">请选择分类</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone" style="width: 15%"><span class="v_star">*</span>KEY</td>
+                        <td>
+                            <input type="text" id="Key" name="Key" dn="Key" maxlength="50" class="wd300" value="@Model.Key">
+                            <span id="KeyVerifyResult" class="prompt m10_l">系统配置KEY</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">Value</td>
+                        <td>
+                            <input type="text" id="Value" name="Value" dn="Value" maxlength="50" class="wd300" value="@Model.Value">
+                            <span class="prompt m10_l">系统配置Value</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">描述</td>
+                        <td>
+                            <textarea id="Description" name="Description" dn="Description" style="width: 90%;">@Model.Description</textarea>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <input id="SysNo" name="SysNo" dn="SysNo" type="hidden" value="@Model.SysNo" />
+</form>

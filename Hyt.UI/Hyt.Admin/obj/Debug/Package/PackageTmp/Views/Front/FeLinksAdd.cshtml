@@ -1,0 +1,109 @@
+﻿@model Hyt.Model.MkBlogroll
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "友情链接管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/DAO.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#form").validate({
+                rules: {
+                    WebSiteName: {
+                        required: true,
+                        rangelength: [1, 100],
+                        remote: {
+                            url: "/Front/FeLinksKeyChk",
+                            type: "post",
+                            data: {
+                                sysNo: function () { return $("#hidSysNo").val(); },
+                                webSiteName: function () { return jQuery("#WebSiteName").val(); }
+                            }
+                        }
+                    },
+                    WebSiteUrl: { required: true, url: true, rangelength: [1, 150] },
+                    EmailAddress: { required: true, email:true},
+                    SiteDescription: { required: true, rangelength: [5, 500] },
+                    DisplayOrder: { required: true, number: true },
+                },
+                errorPlacement: function(error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function(label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function addOrEdit() {
+            var from = $("#form");
+            if ($(from).valid()) {
+                var json = {
+                    SysNo: $("#hidSysNo").val(),
+                    WebSiteName:$("#WebSiteName").val(),
+                    WebSiteUrl: $("#WebSiteUrl").val(),
+                    EmailAddress: $("#EmailAddress").val(),
+                    DisplayOrder: $("#DisplayOrder").val(),
+                    SiteDescription: $("#SiteDescription").val()
+                };
+
+                var ajax = {
+                    url: '/Front/FeLinksAddOrEdit',
+                    data: json,
+                    type: 'POST',
+                    dataType: 'json',
+                    cache: false,
+                    success: function(json, statusText) {
+                        if (json.result) {
+                            UI.Dialog.opener.tip_alert('tips_shrot tips_success', json.info);
+                            UI.Dialog.opener.doSearch();
+                            UI.Dialog.close();
+                        } else {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.close();
+                        }
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                    }
+                };
+                $.ajax(ajax);
+            }
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+  <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>网站名称</td>
+              <td>@Html.TextBoxFor(m => m.WebSiteName, new { @class = "input_large" })<span id="forWebSiteName" class="prompt m10_l">网站名称,1-100字符</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>网站地址</td>
+              <td>@Html.TextBoxFor(m => m.WebSiteUrl, new { @class = "input_large" })<span id="forWebSiteUrl" class="prompt m10_l">网站地址</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>电子邮箱</td>
+              <td>@Html.TextBoxFor(m => m.EmailAddress, new { @class = "input_large" })<span id="forEmailAddress" class="prompt m10_l">电子邮箱</span>
+              </td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>排序号</td>
+              <td>@Html.TextBoxFor(m => m.DisplayOrder, new { @class = "input_large" })<span id="forDisplayOrder" class="prompt m10_l">用于显示排序的数字编号</span></td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>网站描述</td>
+              <td>@Html.TextAreaFor(x=>x.SiteDescription,10,20,new { @class = "input_xlarge"})<span id="forSiteDescription" class="prompt m10_l">网站描述,5-500字符</span></td>
+          </tr>
+      </tbody>
+   </table>
+   </div>
+  </div>  
+</div>
+</form>

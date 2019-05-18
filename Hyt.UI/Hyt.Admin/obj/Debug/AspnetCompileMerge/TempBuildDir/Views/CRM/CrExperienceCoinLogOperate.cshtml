@@ -1,0 +1,94 @@
+﻿@model Hyt.Model.CrCustomer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "调整客户惠源币";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#crExperienceCoinLogOperateForm").validate({
+                debug: true,
+                rules: {
+                    selChangeType: {
+                        min:0
+                    },
+                    txtCreased: { required: true, number: true, min: 1},
+                    txtChangeDescription: {
+                        required: true,
+
+                        maxlength: 200
+                    }
+
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function add() {
+            $("#crExperienceCoinLogOperateForm").submit();
+            if ($("#crExperienceCoinLogOperateForm").valid()) {
+                $.post('/CRM/CrExperienceCoinLogOperate/', $("#crExperienceCoinLogOperateForm").serialize(), function (data) {
+                    if (data.IsPass) {
+                        UI.Dialog.opener.dialog();
+                        UI.Dialog.opener.searchExperienceCoinLog();
+                        UI.Dialog.close();
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+
+<form id="crExperienceCoinLogOperateForm" name="crExperienceCoinLogOperateForm" action="CrExperienceCoinLogOperate">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tbody>
+              <tr>
+               <td width="60"  class="nameright border_rnone">客户帐号:</td>
+               <td class="border_right">@Model.Account</td>
+              </tr>
+              <tr>
+               <td width="60" class="nameright border_rnone">当前剩余:</td>
+                  <td class="border_right border_rnone">
+                   @Model.ExperienceCoin
+                  </td>
+              </tr>
+              <tr>
+               <td width="60" class="nameright border_rnone">调整类型:</td>
+               <td class="border_right border_rnone">
+                   <select id="selChangeType" name="selChangeType" class="select_ht28">
+                       <option value="-1">请选择</option>
+                       <option value="0">增加惠源币</option>
+                       <option value="1">减少惠源币</option>
+                   </select>
+                   <span id="forselChangeType" class="prompt m10_l">调整类型</span>
+               </td>
+              </tr>
+              <tr>
+               <td width="60" class="nameright border_rnone">调整数量:</td>
+               <td class="border_right border_rnone"><input id="txtCreased" class="c3 valid" type="text" name="txtCreased"><span id="fortxtCreased" class="prompt m10_l">不为0的正整数</span></td>
+              </tr>
+              <tr>
+               <td width="60"  class="nameright border_rnone">变更描述:</td>
+               <td class="border_right">
+                <textarea id="txtChangeDescription" class="input_xlarge" rows="2" name="txtChangeDescription" cols="20" style="width: 238px; height: 50px;"></textarea><span id="fortxtChangeDescription" class="prompt m10_l">字数限制,1-200个字符</span>
+               </td>
+              </tr>
+             </tbody>
+           </table>  
+   </div>
+  </div>  
+</div>
+</form>

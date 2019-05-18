@@ -1,0 +1,312 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.BLL.Log
+@using Hyt.BLL.Sys
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@{
+    ViewBag.Title = "我的工作";
+}
+<style type="text/css">
+    .errand_tb {
+        width: auto;
+        padding: 0 10px 10px 10px;
+    }
+
+        .errand_tb li {
+            margin-bottom: 10px;
+        }
+
+            .errand_tb li.lf {
+                width: 49%;
+                float: left;
+            }
+
+            .errand_tb li.rf {
+                width: 49%;
+                float: right;
+            }
+
+    .radio_switch {
+        margin-top: 1px;
+    }
+</style>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript">
+    $(function () {
+        //Check选择
+        UI.CheckAllbox(".boxs_detail", ".checkall");
+
+        //ordio开关
+        var rd_switch = $('#radiobox').find('.radio_switch');
+        rd_switch.toggle(
+            function () {
+                switchRd($(this));
+            }, function () {
+                switchRd($(this));
+            }
+        );
+        //tab选项卡
+        UI.Tab({
+            tabNavBox: '#tabboxs2',
+            tabNavObj: '.tabNav2',
+            tabContentObj: ".boxs_con_p10",
+            tabContent: ".list2",
+            onActiveTab: function (index, element) {
+                var taskType = $(element).val();
+                $("#taskType").val(taskType);
+                loadMyJob();
+            }
+        });
+
+        $("#rleasejob").click(function () {
+            var ids = getSelectedJobs();
+            if (ids == '' || ids == undefined) {
+                Utils.alert("请先选择工作任务！");
+                return false;
+            }
+            rleaseJob(ids);
+            return false;
+        });
+    });
+    //解除任务
+    function rleaseJob(ids) {
+        UI.Confirm({
+            content: '您确定要解除申领选择的任务吗？', ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/JobPool/ReleaseJobs",
+                    data: "sysNos=" + ids,
+                    success: function (ret) {
+                        loadMyJob();
+                    }
+                });
+            }
+        });
+        return false;
+    }
+    //加载我的工作列表
+    function loadMyJob() {
+        if ($("#taskType").val() > 0) {
+            $.ajax({
+                type: "POST",
+                url: "/JobPool/LoadMyJobs",
+                data: { taskType: $("#taskType").val() },
+                success: function(data) {
+                    $("#job" + $("#taskType").val()).empty();
+                    $('#job' + $("#taskType").val()).html(data);
+                }
+            });
+        }
+    }
+    //取得选中的订单池编号
+    function getSelectedJobs() {
+        var ids = '';
+        $('input.checktd').each(function () {
+            if ($(this).attr("checked") && $(this).val()) {
+                if (ids == '')
+                    ids += $(this).val();
+                else
+                    ids += ("," + $(this).val());
+            }
+        });
+        return ids;
+    }
+    //任务开关
+    function switchRd(obj) {
+        if (obj != null && obj.attr("taskType") > 0 && obj.attr("status") >= 0) {
+            $.ajax({
+                type: "POST",
+                url: "/JobPool/JobDispatcher?r=" + Math.random(),
+                cache: false,
+                data: "taskType=" + obj.attr("taskType") + "&status=" + obj.attr("status"),
+                success: function (ret) {
+                    //当开关为关时
+                    if (ret.StatusCode == 0) {
+                        obj.addClass('close');
+                        obj.attr("status", 0);
+                    } else if (ret.StatusCode == 1) {
+                        obj.removeClass('close');
+                        obj.attr("status", 1);
+                    }
+                }
+            });
+        }
+    }
+    
+    //修改优先级
+    function changePriority(obj, sysNo, priority) {
+        if (obj != null && sysNo > 0 && priority >= 0) {
+            $.ajax({
+                type: "POST",
+                url: "/JobPool/ChangePriority",
+                cache: false,
+                data: "sysNo=" + sysNo + "&priority=" + priority,
+                success: function (ret) {
+                    //当开关为关时
+                    if (ret.StatusCode) {
+                        $(obj).parent().removeClass().addClass(ret.Data).html('<a href="javascript:void()" onclick="changePriority(this,' + sysNo + ',' + ret.StatusCode + ')">' + ret.Message + '</a>');
+                    } else {
+                        UI.Alert({ content: ret.Message != '' ? ret.Message : '未知错误，请联系管理员' });
+                    }
+                }
+            });
+        }
+    }
+</script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>我的工作</h3>
+        </div>
+        <div class="boxs_con_c1 clearfix">
+            <!--工具条开始-->
+            <div class="boxs_tool" style="height: 40px; overflow: hidden;">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix" id="radiobox">
+                    @{
+                        List<SelectListItem> lst = new List<SelectListItem>();
+                        Hyt.Util.EnumUtil.ToListItem<Hyt.Model.WorkflowStatus.SystemStatus.任务对象类型>(ref lst);
+                        foreach (var item in lst)
+                        {
+                            if (string.IsNullOrEmpty(item.Value))
+                            {
+                                SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Info, LogStatus.系统日志来源.后台, "任务对象类型值为空:"+item.Text,
+                                  LogStatus.系统日志目标类型.任务池,0, null, null, 0);
+                            }
+                            var jobDispatcher = SyJobDispatcherBo.Instance.GetJobDispatcher(AdminAuthenticationBo.Instance.Current.Base.SysNo, int.Parse(item.Value));
+                        <span class="veralign_t m10_l fl">@item.Text&nbsp;</span>
+                        <div taskType="@item.Value" class="radio_switch fl @if (jobDispatcher == null || jobDispatcher.Status == 0)
+                                                                     {@:close
+                                                                         }" status="@if (jobDispatcher != null)
+                                                                                    {@jobDispatcher.Status}
+                                                                                    else
+                                                                                    {@:0
+                                                               }">
+                        </div>
+                        }
+                    }
+                </div>
+                <!--搜索结束-->
+
+                <!--功能按钮开始-->
+                <div class="left_tool clearfix">
+                    <button class="btn btn_blue btn_ht28 m10_l fl" title="申领任务" onclick='UI.OpenCreatTab("我的工作", "/JobPool/Index/");return false;'><span class="icon_plus icon_white"></span><span class="m5_l">申领任务</span></button>
+                    <button class="btn btn_blue btn_ht28 m10_l fl" id="rleasejob" title="解除任务"><span class="icon_minus icon_white"></span><span class="m5_l">解除任务</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <div class="boxs" id="tabboxs2">
+                <div class="head_tab head_tabsmall">
+                    <!--/small选项卡-->
+                    <ul class="tabNav2" init="true">
+                        @{
+                            var i = 1;
+                            foreach (var item in lst)
+                            {
+                                string spanId = "span" + item.Value;
+                                var jobDispatcher = SyJobDispatcherBo.Instance.GetJobDispatcher(AdminAuthenticationBo.Instance.Current.Base.SysNo, int.Parse(item.Value));
+                            <li @if (i == 1)
+                                {@:class="menuon"
+                            } value="@item.Value"><a>@item.Text<span>（<span id="@spanId"></span>）</span></a></li>
+                                i++;
+                            }
+                        }
+                    </ul>
+                </div>
+                <div class="boxs_con_p10 border_bnone border_rnone border_lnone">
+
+                    @{
+                        i = 1;
+                        foreach (var item in lst)
+                        {
+                            string id = "job" + item.Value;
+                        <div class="list2"  @if (i > 1)
+                                            {@:style="display:none;"
+                                            }>
+                            <div class="boxs_detail border_lnone" style="background-color: #ebebeb;" id="@id">
+                            </div>
+                        </div>
+                                            i++;
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="taskType" value="@Convert.ToInt32(Hyt.Model.WorkflowStatus.SystemStatus.任务对象类型.客服订单审核)"/>
+<div style="z-index: 9; background-color: White; position: absolute;display: none; border: #ddd solid 1px; line-height: 22px; padding:5px 10px; top: -10px;"  id="divPriority">
+    <ul>
+        @{
+            var priorityList = SyJobPoolPriorityBo.Instance.SelectAll();
+            foreach (SyJobPoolPriority item in priorityList)
+            {
+                @:<li><a id="@item.Priority">@item.PriorityDescription<span>(@item.Priority)</span></a></li>
+            }
+        }
+    </ul>
+</div>
+<script type="text/javascript">
+    @{
+        var jobTypelst = new List<SelectListItem>();
+        Hyt.Util.EnumUtil.ToListItem<Hyt.Model.WorkflowStatus.SystemStatus.任务对象类型>(ref jobTypelst);
+        foreach (var litem in jobTypelst)
+        {
+            string id="span"+litem.Value;
+            var num=SyJobPoolManageBo.Instance.GetJobsNumByUser(AdminAuthenticationBo.Instance.Current.Base.SysNo, int.Parse(litem.Value));
+            @:$("#@id").html(@num);
+                    }
+    }
+    var jobObj;
+    var jobSysNo;
+    //显示菜单
+    function showDiv(obj, sysNo) {
+        jobObj = obj;
+        jobSysNo = sysNo;
+        $("#divPriority").find("li").find("a").each(function () {
+            $(this).unbind("click");
+            $(this).click(function () {
+                updatePriority($(this).attr("id"), $(this).text());
+            });
+        });
+        $("#divPriority").css("display", "inline");
+        var offset = $(obj).parent().position();
+        $("#divPriority").css("top", offset.top + 25);
+        $("#divPriority").css("left", offset.left + 20);
+        $("#divPriority").one("mouseleave", function () {
+            hidDiv();
+        });
+    }
+
+    //修改优先级
+    function updatePriority(priority, priorityName) {
+        var obj = jobObj;
+        var sysNo = jobSysNo;
+        if (obj != null && sysNo > 0 && priority >= 0) {
+            $.ajax({
+                type: "POST",
+                url: "/JobPool/ChangePriority",
+                cache: false,
+                data: "sysNo=" + sysNo + "&priority=" + priority,
+                success: function (ret) {
+                    //当开关为关时
+                    if (ret.Status) {
+                        $(obj).text(priorityName);
+                        hidDiv();
+                    } else {
+                        UI.Alert({ content: ret.Message != '' ? ret.Message : '未知错误，请联系管理员' });
+                    }
+                }
+            });
+        }
+    }
+
+    //隐藏订单日志
+    function hidDiv() {
+        $("#divPriority").hide();
+    }
+</script>

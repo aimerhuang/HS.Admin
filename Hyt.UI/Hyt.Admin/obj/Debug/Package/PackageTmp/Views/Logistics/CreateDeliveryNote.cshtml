@@ -1,0 +1,1040 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Model.Parameter.ParaLogisticsControllerGetDeliveryNoteItemList
+@{
+    ViewBag.Title = "创建配送单";
+
+    //保存取件单枚举值
+    int deliveryPickUpValue = (int)Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型.取件单;
+
+    //保存出库单枚举值
+    int deliveryStockOutValue = (int)Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型.出库单;
+
+    //保存取件单枚举文本值
+    string deliveryPickUpText = Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型.取件单.ToString();
+
+    //保存出库单枚举文本值
+    string stockOutText = Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型.出库单.ToString();
+}
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+}
+@section headjs{
+    @if (false)
+    {
+        <script src="~/Theme/scripts/dao.min.js"></script>
+    }
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script type="text/javascript">
+       
+        //#region 定义用于--保存当前页面数据--的类
+        var pageData = {
+            /*
+            * 配送单属性
+            *******************
+            */
+            //仓库编号
+            StockSysNo: "",
+            //配送员编号
+            DeliveryUserSysNo: "",
+            //预付金额
+            PaidAmount: 0,
+            //到付金额
+            CODAmount: 0,
+            //是否在额度不够时强制放行，默认为0(是[1]、否[0])
+            IsEnforceAllow: "0",
+            //配送方式编号
+            DeliveryTypeSysNo: "",
+            //配送类型 （第三方配送[1]、非三方配送[0]）
+            DeliveryType: "",
+
+            /*
+            * 配送单明细对象集合
+            *******************
+            * 集合中包含对象属性列表
+            * 单据类型:         NoteType
+            * 单据编号:         NoteSysNo
+            * 是否到付:         IsCOD   (是[1]、否[0])
+            * 出库单金额:       StockOutAmount
+            * 应收金额:         Receivable
+            * 收货地址编号:     AddressSysNo
+            * 取件单总金额：    TotalAmount
+            * 快递单号:         ExpressNo
+            * 配送类型:         DeliveryType (第三方配送[1]、非三方配送[0])
+            */
+            deliveryNoteItems: []
+        };
+        //#endregion
+
+        /*$(function () {Start}*/
+        $(function() {
+
+            //#region 初始化--选择仓库--文本框事件
+            $("#text_warehouse").click(function() {
+                var self = this;
+
+                var obj = DAO.SelectWhareHouseDialog({
+                    chkStyle: 'radio',
+                    //chkStyle: 'checkbox',
+                    callBack: function(data) {
+                        if (data[0]) {
+                            //选择完成后，将选中的仓库添加到文本框中
+                            $(self).val(data[0].name).attr("sysno", data[0].id);
+                        }
+                        //移除弹出层
+                        //obj.Remove();
+
+                        //加载仓库支持的配送方式下拉列表
+                        if (data) {
+                            $.ajax({
+                                url: '@Url.Action("GetWarehouseDeliveryType")',
+                                type: "post",
+                                dataType: "json",
+                                data: { "warehouseSysNo": data[0].id },
+                                success: function(result) {
+                                    if (result) {
+                                        if (result.Status) {
+                                            //var htmls = [];
+                                            //htmls.push("<option value='-1'>---请选择配送方式---</option>");
+                                            //for (var i = 0; i < result.Data.length; i++) {
+                                            //    htmls.push("<option sysno='" + result.Data[i].SysNo + "' value='" + result.Data[i].IsThirdPartyExpress + "'>" + result.Data[i].DeliveryTypeName + "</option>");
+                                            //}
+                                            //$("#select_delivery_type").empty().append(htmls.join(""));
+                                            var html = CommonClass.getOptionHtml(result.Data);
+                                            $("#select_delivery_type").empty().append(html);
+                                        } else {
+                                            UI.tips.tip_alert('tips_wrong', result.Message);
+                                        }
+                                    }
+                                },
+                                error: function(a, b, c) {
+
+
+                                }
+                            });
+                        } else {
+                            $("#select_delivery_type").empty().append("<option value='-1'>---请先选择仓库---</option>");
+                        }
+                    }
+                });
+            });
+            //#endregion
+
+            //#region 初始化--选择配送方式--下拉框事件
+            $("#select_delivery_type").change(function(e) {
+                var self = $(this);
+                var select_val = self.val();
+
+                if (select_val != -1) {
+
+                    //非三方快递操作
+                    if (select_val == 0) {
+                        $.ajax({
+                            url: '@Url.Action("GetDeliverymanByWarehouseSysNo")',
+                            data: { "warehouseSysNo": $('#text_warehouse').attr("sysno") },
+                            type: "post",
+                            dataType: "json",
+                            success: function(result) {
+                                if (result) {
+                                    if (result.Status) {
+                                        var options = [];
+                                        options.push("<option value='-1'>---选择配送员---</option>");
+                                        for (var i = 0; i < result.Data.length; i++) {
+                                            options.push("<option value='" + result.Data[i].SysNo + "'>" + result.Data[i].UserName + "</option>");
+                                        }
+
+                                        //呈现配送员选择下拉框及详细信息
+                                        $("#delivery_body").find("#select_delivery_user").empty().append(options.join("")).end()
+                                            .find("[name='delivery_group_op']").show();
+
+                                        //隐藏快递单号输入文本框
+                                        $("#addexpressno").find("[name='exp']").hide();
+
+                                        //检查单据类型是否缺少取件单选项
+                                        var selectNoteType = $("#note_type");
+                                        if (CommonClass.getSelectOptionsCount(selectNoteType) == 1) {
+                                            selectNoteType.append("<option value='@deliveryPickUpValue'>@deliveryPickUpText</option>");
+                                        }
+
+                                        //清空快递单号文本框
+                                        $("#express_no").val("请输入快递单号");
+
+                                        //隐藏列表中快递单号列
+                                        CommonClass.isShowExpressNo(false);
+
+                                    } else {
+                                        UI.tips.tip_alert('tips_wrong', result.Message);
+                                    }
+                                }
+
+                            }
+                        });
+                    }
+
+                    //第三方快递操作
+                    if (select_val == 1) {
+                        //隐藏配送员选择下拉框及详细信息
+                        $("#delivery_body").find("[name='delivery_group_op']").hide();
+
+                        //清空配送员选择下拉框
+                        $("#select_delivery_user").empty().append("<option value='-1'>---选择配送员---</option>");
+
+                        //呈现快递单号输入文本框
+                        $("#addexpressno").find("[name='exp']").show();
+
+                        //清空配送员信用额度显示文本
+                        $("#remaining_delivery_credit").empty().removeAttr("price");
+
+                        //删除单据类型下拉框中的取件单项
+                        CommonClass.removeSelectItemByValue($("#note_type"), "@deliveryPickUpValue");
+
+                        //显示列表中快递单号列
+                        CommonClass.isShowExpressNo(true);
+                    }
+
+                    $("#note_type").triggerHandler("change");
+                }
+            });
+            //#endregion
+
+            //#region 初始化--配送人员--下拉框事件
+            $("#select_delivery_user").change(function(e) {
+                var self = $(this);
+                var select_value = self.val();
+
+                if (select_value != -1) {
+                    $.ajax({
+                        url: "@Url.Action("GetDeliveryUserInfo")",
+                        type: "post",
+                        dataType: "json",
+                        data: { "sysNo": select_value, "warehouseSysNo": $("#text_warehouse").attr("sysno") },
+                        success: function(result) {
+                            if (result) {
+                                if (result.Status) {
+                                    //显示配货可用信用额度
+                                    $("#remaining_delivery_credit").empty().text(result.Data.RemainingDeliveryCredit).attr("price", result.Data.Price);
+                                } else {
+                                    UI.tips.tip_alert('tips_wrong', result.Message);
+                                    $("#remaining_delivery_credit").empty().removeAttr("price");
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+            //#endregion
+
+            //#region 初始化--快递单号--输入框事件
+            $("#express_no").keydown(function(e) {
+                e.stopPropagation();
+
+                //当点击回车按钮时需处理的逻辑
+                if (e.which == "13") {
+                    //触发添加出库/取件单按钮事件
+                    $("#add_note").triggerHandler("click");
+                }
+            });
+            //#endregion
+
+
+            //#region 初始化--单据号--输入文本框事件
+            $("#note_number").keydown(function(e) {
+                e.stopPropagation();
+
+                //当点击回车按钮时需处理的逻辑
+                if (e.which == "13") {
+                    //获取配送方式
+                    var delivery_type = $("#select_delivery_type").val();
+
+                    //非三方配送
+                    if (delivery_type == 0) {
+                        //触发添加出库/取件单按钮事件
+                        $("#add_note").triggerHandler("click");
+                    }
+
+                    //第三方配送
+                    if (delivery_type == 1) {
+                        //触发快递单号输入框事件
+                        $("#express_no").triggerHandler("click");
+                        //设置快递单号输入框被选中
+                        document.getElementById("express_no").select();
+                    }
+                }
+            });
+            //#endregion
+
+
+            //#region 初始化--添加出库/取件单--按钮事件
+            $("#add_note").click(function(e) {
+
+                var datas = CommonClass.getAndCheckDeliveryItemInput();
+                if (!datas) {
+                    return;
+                }
+                //获取单据编号
+                datas.NoteNumber = $.trim($("#note_number").val());
+
+                //检查单据类型，获取取件单，出库单文本
+                var noteName = (datas.NoteType == "@deliveryPickUpValue") ? "@deliveryPickUpText" : "@stockOutText";
+
+                if (!datas.NoteNumber) {
+                    UI.tips.tip_alert('tips_warning', "请输入" + noteName + "号！");
+                    return;
+                }
+
+                //检查待添加的单据，是否已经添加
+                if (CommonClass.isDeliveryItemAdd(datas.NoteType, datas.NoteNumber)) {
+                    UI.tips.tip_alert('tips_warning', "单据编号为" + datas.NoteNumber + "的" + noteName + "，已经添加到配送单明细！");
+                    return;
+                }
+
+                var sendData = {};
+                sendData.noteType = datas.NoteType;
+                sendData.noteSysNo = { "0": datas.NoteNumber };
+                sendData.deliveryTypeSysNo = datas.DeliveryTypeSysNo;
+                sendData.deliveryType = datas.DeliveryType;
+                sendData.deliveryUserSysNo = datas.DeliverymanSysNo;
+                sendData.warehouseSysNo = datas.WarehouseSysno;
+
+                CommonClass.addDeliveryItems(sendData);
+            });
+            //#endregion
+
+
+            //#region 初始化--确认发货--按钮事件
+            $("#confirm_deliver_goods").click(function() {
+
+                //获取仓库系统编号
+                pageData.StockSysNo = $("#text_warehouse").attr("sysno");
+                //获取配送员系统编号
+                pageData.DeliveryUserSysNo = $("#select_delivery_user").val();
+
+                //获取配送类型及系统编号
+                var obj = CommonClass.getSysNoAndDeliveryType();
+                pageData.DeliveryTypeSysNo = obj.sysno; //配送类型编号
+                pageData.DeliveryType = obj.type; //配送类型
+
+                if (!pageData.StockSysNo) {
+                    UI.tips.tip_alert('tips_wrong', "请指定需要配送的仓库，再确认发货！");
+                    return;
+                }
+                if (pageData.DeliveryType == -1) {
+                    UI.tips.tip_alert('tips_wrong', "请指定仓库的配送方式，再确认发货！");
+                    return;
+                }
+
+                if (pageData.deliveryNoteItems.length == 0) {
+                    UI.tips.tip_alert('tips_wrong', "请添加配送单明细，再确认发货！");
+                    return;
+                }
+
+                //保存是否打开超出可用配货信用额度确认提示窗口状态
+                var isOpenConfirmWindow = false;
+
+                //非三方配送需要的检查
+                if (pageData.DeliveryType == 0) {
+                    if (pageData.DeliveryUserSysNo == -1) {
+                        UI.tips.tip_alert('tips_wrong', "请指定配送员，再确认发货！");
+                        return;
+                    }
+
+                    //获取当前指定的配送员可用配货信用额度
+                    var deliverymanCredit = $("#remaining_delivery_credit").attr("price");
+
+                    if (!deliverymanCredit) {
+                        UI.tips.tip_alert('tips_wrong', "当前配送员未添加配货信用额度，不能发货！");
+                        return;
+                    }
+
+                    //检查当前配送额度是否超过配送员可用配货信用额度
+                    isOpenConfirmWindow = CommonClass.isExcess(deliverymanCredit);
+                }
+
+                var tmpfunc = function(/*是否在额度不够时强制放行，(是[true]、否[false])*/IsEnforceAllow) {
+                    var sendData = {};
+                    sendData.warehouseSysNo = pageData.StockSysNo;
+                    sendData.deliveryUserSysNo = pageData.DeliveryUserSysNo;
+                    sendData.deliverTypeSysno = pageData.DeliveryTypeSysNo;
+                    sendData.items = CommonClass.getNoteTypeAndNoteNumberObject();
+                    sendData.isForce = IsEnforceAllow;
+
+                    var ajaxLoadingMask = UI.Mask({
+                        obj: $("#createDeliverMainDiv"),
+                        zindex: 1000
+                    });
+                    
+                    //重设遮罩高度，防止按钮被重复点击
+                    $("#createDeliverMainDiv").next("div").css("height", "500px");
+
+                    $.ajax({
+                        url: '@Url.Action("ConfrimDelivery")',
+                        type: "post",
+                        dataType: "json",
+                        data: sendData,
+                        success: function(result) {
+                            ajaxLoadingMask.Remove();
+
+                            if (result) {
+                                if (result.Status) {
+                                    UI.tips.tip_alert('tips_success', result.Message + ",系统将跳转到列表页面。");
+
+                                    window.setTimeout(function() {
+                                        window.location.href = '@Url.Action("DeliveryNoteMaintain")';
+                                    }, 1500);
+
+                                } else {
+                                    UI.tips.tip_alert('tips_wrong', result.Message);
+                                }
+                            }
+                        }
+                    });
+                };
+                if (isOpenConfirmWindow) {
+                    UI.Confirm({
+                        content: "配送员可用配货信用额度已不足，是否超出额度放行？",
+                        cancel: true,
+                        ok: function() {
+                            tmpfunc(true);
+                        }
+                    });
+                } else {
+                    tmpfunc(false);
+                }
+            });
+            //#endregion
+
+
+            //#region 初始化--配送单明细表格删除--按钮事件
+            $("#delivery_item_main").delegate("button", "click", function(e) {
+                var self = $(this);
+
+                UI.Confirm({
+                    cancel: true,
+                    content: "确定删除吗？",
+                    ok: function() {
+                        var note_sysno = self.attr("noteSysno");
+                        var note_type = self.attr("noteType");
+                        self.parents("tr").remove();
+
+                        CommonClass.setTableNumlineAndCss();
+                        CommonClass.deleteDeliveryItemBySysNo(note_type, note_sysno);
+                    }
+                });
+
+            });
+            //#endregion
+
+
+            //#region 初始化--选择出库/取件单弹出窗--按钮事件
+            $("#select_stock_out_btn").click(function() {
+
+                var datas = CommonClass.getAndCheckDeliveryItemInput();
+                if (!datas) {
+                    return;
+                }
+
+                //保存已经添加的配送明细系统编号数组
+                var selectedNoteSysno;
+
+                if (datas.NoteType == "@deliveryPickUpValue") { //取件单操作
+
+                    //获取已经添加的--取件单--系统编号数组
+                    selectedNoteSysno = CommonClass.getSelectedDeliveryItemSysNos("@deliveryPickUpValue");
+                    DAO.SelectPickUp({
+                        whSysNo: datas.WarehouseSysno,
+                        sysNoFilter: selectedNoteSysno,
+                        status: @((int) Hyt.Model.WorkflowStatus.LogisticsStatus.取件单状态.待取件),
+                        callBack: function(data) {
+
+                            if (data && data.length > 0) {
+                                var sendData = {};
+                                sendData.noteType = datas.NoteType;
+                                sendData.noteSysNo = CommonClass.convertArrayToObject(data);
+                                sendData.deliveryTypeSysNo = datas.DeliveryTypeSysNo;
+                                sendData.deliveryType = datas.DeliveryType;
+                                sendData.deliveryUserSysNo = datas.DeliverymanSysNo;
+                                sendData.warehouseSysNo = datas.WarehouseSysno;
+                                CommonClass.addDeliveryItems(sendData);
+                            }
+                        }
+                    });
+
+                } else { //出库单操作
+                    //获取已经添加的--出库单--系统编号数组
+                    selectedNoteSysno = CommonClass.getSelectedDeliveryItemSysNos("@deliveryStockOutValue");
+
+                    DAO.SelectOutStocks({
+                        WarehouseSysNo: datas.WarehouseSysno,
+                        DeliveryTypeSysNo: datas.DeliveryTypeSysNo,
+                        SysNoFilter: selectedNoteSysno.join(","),
+                        callBack: function(data) {
+
+                            if (data && data.length > 0) {
+                                var sendData = {};
+                                sendData.noteType = datas.NoteType;
+                                sendData.noteSysNo = CommonClass.convertArrayToObject(data);
+                                sendData.deliveryTypeSysNo = datas.DeliveryTypeSysNo;
+                                sendData.deliveryType = datas.DeliveryType;
+                                sendData.deliveryUserSysNo = datas.DeliverymanSysNo;
+                                sendData.warehouseSysNo = datas.WarehouseSysno;
+                                CommonClass.addDeliveryItems(sendData);
+                            }
+                        }
+                    });
+                }
+            });
+            //#endregion
+
+            
+            //#region 初始化--在地图上选择出库/取件单弹出窗--按钮事件 2013-03-04 唐文均 创建
+            $("#select_stock_out_map_btn").click(function(){
+                var datas = CommonClass.getAndCheckDeliveryItemInput();
+                if (!datas) {
+                    return;
+                }
+
+                //保存已经添加的配送明细系统编号数组
+                var selectedNoteSysno;
+
+                if (datas.NoteType == "@deliveryPickUpValue") { //取件单操作
+                    
+                } else { //出库单操作
+                    //获取已经添加的--出库单--系统编号数组
+                    selectedNoteSysno = CommonClass.getSelectedDeliveryItemSysNos("@deliveryStockOutValue");
+
+                    DAO.SelectOutStocksFromMap({
+                        WarehouseSysNo: datas.WarehouseSysno,
+                        DeliveryUserSysNo: datas.DeliverymanSysNo,
+                        DeliveryTypeSysNo: datas.DeliveryTypeSysNo,
+                        SysNoFilter: selectedNoteSysno.join(","),
+                        callBack: function(data) {
+
+                            if (data && data.length > 0) {
+                                var sendData = {};
+                                sendData.noteType = datas.NoteType;
+                                sendData.noteSysNo = CommonClass.convertArrayToObject(data);
+                                sendData.deliveryTypeSysNo = datas.DeliveryTypeSysNo;
+                                sendData.deliveryType = datas.DeliveryType;
+                                sendData.deliveryUserSysNo = datas.DeliverymanSysNo;
+                                sendData.warehouseSysNo = datas.WarehouseSysno;
+                                CommonClass.addDeliveryItems(sendData);
+                            }
+                        }
+                    });
+                }
+            });
+            //#endregion
+
+
+            //#region 初始化--选择单据类型--下拉框事件
+            $("#note_type").change(function(e) {
+                var index = this.selectedIndex;
+                var txt = this.options[index].text;
+                $(this).parent().next().text(txt + "号");
+                $("#select_stock_out_btn").attr("title", "选择" + txt).text("选择" + txt);
+                if(txt.indexOf("出库")>=0)
+                    $("#select_stock_out_map_btn").show();
+                else
+                    $("#select_stock_out_map_btn").hide();
+            });
+            //#endregion
+
+        });
+        /*$(function () {End}*/
+
+
+        //#region 本页面公共类，供其他方法调用
+        var CommonClass = {};
+
+        //获取配送方式下拉列表中的选项html字符串
+        CommonClass.getOptionHtml = function(delivery) {
+            var html = "<option value='-1'>---请选择配送方式---</option>";
+            var len = delivery.length;
+            var array = [];
+            for (var i = 0; i < len; i++) {
+                var names = delivery[i].DeliveryTypeName.split("_");
+                if (!isContain(array, names[0])) {
+                    array.push(names[0]);
+                }
+            }
+
+            for (var k = 0; k < array.length; k++) {
+                html += "<optgroup label='" + array[k] + "'></optgroup>";
+                for (var e = 0; e < len; e++) {
+                    var tmpname = delivery[e].DeliveryTypeName.split("_");
+                    if (array[k] == tmpname[0]) {
+                        var sysno = delivery[e].SysNo;
+                        var val = delivery[e].IsThirdPartyExpress;
+                        html += "<option sysno='" + sysno + "' value='" + val + "'>" + tmpname[1] + "</option>";
+                    }
+                }
+            }
+
+            //检查数组中是否包含已有项
+            function isContain(arr, value) {
+                var tmp = 0;
+                for (var j = 0; j < arr.length; j++) {
+                    if (arr[j] == value) {
+                        tmp++;
+                        break;
+                    }
+                }
+                return tmp > 0;
+            }
+
+            return html;
+        };
+
+
+        //添加配送单明细，并在页面显示
+        CommonClass.addDeliveryItems = function(/*向服务端发送的数据对象*/sendData) {
+            var self = this;
+
+            $.ajax({
+                url: '@Url.Action("GetDeliveryNoteItemList")',
+                type: "post",
+                dataType: "json",
+                data: sendData,
+                success: function(result) {
+                    if (result) {
+
+                        if (result.Status) {
+
+                            //创建表格
+                            self.createDeliveryItemsTable(result.Data);
+                            //保存服务端返回的数据
+                            self.saveResultDataToDeliveryItemArray(result.Data);
+                            if (result.Message) {
+                                showMessage(result.Message);
+                            }
+                            if (result.Data.length) {
+                                //禁用配送单选项控件
+                                CommonClass.isDisabledDeliveryNoteControls(true);
+                            }
+                        } else {
+                            showMessage(result.Message);
+                        }
+                    }
+                }
+            });
+
+            function showMessage(msg) {
+                var len = msg.split("_").length;
+                if (len > 1) {
+                    UI.Alert({
+                        content: msg.replace(/_/g, "<br/><hr/>"),
+                        ok: true,
+                        cancel: true,
+                        width: 400
+                    });
+                } else {
+                    UI.tips.tip_alert('tips_wrong', msg);
+                }
+            }
+        };
+
+        //是否显示配送单明细中，快递单号列
+        CommonClass.isShowExpressNo = function(/*true:显示；false:隐藏*/isShow) {
+            if (isShow) {
+                $("#deliveryitems").find("[name='express_number_column']").show();
+            } else {
+                $("#deliveryitems").find("[name='express_number_column']").hide();
+            }
+        };
+
+        //创建配送单明细表格
+        CommonClass.createDeliveryItemsTable = function(/*note:配送单明细组合对象集合 type:Array*/deliveryItemList) {
+            var len = deliveryItemList.length;
+            var htmls = [];
+
+            //获取快递单号
+            var expressNo = $("#express_no").val();
+            expressNo = expressNo == "请输入快递单号" ? "" : expressNo;
+
+            //三方快递标识
+            var isThirdParty = $("#select_delivery_type").val();
+            for (var i = 0; i < len; i++) {
+                var o = deliveryItemList[i];
+                htmls.push("<tr>");
+                htmls.push("<td></td>");
+                htmls.push("<td class='align_l p10_lr'>" + o.NoteSysNo + "</td>");
+
+                //检查单据类型，获取取件单，出库单文本
+                var noteName = (o.NoteType == "@deliveryPickUpValue") ? "@deliveryPickUpText" : "@stockOutText";
+                htmls.push("<td>" + noteName + "</td>");
+
+                if (isThirdParty == 1) { //三方快递
+                    htmls.push("<td name='express_number_column'>" + expressNo + "</td>");
+                } else { //非三方快递
+                    htmls.push("<td name='express_number_column' style='display:none'>" + expressNo + "</td>");
+                }
+
+                htmls.push("<td>" + o.Name + "</td>");
+                htmls.push("<td>" + o.CreatedDate + "</td>");
+                htmls.push("<td>" + o.MobilePhoneNumber + "</td>");
+                htmls.push("<td class='red p10_r align_r'>" + o.Receivable + "</td>");
+                htmls.push("<td><button class='btn btn_ht26' noteSysno='" + o.NoteSysNo + "' noteType='" + o.NoteType
+                    + "' ><span class='icon_trash m5_r' noteSysno='" + o.NoteSysNo + "' noteType='" + o.NoteType + "' ></span><span>删除</span></button></td>");
+                htmls.push("</tr>");
+            }
+
+            if ($("#data_tips_tr").length) {
+                $("#data_tips_tr").remove();
+            }
+
+            //将组装的表格插入到页面
+            //$("#delivery_item_main").append(htmls.join(""));
+            $("#delivery_item_main").prepend(htmls.join(""));
+            this.setTableNumlineAndCss();
+        };
+
+        //设置表格序号与交替样式
+        CommonClass.setTableNumlineAndCss = function() {
+            //设置表格序号
+            $("#delivery_item_main").children("tr").each(function(index) {
+                var self = $(this);
+                var num = index + 1;
+                self.children("td").first().text(num); //设置序号
+            });
+            //重置表格交替行样式
+            DAO.InterlineStyle({ tableid: 'deliveryitems' });
+        };
+
+        //检查配送单明细输入项，并返回一个包含输入值的对象（注意：返回的对象不包含单据编号）
+        CommonClass.getAndCheckDeliveryItemInput = function() {
+            var datas = {};
+
+            //获取仓库系统编号
+            datas.WarehouseSysno = $("#text_warehouse").attr("sysno");
+            //获取添加单据类型
+            datas.NoteType = $("#note_type").val();
+            //获取强制扫描状态
+            datas.IsCompel = $("#compel_scan").attr("checked") ? 1 : 0;
+            //获取快递单号
+            datas.ExpressNumber = $.trim($("#express_no").val());
+            //获取配送员系统编号
+            datas.DeliverymanSysNo = $("#select_delivery_user").val();
+            //获取配送类型以及第三方配送系统编号
+            var obj = CommonClass.getSysNoAndDeliveryType();
+            //配送类型，是否为第三方快递
+            datas.DeliveryType = obj.type;
+            //配送类型系统编号
+            datas.DeliveryTypeSysNo = obj.sysno;
+
+            if (!datas.WarehouseSysno) {
+                UI.tips.tip_alert('tips_warning', "请选择仓库！");
+                return null;
+            }
+
+            if (datas.DeliveryType == -1) {
+                UI.tips.tip_alert('tips_warning', "请选择配送方式！");
+                return null;
+            }
+
+            if (datas.DeliveryType == 0) {
+                if (datas.DeliverymanSysNo == -1) {
+                    UI.tips.tip_alert('tips_warning', "请先指定配送员，然后再添加需配送单据！");
+                    return null;
+                }
+            }
+
+            if (datas.DeliveryType == 1) {
+                if (!datas.ExpressNumber || datas.ExpressNumber == "请输入快递单号") {
+                    UI.tips.tip_alert('tips_warning', "请输入快递单号！");
+                    return null;
+                }
+            } else {
+                datas.ExpressNumber = "";
+            }
+            return datas;
+        };
+
+        //指定单据类型的单据是否已经添加（返回值：  true：已添加；false：未添加）
+        CommonClass.isDeliveryItemAdd = function(/*note:单据类型（出库单/取件单）*/noteType, /*note:单据编号*/noteSysno) {
+            var len = pageData.deliveryNoteItems.length;
+            var arr = pageData.deliveryNoteItems;
+            var status = false;
+            for (var i = 0; i < len; i++) {
+                if (arr[i].NoteType == noteType && arr[i].NoteSysNo == noteSysno) {
+                    status = true;
+                    break;
+                }
+            }
+            return status;
+        };
+
+        //根据指定的单据类型，获取单据系统编号
+        CommonClass.getSelectedDeliveryItemSysNos = function(/*note:单据类型 type:int*/noteType) {
+            var arr = [];
+            var deliveryItems = pageData.deliveryNoteItems;
+            var len = deliveryItems.length;
+
+            for (var i = 0; i < len; i++) {
+                if (deliveryItems[i].NoteType == noteType) {
+                    arr.push(deliveryItems[i].NoteSysNo);
+                }
+            }
+            return arr;
+        };
+
+        //根据指定的value值，删除下拉框的指定option
+        CommonClass.removeSelectItemByValue = function(/*note : 一个下拉框jquery对象*/selectObj, /*type : string*/value) {
+            //获取下拉框option数量
+            var option_len = this.getSelectOptionsCount(selectObj);
+
+            //查找并删除指定value的选项
+            for (var i = 0; i < option_len; i++) {
+                if (selectObj[0].options[i].value == value) {
+                    selectObj[0].remove(i);
+                    break;
+                }
+            }
+        };
+
+        //获取指定下拉框中的option数量
+        CommonClass.getSelectOptionsCount = function(/*note : 一个下拉框jquery对象*/selectObj) {
+            return selectObj[0].options.length;
+        };
+
+        //获取配送类型与第三方配送系统编号
+        CommonClass.getSysNoAndDeliveryType = function() {
+            //获取配送方式下拉框的选中项，从中得到配送类型以及第三方配送系统编号
+            var delivery_type = $("#select_delivery_type");
+            var index = delivery_type[0].selectedIndex;
+            var selectedOption = $(delivery_type[0].options[index]);
+
+            var obj = {};
+            obj.type = selectedOption.val();
+            obj.sysno = selectedOption.attr("sysno");
+
+            return obj;
+        };
+
+        //删除页面对象，配送单明细数组中指定系统编号的明细
+        CommonClass.deleteDeliveryItemBySysNo = function(/*note:单据类型（出库单/取件单）*/noteType, /*note:单据编号*/noteSysno) {
+
+            var len = pageData.deliveryNoteItems.length;
+            var arr = pageData.deliveryNoteItems;
+
+            for (var i = 0; i < len; i++) {
+                if (arr[i].NoteType == noteType && arr[i].NoteSysNo == noteSysno) {
+                    arr.splice(i, 1);
+                    break;
+                }
+            }
+
+            if (pageData.deliveryNoteItems.length == 0) {
+                //启用配送单选项控件
+                CommonClass.isDisabledDeliveryNoteControls(false);
+            }
+        };
+
+        //保存服务端返回的数据，到页面pageData对象中的deliveryNoteItems数组中
+        CommonClass.saveResultDataToDeliveryItemArray = function(resultData) {
+            var obj = this.getSysNoAndDeliveryType();
+            var expressNo = $("#express_no").val();
+            expressNo = expressNo == "请输入快递单号" ? "" : expressNo;
+
+            for (var i = 0; i < resultData.length; i++) {
+                var o = resultData[i];
+                o.ExpressNo = expressNo; //快递单号
+                o.DeliveryType = obj.type; //是否为第三方快递(是[1]、否[0])
+
+                pageData.deliveryNoteItems.push(o);
+                //pageData.deliveryNoteItems.unshift(o);//更改为新添加的配送单显示在最前面
+            }
+        };
+
+        //是否禁用与配送单创建有关的控件
+        CommonClass.isDisabledDeliveryNoteControls = function(/*true:禁用;false:启用*/status) {
+            $("#select_delivery_type").attr("disabled", status);
+            $("#select_delivery_user").attr("disabled", status);
+            $("#text_warehouse").attr("disabled", status);
+        };
+
+        //配送员是否超出额度（返回值   true：超出额度；false：未超出额度）
+        CommonClass.isExcess = function(/*配送员可用配送信用额度*/deliverymanCredit) {
+            var arr = pageData.deliveryNoteItems;
+            var len = arr.length;
+
+            //保存累加的值
+            var sum = 0.0;
+
+            for (var i = 0; i < len; i++) {
+                //检查是否为出库单
+                if (arr[i].NoteType == "@deliveryStockOutValue") {
+                    var num = arr[i].Receivable.replace("¥", "").replace(/,/g, "");
+                    sum += window.parseFloat(num);
+                }
+                //检查是否为取件单
+                if (arr[i].NoteType == "@deliveryPickUpValue") {
+                    sum += window.parseFloat(arr[i].TotalAmount);
+                }
+            }
+            return sum > deliverymanCredit;
+        };
+
+        //将数组转换为以数组索引为key的对象集合
+        CommonClass.convertArrayToObject = function(/*待转换数组*/array) {
+            var convertObj = {};
+            var len = array.length;
+            for (var i = 0; i < len; i++) {
+                convertObj[i] = array[i];
+            }
+            return convertObj;
+        };
+
+        //获取单据类型、单据编号以及快递单号集合对象
+        CommonClass.getNoteTypeAndNoteNumberObject = function() {
+            var tmp = [];
+            var len = pageData.deliveryNoteItems.length;
+            var arr = pageData.deliveryNoteItems;
+            for (var i = 0; i < len; i++) {
+                tmp.push(arr[i].NoteType + "," + arr[i].NoteSysNo + "," + arr[i].ExpressNo);
+            }
+            return this.convertArrayToObject(tmp);
+        };
+    //#endregion
+    </script>
+   
+}
+<div class="case" id="createDeliverMainDiv">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"><button class="btn btn_ht26 m10_r" onclick="window.location.href='@Url.Action("DeliveryNoteMaintain")'"><span class="icon_share_alt"></span><span class="m5_l">返回配送单管理</span></button></span>
+            <h3>创建配送单</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_detail_dispay">
+                <div class="tit_dispay border_tnone">
+                    <h5>指定配送员</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody id="delivery_body">
+                            <tr>
+                                <td width="10%" class="nameright">配送单号:</td>
+                                <td colspan="7">
+                                    <span id="auto_sysno">自动编号</span>
+                                </td>
+                            </tr>
+
+                            <tr id="tr_wharehouse">
+                                <td class="nameright border_bnone"><span class="v_star">*</span>仓库</td>
+                                <td class="border_right border_bnone" id="select_list" style="width: 120px">
+                                    <input id="text_warehouse" type="text" sysno="" readonly="readonly" class="m5_r" />
+                                </td>
+                                <td class="nameright border_bnone" width="60px"><span class="v_star">*</span>配送方式</td>
+                                <td class="border_bnone" width="151px">
+                                    <select class="wd100 " style="width: 150px;" id="select_delivery_type">
+                                        <option value="-1">---请先选择仓库---</option>
+                                    </select>
+                                </td>
+                                <td class="nameright border_bnone" width="59">
+                                    <span name="delivery_group_op" style="display: none;" class="v_star">*</span>
+                                    <span name="delivery_group_op" style="display: none;">配送员</span>
+                                </td>
+                                <td id="man_user" class="border_bnone" width="125px">
+                                    <select name="delivery_group_op" class="wd100 select_ht28" style="width: 120px; display: none;" id="select_delivery_user">
+                                        <option value="-1">---请选择---</option>
+                                    </select>
+                                    @*<button class="btn btn_blue btn_ht26" title="添加配送单" id="add_delivery_man" style="display:none" >添加配送单</button>*@
+                                </td>
+                                <td class="nameright border_bnone" width="130px">
+                                    <span name="delivery_group_op" style="display: none;">当前可用配送信用额度:</span>
+                                </td>
+                                <td style="text-align: left" class="border_bnone">
+                                    <span id="remaining_delivery_credit" name="delivery_group_op" style="display: none;" class="p10_r red"></span>
+                                </td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tit_dispay">
+                    <h5>添加出库/取件单</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody id="addexpressno">
+                            @*<tr>
+                                <td width="10%" class="nameright"></td>
+                                <td width="90%" style="color: blue" colspan="3">①如果是两星期前出库的订单,需要强制扫描才能添加成功<br />
+                                    ②如果出库单的收货地区与快递匹配区域不符，需要强制扫描才能添加成功 
+                                </td>
+                            </tr>*@
+                            
+                            <tr>
+                                <td width="10%" class="nameright border_bnone">单据类型</td>
+                                <td width="4%" class="border_bnone">
+                                    <select class="prov" id="note_type">
+                                        @foreach (var noteType in typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型).GetEnumValues())
+                                        {
+                                            int selectValue = (int)noteType;
+                                            string selectText = noteType.ToString();
+                                            <option value="@selectValue">@selectText</option>
+                                        }
+                                    </select>
+                                </td>
+                                <td width="7%" class="nameright border_bnone">出库单号</td>
+                                <td width="7%" class="borde_right border_bnone" style="padding-right:0">
+                                    <input type="text" class="input_medium m10_r" value="" id="note_number" maxlength="30" />
+                                </td>
+                                <td class="nameright border_bnone" width="6%" name="exp" style="display: none;" >
+                                    快递单号
+                                </td>
+                                <td name="exp" width="6%" style="display: none;padding-right:0" class="border_bnone">
+                                     <input type="text" name="exp" class="input_medium m10_r"  maxlength="30" id="express_no"  value="请输入快递单号" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入快递单号'; " onfocus="this.select()" onclick="if (this.value == '请输入快递单号') this.value = ''; " />
+                                </td>
+                                <td style="padding-left:0" class="border_bnone">
+                                    <button class="btn btn_ht28 m5_r" title="添加到配送单" id="add_note">添加到配送单</button>
+                                    <button class="btn btn_ht28 m5_r" title="选择出库单" id="select_stock_out_btn">选择出库单</button>
+                                    <button class="btn btn_ht28 m5_r" title="地图选择出库单" id="select_stock_out_map_btn">地图选择出库单</button>
+                                    <div style="display:none"><input type="checkbox" id="compel_scan" />&nbsp;强制扫描</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="tit_dispay">
+                    <h5>配送单明细</h5>
+                </div>
+                <!--配送单信息列表-->
+                <div class="tit_con">
+                    <div class="boxs_list">
+                        <div class="boxs_listtabel">
+                            <table id="deliveryitems" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+                                <thead>
+                                    <tr>
+                                        <th style="width:44px;">序号</th>
+                                        <th class="align_l p10_lr">单据编号</th>
+                                        <th style="width:68px;">单据类型</th>
+                                        <th name="express_number_column" style="display:none" width="68px">快递单号</th>
+                                        <th style="width: 80px">收货人姓名</th>
+                                        <th style="width:116px;">出库日期</th>
+                                        <th class="wd100">收货人手机</th>
+                                        <th class="wd100">代收金额</th>
+                                        <th style="width: 79px">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="delivery_item_main">
+                                    @*配送单明细列表*@
+                                    <tr id="data_tips_tr">
+                                        <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+                                     </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination align_c clearfix">
+
+                    <button class="btn btn_blue btn_ht32 bold f14" id="confirm_deliver_goods">创建配送单</button>&nbsp;
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

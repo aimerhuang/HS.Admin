@@ -1,0 +1,72 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList<Hyt.Model.Transfer.CBCrRecharge>
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="66">编号</th>
+            <th width="100">用户账号</th>
+            <th width="110">用户余额</th>
+            <th width="110">昵称</th>
+            <th width="110">入账金额</th>
+            <th width="300">交易凭证</th>
+            <th>描述</th>
+            <th width="130">入账日期</th>
+            <th width="200">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (var item in Model.TData)
+            {
+                <tr>
+                    <td>@item.SysNo</td>
+                    <td class="blue">
+                        <a href="javascript:Look('@item.SysNo');">@item.Account</a>
+                    </td>
+                    <td class="red">@item.AvailableBalance</td>
+                    <td>@item.NickName</td>
+                    <td class="red">@item.ReAmount</td>
+                    <td>
+                        @if (item.RePaymentId == (int)Hyt.Model.CommonEnum.PayCode.易宝)
+                        {
+                            var temp = item.TradeNo;
+                            var arr = item.TradeNo.Split('_');
+                            if (arr.Length > 1)
+                            {
+                                temp = string.Format("{0}_{1}_{2}", arr[0], item.SysNo, arr[1]);
+                            }
+                            @temp
+                        }
+                        else
+                        { 
+                            @item.TradeNo
+                        }
+                    </td>
+                    <td class="align_l p10_lr">@item.ReMark</td>
+                    <td>@item.ReAddTime</td>
+                    <td>
+                        <button class="btn btn_ht26 m10_l" onclick="Check(@item.CustomerSysNo);" title="查看当前会员所有"><span class="icon_search"></span><span class="m5_l">查看当前会员所有</span></button>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    //隔行样式
+    DAO.InterlineStyle();
+</script>

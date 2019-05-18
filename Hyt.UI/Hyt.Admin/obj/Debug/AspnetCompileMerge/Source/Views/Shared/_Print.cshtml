@@ -1,0 +1,34 @@
+﻿@{
+  
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    <link href="/Theme/css/base.chirp.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/frame.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/common.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/icon.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/form.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/btn.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/boxandtable.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/search.css" rel="stylesheet" type="text/css" media="all" />
+    <script type="text/javascript" src="/Theme/scripts/jquery.min.js"></script>
+     <script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Print/LodopFuncs.js?v=3"></script>  
+    @RenderSection("HeadCss", required: false)
+    @RenderSection("HeadJs", required: false)
+</head>
+<body>
+    <div class="caseout" style="margin: auto;">
+        @RenderBody()
+        <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" source="~/Print/install_lodop32.exe" width="100%" height="550">
+            <embed id="LODOP_EM" type="application/x-print-lodop" width="100%" height="550" pluginspage="~/Print/install_lodop32.exe" source="~/Print/install_lodop32.exe" /></embed>
+        </object>
+        @RenderSection("FooterJs", required: false)
+    </div>
+</body>
+</html>

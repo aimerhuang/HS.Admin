@@ -1,0 +1,143 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.UnUnionSite>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.UN1001301, ".UN1001301");
+    @Html.PrivilegeControl(PrivilegeCode.UN1001701, ".UN1001701");
+}
+<table id="item_list" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th class="wd75">系统编号</th>
+            <th class="align_l p10_lr">网站名称</th>
+            <th class="align_l p10_lr">网站Url</th>
+            <th width="72">联系人</th>
+            <th width="100">电话</th>
+            <th width="100">手机</th>
+            <th width="120">有效日期起</th>
+            <th width="120">有效日期止</th>
+            <th width="62">状态</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.TData != null && Model.TData.Any())
+        {
+            foreach (var item in Model.TData)
+            {
+  
+            <tr>
+                <td class="blue"><a href="javascript:;" name="detail" title="点击查看">@item.SysNo</a></td>
+                <td class="align_l p10_lr">@item.SiteName</td>
+                <td class="align_l p10_lr">@item.SiteUrl</td>
+                <td>@item.Contact</td>
+                <td>@item.Telephone</td>
+                <td>@item.MobilePhoneNumber</td>
+                <td>@item.BeginTime.ToString("yyyy-MM-dd")</td>
+                <td>@item.EndTime.ToString("yyyy-MM-dd")</td>
+                <td>@((UnionStatus.联盟网站状态)item.Status)</td>
+                <td>
+                    @if (item.Status == (int)UnionStatus.联盟网站状态.启用)
+                    {
+                        <button title="禁用" name="disabled" data-id="@item.SysNo" class="btn btn_ht26 m10_r btn_blue UN1001701" type="button"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button><button title="修改" class="btn btn_ht26 btn_blue UN1001301" type="button" data-id="@item.SysNo" name="edit"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    }
+                    else
+                    {
+                        <button title="启用" name="enable" data-id="@item.SysNo" class="btn btn_ht26 m10_r btn_blue UN1001701" type="button"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button><button title="修改" class="btn btn_ht26 btn_blue UN1001301" type="button" data-id="@item.SysNo" name="edit"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+        $("#item_list").delegate("button[name='edit']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                var url = "@Url.Action("UnionSiteEdit")/"+id;
+                UI.DialogOpen(url, {
+                    title: '修改联盟网站',
+                    width: 616,
+                    height: 349,
+                    init: function () {
+                        this.button({
+                            name: '确认',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                if (!iframe.document.body) {
+                                    UI.Alert('页面还没加载完毕呢');
+                                    return false;
+                                };
+                                iframe.submitUnionSite();
+                                return false;
+                            }, focus: true
+                        }, {
+                            name: "取消"
+                        });
+                    }
+                }, false);
+            }
+        });
+        $("#item_list").delegate("a[name='detail']", "click", function () {
+            var id = $(this).text();
+            var url = "@Url.Action("UnionSiteDetail")/"+id;
+            UI.DialogOpen(url, {
+                title: '联盟网站查看',
+                width: 551,
+                height: 349,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+        $("#item_list").delegate("button[name='disabled']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                StatusChange(id, @((int)UnionStatus.联盟网站状态.禁用), '确定要禁用该联盟网站吗？');
+        }
+        });
+        $("#item_list").delegate("button[name='enable']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                StatusChange(id, @((int)UnionStatus.联盟网站状态.启用), '确定要启用该联盟网站吗？');
+            }
+        });
+    });
+
+    function StatusChange(id, status, content) {
+        var data = {};
+        data.id = id;
+        data.status = status;
+        UI.Confirm({
+            content: content,
+            ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("UnionSiteStatusChange", "Union")",
+                    data:data,
+                    chche: false,
+                    success: function (ret) {
+                        if (ret.StatusCode == 0) {
+                            doSearch();
+                        } else {
+                            UI.Alert({ content: ret.Message });
+                        }
+                    },
+                    error: function () {
+                        UI.Alert({ content: '操作出错,请稍候重试!' });
+                    }
+                });
+            }
+        });
+    }
+</script>

@@ -1,0 +1,206 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.rp_绩效_办事处>
+@{
+    ViewBag.Title = "OfficePerformance";
+}
+
+@section FooterJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    @*分页
+    其中包括添加X-Requested-With=XMLHttpRequest,后台Request.IsAjaxRequest
+    http://localhost:12893/appcontent/ProductBrowseHistory/2?X-Requested-With=XMLHttpRequest
+    *@
+
+    <script type="text/javascript">
+        var paras;
+
+        function setWhData() {
+            var whSelected = getCheckedWarehouses().join();
+            $.ajax({
+                url: '@Url.Action("SetWhSelected")',
+                async: false,
+                type: 'post',
+                data: { whSelected: whSelected }
+            });
+            AjaxStart();
+        }
+
+        function ajaxAction(url, type, vals) {
+            $.ajax({
+                url: url,
+                type: type === undefined ? 'get' : type,
+                //async: async === undefined ? true : async,
+                data: vals,
+                success: function(data) {
+                    //login time out handling
+                    /*CustomActionFilter
+                    
+                    */
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    $('#divSearchResult').html(data);
+                }
+            });
+        }
+
+        $(document).ready(function() {
+
+            //set date
+            var dateNow = new Date();
+            var monthNum = dateNow.getMonth() + 1;
+            var dMonth = monthNum < 10 ? '0' + monthNum : monthNum;
+            var dateVal = dateNow.getFullYear() + '-' + dMonth;
+            $('#txtCalDate').val(dateVal);
+
+            $('#btnSearch').click(function() {
+                var warehouses = getCheckedWarehouses(), msgRtn;
+                var whSelected = warehouses.join();
+                
+                $.ajax({
+                    url: '@Url.Action("SetWhSelected")',
+                    async: false,
+                    type: 'post',
+                    data: { whSelected: whSelected }
+                });
+
+                ajaxAction('@Url.Action("OfficePerformance")', undefined, { 统计日期: $('#txtCalDate').val() });
+            });
+
+            $('#btnExport').click(function() {
+                if ($('#tableResult tbody tr').length == 0) {
+                    UI.Alert({ content: '没有数据!' });
+                    return;
+                }
+                
+                var warehouses = getCheckedWarehouses(), msgRtn;
+                var whSelected = warehouses.join();
+
+                $.ajax({
+                    url: '@Url.Action("SetWhSelected")',
+                    async: false,
+                    type: 'post',
+                    data: { whSelected: whSelected }
+                });
+
+                window.location = '@Url.Action("OfficePerformanceToExcel")'
+                    + '?统计日期=' + $('#txtCalDate').val();
+
+            });
+
+            $("#btnOk").click(function() {
+                var warehouses = getCheckedWarehouses(), msgRtn;
+                var whNames = getCheckedWarehouseNames().join();
+                if (warehouses.length > 2) {
+                    msgRtn = '你选择了' + warehouses.length + '个组织机构';
+                } else {
+                    msgRtn = whNames;
+                }
+                $('#txtMulWh').val(msgRtn);
+                $("#divWh").hide();
+            });
+
+            $("#btnCancel").click(function() {
+                $("#divWh").hide();
+            });
+
+            $('#txtMulWh,#btnWareHouseSel').bind('click', function(e) {
+
+                var position = $('#txtMulWh').offset();
+                $("#divWh").css({ top: position.top + 25, left: position.left }).show();
+                e.stopPropagation();
+
+            });
+            
+
+        });
+
+    </script>
+}
+
+
+<div id="divWh"  style="width: 282px; vertical-align:top; position: absolute; display: none; z-index: 1000">
+    @{
+        Html.RenderAction("OrganizationTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel" >取消</button>
+    </div>
+</div>
+<div class="case" id="divP">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>办事处绩效报表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="left_tool" style="float: left">
+                    <button class="btn btn_ht26 m10_r" id="btnExport" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+                <div class="right_tool clearfix">
+                    <span class="fl m10_r">办事处</span>
+                    @*<select data-method="tree" class="wd100 fl m10_l" name="InvStatus" ><option>全部</option></select>*@
+                    
+                    <div class="fl m10_r" id="JS_outbox" style="margin-right: 10px;">
+                        @*<input id="txtMulWh" name="txtMulWh" type="text" value="选择仓库" class="input_ht28 wd150" readonly="readonly" style="margin-right: -10px">
+                        <button title="选择仓库" class="btn btn_ht28" id="btnWareHouseSel">
+                            <span class="icon_th_list"></span>
+                        </button>*@
+                        
+                        <div class="date_btn" >
+                            <input type="text" class="input_ht26" id="txtMulWh" name="txtMulWh" readonly="readonly" />
+                            <button type="button" title="选择办事处"  class="btn btn_ht26" id="btnWareHouseSel">
+                                <span class="icon_th_list"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    @*                    <span class="fl m10_l">开始日期</span>
+                    <div class="date_btn fl m10_l ">
+                        <input type="text" value="" id="BeginDate" name="" class="input_ht26">
+                        <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate',maxDate:$(EndDate).val()})"><span class="icon_calendar"></span></button>
+                    </div>
+
+                    <span class="fl m10_l">结束日期</span>
+                    <div class="date_btn fl m10_l">
+                        <input type="text" value="" id="EndDate" name="" class="input_ht26">
+                        <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate',minDate:$(BeginDate).val()})"><span class="icon_calendar"></span></button>
+                    </div>*@
+                    
+                    <span class="veralign_t fl">统计月份</span>
+                    <div class="fl m10_l">
+                        <div class="date_btn" >
+                            <input type="text" id="txtCalDate" name="start_date" class="input_ht26"   value=""  />
+                            <button type="button" title="日历"  class="btn btn_ht26" onclick="UI.Date({el:'txtCalDate',dateFmt:'yyyy-MM'})">
+                                <span class="icon_calendar"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="button" id="btnSearch" class="btn btn_ht26 fl m10_l" title="查询"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+                </div>
+            </div>
+
+
+
+
+            <!-- 查询结果 -->
+            <div id="divSearchResult" class="boxs_listtabel">
+
+                @{Html.RenderPartial("pAjaxPager_OfficePerformance", Model);}
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+

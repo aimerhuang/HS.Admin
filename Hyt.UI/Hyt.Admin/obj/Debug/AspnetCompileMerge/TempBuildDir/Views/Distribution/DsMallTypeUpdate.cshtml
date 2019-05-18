@@ -1,0 +1,162 @@
+﻿@model Hyt.Model.DsMallType
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改分销商城类型";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+}
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+
+                            <td style="width: 21%" class="nameright border_rnone">商城类型代号：</td>
+                            <td style="width: 79%" class="">
+                                @Model.MallCode
+                                <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+                                <input type="hidden" id="MallCode" name="MallCode" value="@Model.MallCode" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>商城类型名称</td>
+                            <td>
+                                <input type="text" id="MallName" maxlength="20" value="@Model.MallName" name="MallName" class="wd156">
+                                <span id="forMallName" class="prompt m10_l">字数限制,1-20字</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>是否使用预存款</td>
+                            <td class="">
+                                <select id="IsPreDeposit" name="IsPreDeposit" class="wd170">
+                                 @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.商城是否使用预存款)))
+                                    {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                                </select>
+                                <span id="forIsPreDeposit" class="prompt m10_l">分销商城类型状态</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                            <td>
+                                <select id="status" name="status" class="wd170">
+                                 @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.商城类型状态)))
+                                    {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                                </select>
+                                <span id="forstatus" class="prompt m10_l">分销商城类型状态</span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //设置选择项
+        window.onload = function () {
+            $("#IsPreDeposit").find("option[value=@Model.IsPreDeposit]").attr("selected", "true");
+            $("#status").find("option[value=@Model.Status]").attr("selected", "true");
+        };
+
+
+        //验证
+        $().ready(function () {
+            $("#form1").validate({
+                rules: {
+                    // 选择框
+                    status: {
+                        required: true,
+                    },
+                    IsPreDeposit: {
+                        required: true,
+                    },
+                    //文本
+                    MallName: {
+                        required: true,
+                        maxlength: 20,
+                    },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        (function () {
+            var opener = art.dialog.opener,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('修改分销商城类型')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定修改吗？",
+                                    ok: function () {
+                                        var model = getModel();
+                                        $.ajax({
+                                            url: "@Url.Action("AjaxDsMallTypeUpdate")",
+                                            data: JSON.stringify(model),
+                                            contentType: 'application/json',
+                                            type: "post",
+                                            success: function (ret) {
+                                                if (ret) {
+                                                    UI.DialogOpener().ExecSuccess("修改分销商城类型成功");
+                                                    UI.Dialog.close();
+                                                } else {
+                                                    UI.tips.tip_alert('tips_shrot tips_wrong', '修改分销商城类型失败');
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.tips.tip_alert('tips_shrot tips_wrong', "操作出错！");
+                                            }
+                                        });
+                                    }
+                                 });
+                             
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                {
+                    name: '关闭'
+                }
+            );
+            function getModel() {
+                var model = {};
+                model.SysNo = $("#SysNo").val();
+                model.MallCode = $("#MallCode").val();
+                model.Status = $("#status").val();
+                model.MallName = $("#MallName").val();
+                model.IsPreDeposit = $("#IsPreDeposit").val();
+                return model;
+            }
+        })();
+
+    </script>
+}

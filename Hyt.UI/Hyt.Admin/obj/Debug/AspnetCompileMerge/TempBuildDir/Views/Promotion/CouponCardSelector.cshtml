@@ -1,0 +1,154 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Model.Transfer.CBCouponCard
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "绑定优惠卡";
+}
+
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+
+<div class="caseout">
+    <form id="form1" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">优惠券卡号</td>
+                            <td width="80%"><input type="text" placeholder="优惠券卡号" class="wd150" name="couponCardNo" id="couponCardNo" maxlength="20" value="@if (Model !=null) {@Model.CouponCard.CouponCardNo}" />
+                                <button class="btn btn_blue btn_ht26 m10_l" type="submit" id="btnQuery"><span class="m5_l">确定</span></button></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">类型名称：</td>
+                            <td>@if (Model != null)
+                                {
+                                    @Model.CouponCardType.TypeName
+                                }</td>
+                        </tr>
+                        <tr>
+                            <td valign="top" class="nameright border_rnone">有效时间：</td>
+                            <td>@if (Model != null)
+                                {
+                                    @Model.CouponCardType.StartTime @:- @Model.CouponCardType.EndTime
+                                }</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone" >状态：</td>
+                            <td>@if (Model != null)
+                                {
+                                    if (Model.CouponCardType.Status == (int)PromotionStatus.优惠券卡类型状态.启用 && Model.CouponCard.Status == (int)PromotionStatus.优惠券卡状态.启用)
+                                    {
+                                        @:启用
+                                    }
+                                    else
+                                    {
+                                        @:禁用
+                                    }
+                                }</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+  
+        </div>
+    </form>
+    <div class="boxs_detail border_lnone">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+            <thead>
+                <tr>
+                    <th class="border_lnone align_l p10_lr">优惠券描述</th>
+                    <th width="85">优惠券金额</th>
+                    <th width="68">绑定次数</th>
+                </tr>
+            </thead>
+            <tbody>
+	            @{
+	                if (Model == null)
+	                {
+	                    <tr>
+	                        <td class="border_lnone align_l p10_lr" colspan="3">请先查询卡号</td>
+	                    </tr>
+	                }
+	                else if (!Model.Coupons.Any())
+	                {
+	                    <tr>
+	                        <td class="border_lnone align_l p10_lr" colspan="3">无相关数据</td>
+	                    </tr>
+	                }
+	                else
+	                {
+	                    foreach (var item in (List<Hyt.Model.SpCoupon>) Model.Coupons)
+	                    {
+	                        <tr>
+	                            <td class="border_lnone align_l p10_lr">@item.Description <input name="couponSysNos" type="hidden" value="@item.SysNo" /></td>
+	                            <td><span class="p10_l">@MvcHtmlString.Create(FormatUtil.FormatCurrency(item.CouponAmount, 2))</span></td>
+	                            <td>@Model.Associations.First(o => o.CardTypeSysNo == Model.CouponCardType.SysNo && o.CouponSysNo == item.SysNo).BindNumber</td>
+	                        </tr>
+	                    }
+	                }
+
+
+	            }
+
+@*                <input name="couponSysNos" type="hidden" value="1" />
+                <input name="couponSysNos" type="hidden" value="2" />*@
+            </tbody>
+        </table>
+    </div>
+    <div class="m10_t"><button class="btn btn_blue btn_ht26" type="button" id="btnBind" onclick="doBind()"><span class="m5_l">绑定到用户</span></button></div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function(e) {
+        $("#form1").ajaxLoadingMask(true);
+        var msg = "@ViewBag.Message";
+        if (msg != "") {
+            tips('tips_warning', msg);
+        }
+    });
+    
+    function doBind() {
+        var parent = artDialog.open.origin;
+        var customerSysNo = parent.document.getElementById("CustomerSysNo").value;
+        var couponCardNo = "@if (Model != null){@Model.CouponCard.CouponCardNo}";
+        var coupons = $("input[name='couponSysNos']");
+        if (coupons.length == undefined || coupons.length == 0 || customerSysNo <= 0) {
+            tips('tips_warning', '请先搜索到优惠卡后再做绑定。');
+            $("#couponCardNo").focus();
+        } else {
+            var couponSysNos = [];
+            coupons.each(function () {
+                couponSysNos.push(this.value);
+            });
+
+            UI.Confirm({
+                content: '确定要将该优惠卡绑定此客户吗?',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Promotion/AssignCouponCard",
+                        data: JSON.stringify({couponCardNo: couponCardNo, couponSysNos: couponSysNos, customerSysNo: customerSysNo}),
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        cache: false,
+                        success: function (ret) {
+                            if (ret.Status) {
+                                parent.doUserDataRead();
+                                UI.Alert({
+                                    icon: "succeed",
+                                    content: '绑定成功。'
+                                });                                UI.CloseDialog();
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+    }
+</script>

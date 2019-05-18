@@ -1,0 +1,88 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    
+    ViewBag.Title = "查看咨询信息";
+    @Html.PrivilegeControl(PrivilegeCode.UN1007201, ".UN1007201")
+}
+@section HeadJs{
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+        });
+        var pageid = 1;
+        //查询列表
+        function doSearch() {
+            if (pageid == $("#pagecount").val()) {
+                UI.tips.tip_alert("tips_short tips_success", "没有更多信息了");
+                $("#seeMore").hide();
+            }
+            $.get('@Url.Action("WeChatReply", "Union")',
+                {
+                    id: pageid,
+                    weixinId: '@ViewBag.WeixinId',
+                },
+                function (data) {
+                    $('#paging').prepend(data);
+                    pageid += 1;
+                });
+            }
+            function Replay() {
+
+                $.ajax({
+                    url: '@Url.Action("AjaxWeChatReplay")',
+                    data: JSON.stringify({ weixinId: '@ViewBag.WeixinId', message: $("#replayinfo").val() }),
+                    type: "post",
+                    contentType: "application/json",
+                    success: function (ret) {
+                        if (ret) {
+                            var strhtml = "<dl class='answer'>";
+                            strhtml += "<dt><span class='more10r'>@DateTime.Now.ToString("yyyy-MM-dd HH:mm")</span><span class='green'>客服账号：@(ViewBag.Account)</span></dt>";
+                            strhtml += "<dd>" + $("#replayinfo").val() + "</dd>";
+                            strhtml += "<div class='arrow_r'></div></dl>";
+                            $('#paging').append(strhtml);
+                            $("#replayinfo").val("");
+                            UI.tips.tip_alert("tips_short tips_success", "回复成功！");
+                        } else {
+                            UI.Alert({ content: "回复失败！" });
+                        }
+
+                    },
+                    error: function () {
+                        UI.Alert({ content: "操作出错！" });
+                    }
+                }
+            );
+            }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <div class="fl">
+                <h3>@ViewBag.Title</h3>
+            </div>
+            <div class="fr">
+                <span class="bold blue">&nbsp;</span>
+                <button onclick="window.location.href='@Url.Action("WeChat")'" class="btn btn_ht26 m5_l"><span class="icon_share_alt"></span><span class="m5_l">返回</span></button>
+            </div>
+        </div>
+        <div class="boxs_con_c1" style="background-color: #f5f5f5;">
+            <div class="wx_list1">
+                <div class="wx_list1more blue" id="seeMore"><a onclick="doSearch()">查看更多>></a></div>
+                <input type="hidden" value="2" id="pagecount" />
+                <div id="paging"></div>
+                <div class="clear" name="current" id="current"></div>
+            </div>
+            <div class="wx_list2">
+                <div>
+                    <textarea name="" cols="" id="replayinfo" rows="" style="width: 99%; height: 90px;"></textarea>
+                </div>
+                <div class="m10_t">
+                    <button class="btn btn_blue btn_ht32 bold UN1007201" onclick="Replay()">发 送</button>
+                    <button class="btn btn_ht32 bold m10_l" onclick="window.location.href ='@Url.Action("WeChat")'">返 回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

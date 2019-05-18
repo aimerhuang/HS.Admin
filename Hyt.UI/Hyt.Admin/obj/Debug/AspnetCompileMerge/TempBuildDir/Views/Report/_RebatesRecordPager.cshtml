@@ -1,0 +1,113 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBRptRebatesRecord>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="30">
+                    <input name="sysNo" id="checkall" type="checkbox" />
+                </th>
+                <th width="100">订单ID</th>
+                <th width="110">订单编号</th>
+                <th width="110">订单日期</th>
+                <th width="110">购买人ID</th>
+
+                <th width="110">购买人账号</th>
+                <th width="110">返利人ID</th>
+                <th width="110">返利人账号</th>
+
+                <th width="110">返利人名称</th>
+                <th width="110">订单利润</th>
+                <th width="110">返利金额</th>
+
+                <th width="110">服务费</th>
+                <th width="110">实际返利</th>
+                <th width="110">订单商品金额</th>
+
+                <th width="110">订单运费</th>
+                <th width="110">订单总额</th>
+                <th width="110">返利状态</th>
+
+                <th width="110">返利类型</th>
+                <th width="110">分销等级ID</th>
+                <th width="120">返利人分销等级</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="19" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBRptRebatesRecord>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>
+                    <input name="sysNo" type="checkbox" value="@item.SysNo" />
+                </td>                    
+                <td>@item.OrderSysNo</td>
+                <td>@item.OrderNo</td>
+                <td>@item.OrderDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.PurchaserSysNo</td>
+                
+                <td>@item.PurchaserAccount</td>
+                <td>@item.RebatesSysNo</td>
+                <td>@item.RebatesAccount</td>
+                
+                <td>@item.RebatesName</td>
+                <td>@item.OrderCatle</td>
+                <td>@item.RebatesAmount</td>
+                
+                <td>@item.OperatFee</td>
+                <td>@item.ARebatesAmount</td>
+                <td>@item.ProductAmount</td>
+                                
+                <td>@item.FreightAmount</td>
+                <td>@item.OrderAmount</td>
+                <td>@item.Status</td>
+                
+                <td>@item.RebatesType</td>
+                <td>@item.LevelSysNo</td>
+                <td>@item.Genre</td> 
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        //查找已被选中项，checkedsysnolist(DealerSales.cshtml中全局变量) 王耀发 2016-2-04
+        if (checkedsysnolist.length > 0) {
+            var flag = true;
+            $("#paging input:checkbox").each(function () {
+                var SysNo = $(this).val();
+                if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                    $(this).attr("checked", true);
+                } else {
+                    flag = false;
+                }
+            });
+            $("#checkall").attr("checked", flag);
+        }
+    });
+
+</script>

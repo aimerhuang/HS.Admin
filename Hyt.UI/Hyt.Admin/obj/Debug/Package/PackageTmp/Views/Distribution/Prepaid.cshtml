@@ -1,0 +1,128 @@
+﻿@model Hyt.Model.Transfer.CBDsDealer
+@{
+    ViewBag.Title = "分销商充值";
+}
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+
+                            <td width="100" class="nameright border_rnone">名称：</td>
+                            <td width="260" class="border_right">
+                                @Model.DealerName
+                            </td>
+                            <td width="100" class="nameright border_rnone">系统账号：</td>
+                            <td>
+                                @Model.Account
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">等级：</td>
+                            <td class="border_right">
+                                @Model.LevelName
+                            </td>
+                            <td class="nameright border_rnone">状态：</td>
+                            <td>
+                                @((Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态)Model.Status)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">联系人：</td>
+                            <td class="border_right">@Model.Contact
+                            </td>
+                            <td class="nameright border_rnone">电子邮箱：</td>
+                            <td>@Model.EmailAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">座机号码：</td>
+                            <td class="border_right">@Model.PhoneNumber
+                            </td>
+                            <td class="nameright border_rnone">手机号码：</td>
+                            <td>@Model.MobilePhoneNumber
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">地区：</td>
+                            <td class="border_right">@Model.AreaAllName
+                            </td>
+                            <td class="nameright border_rnone">街道地址：</td>
+                            <td>@Model.StreetAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">累积预存金额：</td>
+                            <td class="border_right red">@Model.TotalPrestoreAmount.ToString("C")
+                            </td>
+                            <td class="nameright border_rnone">预存款可用余额：</td>
+                            <td class="red">@Model.AvailableAmount.ToString("C")
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_lnone" valign="top">备注:</td>
+                            <td colspan="3">
+                                <textarea id="Remarks" name="Remarks" maxlength="200" class="wd600"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>本次充值金额(￥)</td>
+                            <td class="border_right" colspan="3">
+                                <input type="text" class="wd300 m10_r" id="amount" onblur="clearNoNum(this)">
+                                <span class="prompt">充值金额必须大于0小于100万!</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+@section FooterJs
+{
+    <script type="text/javascript">
+        function prepaid() {
+            var amount = $("#amount").val();
+            if (amount) {
+                amount = parseFloat(amount);
+                if (amount <= 0 || amount > 100000000) {
+                    UI.Alert({ content: '充值金额必须大于0－小于1亿!' });
+                    return;
+                }
+                var msg = "确定要向分销商充入<span class='red'>" + amount + "</span>元吗？";
+                UI.Confirm({
+                    content: msg,
+                    width:245,
+                    ok: function () {
+                        var data = { amount: amount, remarks: $("#Remarks").val() };
+                        if (data && amount > 0) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("Prepaid", "Distribution")",
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function (ret) {
+                                    mask.Remove();
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('充值成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function () { mask.Remove(); }
+                            });
+                        } else {
+                            UI.Alert({ content: '数据错据,请检查重试!' });
+                        }
+                    }
+                });
+            } else {
+                UI.Alert({ content: '充值金额不能低于0.01元!' });
+            }
+        }
+    </script>
+}

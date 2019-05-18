@@ -1,0 +1,116 @@
+@using Hyt.BLL.Product
+@model Hyt.Model.Transfer.PrtInstock
+@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "入库单打印";
+}
+
+@*退货 借货 出库*@
+<div id="print">
+    <div id="divmain" class="divdisplay">
+        <div class="print_title">入库单-@Model.SourceTypeName</div>
+        <table class="main_tb">
+            <tr>
+                <td class="main_title" style="width: 16%">入库单号：</td>
+                <td style="width: 34%">@Model.SysNo</td>
+                <td class="main_title" style="width: 16%">入库仓库：
+                </td>
+                <td colspan="3" style="width: 34%">@Model.WareHouseName</td>
+            </tr>
+            <tr>
+                <td class="main_title">来源类型：</td>
+                <td>@((Hyt.Model.WorkflowStatus.WarehouseStatus.入库单据类型)Model.SourceType)</td>
+                <td class="main_title">来源单号：</td>
+                <td>@Model.SourceSysNO</td>
+
+            </tr>
+            <tr>
+                <td class="main_title">订单号：</td>
+                <td>@Model.SoOrderSysNo</td>
+                <td class="main_title">淘宝单号：</td>
+                <td>@Model.TaoBaoSysNo</td>
+
+            </tr>
+            <tr>
+                <td class="main_title">创建人：</td>
+                <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(Model.CreatedBy)</td>
+                <td class="main_title">创建时间：</td>
+                <td>@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+        </table>
+    </div>
+
+    <div id="divitem" class="divdisplay">
+        <table class="item_tb_instock">
+            <thead>
+                <tr>
+                    <th style="width: 82px">商品编号</th>
+                    <th >后台显示名称</th>
+                    <th style="width: 50px;">数量</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (null != Model.List && Model.List.Count > 0)
+                {
+                    foreach (var item in Model.List)
+                    { 
+                      <tr>
+                        <td>@item.ErpCode</td>
+                        <td class="auto_left">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                        <th>@item.RealStockInQuantity</th>
+                       </tr>
+                    }
+                }
+
+            </tbody>
+
+            <tr class="item_allcount">
+                <th colspan="2">合计：
+                </th>
+                <th>@Model.QuantityCount</th>
+            </tr>
+
+        </table>
+    </div>
+
+    <div id="divfoot" class="divdisplay">
+        <table class="foot_tb_instock">
+            <tr>
+                <td>操作人__________   日期__________</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+@section FooterJs
+{
+    <script type="text/javascript">
+          
+
+        function CreatePrintPage() {
+            LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+            LODOP.PRINT_INIT("入库单打印");
+            LODOP.SET_PRINT_PAGESIZE(1, 2100, 1480, '');
+
+            var strStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+            LODOP.ADD_PRINT_HTM(20, "4%", "92%", "BottomMargin:20px", strStyle + document.getElementById("print").innerHTML);
+            //  LODOP.ADD_PRINT_TABLE(128, "5%", "90%", 315, strStyle + document.getElementById("divitem").innerHTML); //明细 高度调
+            //  LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+            //  LODOP.ADD_PRINT_HTM(20, "5%", "90%", 100, strStyle + document.getElementById("divmain").innerHTML);//头
+            // // LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);//页眉页脚
+            //  //LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            //  LODOP.ADD_PRINT_HTM(445, "5%", "90%", 50, strStyle + document.getElementById("divfoot").innerHTML); //脚 top调
+            //LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            //  LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            LODOP.ADD_PRINT_TEXT(3, "86%", 135, 20, "第#页/共&页");
+            LODOP.SET_PRINT_STYLEA(0, "ItemType", 2);
+            LODOP.SET_PRINT_STYLEA(0, "Horient", 1);
+
+        }
+
+        
+    </script>
+}

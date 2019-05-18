@@ -1,0 +1,178 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.CrSellBusinessGrade
+@{
+    ViewBag.Title = "分销等级编辑";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#SellBusinessGradeForm").validate({
+                rules: {
+                    Name: {
+                        required: true
+                         , maxlength: 100
+                    },
+                    MinCondition: {
+                        required: true
+                         , number: true
+                    },
+                    MaxCondition: {
+                        required: true
+                         , number: true
+                    },
+                    Direct: {
+                        required: true
+                         , number: true
+                    },
+                    Indirect1: {
+                        required: true
+                         , number: true
+                    },
+                    Indirect2: {
+                        required: true
+                         , number: true
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "分销等级名称必填"
+                       , maxlength: "长度超出100个字"
+                    },
+                    MinCondition: {
+                        required: "最低升级条件必填"
+                       , number: "请输入合法的数字"
+                    },
+                    MaxCondition: {
+                        required: "等级升级上限必填"
+                       , number: "请输入合法的数字"
+                    },
+                    Direct: {
+                        required: "直接推荐人返利比例"
+                       , number: "请输入合法的数字"
+                    },
+                    Indirect1: {
+                        required: "间1推荐人返利比例"
+                       , number: "请输入合法的数字"
+                    },
+                    Indirect2: {
+                        required: "间2推荐人返利比例"
+                       , number: "请输入合法的数字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#SellBusinessGradeForm").valid()) {
+                                $.post('/SellBusiness/SaveCrSellBusinessGrade/', $("#SellBusinessGradeForm").serialize(), function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doSearch();
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                }); 
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="SellBusinessGradeForm" name="SellBusinessGradeForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>等级名称</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Name" id="Name" class="wd200" value="@if (Model.Name != null){@Model.Name}" maxlength="100" /><span class="prompt m10_l" id="c_Name">填写等级名称</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>最低升级条件</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="MinCondition" id="MinCondition" class="wd200" value="@if (Model.MinCondition != null)
+                                                                                              {@Model.MinCondition}" maxlength="100" /><span class="prompt m10_l" id="c_MinCondition">填写最低升级条件</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>等级升级上限</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="MaxCondition" id="MaxCondition" class="wd200" value="@if (Model.MaxCondition != null)
+                                                                                              {@Model.MaxCondition}" maxlength="100" /><span class="prompt m10_l" id="c_MaxCondition">填写等级升级上限</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>直接推荐人返利比例</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Direct" id="Direct" class="wd200" value="@if (Model.Direct != null)
+                                                                                              {@Model.Direct}" maxlength="100" /><span class="prompt m10_l" id="c_Direct">填写直接推荐人返利比例</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>间1推荐人返利比例</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Indirect1" id="Indirect1" class="wd200" value="@if (Model.Indirect1 != null)
+                                                                                              {@Model.Indirect1}" maxlength="100" /><span class="prompt m10_l" id="c_Indirect1">填写间1推荐人返利比例</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>间2推荐人返利比例</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Indirect2" id="Indirect2" class="wd200" value="@if (Model.Indirect2 != null)
+                                                                                              {@Model.Indirect2}" maxlength="100" /><span class="prompt m10_l" id="c_Indirect2">填写间2推荐人返利比例</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>

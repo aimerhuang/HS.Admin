@@ -1,0 +1,54 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.SoTransactionLog>
+@{
+    int row = 0;
+}
+<div id="logPaging">
+    <div class="boxs_listtabel m10_t">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0"  class="border_rnone border_bnone">
+            <thead>
+                <th width="120px">操作时间</th>
+                <th width="150px">操作人姓名</th>
+                <th align="left" class="p10_l">日志内容</th>
+            </thead>
+            @{
+                foreach (var item in Model.TData)
+                {
+                    row++;
+                <tr @{if (row % 2 == 0){<text>class='stag_color'</text>}}>
+                    <td >
+
+                        @item.OperateDate.ToString("yyyy-MM-dd HH:mm")
+                    </td>
+                    <td >
+
+                        @item.Operator
+                    </td>
+                    <td   align="left" class="p10_l" >@Html.Raw(item.LogContent)</td>
+                </tr>
+                }
+            }
+            @if (row < 1)
+            {
+                 <tr>
+                    <td colspan="3" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+            }
+        </table>
+    </div>
+    <!--分页-->
+    <div class="pagination clearfix">
+        <b class="fl"><span class="f12 c6 bold4">共</span><span class=" m5_r m5_l f12 c3">@Model.TotalPageCount</span><span class="f12 c6 bold4">页</span><span class="f12 c6  m5_r m5_l  bold4">|</span><span class="f12 c6 bold4">每页显示</span><span class=" m5_r m5_l f12 c3">@Model.PageSize</span><span class="f12 c6 m5_l  bold4">条</span></b>
+        <div class="boxx fr clearfix" id="pager">
+            @Html.AjaxPager(Model,
+                            new PagerOptions()
+                                {
+                                    PageIndexParameterName = "logPageIndex",
+                                    CurrentPagerItemWrapperFormatString = "<a class=\"hover\">{0}</a>",
+                                    DisabledCss = "disabled"
+                                },
+                           new AjaxOptions { UpdateTargetId = "logPaging" }
+                 )
+        </div>
+    </div>
+</div>

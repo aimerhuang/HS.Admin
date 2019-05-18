@@ -1,0 +1,117 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.Transfer.CBSyPrivilege>
+
+
+
+      <!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="78" style="display:none">权限编号</th>
+                <th width="280">权限名称</th>
+                <th width="120">权限代码</th>
+                <th>备注</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBSyPrivilege>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                                    
+                    <td style="display:none">@item.SysNo</td>
+                    <td>@item.Name</td>
+                    <td>@item.Code</td>
+                    <td>@item.Description</td>
+                    <td><button class="btn btn_ht26" onclick="doSelect(this);" id="btn_@item.SysNo"><span class="icon_ok"></span><span class="m5_l">选择</span></button>
+                        <input type="hidden" value="@item.SysNo" />
+                    </td>  
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+
+
+<script type="text/javascript">
+    var currentPage = @Model.CurrentPageIndex;
+    
+    function doSelectedFilter() {
+        var parent = artDialog.open.origin;
+        var integer = /^\+?[1-9][0-9]*$/;　　//正整数 
+        parent.$("#attributeTalbe .cbPrivilegeItem").each(function (index, domEle) {
+            var sysno = $(this).text();
+            if (integer.test(sysno)) {
+                var obj = "#btn_" + sysno;
+                $(obj).addClass("disabled");
+                $(obj).attr("onclick", "").bind("click",function() {
+                    undoSelect(document.getElementById("btn_" + sysno));
+                });
+                $(obj + " span[class='m5_l']").text("已选");
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        doSelectedFilter();
+    });
+    
+    function doSelect(obj) {
+        $(obj).addClass("disabled");
+        $(obj).attr("onclick", "").bind("click",function() {
+            undoSelect(obj);
+        });
+        $("#" + obj.id + " span[class='m5_l']").text("已选");
+
+        var arrSelectedObject = [];
+        var parent = artDialog.open.origin;
+        var sysNo = $.trim($(obj).parent().parent().find("td").eq(0).html());
+        var name = $.trim($(obj).parent().parent().find("td").eq(1).html());
+        var code = $.trim($(obj).parent().parent().find("td").eq(2).html());
+        var description = $.trim($(obj).parent().parent().find("td").eq(3).html());
+        
+        arrSelectedObject.push({ SysNo: sysNo, Name: name, Code: code, Description: description });
+        parent.myTableBinder.InsertRow(arrSelectedObject);
+    }
+    
+    function undoSelect(obj) {
+        $(obj).removeClass("disabled");
+        $(obj).attr("onclick", "").bind("click", function () {
+            doSelect(obj);
+        });
+        
+        $("#" + obj.id + " span[class='m5_l']").text("选择");
+
+        var sysNo = $.trim($(obj).parent().parent().find("td").eq(0).html());
+        
+        var parent = artDialog.open.origin;
+        parent.myTableBinder.DelRow(sysNo);
+    }
+
+</script>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

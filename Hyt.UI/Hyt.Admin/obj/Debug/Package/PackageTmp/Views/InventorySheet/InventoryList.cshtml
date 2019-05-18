@@ -1,0 +1,117 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "盘点单";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>
+                @(ViewBag.PageStatus == 1 ? "盘点作业管理" : "")
+                @(ViewBag.PageStatus == 2 ? "盘点数据录入" : "")
+            </h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    @{
+                        if (ViewBag.PageStatus == 1)
+                        {
+                            <span class="veralign_t fl m10_l">状态</span>
+                            <div class="fl m10_l">
+                                <select class="select_ht28" id="StatusList" searchitem='Status' search="Status">
+                                    <option value="-1">全部</option>
+                                    @(ViewBag.Status)
+                                </select>
+                            </div>
+                        }
+                    }
+
+                    <div class="search_btn wd200 m10_l fl">
+                        <input type="text" value="" class="input_ht28" id="Keyword" placeholder="请输入盘点单编号...">
+                        <button class="btn btn_ht28 wd28 SY1008101" title="搜索" id="searchBtn">
+                            <span class="icon_search"></span>
+                        </button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    @{
+                        if (ViewBag.PageStatus == 1)
+                        {
+                            <button class="btn btn_ht26 btn_blue m10_r SY1008201" id="addUser" title="新建盘点作业">
+                                <span class="icon_plus icon_white"></span>
+                                <span class="m5_l">新建盘点作业</span>
+                            </button>
+                        }
+                    }
+
+                </div>
+                <!--功能按钮结束-->
+            </div>
+            <!--工具条结束-->
+
+            <div id="paging">
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        doSearch(1);
+    })
+
+    //启用状态查询
+    $("[searchItem='Status']").change(function () {
+        doSearch(1);
+    });
+
+    $("#searchBtn").click(function () {
+        doSearch(1);
+    });
+
+    //新增弹出
+    $("#addUser").bind("click", function () {
+        popUserInfo('', 1);
+    });
+    //弹出窗口
+    function popUserInfo(id, page) {
+        UI.DialogOpen('/InventorySheet/EditInventory' + id + '?page=' + page, {
+            width: 1000,
+            height: 600,
+            title: '新建盘点作业',
+            button: [{
+                name: '保存',
+                callback: function () { },
+                focus: true
+            }, { name: '取消' }
+            ]
+        }, false);
+    }
+
+    //查询列表
+    function doSearch(id) {
+        var status = $("[searchItem='Status']").val(); //选中状态
+        var Keyword = $("#Keyword").val();
+        Ajax.get("/InventorySheet/InventoryListPage?r=" + Math.random(), "Search", function (p) {
+            p.setParams("id", id),
+            p.setParams("status", status),
+            p.setParams("Keyword", Keyword),
+            p.setParams("PageStatus", '@(ViewBag.PageStatus)');
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+
+</script>

@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "ScavengingPayment";
+}
+
+@section HeadJs
+{
+<script src="~/Theme/scripts/jquery-1.10.2.min.js"></script>
+}
+<head>
+    <meta charset="UTF-8">
+    <meta name="Generator" content="EditPlus">
+    <meta name="Author" content="">
+    <meta name="Keywords" content="">
+    <meta name="Description" content="">
+    <title>Document</title>
+</head>
+<script type="text/javascript">
+    $(function () {
+        $("#wx").hide();
+        $("#scan").click(function () {
+            var OrderNo = $("#orderNo").val();
+            $.ajax({
+                url: "@Url.Action("AjaxScanPayment", "ScavengingPayment")",
+                data: { SysNo: OrderNo },
+                dataType: "JSON",
+                success: function (data) {
+                    if (data == '1') {
+                        alert('订单不存在！！！');
+                        $("#wx").hide();
+                    } else if (data == '0') {
+                        alert("现只支持微信丶支付宝扫码，谢谢！！！");
+                        $("#wx").hide();
+                    }
+                    var json = JSON.parse(data.json);
+                    if (data.pd == '2') {
+                        $("#zf").text("支付宝支付")
+                        $("#ScavengingPayment").attr("src", json["rd_Pic"]);
+                        $("#wx").show();
+                    } else if (data.pd == '1') {
+                        $("#zf").text("微信支付")
+                        $("#ScavengingPayment").attr("src", json["rd_Pic"]);
+                        $("#wx").show();
+                    } else {
+                        alert("网咯异常，请重试，谢谢！！！");
+                        $("#wx").hide();
+                    };
+                    
+                }
+            });
+        });
+        $("#push").click(function () {
+            $.ajax({
+                url: "@Url.Action("AjaxPush", "ScavengingPayment")",
+                dataType: "JSON",
+                success: function (data) {
+                    var json = JSON.parse(data);
+                    alert(json["message"]);
+                 
+                }
+            });
+        })
+    });
+</script>
+<body id="">
+    请输入订单号：<input id="orderNo" type="text" />&nbsp;&nbsp;&nbsp;
+    <button class="btn btn_ht26 m10_r WH1003301" id="scan" type="button">扫码支付生成二维码</button>
+    <button class="btn btn_ht26 m10_r WH1003301" id="quick" type="button">快捷支付</button>
+    <button class="btn btn_ht26 m10_r WH1003301" id="push" type="button">推送海关</button><br /><br />
+    <span id="wx" style="float:left">
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b id ="zf"></b><br/>
+        <img id="ScavengingPayment" src="" style="border: 1px solid #808080;" />
+    </span>
+</body>
+

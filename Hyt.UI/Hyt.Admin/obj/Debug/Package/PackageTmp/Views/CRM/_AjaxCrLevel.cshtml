@@ -1,0 +1,54 @@
+﻿@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th style="text-align: left; text-indent: 10px;">等级名称</th>
+                <th width="72">积分下限</th>
+                <th width="72">积分上限</th>
+                @*<th width="137">惠源币用于支付货款</th>
+                <th width="98">支付货款上限</th>
+                <th width="98">支付货款比例</th>
+                <th width="137">惠源币用于支付服务</th>
+                <th width="98">支付服务上限</th>
+                <th width="98">支付服务比例</th>*@
+                <th width="79">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+        @{
+            var Level = ViewBag.LevelList as List<Hyt.Model.CrCustomerLevel>;
+            if (Level != null)
+            {
+                var Index = 0;
+                string cs = string.Empty;
+                foreach (var item in Level)
+                {
+                    cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                    <tr class="@cs">
+                        <td style="text-align: left; text-indent: 10px">@item.LevelName</td>
+                        <td>@item.LowerLimit</td>
+                        <td>@item.UpperLimit</td>
+                        @*<td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.惠源币是否可用于支付货款), item.CanPayForProduct)</td>
+                        <td class="red p10_r" align="right">¥@item.ProductPaymentUpperLimit</td>
+                        <td>@item.ProductPaymentPercentage%</td>
+                        <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.惠源币是否可用于支付服务), item.CanPayForService)</td>
+                        <td class="red p10_r" align="right">¥@item.ServicePaymentUpperLimit</td>
+                        <td>@item.ServicePaymentPercentage%</td>*@
+                        <td>
+                            <button type="button" class="btn btn_ht26 btn_blue m5_r CR1005201" onclick="LevelEdit(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                        </td>
+                    </tr>
+                    Index++;
+                }
+            }
+            else
+            {
+            
+            }
+        }
+        </tbody>
+    </table>
+</div>

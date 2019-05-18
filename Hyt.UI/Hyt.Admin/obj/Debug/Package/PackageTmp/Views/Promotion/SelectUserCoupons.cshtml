@@ -1,0 +1,97 @@
+﻿@using Hyt.Model.WorkflowStatus
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "绑定优惠券";
+    
+    var isCouponCard = (int)PromotionStatus.是否优惠卡.是;
+    var permissions = (bool[])ViewBag.Permission; 
+}
+
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<div class="caseout">
+    <!--绑定优惠券-->
+    <div class="boxs_listtabel">
+    
+        <div class="boxs_tool boxs_toolbgnone p0"> 
+
+            <!--搜索开始-->
+            <div class="right_tool clearfix" style="float:none;">
+                <span class="fl">优惠券搜索：</span>
+                @*<input id="IsCouponCard" type="checkbox" class="fl m10_l m5_r" style="margin-top:8px;" /><span class="fl">优惠卡</span>*@
+                @if (permissions[0])
+                {
+                   <text><input id="WebPlatform" type="checkbox" class="fl m10_l m5_r" style="margin-top:8px;" /><span class="fl">PC商城使用</span></text> 
+                }
+                @if (permissions[1])
+                {
+                   <text><input id="ShopPlatform" type="checkbox" class="fl m10_l m5_r" style="margin-top:8px;" /><span class="fl">门店使用</span></text> 
+                }
+                @if (permissions[2])
+                {
+                   <text><input id="MallAppPlatform" type="checkbox" class="fl m10_l m5_r" style="margin-top:8px;" /><span class="fl">手机商城使用</span></text> 
+                }
+                @if (permissions[3])
+                {
+                   <text><input id="LogisticsAppPlatform" type="checkbox" class="fl m10_l m5_r" style="margin-top:8px;" /><span class="fl">物流App使用</span></text> 
+                }
+                <input type="text" class="input_ht28 fl m10_l" maxlength="20" placeholder="优惠券描述" searchItem="Description" onclick="this.select();">
+                <button class="btn btn_ht28 fl m10_l" title="搜索" type="button" id="btnSearch"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+            </div>
+            <!--搜索结束-->
+  
+        </div>
+
+        <div class="boxs_detail border_lnone "  id="paging">
+
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Promotion/DoUserCouponsQuery/?r=" + Math.random(), "searchItem", function(p) {
+@*            if ($("#IsCouponCard").attr("checked")) {
+                var checked = @isCouponCard;
+                p.setParams("IsCouponCard", checked);
+            }*@
+            if ($("#WebPlatform").attr("checked")) {
+                p.setParams("WebPlatform", 1);
+            }
+            if ($("#ShopPlatform").attr("checked")) {
+                p.setParams("ShopPlatform", 1);
+            }
+            if ($("#MallAppPlatform").attr("checked")) {
+                p.setParams("MallAppPlatform", 1);
+            }
+            if ($("#LogisticsAppPlatform").attr("checked")) {
+                p.setParams("LogisticsAppPlatform", 1);
+            }
+            p.setParams("PageSize", 10);
+        }, function(data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    
+    $(document).ready(function (e) {
+        doSearch();
+        
+        $("#btnSearch,#IsCouponCard,#WebPlatform,#ShopPlatform,#MallAppPlatform,#LogisticsAppPlatform").click(function () {
+            doSearch();
+        });
+        $("#UsePlatform").change(function () {
+            doSearch();
+        });
+
+    });
+
+
+
+</script>

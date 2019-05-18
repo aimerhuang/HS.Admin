@@ -1,0 +1,156 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.BsCode
+@{
+    ViewBag.Title = "BsCodeCreate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#bsCodeForm").validate({
+                rules: {
+                    ParentSysNo: {
+                        required: true,
+                        digits: true,
+                        min: 0
+                    },
+                    CodeName: {
+                        required: true,
+                        maxlength: 30
+                    }
+                },
+                messages: {
+                    ParentSysNo: {
+                        required: "父级编号必填",
+                        digits: "父级编号必须是大于零的整数",
+                        min: "父级编号必须是大于零的整数"
+                    },
+                    CodeName: {
+                        required: "品牌名称必填",
+                        maxlength: "长度超出30个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+                },
+                success: function (span, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+            function getModel() {
+                var model = {};
+                model.SysNo = $("#SysNo").val();
+                model.ParentSysNo = $("#ParentSysNo").val();
+                model.CodeName = $("#CodeName").val();
+                model.Status = $("input[name=Status]:checked").val();
+                return model;
+            }
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#bsCodeForm").valid()) {
+                                var model = getModel();
+                                $.ajax({
+                                    url: "@Url.Action("BsCodeCreate")",
+                                    data: JSON.stringify(model),
+                                    contentType: 'application/json',
+                                    type: "post",
+                                    success: function (data) {
+                                        if (data.StatusCode > 0) {
+                                            try {
+                                                UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage, true);
+                                            } catch (e) { };
+                                            UI.Dialog.close();
+                                        } else {
+                                            var message = "操作失败";
+                                            if (!!data && !!data.Message) {
+                                                message = data.Message;
+                                                if (data.StatusCode == -2) {
+                                                    $("#name").focus();
+                                                }
+                                            }
+                                            UI.tips.tip_alert("tips_wrong", message);
+
+                                        }
+                                    },
+                                    error: function () {
+                                        UI.Alert({ content: "操作出错！" });
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+                }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="bsCodeForm" name="bsCodeForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>父级系统编号</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="ParentSysNo" id="ParentSysNo" value="@if (@Model.ParentSysNo > 0)
+                                                                                              { @Model.ParentSysNo }" class="wd200" maxlength="30"/>
+                                <span class="prompt m10_l">必须是正整数</span></td>
+
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>码表名称:</td>
+                            <td class="borde_right">
+                                <input type="text" name="CodeName" id="CodeName" class="wd200" value="@Model.CodeName" /><span class="prompt m10_l">码表名称必填</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">码表状态:</td>
+                            <td class="borde_right">
+                                <label>
+
+                                    <input type="radio" name="Status" @if (Model.Status == (int)Hyt.Model.WorkflowStatus.BasicStatus.码表状态.启用)
+                                                                      { @Html.Raw("checked=\"checked\"");
+                                                                      } value="@Hyt.Model.WorkflowStatus.BasicStatus.码表状态.启用.GetHashCode()" class="m5_r" />启用</label><label><input type="radio" name="Status" class="m10_l m5_r"  @if (Model.Status == (int)Hyt.Model.WorkflowStatus.BasicStatus.码表状态.禁用)
+                                                                                                                                                                                                                                          {@Html.Raw("checked=\"checked\"");
+                                                                                                                                                                                                                                          } value="@Hyt.Model.WorkflowStatus.BasicStatus.码表状态.禁用.GetHashCode()" />禁用</label>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>
+

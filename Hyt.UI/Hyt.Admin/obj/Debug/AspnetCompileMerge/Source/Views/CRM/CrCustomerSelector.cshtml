@@ -1,0 +1,514 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@model PagedList<CBCrCustomer>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户管理";
+    @Html.PrivilegeControl(PrivilegeCode.CR1004201, "button." + PrivilegeCode.CR1004201.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004202, "button." + PrivilegeCode.CR1004202.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004601, "button." + PrivilegeCode.CR1004601.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004101, "button." + PrivilegeCode.CR1004101.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004203, "button." + PrivilegeCode.CR1004203.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004204, "button." + PrivilegeCode.CR1004204.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004205, "button." + PrivilegeCode.CR1004205.ToString())
+    @Html.PrivilegeControl(PrivilegeCode.CR1004102, "button." + PrivilegeCode.CR1004102.ToString())
+}
+<!--高级搜索-->
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"> <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="40%" align="right" class="c3">是否接收邮件</td>
+                <td width="70">
+                    <select name="IsReceiveEmail" id="IsReceiveEmail" class="wd150 valid">
+                        <option value="">请选择</option>
+                        @{
+                            string sel;
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsReceiveEmail)
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="40%" align="right" class="c3">是否接收短信</td>
+                <td width="70">
+                    <select name="IsReceiveShortMessage" id="IsReceiveShortMessage" class="wd150 valid">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsReceiveShortMessage)
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="40%" align="right" class="c3">是否是公共账户</td>
+                <td width="70">
+                    <select name="IsPublicAccount" id="IsPublicAccount" class="wd150 valid">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsPublicAccount)
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="40%" align="right" class="c3">等级是否固定</td>
+                <td width="70">
+                    <select name="IsLevelFixed" id="IsLevelFixed" class="wd150 valid">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsLevelFixed)
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="40%" align="right" class="c3">经验积分是否固定</td>
+                <td width="70">
+                    <select name="IsExperiencePointFixed" id="IsExperiencePointFixed" class="wd150 valid">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsExperiencePointFixed)
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="40%" align="right" class="c3">惠源币是否固定</td>
+                <td width="70">
+                    <select name="IsExperienceCoinFixed" id="IsExperienceCoinFixed" class="wd150 valid">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictIsExperienceCoinFixed)
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" type="button" class="btn btn_blue btn_ht30 bold" onclick="doSearchClass()">开始查询</button><button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+    <div class="boxs">
+        @*<div class="boxs_tit head_m">
+            <h3>客户管理</h3>
+        </div>*@
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <div style="position:relative;float:left;margin-left:17px;margin-top:8px;"><input name="AllsysNo" type="checkbox" id="AllSelected" value="" /></div>
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    @*<span class="veralign_t fl">状态</span>
+                    <div class="fl m10_l">
+                        <select id="Status" name="Status" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictStatus)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>*@
+                    <span class="veralign_t fl m10_l">会员等级</span>
+                    <div class="fl m10_l">
+                        <select id="LevelSysNo" name="LevelSysNo" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>ViewBag.Level
+                            @{
+                                foreach (var item in ViewBag.Level as List<Hyt.Model.CrCustomerLevel>)
+                                {
+                                    <option value="@item.SysNo">@item.LevelName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    @*<span class="veralign_t fl m10_l">邮箱状态</span>
+                    <div class="fl m10_l">
+                        <select id="EmailStatus" name="EmailStatus" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictEmailStatus)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>*@
+                    @*<span class="veralign_t fl m10_l">手机状态</span>
+                    <div class="fl m10_l">
+                        <select id="MobilePhoneStatus" name="MobilePhoneStatus" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>)ViewBag.dictMobilePhoneStatus)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>*@
+                    <span class="fl m10_l veralign_t">帐号</span>
+                    <div class="search_btn m10_l fl">
+                        <input name="account" type="text" id="account" class="input_ht28" maxlength="20" value="请输入帐号..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入帐号...'" onclick="if (this.value == '请输入帐号...') this.value = ''" />
+                        <button type="button" title="搜索" class="btn btn_ht28 m10_l fl" onclick="doSearch()"><span class="icon_search"></span><span class="m5_l"></span></button>
+                    </div>
+                    @*<button type="button" id="searchCustomer" title="高级搜索" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>*@
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+                @*<div class="left_tool">
+                    <button class="btn btn_ht26 btn_blue m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004201.ToString())" id="btn_addleave"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加新会员</span></button>
+                </div>*@
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel">
+                @{Html.RenderPartial("_AjaxCrCustomerSelector", Model); }
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+@section headjs{
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+}
+@section FooterJs{
+    <script type="text/javascript">
+        var searchAccountTxt = "请输入帐号...";
+
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+
+        function tip_alert(mode, context) {
+            UI.tips.tip_alert(mode, context);
+        }
+
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+
+        function AjaxStop() {
+            cover.Remove();
+        }
+
+        function doSearchClass() {
+            var isReceiveEmail = $("#IsReceiveEmail").val();
+            var isReceiveShortMessage = $("#IsReceiveShortMessage").val();
+            var isPublicAccount = $("#IsPublicAccount").val();
+
+            var isLevelFixed = $("#IsLevelFixed").val();
+            var isExperiencePointFixed = $("#IsExperiencePointFixed").val();
+            var isExperienceCoinFixed = $("#IsExperienceCoinFixed").val();
+
+
+            AjaxStart();
+            var json = {};
+            if ($.trim(isReceiveEmail) != "") {
+                json.isReceiveEmail = isReceiveEmail;
+            }
+
+            if ($.trim(isReceiveShortMessage) != "") {
+                json.isReceiveShortMessage = isReceiveShortMessage;
+            }
+
+            if ($.trim(isPublicAccount) != "") {
+                json.isPublicAccount = isPublicAccount;
+            }
+
+            if ($.trim(isLevelFixed) != "") {
+                json.isLevelFixed = isLevelFixed;
+            }
+
+            if ($.trim(isExperiencePointFixed) != "") {
+                json.isExperiencePointFixed = isExperiencePointFixed;
+            }
+
+            if ($.trim(isExperienceCoinFixed) != "") {
+                json.isExperienceCoinFixed = isExperienceCoinFixed;
+            }
+
+            $.get('/CRM/CrCustomerSelector/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+        function doSearch() {
+            var status = $("#Status").val();
+            var levelSysNo = $("#LevelSysNo").val();
+            var emailStatus = $("#EmailStatus").val();
+            var mobilePhoneStatus = $("#MobilePhoneStatus").val();
+            var account = $("#account").val();
+
+
+            AjaxStart();
+            var json = {};
+            if ($.trim(status) != "") {
+                json.status = status;
+            }
+            if ($.trim(levelSysNo) != "") {
+                json.levelSysNo = levelSysNo;
+            }
+            if ($.trim(emailStatus) != "") {
+                json.emailStatus = emailStatus;
+            }
+            if ($.trim(mobilePhoneStatus) != "") {
+                json.mobilePhoneStatus = mobilePhoneStatus;
+            }
+            if ($.trim(account) != "" && account != searchAccountTxt) {
+                json.account = account;
+            }
+
+            $.get('/CRM/CrCustomerSelector/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+        //查看详情
+
+        function Detail(sysNo) {
+            UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+                title: '查看会员详细信息',
+                width: '698px',
+                height: '489px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        //修改
+
+        function CrCustomerEdit(sysNo) {
+            UI.DialogOpen('/CRM/CrCustomerEdit?sysNo=' + sysNo, {
+                title: '修改',
+                width: '515px',
+                height: '320px',
+                init: function () {
+                    this.button({
+                        name: '保存',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            var form = iframe.document.getElementById('form');
+                            iframe.addOrEdit();
+                            return false;
+                        },
+                        focus: true
+                    }, {
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        //等级日志
+
+        function LevelLog(sysNo, mobile) {
+            UI.DialogOpen('/CRM/CrLevelLog?sysNo=' + sysNo, {
+                title: '会员 ' + mobile + ' 等级变更日志',
+                width: '725px',
+                height: '505px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        //等级积分
+
+        function CrLevelPointLog(sysNo, mobile) {
+            UI.DialogOpen('/CRM/CrLevelPointLog?customerSysNo=' + sysNo, {
+                title: '会员 ' + mobile + ' 等级积分日志',
+                width: '600px',
+                height: '490px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        //经验积分
+
+        function CrExperiencePointLog(sysNo) {
+            UI.DialogOpen('/CRM/CrExperiencePointLog?customerSysNo=' + sysNo, {
+                title: '会员经验积分日志',
+                width: '600px',
+                height: '490px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        //查看订单
+
+        function CrOrder(account) {
+            UI.OpenCreatTab("历史订单", "/CRM/CrOrder?customerAccount=" + account);
+        }
+
+        //查看惠源币
+
+        function CrExperienceCoinLog(sysNo) {
+            UI.DialogOpen('/CRM/CrExperienceCoinLog?customerSysNo=' + sysNo, {
+                title: '惠源币日志',
+                width: '650px',
+                height: '432px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        //状态设置
+
+        function UpdateStatus(sysNo) {
+            UI.Confirm({
+                content: '您确认要此操作吗？',
+                ok: function () {
+                    $.post('@Url.Action("CrCustomerUpdateStatus", "CRM")', { sysNo: sysNo }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.result) {
+                            UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                            doSearch();
+                            UI.Dialog.close();
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        //重置密码
+
+        function CrPassword(customerSysNo) {
+            UI.DialogOpen('/CRM/CrCustomerPassword?customerSysNo=' + customerSysNo, {
+                title: '重置密码',
+                width: '400px',
+                height: '65px',
+                init: function () {
+                    this.button({
+                        name: '确认',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            var form = iframe.document.getElementById('form');
+                            iframe.addOrEdit();
+                            return false;
+                        },
+                        focus: true
+                    }, {
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+        $(function () {
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        doSearch();
+                        break;
+                }
+            });
+            $('#btn_addleave').click(function () {
+                DAO.CreateCustomer({
+                    from: '70',//(int)CustomerStatus.注册来源.商城客户管理
+                    fromNo: '@ViewBag.CreatorSysNo',  //当前用户编号
+                    onselect: function (result) {
+                        var c = result.customer;
+                        var row = result.address;
+                        if (result.error == "") {
+                            doSearch();
+                            UI.Alert({ content: "添加会员成功！" });
+                            UI.Dialog.close();
+                        } else {
+                            UI.Alert({ content: result.error });
+                        }
+                    }
+                });
+            });
+        })
+    </script>
+    <script type="text/javascript">
+        UI.searchbox($("#searchCustomer"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        function CallBack() {
+            
+            var data;
+            var json = '[';
+            var i = 0, j = 0;
+            $("#paging input:checkbox:checked").each(function () {
+                i++;
+            });
+            $("#paging input:checkbox:checked").each(function () {
+                j = j + 1;
+                json += '{';
+                var obj = $(this);
+                var sysno = obj.val();
+                json += '"SysNo":' + sysno;
+                var Account = $.trim(obj.parent().next().find("a").html());
+                json += ',"Account":"' + Account + '"}';
+                if (j < i) {
+                    json += ',';
+                }
+            });
+            json += ']';
+            eval("data=" + json);
+
+            parent && parent._ActiveCrCustomerSelectorCallBack(data);
+            
+        }
+        //全选按钮
+        $("#AllSelected").live('click', function () {
+            if ($(this).attr("checked")) {
+                $("#paging input:checkbox").attr("checked", true);
+            } else {
+                $("#paging input:checkbox").attr("checked", false);
+            }
+        });
+    </script>
+}

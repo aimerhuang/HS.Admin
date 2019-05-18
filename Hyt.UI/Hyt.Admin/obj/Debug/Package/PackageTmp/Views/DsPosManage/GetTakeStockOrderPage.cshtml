@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "GetTakeStockOrderPage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>商品盘点</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="right_tool clearfix">
+                    <span class="fl" style="padding-right:10px;">
+                        经销商：
+                        <select id="select_DealerList">
+                            
+                        </select>
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <span class="fl" style="padding-right:10px;">
+                        盈亏：
+                        <select id="select_DealerList"></select>
+                    </span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <div class="date_btn120 fl m10_l" style="width:183px; padding-top:0px;">
+                        盘点时间：
+                        <input type="text" 
+                               value="@((ViewBag.DateTime))" class="input_ht26" id="ipt_SearchData" name="ipt_SearchData" 
+                               querypara="ipt_SearchData" 
+                               onfocus="this.blur()" onclick="UI.Date({ el: 'ipt_SearchData' })">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'ipt_SearchData' })" type="button" style="margin-top:2px; padd"><span class="icon_calendar"></span></button>
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;
+                    <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+
+
+                </div>
+
+            </div>
+            <!--工具条开始-->
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function doSearch() {
+
+        $.get('@Url.Action("GetTakeStockOrderPage", "DsPosManage")',
+            { id: 1, dsSysNo: @ViewBag.dsSysNo },
+            function (data) {
+
+                $('#paging').html(data);
+
+            });
+    }
+    doSearch();
+</script>

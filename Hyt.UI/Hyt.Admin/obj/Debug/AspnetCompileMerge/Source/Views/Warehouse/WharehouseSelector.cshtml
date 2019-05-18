@@ -1,0 +1,202 @@
+﻿@{
+    ViewBag.Title = "仓库选择";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section headcss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+    <style type="text/css">
+        .wrap {
+            background: #eee;
+            position: absolute;
+        }
+
+        .module_tree {
+            width: 282px;
+            height: 360px;
+        }
+
+        .search_btn {
+            width: 260px;
+        }
+
+            .search_btn input {
+                width: 216px;
+            }
+
+        .comp5 {
+            background-color: #f5f5f5;
+            height: 260px;
+            overflow-y: auto;
+        }
+
+        .pagination {
+            border: #c1c1c1 solid 1px;
+            margin-left: 0px;
+        }
+    </style>
+}
+@section headjs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript">
+        var expandAll, areaCheck;
+        $(function () {
+            expandAll = $.getUrlParam("expandAll");
+            areaNoCheck = $.getUrlParam("areaNoCheck");
+            $("#city").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    expandAll = true;
+                    var val = $("#city").val();
+                    if (val && val != "搜索您要的地区...") {
+                        doSearch(val);
+                    } else {
+                        doSearch(null);
+                    }
+                }
+            });
+
+            $("#search_btn").click(function () {
+                expandAll = true;
+                var val = $("#city").val();
+                if (val && val != "搜索您要的地区...") {
+                    doSearch(val);
+                } else {
+                    doSearch(null);
+                }
+            });
+
+            //确认保存
+            $("#save_data_btn").click(function () {
+                getValue();
+            });
+            //重置树
+            $("#reset_btn").click(function () {
+                doSearch(null);
+                parent && parent._ActiveSelectWhareHouseRestCallBack();
+            });
+
+            function getValue() {
+                var data = new Array();
+                var j = 0;
+                //获取所有选中状态的节点
+                var zTree = $.fn.zTree.getZTreeObj("areatree").getCheckedNodes(true);
+                for (var i = 0; i < zTree.length; i++) {
+                    if (zTree[i].nodetype == 1) {
+                        data[j] = '{"id":"' + -zTree[i].id + '","name":"' + zTree[i].name + '"}';
+                        j++;
+                    }
+                }
+                //回调StockSelectorCallback,返回Json({"id":"1","name":"节点"})
+                var obj = data.join(',');
+                var json = eval('(' + '[' + obj + ']' + ')');
+
+
+                parent && parent._ActiveSelectWhareHouseCallBack(json); //div模式
+
+            }
+
+            doSearch(null);
+        });
+
+        function doSearch(val) {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            $.ajax({
+                url: "@Url.Action("GetWharehouseSelector", "Warehouse")",
+                dataType: "json",
+                data: { keyword: val, areaNoCheck: areaNoCheck },
+                async: false,
+                success: function (result) {
+                    mask.Remove();
+                    showTree(result);
+                    if (expandAll === true) {
+                        zTreeObj.expandAll(true);
+                    } else {
+                        zTreeObj.expandAll(false);
+                    }
+                },
+                error: function () {
+                    mask.Remove();
+                }
+            });
+        }
+
+        var zTreeObj;
+
+        function showTree(data) {
+            var chkStyle = $.getUrlParam("chkStyle");
+            var radioType;
+            if (chkStyle == 'radio') {
+                radioType = 'all';
+            } else {
+                radioType = 'level';
+                chkStyle = 'checkbox';
+            }
+
+            var setting = {
+                data: {
+                    simpleData: {
+                        enable: true,
+                        idKey: "id",
+                        pIdKey: "pId"
+                    }
+                },
+                check: {
+                    enable: true,
+                    chkStyle: chkStyle,//default:checkbox,radio
+                    radioType: radioType
+                },
+                callback: {
+                    //绑定回调函数  
+                    onAsyncSuccess: zTreeOnAsyncSuccess //在异步加载完成时调用
+                }
+            };
+
+            zTreeObj = UI.ZTree.init($("#areatree"), setting, data);
+            $("#areatree").show();
+        }
+
+        //ztree异步加载完成时调用
+
+        function zTreeOnAsyncSuccess() {
+            var ids = new Array(); //父页面传递须绑定的值集合(1,2,3,4,5)       
+            var zTree = zTreeObj.getCheckedNodes(false);
+            for (var i = 0; i < zTree.length; i++) {
+                if (ids.indexOf("," + zTree[i].id + "," != -1) && zTree[i].nodetype == 1) {
+                    zTreeObj.checkNode(zTree[i], true);
+                }
+            }
+        }
+
+        //获得URL参数
+        $.getUrlParam = function (name) {
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            var r = window.location.search.substr(1).match(reg);
+            if (r != null) return unescape(r[2]);
+            return null;
+        };
+
+    </script>
+
+}
+
+<div class="module_tree" id="treePanel">
+    <!--导航-->
+    <div class="boxs_tit head_m">
+        <div class='search_btn m5_t'>
+            <input name='' type='text' class='input_ht28' id='city' value='搜索您要的地区...' onmouseover='this.focus()' onblur="if (this.value =='') this.value='搜索您要的地区...'; " onfocus='this.select()' onclick="if (this.value == '搜索您要的地区...') this.value = ''; ">
+            <button class='btn btn_ht28 wd28' title='搜索' id='search_btn'><span class='icon_search'></span></button>
+        </div>
+    </div>
+    <!--导航-->
+    <div class="comp5">
+        <span style='display: none;' id='areatree' class='ztree'></span>
+    </div>
+
+
+    <!--关闭按钮-->
+    <div class="pagination align_c clearfix">
+        <button class='btn btn_blue btn_ht32' id='save_data_btn' title='确定'>确定</button>&nbsp;
+        <button class='btn btn_blue btn_ht32' id='reset_btn' title='重置'>重置</button>
+    </div>
+
+</div>

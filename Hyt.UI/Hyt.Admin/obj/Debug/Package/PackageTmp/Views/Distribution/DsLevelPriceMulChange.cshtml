@@ -1,0 +1,261 @@
+﻿@model IList<Hyt.Model.CBPdPrice>
+
+@{
+    ViewBag.Title = "添加分销商调价申请";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" type="text/css" media="all"/>
+    <style type="text/css">
+        #ChangePricePanel div, #expressPricePanel div {
+            margin: 0 0;
+        }
+
+        .number_btn {
+            float: left;
+        }
+
+        .priceheadtitle thead tr th {
+            height: 30px;
+            border-bottom: #c1c1c1 solid 1px;
+        }
+
+        .priceheadtitle thead {
+            background-color: #e1e1e1;
+        }
+    </style>
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+}
+<form id="formAddPriceHistory" name="formAddPriceHistory" action="" onsubmit="return false;">
+    <div class="boxs p10" style="width: 400px;">
+        <div class="boxs_con_c1">
+
+            <div class="boxs_detail_dispay">
+                <div id="express">
+                    <div class="tit_dispay border_tnone">
+                        <div class="more10r m5_t"></div>
+                        <h5>快捷调价</h5>
+                    </div>
+                    <div class="tit_con">
+
+                        <table id="expressPricePanel" width="398" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td widt="120" align="center" class="noborder"><span>统一调价</span></td>
+                                    <td width="60" align="center" class="noborder red">
+                                        <select id="multi_select">
+                                            <option value="1">提高</option>
+                                            <option value="-1">降低</option>
+                                        </select>
+                                    </td>
+                                    <td width="100" align="center" class="noborder">
+                                        <input id="multi" name="multi" class="{number:true,min:0,messages:{number:'',min:''}} wd24" name="0" type="text" value="0" data="0">
+                                    </td>
+                                    <td width="54" align="left" class="noborder">元</td>
+                                </tr>
+                                
+
+                            </tbody>
+                        </table>
+                        <table class="priceheadtitle" width="398" border="0" cellspacing="0" cellpadding="0">
+                            <thead>
+                                <tr class="ht35">
+                                    <th style = "width:120px" align="center" class="noborder">价格名称</th>
+                                    <th id="td_o_p" style = "width:60px;" align="center" class="noborder">商品原价</th>
+                                    <th style = "width:100px" align="center" class="noborder">调整价格
+                                    </th>
+                                    <th style = "width:54px;">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ChangePricePanel">
+                                @{
+                                    foreach (Hyt.Model.CBPdPrice m in Model)
+                                    {
+                                        var selectId = @m.SysNo + "_select";
+                                        <tr>
+                                            <td style = "width:120px" align="center" class="noborder">@m.PriceName</td>
+                                            <td style = "width:60px;" align="center" class="noborder red">
+                                                <select id="@selectId">
+                                                    <option value="1">提高</option>
+                                                    <option value="-1">降低</option>
+                                                </select>
+                                            </td>
+                                            <td style = "width:100px" align="center" class="noborder">
+                                                <input id="0" name="@m.SysNo" type="text" value="@m.Price" data="@m.Price" sourcesysno="@m.SourceSysNo" pricesource="@m.PriceSource" class="{number:true,min:0,messages:{number:'',min:''}} wd24">
+                                            </td>
+                                            <td style = "width:54px;" align="left" class="noborder">元</td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <!--提交按钮-->
+            <div class="pagination align_c clearfix hide">
+                <button id="btnSave" class="btn btn_blue btn_ht32 bold f14">保存</button>&nbsp;
+                <button class="btn btn_ht32 bold f14">取消</button>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $(function() {
+            $("#multi").bind("change", OnChangeMultiNumber);
+        });
+        function OnChangeMultiNumber() {
+            var number = parseFloat($(this).val());
+            $("#multi").val(number);
+            if (number > 0) {
+                $("#ChangePricePanel input").val(number);
+            }
+        }
+        /*******************************
+            * 保存商品调价申请回调
+            *******************************/
+
+        function SaveCallback() {
+            //验证数据
+            if (!$("#formAddPriceHistory").valid()) {
+                UI.tips.tip_alert("tips_warning", "输入错误, 价格必须是大于0的数字！");
+                return false;
+            }
+            //查找所有预期修改的价格申请，并组合成结果数组
+            var inputItems;
+            inputItems = $("input", $("#ChangePricePanel")); //价格输入值
+            var expectPriceArray = BuildPdPriceHistoryList(inputItems);
+
+            //如果结果集长度是0者不做任何操作
+            if (expectPriceArray.length == 0) {
+                UI.tips.tip_alert("tips_warning", "没有要更新或保存的数据！");
+                return false;
+            }
+
+            UI.Confirm({
+                content: '确认新增等级价格申请吗？',
+                padding: '10px 20px',
+                ok: function () {
+                    var productSysNoList = @ViewBag.Products;
+                    $.ajax({
+                        url: '/Distribution/SaveProductPrice',
+                        data: { priceHistories: JSON.stringify(expectPriceArray), productSysNoList: JSON.stringify(productSysNoList) },
+                        dataType: "json",
+                        type: "POST",
+                        success: function (ret) {
+                            
+                            if (ret.IsLogout) {
+                                DAO.LoginBox();
+                                return;
+                            }
+                            if (ret.StatusCode == undefined) {
+                                UI.tips.tip_alert('tips_warning', ret);
+                                return;
+                            }
+                            if (ret.Status) {
+                                UI.Alert({
+                                    title: '提示',
+                                    content: ret.Message,
+                                    icon:"succeed",
+                                    callback: function() { UI.DialogOpener().location.reload(); },
+                                    cancel: false,
+                                    padding: '10px 20px'
+                                });
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function (httpRequest, txtStatus, error) {
+                            //失败处理逻辑
+                            UI.tips.tip_alert('tips_wrong', error);
+                        }
+                    });
+                    return true;
+                },
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }
+
+        /*******************************
+            * 生产调价结果申请数字
+            *******************************/
+
+        function BuildPdPriceHistoryList(inputArray) {
+            var expectPriceArray = new Array(); //预期结果集
+            var tempPrice = null; //价格缓存，用于价格验证
+
+            var tempObj; //结果对象
+            var inputObj; //输入框对象
+            for (var i = 0; i < inputArray.length; i++) {
+                inputObj = $(inputArray[i]);
+                //对象为空将跳过
+                if (inputObj.length == 0) {
+                    continue;
+                }
+                //判断是否有值或是否值为0
+                if (inputObj.val() == 0)
+                    continue;
+
+                //组合调价申请对象(PdPriceHistory)
+                tempObj = {
+                    SysNo: 0,
+                    PriceSysNo: 0,
+                    OriginalPrice: 0,
+                    ApplyPrice: 0,
+                    ApplySysNo: 0,
+                    ApplyDate: "@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")",
+                    Opinion: "",
+                    Auditor: 0,
+                    AuditDate: "@((new DateTime()).ToString("yyyy-MM-dd HH:mm:ss"))",
+                    Status: 1
+                };
+                tempObj.OriginalPrice = inputObj.attr("data"); //获取原价
+                tempObj.PriceSysNo = inputObj.attr("id"); //获取系统编号（input控件ID就是价格的系统编号）
+                tempObj.SourceSysNo = inputObj.attr("sourcesysno"); //来源编号
+                tempObj.PriceSource = inputObj.attr("pricesource"); //来源编号类型
+                
+                //更具不同的价格调价设置（select控件）来计算申请价格
+                var selectId = $(inputObj).attr("name") + "_select";
+                var selectValue = $("#" + selectId).val();
+                switch (selectValue) {
+                case "0":
+                    tempObj.ApplyPrice = parseFloat(inputObj.val());
+                    break;
+                case "1":
+                    tempObj.ApplyPrice = parseFloat(tempObj.OriginalPrice) + parseFloat(inputObj.val());
+                    break;
+                case "-1":
+                    tempObj.ApplyPrice = parseFloat(tempObj.OriginalPrice) - parseFloat(inputObj.val());
+                    break;
+                }
+                
+                //验证会员等级价格 
+                if (tempObj.PriceSource == "@((int) Hyt.Model.WorkflowStatus.ProductStatus.产品价格来源.会员等级价)") {
+                    //价格对比，只能从第二个价格开始
+                    if (tempPrice != null && tempObj.ApplyPrice > tempPrice.ApplyPrice) {
+                        UI.Alert({
+                            content: "分销商等级价设置不正确，价格必须从高到底设置",
+                            width: 250
+                        });
+                        return null;
+                    }
+                    tempPrice = tempObj;
+                }
+
+
+                //如果价格有改动才添加到预期调价列表中
+                if (tempObj.OriginalPrice != tempObj.ApplyPrice)
+                    expectPriceArray.push(tempObj);
+            }
+
+
+            return expectPriceArray;
+        }
+
+    </script>
+</form>

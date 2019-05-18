@@ -1,0 +1,46 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@model PagedList
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="68px">客户姓名</th>
+                <th width="72">客户帐号</th>
+                <th width="95">咨询电话</th>
+                <th style="text-align: left; text-indent: 10px;">咨询内容</th>
+                <th width="95">记录人</th>
+                <th width="135">记录时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+            if (Model.TotalItemCount > 0)
+            {
+                var row = 1;
+                string cs = string.Empty;
+                foreach (var item in (List<CBCrFeedback>)Model.Data)
+                {
+                    cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                    <tr class="@cs">
+                        <td width="59">@item.Name</td>
+                        <td width="97">@item.Account</td>
+                        <td width="59">@item.Account</td>
+                        <td style="text-align:left; text-indent:10px;">@item.Content</td>
+                        <td width="59">@item.CreateName</td>
+                        <td width="120">@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    </tr>
+                    row++;
+                }
+            }
+            else
+            {
+                <tr class="odd_color">
+                    <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                </tr>
+            }
+            }
+        </tbody>
+    </table>
+</div>
+    @{Html.RenderPartial("_UrlPaging", Model); }

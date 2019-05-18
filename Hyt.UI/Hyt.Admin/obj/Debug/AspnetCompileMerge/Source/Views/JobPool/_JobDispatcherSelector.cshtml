@@ -1,0 +1,228 @@
+﻿@*
+文件作废，最新的参考：JobDispatcherSelector.cshtml
+*@
+
+@using Hyt.Model
+@model System.Collections.Generic.List<Hyt.Model.SyUser>
+@{
+    var jobTypes = (IDictionary<int, string>) ViewBag.JobTypes;
+    var jobs = (List<SyJobDispatcher>) ViewBag.Jobs;
+}
+<script type="text/javascript" src="/Theme/scripts/DAO.yui.js"></script>
+<script type="text/javascript" src="/Theme/scripts/jquery.validate.min.js"></script>
+
+<div class="boxs_listtabel">
+      <form id="addForm" name="addForm"  action="" onsubmit="return false;">
+    <!--/表格列表区-->
+      <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+          <thead>
+              <tr>
+                  <th>姓名</th>
+                  @{
+                      foreach (var k in jobTypes)
+                      {
+                          <th width="">@k.Value</th>
+                      }
+                  }
+                  <th width="80">操作</th>
+              </tr>
+
+            
+  
+              <tr style="background-color:#e5f4e5;">
+                  <th class="align_l p10_l">
+<div  class="search_btn fl m5_r" style="width: 180px;">新增 
+                      <input type="text" class="input_ht26" title="姓名"  inputItem="inputSelectUser" id="inputSelectUser" name="inputSelectUser" onfocus="this.blur();"/>
+                                                <button id="search_user" class="btn btn_ht26" title="搜索" type="button">
+                                                    <span class="icon_search"></span>
+                                                </button>
+<input id="txtAddUserSysNo" type="hidden" />
+    </div>
+                  </th>
+                  @{
+                      foreach (var k in jobTypes)
+                      {
+                          <th><input name="txtAddTaskType" type="checkbox" title="@k.Value" value="@k.Key" /> <input id="txtAddMaxTaskQuantity_@k.Key" type="text"  class="wd50 number_input" maxlength="4" value="5"  title="@k.Value _最大任务数" onblur="NumberInput(this)" onkeyup="NumberInput(this)" /></th>
+                      }
+                  }
+                  <th><button class="btn btn_ht26 btnAddSave" title="保存"><span class="icon_plus_sign"></span></button></th>
+              </tr>
+
+          </thead>
+          <tbody>
+              @{
+                  if (!Model.Any())
+                  {
+                      <tr>
+                          <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+                      </tr>
+                  }
+
+                  int i = 0;
+                  foreach (var item in Model)
+                  {
+
+                      if (i % 2 == 0)
+                      {
+                          @Html.Raw("<tr>")
+                      }
+                      else
+                      {
+                          @Html.Raw("<tr class='stag_color'>")
+                      }
+                      <td class="p10_l p10_r" align="left">@item.UserName</td>
+
+                      foreach (var k in jobTypes)
+                      {
+                          var job = Hyt.Admin.Controllers.JobPoolController.GetTaskInfo(item.SysNo, k.Key, jobs);
+                          var selected = job != null ? "checked='checked'" : "";
+                          var selectedVal = job != null ? job.MaxTaskQuantity : 0;
+                          <td>
+                              <input name="txtAddTaskType_@item.SysNo" type="checkbox" title="@k.Value" value="@k.Key" @selected /> 
+                              <input id='txtAddMaxTaskQuantity_@Html.Raw(item.SysNo+"_"+k.Key)' type="text" class="wd50 number_input" maxlength="4" value="@selectedVal"  title="@k.Value _最大任务数" onblur="NumberInput(this)" onkeyup="NumberInput(this)"  />
+                          </td>
+                      }
+
+                      <td>
+                          <button class="btn btn_ht26 btnAddSave" title="保存" id="btnSave_@item.SysNo"><span class="icon_save"></span></button>
+                          <button class="btn btn_ht26" onclick="doDel(@item.SysNo);" title="删除"><span class="icon_trash"></span></button>
+                      </td>
+
+                      @Html.Raw("</tr>")
+                      i++;
+                  }
+              }
+          
+          </tbody>
+        
+
+      </table>
+          
+        </form>
+</div>
+
+<script>
+    
+    function NumberInput(obj) {
+        obj.value = obj.value.replace(/[^0-9]\D*$/, "");
+    }
+
+    function doDel(userId) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+                $.post('/JobPool/RemoveJobDispatcher', { userSysNo: userId }, function (r) {
+                    if (r.Status) {
+                        UI.Prompt.Success(r.Message);
+                        doSearch();
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+
+                });
+            },
+            cancel: true
+        });
+    }
+
+    $(function() {
+
+        $(".btnAddSave").click(function() {
+
+            var btnId = this.id;
+            var isCreating = btnId == "";
+            
+            var sets = [];
+            var integer = /^\+?[0-9][0-9]*$/;
+            var userId, checkboxName, inputName;
+            if (isCreating) {
+                BindValidate();
+                userId = $("#txtAddUserSysNo").val();
+                checkboxName = "txtAddTaskType";
+                inputName = "txtAddMaxTaskQuantity_";
+                if (!$("#addForm").valid()) {
+                    UI.tips.tip_alert('tips_shrot tips_wrong', '请先指定用户。');
+                    return false;
+                }
+            } else {
+                UnbindValidate();
+                userId = btnId.replace("btnSave_", "");
+                checkboxName = "txtAddTaskType_" + userId;
+                inputName = "txtAddMaxTaskQuantity_" + userId + "_";
+            }
+
+            var selected = false;
+            $("[name='" + checkboxName + "']").each(function() {
+                if (this.checked) {
+                    var taskType = this.value;
+                    var quartity = $("#" + inputName + taskType).val();
+                    if (integer.test(quartity) && quartity>0) {
+                        sets.push({ SysNo: 0, UserSysNo: userId, TaskType: taskType, MaxTaskQuantity: quartity });
+                        selected = true;
+                    }
+                }
+            });
+
+            if (!selected) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '勾选项的值必须大于零才能保存。');
+                return false;
+            }
+                
+
+            $.ajax({
+                url: "@Url.Content("/JobPool/SaveJobDispatcher/")",
+                data: JSON.stringify({ UserSysNo: userId, sets: sets }),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function(data) {
+                    if (data.Status == true) {
+                        UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                        if (isCreating) {
+                            doSearch();
+                            addForm.reset();
+                        }
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                    }
+                },
+                error: function() {
+                }
+            });
+        });
+
+        $("#inputSelectUser,#search_user").click(function () {
+            DAO.SelectSyUser(function(data) {
+                $("#txtAddUserSysNo").val(data.sysNo);
+                $("#inputSelectUser").val(data.userName);
+            });
+        });
+
+    });
+    
+   function BindValidate() {
+       $("#addForm").validate({
+           rules: {
+               inputSelectUser: {
+                   required: true
+               }
+           },
+           errorPlacement: function (error, element) {
+               //jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+           },
+           success: function (span, element) {
+               //jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+           }
+       });
+   }
+   
+   function UnbindValidate() {
+       $("#addForm").unbind("validate");
+   }
+
+
+</script>

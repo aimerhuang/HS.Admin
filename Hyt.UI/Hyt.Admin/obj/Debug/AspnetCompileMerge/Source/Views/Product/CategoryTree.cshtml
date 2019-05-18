@@ -1,0 +1,42 @@
+﻿@{
+    ViewBag.Title = "选择商品类别";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section HeadJs{
+    <script type="text/javascript" src='@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")'></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+    <script type="text/javascript">
+        var setting = {
+            view: {
+                selectedMulti: false
+            },
+            async: {
+                enable: true,
+                url: '@Url.Content("~/Ajax/GetProductCategoryZTreeList/")',
+                autoParam: ["id"]
+            },
+            callback: {
+                onClick: onClick
+            }
+        };
+        function onClick(event, treeId, treeNode, clickFlag) {
+            if (treeNode.target == "node") {
+                $("#productCategory", window.parent.document).val(treeNode.id);
+                art.dialog.close();
+            }
+        }
+        $(document).ready(function () {
+            UI.ZTree.init($("#tree"), setting);
+        });
+    </script>
+}
+<div class="zTreeDemoBackground left">
+    <ul id="tree" class="ztree"></ul>
+</div>
+
+
+
+

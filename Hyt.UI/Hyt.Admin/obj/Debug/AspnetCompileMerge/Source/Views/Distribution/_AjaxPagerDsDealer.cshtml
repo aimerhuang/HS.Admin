@@ -1,0 +1,88 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBDsDealer>
+
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="60">系统编号</th>
+            <th width="98">分销商名称</th>   
+            <th width="98">系统账号</th>
+            <th width="85">等级</th>
+            <th width="72">联系人</th>
+            <th width="124">座机号码</th>
+            <th width="95">手机号码</th>
+            <th width="180" class="align_l p10_lr">邮箱</th>
+            <th width="46">状态</th>
+            <th width="400">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBDsDealer item in Model.TData)
+            {
+            <tr>
+                <td class="blue">
+                    <a href="javascript:Look('@item.SysNo');">@item.SysNo</a>
+                </td>
+                <td>@item.DealerName</td>
+                <td>@item.Account</td>
+                <td>@item.LevelName</td>
+                <td>@item.Contact</td>
+                <td>@item.PhoneNumber</td>
+                <td>@item.MobilePhoneNumber</td>
+                <td class="align_l p10_lr">@item.EmailAddress</td>
+                <td id="status@(item.SysNo)">@((Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态)item.Status)
+                </td>
+                <td>
+                    <button class="btn btn_ht26 m10_l btn_blue DS1002101" value="427" onclick="PostDistriToNitago(@item.SysNo)">
+                        <span class="icon_pencil icon_white"></span>
+                        <span class="m5_l">推送</span>
+                    </button>
+                    <button id="btnStatus@(item.SysNo)" class="btn btn_ht26 DS1002701" type="button" onclick="SetReverseStatus(@item.SysNo) ">
+                        @if (item.Status == (int)Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态.禁用)
+                        {
+                            <span class="icon_check m5_r "></span><span>启用</span>                               
+                        }
+                        else
+                        {
+                            <span class="icon_ban_circle m5_r "></span><span>禁用</span>
+                        }
+                    </button>
+                    <button class="btn btn_ht26 m10_l DS1002301" onclick="Update(@item.SysNo)" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>
+
+                    <button class="btn btn_ht26 m10_l DS1002301" onclick="CreateMenu(@item.SysNo,'@item.DealerName')" title="生成微信菜单"><span class="icon_share"></span><span class="m5_l">生成微信菜单</span></button>
+                    @*<button class="btn btn_ht26 m10_l DS1002301" onclick="AccountBrowse(@item.SysNo,'@item.DealerName')" title="账号"><span class="icon_pencil"></span><span class="m5_l">账号</span></button>*@
+
+                </td>
+            </tr>                      
+                   
+            }
+
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+    //账号详情
+    function AccountBrowse(dealersysno,dealername) {
+        
+        UI.OpenCreatTab(dealername+"账号列表", "/Distribution/DsUserList?dealersysno=" + dealersysno+"&dealername="+dealername);
+            
+    }
+</script>

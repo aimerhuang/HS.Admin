@@ -1,0 +1,81 @@
+﻿@using Hyt.BLL.Order
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBAtAllocation>
+
+<style>
+    table th {
+        white-space: nowrap;
+    }
+
+    table td {
+        padding: 0 5px;
+    }
+
+    .nowrap {
+        white-space: nowrap;
+    }
+</style>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table class="list_tit border_rnone border_bnone" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="25">
+                    <input name="sysNo" type="checkbox" class="checkall" value="" />
+                </th>
+                <th>调拨单编号</th>
+                <th>创建时间</th>
+                <th>创建人</th>
+                <th>审核人</th>
+                <th>审核时间</th>
+                <th>调出仓库</th>
+                <th>调入仓库</th>
+                <th>调拨状态</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.TData.Any())
+            {
+                <tr>
+                    <td colspan="14" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+            }
+            else
+            {
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CBAtAllocation>)Model.TData)
+                {
+                    <tr @(i % 2 != 0 ? "class='stag_color'" : "")>
+                        <td>
+                            <input name="sysNo" type="checkbox" class="checktd" value="@item.SysNo" />
+                        </td>
+                        <td class="blue nowrap"><a onclick="javascript:UI.OpenCreatTab('查看调拨单', '/Warehouse/AtAllocationAddOrEdit?SysNo=@item.SysNo')">@item.AllocationCode</a></td>
+                        <td class="nowrap">@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td class="nowrap">@Hyt.BLL.Sys.SyUserBo.Instance.GetSyUser(item.CreatedBy).UserName</td>
+                        <td class="nowrap">@(item.CheckUserSysNo > 0 ? Hyt.BLL.Sys.SyUserBo.Instance.GetSyUser(item.CheckUserSysNo).UserName : "")</td>
+                        <td class="nowrap">@(item.CheckDate == (DateTime)System.Data.SqlTypes.SqlDateTime.MinValue ? "" : item.CheckDate.ToString("yyyy-MM-dd HH:mm"))</td>
+                        <td class="nowrap">@Hyt.BLL.Warehouse.WhWarehouseBo.GetEntity(item.OutWarehouseSysNo).BackWarehouseName</td>
+                        <td class="nowrap">@Hyt.BLL.Warehouse.WhWarehouseBo.GetEntity(item.EnterWarehouseSysNo).BackWarehouseName</td>
+                        <td class="nowrap">@((Hyt.Model.WorkflowStatus.WarehouseStatus.库存调拨单状态)item.Status)</td>
+                        <td class="nowrap">
+                            @if (item.Status == 0)
+                            {
+                                if (ViewBag.checkData)
+                                {
+                                    <button onclick="CheckAtAllocation('@item.SysNo')" class="btn btn_ht26 m10_r btn_blue"><span class="icon_pencil icon_white"></span><span class="m5_l">审核通过</span></button>
+                                }
+
+                                <button onclick="location.href='/Warehouse/AtAllocationAddOrEdit?isEdit=true&SysNo=@item.SysNo'" class="btn btn_ht26 btn_blue"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

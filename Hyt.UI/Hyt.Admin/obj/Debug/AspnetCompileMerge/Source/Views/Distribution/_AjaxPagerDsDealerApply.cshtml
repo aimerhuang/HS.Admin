@@ -1,0 +1,64 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBDsDealerApply>
+@using Hyt.Model.WorkflowStatus;
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="60">联系人</th>
+            <th width="98">联系方式</th>   
+            <th width="98">公司名称</th>
+            <th width="98">身份证号码</th>
+            <th width="60">提交时间</th>
+            <th width="60">处理人</th>
+            <th width="60">提交时间</th>
+            <th width="46">状态</th>
+            <th width="120">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBDsDealerApply item in Model.TData)
+            {
+            <tr>
+                <td>@item.ContactName</td>
+                <td>@item.ContactWay</td>
+                <td>@item.CompanyName</td>
+                <td>@item.IDCard</td>
+                <td>@item.CommitDate.ToString("yyyy-mm-dd HH:MM:SS")</td>
+                <td>@item.HandlerName</td>
+                <td>@item.HandleDate.ToString("yyyy-mm-dd HH:MM:SS")</td>
+                <td>@((DistributionStatus.分销商申请状态)item.Status)</td>
+                <td>
+                @{
+                    const int audit = (int)DistributionStatus.分销商申请状态.已审核;
+                    const int invalid = (int)DistributionStatus.分销商申请状态.作废;
+                    <button class="btn btn_ht26 btn_blue m10_r DSA1002201" type="button" title="审核" onclick="Audit(@item.SysNo,@audit) "><span class=" icon_audit icon_white"></span><span class="m5_l">审核</span></button>
+                    <button class="btn btn_ht26 m10_r btn_red DSA1002301" type="button" onclick="Cancel(@item.SysNo,@invalid)"><span class="icon_forbidden m5_r icon_white"></span><span>作废</span></button>
+                }
+                </td>
+            </tr>                      
+                   
+            }
+
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="4">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+</script>

@@ -1,0 +1,141 @@
+﻿@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@using Hyt.Util.Log
+<script type="text/javascript">
+    var collocationTable;
+    var productSysno;
+    var selectedProductList = new Array();
+    
+    function initProductCollocation() {
+        productSysno = parseInt($("#hdf_ProductSysNo").val());
+    }
+
+    $(function () {
+        initProductCollocation();
+        
+        $("#PdProductCollocationAdd").click(function () {
+            DAO.SelectProduct({
+                selectedProducts: selectedProductList,
+                selectedIsReadOnly: false,
+                syncWebFront: true,
+                onselect: function (data) {
+                    collocationTable.InsertRow(data);
+                }
+            });
+        });
+
+        collocationTable =new TableBind({
+            table: $("#collocationASTable"),
+            data: [],
+            key: 'pid',
+            selectedCss: '',
+            rowCss: "",               //交替行样式
+            hoverCss: "trhover",
+            alternatelyCss: "",
+            beforeRowBind: function (data) {
+                if (data.categoryName == undefined)
+                        data.categoryName = data.category[0].name;
+            }
+        });
+    });
+    function GetProductCollocation(productSysno) {
+        if ($("#collocationASTable").attr("inited") == null) {
+            $.ajax({
+                url: '/Product/PdProductCollocation/',
+                data: { productSysno: productSysno },
+                success: function(data) {
+                    $.each(data, function (i, e) {
+                        selectedProductList.push(e.pid);
+                    });
+                    collocationTable.InsertRow(data);
+                    $("#collocationASTable").attr("inited", "true");
+                }
+            });
+        }
+    }
+    function collocationDelRow() {
+        var arrSysno = [];
+        $("#collocationASTable tbody input:checkbox:checked").each(function () {
+            arrSysno.push($(this).val());
+        });
+        if (arrSysno.length == 0) {
+            UI.Alert({ content: '请勾选要取消搭配的商品' });
+            return;
+        }
+        for (var i = 0; i < arrSysno.length; i++) {
+            collocationTable.DelRow(arrSysno[i]);
+        }
+    }
+    //搭配销售商品添加
+    function collocationAdd() {
+        
+        //兼容新建商品
+        if (!(productSysno > 0)) {
+            productSysno = parseInt($("#hdf_ProductSysNo").val());
+        }
+
+        var result = [];
+        $("#collocationASTable tbody input:checkbox").each(function () {
+            if ($(this).hasClass('checkall'))
+                return;
+
+            var json = {};
+            json.Code = productSysno;
+            json.ProductSysNo = $(this).val(); 
+            result.push(json);
+        });
+        
+        $.ajax({
+            url: "/Product/PdProductCollocationAdd/?productSysno=" + productSysno,
+            data: JSON.stringify({ collocation: result }),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data.result) {
+                    UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                }
+            }
+        });
+    }
+</script>
+<!-- 搭配销售商品维护 -->
+<!--工具条开始-->
+<div class="boxs_tool boxs_toolbgnone p0">
+    <!--功能按钮开始-->
+    <div class="left_tool">
+        <button id="PdProductCollocationAdd" type="button" class="btn btn_ht28 m10_r" title="添加商品"><span class="icon_plus"></span><span class="m5_l">添加搭配商品</span></button>
+        <button type="button" class="btn btn_ht28 m10_r" title="取消搭配" onclick="collocationDelRow()"><span class="icon_trash"></span><span class="m5_l">取消搭配商品</span></button>
+    </div>
+    <!--功能按钮结束-->
+</div>
+<!--工具条结束-->
+<div class="boxs_detail line25" id="div_productCollocation">
+    <table id="collocationASTable" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="53" class="border_lnone align_c"><input class="checkall" name="" type="checkbox" value="" /></th>
+                <th align="center" width="10%">商品编号</th>
+                <th style="text-align: left; text-indent: 10px;">商品名称</th>
+                <th align="center" width="150">价格</th>
+                <th align="center" width="15%">分类</th>
+            </tr>
+            <tr template="true"  style="display: none;">
+                <td class="border_lnone align_c"><input type="checkbox" value="{pid}" /></td>
+                <td align="center" class="blue"><a href="@Url.Action("ViewProduct","Product")?sysno={pid}">{erp}</a></td>
+                <td align="left" class="p10_l">{name}</td>
+                <td align="center">&yen;{baseprice}</td>
+                <td align="center">{categoryName}</td>
+            </tr>
+        </thead>
+        <tbody>
+            
+        </tbody>
+    </table>
+</div>
+<div class="align_c m10_t">
+    <button class="btn btn_blue btn_ht30" onclick="collocationAdd()"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;
+</div>
+<!-- 搭配销售商品维护 END -->

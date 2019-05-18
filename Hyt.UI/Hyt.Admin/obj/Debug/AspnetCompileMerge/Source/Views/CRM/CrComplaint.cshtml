@@ -1,0 +1,203 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@model PagedList<CBCrComplaint>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户投诉";
+    @Html.PrivilegeControl(PrivilegeCode.CR1001301, "button.CR1001301")
+    @Html.PrivilegeControl(PrivilegeCode.CR1001501, "button.CR1001501")
+}
+@section headjs{
+     <script type="text/javascript">
+         var searchorderSysNoTxt = "请输入订单编号...";
+         var searchmobilePhoneNumberTxt = "请输入手机号...";
+         function dialog(content) {
+             UI.Alert({
+                 content: content
+             });
+         }
+         function refresh(id) {
+             var json = { id: 1};
+             $.get('/Front/CrComplaint/', json, function (data) {
+                $('#paging').html(data);
+            });
+        }
+        function addOrEdit(sysNo, status) {
+            var url, title, w, h;
+
+             url = "/CRM/CrComplaintEdit/?sysNo=" + sysNo;
+             title = "回复";
+             w = 630;
+             h = 460;
+             UI.DialogOpen(url, {
+                 title: title,
+                 width: w,
+                 height: h,
+                 init: function () {
+                     this.button(
+                         {
+                             name: '回复',
+                             callback: function () {
+                                 var iframe = this.iframe.contentWindow;
+                                 var form = iframe.document.getElementById('form');
+                                 iframe.addOrEdit();
+                                 return false;
+                             }, focus: true
+                         },
+                         {
+                             name: '关闭投诉',
+                             callback: function () {
+                                 var iframe = this.iframe.contentWindow;
+                                 iframe.CloseStatus();
+                                 return false;
+                             }
+                         },
+                         {
+                             name: '作废',
+                             callback: function () {
+                                 var iframe = this.iframe.contentWindow;
+                                 iframe.UpdateStatus();
+                                 return false;
+                             }
+                         },
+                         {
+                             name: '关闭'
+                         }
+                     )
+                 }
+             });
+        }
+        function view(sysNo) {
+            var url, title, w, h;
+            url = "/CRM/CrComplaintView/?sysNo=" + sysNo;
+            title = "查看";
+            w = 560;
+            h = 389;
+            UI.DialogOpen(url, {
+                title: title,
+                width: w,
+                height: h,
+                init: function () {
+                    this.button(
+                        {
+                            name: '关闭'
+                        }
+                    );
+                }
+            });
+        }
+         function UpdateStatus(sysNo) {
+             UI.Confirm({
+                 content: '您确定要作废此条记录吗？',
+                 ok: function () {
+                     $.post('@Url.Action("CrComplaintUpdate", "CRM")', { sysNo: sysNo }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.result) {
+                            dialog(data.info);
+                            doSearch();
+                            UI.Dialog.close();
+                        } else {
+                            dialog(data.info);
+                        }
+                    });
+                },
+                cancel: true
+            });
+         }
+         function doSearch() {
+             AjaxStart();
+
+             var searchstatus = $("#status").val();
+             var searchcomplainType = $("#complainType").val();
+             var searchreplyerType = $("#replyerType").val();
+             var searchorderSysNo = $("#orderSysNo").val();
+             var searchmobilePhoneNumber = $("#mobilePhoneNumber").val();
+
+             var json = {};
+             json.id = 1;
+             if ($.trim(searchstatus) != "") {
+                 json.status = searchstatus
+             }
+             if ($.trim(searchcomplainType) != "") {
+                 json.complainType = searchcomplainType
+             }
+             if ($.trim(searchreplyerType) != "") {
+                 json.replyerType = searchreplyerType
+             }
+             if ($.trim(searchorderSysNo) != "" && searchorderSysNo != searchorderSysNoTxt) {
+                 json.orderSysNo = searchorderSysNo;
+             }
+             if ($.trim(searchmobilePhoneNumber) != "" && searchmobilePhoneNumber != searchmobilePhoneNumberTxt) {
+                 json.mobilePhoneNumber = searchmobilePhoneNumber;
+             }
+             $.get('/CRM/CrComplaint/', json, function (data) {
+                 $('#paging').html(data);
+                 AjaxStop();
+             });
+         }
+
+         $(function() {
+             $("body").keydown(function(event) {
+                 switch (event.keyCode) {
+                 case 13:
+                     doSearch();
+                     break;
+                 }
+             });
+         });
+     </script>
+
+}
+<form id="form" method="Get" action="@Url.Action("CrComplaint")">
+<div class="case">
+    <div class="boxs">
+	    <div class="boxs_tit head_m"><h3>客户投诉</h3></div>
+	    <div class="boxs_con_c1">
+            <div class="boxs_tool">
+              <div class="right_tool">
+                  <span class="fl veralign_t">状态</span>
+                  <div class="m10_l fl">
+                  <select id="status" name="status" class="select_ht28" onchange="doSearch()">
+                      <option value="-1">全部</option>
+                         @{
+                                string sel;
+                              foreach (var dict in (IDictionary<int, string>)ViewBag.dictstatus)
+                              {
+                                  sel = dict.Key == (int)Hyt.Model.WorkflowStatus.CustomerStatus.会员投诉状态.待处理 ? "selected='selected'" : string.Empty;
+                                 <option value="@dict.Key" @sel>@dict.Value</option>
+                              }
+                          }
+                  </select>
+                  </div>
+                  <span class="fl m10_l veralign_t">类型</span>
+                  <div class="m10_l fl">
+                  <select id="complainType" name="complainType" class="select_ht28" onchange="doSearch()">
+                         <option value="-1">全部</option>
+                         @{
+                             foreach (var dict in (IDictionary<int, string>)ViewBag.dictComplainType)
+                              {
+                              <option value="@dict.Key">@dict.Value</option>
+                              }
+                              }
+                  </select>
+                  </div>
+                  <span class="fl m10_l veralign_t">订单编号</span>
+                  <div class="m10_l fl"><input name="orderSysNo" type="text" id="orderSysNo" class="input_ht28" maxlength="20" value="请输入订单编号..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入订单编号...'" onclick="if (this.value == '请输入订单编号...') this.value = ''" /></div>
+                  <span class="fl m10_l veralign_t">手机号</span>
+                  <div class="m10_l fl"><input name="mobilePhoneNumber" type="text" id="mobilePhoneNumber" class="input_ht28" maxlength="20" value="请输入手机号..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入手机号...'" onclick="if (this.value == '请输入手机号...') this.value = ''" /></div>
+                  <button class="btn btn_ht28 m10_l fl" title="搜索" type="button" onclick="doSearch()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+              </div>
+            </div>
+            <div class="boxs_list">
+              <div class="boxs_listtabel">
+                  @{Html.RenderPartial("_AjaxCrComplaint", Model); }
+              </div>
+            </div>
+        </div>
+    </div>
+</div>
+</form>

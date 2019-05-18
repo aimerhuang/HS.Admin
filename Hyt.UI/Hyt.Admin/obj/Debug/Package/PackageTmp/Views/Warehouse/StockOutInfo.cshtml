@@ -1,0 +1,261 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.CBWhStockOut
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "出库单查看";
+
+    if (!string.IsNullOrWhiteSpace(ViewBag.Pic))
+    {
+        ViewBag.Pic = ViewBag.Pic.Replace("\\", "/");
+    }
+
+    var imgButtonStyle = "none";
+    if (Model.Status == Hyt.Model.WorkflowStatus.WarehouseStatus.出库单状态.已签收.GetHashCode() && (bool)ViewBag.uploadPermission)
+    {
+        imgButtonStyle = "inline";
+    }
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+@if (Model != null)
+{
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_dispay border_left border_right">
+                <h5>出库单信息</h5>
+            </div>
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="15%" class="nameright border_rnone">出库单号：</td>
+                        <td width="35%" class="border_rnone">@Model.SysNo</td>
+                        <td style="width: 15%;" class="nameright border_rnone">订单编号：</td>
+                        <td style="width: 35%;">@Model.OrderSysNO</td>
+                    </tr>
+                    <tr>
+                        <td style="width: 15%;" class="nameright border_rnone">仓库：</td>
+                        <td style="width: 35%;" class="border_rnone">@Model.WarehouseName</td>
+
+                        <td width="15%" class="nameright border_rnone">状态：</td>
+                        <td width="35%">@((WarehouseStatus.出库单状态)Model.Status)</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">销售类型：</td>
+                        <td class="border_rnone">
+                            @(Enum.IsDefined(typeof(OrderStatus.销售方式), Model.SalesType)
+                                  ? ((OrderStatus.销售方式)Model.SalesType).ToString()
+                                  : "未知类型 " + Model.SalesType)
+                        </td>
+                        <td class="nameright border_rnone">运费：</td>
+                        <td class="red">@Model.FreightAmount.ToString("C")</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">支付方式：</td>
+                        <td colspan="3">@Model.PaymentName</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">销售单对内备注：</td>
+                        <td colspan="3">@Model.SoInternalRemarks</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="tit_dispay border_left border_right border_tnone">
+                <h5>出库单明细</h5>
+            </div>
+            <div class="boxs_detail border_none">
+                <div class="tit_con border_none">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <thead>
+                            <tr>
+                                <th class="border_lnone" style="width: 110px">商品编号</th>
+                                <th class="align_l p10_lr">后台显示名称</th>
+                                <th class="wd100">金额</th>
+                                <th style="width: 44px;">数量</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tr_list">
+                            @foreach (var item in Model.Items)
+                            {
+                                var erpNo = Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo);
+                                
+                                <tr class="border_bnone">
+                                    <td class="border_lnone border_rnone border_bnone">@erpNo</td>
+                                    <td class="border_rnone border_bnone align_l p10_lr">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                                    <td class="red border_rnone border_bnone p10_r align_r">
+                                    @if(Model.OrderSource==OrderStatus.销售单来源.RMA下单.ToString())
+                                    {
+                                        var itx = Hyt.BLL.RMA.RmaBo.Instance.GetSoReturnOrderItem(item.OrderItemSysNo);
+                                        if(itx!=null)
+                                        {
+                                             @Math.Round(item.ProductQuantity * (itx.FromStockOutItemAmount / (decimal)itx.FromStockOutItemQuantity), 2).ToString("C")
+                                        
+                                            @*@Math.Round(itx.FromStockOutItemAmount * ((decimal)itx.OrderItemQuantity / (decimal)itx.FromStockOutItemQuantity), 2).ToString("C")*@
+                                        }
+                                        else
+                                        {
+                                             @item.RealSalesAmount.ToString("C")
+                                        }
+                                    }
+                                    else
+                                    { 
+                                      @item.RealSalesAmount.ToString("C")
+                                    }
+                                    
+                                    </td>
+                                    <td class="border_rnone border_bnone">@item.ProductQuantity</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="boxs_detail_dispay @if (ViewBag.ShowLogistics != true)
+                                           {
+                                                       @Html.Raw("hide")
+                                           }">
+                <div class="tit_dispay border_left border_right border_tnone">
+                    <h5>物流信息</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td style="width: 15%;" class="nameright border_rnone">配送方式：</td>
+                            <td style="width: 35%;" class="border_rnone">@Model.DeliveryTypeName</td>
+                            <td style="width: 15%;" class="nameright border_rnone">应收金额：</td>
+                            <td style="width: 35%;" class="red">@Model.Receivable.ToString("C")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">收货地址：</td>
+                            <td colspan="3">
+                                <div id="city_2">
+                                    @Model.District
+                                    @Model.StreetAddress
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">收货联系人：</td>
+                            <td class="border_rnone">@Model.ReceiverName</td>
+                            <td class="nameright border_rnone">联系电话：</td>
+                            <td>@Model.PhoneNumber</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">配送时间：</td>
+                            <td class="border_rnone">@Model.DeliveryTime</td>
+                            <td class="nameright border_rnone">配送备注：</td>
+                            <td>@Model.DeliveryRemarks</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">联系手机：</td>
+                            <td class="border_rnone">@Model.MobilePhoneNumber</td>
+                            <td class="nameright border_rnone">邮编：</td>
+                            <td>@Model.ZipCode</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            <div class="boxs border_tnone" >
+                <div class="boxs_detail_dispay">
+                    <div class="tit_dispay border_left border_right border_tnone">
+                        <h5>发票信息</h5>
+                    </div>
+                    @{
+                                           if (Model.InvoiceSysNo == 0)
+                                           {
+                        <div class="tit_con">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td style="width: 15%;" class="nameright border_rnone">该订单未申请发票</td>
+                                    <td style="width: 35%;" class="border_rnone"></td>
+                                    <td style="width: 15%;" class="border_rnone"></td>
+                                    <td style="width: 35%;"></td>
+                                </tr>
+                            </table>
+                        </div>
+                                           }
+                    }
+                    <div class="tit_con  @if (Model.InvoiceSysNo == 0)
+                                         {
+                                             @Html.Raw("hide")
+                                         }">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td style="width: 15%;" class="nameright border_rnone">发票代码：</td>
+                                <td style="width: 35%;" class="border_right">@Model.InvoiceCode</td>
+                                <td style="width: 15%;" class="nameright border_rnone">发票号码：</td>
+                                <td style="width: 35%;">@Model.InvoiceNo</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票抬头：</td>
+                                <td class="border_right">@Model.InvoiceTitle</td>
+                                <td class="nameright border_rnone">发票金额：</td>
+                                <td class="red">@Model.InvoiceAmount.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票类型：</td>
+                                <td class="border_right">@Model.InvoiceTypeName</td>
+                                <td class="nameright border_rnone">发票状态：</td>
+                                <td>@(Enum.IsDefined(typeof(FinanceStatus.发票状态), Model.InvoiceStatus)
+                                          ? ((FinanceStatus.发票状态)Model.InvoiceStatus).ToString()
+                                          : "未知状态 " + Model.InvoiceStatus)</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票备注：</td>
+                                <td class="border_right" colspan="3">@Model.InvoiceRemarks</td>
+
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="tit_dispay border_left border_right border_tnone " >
+                <h5>签收图片　  <a href="javascript:" style="color: #3366cc; text-decoration:underline; display:@imgButtonStyle" onclick="uploadImg(); return false;">(上传图片)</a></h5> 
+                <iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("UploadSignedImg", new { whStockOutSysNo = Model.SysNo})" class="hide"></iframe> 
+            </div>
+            <div class="boxs_detail border_none" >
+                <div class="tit_con border_none" id="imgContainer">
+                    
+                    @{
+                        if (!string.IsNullOrWhiteSpace(ViewBag.Pic))
+                        {
+                            <img src="@ViewBag.Pic" alt="签收图片" style="max-width: 300px; cursor:pointer;" onclick="showImage(this.src)" />
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $("input[type=text]").attr("disabled", true);
+        $("input[type=radio]").attr("disabled", true);
+        $("textarea").attr("disabled", true);
+
+        function showImage(src) {
+            UI.DialogOpen('/warehouse/PicBrowser?path=' + src, {
+                title: '签收图片',
+                height: 650
+            }, false);
+        }
+
+        var uploadImg = function() {
+            if (window.frames["ifrmImport"].chooseFile) {
+                window.frames["ifrmImport"].chooseFile();
+            }
+        }
+
+        function uploadCallBack(res) {
+            if (res.indexOf('成功') !== -1) {
+                UI.tips.tip_alert("tips_success", res);
+
+            } else
+                UI.tips.tip_alert("tips_wrong", res);
+
+        }
+
+    </script>
+
+}

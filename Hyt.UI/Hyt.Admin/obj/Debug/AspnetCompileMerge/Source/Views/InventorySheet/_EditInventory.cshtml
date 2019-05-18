@@ -1,0 +1,43 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<PdBrand>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="0%" style="display: none">
+                <input name="sysNo" onclick="all(this)" type="checkbox" />
+            </th>
+            <th width="" class="align_l p10_lr">系统编号</th>
+            <th width="" class="align_l p10_lr">品牌名称</th>
+            <th width="60">状态</th>
+            <th width="148" class="borde_r_none">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count == 0)
+            {
+                <tr class="odd_color trhover">
+                    <td colspan="4" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+                return;
+            }
+            foreach (var item in Model.TData)
+            {
+                <tr @(Model.TData.IndexOf(item) % 2 == 0 ? "class='stag_color'" : "")>
+                    <td width="0%" style="display: none">
+                        <input name="sysNo" type="checkbox" value="@item.SysNo" />
+                    </td>
+                    <td width="70" class="align_l p10_lr">@item.SysNo</td>
+                    <td width="" class="align_l p10_lr">@item.Name</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.品牌状态), item.Status)</td>
+                    <td>
+                        <button class="btn btn_ht26" id="btn_@(item.SysNo)" onclick="xuanze(this,'@item.SysNo','@item.Name')"><span class="icon_ok"></span><span class="m5_l">选择</span></button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+

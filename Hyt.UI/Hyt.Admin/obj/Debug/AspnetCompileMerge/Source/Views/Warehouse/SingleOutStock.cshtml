@@ -1,0 +1,544 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBWhStockOut>
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "出库单管理";
+}
+@section HeadJs
+{
+    <script type="text/javascript" src="~/Theme/scripts/tab.js"> </script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"> </script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"> </script>
+    <script type="text/javascript" src="/Theme/scripts/search.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+}
+@section FooterJs
+{
+    <script type="text/javascript">
+
+        var queryPara = {};
+        //设置查询参数
+
+        function setQueryPara(isQuick) {
+            for (var i in queryPara) {
+                queryPara[i] = null;
+            }
+            if (isQuick) {
+                queryPara.StockOutSysNo = $("#sysno").val(); //出库单编号
+                queryPara.WarehouseSysNo = $("#warehouse").val(); //仓库编号
+                queryPara.Status = $("#status").val(); //状态
+                queryPara.InvoiceSysNo = $("#isInvoice").val(); //是否开票
+                queryPara.DeliveryTypeSysNo = $("#deliveryList").val(); //配送方式系统编号
+            } else {
+                queryPara.StockOutSysNo = $("#txtOutStockTransactionSysNo").val(); //出库单编号
+                queryPara.WarehouseSysNo = $("#WarehouseSysNo").val(); //仓库编号
+                queryPara.startDate = $("#txtStartDate").val(); //开始日期
+                queryPara.EndDate = $("#txtEndDate").val(); //结束日期
+                queryPara.SoSysNo = $("#txtSoSysNo").val(); //订单编号
+                queryPara.ProductSysNo = $("#txtProductSysNo").val(); //商品系统编号
+                queryPara.ProductErpCode = $("#txtProductErpCode").val(); //商品ERP编号
+                queryPara.ProductName = $("#txtProductName").val(); //商品名称
+                queryPara.ExpressNo = $("#txtExpressNo").val();//快递单号
+                queryPara.Status = $("#statusAdv").val(); //状态
+                queryPara.DeliveryTypeSysNo = $("#advDeliveryList").val(); //配送方式系统编号
+                queryPara.DsDealerMallSysNo = $("#dsDealerMallList").val();//店铺系统编号
+                queryPara.ThirdPartyOrder = $("#thirdPartyOrder").val();//第三方订单编号
+                queryPara.ReceiveName = $("#receiveName").val();//收件人姓名
+                queryPara.CustomerAccount = $("#customerAccount").val();//收件人姓名
+                if($("#txtStartStockOutDate").val()!="")
+                    queryPara.StartStockOutDate=$("#txtStartStockOutDate").val();//出库开始日期
+                if($("#txtEndStockOutDate").val()!="")
+                    queryPara.EndStockOutDate=$("#txtEndStockOutDate").val();//出库结束日期
+
+                queryPara.OrderSysNoList="";
+
+                queryPara.AwaitShipStatus=0;
+
+                if($("#awaitShipStatus").get(0).checked)
+                    queryPara.AwaitShipStatus=1;
+
+
+                $("input.xz").each(function () {
+                    if (this.checked) {
+                        if (queryPara.OrderSysNoList != "")
+                            queryPara.OrderSysNoList += ",";
+                        queryPara.OrderSysNoList += $(this).val();
+                    }
+                });
+            }
+            queryPara.CurrentPage = 0;
+        }
+
+        function selectWharehouse() {
+            DAO.SelectWhareHouseDialog({
+                chkStyle: 'radio',
+                callBack: function(data) {
+                    if (data) {
+                        $('#warehouse_sysno').val(data[0].name);
+                        $('#WarehouseSysNo').val(data[0].id);
+                    }
+                }
+            });
+        }
+
+        //开始查询
+        $("#search_btn").click(function() {
+            var sysno = $("#sysno").val();
+            if (sysno) {
+                setQueryPara(true);
+                submitForm();
+            }
+        });
+
+        $("#sysno").keydown(function(e) {
+            var keycode = e.which;
+            if (keycode != 13) {
+                return;
+            }
+            setQueryPara(true);
+            submitForm();
+        });
+
+        $(document).ready(function() {
+            $("#sysno").defaultValue("搜索出库单号...");
+
+
+            //高级查询
+            searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+
+            $("#status").attr("class", "wd100 select_ht28");
+            $("#isInvoice").attr("class", "wd100 select_ht28");
+            $("#deliveryList").attr("class", "wd100 select_ht28");
+
+            advancedQuery();
+        });
+        //快捷状态查询
+        $("#status").change(function() {
+            $("#sysno").val("");
+            setQueryPara(true);
+            submitForm();
+        }).addClass("wd100");
+
+        $("#deliveryList").change(function() {
+            $("#sysno").val("");
+            setQueryPara(true);
+            submitForm();
+        }).addClass("wd100");
+
+        $("#isInvoice").change(function() {
+            $("#sysno").val("");
+            setQueryPara(true);
+            submitForm();
+        }).addClass("wd100");
+
+        $("#warehouse").change(function() {
+            $("#sysno").val("");
+            setQueryPara(true);
+            submitForm();
+        }).addClass("wd100");
+
+        //高级查询
+
+        function advancedQuery() {
+            setQueryPara();
+            submitForm();
+        }
+
+        function submitForm() {
+            var mask = UI.Mask({
+                obj: $("#paging"),
+                zindex: 1000
+            });
+
+            var url = "/Warehouse/SingleOutStock?o=" + Math.random();
+            Ajax.get(url, "Search", function(p) {
+                for (var key in queryPara) {
+                    p.setParams(key, queryPara[key]);
+                }
+            }, function(data) {
+
+                $('#paging').html(data);
+
+                if (mask != null && $.isFunction(mask.Remove)) {
+                    mask.Remove();
+                }
+
+                if (data.IsLogout) {
+                    DAO.LoginBox();
+                    return;
+                }
+            });
+        }
+
+
+        //重置搜索条件
+
+        function reset() {
+            $("#txtStartDate").val("");
+            $("#txtEndDate").val("");
+            $("#txtSoSysNo").val("");
+            $("#txtProductSysNo").val("");
+            $("#txtOutStockTransactionSysNo").val("");
+            $("#warehouse_sysno").val("");
+            $("#WarehouseSysNo").val("");
+            $("#statusAdv").val("");
+            $("#txtExpressNo").val("");//
+            $("#advDeliveryList")[0].options[0].selected = true;
+            $("#dsDealerMallList")[0].options[0].selected = true;
+            $("#thirdPartyOrder").val("");
+            $("#receiveName").val("");
+            $("#customerAccount").val("");//收件人姓名
+            $("#awaitShipStatus").removeAttr("checked");
+
+        }
+
+        //出库单出库成功后的回调
+        function outStockCallback(status, msg,sysno,deliveryTypeSysNo) {
+            if (status) {
+                UI.tips.tip_alert('tips_success', msg);
+            } else {
+                UI.tips.tip_alert('tips_wrong', msg);
+            }
+            //var sysno = $(outstackBtn).attr("sysno");
+            //var deliveryTypeSysNo = $(outstackBtn).attr("deliveryTypeSysNo");
+            var url = '/Print/Picking/' + sysno;
+            UI.DialogOpen(url, {
+                title: '打印拣货单',
+                width: 1000,
+                height: 720,
+                init: function() {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        //this.iframe.contentWindow.location.reload();
+                        this.iframe.contentWindow.location.href = url + "?isRefresh=" + Math.random();
+                    }
+                },
+                close: function() {
+                    url = '/Print/Pack?id=' + sysno + '&deliveryTypeSysNo=' + deliveryTypeSysNo;
+                    UI.DialogOpen(url, {
+                        title: '打印包裹单',
+                        width: 1000,
+                        height: 720,
+                        init: function() {
+                            if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                                //this.iframe.contentWindow.location.reload();
+                                this.iframe.contentWindow.location.href = url + "&isRefresh=" + Math.random();
+                            }
+                        },
+                        close: function () {
+                            @{
+                                int status = (int)WarehouseStatus.出库单状态.待配送;
+                            }
+                            $(outstackBtn).removeAttr("onclick").addClass("disabled");
+
+                            $(outstackBtn).next("button").removeAttr("onclick").click(function() {
+                                Cancel(sysno, @status);
+                            });
+
+                            $(outstackBtn).prev().removeAttr("onclick").removeClass("disabled").addClass("btn_blue").click(function () {
+                                var deliveryTypeSysNo = $(this).attr("deliveryTypeSysNo");
+                                PackagePrint(sysno, @status, deliveryTypeSysNo, this);
+                            });
+
+                            $(outstackBtn).prev().prev().removeAttr("onclick").removeClass("disabled").addClass("btn_blue").click(function () {
+                                PickUpOrderPrint(sysno, @status, this);
+                            });
+
+                            $(outstackBtn).parent("td").prev().text("待配送");
+                            submitForm();
+                        },
+                        resize: false
+                    });
+                },
+                resize: false
+            });
+        }
+    </script>
+}
+<input type="hidden" id="cancelStockoutText" value="@ViewBag.CancelStockOutTexts" />
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix">
+        <span class="f14 bold cf fl">高级搜索</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a>
+    </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">开始日期</td>
+                <td width="75%">
+                    <div class="date_btn">
+                        <input type="text" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd HH:mm")" class="input_ht26" onclick="UI.Date({ el: 'txtStartDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtStartDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtStartDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">结束日期</td>
+                <td>
+                    <div class="date_btn">
+                        <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm")" class="input_ht26" onclick="UI.Date({ el: 'txtEndDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtEndDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtEndDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">出库开始</td>
+                <td width="75%">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtStartStockOutDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtStartStockOutDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtStartStockOutDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">出库结束</td>
+                <td>
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtEndStockOutDate', dateFmt: 'yyyy-MM-dd HH:mm' })" id="txtEndStockOutDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'txtEndStockOutDate', dateFmt: 'yyyy-MM-dd HH:mm' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            @*<tr>
+                    <td align="right"></td>
+                    <td>
+
+                    </td>
+                </tr>*@
+            <tr>
+                <td align="right">出库状态</td>
+                <td>
+                    @Html.DropDownList("statusAdv", ViewData["status"] as SelectList)
+
+                    可发货状态 <input type="checkbox" id="awaitShipStatus" value="1" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">配送方式</td>
+                <td>
+                    <select id="advDeliveryList" name="advDeliveryList" class="wd100 select_ht28">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var group in ViewBag.DeliveryTypeGroupName)
+                            {
+                                <optgroup label="@group"></optgroup>
+                                foreach (Hyt.Model.LgDeliveryType type in ViewBag.DeliveryTypeList)
+                                {
+                                    if (type.DeliveryTypeName.Split('_')[0] == group)
+                                    {
+                                        <option value="@type.SysNo">@type.DeliveryTypeName.Split('_')[1]</option>
+                                    }
+                                }
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">店铺名称</td>
+                <td>
+                    <select id="dsDealerMallList" name="dsDealerMallList" class="wd100 select_ht28">
+                        <option value="">请选择</option>
+                        @{
+                            foreach (var item in ViewBag.DsDealerMallList)
+                            {
+                                <option value="@item.SysNo">@item.ShopName</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">三方订单号</td>
+                <td><input type="text" class="wd156" id="thirdPartyOrder" name="thirdPartyOrder" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">收件人姓名</td>
+                <td><input type="text" class="wd156" id="receiveName" name="receiveName" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">会员帐号</td>
+                <td><input type="text" class="wd156" id="customerAccount" name="customerAccount" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">订单编号</td>
+                <td><input type="text" class="wd156" id="txtSoSysNo" name="txtSoSysNo" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">商品编号</td>
+                <td><input type="text" class="wd156" id="txtProductSysNo" name="txtProductSysNo" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">商品编码</td>
+                <td><input type="text" class="wd156" id="txtProductErpCode" name="txtProductErpCode" value="" /></td>
+            </tr>
+
+            <tr>
+                <td align="right">商品名称</td>
+                <td><input type="text" class="wd156" id="txtProductName" name="txtProductName" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">出库单号</td>
+                <td><input type="text" class="wd156" id="txtOutStockTransactionSysNo" name="txtOutStockTransactionSysNo" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right">快递单号</td>
+                <td><input type="text" class="wd156" id="txtExpressNo" name="txtExpressNo" value="" /></td>
+            </tr>
+            <tr>
+                <td align="right" class="c3">仓库</td>
+                <td>
+                    <input type="text" onclick=" selectWharehouse() " class=" wd156 m5_r" id="warehouse_sysno" />
+                    <input id="WarehouseSysNo" type="hidden" />
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="查询" class="btn btn_blue btn_ht30 bold " type="button" onclick="advancedQuery() ">开始查询</button><button title="清除" class="btn btn_ht30 bold m10_l " onclick=" reset() " type="button">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>出库单管理</h3>
+
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+
+                <div class="fl ">
+                    <button class="btn btn_ht26 btn_blue WH1006103" title="快递订单批量出库" id="batchprint_btn" type="button" onclick='javascript:UI.OpenCreatTab("快递订单批量出库", "/Warehouse/OutStockPrint/");'><span class="icon icon_print icon_white"></span><span class="m5_l">快递-批量出库</span></button>
+                    @*<button class="btn btn_ht26 btn_blue WH1006103" title="当日达订单批量出库" id="batchprint_btn" type="button" onclick='javascript:UI.OpenCreatTab("当日达订单批量出库", "/Warehouse/DRDOutStockPrint/");'><span class="icon icon_print icon_white"></span><span class="m5_l">当日达-批量出库</span></button>*@
+                    <button type="button" id="btnExport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue">
+                        <span class="icon icon_share icon_white"></span>
+                        <span class="m5_l">Excel出库单导出</span>
+                    </button>
+
+                    <button class="btn btn_ht26 btn_blue WH1006103" title="批量生成快递单号" id="btnkuaidi" type="button"><span class="icon icon_print icon_white"></span><span class="m5_l">批量生成快递单号</span></button>
+                    @*<button type="button" id="btnExportTo" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue">
+                            <span class="icon icon_share icon_white"></span>
+                            <span class="m5_l">Excel导出当前全部</span>
+                        </button>*@
+                </div>
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">仓库</span>
+                    <div class="fl m10_l">
+                        <select id="warehouse" class="wd100 select_ht28">
+                            <option>请选择</option>
+                            @foreach (Hyt.Model.WhWarehouse warehouse in ViewBag.WarehouseList)
+                            {
+                                <option value="@warehouse.SysNo">@warehouse.BackWarehouseName</option>
+                            }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">配送方式</span>
+                    <div class="fl m10_l">
+                        @*@Html.DropDownList("deliveryList")*@
+                        <select id="deliveryList" name="deliveryList" class="wd100 select_ht28">
+                            <option value="">请选择</option>
+                            @{
+                                foreach (var group in ViewBag.DeliveryTypeGroupName)
+                                {
+                                    <optgroup label="@group"></optgroup>
+                                    foreach (Hyt.Model.LgDeliveryType type in ViewBag.DeliveryTypeList)
+                                    {
+                                        if (type.DeliveryTypeName.Split('_')[0] == group)
+                                        {
+                                            <option value="@type.SysNo">@type.DeliveryTypeName.Split('_')[1]</option>
+                                        }
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">@Html.DropDownList("status")</div>
+                    <span class="veralign_t fl m10_l">是否开票</span>
+                    <div class="fl m10_l">@Html.DropDownList("isInvoice")</div>
+
+                    <span class="veralign_t fl m10_l">出库单号</span>
+                    <div class="search_btn fl m10_l">
+                        <input name="sysno" type="text" id="sysno" class="input_ht28" />
+                        <button class="btn btn_ht28" id="search_btn" type="button" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fr" id="outbtn2" type="button"><span class="icon_search "></span><span class="m5_l">高级搜索</span></button>
+
+                </div>
+
+            </div>
+            <!--/表格列表区-->
+            <div class="boxs_list">
+                <div id="paging">
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    //导出出库单Excel 吴琨 2017-7-10 创建
+    $('#btnExport').click(function () {
+        setQueryPara();
+        window.location = '@Url.Action("WareHouseExcel")' + "?data="+JSON.stringify(queryPara);
+
+    });
+
+
+    //导出当前全部  2017/10/12 吴琨
+    $("#btnExportTo").click(function(){
+        window.location = '@Url.Action("WareHouseToExcel")';
+    })
+
+
+
+
+    //批量打印 廖移凤 2017-11-8
+    $("#btnkuaidi").click(function () {
+        var items = $("[name='checkinfo']:checked");
+        var selectIds="";
+        if (items.length > 0) {
+            selectIds = items.map(function (i, n) {
+                return $(n).val();
+            }).get();
+            if (selectIds.length > 0) {
+                var url = '/Print/BatchKuaiDi?sysNo=' + selectIds;
+                $.ajax({
+                    url:url,
+                    success:function(data){
+                        var da = JSON.parse(data)
+                        $(da).each(function(i,e){
+                            $("#"+e.WhStockInId+"").html(e.ExpressListNo);
+                        });
+                        UI.Alert({
+                            content: "生成成功"
+                        });
+                    }
+
+                })
+
+
+                //var url = '/Print/BatchKuaiDi?sysNo=' + selectIds;
+
+                //window.location.href = url;
+            }
+
+        } else {
+            UI.Alert({
+                content: "请选择要获取的快递单号"
+            });
+            return;
+        }
+    });
+
+</script>

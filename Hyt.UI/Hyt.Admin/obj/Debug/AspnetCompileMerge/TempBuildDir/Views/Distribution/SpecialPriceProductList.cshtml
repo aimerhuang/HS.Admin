@@ -1,0 +1,1012 @@
+﻿@{
+    ViewBag.Title = "SpecialPriceProductList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBPdProductDetail>
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+
+@section HeadCss
+{
+    <style type="text/css">
+        #divMsg dl dt, #divMsg dl dd {
+            width: 100%;
+        }
+
+        #divMsg dl dd {
+            color: red;
+        }
+
+            #divMsg dl dd span {
+                width: 100px;
+                text-align: right;
+                display: block;
+                float: left;
+                color: #000;
+            }
+
+        #divMsg .msg_context_box {
+            max-height: 100px;
+            overflow: auto;
+        }
+    </style>
+}
+
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+}
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001201, ".PD1001201")
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001202, ".PD1001202")
+<!--高级搜索开始-->
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">系统编号</td>
+                <td width="75%">
+                    <input type="text" id="complexSysno" value="" class="wd156" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">商品类型</td>
+                <td>
+                    <select name="status" id="complexType" class="wd170">
+                        <option value="-1" selected="selected">全部</option>
+                        @{
+                            foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型)))
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td align="right">分销商</td>
+                <td>
+                    <select name="status" id="complexDealerSysNo" class="wd170">
+
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td align="right">总部状态</td>
+                <td>
+                    <select name="status" id="complexMainStatus" class="wd170">
+                        <option value="-1" selected="selected">全部</option>
+                        @{
+                            foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">状态</td>
+                <td>
+                    <select name="status" id="complexStatus" class="wd170">
+                        <option value="-1" selected="selected">全部</option>
+                        @{
+                            foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">是否调价</td>
+                <td>
+                    <select name="status" id="complexHasChangePrice" class="wd170">
+                        <option value="0" selected="selected">全部</option>
+                        <option value="1">已调价</option>
+                        <option value="2">未调价</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">后台显示名称</td>
+                <td width="75%">
+                    <input type="text" id="complexProductName" value="" class="wd156" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">商品编号</td>
+                <td width="75%">
+                    <input type="text" id="complexErpCode" value="" class="wd156" />
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">条形码</td>
+                <td width="75%">
+                    <input type="text" id="complexBarcode" value="" class="wd156" />
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">商品分类</td>
+                <td width="75%" id="btn_selectCategory">
+                    <input id="complexCategory" name="txt_aprentProductCategory" type="text" value="选择分类" class="wd156" name="" readonly="readonly" />
+                    <input type="hidden" id="complexCategorySysno" value="" class="wd156" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">更新时间</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtBDate' })" id="txtBDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtBDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtEDate' })" id="txtEDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtEDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">创建时间</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtCBDate' })" id="txtCBDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtCBDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtCEDate' })" id="txtCEDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtCEDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">前台下单</td>
+                <td width="75%">
+                    @*<input name="" type="checkbox" value="" class="m5_r" />*@
+                    <select id="CanFrontEndOrder" name="CanFrontEndOrder">
+                        <option value="-1" selected="selected">全部</option>
+                        <option value="1">能下</option>
+                        <option value="0">不能</option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" id="btnComplexSearch" class="btn btn_blue btn_ht30 bold">开始查询</button>
+        <button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+<!--高级搜索结束-->
+
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>分销商商品列表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    @*<div class="fl m10_r">
+                        <label> 显示已调价 
+                            <input type="checkbox" id="chkHasChangePrice" />
+                        </label>
+                    </div>*@
+                    <span class="veralign_t fl">是否调价</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="chkHasChangePrice">
+                            <option value="0">全部</option><option value="1">已调价</option><option value="2">未调价</option>
+                        </select>
+                    </div>
+                    <span class="veralign_t fl">代理商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="agentSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl">分销商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="dealerSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">总部状态</span>
+                    <div class="m10_l fl">
+                        <select name="status" id="mainstatus" class="select_ht28">
+
+                            <option value="-1" selected="selected">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="m10_l fl">
+                        <select name="status" id="status" class="select_ht28">
+
+
+                            @{
+                                <option value="-1" selected="selected">全部</option>
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }                                  
+                            }
+                        </select>
+                    </div>
+
+                    <div class="search_btn wd200 m10_l fl">
+                        <input name="" type="text" id="name" class="input_ht28" value="后台显示名称/商品编号..." onclick="$(this).select()" />
+                        <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="JS_btnSearch" type="button"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    @*<button id="btn_add" class="btn btn_ht26 btn_blue m10_r PD1001201" title="添加商品"><span class="icon_white icon_plus"></span><span class="m5_l">添加商品</span></button>*@
+                    <button style="background-position: 0px -35px; border-color: #BDBDBD;" class="btn btn_ht26 btn_blue m10_r DS1011503" id="btnStore" title="同步中..."><span class="icon icon_white icon_repeat"></span><span class="m5_l">同步中...</span></button>
+                    <button style="display:none;" class="btn btn_ht26 btn_blue m10_r DS1011503" id="btnChangePrice" title="批量调价"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量调价</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r DS1011504" id="btnIntoStore" title="批量上架"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量上架</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r DS1011504" id="btnOutStore" title="批量下架"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量下架</span></button>
+                    <button id="batchDelete" title="删除内存" class="btn btn_ht28 btn_red m10_r fl DS1011506" onclick="deleteDealerMemcachedByPrefix(); return false;"><span class="icon_trash icon_white"></span><span class="m5_l">删除内存</span></button>
+                    <button id="btn_qrcode" class="btn btn_ht26 btn_blue m10_r" title="生成当前页商品二维码"><span class="m5_l">生成当前页商品二维码</span></button>
+                    @*<button id="btn_qrcodeall" class="btn btn_ht26 btn_blue m10_r" title="生成所有商品二维码"><span class="m5_l">生成所有上架商品二维码</span></button>*@
+                        @*<button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon_importing icon_white m5_r"></span><span>Excel商品导入</span></button>
+    <button id="btn_qrcode" class="btn btn_ht26 btn_blue m10_r" title="生成当前页商品二维码"><span class="m5_l">生成当前页商品二维码</span></button>*@
+                    @*<button class="btn btn_ht26 m10_l" id="btnExport" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载模板</span></button>*@
+                    @*<iframe id="pifrmImport" name="pifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>*@
+                </div>
+
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+
+            </div>
+            <!--表格列结束-->
+
+        </div>
+    </div>
+</div>
+
+<div style="display: none;z-index: 9; background-color: White; position: absolute;" id="divMsg">
+</div>
+<input type="hidden" id="IsBindDealer" value="@ViewBag.IsBindDealer"/>
+
+<script type="text/javascript">
+    //选中的记录SysNo列项
+    var checkedsysnolist = [];
+
+    //选中已上架过的商品记录SysNo、Price
+    var checkedspsysnopricelist = [];
+
+    //选中未上架过的商品记录SysNo、Price
+    var checkedsysnopricelist = [];
+
+
+    //高级搜索
+    UI.searchbox($("#JS_btnSearch"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+    $("#name").defaultValue("后台显示名称/商品编号...");
+
+    var currentSearchType = 1;
+
+
+    var curpage = 1;
+    //查询列表
+    function doSearch(id) {
+        checkedsysnolist = [];
+        checkedspsysnopricelist = [];
+        checkedsysnopricelist = [];
+
+        var haschangeprice = $('#chkHasChangePrice').val();
+        //if ($('#chkHasChangePrice').is(':checked')) {
+        //    haschangeprice = 1;
+        //}
+
+        var name;
+        if ($("#name").val() != "后台显示名称/商品编号...") {
+            name = $.trim($("#name").val());
+        }
+        currentSearchType = 1;
+        curpage = id;
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("SpecialPriceProductList", "Distribution")',
+            { id: id, ProductName: name, Status: $("#status").val(), CanFrontEndOrder: -1, IsFrontDisplay: -1, MainStatus: $("#mainstatus").val(), SelectedDealerSysNo: $("#dealerSysNo").val(), HasChangePrice: haschangeprice },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+    function doComplexSearch(id) {
+        checkedsysnolist = [];
+        checkedspsysnopricelist = [];
+        checkedsysnopricelist = [];
+        var name, erpCode,barCode, startTime, endTime, createStartTime, createEndTime;
+        currentSearchType = 2;
+        if ($("#complexProductName").val() != "") {
+            name = $.trim($("#complexProductName").val());
+        }
+        if ($("#complexErpCode").val() != "") {
+            erpCode = $.trim($("#complexErpCode").val());
+        }
+        if ($("#complexBarcode").val() != "") {
+            barCode = $.trim($("#complexBarcode").val());
+        }
+        if ($("#txtBDate").val() != "") {
+            startTime = $.trim($("#txtBDate").val());
+        }
+        if ($("#txtEDate").val() != "") {
+            endTime = $.trim($("#txtEDate").val());
+        }
+        if ($("#txtCBDate").val() != "") {
+            createStartTime = $.trim($("#txtCBDate").val());
+        }
+        if ($("#txtCEDate").val() != "") {
+            createEndTime = $.trim($("#txtCEDate").val());
+        }
+
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("SpecialPriceProductList", "Distribution")',
+            {
+                id: id, ProductName: name, StartTime: startTime, EndTime: endTime, CreateStartTime: createStartTime, CreateEndTime: createEndTime,
+                SysNo: parseInt($("#complexSysno").val()), ProductType: $("#complexType").val(), Status: $("#complexStatus").val(),
+                MainStatus: $("#complexMainStatus").val(), IsFrontDisplay: -1, ErpCode: erpCode, Barcode: barCode, ProductCategorySysno: parseInt($("#complexCategorySysno").val()),
+                CanFrontEndOrder: $("#CanFrontEndOrder").val(), SelectedDealerSysNo: $("#complexDealerSysNo").val(), HasChangePrice: $('#complexHasChangePrice').val()
+            },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+    //查询按钮
+    $("#btnSearch").click(function () {
+        doSearch(1);
+    });
+
+    $("#btnComplexSearch").click(function () {
+        doComplexSearch(1);
+    });
+
+    $("#status,#mainstatus").change(function () {
+        doSearch(1);
+    });
+
+    //添加按钮
+    @*$("#btn_add").click(function () {
+        UI.OpenCreatTab('添加商品', '@Url.Action("AddProduct")');
+    });*@
+
+
+    // 生成二维码
+    $('#btn_qrcode').click(function () {
+        //(checkedsysnolist);
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要生成二维码的上架商品' });
+            return;
+        }
+        var dealerSysNo = $("#dealerSysNo").val();
+        var sysNos = checkedsysnolist.join(',').toString();
+        alert(sysNos);
+        //alert(SpecialPriceSysNoList);
+        //alert(checkedsysnolist);
+        //var sysNos = checkedsysnolist.join(',').toString();
+        //alert(sysNos);
+        //var sysNos = $("#SpecialPriceSysNoList").val().join(',').toString();
+        //alert(sysNos);
+        Post("@Url.Action("CreateDealerProductQRCode")", dealerSysNo, sysNos);
+       // window.open("Url.Action("CreateDealerProductQRCode")" + '?dealerSysNo='+ $("#dealerSysNo").val() + '&sysNos=' + checkedsysnolist.join(',').toString());
+    });
+    // 生成所有商品二维码
+    //创建人：罗勤尧 
+    $('#btn_qrcodeall').click(function () {
+        //if (checkedsysnolist.length == 0) {
+        //    UI.Alert({ content: '请勾选要生成二维码的上架商品' });
+        //    return;
+        //}
+      
+        var dealerSysNo = $("#dealerSysNo").val();
+        var SpecialPriceSysNoList = $("#SpecialPriceSysNoList").val();
+        //alert(SpecialPriceSysNoList);
+        //alert(checkedsysnolist);
+        //var sysNos = checkedsysnolist.join(',').toString();
+        //alert(sysNos);
+        //var sysNos = $("#SpecialPriceSysNoList").val().join(',').toString();
+        //alert(sysNos);
+        Post("@Url.Action("CreateDealerProductQRCodeAll")", dealerSysNo, SpecialPriceSysNoList);
+        //window.open("Url.Action("CreateDealerProductQRCodeAll")" + '?dealerSysNo='+ $("#dealerSysNo").val() + '&sysNos=' + checkedsysnolist.join(',').toString());
+    });
+    /*
+       *功能： 模拟form表单的提交
+       *参数： URL 跳转地址 PARAMTERS 参数
+       *返回值：
+       *创建时间：20170517
+       *创建人：罗勤尧 
+       */
+    function Post(URL, dealerSysNo, sysNos) {
+        //创建form表单
+        var temp_form = document.createElement("form");
+        temp_form.action = URL;
+        //如需打开新窗口，form的target属性要设置为'_blank'
+        temp_form.target = "_blank";
+        temp_form.method = "post";
+        temp_form.style.display = "none";
+        //添加参数
+        var hideInput1 = document.createElement("input");
+        hideInput1.type = "hidden";
+        hideInput1.name = "dealerSysNo"; //后台要接受这个参数来取值
+        hideInput1.value = dealerSysNo; //后台实际取到的值
+        var hideInput2 = document.createElement("input");
+   hideInput2.type = "hidden";
+   hideInput2.name = "sysNos";
+   hideInput2.value = sysNos;
+   temp_form.appendChild(hideInput1);
+        temp_form.appendChild(hideInput2);
+        document.body.appendChild(temp_form);
+        //提交数据
+        temp_form.submit();
+    }
+
+    DAO.SelectProductCategory($("#complexCategory"), $("#complexCategory"), {
+        margin: {
+            vertical: 8,         //垂直位置
+            horizontal: -30        //水平位置
+        },
+        callBack: function (data) {
+            if (data.length == 0) {
+                $("#complexCategorySysno").val("0");
+                $("#complexCategory").val("选择分类");
+                return;
+            }
+            if (!!data) {
+                $("#complexCategorySysno").val(data[0].id);
+            }
+
+        }
+
+    });
+
+    Array.prototype.indexOf = function (val) {
+        for (var i = 0; i < this.length; i++) {
+            if ($.trim(this[i]) == $.trim(val)) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function (val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging table tbody input:checkbox").each(function () {
+                var obj = $(this);
+               
+               
+                if (obj.attr("disabled") != "disabled" && obj.attr("checked") != "checked") {
+                    
+                    var price = obj.closest("tr").find(".clsPrice").val();
+                    obj.closest("tr").find(".clsPrice").attr("disabled", "disabled");
+                    obj.attr("checked", "checked");
+                   
+                    //spsysno 0:从未上架过，1:上架过
+                    if (obj.attr("spsysno") != "0") {
+                       
+                        if (price != undefined) {
+                           // alert(obj.val());
+                            checkedsysnolist.push(obj.val());
+                            checkedspsysnopricelist.push(obj.val() + ':' + price);
+                        } else {
+                           
+                            checkedsysnolist.push(obj.val());
+                        }
+                    }
+                    else {
+                        if (price != undefined) {
+                            checkedsysnopricelist.push(obj.val() + ':' + price);
+                        }
+                    }
+                }
+            });
+        } else {
+            $("#paging table tbody input:checkbox").each(function () {
+                var obj = $(this);
+                if (obj.attr("checked") == "checked") {
+                    var price = obj.closest("tr").find(".clsPrice").val();
+                    obj.closest("tr").find(".clsPrice").removeAttr("disabled");
+                    obj.removeAttr("checked");
+                    //spsysno 0:从未上架过，1:上架过
+                    if (obj.attr("spsysno") != "0") {
+                        //price = undefined 上架过，但后来下架
+                        if (price != undefined) {
+                            checkedsysnolist.remove(obj.val());
+                            checkedspsysnopricelist.remove(obj.val() + ':' + price);
+                        } else {
+                            checkedsysnolist.remove(obj.val());
+                        }
+                    } else {
+                        if (price != undefined) {
+                            checkedsysnopricelist.remove(obj.val() + ':' + price);
+                        }
+                    }
+                }
+            });
+        }
+    });
+
+
+
+    $("#paging table tbody input:checkbox").live('click', function () {
+        var obj = $(this);
+        var price = obj.closest("tr").find(".clsPrice").val();
+        if (obj.attr("checked")) {
+            obj.closest("tr").find(".clsPrice").attr("disabled", "disabled");
+            //spsysno 0:从未上架过，1:上架过
+            if (obj.attr("spsysno") != "0") {
+                //price = undefined 上架过，但后来下架
+                if (price != undefined) {
+                    checkedsysnolist.push(obj.val());
+                    checkedspsysnopricelist.push(obj.val() + ':' + price);
+                } else {
+                    checkedsysnolist.push(obj.val());
+                }
+            }
+            else {
+                if (price != undefined) {
+                    checkedsysnopricelist.push(obj.val() + ':' + price);
+                }
+            }
+        } else {
+            obj.closest("tr").find(".clsPrice").removeAttr("disabled");
+            //spsysno 0:从未上架过，1:上架过
+            if (obj.attr("spsysno") != "0") {
+                if (price != undefined) {
+                    checkedsysnolist.remove(obj.val());
+                    checkedspsysnopricelist.remove(obj.val() + ':' + price);
+                } else {
+                    checkedsysnolist.remove(obj.val());
+                }
+            } else {
+                if (price != undefined) {
+                    checkedsysnopricelist.remove(obj.val() + ':' + price);
+                }
+            }
+        }
+    });
+
+    $("#btnChangePrice").click(function () {
+        var arrSysno = [];
+
+        $("#paging input:checkbox:checked").each(function () {
+            if ($(this).attr("id") == "checkall") {
+                return;
+            }
+            arrSysno.push($(this).val());
+        });
+        dealerSysNo= $("#dealerSysNo").val();
+        DAO.PriceDistributionRequest({
+            productSysNoList: arrSysno,
+            dealerSysNo: dealerSysNo,
+            success: function () {
+                UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+            }
+        });
+    });
+    //第一次进入时同步商品
+    $(function () {
+        $("#btnStore").hide();
+        $("#btnChangePrice").show();
+    });
+    function SpecialPrice() {
+        $("#btnStore").show();
+        $("#btnChangePrice").hide();
+        $.ajax({
+            type: "POST",
+            url: "/Distribution/ProCreateSpecialPrice",
+            data: "DealerSysNo=" + $("#dealerSysNo").val(),
+            success: function (data) {
+                if (data.Status) {
+                    $("#btnStore").hide();
+                    $("#btnChangePrice").show();
+                }
+                else {
+                    UI.Alert({ content: data.Message });
+                }
+            }
+        });
+    }
+    ////同步总部
+    //$("#btnStore").click(function () {
+    //    UI.Confirm({
+    //        content: "您确定同步吗？",
+    //        ok: function () {
+    //            if ($("#dealerSysNo").val() == -1 || $("#dealerSysNo").val() == null) {
+    //                UI.Alert({ content: '请选择要同步的分销商' });
+    //                return;
+    //            }
+    //            $.ajax({
+    //                type: "POST",
+    //                url: "/Distribution/ProCreateSpecialPrice",
+    //                data: "DealerSysNo=" + $("#dealerSysNo").val(),
+    //                success: function (data) {
+    //                    if (data.Status) {
+    //                        $("#btnStore").hide();
+    //                        $("#btnChangePrice").show();
+    //                    }
+    //                    UI.Alert({ content: data.Message });
+    //                }
+    //            });
+    //        }
+    //    })
+    //});
+    //批量上架
+    $("#btnIntoStore").click(function () {
+        //if (checkedspsysnopricelist.length == 0 && checkedsysnopricelist.length == 0) {
+        //    UI.Alert({ content: '请勾选要上架的下架商品' });
+        //    return;
+        //}
+        var spProductSysNoList = "";
+        for (var i = 0 ; i < checkedspsysnopricelist.length; i++) {
+            if (spProductSysNoList == "") {
+                spProductSysNoList = checkedspsysnopricelist[i];
+            } else {
+                spProductSysNoList += ',' + checkedspsysnopricelist[i];
+            }
+        }
+
+        var ProductSysNoList = "";
+        for (var i = 0 ; i < checkedsysnopricelist.length; i++) {
+            if (ProductSysNoList == "") {
+                ProductSysNoList = checkedsysnopricelist[i];
+            } else {
+                ProductSysNoList += ',' + checkedsysnopricelist[i];
+            }
+        }
+
+        CreatePLSpecialPrice($("#dealerSysNo").val(), spProductSysNoList, ProductSysNoList);
+    });
+
+    function CreatePLSpecialPrice(DealerSysNo, spProductSysNoList, ProductSysNoList) {
+        var jsonData = { DealerSysNo: DealerSysNo, spProductSysNoList: spProductSysNoList, ProductSysNoList: ProductSysNoList };
+        $.ajax({
+            url: "/Distribution/CreatePLSpecialPrice",
+            type: "post",
+            dataType: 'json',
+            data: jsonData,
+            success: function (result) {
+                if (result.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                    @*if (currentSearchType == 2) {
+                        doComplexSearch(@Model.CurrentPageIndex);
+                    } else {
+                        doSearch(@Model.CurrentPageIndex);
+                    }*@
+                    RefreshCurrentPage();
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.Message) {
+                        message = result.Message;
+                    }
+                    UI.Alert({ content: message });
+                }
+            }
+        });
+    }
+
+    //批量下架
+    $("#btnOutStore").click(function () {
+        //if (checkedsysnolist.length == 0) {
+        //    UI.Alert({ content: '请勾选要下架的上架商品' });
+        //    return;
+        //}
+        var productSysNoList = "";
+        for (var i = 0 ; i < checkedsysnolist.length; i++) {
+            if (productSysNoList == "") {
+                productSysNoList = checkedsysnolist[i];
+            } else {
+                productSysNoList += ',' + checkedsysnolist[i];
+            }
+        }
+        var status = "@Hyt.Model.WorkflowStatus.ProductStatus.商品状态.下架.GetHashCode()";
+        changePLStatus($("#dealerSysNo").val(), productSysNoList, status);
+    });
+
+    function changePLStatus(DealerSysNo, productSysNoList, status) {
+        var jsonData = { DealerSysNo: DealerSysNo, status: status, productSysNoList: productSysNoList };
+        $.ajax({
+            url: "/Distribution/UpdatePLSpecialPriceProductStatus",
+            type: "post",
+            dataType: 'json',
+            data: jsonData,
+            success: function (result) {
+                if (result.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                    @*if (currentSearchType == 2) {
+                        doComplexSearch(@Model.CurrentPageIndex);
+                    } else {
+                        doSearch(@Model.CurrentPageIndex);
+                    }*@
+                    RefreshCurrentPage();
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.Message) {
+                        message = result.Message;
+                    }
+                    UI.Alert({ content: message });
+                }
+            }
+        });
+    }
+
+    //取得订单状态
+    function GetPriceInfo(sysno, obj) {
+        $.ajax({
+            type: "POST",
+            url: "/Product/GetProductPriceInfo",
+            data: "productSysNo=" + sysno,
+            success: function (content) {
+                if (content != null && content != "") {
+
+                    $("#divMsg").html(content);
+                    $("#divMsg").css("display", "inline");
+                    var offset = $(obj).position();
+
+
+                    var parentPosition = $(obj).closest("table").position();
+                    var top;
+
+                    if ($("body").height() - (offset.top) < $("#divMsg").height()) {
+                        top = offset.top - $("#divMsg").height() + $(obj).height();
+                        if (top < 0) {
+                            top = 0;
+                        }
+
+                    } else {
+                        top = offset.top - 10;
+                    }
+
+                    $("#divMsg").css("top", top);
+                    $("#divMsg").css("left", offset.left + 40);
+                    $(document).one("click", function () { HidePriceInfo(); });
+                    $("#divMsg").one("click", function () { return false; });
+
+                }
+            }
+        });
+    }
+
+    function HidePriceInfo() {
+        $("#divMsg").hide();
+    }
+
+
+    window.top.ProductList_ShowMessage = function (result, message, confirm) {
+        var css = "tips_success";
+        if (!result.Status) {
+            css = "tips_wrong";
+        }
+        if (confirm) {
+            UI.Confirm({
+                content: message,
+                ok: function () {
+                    UI.OpenCreatTab('修改商品', "@Url.Action("EditProduct", "Product")" + "?sysNo=" + result.StatusCode);
+                },
+            });
+        } else {
+            UI.tips.tip_alert(css, message);
+        }
+    }
+    function GetDealersListByCreatedBy(DealerCreatedBy) {
+        $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+            $("#dealerSysNo,#complexDealerSysNo").html("");
+            //$("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    $("#dealerSysNo,#complexDealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            SpecialPrice();
+            doSearch();
+        });
+    }
+
+    $(function () {
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined&&item.Status==1) {
+                    $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+            SpecialPrice();
+        });
+
+        $("#dealerSysNo").change(function () {
+            SpecialPrice();
+            doSearch();
+        });
+
+        $("#name").keyup(function (e) {
+            if (e.keyCode == 13) {
+                doSearch();
+            }
+        });
+
+        $('#btnExport').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });
+
+        $('#btnImport').click(function () {
+            if (window.frames["pifrmImport"].chooseFile) {
+                window.frames["pifrmImport"].chooseFile();
+            }
+        });
+
+        $('#chkHasChangePrice').change(function () {
+            doSearch();
+        });
+    })
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.indexOf('成功') !== -1) {
+            UI.tips.tip_alert("tips_success", res);
+            setTimeout(function () {
+                doSearch();
+            }, 1000);
+        } else
+            UI.tips.tip_alert("tips_wrong", res);
+
+    }
+
+    //选择模板
+    $("#btn_add").live('click', function () {
+        DAO.SelectDealerMallProduct({
+            callBack: function (data) {
+                var ProductSysNoList = "";
+                for (var i = 0 ; i < data.length ; i++) {
+                    if (ProductSysNoList == "") {
+                        ProductSysNoList = data[i].SysNo;
+                    } else {
+                        ProductSysNoList += ',' + data[i].SysNo;
+                    }
+                }
+                if (ProductSysNoList != "") {
+                    $.ajax({
+                        url: '@Url.Action("SaveDealerMallProduct")',
+                        type: 'post',
+                        data: {
+                            ProductSysNoList: ProductSysNoList
+                        },
+                        success: function (data) {
+                            if (data.Status) {
+                                doSearch(1);
+                            } else {
+                                UI.Alert({
+                                    content: data.Message
+                                });
+                            }
+                        }
+                    });
+                }
+            }
+        });
+    });
+
+    //删除配送方式
+    function DeleteDealerMallProduct(sysno) {
+        UI.Confirm({
+            content: "您确定删除吗？",
+            ok: function () {
+                $.ajax({
+                    url: '@Url.Action("DeleteDealerMallProduct")',
+                    type: "post",
+                    data: {
+                        SysNo: sysno
+                    },
+                    success: function (data) {
+                        if (data.Status) {
+                            doSearch(1);
+                        } else {
+                            UI.Alert({
+                                content: data.Message
+                            });
+                        }
+                    }
+                });
+            }
+        })
+    }
+
+    function deleteDealerMemcachedByPrefix() {
+        //批量删除
+        var dealerSysNo = $('#dealerSysNo').val();
+        UI.Confirm({
+            width: 300,
+            content: '您确定要删除该分销商的商品缓存吗？',
+            ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Sys/DeleteDealerMemcachedByPrefix",
+                    data: "dealerSysNo=" + dealerSysNo,
+                    success: function (ret) {
+                        if (ret.Status) {
+                            Utils.alert("删除成功", function () {
+                                doSearch(1);
+                            }, "succeed");
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    //异步刷新当前页，不适用于删除功能使用后刷新
+    function RefreshCurrentPage() {
+        try {
+            $(window).data('CurrentPageFuc')();
+        } catch (e) {
+            if (currentSearchType == 2) {
+                doComplexSearch(@Model.CurrentPageIndex);
+            } else {
+                doSearch(@Model.CurrentPageIndex);
+            }
+            //if (isSearch)
+            //    doSearch();
+            //else
+            //    doComplexSearch(1);
+        }
+    }
+</script>
+

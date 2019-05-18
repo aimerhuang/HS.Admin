@@ -1,0 +1,179 @@
+﻿@using Extra.Erp
+@using Hyt.Infrastructure.Memory
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@model PagedList<CBDsMallSyncLog>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.EAS1001108, ".EAS1001108")
+    @Html.PrivilegeControl(PrivilegeCode.EAS1001109, ".EAS1001109")
+}
+
+@helper ShowData(Hyt.Model.Generated.DsMallSyncLog entity)
+{
+    <div id="jsonMsg_@entity.SysNo" style="display: none">
+        <textarea style="min-width: 500px; min-height: 300px; word-break: break-all; word-wrap: break-word;">
+            @entity.Data
+        </textarea>
+    </div>
+    @*<button onclick="Open(@entity.SysNo);return false;" class="btn btn_ht26 EAS1001101"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>*@
+    <button onclick="showxml('@entity.SysNo')" class="btn btn_ht26 EAS1001101"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+}
+@helper TrimString(string msg, int len)
+{
+    if (msg != null && msg.Length > len)
+    {
+        @MvcHtmlString.Create(Hyt.Util.FormatUtil.GetUnicodeSubString(msg, len, "..."))
+    }
+    else
+    {
+        @MvcHtmlString.Create(msg)
+    }
+}
+<style>
+    .boxs_listtabel table th {
+        padding: 0 10px;
+        white-space: nowrap;
+    }
+
+    .boxs_listtabel table td {
+        padding: 0 10px;
+    }
+
+    .nowrap {
+        white-space: nowrap;
+    }
+</style>
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="33">
+                    <input name="" type="checkbox" class="checkall" value="" />
+                </th>
+                <th>系统编号</th>          
+                <th>接口名称</th>
+                <th>同步耗时<br />(ms)</th>
+                <th>同步消息</th>
+                <th>创建时间</th>
+                <th>同步时间</th>
+                <th>状态</th>
+                <th>同步次数</th>
+                <th width="60">同步数据</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData != null && Model.TData.Count > 0)
+                {
+                    int i = 0;
+                    foreach (var item in (List<CBDsMallSyncLog>)Model.TData)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }
+                        else
+                        {
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                    <td>
+                        <input name="" type="checkbox" class="checktd" value="@item.SysNo" />
+                    </td>
+                    <td class="blue"><a href="javascript:void(0)" onclick="show('@item.SysNo', '@item.Data')">@item.SysNo</a></td>
+           
+             
+                    <td class="nowrap">
+                         @if (item.SyncType == 10)
+                         {
+                             @:发货
+                         }
+                         else if (item.SyncType == 20)
+                         {
+                             @:订单
+                         }
+                    </td>
+                    <td>@item.ElapsedTime</td>
+               
+                    <td class="align_l">@item.Message</td>             
+                    <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    <td>@Html.Raw(item.LastSyncTime == default(DateTime) ? "" : item.LastSyncTime.ToString("yyyy-MM-dd HH:mm:ss"))</td>
+                 
+                    <td>
+                        @if (item.Status == 10)
+                        {
+                            @:成功
+                        }
+                        else if (item.Status == 20)
+                        {
+                            @:失败
+                        }
+                        else
+                        {
+                            @:作废
+                        }
+                    </td>
+                    <td>@item.SyncNumber</td>
+                    <td class="blue">@ShowData(item)</td>
+                    <td class="blue nowrap">
+                        @if (item.Status ==20)
+                        {
+                            <button onclick="EasSyn(@item.SysNo,this);return false;" class="btn btn_blue m10_r btn_ht26 EAS1001108"><span class="icon_repeat icon_white"></span><span class="m5_l">同步</span></button>
+                            <button onclick="InvalidEas(@item.SysNo);" type="button" class="btn btn_ht26 btn_red EAS1001109" title="作废" name="cancel_btn"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                        }
+                    </td>
+                    @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+                    </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+    @{
+        int pageIndex = 1;
+        if (Request.RequestContext.RouteData.Values["id"] != null)
+        {
+            pageIndex = int.Parse(Request.RequestContext.RouteData.Values["id"].ToString());
+        }
+        if (!string.IsNullOrEmpty(Request.Params["id"]))
+        {
+            pageIndex = int.Parse(Request.Params["id"]);
+        }
+        <input type="hidden" id="pageIndex" value="@pageIndex" />
+    }
+    <div id="divJson" style="display: none">
+        <textarea id="jsonMsg" style="min-width: 500px; min-height: 300px; word-break: break-all; word-wrap: break-word;"></textarea>
+    </div>
+    @{Html.RenderPartial("_UrlPaging", Model); }
+
+    <script type="text/javascript">
+        $(function () {
+            //全选
+            $("input.checkall").click(function () {
+                var state = $(this).attr("checked");
+                if (state) {
+                    state = true;
+                } else {
+                    state = false;
+                }
+                $("input.checktd").each(function () { $(this).attr("checked", state); });
+            });
+        });
+        function show(title, content) {
+            $('#jsonMsg').text(content);
+            UI.DialogBox({ width: 500, title: title, content: $('#divJson').html(), padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' })
+        }
+        function showxml(id) {
+            UI.DialogBox({ width: 500, title: id, content: $('#jsonMsg_' + id).html(), padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' })
+        }
+    </script>

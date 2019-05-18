@@ -1,0 +1,76 @@
+﻿@model IList<Hyt.Model.DsDealerLevel>
+
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="98">等级名称</th>
+            <th width="140">直接推荐人返利比例</th>
+            <th width="140">间1推荐人返利比例</th>
+            <th width="140">间2推荐人返利比例</th>
+            <th width="140">会员价调整上限</th>
+            <th width="140">会员价调整下限</th>
+            <th width="140">利润比例</th>
+            <th class="align_l p10_lr">等级描述</th>
+            <th width="46">状态</th>
+            <th width="72">创建人</th>
+            <th width="120">创建时间</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (null != Model && Model.Count > 0)
+        {
+
+            foreach (Hyt.Model.DsDealerLevel item in Model)
+            {
+            <tr>
+                <td>@item.LevelName</td>
+                <td>@item.Direct</td>
+                <td>@item.Indirect1</td>
+                <td>@item.Indirect2</td>
+                <td>@item.SalePriceUpper</td>
+                <td>@item.SalePriceLower</td>
+                <td>@item.ProfitRatio</td>
+                <td class="align_l p10_lr">@item.LevelDescription</td>
+                <td id="status@(item.SysNo)">@((Hyt.Model.WorkflowStatus.DistributionStatus.分销商等级状态)item.Status)</td>
+
+                <td>@(Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.CreatedBy))</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")  </td>
+                <td>
+                    <button id="btnStatus@(item.SysNo)" class="btn btn_ht26 DS1003701" type="button" onclick="SetReverseStatus(@item.SysNo) ">
+                        @if (item.Status == (int)Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态.禁用)
+                        {
+                            <span class="icon_check m5_r "></span><span>启用</span>                               
+                        }
+                        else
+                        {
+                            <span class="icon_ban_circle m5_r "></span><span>禁用</span>
+                        }
+                    </button>
+                    <button class="btn btn_ht26 m10_l DS1003301" onclick="Update(@item.SysNo)" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>
+                </td>
+            </tr>                      
+                   
+            }
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div id="pagination" class="pagination clearfix ">
+    <b class="fl">
+        <span class="f12 c6 bold4">共</span>
+        <span class=" m5_r m5_l f12 c3">1</span>
+        <span class="f12 c6 bold4">页</span><span class="f12 c6 m5_r m5_l bold4">|</span>
+        <span class="f12 c6 bold4">每页显示</span>
+        <span class=" m5_r m5_l f12 c3">10</span>
+        <span class="f12 c6 m5_l bold4">条</span>
+    </b>
+
+</div>

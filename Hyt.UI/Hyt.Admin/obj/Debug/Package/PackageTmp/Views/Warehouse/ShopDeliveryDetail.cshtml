@@ -1,0 +1,18 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "门店提货-详情";
+}
+
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+          <h3>门店提货-详情</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+        	<div class="boxs_detail_dispay">
+              @{Html.RenderAction("ShopDeliveryInfo", new { id = ViewBag.SysNo});}
+            
+            </div>
+        </div>
+    </div>
+</div>

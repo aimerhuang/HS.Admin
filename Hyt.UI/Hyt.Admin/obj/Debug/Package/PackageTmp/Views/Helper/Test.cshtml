@@ -1,0 +1,27 @@
+﻿@{
+    Layout = "_Layout.cshtml";
+    ViewBag.Title = "后台帮助 - 首页";
+}
+ @{Html.RenderPartial("_Header"); }
+<div id="paymain" class="content clearfix">
+     @{
+         ViewData.Add("nav", "upgrade"); 
+           Html.RenderPartial("_LeftNav", ViewData); 
+       }
+    <div class="py_fr">
+        <div class="py_fr_title">
+            <div class="fr grayc9">帮助中心 > 流程帮助视频 > 新增订单1</div>
+            <h3>新增订单流程视频教程</h3>
+        </div>
+        <div class="py_fr_con f14">
+            <div class="py_fr_intro">
+                新增订单是在品胜PC商城后台帮助特定的用户购买PC商城的商品。我们能轻松而不费力的在后台快速的帮助我们的用户购买购买商品,这样增加
+了非常友好的用户体验，不需要用户操作，只需一个电话给我我们，就能购买到理想的商品宝贝,不但增加了用户黏度还为我们增加了不少销量这样何乐而不
+为呢，下边是我们在后台进行购买商品的详细步骤
+            </div>
+            <div class="align_c m20_t">
+                <img src="../Theme/images/help01.jpg" width="800" height="501" /></div>
+        </div>
+    </div>
+</div>
+

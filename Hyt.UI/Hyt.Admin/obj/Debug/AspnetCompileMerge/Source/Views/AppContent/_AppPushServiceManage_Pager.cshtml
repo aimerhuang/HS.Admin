@@ -1,0 +1,62 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Util
+@using Hyt.Util.Extension
+@using Hyt.Model
+@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<CBApPushService>  
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_bnone">
+    <thead>
+        <tr>
+            <th width="72">系统编号</th>
+            <th width="72">App类型</th>
+            <th width="72">服务类型</th>
+            <th width="120">客户名称</th>
+            <th class="p10_lr">标题</th>
+            <th width="60">状态</th>
+            <th width="85">更新人</th>
+            <th width="136">更新时间</th>
+            <th width="230">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        @foreach (var item in Model.TData)
+        {
+        <tr id="row_@item.SysNo">
+            <td class="blue"><a href="javascript:void();" onclick="view(@item.SysNo)">@item.SysNo</a></td>
+            <td>@(((AppStatus.App推送App类型)item.AppType).ToString())</td>
+            <td>@(((AppStatus.App推送服务类型)item.ServiceType).ToString())</td>
+            <td>@(string.IsNullOrEmpty(item.CustomerAccount)?"全部":item.CustomerAccount)</td>
+            <td class="align_l p10_lr blue">
+                <a href="javascript:void();" onclick="view(@item.SysNo)">@item.Title.SubString("...",0,60)</a>
+            </td>
+            <td>@(((AppStatus.App推送服务状态)item.Status).ToString())</td>
+            <td width="85">@item.LastUpdateUser</td>
+            <td width="136">@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                @if (item.Status == (int) AppStatus.App推送服务状态.待审)
+                {
+                    <button class="btn btn_ht26 btn_blue @PrivilegeCode.AP1002103.ToString()" onclick=" audit(@item.SysNo, this) "><span class="icon_white icon_check"></span><span class="m5_l">审核</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_l @PrivilegeCode.AP1002102.ToString()" onclick="edit(@item.SysNo,this)"><span class="icon_white icon_pencil"></span><span class="m5_l">修改</span></button>
+                }
+                else
+                {
+                    <button class="btn btn_ht26 disabled @PrivilegeCode.AP1002103.ToString()" disabled="disabled"><span class="icon_white icon_check"></span><span class="m5_l">审核</span></button>
+                    <button class="btn btn_ht26 disabled m10_l @PrivilegeCode.AP1002102.ToString()" disabled="disabled"><span class="icon_white icon_pencil"></span><span class="m5_l">修改</span></button>
+                }
+                 @if (item.Status == (int)AppStatus.App推送服务状态.已发送 || item.Status == (int)AppStatus.App推送服务状态.失败 || item.Status == (int)AppStatus.App推送服务状态.作废)
+                 {
+                     <button class="btn btn_ht26 m10_l disabled @PrivilegeCode.AP1002102.ToString() @PrivilegeCode.AP1002103.ToString()" disabled="disabled"><span class="icon_ban_circle icon_white"></span><span class="m5_l">作废</span></button>
+                 }
+                 else
+                 {
+                     <button class="btn btn_ht26 btn_red m10_l @PrivilegeCode.AP1002102.ToString() @PrivilegeCode.AP1002103.ToString()" onclick=" invalid(@item.SysNo, this) "><span class="icon_ban_circle icon_white"></span><span class="m5_l">作废</span></button>
+                 }
+            </td>
+        </tr> 
+        }
+    </tbody>
+</table>  
+@{Html.RenderPartial("_UrlPaging", Model); }

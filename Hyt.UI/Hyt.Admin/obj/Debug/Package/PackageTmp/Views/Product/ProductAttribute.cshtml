@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "ProductAttribute";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using Hyt.Infrastructure.Pager
+@model PagedList
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1002201,".PD1002201")
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+             <h3>属性管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <span class="veralign_t fl m10_l">状态</span>
+                        <div class="m10_l fl">
+                            <select name="status" id="status" class="select_ht28">
+                                <option value="-1" selected="selected">全部</option>
+                                @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品属性状态)))
+                                    {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="search_btn m10_l fl" style="width:233px;">
+                          <input name="Name" type="text" id="name" style="width:189px;" class="input_ht28" value="搜索属性名称/后台显示名称...">
+                          <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 btn_blue PD1002201" id="createBtn"><span class="icon icon_white icon_plus"></span><span class="m5_l">新增属性</span></button>
+                    </div>
+                </div>
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/JavaScript">
+    var curpage = 1;
+    //查询列表
+    function doSearch(id) {
+        var name;
+        if ($("#name").val() != "搜索属性名称/后台显示名称...") {
+            name = $.trim($("#name").val());
+        }
+        
+        if (!!id && id > 0) {
+            curpage = id;
+        } else {
+            id = curpage;
+        }
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("ProductAttribute","Product")',
+            { id: id, name: name, status: $("#status").val() },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+
+    $(function () {
+        //创建属性
+        $("#createBtn").click(function () {
+            var url = '/Product/ProductAttributeCreate';
+            UI.DialogOpen(url, {
+                title: '属性创建',
+                width: '600px',
+                height: '350px'
+            }, false);
+        });
+
+
+        $(".showDetail").live("click", function () {
+            var no = $(this).closest("tr").find("input:checkbox").val();
+            var url = '/Product/ProductAttributeCreate?sysno=' + no;
+            UI.DialogOpen(url, {
+                title: '属性详细信息',
+                width: '600px',
+                height: '350px'               
+            }, false);
+
+        });
+
+        $("#name").defaultValue("搜索属性名称/后台显示名称...");
+
+        doSearch();
+        //全选
+        $("input.checkall").click(function () {
+            var state = $(this).attr("checked");
+            if (state) { state = true; } else { state = false }
+            $("input.checkedtd").each(function () { $(this).attr("checked", state); });
+        });
+        //查询条件变化时执行
+        $("[Search]").filter("[Search='Status']").change(function () { doSearch(1); });
+        //订单状态变化时执行
+       
+        //查询按钮
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+
+        $("#status").change(function () {
+            doSearch();
+        });
+
+       
+    });
+</script>

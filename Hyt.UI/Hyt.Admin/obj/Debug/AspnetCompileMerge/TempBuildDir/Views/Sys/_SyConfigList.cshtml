@@ -1,0 +1,116 @@
+﻿@using Hyt.BLL.Sys
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.SyConfig>
+@Html.PrivilegeControl(PrivilegeCode.SY1012202, ".SY1012202")
+<table id="item_list" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">配置分类</th>
+            <th class="align_l p10_lr">key</th>
+            <th class="align_l p10_lr">value</th>
+            <th class="align_l p10_lr">描述</th>
+            <th width="100">创建人</th>
+            <th width="100">创建时间</th>
+            <th width="120">最后更新人</th>
+            <th width="120">最后更新时间</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.TData != null && Model.TData.Any())
+        {
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td class="align_l p10_lr">@((SystemStatus.系统配置类型)item.CategoryId)</td>
+                <td class="align_l p10_lr">@item.Key</td>
+                <td class="align_l p10_lr">@item.Value</td>
+                <td class="align_l p10_lr">@item.Description</td> 
+                <td>@SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@SyUserBo.Instance.GetUserName(item.LastUpdateBy)</td>
+                <td>@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <button title="更新" class="btn btn_ht26 btn_blue SY1012202" type="button" data-id="@item.SysNo" name="edit">
+                        <span class="icon_pencil icon_white"></span><span class="m5_l">更新</span>
+                    </button>
+                    <button class="btn btn_ht26 btn_red SY1012202" type="button" data-id="@item.SysNo" name="remove">
+                        <span class="icon_trash icon_white"></span><span class="m5_l">删除</span>
+                    </button>
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    $(function () {
+
+        DAO.InterlineStyle();
+
+        $("#item_list").delegate("button[name='edit']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                var url = "@Url.Action("SyConfigEdit")/" + id;
+                UI.DialogOpen(url, {
+                    title: '修改系统配置功能',
+                    width: 596,
+                    height: 243,
+                    init: function () {
+                        this.button({
+                            name: '确认',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                if (!iframe.document.body) {
+                                    UI.Alert('页面还没加载完毕呢');
+                                    return false;
+                                };
+                                iframe.submitSyConfig();
+                                return false;
+                            }, focus: true
+                        }, {
+                            name: "取消"
+                        });
+                    }
+                }, false);
+            }
+        });
+
+
+        $("#item_list").delegate("button[name='remove']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                UI.Confirm({
+                    content: "您确定删除该系统配置项吗？",
+                    ok: function () {
+                        $.ajax({
+                            url: "@Url.Action("SyConfigRemove")",
+                            data: { id: id },
+                            chche: false,
+                            success: function (ret) {
+                                if (ret.StatusCode == 0) {
+                                    window.doSearch();
+                                } else {
+                                    UI.Alert({ content: ret.Message });
+                                }
+                            },
+                            error: function () {
+                                UI.Alert({ content: '操作出错,请稍候重试!' });
+                            }
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+</script>

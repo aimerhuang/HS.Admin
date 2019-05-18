@@ -1,0 +1,157 @@
+﻿@using Hyt.BLL.Basic
+@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.FnReceiptTitleAssociation>
+
+@{
+    <style type="text/css">
+        td { word-break: break-all; }
+    </style>
+
+    <div id="paging" ><!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th width="53px"><input class="checkall" type="checkbox" value=""></th>
+                    <th class="wd65">系统编号</th>
+                    @*<th width="98px">父级科目编码</th>*@
+                    <th width="106px">科目编码</th>
+                    <th>科目名称</th>
+                    <th width="150px">仓库名称</th>
+                    <th width="98px">支付方式类型</th>
+                    <th>默认收款科目</th>
+                    <th width="85px">创建人</th>
+                    <th width="104px">创建日期</th>
+                    <th width="85px">最后更新人</th>
+                    <th width="104px">最后更新时间</th>
+                    <th width="148px">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                @{
+                    if (Model.TData == null)
+                    {
+                        <tr>
+                            <td colspan="20" class="align_l">&nbsp;暂无数据.</td>
+                        </tr>
+                        return;
+                    }
+
+                    var count = 1;
+
+                    foreach (var m in Model.TData)
+                    {
+                        if (count%2 == 0)
+                        {
+                            @: <tr name="@m.SysNo" class="stag_color">
+                        }
+                        else
+                        {
+                            @: <tr name="@m.SysNo">
+                        }
+
+
+                        <td><input type="checkbox" name="@m.SysNo" value=""></td>
+                        <td name="SysNo">@m.SysNo</td>
+                        //<td name="ParentSysNo">@m.ParentCode</td>
+                        <td name="Code">@m.EasReceiptCode</td>
+                        <td name="Name">@m.EasReceiptName</td>
+                        <td name="WareHouseName" sysno="@m.WarehouseSysNo">
+                            @{
+                                var wh = WhWarehouseBo.Instance.GetWarehouse(m.WarehouseSysNo);
+                                if (wh == null)
+                                {
+                                    @m.WarehouseSysNo
+                                }
+                                else
+                                {
+                                    @wh.WarehouseName
+                                }
+                            }
+
+                        </td>
+                        <td name="TitleType" selval="@m.PaymentTypeSysNo">
+                            @PaymentTypeBo.Instance.GetEntity(m.PaymentTypeSysNo).PaymentName
+                        </td>
+                        <td name="Status" selval="@m.IsDefault">@Enum.Parse(typeof (FinanceStatus.是否默认收款科目), m.IsDefault + "")</td>
+                        <td name="CreatedBy">@SyUserBo.Instance.GetUserName(m.CreatedBy)</td>
+                        <td name="CreatedDate" timespan="@m.LastUpdateDate">@m.CreatedDate.ToString("D")</td>
+                        <td>@SyUserBo.Instance.GetUserName(m.LastUpdateBy)</td>
+                        <td>@m.LastUpdateDate.ToLongDateString()</td>
+                        <td><button type="button" name="btnEdit" class="btn btn_blue btn_ht26 m10_lr" ><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button type="button" id="@m.SysNo" name="btnDel" class="btn btn_red btn_ht26  m10_r"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                            @*                            @if (Enum.Parse(typeof (FinanceStatus.收款科目状态), m.Status + "").ToString() == "启用")
+                            {
+                                <button type="button" name="btnEnable" class="btn btn_ht26" style="margin-left: -3px"><span class="icon_ban_circle"></span><span class="m5_l">禁用</span></button>
+                            }
+                            else
+                            {
+                                <button type="button" name="btnDisable" class="btn btn_ht26" style="margin-left: -3px"><span class="icon_check"></span><span class="m5_l">启用</span></button>
+                            }*@
+                            
+                        </td>
+                        @:</tr>
+
+                        count++;
+                    }
+                }
+            
+            </tbody>
+        </table>
+        <!-- end content -->
+        
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+            -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+}  
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        //checkbox 
+        UI.CheckAllbox(".boxs_listtabel", ".checkall");
+
+        $('[name=btnDel]').click(function() {
+            var vals = $(this).attr('id');
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function() {
+                    del(vals);
+                }
+            });
+        });
+
+        $('[name=btnEnable],[name=btnDisable]').click(function() {
+            var vals = { id: $(this).siblings('[name=btnDel]').attr('id'), status: $(this).text() };
+            var btn = $(this);
+            $.ajax({
+                url: '@Url.Action("SetReceiptStatus")',
+                type: 'post',
+                data: vals,
+                success: function(data) {
+                    if (data.Status) {
+                        UI.tips.tip_alert('tips_success', data.Message);
+                        //setTimeout(location.reload(), 6000);
+                        //set the status
+                        //btn.parents('tr').find('td[name=Status]').text(btn.text());
+                        ajaxAction(getFilterVals());
+                    } else {
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    }
+
+                }
+            });
+        });
+
+        $('[name=btnEdit]').click(function() {
+            createOrUpdate($(this).next().attr('id'));
+        });
+
+    });
+</script>

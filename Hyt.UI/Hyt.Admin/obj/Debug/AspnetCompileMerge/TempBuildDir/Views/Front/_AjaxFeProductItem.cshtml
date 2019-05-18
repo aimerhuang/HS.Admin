@@ -1,0 +1,87 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model
+@using Hyt.Util.Extension
+@using Hyt.Util
+@model PagedList<CBFeProductItem>
+
+<div id="paging">
+    <table id="collocationASTable" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+      <tr>
+          <th width="53"><input class="checkall" name="sysNo" id="sysNo" type="checkbox" value="0" /></th>
+          <th style="text-align: left; text-indent: 10px;">后台显示名称</th>
+          <th style="text-align: left; text-indent: 10px;">前台显示名称</th>
+          <th width="150">分销商</th>
+          <th width="59">排序号</th>
+          <th width="46">状态</th>
+          <th width="72">显示类型</th>
+          <th width="300">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+    @{
+        const int pending = (int)Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.待审;
+        const int assessed = (int)Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.已审;
+        const int repeal = (int)Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.作废;
+
+        if (Model.TotalItemCount > 0)
+        {
+            var row = 1;
+            string cs = string.Empty;
+            foreach (var item in (List<CBFeProductItem>)Model.TData)
+            {
+                cs = row % 2 == 0 ? "stag_color" : string.Empty;
+              <tr class="@cs">
+                  <td><input name="sysNo" type="checkbox" @(item.Status == (int)Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.作废 ? "disabled=disabled" : "") @(item.Status == (int)Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.已审 ? "disabled=disabled" : "") value="@item.SysNo" /></td>
+                  <td style="text-align:left; text-indent:10px;" >@Html.Raw(item.EasName.HtmlEncode())</td>
+                  <td style="text-align:left; text-indent:10px;" >@Html.Raw(item.ProductName.HtmlEncode())</td>
+                  <td width="150">@item.DealerName</td>
+                  <td>
+                      @if (item.Status == assessed || item.Status == repeal)
+                      {
+                          <input type="text" class="displayorderinput" sysno="@item.SysNo" defaultval="@item.DisplayOrder" value="@item.DisplayOrder" style="width:59px;" disabled="disabled"/>
+                      }
+                      else
+                      {
+                          <input type="text" class="displayorderinput" sysno="@item.SysNo" defaultval="@item.DisplayOrder" value="@item.DisplayOrder" style="width:59px;" />
+                      }
+                  </td>
+                  <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ForeStatus.商品项状态), item.Status)</td>
+                  <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ForeStatus.显示标志), item.DispalySymbol)</td>
+                  <td>@if (item.Status == assessed)
+                      {
+                          <button type="button" class="btn btn_ht26 btn_red m10_r FE1009602" onclick="UpdateStatus('确定取消该广告组记录吗？',@pending,@item.SysNo,@Model.CurrentPageIndex)"><span class="icon icon_audit icon_white"></span><span class="m5_l">取消审核</span></button>
+                          <button type="button" class="btn btn_ht26 disabled m10_r FE1009501"><span class="icon icon_forbidden"></span><span class="m5_l">作废</span></button>
+                          <button title="修改" class="btn btn_ht26 disabled FE1009202" type="button"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>
+                          <button type="button" class="btn btn_ht26 disabled FE1009202" title="删除"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+                      }
+                      else if (item.Status == repeal)
+                      {
+                          <button type="button" class="btn btn_ht26 disabled m10_r FE1009602" ><span class="icon icon_audit"></span><span class="m5_l">审核通过</span></button>
+                          <button type="button"  class="btn btn_ht26 disabled m10_r FE1009501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                          <button title="修改" class="btn btn_ht26 disabled FE1009202" type="button"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>
+                          <button type="button" class="btn btn_ht26 disabled FE1009202" title="删除"><span class="icon_trash"></span><span class="m5_l">删除</span></button>                   
+                      }else
+                      {
+                          <button type="button" class="btn btn_ht26 btn_blue m10_r FE1009602"  onclick="UpdateStatus('确定审核该广告组记录吗？', @assessed, @item.SysNo,@Model.CurrentPageIndex)"><span class="icon icon_audit icon_white"></span><span class="m5_l">审核通过</span></button>
+                          <button type="button" class="btn btn_ht26 btn_red m10_r" onclick="UpdateStatus('确定作废该广告组记录吗？',@repeal,@item.SysNo,@Model.CurrentPageIndex)"><span class="icon icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                          <button onclick="addOrEdit(@item.SysNo,@Model.CurrentPageIndex)" title="修改" class="btn btn_ht26 btn_blue FE1009202" type="button"><span class="icon icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                          <button type="button" class="btn btn_ht26 btn_red FE1009201" title="删除" onclick="Delete(@item.SysNo)"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>                     
+                      }
+                  </td>
+              </tr>
+                      row++;
+            }
+        }
+        else
+        {
+              <tr>
+                <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+              </tr>
+        }
+    }
+    </tbody>
+    </table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+</div>

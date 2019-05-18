@@ -1,0 +1,495 @@
+﻿@{
+    ViewBag.Title = "盘点作业管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+<style type="text/css">
+    .ztree li a.curSelectedNode {
+        width: 80%;
+        border: solid 1px #ffb951;
+        padding-top: 1px;
+        padding-bottom: 0;
+    }
+
+    #productCatetoryTree a {
+        width: 95%;
+        *width: 85%;
+        border: solid 1px #fff;
+        height: 17px;
+        line-height: 17px;
+    }
+
+        #productCatetoryTree a.curSelectedNode {
+            border: solid 1px #ffb951;
+        }
+
+    .ztree li a:hover {
+        background-color: #FFE6B0;
+        border: solid 1px #FFE6B0;
+    }
+
+    tr.selected {
+        background-color: #FFE6B0;
+    }
+
+    .ztree li span.button {
+        float: left;
+    }
+
+    .biaoqian {
+        display: block;
+        margin-right: 9px;
+        margin-bottom: 10px;
+        min-width: 50px;
+        height: 25px;
+        line-height: 25px;
+        background-image: url(/Theme/images/btnbg.png);
+        padding: 0px 5px;
+        float: left;
+        border: #c1c1c1 solid 1px;
+    }
+
+        .biaoqian:hover {
+            background-position: 0 -34px;
+        }
+
+    .yixuan {
+        min-width: 50px;
+        height: 25px;
+        line-height: 25px;
+        padding: 0px 5px;
+        float: left;
+    }
+</style>
+<script src="~/Theme/scripts/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript">
+    $(function () {
+        doSearch(null);  //加载仓库菜单树
+        doSearchTo(null);  //加载商品分类菜单树
+        $(".tr_where").append(html); //首次加载仓位/商品内容
+        doSearchList(1);
+        initDialog();  //保存回调
+    });
+
+    /*仓库菜单树*/
+    function doSearch(val) {
+        $.ajax({
+            url: "@Url.Action("GetWharehouseSelector", "Warehouse")",
+            dataType: "json",
+            data: {},
+            async: false,
+            success: function (result) {
+                showTree(result);
+                zTreeObj.expandAll(true);  //展开所有节点
+            },
+            error: function () {
+                // mask.Remove();
+            }
+        });
+    }
+
+    var zTreeObj;
+    function showTree(result) {
+        var radioType;
+        var setting = {
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pId"
+                }
+            },
+            check: {
+                enable: true,
+                chkStyle: "checkbox",
+                radioType: radioType
+            }
+        };
+        zTreeObj = UI.ZTree.init($("#areatree"), setting, result);
+    }
+
+    /*仓库菜单树结束*/
+
+
+    /*商品分类菜单树*/
+    var zTreeObjTo;
+    function doSearchTo(val) {
+        $.ajax({
+            url: '@Url.Action("GetProductCategoryZTreeList", "Ajax")',
+            dataType: "json",
+            data: { all: true },
+            async: false,
+            success: function (result) {
+                showTreeTo(result);
+                zTreeObjTo.expandAll(true);  //展开所有节点
+            },
+            error: function () {
+                // mask.Remove();
+            }
+        });
+    }
+    function showTreeTo(result) {
+        var radioType;
+        var setting = {
+            data: {
+                simpleData: {
+                    enable: true,
+                    idKey: "id",
+                    pIdKey: "pId"
+                }
+            },
+            check: {
+                enable: true,
+                chkStyle: "checkbox",
+                radioType: radioType
+            }
+        };
+        zTreeObjTo = UI.ZTree.init($("#productCatetoryTree"), setting, result);
+    }
+    /*商品分类菜单树结束*/
+</script>
+
+<div class="case commodity_sortmanage">
+    <!--sortmanage_fl-->
+    <div class="sortmanage_fl" style="width:310px;">
+        <div class="boxs">
+            <!--有导航条时-->
+            <div id="treeTitle" class="boxs_tit head_m">
+                <h3>选择盘点仓库</h3>
+            </div>
+            <div class="comp5" style="padding: 0; height: 520px; overflow-y: scroll; ">
+                <div id="treePanel" class="zTreeDemoBackground left p5" style="overflow: auto;">
+                    <ul id="areatree" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- test -->
+    <!--sortmanage_fr-->
+    <div class="sortmanage_fr" style="margin-left:325px;">
+        <form id="inputForm" name="inputForm" onsubmit="return false;">
+
+            <div id="tabboxs" class="boxs" style="margin-bottom:10px;">
+                <div class="boxs_con_p10">
+                    <div class="list2">
+                        <div class="boxs_detail_dispay">
+                            <div class="tit_con basebox1">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1">
+                                    <tbody>
+                                        <tr>
+                                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>库存备份日期</td>
+                                            <td width="80%">
+                                                <input type="radio" id="Time" checked />&nbsp;即时库存
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tabboxs" class="boxs">
+                <div class="boxs_con_p10">
+                    <div class="list2">
+                        <div class="boxs_detail_dispay">
+                            <div class="tit_con basebox1">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1">
+                                    <tbody>
+                                        <tr>
+                                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>盘点类型</td>
+                                            <td width="80%">
+                                                <input type="radio" name="Type" value="1" id="Type_1" checked><label for="Type_1">&nbsp;仓位/商品</label>
+                                                &nbsp;&nbsp;
+                                                <input type="radio" name="Type" value="2" id="Type_2"><label for="Type_2">&nbsp;商品类别</label>
+                                                &nbsp;&nbsp;
+                                                <input type="radio" name="Type" value="3" id="Type_3"><label for="Type_3">&nbsp;品牌</label>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!--仓位/商品-->
+            <div id="yc_1" class="boxs boxs_con_p10 boxs_listtabel boxs_con_c1 " style="margin-top: 5px; max-height: 390px; overflow-y: scroll; ">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class=" border_none ">
+                    <thead>
+                        <tr>
+                            <th class="p10_lr">名称</th>
+                            <th class="p10_lr">比较</th>
+                            <th class="p10_lr">比较值</th>
+                            <th class="p10_lr">逻辑</th>
+                        </tr>
+                    </thead>
+                    <tbody class="tr_where"></tbody>
+                </table>
+            </div>
+            <!--仓位/商品End-->
+            <!--商品分类-->
+            <div id="yc_2" class="boxs boxs_con_p10 boxs_listtabel boxs_con_c1 " style="margin-top: 5px; max-height: 390px; overflow-y: scroll; display: none; ">
+                <ul id="productCatetoryTree" class="ztree"></ul>
+            </div>
+            <!--商品分类-->
+            <!--品牌-->
+            <div id="yc_3" class="boxs boxs_con_p10 boxs_listtabel boxs_con_c1 " style="margin-top: 5px; height: 390px; overflow-y: scroll; display: none; ">
+                <div style="width: 98%; min-height: 50px; clear: both; border: #c1c1c1 solid 1px; margin-bottom: 5px; text-align: left; padding: 5px 5px; ">
+                    <div class="yixuan">已选品牌：</div>
+                    <span id="sp_biaoqian">
+
+                    </span>
+                    <div style="clear: both;"></div>
+                </div>
+
+                <div class="boxs_con_c1">
+                    <div class="list">
+                        <div class="boxs_tool">
+                            <!--/工具条-->
+                            <div class="right_tool clearfix">
+                                <span class="veralign_t fl m10_l">状态</span>
+                                <div class="m10_l fl">
+                                    <select name="status" id="status" searchitem='Status' class="select_ht28">
+                                        <option value="-1" selected="selected">全部</option>
+                                        <option value="0">禁用</option>
+                                        <option value="1">启用</option>
+
+                                    </select>
+                                </div>
+                                <div class="search_btn  fl" style="width:213px;">
+                                    <input name="Name" type="text" id="name" class="input_ht28" style="width:138px;" placeholder="搜索品牌名称关键字...">
+                                    <button class="btn btn_ht28 wd28" id="searchBtn" onclick="doSearchList(1,1)" title="搜索"><span class="icon_search"></span></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="paging">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--品牌-->
+        </form>
+    </div>
+    <!-- test end -->
+</div>
+    
+
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+<script type="text/javascript">
+    $("body").width(1000);
+    $("body").height($(document).height());
+   
+    
+
+    var html = '<tr><td class="align_c  p5_lr "><select style="width:100%;" class="Name" >';
+    html += '<option value="-1"></option><option value="物料代码">物料代码</option><option value="物料名称">物料名称</option><option value="仓位代码">仓位代码</option><option value="仓位名称">仓位名称</option><option value="条形码">条形码</option></select></td>';
+    html += '<td class="align_l p5_lr"><select style="width:100%;" class="Symbol" ><option value="-1"></option>';
+    html += '<option value="=">=</option><option value="<>"><></option><option value=">">></option>';
+    html += '<option value=">=">>=</option><option value="<"><</option><option value="<="><=</option>';
+    html += '<option value="like">like</option><option value="not like">not like</option></select>';
+    html += '</td><td class="align_l p5_lr"><input type="text" style="width:95%;"  class="Context" /></td>';
+    html += '<td class="align_l p10_lr "><select style="width:100%;" class="LuoJi"  onchange="luoji(this)">';
+    html += '<option value="-1"></option><option value="and">and</option><option value="or">or</option></select></td></tr>';
+    function luoji(th) {
+        if (Addluoji()) {
+            var val = $(th).val();
+            if (val != -1) {
+                $(".tr_where").append(html);
+            }
+        }
+    }
+    function Addluoji() {
+        var wtr = $(".tr_where tr");
+        var rtn = true;
+        for (var i = 0; i < wtr.length; i++) {
+            var wname = $(".tr_where").children("tr").eq(i).children("td").children(".Name").val(); //获取名称的值
+            var wSymbol = $(".tr_where").children("tr").eq(i).children("td").children(".Symbol").val(); //获取比较的值
+            var wContext = $(".tr_where").children("tr").eq(i).children("td").children(".Context").val(); //获取比较值的值
+            var wLuoJi = $(".tr_where").children("tr").eq(i).children("td").children(".LuoJi").val(); //获取逻辑的值
+            if (wname == undefined || wname == -1 || wSymbol == undefined || wSymbol == -1 || wLuoJi == undefined || wLuoJi == -1 || wContext == undefined || wContext == "") {
+                rtn = false;
+            }
+        }
+        return rtn;
+    }
+
+    $('input:radio[name="Type"]').click(function () {
+        var val = $('input:radio[name="Type"]:checked').val();
+        if (val == 1) {
+            $("#yc_2").hide();
+            $("#yc_3").hide();
+            $("#yc_1").show();
+        } else if (val == 2) {
+            $("#yc_1").hide();
+            $("#yc_3").hide();
+            $("#yc_2").show();
+        } else {
+            $("#yc_1").hide();
+            $("#yc_2").hide();
+            $("#yc_3").show();
+        }
+    })
+
+    //查询列表
+    function doSearchList(id, ss) {
+        var status, name;
+        if (ss == 1) {
+            status = $("[searchItem='Status']").val(); //选中状态
+            name = $("#name").val();
+            if (name == "搜索品牌名称..." || name == "") {
+                UI.tips.tip_alert('tips_wrong', '请输入您要查询的品牌名称关键字！');
+                return;
+            }
+        }
+        Ajax.get("BrandPage?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("id", id),
+            p.setParams("status", status),
+            p.setParams("name", name)
+            ;
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            $(".mloading-full").remove();
+        });
+        isLogding = true;
+    }
+
+    //添加品牌标签
+    function xuanze(th, id, name) {
+        var bol = true;
+        for (var i = 0; i < $('#sp_biaoqian input[type=hidden]').length; i++) {
+            if ($('#sp_biaoqian input[type=hidden]').eq(i).val() == id) {
+                bol = false;
+            }
+        }
+        if (bol) {
+            $(th).addClass("disabled").html('<span class="icon_ok"></span><span class="m5_l">已选</span>');
+            $("#sp_biaoqian").append('<a class="biaoqian"><input type="hidden" value="' + id + '" /><span>' + name + '</span> <span class="m5_l" onclick="deleteBiaoQian(this,' + id + ')">X</span></a>')
+        }
+    }
+    //删除品牌标签
+    function deleteBiaoQian(th, id) {
+        $("#btn_" + id).removeClass("disabled").html('<span class="icon_ok"></span class="m5_l" ><span>选择</span>');
+        $(th).parent().remove();
+    }
+    var btn = false;
+    function initDialog() {
+      
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    if (btn) { return false; }
+                    btn = true;
+                    var WhInventoryStr = ""; //仓库id
+                    var nodes = $.fn.zTree.getZTreeObj("areatree").getChangeCheckedNodes(true);  //获取选中仓库菜单的节点
+                    if (nodes.length == 0) {
+                        UI.tips.tip_alert('tips_wrong', '请选择要盘点的仓库！');
+                        btn = false;
+                        return false;
+                    }
+                    for (var i = 0; i < nodes.length; i++) {
+                        WhInventoryStr += (0 - nodes[i].id) + ",";
+                    }
+                    var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                    var Type = $('input:radio[name="Type"]:checked').val();  //获取盘点类型
+                    var whereStr = ""; //若盘点类型为仓库/商品,用于存放条件语句
+                    var TypeIdStr = ""; //若为商品类别,用于存放类别id
+                    var brandIdStr = "";//若为品牌类别,用于存放品牌id
+                    if (Type == 1) {//盘点类型为仓库/商品
+                        var wtr = $(".tr_where tr");
+                        var bol = true;
+                        for (var i = 0; i < wtr.length; i++) {
+                            if (bol) {
+                                var wname = $(".tr_where").children("tr").eq(i).children("td").children(".Name").val(); //获取名称的值
+                                var wSymbol = $(".tr_where").children("tr").eq(i).children("td").children(".Symbol").val(); //获取比较的值
+                                var wContext = $(".tr_where").children("tr").eq(i).children("td").children(".Context").val(); //获取比较值的值
+                                var wLuoJi = $(".tr_where").children("tr").eq(i).children("td").children(".LuoJi").val(); //获取逻辑的值
+                                if (wname != undefined && wname != -1 && wSymbol != undefined & wSymbol != -1 && wContext != undefined && wContext != "") {
+                                    whereStr += " " + wname + wSymbol + "'" + wContext + "' ";
+                                }
+                                if (wLuoJi != undefined && wLuoJi != -1) {
+                                    whereStr += wLuoJi;
+                                } else {
+                                    bol = false;
+                                }
+                            }
+                        }
+                        var b = whereStr.substring((whereStr.length - 2), whereStr.length);
+                        if (whereStr.substring((whereStr.length - 3), whereStr.length) == "and") {
+                            whereStr = whereStr.substring(0, (whereStr.length - 3))
+                        }
+                        if (b == "or") {
+                            whereStr = whereStr.substring(0, (whereStr.length - 2))
+                        }
+                    } else if (Type == 2) {//盘点类型为商品类别
+                        nodes = $.fn.zTree.getZTreeObj("productCatetoryTree").getChangeCheckedNodes(true);  //获取选中商品类型菜单的节点
+                        if (nodes.length == 0) {
+                            UI.tips.tip_alert('tips_wrong', '请选择要盘点的商品类型！');
+                            btn = false;
+                            return false;
+                        }
+                        for (var i = 0; i < nodes.length; i++) {
+                            TypeIdStr += (nodes[i].id) + ",";
+                        }
+                    } else if (Type == 3) {//盘点类型为品牌
+                        if ($('#sp_biaoqian input[type=hidden]').length == 0) {
+                            UI.tips.tip_alert('tips_wrong', '请选择要盘点的商品品牌！');
+                            btn = false;
+                            return false;
+                        }
+                        for (var i = 0; i < $('#sp_biaoqian input[type=hidden]').length; i++) {
+                            brandIdStr += $('#sp_biaoqian input[type=hidden]').eq(i).val() + ",";
+                        }
+                    }
+                    $.ajax({
+                        cache: true,
+                        type: "POST",
+                        url: "AddWhInventory",
+                        data: { "WhInventoryStr": WhInventoryStr, "Type": Type, "whereStr": whereStr, "TypeIdStr": TypeIdStr, "brandIdStr": brandIdStr },
+                        error: function (data) {
+                            mask.Remove();
+                            btn = false;
+                            return false;
+                        },
+                        success: function (data) {
+                            mask.Remove();
+                            if (data.Message != "成功") {
+                                UI.tips.tip_alert('tips_wrong', data.Message);
+                            } else {
+                                Utils.alert("创建盘点作业成功!", "succeed");
+                                UI.Dialog.opener.doSearch(1);
+                            }
+                            btn = false;
+                        }
+                    });
+                    return false;
+                   
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+    
+</script>

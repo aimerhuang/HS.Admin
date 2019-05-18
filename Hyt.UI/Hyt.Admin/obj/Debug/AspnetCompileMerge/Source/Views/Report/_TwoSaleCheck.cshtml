@@ -1,0 +1,50 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBTwoSale>
+@{
+    Model.OnBegin = "tableBegin";
+}
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+        <thead>
+            <tr>
+                <th width="120">下单时间</th>
+                <th width="300">仓库</th>
+                <th>业务员</th>
+                <th width="140">单量</th>
+                <th width="140">金额</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                var i = 0;
+                foreach (var item in Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td class="blue"><span class="p10_lr"><a href="#" onclick="OpenDetail('@item.CreateDate',@item.UserID,@item.WarehouseSysNo,'@item.UserName','@item.WarehouseName')">@item.CreateDate</a></span></td>
+                <td>@item.WarehouseName</td>
+                <td >@item.UserName</td>
+                <td>@item.OrderCount</td>
+                <td>@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.OrderCash, 2))</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

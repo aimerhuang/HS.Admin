@@ -1,0 +1,72 @@
+﻿<style type="text/css">
+    table tr td {
+        font-family: STLiti;
+        font-size: 15px;
+    }
+</style>
+@using Hyt.Model;
+@using Hyt.Model.WorkflowStatus;
+@{
+    ViewBag.Title = "DealerProductQRCodeCreate";
+    string DomainName = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDsDealer(int.Parse(ViewBag.dealerSysNo)).DomainName;
+    //string qrSite = "http://qr.liantu.com/api.php?text=http://";
+    string qrSite = "/Distribution/CreateQR?url=http://";
+    var generalConfig = Hyt.BLL.Config.Config.Instance.GetGeneralConfig();
+    if (!string.IsNullOrEmpty(DomainName))
+    {
+        qrSite += DomainName + "/" + ViewBag.dealerSysNo + "/product/details/";
+    }
+    else
+    {
+        qrSite += generalConfig.Domain.Replace("http://", "") + "/" + ViewBag.dealerSysNo + "/product/details/";
+    }
+}
+
+<div style="min-width:1300px;padding:15px;">
+    <div>
+        @{
+    int i = 0;
+    foreach (var item in ViewBag.sysNos)
+    {
+        i += 1;
+        var p = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetEntityBySysNo(int.Parse(item));
+        if (p == null)
+        {
+            continue;
+        }
+        int ProductSysNo = p.ProductSysNo;
+        CBSimplePdProduct Entity = Hyt.BLL.Web.PdProductBo.Instance.GetProduct(int.Parse(item));
+        if (Entity == null)
+        {
+            continue;
+        }
+        decimal salesprice = 0;
+        foreach (var price in Entity.Prices)
+        {
+            if (price.PriceSource == 90)
+            {
+                salesprice = price.Price;
+            }
+        }
+        <div style="float:left;width:410px">
+            <div style="display: inline-block; width: 220px; height: 280px; overflow: hidden;">
+                <table style="width: 220px;">
+                    <tr><td style="width: 60px;">品名：</td><td>@Entity.ProductName</td></tr>
+                    <tr><td style="width: 60px; ">价格：</td><td>@salesprice</td></tr>
+                    <tr><td style="width: 60px; ">条形码：</td><td>@Entity.Barcode</td></tr>
+                    <tr><td style="width: 60px; ">产地：</td><td>@Entity.Origin_Name</td></tr>
+                    <tr><td style="width: 60px; ">品牌：</td><td>@Entity.BrandName</td></tr>
+                </table>
+            </div>
+            <div style="display:inline-block;height:280px;overflow:hidden;">
+                <img style="width:180px;" src="@qrSite@int.Parse(item)">
+            </div>
+            @*if (i % 3 == 0)
+                {
+                    <br />
+                }*@
+        </div>
+    }
+}
+    </div>
+</div>

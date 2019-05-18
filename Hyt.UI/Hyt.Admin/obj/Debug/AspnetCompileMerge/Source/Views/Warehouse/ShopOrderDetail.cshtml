@@ -1,0 +1,185 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.SoOrder
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "门店订单详情";
+}
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <style type="text/css">
+        body {
+            background: none;
+        }
+
+        select, input[type='text'], button {
+            font-size: 12px;
+        }
+
+        .commoditybox tr td {
+            padding: 0 5px;
+        }
+    </style>
+</head>
+<body class="">
+    <div class="p10">
+        <div class="boxs_detail_dispay boxs_con_c1">
+            <div class="tit_con">
+                <form method="POST" id="form1" name="form1">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone border_bnone">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright borde_rnone">下单门店:</td>
+                                <td width="90%" colspan="3">
+                                    @if (ViewBag.DefaultWarehouse != null)
+                                    {@ViewBag.DefaultWarehouse.WarehouseName}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright borde_rnone">会员名称:</td>
+                                <td width="42%" class="border_right">
+                                    @Html.DisplayFor(m => m.Customer.Account)
+                                </td>
+                                <td width="10%" class="nameright borde_rnone">订单号:</td>
+                                <td width="40%">
+                                    @Html.DisplayFor(m => m.SysNo)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright borde_rnone">收货人:</td>
+                                <td width="40%" class="border_right">
+                                    @Html.DisplayFor(m => m.ReceiveAddress.Name)</td>
+                                <td width="10%" class="nameright borde_rnone">收货手机:</td>
+                                <td width="40%">
+                                    @Html.DisplayFor(m => m.ReceiveAddress.MobilePhoneNumber)</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">对内备注:</td>
+                                <td colspan="3">
+                                    @Html.DisplayFor(m => m.InternalRemarks)</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright ">说明:</td>
+                                <td colspan="3">
+                                    @Html.DisplayFor(m => m.Remarks)
+
+                                  @if (ViewBag.PickUpDate!=null && ViewBag.PickUpDate.Year > 1)
+                                    {
+                                        if(!string.IsNullOrEmpty(Model.Remarks)){
+                                            @:";"
+                                            }
+                                         @:延迟到 @ViewBag.PickUpDate.ToString("yyyy-MM-dd") , 原因: @ViewBag.Remarks
+                                    }
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_bnone">发票:</td>
+                                <td colspan="3" class="border_bnone">
+                                    @if (string.IsNullOrWhiteSpace(Model.OrderInvoice.InvoiceTitle))
+                                    { 
+                                        @:无需发票
+                                    }
+                                    else
+                                    {
+                                        var invoice = Hyt.BLL.Warehouse.FnInvoiceTypeBo.Instance.GetModel(Model.OrderInvoice.InvoiceTypeSysNo);
+                                        string invoiceStr = (invoice != null ? "发票类型:&nbsp;&nbsp;【" + invoice.Name + "】;" : "") + "<span class='m10_l'>发票抬头:&nbsp;&nbsp;<span>【" + Model.OrderInvoice.InvoiceTitle + "】;" + (!string.IsNullOrWhiteSpace(Model.OrderInvoice.InvoiceCode) ? "<span class='m10_l'>发票代码:&nbsp;&nbsp;<span>【" + Model.OrderInvoice.InvoiceCode + "】;" : "") + (!string.IsNullOrWhiteSpace(Model.OrderInvoice.InvoiceNo) ? "<span class='m10_l'>发票号码:&nbsp;&nbsp;</span>【" + Model.OrderInvoice.InvoiceNo + "】" : "");
+                                        @Html.Raw(invoiceStr)
+                                    }
+                                </td>
+                            </tr>
+                            @if (ViewBag.DsOrder != null)
+                                {
+                                    <tr>
+                                        <td class="nameright border_top border_bnone">商城订单号:</td>
+                                        <td class="border_top border_bnone" colspan="3">
+                                            @Html.Raw(
+                                         string.Format("【{0}】 {1}", ((DsDealerMall)ViewBag.DealerMall).ShopName, ((DsOrder)ViewBag.DsOrder).MallOrderId) 
+                                            )
+
+                                        </td>
+                                    </tr>
+                                }
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+        <div class="boxs_con_c1 m5_t border_tnone">
+            <div class="boxs_listtabel">
+                <!--/表格列表区-->
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                    <thead>
+                        <tr>
+                            <th width="20%">商品编号</th>
+                            <th width="30%">后台显示名称</th>
+                            <th width="10%">数量</th>
+                            <th width="12%">原单价</th>
+                            <th width="12%">购买总价</th>
+                            <th width="16%">积分</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{  decimal sumOriginalPrice = 0;
+                            decimal sumRealSalesAmount = 0;
+                            int sumPoint = 0;
+                            foreach (var item in Model.OrderItemList)
+                            {
+                                int point = Convert.ToInt32(item.SalesAmount);
+                            <tr>
+                                <td>@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                                <td>@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                                <td>@item.Quantity</td>
+                                <td>&yen;@item.OriginalPrice.ToString("0.00")</td>
+                                <td class="red p10_r" align="right">&yen;@item.SalesAmount.ToString("0.00")</td>
+                                <td>@point</td>
+                            </tr>
+                                sumOriginalPrice += item.OriginalPrice*item.Quantity;
+                                sumRealSalesAmount += item.SalesAmount;
+                                sumPoint += point;
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="boxs_con_c1 m5_t">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <span class="bold f14">金额汇总</span>
+            </div>
+            <div class="boxs_listtabel">
+                <!--/表格列表区-->
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                    <thead>
+                        <tr>
+                            <th>销售金额</th>
+                            <th>支付金额</th>
+                            <th >支付惠源币</th>
+                            <th >获得积分</th>
+                            <th>折扣</th>
+                            <th >优惠</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tb2">
+                        <tr id="tr2_1">
+                            <td  id="saleAmount" class="red p10_r" align="right">&yen;@Model.OrderAmount.ToString("N")</td>
+                            <td  id="payAmount" class="red p10_r" align="right">&yen;@Model.CashPay.ToString("N")</td>
+                            <td>@Model.CoinPay</td>
+                            <td  id="getScore">@Convert.ToInt32(Math.Floor(Model.CashPay))</td>
+                            <td  id="rebate">&yen;@Model.ProductDiscountAmount.ToString("N")</td>
+                            <td  id="Coupon" class="red p10_r" align="right">&yen;@Model.CouponAmount.ToString("N")</td> 
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,68 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBDsPrePaymentItem>
+<table id="item_list" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">分销商名称</th>
+            <th width="100">单据来源</th>
+            <th width="100" class="p10_r">增加</th>
+            <th width="110" class="p10_r">减少</th>
+            <th width="110" class="p10_r">剩余</th>
+            <th width="50">状态</th>
+            <th width="120">创建时间</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TData != null && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td class="align_l p10_lr">@item.DealerName</td>
+                <td>@((DistributionStatus.预存款明细来源)item.Source)</td>
+                <td class="red p10_r align_r">@item.Increased.ToString("C")</td>
+                <td class="red p10_r align_r">@item.Decreased.ToString("C")</td>
+                <td class="red p10_r align_r">@item.Surplus.ToString("C")</td>
+                <td>@((DistributionStatus.预存款明细状态)item.Status)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="9">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        var aValue1 = "", aValue2 = "", i = 0, color = "blue";
+        $("table tbody tr td.source").each(function () {
+            i += 1;
+            if (i == 1) {
+                $(this).addClass(color);
+                aValue1 = $.trim($(this).html());
+                return;
+            } else {
+                aValue2 = $.trim($(this).html());
+                if (aValue1 == aValue2) {
+                    $(this).addClass(color);
+                }
+                else {
+                    if (color == "blue") {
+                        color = "red";
+                    } else {
+                        color = "blue";
+                    }
+                    $(this).addClass(color);
+                }
+            }
+            aValue1 = $.trim($(this).html());
+        });
+
+        DAO.InterlineStyle();
+    });
+</script>

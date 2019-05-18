@@ -1,0 +1,141 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.FeArticle
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "文章管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+        var er;
+       
+        $(function () {
+            er = UI.Editor("#editor_Content", {});
+            $("#feArticleForm").validate({
+                debug: true,
+                rules: {
+                    txtTitle: {
+                        required: true,
+                        maxlength: 100,
+                        remote: {
+                            url: "/Front/FeArticleVerify",
+                            type: "post",
+                            data: {
+                                txtTitle: function () {
+                                    return $("#txtTitle").val();
+                                },
+                                hidSysNo: function () {
+                                    return $("#hidSysNo").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#fortxtTitle').text('字数限制,1-100个字符');
+                                } else {
+                                    $('#fortxtTitle').text('文章标题已存在');
+                                }
+                                return data;
+                            }
+                        }
+
+                    },
+                    selClass: { min: 1 }
+                },
+             
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function addOrEdit() {
+            er.sync();
+            $("#feArticleForm").submit();
+            if ($.trim(er.text()) == "") {
+                $("#s_editor").attr('class', 'error');
+                return;
+            } else {
+                $("#s_editor").attr('class', 'success');
+            }
+            if ($("#feArticleForm").valid()) {
+                var da = {
+                    hidSysNo: $("#hidSysNo").val(),
+                    txtTitle: $("#txtTitle").val(),
+                    editor_Content: escape(er.html()),
+                    selClass: $("#selClass").val()
+                };
+                $.post('/Front/FeArticleAddOrEdit/', da, function (data) {
+                    if (data.IsPass) {
+                        UI.Dialog.opener.dialog();
+                        UI.Dialog.opener.searchHelpClass();
+                        UI.Dialog.close();
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+<form id="feArticleForm" name="feHelpArticleForm" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+    <div class="tit_con">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tr>
+                <td width="67" class="nameright border_rnone"><span class="v_star">*</span>文章分类</td>
+                <td>
+                    <div>
+                        <select id="selClass" name="selClass">
+                            @{
+                                var cList = (IList<FeArticleCategory>)ViewBag.Category;
+                                string selc;
+                                bool dis;
+                                if (cList != null && cList.Any())
+                                {
+                                    dis = true;
+                                    foreach (var dict in cList)
+                                    {
+                                        selc = dict.SysNo == Model.CategorySysNo ? "selected='selected'" : string.Empty;
+                                        <option value="@dict.SysNo" @Html.Raw(selc)>@dict.Name</option>
+                                    }
+                                }
+                                else
+                                {
+                                    dis = false;
+                                }
+                            }
+                        </select>
+                          @if (!dis)
+                        {
+                            <span class="error m10_l">没有文章分类,请先到文章分类页面添加文章分类</span>
+                        }
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="67" class="nameright border_rnone">
+                    <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/><span class="v_star">*</span>标题</td>
+                <td>
+                    <input type="text" id="txtTitle" name="txtTitle" style="width: 500px;"  value="@Model.Title" class="c3"/><span id="fortxtTitle" class="prompt m10_l">字数限制,1-100个字符</span>
+                </td>
+            </tr>
+            <tr>
+                <td width="67" class="nameright border_rnone"><span class="v_star">*</span>内容</td>
+                <td><textarea id="editor_Content" name="editor_Content" style="width: 1100px; height: 470px; visibility: hidden;">@Server.UrlDecode(Model.Content)</textarea>
+                    <span id="s_editor" class="prompt">文章内容</span>
+                </td>
+            </tr>
+
+        </table>
+    </div>
+     </div>
+    </div>
+</form>

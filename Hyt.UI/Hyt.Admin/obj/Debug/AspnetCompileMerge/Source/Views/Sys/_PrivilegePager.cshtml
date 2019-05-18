@@ -1,0 +1,157 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.SyPrivilege>
+
+
+
+      <!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="78">权限编号</th>
+                <th width="280">权限名称</th>
+                <th width="100">权限代码</th>
+                <th>备注</th>
+                <th width="60">状态</th>
+                <th width="220">操作</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.SyPrivilege>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    }                  
+                    <td>@item.SysNo<input type="hidden" value="@item.SysNo" /></td>
+                    <td align="left" class="p10_l p10_r">@item.Name</td>
+                    <td>@item.Code</td>
+                    <td align="left" class="p10_l p10_r">@item.Description</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof (SystemStatus.权限状态), item.Status)</td>
+                    <td>
+@if (item.Status == (int)SystemStatus.权限状态.启用)
+                {<button class="btn btn_ht26 btn_red forbid SY1005701"><span class="icon icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button>}
+                else
+                {<button class="btn btn_ht26 btn_blue agree SY1005701"><span class="icon  icon_check icon_white"></span><span class="m5_l">启用</span></button>}<button class="editpurview btn btn_ht26 btn_blue m10_l SY1005201"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button class="btn btn_ht26 m10_l btn_red SY1005401" onclick="doRemove(@item.SysNo)"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button></td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+
+    </table>
+</div>
+
+
+
+
+<script type="text/javascript">
+    var currentPage = @Model.CurrentPageIndex;
+    //修改弹出
+    $(".editpurview").bind("click", function () {
+        var sysNo = $(this).closest("tr").find("input:hidden").val();
+
+        UI.DialogOpen('/Sys/Privilege/' + sysNo, {
+            width: 600,
+            height: 245,
+            title: '修改权限',
+            button: [{
+                    name: '保存',
+                    callback: function() {
+                    },
+                    focus: true
+                },
+                { name: '取消' }
+            ]
+        }, false);
+    });
+    
+    function changeStatus(obj, status) {
+        var sysNo = $(obj).closest("tr").find("input:hidden").val();
+        $.ajax({
+            url: "/Sys/ChangePrivilegeStatus",
+            type: "post",
+            dataType: 'json',
+            data: { sysNo: sysNo },
+            success: function (result) {
+                if (result.Status) {
+                    UI.Prompt.Success('操作成功');
+                    doSearch(currentPage);
+                } else {
+                    var message = "操作失败";
+                    Utils.alert(message);
+                }
+            }
+        });
+    }
+
+    $(".forbid, .agree").click(function () {
+        var status = $(this).hasClass("forbid") ? 0 : 1;
+        var obj = this;
+        if (status == 0) {
+            UI.Confirm({
+                content: '确定要禁用吗?',
+                ok: function () {
+                    changeStatus(obj, status);
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+        } else {
+            UI.Confirm({
+                content: '确定要启用吗?',
+                ok: function () {
+                    changeStatus(obj, status);
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+        }
+
+    });
+    
+    function doRemove(id) {
+
+        UI.Confirm({
+            content: '确定要删吗?',
+            ok: function() {
+
+                $.ajax({
+                    url: "/Sys/RemovePrivilege/",
+                    type: "post",
+                    dataType: 'json',
+                    data: { sysNo: id },
+                    success: function(result) {
+                        if (result.Status) {
+                            UI.Prompt.Success(result.Message);
+                            doSearch(currentPage);
+                        } else {
+                            Utils.alert(result.Message);
+                        }
+                    }
+                });
+
+            },
+            cancelVal: '取消',
+            cancel: true
+        });
+
+    }
+</script>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

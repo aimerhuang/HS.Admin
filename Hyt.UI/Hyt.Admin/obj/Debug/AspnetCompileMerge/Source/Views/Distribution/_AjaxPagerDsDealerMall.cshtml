@@ -1,0 +1,74 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBDsDealerMall>
+
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+
+            <th class="align_l p10_lr">分销商</th>
+            <th width="124">商城类型</th>
+            <th class="align_l p10_lr">店铺名称</th>
+            <th width="150">店铺账号</th>
+            <th width="72">是否自营</th>
+            <th width="92">APPKEY</th>
+            <th width="46">状态</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+            foreach (Hyt.Model.Transfer.CBDsDealerMall item in Model.TData)
+            {
+            <tr>
+                <td class="blue align_l p10_lr">
+                   <a href="javascript:Look('@item.DealerSysNo');">@item.DealerName</a> 
+                </td>
+                <td>@item.MallName</td>
+                <td class="align_l p10_lr">@item.ShopName</td>
+                <td>@item.ShopAccount</td>
+                <td>@((Hyt.Model.WorkflowStatus.DistributionStatus.是否自营)item.IsSelfSupport)</td>
+                <td>@item.AppName</td>
+                <td id="status@(item.SysNo)">@((Hyt.Model.WorkflowStatus.DistributionStatus.分销商商城状态)item.Status)
+                </td>
+                <td>
+                    <button id="btnStatus@(item.SysNo)" class="btn btn_ht26 DS1006701" type="button" onclick="SetReverseStatus(@item.SysNo) ">
+                        @if (item.Status == (int)Hyt.Model.WorkflowStatus.DistributionStatus.分销商商城状态.禁用)
+                        {
+                            <span class="icon_check m5_r "></span><span>启用</span>                               
+                        }
+                        else
+                        {
+                            <span class="icon_ban_circle m5_r "></span><span>禁用</span>
+                        }
+                    </button><button class="btn btn_ht26 m10_l DS1006301" onclick="Update(@item.SysNo)" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>
+                    
+
+
+
+                </td>
+            </tr>                      
+                   
+            }
+
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+
+</script>

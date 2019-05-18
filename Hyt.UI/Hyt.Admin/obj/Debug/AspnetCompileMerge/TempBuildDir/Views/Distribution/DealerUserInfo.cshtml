@@ -1,0 +1,622 @@
+﻿@using Hyt.Admin.Controllers;
+@using Hyt.Model
+@model Hyt.Model.Transfer.CBSyUser
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "分销商账号信息";
+}
+
+@*初始化用户组*@
+@*@helper LoadUserGroup(bool selected)
+{
+    var allGroup = SysController.GetAllSyUserGroup().Where(i => i.Status == (int)Hyt.Model.WorkflowStatus.SystemStatus.用户组状态.启用);
+    if (allGroup.Count() > 0)
+    {
+        if (selected)
+        {//已选择的用户组
+            if (Model != null)
+            {//修改
+                var hasGroup = Model.GroupUsers;
+                if (hasGroup != null && hasGroup.Count > 0)
+                {
+                    foreach (var group in hasGroup)
+                    {
+                        var g = allGroup.Where(i => i.SysNo == group.GroupSysNo);
+                        if (g.Count() > 0)
+                        {
+                            <option value="@group.GroupSysNo">@g.First().GroupName</option>
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {//未选择的用户组
+            if (Model != null)
+            {
+                //修改
+                var groupUnselect = allGroup;
+                if (Model.GroupUsers != null && Model.GroupUsers.Count > 0)
+                {
+                    groupUnselect = allGroup.Where(i => Model.GroupUsers.Count(j => j.GroupSysNo == i.SysNo && i.Status == 1) == 0);
+
+                }
+                if (groupUnselect.Count() > 0)
+                {
+                    foreach (var group in groupUnselect)
+                    {
+                        <option value="@group.SysNo">@group.GroupName</option>
+                    }
+                }
+            }
+            else
+            {
+                //新增
+                foreach (var group in allGroup)
+                {
+                    <option value="@group.SysNo">@group.GroupName</option>
+                }
+            }
+        }
+    }
+}*@
+@*初始化角色*@
+@*@helper LoadRole(bool selected)
+{
+    var allRole = SysController.GetAllRole().Where(i => i.Status == (int)Hyt.Model.WorkflowStatus.SystemStatus.角色状态.启用);
+    if (allRole.Count() > 0)
+    {
+        if (selected)
+        {//已选择的角色
+            if (Model != null)
+            {//修改
+                var hasRole = Model.UserRoles;
+                if (hasRole != null && hasRole.Count > 0)
+                {
+                    foreach (var role in hasRole)
+                    {
+                        var r = allRole.Where(i => i.SysNo == role.RoleID);
+                        if (r.Count() > 0)
+                        {
+                            <option value="@role.RoleID">@r.First().RoleName</option>
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {//未选择的用户组
+            if (Model != null)
+            {
+                //修改
+                var roleUnselect = allRole;
+                if (Model.UserRoles != null && Model.UserRoles.Count > 0)
+                {
+                    roleUnselect = allRole.Where(i => Model.UserRoles.Count(j => j.RoleID == i.SysNo && i.Status == 1) == 0);
+
+                }
+                if (roleUnselect.Count() > 0)
+                {
+                    foreach (var role in roleUnselect)
+                    {
+                        <option value="@role.SysNo">@role.RoleName</option>
+                    }
+                }
+            }
+            else
+            {
+                //新增
+                foreach (var role in allRole)
+                {
+                    <option value="@role.SysNo">@role.RoleName</option>
+                }
+            }
+        }
+    }
+}*@
+@*初始化仓库*@
+@*@helper LoadWareHouse()
+{
+    var wareHouseList = ViewBag.Warehouse as IList<WhWarehouse>;
+    if (wareHouseList != null && wareHouseList.Count > 0)
+    {
+        foreach (var warehouse in wareHouseList)
+        {
+            <option value="@warehouse.SysNo">@warehouse.WarehouseName</option>
+        }
+    }
+}*@
+@section HeadCss{
+    <link href="~/Theme/Plugins/ZTree/skin.css" rel="stylesheet" type="text/css" media="all" />
+    <style type="text/css">
+        .basebox1 {
+            padding: 10px 0;
+        }
+
+            .basebox1 table tr td {
+                border-right: none !important;
+                border-bottom: none !important;
+            }
+
+        .usergroup {
+            background-color: #f5f5f5;
+            padding: 10px 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 200px;
+        }
+
+            .usergroup dl {
+                float: left;
+            }
+
+                .usergroup dl dt {
+                    margin-bottom: 5px;
+                }
+
+                .usergroup dl.operate {
+                    padding: 10px 36px 0 36px;
+                }
+
+                    .usergroup dl.operate dd {
+                        margin-top: 40px;
+                    }
+
+        .usermenu {
+            background-color: #f5f5f5;
+            padding: 10px 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 200px;
+        }
+    </style>
+}
+<form method="POST" id="form1" name="form1">
+    <div class="caseout">
+        <div class="boxs" id="tabboxs3">
+            <div class="head_tab">
+                <ul class="tabNav">
+                    <li><a>基本信息</a></li>
+                </ul>
+            </div>
+            <div class="boxs_con_c1" id="tabcon">
+                <div class="list">
+                    <div class="boxs_detail_dispay">
+                        <div class="tit_con basebox1">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lnone border_tnone">
+                                <tbody>
+                                    <tr style="display:none;">
+                                        <td>
+                                            <button class="btn btn_ht26 btn_blue" id="addEnterpriseUser" title="新增企业用户"><span class="icon_plus icon_white"></span><span class="m5_l">企业用户</span></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="display: none;"><input type="hidden" id="txtSsoId" name="SsoId" value=""/></td>
+                                        <td width="20%" class="nameright border_rnone">
+                                            <span class="v_star">*</span>用户账号
+                                            <input type="hidden" id="txtSysNo" value="@if (Model != null)
+                                                                                      { @Model.SysNo}" />
+                                        </td>
+                                        <td width="80%">
+                                            <input type="text" name="txtAccount" id="txtAccount" maxlength="30" class="wd270 m10_r" @if (Model != null) { @: value="@Model.Account" disabled="disabled"
+                                                                                                                                    } />
+                                            <span class="prompt" id="c_txtAccount">填写用户帐号</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>用户姓名</td>
+                                        <td>
+                                            <input type="text" class="wd270 m10_r" name="txtUserName" id="txtUserName" maxlength="20" value="@if (Model != null)
+                                                                                                                                             {
+                                                                                                                                                 @Model.UserName
+                                                                                                                                             }" />
+                                            <span class="prompt" id="c_txtUserName">填写用户姓名</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">Email</td>
+                                        <td>
+                                            <input type="text" class="wd270 m10_r" id="txtEmailAddress" maxlength="100" name="txtEmailAddress" value="@if (Model != null)
+                                                                                                                                                      {
+                                                                                                                                                          @Model.EmailAddress
+                                                                                                                                                      }">
+                                            <span class="prompt" id="c_txtEmailAddress">填写用户邮箱</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>手机号</td>
+                                        <td>
+                                            <input type="text" id="txtMobilePhoneNumber" maxlength="11" name="txtMobilePhoneNumber" class="wd270 m10_r" value="@if (Model != null)
+                                                                                                                                                               {
+                                                                                                                                                                   @Model.MobilePhoneNumber
+                                                                                                                                                               }" />
+                                            <span class="prompt" id="c_txtMobilePhoneNumber">填写手机号</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone" valign="top">状态</td>
+                                        <td>
+                                            <input name="UserStatus" id="radioStatusY" type="radio" value="1" class="m10_r" @if (Model != null && Model.Status == 1) { @: checked="checked"
+                                                                                                                                                                                                                                    } />
+                                            <label for="radioStatusY">启用</label>&nbsp;&nbsp;
+                                            <input name="UserStatus" id="radioStatusN" class="m10_r m10_l" type="radio" value="0" @if (Model == null || Model.Status == 0) { @: checked="checked"
+                                                                                                                                                                                                                                         } /><label for="radioStatusN"> 禁用</label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section FooterJs{
+    <script type="text/javascript" src="~/Theme/Plugins/ZTree/ZTree.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"></script>
+    <script type="text/javascript" src="~/Theme/scripts/search.js"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <!--2014-10-16 谭显锋 添加-->
+    <script type="text/javascript">
+        function setUserInfo(data) {
+            $("#txtSsoId").val(data.Id);
+            $("#txtAccount").val(data.Account).focus();
+            $("#txtUserName").val(data.UserName).focus();
+            $("#txtEmailAddress").val(data.EmailAddress).focus();
+            $("#txtMobilePhoneNumber").val(data.MobilePhoneNumber).focus();
+            $("#radioStatusY").focus();
+        }
+        //新增弹出
+        $("#addEnterpriseUser").bind("click", function () {
+            popUserInfo();
+        });
+        //弹出企业用户信息窗口
+        function popUserInfo(id) {
+            UI.DialogOpen('/Sys/SSOUserList/', {
+                width: 950,
+                height: 680,
+                title: '添加企业用户',
+
+            }, false);
+        }
+    </script>
+    <!--end-->
+    <script type="text/javascript">
+        var sysno = $("#txtSysNo").val();
+        //用户的sysno
+        var isCreateUser = Number(sysno) <= 0;
+        // true:创建用户  false:修改用户
+        if (isCreateUser == true) sysno = 0;
+
+        var histories = [];
+        //添加操作历史记录
+
+        function AddHistory(type, sysno, action) {
+            var inversionAction = (action == "add" ? "remove" : "add");
+
+            if (histories.contains(function(p) {
+                if (p.type == type && p.sysno == sysno && p.action == inversionAction) {
+                    return true;
+                }
+            })) {
+                histories = histories.del(function(p) {
+                    if (p.type == type && p.sysno == sysno && p.action == inversionAction) {
+                        return true;
+                    }
+                });
+            } else {
+                if (histories.contains(function(p) {
+                    if (p.type == type && p.sysno == sysno && p.action == action) {
+                        return true;
+                    }
+                }) == false) {
+                    histories.push({
+                        type: type,
+                        sysno: sysno,
+                        action: action
+                    });
+                }
+            }
+        }
+
+        //添加仓库
+
+        //function AddWareHouse() {
+        //    DAO.SelectWhareHouseDialog({
+        //        isAllWh:true,
+        //        chkStyle: 'checkbox',
+        //        callBack: function(data) {
+        //            if ($(data).length > 0) {
+        //                $(data).each(function(i){
+        //                    var node = $("<option value='" + this.id + "'>" + this.name + "</option>");
+        //                    if ($('#ddlWareHouse option[value="' + this.id + '"]').length == 0) {
+        //                        node.appendTo($('#ddlWareHouse'));
+        //                        if (isCreateUser == false) {
+        //                            AddHistory("UserWarehouse", this.id, "add");
+        //                        }
+        //                    }
+
+        //                });
+        //            }
+        //        }
+        //    });
+        //}
+
+        ////移除仓库权限
+
+        //function RemoveWareHouse() {
+        //    var wareHouse = $("#ddlWareHouse").find('option:selected');
+        //    if (wareHouse.length < 1) return;
+        //    wareHouse.remove();
+        //    if (isCreateUser == false) {
+        //        wareHouse.each(function(i) {
+        //            AddHistory("UserWarehouse", this.value, "remove");
+        //        });
+        //    }
+        //}
+
+        //function BindDbClick() {
+        //    $("#ddlUserGroupLeft option").dblclick(function() { RemoveUserGroup(); });
+        //    $("#ddlUserGroupRight option").dblclick(function() { AddUserGroup(); });
+        //    $("#ddlRoleLeft option").dblclick(function() { RemoveRole(); });
+        //    $("#ddlRoleRight option").dblclick(function() { AddRole(); });
+        //}
+
+        ////移除用户组
+        //function RemoveUserGroup() {
+        //    var leftNote = $("#ddlUserGroupLeft").find('option:selected');
+        //    if (leftNote.length < 1) return;
+        //    leftNote.remove().appendTo($("#ddlUserGroupRight"));
+        //    if (isCreateUser == false) {
+        //        leftNote.each(function(i) {
+        //            AddHistory("UserGroup", this.value, "remove");
+        //        });
+        //    }
+        //    $("#ddlUserGroupRight option").dblclick(function() { AddUserGroup(); });
+        //}
+
+        ////添加用户组
+        //function AddUserGroup() {
+        //    var rightNote = $("#ddlUserGroupRight").find('option:selected');
+        //    if (rightNote.length < 1) return;
+        //    rightNote.remove().appendTo($("#ddlUserGroupLeft"));
+        //    if (isCreateUser == false) {
+        //        rightNote.each(function(i) {
+        //            AddHistory("UserGroup", this.value, "add");
+        //        });
+        //    }
+        //    $("#ddlUserGroupLeft option").dblclick(function() { RemoveUserGroup(); });
+        //}
+
+        ////移除角色
+        //function RemoveRole() {
+        //    var leftNote = $("#ddlRoleLeft").find('option:selected');
+        //    if (leftNote.length < 1) return;
+        //    leftNote.remove().appendTo($("#ddlRoleRight"));
+        //    if (isCreateUser == false) {
+        //        leftNote.each(function(i) {
+        //            AddHistory("Role", this.value, "remove");
+        //        });
+        //    }
+        //    $("#ddlRoleRight option").dblclick(function() { AddRole(); });
+        //}
+
+        ////添加角色
+        //function AddRole() {
+        //    var rightNote = $("#ddlRoleRight").find('option:selected');
+        //    if (rightNote.length < 1) return;
+        //    rightNote.remove().appendTo($("#ddlRoleLeft"));
+        //    if (isCreateUser == false) {
+        //        rightNote.each(function(i) {
+        //            AddHistory("Role", this.value, "add");
+        //        });
+        //    }
+        //    $("#ddlRoleLeft option").dblclick(function() { RemoveRole(); });
+        //}
+
+
+        //tab选项卡
+        $(function() {
+            UI.Tab({
+                tabNavBox: '#tabboxs3',
+                tabContentObj: "#tabcon",
+                onActiveTab: function(index, obj) {
+                }
+            });
+            LoadMeun();
+            //BindDbClick();
+        });
+
+        //加载菜单
+        var zTreeObj;
+
+        function LoadMeun() {
+            var ztreeSetting = {
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                },
+                check: {
+                    autoCheckTrigger: true,
+                    enable: true,
+                    chkboxType: { "Y": "p", "N": "ps" }
+                },
+                callback: {
+                    onCheck: onCheck
+                }
+            };
+            $.ajax({
+                url: '/Sys/GetTreeListByUser/@(Model == null ? "" : Model.SysNo.ToString())',
+                success: function(response) {
+                    if (response != null) {
+                        zTreeObj = UI.ZTree.init($("#treeMenu"), ztreeSetting, response);
+                    }
+                }
+            });
+        }
+
+        function onCheck(event, treeId, treeNode) {
+            if (isCreateUser == false) {
+                if (treeNode.nodetype == 0) {
+                    //菜单
+                    AddHistory("Menu", treeNode.id.replace("m_", ""), treeNode.checked ? "add" : "remove");
+                } else {
+                    //权限
+                    AddHistory("Privilege", treeNode.id.replace("p_", ""), treeNode.checked ? "add" : "remove");
+
+                }
+            }
+        }
+
+        function Save(win) {
+            var ssoId = $("#txtSsoId").val();
+            var user = {
+                SysNo: sysno,
+                Account: $("#txtAccount").val(),
+                UserName: $("#txtUserName").val(),
+                MobilePhoneNumber: $("#txtMobilePhoneNumber").val(),
+                EmailAddress: $("#txtEmailAddress").val(),
+                Status: $("input[name='UserStatus'][type='radio']:checked").val()
+            };
+            if (isCreateUser == true) {
+                $("#ddlUserGroupLeft option").each(function() {
+                    AddHistory("UserGroup", $(this).attr("value"), "add");
+                });
+                $("#ddlWareHouse option").each(function() {
+                    AddHistory("UserWarehouse", $(this).attr("value"), "add");
+                });
+                $("#ddlRoleLeft option").each(function() {
+                    AddHistory("Role", $(this).attr("value"), "add");
+                });
+
+                //var nodes = zTreeObj.getCheckedNodes(true);
+
+                //for (var i = 0; i < nodes.length; i++) {
+                //    var node = nodes[i];
+                //    if (node.nodetype == 0) {
+                //        AddHistory("Menu", node.id.replace("m_", ""), "add");
+                //    } else {
+                //        AddHistory("Privilege", node.id.replace("p_", ""), "add");
+                //    }
+                //}
+            }
+            //用户不能同时在分销商组(13)和代理商组(4)里面 2016-3-22 王耀发 创建
+            var GroupAgentSysNo = 0;
+            var GroupDealerSysNo = 0;
+            $("#ddlUserGroupLeft").find('option').each(function(){
+                if($(this).val() == 4){
+                    GroupAgentSysNo = 4;
+                }
+                if($(this).val() == 13){
+                    GroupDealerSysNo = 13;
+                }
+            });
+            if(GroupAgentSysNo == 4 && GroupDealerSysNo == 13){
+                UI.Alert({ content: '用户不能同时在代理商和分销商组中' });
+                return false;
+            }
+
+            $.ajax({
+                url: '/Distribution/SaveDealerUser',
+                type: 'post',
+                cache: false,
+                data: JSON.stringify({ syUser: user, histories: histories,ssoId:ssoId }),
+                dataType: "json",
+                contentType: 'application/json; charset=utf-8',
+                success: function(result) {
+                    if (result.Status) {
+                        if (win.Refresh != null) {
+                            win.Refresh("操作成功", @ViewBag.Page);
+                        }
+                        UI.CloseDialog();
+                    } else {
+                        UI.Alert({
+                            content: result.Message
+                        });
+                    }
+                }
+            });
+        }
+
+        (function() {
+            var parent = artDialog.open.origin, // 父页面window对象
+                api = art.dialog.open.api; // 			art.dialog.open扩展方法
+            if (!api) return;
+            // 自定义按钮
+            api.button(
+                {
+                    name: '保存',
+                    callback: function() {
+                        if (!$("#form1").valid()) {
+                            $(".tabNav li:first").click();
+                            return false;
+                        }
+                        var $iframe = this.iframe.contentWindow;
+                        $iframe.Save(parent);
+                        return false;
+                    },
+                    focus: true
+                },
+                {
+                    name: '取消'
+                }
+            );
+        })();
+        $(document).ready(function(e) {
+            $("#form1").ajaxLoadingMask(true);
+            LoadRule();
+        });
+
+        var setting;
+        //加载验证规则
+        function LoadRule() {
+            setting = $("#form1").validate({
+                onclick: false,
+                onkeyup: false,
+                rules: {
+                    txtAccount: {
+                        required: true,
+                        maxlength: 30,
+                        remote: {
+                            type: "get",
+                            url: "/Sys/GetSyUser",
+                            data: {
+                                account: function() {
+                                    return $("#txtAccount").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function(data, type) {
+                                if (data == 'true') {
+                                    $('#c_txtAccount').text('填写用户帐号');
+                                } else {
+                                    $('#c_txtAccount').text('帐号已注册').delay(3000).show(function() {
+                                        $(this).text('填写用户帐号').css('display', 'inline');
+                                    });
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    txtUserName: { required: true, maxlength: 20 },
+                    txtEmailAddress: { email: true, maxlength: 100 },
+                    txtMobilePhoneNumber: { required: true, isMobile: true, maxlength: 11 }
+                },
+                errorPlacement: function(error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error');
+                },
+                success: function(label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success');
+                },
+                ignore: ""
+            });
+        }
+
+    </script>
+}

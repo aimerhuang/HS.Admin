@@ -1,0 +1,47 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<Hyt.Model.CBCrExperienceCoinLog>
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone">
+    <thead>
+        <tr>
+            <th>变更类型</th>
+            <th width="85">增加惠源币</th>
+            <th width="85">减少惠源币</th>
+            <th width="124">变更时间</th>
+            <th width="60">变更人</th>
+            <th width="79">操作</th>
+        </tr>
+    </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            if (Model.TotalItemCount > 0)
+            {
+                foreach (var item in Model.TData)
+                {
+            <tr>
+                <td class="align_c">@EnumUtil.GetDescription(typeof(CustomerStatus.惠源币变更类型), item.ChangeType)</td>
+                <td class="align_c">@item.Increased</td>
+                <td class="align_c">@item.Decreased</td>
+                <td class="align_c">@(item.ChangeDate.ToString("yyyy-MM-dd HH:mm"))</td>
+                <td class="align_c">@item.CreatedByName</td>
+                <td class="align_c">
+                    <button onclick="CrLevelLogDetail(@item.SysNo)" type="button" class="btn btn_ht26" title="查看"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+                </td>
+            </tr>
+                }
+
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+<div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+

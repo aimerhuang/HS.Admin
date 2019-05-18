@@ -1,0 +1,313 @@
+﻿ @using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model IList<Hyt.Model.PdProductImage>
+
+<ul id="ul clearfix">
+    @{
+        int i = 1;    
+    foreach (var item in Model)
+    {
+        if (string.IsNullOrEmpty(item.ImageUrl))
+        {
+            continue;
+        }
+        <li class="li" displayOrder="@i" sysNo="@item.SysNo">
+            <div class="arrow_lf"></div>
+            <div class="arrow_rf"></div>
+            <a><img src="@Hyt.BLL.Web.ProductImageBo.Instance.GetProductImagePath(item.ImageUrl,Hyt.BLL.Web.ProductThumbnailType.Big)" ImageUrl="@item.ImageUrl" isHome="@item.Status"  width="140" height="140" /></a>
+            <div class="name">
+                <button id="ImageIsHome" class="btn btn_blue btn_ht26 m5_r" onclick="setImageIsHome(this)">设为封面</button>
+                <button class="btn btn_red btn_ht26" onclick="ImageDel(this,@item.SysNo)">删除</button>
+            </div>
+            @if (item.Status == 1)
+            {
+                <span class="pic_cover"></span>
+            }
+        </li>
+        i++;
+    }
+}
+        <li><a><img id="addpic" src="../Theme/images/addpic.png" width="140" height="140" /></a></li>
+</ul>
+<script type="text/javascript">
+    var BaseFolder = "@ViewBag.BaseFolder";
+    var ImageServer = "@ViewBag.ImageServer";
+    var picobjli;
+
+    //不相等设置true
+    var isCoverChange = false;
+    var isNo = false;
+    var coverImagePath = "";
+    var delFiles = [];
+    
+    var coverImage = "";
+    //从隐藏文本域中取出商品系统编号
+    productSysNo = ($("#hdf_ProductSysNo").val().length > 0) ? parseInt($("#hdf_ProductSysNo").val()) : 0;
+    function setImageIsHome(obj) {
+        var result = new Array();
+        
+        var imageUrl = $(obj).parent().parent().find('img').attr('ImageUrl').replace(ImageServer, "");
+        //当isCoverChange为false时，及第一次查找封面
+        if (!isCoverChange) {
+            $(".pic_box>ul>li.li").each(function (index, element) {
+                if ($(this).find("img").attr("ishome") == 1) {
+                    coverImage = $(this).find("img").attr("ImageUrl").replace(ImageServer, "");
+                }
+            });
+            if (coverImage == "") {
+                isNo = true;
+                coverImage = imageUrl;
+            }
+        }
+        if (isNo) {
+            coverImagePath = imageUrl;
+        } else {
+            if (coverImagePath == "") {
+                coverImagePath = coverImage;
+                coverImage = "";
+            } else if (coverImagePath != coverImage) {
+                isCoverChange = true;
+                coverImage = "";
+            }
+        }
+
+        //取消封面
+        $(".pic_box>ul>li.li").each(function (index, element) {
+            $(this).find(".pic_cover").remove();
+            $(this).find("img").attr("isHome", "0");
+        });
+
+
+
+        //设置封面
+        var json = {};
+        json.SysNo = $(obj).parents("li").attr("sysNO");
+        json.ProductSysNo = productSysNo;//productSysNo
+        json.ImageUrl = imageUrl;
+        result.push(json);
+        
+
+        $.ajax({
+            url: "/Product/ProductImagesInfoSetHome",
+            data: JSON.stringify({ images: result }),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data.result.Status) {
+                    $(obj).parent().parent().append('<span class="pic_cover"></span>');
+                    $(obj).parent().parent().find("img").attr("isHome", "1");
+                    delFiles.length = 0;
+                    UI.tips.tip_alert('tips_shrot tips_success', data.result.Message);
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_warning', data.result.Message);
+                }
+            }
+        });
+    }
+
+    $(function () {
+        //商品图片JS
+        var index = 0;
+        $(document).ready(function (e) {
+            
+            if (isReadOnly) {
+                $("button").remove();
+            }
+
+            picobjli = $(".pic_box>ul>li");
+            //隐藏按钮方法
+            function BtnHideEvent(obj) {
+                obj.children("div").hide();
+            }
+            //显示隐藏
+            picobjli.bind("mouseover", function () {
+                $(this).children("div").show();
+            }).bind("mouseout", function () {
+                BtnHideEvent($(this));
+            });
+            //向左移
+            picobjli.children(".arrow_lf").bind("click", function () {
+
+                if (isReadOnly) {
+                    return;
+                }
+                if ($(this).parents("li").prev().length != 0) {
+                    //编号
+                    var prevNo = $(this).parents("li").prev().attr("sysNO");
+                    var currNo = $(this).parents("li").attr("sysNO");
+                    //获取当前索引和上一张索引
+                    var prev = $(this).parents("li").prev().attr("displayOrder");
+                    var curr = $(this).parents("li").attr("displayOrder");
+                    //互换索引
+                    $(this).parents("li").prev().attr("displayOrder", curr);
+                    $(this).parents("li").attr("displayOrder", prev);
+                    
+                    //上一个实体
+                    var result = new Array();
+                    var json = {};
+                    json.SysNo = prevNo;
+                    json.DisplayOrder = curr;
+                    result.push(json);
+                    
+                    json = {};
+                    json.SysNo = currNo;
+                    json.DisplayOrder = prev;
+                    result.push(json);
+                    //提交数据
+                    $.ajax({
+                        url: "/Product/ProductImagesInfoDisplayOrder/",
+                        data: JSON.stringify({ images: result}),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.result) {
+                                UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                            }
+                        }
+                    });
+
+                    $(this).parents("li").prev().before($(this).parents("li"));
+                    BtnHideEvent($(this).parents("li"));
+                }
+            });
+            //向右移
+            picobjli.children(".arrow_rf").bind("click", function () {
+                
+                if (isReadOnly) {
+                    return;
+                }
+
+                if ($(this).parents("li").next().next().length != 0) {
+                    //编号
+                    var nextNo = $(this).parents("li").next().attr("sysNO");
+                    var currNo = $(this).parents("li").attr("sysNO");
+                    //获取当前索引和下一张索引
+                    var next = $(this).parents("li").next().attr("displayOrder");
+                    var curr = $(this).parents("li").attr("displayOrder");
+                    //互换索引
+                    $(this).parents("li").next().attr("displayOrder", curr);
+                    $(this).parents("li").attr("displayOrder", next);
+                    
+                    //实体
+                    var result = new Array();
+                    var json = {};
+                    json.SysNo = nextNo;
+                    json.DisplayOrder = curr;
+                    result.push(json);
+                    
+                    json = {};
+                    json.SysNo = currNo;
+                    json.DisplayOrder = next;
+                    result.push(json);
+
+                    //提交数据
+                    $.ajax({
+                        url: "/Product/ProductImagesInfoDisplayOrder/",
+                        data: JSON.stringify({ images: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.result) {
+                                UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                            }
+                        }
+                    });
+
+                    $(this).parents("li").next().after($(this).parents("li"));
+                    BtnHideEvent($(this).parents("li"));
+                }
+            });
+            //上传图片
+            $("img#addpic").click(function () {
+                
+                if (isReadOnly) {
+                    return;
+                }
+
+                if (picobjli.length < 6) {
+                    DAO.Upload({
+                        config: '@(Hyt.Model.SystemPredefined.UploadConfigAlias.ProductImageConfigAlias)',
+                        callback: function (data) {
+                            var result = [];
+                            for (var i = 0; i < data.length; i++) {
+                                if (data[i].url != "") {
+                                    var json = {};
+                                    json.ProductSysNo = productSysNo;
+                                    json.ImageUrl = data[i].url;
+                                    result.push(json);
+                                }
+
+                            }
+                            $.ajax({
+                                url: "/Product/ProductImagesInfoAdd/",
+                                data: JSON.stringify({ images: result}),
+                                dataType: "json",
+                                type: "POST",
+                                cache: false,
+                                contentType: 'application/json; charset=utf-8',
+                                success: function (res) {
+                                    if (res.result) {
+                                        UI.tips.tip_alert('tips_shrot tips_success', res.info);
+                                        $.get('/Product/ProductImagesInfo/?' + Math.random(), { productSysno: productSysNo }, function (data) {
+                                            $(".pic_box").attr("init", true);
+                                            $(".pic_box").html("");
+                                            $(".pic_box").html(data);
+                                        });
+                                    }
+                                }
+                            });
+
+                            picobjli = $(".pic_box>ul>li");
+                            //隐藏按钮方法
+
+                            function BtnHideEvent(obj) {
+                                obj.children("div").hide();
+                            }
+
+                            //显示隐藏
+                            picobjli.bind("mouseover", function() {
+                                $(this).children("div").show();
+                            }).bind("mouseout", function() {
+                                BtnHideEvent($(this));
+                            });
+                        }
+                    });
+                } else {
+                    UI.Alert({ content: '商品图片最多添加5张图片！' });
+                }
+            });
+        });
+    });
+    //删除图片
+    function ImageDel(obj, sysNo) {
+        var result = new Array();
+        
+        var json = {};
+        json.ProductSysNo = productSysNo;
+        json.ImageUrl = $(obj).parent().parent().find("img").attr("ImageUrl").replace(ImageServer, "");
+        result.push(json);
+        $.ajax({
+            url: "/Product/ProductImagesInfoDel/?productImageSysNo=" + sysNo,
+            data: JSON.stringify({ images: result, productImageSysNo: sysNo }),
+            dataType: "json",
+            type: "POST",
+            cache: false,
+            contentType: 'application/json; charset=utf-8',
+            success: function (data) {
+                if (data.result) {
+                    delFiles.length = 0;
+                    $(obj).parent().parent().remove();
+                    picobjli = $(".pic_box>ul>li");
+                    UI.tips.tip_alert('tips_shrot tips_success', data.info);
+                }
+            }
+        });
+    }
+</script>

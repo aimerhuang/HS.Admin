@@ -1,0 +1,167 @@
+﻿@{
+    ViewBag.Title = "会员返利统计报表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>会员返利统计报表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="veralign_t fl">代理商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="agentSysNo"></select>
+                        </div>
+
+                        <span class="veralign_t fl">分销商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="dealerSysNo"></select>
+                        </div>
+                        <span class="veralign_t fl">返利日期</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")" class="input_ht26" onclick="UI.Date({ el: 'BeginDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" id="BeginDate" name="">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'BeginDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" type="button"><span class="icon_calendar"></span></button>
+                        </div>
+                        <span class="veralign_t fl">到</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")" class="input_ht26" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" id="EndDate" name="">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd HH:mm:ss' })" type="button"><span class="icon_calendar"></span></button>
+                        </div>
+                        <div class="search_btn m10_l fl wd270">
+                            <input name="" type="text" class="input_ht28 wd240" id="Condition" value="搜索订单ID、返利人账号、返利人名称..." title="搜索订单ID、返利人账号、返利人名称..." maxlength="25" />
+                            <button class="btn btn_ht28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button type="button" id="btnExport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon icon_share icon_white"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                </div>
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //选中的记录SysNo列项
+    var checkedsysnolist = [];
+
+    $(document).ready(function () {
+        $("#Condition").defaultValue("搜索订单ID、返利人账号、返利人名称...");
+
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $("#agentSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+
+        $("#dealerSysNo").change(function () {
+            doSearch();
+        });
+
+    });
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    //列表数据显示
+    function doSearch() {
+        checkedsysnolist = [];
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Report/DoRebatesRecordQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("SelectedAgentSysNo", $("#agentSysNo").val());
+            p.setParams("SelectedDealerSysNo", $("#dealerSysNo").val());
+            p.setParams("BeginDate", $("#BeginDate").val());
+            p.setParams("EndDate", $("#EndDate").val());
+            if ($("#Condition").val() != "搜索订单ID、返利人账号、返利人名称...") {
+                p.setParams("Condition", $("#Condition").val());
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    function GetDealersListByCreatedBy(DealerCreatedBy) {
+        $("#dealerSysNo").html("");
+        if (DealerCreatedBy != -1) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                doSearch();
+            });
+        } else {
+            $("#dealerSysNo").append("<option value='-1'>全部</option>");
+            doSearch();
+        }
+    }
+    Array.prototype.indexOf = function (val) {
+        for (var i = 0; i < this.length; i++) {
+            if ($.trim(this[i]) == $.trim(val)) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function (val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("checked") != "checked") {
+                    $(this).attr("checked", "checked");
+                    checkedsysnolist.push($(this).val());
+                }
+            });
+        } else {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("checked") == "checked") {
+                    $(this).removeAttr("checked");
+                    checkedsysnolist.remove($(this).val());
+                }
+            });
+        }
+    });
+
+    $("#paging table tbody input:checkbox").live('click', function () {
+        if ($(this).attr("checked")) {
+            checkedsysnolist.push($(this).val());
+        } else {
+            checkedsysnolist.remove($(this).val());
+        }
+    });
+
+    //导出商品 王耀发 2016-2-4 创建 不勾选导出全部分销商
+    $('#btnExport').click(function () {
+        var recordSysNos = checkedsysnolist;
+        var condition = "";
+        if ($("#Condition").val() != "搜索订单ID、返利人账号、返利人名称...") {
+            condition = $("#Condition").val();
+        }
+        window.location = '@Url.Action("ExportRebatesRecord")' + "?SelectedAgentSysNo=" + $("#agentSysNo").val() + "&SelectedDealerSysNo=" + $("#dealerSysNo").val() + "&recordSysNos=" + JSON.stringify(recordSysNos) + "&BeginDate=" + $("#BeginDate").val() + "&EndDate=" + $("#EndDate").val() + "&Condition=" + condition;
+        Utils.MaskStop();
+    });
+
+</script>
+

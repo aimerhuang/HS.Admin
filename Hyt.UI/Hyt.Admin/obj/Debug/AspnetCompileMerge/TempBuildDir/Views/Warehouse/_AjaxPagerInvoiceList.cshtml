@@ -1,0 +1,211 @@
+﻿@using Hyt.BLL.Order
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<CBFnInvoice>
+@Html.PrivilegeControl(PrivilegeCode.FN1001301, ".FN1001301")
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th class="wd75">订单编号</th>
+                <th class="align_l p10_lr">发票代码</th>
+                <th class="align_l p10_lr">发票号码</th>
+                <th class="align_l p10_lr">发票抬头</th>
+                <th class="wd100">金额</th>
+                <th width="70">状态</th>
+                <th width="104">发票类型</th>
+                <th width="116">开票时间</th>
+                <th width="67">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData != null && Model.TData.Any())
+                {
+                    foreach (var item in (List<CBFnInvoice>)Model.TData)
+                    {
+                        var createDate = item.Status == FinanceStatus.发票状态.已开票.GetHashCode() ? item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm") : "";
+                        var order = SoOrderBo.Instance.GetByTransactionSysNo(item.TransactionSysNo);
+                <tr>
+                    <td class="blue">
+                        @{
+                        if (order != null)
+                        {
+                            <a onclick="ShowInfo(@order.SysNo) ">@order.SysNo</a>
+                        }
+                        else
+                        {
+                            <span>找不到订单</span>
+                        }
+                        }
+                    </td>
+                    <td class="align_l p10_lr">@item.InvoiceCode</td>
+                    <td class="align_l p10_lr">@item.InvoiceNo</td>
+                    <td class="align_l p10_lr">@item.InvoiceTitle</td>
+                    <td class="red p10_r align_r">
+                        @if (item.InvoiceAmount <= decimal.Zero && order != null)
+                        {
+                            @order.CashPay.ToString("C")
+                        }
+                        else
+                        {
+                            @item.InvoiceAmount.ToString("C")
+                        }
+                    </td>
+                    <td>
+                        @if (item.Status <= 0)
+                        {
+                            <span>未申请发票</span>
+                        }
+                        else
+                        {
+                            @((FinanceStatus.发票状态)item.Status)
+                        }
+                    </td>
+                    <td>
+                        @{
+                        var invoiceType = FnInvoiceTypeBo.Instance.GetModel(item.InvoiceTypeSysNo);
+                        if (invoiceType != null)
+                        {
+                            @invoiceType.Name
+                        }
+                        }
+                    </td>
+                    <td>@createDate</td>
+                    <td>
+                        @if (order != null)
+                        {
+                            if (item.Status == FinanceStatus.发票状态.已开票.GetHashCode())
+                            {
+                            <button class="btn btn_ht26 btn_red FN1001301" type="button" onclick="InvoiceEdit(@order.SysNo)" ><span>重开</span></button>
+                            }
+                            else
+                            {
+                            <button class="btn btn_ht26 btn_blue FN1001301" type="button" onclick=" InvoiceEdit(@order.SysNo)" ><span>开票</span></button>
+                            }
+                        }
+                    </td>
+                </tr>
+                    }
+                }
+                else
+                {
+                <tr>
+                    <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+    });
+
+    //显示订单及发票信息
+
+    function ShowInfo(sysno) {
+        UI.DialogOpen('/Order/OrderView?id=' + sysno + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+
+    function InvoiceEdit(orderSysNo) {
+        if (status == -10) {
+            return;
+        }
+
+        var url = '@Url.Action("InvoiceEdit")' + '/' + orderSysNo;
+        UI.DialogOpen(url, {
+            title: '开具发票',
+            width: 930,
+            height: 243,
+            resize: false,
+            init: function () {
+                this.button({
+                    name: "开票",
+                    focus: true,
+                    callback: function () {
+                        var iframe = this.iframe.contentWindow;
+
+                        if (!iframe.document.body) {
+                            UI.Alert({
+                                content: '数据加载中,请稍等.'
+                            });
+                            return false;
+                        }
+
+                        iframe.updateInvoice();
+                        return false;
+                    }
+                },
+                    { name: "关闭" });
+            }
+        }, false);
+    }
+
+    //打印拣货单
+
+    function PickUpOrderPrint(sysno, status) {
+        if (status == -10) {
+            return;
+        }
+        var url = '/Print/PrintPicking/' + sysno;
+        UI.DialogOpen(url, {
+            title: '打印拣货单', time: 2, init: function () {
+                if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                    this.iframe.contentWindow.location.reload();
+                }
+            }
+        }, false);
+
+    }
+
+    function showDialogBox(msg) {
+        UI.Alert({
+            content: msg,
+            callback: function () {
+                window.location.reload();
+            },
+            width: '200px'
+        });
+    }
+
+    function Cancel(sysno, status) {
+        if (status < 0) {
+            return;
+        }
+
+        UI.Confirm({
+            content: '您确认要作废该发票吗？',
+            padding: '10px 20px',
+            ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Warehouse/CancelInvoice/",
+                    data: { sysno: sysno },
+                    chche: false,
+                    success: function (ret) {
+                        if (ret.StatusCode == 0) {
+                            showDialogBox('成功作废发票。');
+                        } else {
+                            showDialogBox(ret.Message);
+                        }
+                    },
+                    error: function () {
+                        showDialogBox('操作出错,请稍候再试!');
+                    }
+                });
+                return false;
+            },
+            cancelVal: '关闭',
+            cancel: true
+        });
+    }
+
+</script>
+

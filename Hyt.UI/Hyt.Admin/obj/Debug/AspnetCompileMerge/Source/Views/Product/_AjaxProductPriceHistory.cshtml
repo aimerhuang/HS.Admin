@@ -1,0 +1,84 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBPdPriceHistory>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th style="width: 100px;">商品编号</th>
+            <th>后台显示名称</th>
+            <th style="width: 120px;">原价格</th>
+            <th style="width: 120px;">申请价格</th>
+            <th style="width: 124px;">申请时间</th>
+            <th style="width: 60px;">申请人</th>
+            <th style="width: 72px;">审批状态</th>
+            <th style="width: 79px;" class="border_rnone">操作</th>
+        </tr>
+    </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            const int pending = (int)ProductStatus.产品价格变更状态.待审;
+            if (Model.TotalItemCount > 0)
+            {
+                var row = 1;
+                var cs = string.Empty;
+                var list = PdPriceBo.Instance.GetPriceTypeItems();
+                var dataList = Model.TData;
+                var codeList = (from m in dataList group m by m.RelationCode into g select new { RelationCode = g.Key }).ToList();
+                var tdApply = string.Empty;
+                var tdOriginal = string.Empty;
+                foreach (var i in codeList)
+                {
+                    cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                    var items = (from m in dataList where m.RelationCode == i.RelationCode select m).ToList();
+                    var erpCode = items[0].ErpCode;
+                    var productName = items[0].ProductName;
+                    var applyDate = items[0].ApplyDate.ToString("yyyy-MM-dd HH:mm");
+                    var applyName = items[0].ApplyName;
+                    var status = items[0].Status;
+                    
+                    foreach (var item in items)
+                    {
+                        var str = PdPriceBo.Instance.GetPriceTypeName(list, item.PriceSource, item.SourceSysNo) + ":";
+                        tdApply = tdApply + str + "<span class=\"red\">¥" + item.ApplyPrice + "</span><br/>";
+                        tdOriginal = tdOriginal + str + "<span class=\"red\">¥" + item.OriginalPrice + "</span><br/>";
+                    }
+            <tr class="@cs">
+                <td>@erpCode</td>
+                <td class="align_l p10_l">@productName</td>
+                <td class="align_l p10_l p5_t p5_b">@Html.Raw(tdOriginal)</td>
+                <td class="align_l p10_l p5_t p5_b">@Html.Raw(tdApply)</td>
+                <td>@applyDate</td>
+                <td>@applyName</td>
+                <td>@EnumUtil.GetDescription(typeof(ProductStatus.产品价格变更状态), status)</td>
+                <td>
+                    @if (status == pending)
+                    {
+                        <button type="button" class="btn btn_ht26 btn_blue PD1003601" title="审核" onclick=" audit('@items[0].RelationCode', @items[0].Status) "><span class="icon_white icon_audit"></span><span class="m5_l">审核</span></button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn_ht26 btn_blue" title="查看" onclick=" audit('@items[0].RelationCode', @items[0].Status) "><span class="icon_white icon_eye_open"></span><span class="m5_l">查看</span></button>
+                    }
+                </td>
+            </tr>
+                    tdApply = string.Empty;
+                    tdOriginal = string.Empty;
+                    row++;
+                }
+
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="8">暂无数据</td>
+            </tr>
+            }
+          
+        }
+    </tbody>
+</table>
+
+@{ Html.RenderPartial("_UrlPaging", Model); }

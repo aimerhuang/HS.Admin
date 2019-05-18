@@ -1,0 +1,45 @@
+﻿@{
+    ViewBag.Title = "选择优惠券";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<div class="caseout">
+    <!--绑定优惠券-->
+    <div class="boxs_listtabel">
+        <div class="boxs_tool boxs_toolbgnone p0">
+            <!--搜索开始-->
+            <div class="right_tool clearfix" style="float: none;">
+                <span class="fl">优惠券</span>
+                <input id="description" name="description" type="text" class="input_ht28 fl m10_l" maxlength="20"  value="优惠券描述..">
+                <button class="btn btn_ht28 fl m10_l" title="搜索" type="button" id="btnSearch"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+            </div>
+            <!--搜索结束-->
+        </div>
+        <div class="boxs_detail border_lnone " id="paging">
+        </div>
+    </div>
+</div>
+
+<script  lang="javascript" type="text/javascript">
+    $(document).ready(function (e) {
+        $("#description").defaultValue("优惠券描述..");
+        dosearch(1);
+        $("#btnSearch").click(function () {
+            dosearch(1);
+        });
+    });
+    function dosearch(id) {
+        var str;
+        if ($("#description").val() != "优惠券描述..") {
+            str = $.trim($("#description").val());
+        }
+        $.get("/Promotion/_SelectCardCoupon?r=" + Math.random(),
+            { id: id, description: str },
+            function (data) {
+                $('#paging').html(data);
+            });
+    }
+ 
+</script>

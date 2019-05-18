@@ -1,0 +1,309 @@
+﻿@model Hyt.Model.UnAdvertisement
+@using Hyt.BLL.Product
+@using Hyt.Model.WorkflowStatus
+@{
+    ViewBag.Title = "修改联盟广告";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/TableBind/TableBind.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript">
+        $(function() {
+            $("#advertisement_form").validate({
+                rules: {
+                    UnionSiteSysNo: { required: true },
+                    AdvertisementType: { required: true },
+                    AccessUrl: { required: true, url: true },
+                    Status: { required: true }
+                },
+                messages: {
+                                                                                                    
+                },
+                errorPlacement: function(error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l');
+                },
+                success: function(span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            $("#UnionSiteSysNo,#Status,#AdvertisementType").addClass("10_r wd180");
+            $("#btnAdd,#product_list").hide();
+            checkCPS($("#AdvertisementType").val());
+
+            $("#AdvertisementType").change(function() {
+                var val = $(this).val();
+                checkCPS(val);
+            });
+
+            $("#btnAdd").click(function() {
+                var products = getProducts();
+                DAO.SelectProduct({
+                    selectedProducts: products,
+                    onselect: function(result) {
+                        if (result) {
+                            for (var i = 0; i < result.length; i++) {
+                                var item = result[i];
+                                if (item) {
+                                    if (!isProductAdd(item.pid)) {
+                                        var product = { ProductSysNo: item.pid, Status: @UnionStatus.CPS商品状态.启用.GetHashCode() };
+                                        Products.push(product);
+                                        var str = "<tr>";
+                                        str += "<td class='border_lnone'>" + item.pid + "</td>";
+                                        str += "<td class='align_l p10_lr'>" + item.name + "</td>";
+                                        str += "<td><span id='status_" + item.pid + "'>启用</td>";
+                                        str += "<td><button class='btn btn_ht26 btn_red' name='remove' type='button' title='删除' data-id='" + item.pid + "'><span class='icon_trash icon_white'></span></button></td>";
+                                        str += "</tr>";
+                                        $("#item_body").append(str);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            });
+            $("#item_body").delegate("button[name='remove']", "click", function(e) {
+                var id = $(this).attr("data-id");
+
+                UI.Confirm({
+                    content: "确定删除该商品吗？",
+                    cancel: true,
+                    ok: function() {
+                        deleteProduct(id);
+                        $(e.target).parents("tr").remove();
+                    }
+                });
+            });
+            $("#item_body").delegate("button[type='button']", "click", function(e) {
+                var s = @UnionStatus.CPS商品状态.启用.GetHashCode();
+                var id = $(this).attr("data-id");
+                var product = getProduct(id);
+                if (product) {
+                    var msg, classname, stauts, title;
+                    //不是启用状态
+                    if (s != product.Status) {
+                        msg = "确定启用该商品吗";
+                        title = "启用";
+                        classname = "icon_ban_circle";
+                        stauts = s;
+                    } else {
+                        msg = "确定禁用该商品吗";
+                        title = "禁用";
+                        classname = "icon_check";
+                        stauts = @UnionStatus.CPS商品状态.禁用.GetHashCode();
+                    }
+                    UI.Confirm({
+                        content: msg,
+                        cancel: true,
+                        ok: function() {
+                            $("#status_" + product.ProductSysNo).text(title);
+                            $("#span_" + product.ProductSysNo).addClass(classname);
+                            changeProductStatus(id, stauts);
+                            //$(e.target).parents("tr").remove();
+                        }
+                    });
+                }
+            });
+
+            var content = @Html.Raw(ViewBag.ItemList);
+            if (content) {
+                $.each(content, function(i, item) {
+                    Products.push(item);
+                });
+            }
+        });
+
+        var cps = @UnionStatus.联盟广告类型.CPS.GetHashCode();
+        var Products = [];
+
+        //检查商品是否已修改(已修改：true；未修改：false)
+
+        function isProductAdd(/*待修改商品编号*/productSysno) {
+            var len = Products.length;
+            for (var i = 0; i < len; i++) {
+                if (Products[i].ProductSysNo == productSysno) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function getProducts() {
+            var data = [];
+            $.each(Products, function(i, item) {
+                data.push(item.ProductSysNo);
+            });
+            return data;
+        }
+
+        function getProduct(productSysno) {
+            var len = Products.length;
+            for (var i = 0; i < len; i++) {
+                if (Products[i].ProductSysNo == productSysno) {
+                    return Products[i];
+                }
+            }
+            return null;
+        }
+
+        //指定的商品状态变更
+
+        function changeProductStatus(/*商品系统编号*/productSysno, status) {
+            var len = Products.length;
+            for (var i = 0; i < len; i++) {
+                if (Products[i].ProductSysNo == productSysno) {
+                    Products[i].Status = status;
+                    break;
+                }
+            }
+        }
+
+        //删除指定的商品
+        function deleteProduct(/*商品系统编号*/sysno) {
+            var len = Products.length;
+            for (var i = 0; i < len; i++) {
+                if (Products[i].ProductSysNo == sysno) {
+                    Products.splice(i, 1);
+                    break;
+                }
+            }
+        }
+
+        function checkCPS(val) {
+            if (cps == val) {
+                $("#btnAdd,#product_list").show();
+            } else {
+                $("#btnAdd,#product_list").hide();
+            }
+        }
+
+        function submitAdvertisement() {
+            if ($("#advertisement_form").valid()) {
+                UI.Confirm({
+                    content: '您确定要修改联盟广告吗？',
+                    ok: function() {
+                        var model = $("#advertisement_form").JsonBind();
+                        model.Status = $("#Status").val();
+                        model.UnionSiteSysNo = $("#UnionSiteSysNo").val();
+                        model.AdvertisementType = $("#AdvertisementType").val();
+                        model.ItemList = Products;
+                        if (model) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("AdvertisementEdit", "Union")",
+                                data: JSON.stringify(model),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function(ret) {
+                                    mask.Remove();
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('联盟广告修改成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function() {
+                                    mask.Remove();
+                                }
+                            });
+                        } else {
+                            UI.Alert({ content: '数据错据,请检查重试!' });
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+<form id="advertisement_form" action="@Url.Action("AdvertisementEdit")" method="post" onsubmit="return false;">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td width="60" class="nameright border_lnone"><span class="v_star">*</span>联盟网站</td>
+                        <td class="border_right">
+                            @Html.DropDownList("UnionSiteSysNo")
+                            <span class="prompt">请选择联盟网站</span>
+                            <input id="SysNo" dn="SysNo" value="@Model.SysNo" type="hidden" />
+                        </td>
+                        <td class="nameright" width="80"><span class="v_star">*</span>状态</td>
+                        <td>
+                            @Html.DropDownList("Status")
+                            <span class="prompt">请选择状态</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone" width="80"><span class="v_star">*</span>有效访问Url</td>
+                        <td colspan="3">
+                            <input type="text" id="AccessUrl" name="AccessUrl" dn="AccessUrl" maxlength="50" class="wd300 m10_r" value="@Model.AccessUrl">
+                            <span class="prompt">请填写有效访问Url　例如:（http://127.0.0.1/product/details/）</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone"><span class="v_star">*</span>联盟通知代码</td>
+                        <td class="border_right" colspan="3">
+                            <textarea id="NotificationCode" name="NotificationCode" dn="NotificationCode" class="wd300 m10_r">@Model.NotificationCode</textarea>
+                            <span class="prompt">联盟通知代码参数说明：（{$orders}：订单号，{$price}：价格，{$like}：URL地址）</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone" valign="top"><span class="v_star">*</span>广告类型</td>
+                        <td class="border_right" colspan="3">
+                            @Html.DropDownList("AdvertisementType")
+                            <span class="prompt">请选择广告类型</span>
+                            <button class="btn btn_ht26 m10_l btn_blue" id="btnAdd" type="button"><span class="icon icon_plus icon_white"></span><span class="m5_l">选择商品</span></button>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <div id="product_list">
+            <div class="head_detail m10_t">
+                <h5>商品信息</h5>
+            </div>
+            <div class="boxs_detail border_lnone">
+                <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                    <thead>
+                        <tr>
+                            <th width="140" class="border_lnone">商品编号</th>
+                            <th class="align_l p10_lr">商品名称</th>
+                            <th class="wd50">状态</th>
+                            <th width="50">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="item_body">
+                        @if (Model.ItemList != null && Model.ItemList.Any())
+                        {
+                            foreach (var item in Model.ItemList)
+                            {
+                                var product = PdProductBo.Instance.GetProduct(item.ProductSysNo);
+                                if (product != null)
+                                {
+                            <tr>
+                                <td class='border_lnone'>@product.SysNo</td>
+                                <td class='align_l p10_lr'>@product.ProductName</td>
+                                <td><span id="status_@product.SysNo">@((UnionStatus.CPS商品状态)item.Status)</span></td>
+                                <td>
+                                    @if (item.Status == UnionStatus.CPS商品状态.启用.GetHashCode())
+                                    {
+                                        <button class='btn btn_ht26' id="btn_@product.SysNo" type='button' data-id='@product.SysNo'><span id="span_@product.SysNo" class='icon_ban_circle'></span></button>
+                                    }
+                                    else
+                                    {
+                                        <button class='btn btn_ht26' id="btn_@product.SysNo" type='button' data-id='@product.SysNo'><span id="span_@product.SysNo" class='icon_check'></span></button>
+                                    }
+                                </td>
+                            </tr>
+                                }
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>

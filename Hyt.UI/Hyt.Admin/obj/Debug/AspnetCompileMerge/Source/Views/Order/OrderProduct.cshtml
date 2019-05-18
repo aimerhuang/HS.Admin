@@ -1,0 +1,191 @@
+﻿@{
+    ViewBag.Title = "OrderProduct";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <link href="@Url.Content("~/Theme/css/base.chirp.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/boxandtable.css")"rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/btn.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/common.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/form.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/frame.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/icon.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/out_box.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/outbox.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/pagination.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/search.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all"/>
+    <script src="@Url.Content("~/Theme/scripts/jquery.min.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/tab.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/selectcontrol.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/UI.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <title>选择商品</title>
+</head>
+<body>
+<div class="boxs_detail">
+    <div class="detail_tit">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td width="14%" class="bt">商品号</td>
+                    <td width="14%" class="bt">商品名称</td>
+                    <td width="14%" class="bt">数量</td>
+                    <td width="15%" class="bt">原价</td>
+                    <td width="15%" class="bt">价格</td>
+                    <td width="14%" class="bt">积分</td>
+                    <td width="14%" class="bt">操作</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="detail_con tr_height">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tbody id="tbOrder">
+                @*<tr id="tr1_1">
+                    <td width="14%">705000301</td>
+                    <td width="14%">备电 4400mAh</td>
+                    <td width="14%"><input type="text" value="1" class="wd24" /></td>
+                    <td width="15%">118.00</td>
+                    <td width="15%">初级会员(110)</td>
+                    <td width="14%">100</td>
+                    <td width="14%">                        
+                        <button class="btn btn_ht26" value="1" onclick="$('#tr1_1').remove()"><span class="icon_trash"></span></button>
+                    </td>
+                </tr>*@
+            </tbody>
+        </table>
+    </div>
+
+    <form method="Get" action="@Url.Action("OrderProduct", new { id = 1 })">
+    <div class="boxs_detail_dispay m10_t">
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>挑选商品</h5>
+        </div>
+        <div class="tit_con" style="display: block;">
+            <table cellspacing="0" cellpadding="0" border="0" width="100%">
+                <tbody>
+                    <tr>
+                        <td width="8%" class="nameright">商品号:</td>
+                        <td width="42%" class="borde_right">
+                            <input type="text" name="" class="input_xlarge" id="productID"></td>
+                        <td width="8%" class="nameright">商品名称:</td>
+                        <td width="42%">
+                            <input type="text" name="" class="input_xlarge" id="productName"></td>
+                    </tr>
+                    <tr>
+                        <td width="8%" class="nameright">商品类型:</td>
+                        <td width="42%" class="borde_right">
+                            <select class="c9 wid" id="productType">
+                                <option value="0">请选择</option>
+                                <option value="1">新品</option>
+                                <option value="2">二手</option>
+                                <option value="3">坏品</option>
+                                <option value="4">维修</option>
+                                <option value="5">其他商品</option>
+                            </select>
+                        </td>
+                        <td width="8%" class="nameright">商品类别:</td>
+                        <td width="42%">
+                            <input type="text" name="" class="input_xlarge" id="productCategory">
+                            <button class="btn btn_ht26" id="selectProductCategory"><span class="icon_zoom_in"></span></button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination align_center clearfix">
+            &nbsp;
+            <input class="btn btn_blue btn_ht32 wd100 bold f14" type="submit" id="seachProduct"></input>&nbsp;
+        </div>
+    </div>
+    </form>
+
+    <div class="detail_tit m10_t">
+        <table cellspacing="0" cellpadding="0" border="0" width="100%">
+            <tbody>
+                <tr>
+                    <td width="17%" class="bt">商品号</td>
+                    <td width="17%" class="bt">商品名称</td>
+                    <td width="17%" class="bt">原价</td>
+                    <td width="17%" class="bt">初级会员价格</td>
+                    <td width="18%" class="bt">数量</td>
+                    <td width="18%" class="bt">操作</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="detail_con tr_height">
+         @{Html.RenderPartial("productPager", Model); }
+    </div>
+
+</div>
+<script type="text/javascript">
+    //挑选商品
+    function selectProduct(id) {
+        var ProductID = id;
+        var ProductName = $("#tr2_" + id).children('td').eq(1).html();
+        var PriceBase = $("#tr2_" + id).children('td').eq(2).html();
+        var PriceReal = $("#tr2_" + id).children('td').eq(3).html();
+        var num = $("#tr2_" + id).find('input').eq(0).val();
+        if ($("#tr1_" + id).length == 0) {
+            var content = templateOrder.format(ProductID, ProductName, num, PriceBase, PriceReal);
+            $("#tbOrder").append(content);
+        } else {
+            var old_num = $("#tr1_" + id).find('input').eq(0);
+            var old_value = parseInt(old_num.val());
+            old_num.val(old_value + parseInt(num));
+        }
+    };
+    //字符串格式化
+    String.prototype.format = function () {
+        var args = arguments;
+        return this.replace(/\{(\d+)\}/g,
+        function (m, i) {
+            return args[i];
+        });
+    };    
+    //设置table行模板
+    var templateOrder = "<tr id='tr1_{0}'><td width='14%'>{0}</td><td width='14%'>{1}</td><td width='14%'><input type='text' value='{2}' class='wd24' /></td><td width='15%'>{3}</td><td width='15%'>{4}</td><td width='14%'>{4}</td><td width='14%'> <button class='btn btn_ht26' value='{0}' onclick=\"$('#tr1_{0}').remove()\"><span class='icon_trash'></span></button></td></tr>";
+    var templateSearch = "<tr id='tr2_{0}'><td width='17%' class='bt'>{0}</td><td width='17%' class='bt'>{1}</td><td width='17%' class='bt'>{2}</td><td width='17%' class='bt'>{3}</td><td width='18%' class='bt'><input type='text' style='width: 100px;' class='input_mini m5_r' value='1'></td><td width='18%' class='bt'><button value='{0}' class='btn btn_ht22 wd50 btn_blue' onclick='selectProduct(this.value);'>订购</button></td></tr>";
+$(document).ready(function (e) {    
+    //弹出商品类别 
+    //2013-06-26 邵斌 修改：调用真实数据
+    DAO.SelectProductCategory($("#selectProductCategory"), $("#productCategory"), {
+        margin: {
+            vertical: 5,
+            horizontal: -14
+        },
+        isMulti: false,
+        zIndex: 5
+    });
+
+     //搜索商品
+    //$("#seachProduct").click(function () {        
+    //    var url="/Ajax/GetProductList?customerID=" + 0 + "&productID=" + $("#productID").val() + "&productName=" + $("#productName").val() + "&productType=" + $("#productType").val() + "&productCategory=" + $("#productCategory").val() + "&pageIndex=1";
+    //    $.ajax({
+    //        async: false,
+    //        type: "get",
+    //        url: url,
+    //        success: function (result) {
+    //            var count = result.count;
+    //            var content = "";
+    //            if (count > 0) {
+    //                $.each(result.list, function (idx, item) {
+    //                    content += templateSearch.format(item.ProductID, item.ProductName, item.PriceBase, item.PriceReal);
+    //                });
+    //                $("#tbSearch").html(content);
+    //            }
+    //        }
+    //    });
+    //});
+ });
+</script>
+</body>

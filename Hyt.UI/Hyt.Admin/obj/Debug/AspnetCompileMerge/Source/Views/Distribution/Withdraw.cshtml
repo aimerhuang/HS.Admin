@@ -1,0 +1,197 @@
+﻿@model Hyt.Model.Transfer.CBDsDealer
+@{
+    ViewBag.Title = "分销商提现";
+}
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="100" class="nameright border_rnone">名称：</td>
+                            <td width="260" class="border_right">
+                                @Model.DealerName
+                            </td>
+                            <td width="100" class="nameright border_rnone">系统账号：</td>
+                            <td width="260">
+                                @Model.Account
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">等级：</td>
+                            <td class="border_right">
+                                @Model.LevelName
+                            </td>
+                            <td class="nameright border_rnone">状态：</td>
+                            <td>
+                                @((Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态)Model.Status)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">联系人：</td>
+                            <td class="border_right">@Model.Contact
+                            </td>
+                            <td class="nameright border_rnone">电子邮箱：</td>
+                            <td>@Model.EmailAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">座机号码：</td>
+                            <td class="border_right">@Model.PhoneNumber
+                            </td>
+                            <td class="nameright border_rnone">手机号码：</td>
+                            <td>@Model.MobilePhoneNumber
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">地区：</td>
+                            <td class="border_right">@Model.AreaAllName
+                            </td>
+                            <td class="nameright border_rnone">街道地址：</td>
+                            <td>@Model.StreetAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">累积预存金额：</td>
+                            <td class="border_right red">@Model.TotalPrestoreAmount.ToString("C")
+                            </td>
+                            <td class="nameright border_rnone">预存款可用余额：</td>
+                            <td class="red">@Model.AvailableAmount.ToString("C")
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_lnone" valign="top">备注:</td>
+                            <td colspan="3">
+                                <textarea id="Remarks" name="Remarks" maxlength="200" class="wd600"></textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>本次提现金额(￥)</td>
+                            <td class="border_right" colspan="3">
+                                <input type="text" class="wd300 m10_r" id="amount" onblur="clearNoNum(this)">
+                                <span class="prompt">提现金额不能超过预存款可用余额 <span class="red">@Model.AvailableAmount.ToString("C")</span></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>支付类型</td>
+                            <td class="border_right">
+
+                                <select id="PayType" style="width:150px;">
+                                    @{
+                                        var larray = Enum.GetValues(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.分销商提现支付类型));
+                                        foreach (Hyt.Model.WorkflowStatus.DistributionStatus.分销商提现支付类型 item in larray)
+                                        {
+                                          <option value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>
+                                        }
+                                    }
+                                </select>
+                                <span class="prompt">支付类型</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>收款账号</td>
+                            <td class="border_right">
+                                <input type="text" class="wd200 m10_r" id="CashAccount" value="">
+                                <span class="prompt">收款账号</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>收款人姓名</td>
+                            <td class="border_right">
+                                <input type="text" class="wd200 m10_r" id="CashName" value="">
+                                <span class="prompt">收款人姓名</span>
+                            </td>
+                            <td class="nameright border_rnone"><span id="v_star_bank" class="v_star">*</span>收款银行</td>
+                            <td class="border_right">
+                                <input type="text" class="wd200 m10_r" id="CashBank" value="">
+                                <span class="prompt">收款银行</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+<input type="hidden" id="PrePaymentSysNo" value="@ViewBag.PrePaymentSysNo" />
+<input type="hidden" id="DealerSysNo" value="@ViewBag.DealerSysNo" />
+@section FooterJs
+{
+    <script type="text/javascript">
+        var PayType = 10;
+        $("#PayType").live('change',function(){
+            PayType = $(this).val();
+            if(PayType == 20){
+                $("#v_star_bank").hide();
+            }else{
+                $("#v_star_bank").show();
+            }
+        });
+
+        function withdraw() {
+            var nflag = true;
+            $("#amount,#CashAccount,#CashName,#CashBank").css({"border":"1px solid #CCCCCC"});
+
+            var availableAmount = @Model.AvailableAmount;
+            if($.trim($("#amount").val()) == ""){
+                $("#amount").css({"border":"1px solid red"});
+                nflag = false;
+            }
+            if($.trim($("#CashAccount").val()) == ""){
+                $("#CashAccount").css({"border":"1px solid red"});
+                nflag = false;
+            }
+            if($.trim($("#CashName").val()) == ""){
+                $("#CashName").css({"border":"1px solid red"});
+                nflag = false;
+            }
+            if(PayType != 20){
+                if($.trim($("#CashBank").val()) == ""){
+                    $("#CashBank").css({"border":"1px solid red"});
+                    nflag = false;
+                }
+            }
+            var amount = $("#amount").val();
+            if (amount && nflag) 
+            {
+                if ( amount> availableAmount) {
+                    UI.Alert({ content: "该分销商最高只能提现<span class='red'>" + availableAmount + "<span>" });
+                    return ;
+                }
+                var msg = "确定要提现<span class='red'>" + amount + "</span>吗？";
+                UI.Confirm({
+                    content: msg,
+                    ok: function () {
+                        var data = { id: $("#PrePaymentSysNo").val(),dealersysno: $("#DealerSysNo").val(),amount: amount, remarks: $("#Remarks").val(),PayType: $("#PayType").val(),CashAccount: $.trim($("#CashAccount").val()),CashName: $.trim($("#CashName").val()),CashBank: $.trim($("#CashBank").val()) };
+                        if (data && amount > 0) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("Withdraw", "Distribution")",
+                                data: JSON.stringify(data),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function (ret) {
+                                    mask.Remove();
+                                    if (ret.IsLogout) { eval(ret.Callback); return; }
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('提现成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function () { mask.Remove(); }
+                            });
+                        } else {
+                            UI.Alert({ content: '数据错据,请检查重试!' });
+                        }
+                    }
+                });
+            }
+        }
+        $(function () {
+            $("#btnSubmit").click(function () {
+                
+            });
+        });
+    </script>
+}

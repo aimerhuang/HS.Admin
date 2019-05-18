@@ -1,0 +1,42 @@
+﻿<div class="explain clearfix" style="width: 400px;">
+    会员留言：@ViewBag.CustomerMessage<br />
+    订单来源：@ViewBag.OrderSource<br />
+    <div>商品图片：</div>
+    <div class="OrderListImg">
+        @{
+            var listImgUrl = (IList<Hyt.Model.PdProductImage>)ViewBag.OrderImgUrl;
+            if (listImgUrl.Count > 0)
+            {
+                foreach (var item in listImgUrl) 
+                {
+                    <img src="@Hyt.BLL.Web.ProductImageBo.Instance.GetProductImagePath(item.ImageUrl, Hyt.BLL.Web.ProductThumbnailType.Small)" alt="">
+                }
+            }
+        }
+    </div>
+    <!--/表格列表区-->
+    @{
+        var list = (List<Hyt.Model.SoTransactionLog>)ViewBag.List;
+        if (list.Count > 0)
+        {
+            @Html.Raw(" <div class=\"boxs_listtabel\"><table class=\"list_tit bd_ts bd_c m10_t\"  width=\"100%\" border=\"0\" cellspacing=\"0\" cellpadding=\"0\"> <tbody>")
+            int i = 1;
+            foreach (Hyt.Model.SoTransactionLog log in (List<Hyt.Model.SoTransactionLog>)ViewBag.List)
+            {
+                if (i % 2 == 0)
+                {
+                    @Html.Raw("<tr class='stag_color'>")
+                }
+                else
+                {
+                    @Html.Raw("<tr>")
+                }
+                <td width="35%"><a>@log.OperateDate.ToString("yyyy-MM-dd HH:mm")</a></td>
+                <td width="65%" class="align_l p10_l">@Html.Raw(log.LogContent)</td>
+                @Html.Raw("</tr>")
+                i++;
+            }
+            @Html.Raw(" </tbody></table></div>")
+        }
+    }
+</div>

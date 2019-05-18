@@ -1,0 +1,371 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.SpPromotionRule
+
+@{
+    ViewBag.Title = "促销规则";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool CanEdit = true;
+}
+@section HeadCss{
+
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+    
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>促销规则</h3>
+        </div>
+        <div class="boxs_con_c1">
+            @using (Html.BeginForm("SavePromotionRule", "Promotion", FormMethod.Post, new { id = "form1" }))
+            {
+                @Html.HiddenFor(m => m.SysNo)
+                @Html.HiddenFor(m => m.Status)
+                  
+                <div id="divEdit" class="boxs_detail_dispay">
+                    <div class="tit_con">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                            <tbody>
+                                <tr>
+                                    <td width="180" class="nameright"><span class="v_star">*</span>规则名称</td>
+                                    <td>
+
+                                        @Html.TextBoxFor(m => m.Name, new { @class = "wd600", maxlength = 50 })
+                                        <span id="c_Name" class="prompt">填写规则名称</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>促销类型</td>
+                                    <td>
+                                        <select id="PromotionType" name="PromotionType" class="wd150">
+                                            <option value="">--请选择--</option>
+                                            @foreach (KeyValuePair<int, string> item in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销应用类型)))
+                                            {
+                                                if (item.Key == Model.PromotionType)
+                                                {
+                                                <option value="@item.Key" selected>@item.Value</option>
+                                                }
+                                                else
+                                                {
+                                                <option value="@item.Key" >@item.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="c_PromotionType" class="prompt">选择促销类型</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>规则类型</td>
+                                    <td>
+                                        <select id="RuleType" name="RuleType" class="wd150">
+                                            <option value="">--请选择--</option>
+                                            @foreach (KeyValuePair<int, string> item in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销规则类型)))
+                                            {
+                                                if (item.Key == Model.RuleType)
+                                                {
+                                                <option value="@item.Key" selected>@item.Value</option>
+                                                }
+                                                else
+                                                {
+                                                <option value="@item.Key" >@item.Value</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span id="c_RuleType" class="prompt">选择规则类型</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright"><span class="v_star">*</span>规则描述</td>
+                                    <td>
+                                        @Html.TextAreaFor(m => m.Description, new { @class = "wd600", maxlength = 200 })
+                                        <span id="c_Description" class="prompt">填写规则描述</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>前台展示文本</td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.FrontText, new { @class = "wd600", maxlength = 200 })
+                                        <span id="c_FrontText" class="prompt">填写前台展示文本</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>成立时显示文本</td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.TrueText, new { @class = "wd600", maxlength = 200 })
+                                        <span id="c_TrueText" class="prompt">填写成立时显示文本</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>不成立时显示文本</td>
+                                    <td>
+                                        @Html.TextBoxFor(m => m.FalseText, new { @class = "wd600", maxlength = 200 })
+                                        <span id="c_FalseText" class="prompt">填写不成立时显示文本</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright"><span class="v_star">*</span>规则脚本</td>
+                                    <td>
+                                        @Html.TextAreaFor(m => m.RuleScript, new { @class = "wd600" })
+                                        <span id="c_RuleScript" class="prompt">填写规则脚本</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright">规则所需键值</td>
+                                    <td>
+                                        @Html.TextAreaFor(m => m.AdminHtml, new { @class = "wd600" })
+
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="divView" class="boxs_detail_dispay" style="display: none">
+                    <div class="tit_con">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                            <tbody>
+                                <tr>
+                                    <td width="180" class="nameright">规则名称:</td>
+                                    <td>
+                                        @Html.DisplayFor(m => m.Name)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">促销类型:</td>
+                                    <td>
+                                        @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销应用类型), Model.PromotionType)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">规则类型:</td>
+                                    <td>
+                                        @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销规则类型), Model.RuleType)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright">规则描述:</td>
+                                    <td>
+                                        @Html.DisplayFor(m => m.Description)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">前台展示文本:</td>
+                                    <td>
+                                        @Html.DisplayFor(m => m.FrontText)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">成立时显示文本:</td>
+                                    <td>
+                                        @Html.DisplayFor(m => m.TrueText)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">不成立时显示文本:</td>
+                                    <td>
+                                        @Html.DisplayFor(m => m.FalseText)
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright">规则脚本:</td>
+                                    <td>
+                                        <div style="max-width: 90%;">
+
+                                            @Html.DisplayFor(m => m.RuleScript)
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright">规则所需键值:</td>
+                                    <td>
+                                        @Html.DisplayFor(m => m.AdminHtml)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="pagination align_c clearfix">
+                    @if (CanEdit && (Model.Status == (int)Hyt.Model.WorkflowStatus.PromotionStatus.促销规则状态.待审 || Model.Status == 0))
+                    {
+                        <button id="btnSave" class="btn btn_blue btn_ht30 m10_r" type="submit">
+                            <span class="icon_save icon_white"></span>
+<span>保存</span>
+                        </button>
+                    }
+                    @if (CanEdit && Model.Status == (int)Hyt.Model.WorkflowStatus.PromotionStatus.促销规则状态.待审 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1003601))
+                    {
+                        <button id="btnAudit" class="btn btn_blue btn_ht30 m10_r" type="button">
+                            <span class="icon_white icon_thumbs_up"></span>
+<span>审核通过</span>
+                        </button>
+                       
+                    }
+                    @if (CanEdit && Model.Status != 0 && Model.Status != (int)Hyt.Model.WorkflowStatus.PromotionStatus.促销规则状态.作废 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1003601))
+                    {
+                        <button id="btnCancel" class="btn btn_red btn_ht30 m10_r" type="button">
+                            <span class="icon_white icon_trash"></span>
+<span>作废</span>
+                        </button>
+                    }
+                    &nbsp;
+                </div>
+            }
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        var setting;
+        //加载验证规则
+        function LoadRule() {
+            setting = $("#form1").validate({
+                onclick: false,
+                onkeyup: false,
+                rules: {
+                    Name: {
+                        required: true,
+                        remote: {
+                            type: "post",
+                            url: "/Promotion/NotExistsRule",
+                            data: {
+                                ruleName: function () {
+                                    return $("#Name").val();
+                                },
+                                excludesysNo: function () {
+                                    return $("#SysNo").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#c_Name').text('填写规则名称');
+                                } else {
+                                    $('#c_Name').text('规则名称已经存在').delay(1500).show(function () {
+                                        $(this).text('填写规则名称').css('display', 'inline');
+                                    });
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    PromotionType:
+                    {
+                        required: true
+                    },
+                    RuleType:
+                    {
+                        required: true
+                    },
+                    Description:
+                    {
+                        required: true
+                    },
+                    FrontText:
+                    {
+                        required: true
+                    },
+                    TrueText:
+                    {
+                        required: true
+                    },
+                    FalseText:
+                    {
+                        required: true
+                    },
+                    RuleScript:
+                    {
+                        required: true
+                    }
+
+                },
+                errorPlacement: function (error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error');
+                },
+                success: function (label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success');
+                }
+            });
+        }
+        $(function () {
+            @if (CanEdit && (Model.Status == (int)Hyt.Model.WorkflowStatus.PromotionStatus.促销规则状态.待审 || Model.Status == 0))
+            {
+               <text> LoadEdit(true);</text>
+               
+            }
+            else
+            {
+               <text> LoadEdit(false);</text>
+            }
+            LoadRule();
+            //审核
+            $("#btnAudit").click(function () {
+                UI.Confirm({
+                    content: "确认审核通过?",
+                    ok: function () {
+                        $.post('/Promotion/AuditPromotionRule', { id: $("#SysNo").val() }, function (r) {
+                            if (r.Status) {
+                                LoadEdit(false);
+                                UI.CloseTab(null, "/Promotion/PromotionRuleList", null, true);
+                                Utils.alert("提交成功！", null, "succeed");
+                                
+                            }
+                            else {
+                                UI.Alert({
+                                    content: r.Message
+
+                                });
+                            }
+                        });
+                    },
+                    cancel: true
+                });
+            });
+            //作废
+            $("#btnCancel").click(function () {
+                UI.Confirm({
+                    content: "确认作废?",
+                    ok: function () {
+                        $.post('/Promotion/CancelPromotionRule', { id: $("#SysNo").val() }, function (r) {
+                            if (r.Status) {
+                                LoadEdit(false);
+                                $("#btnCancel").hide();
+                                UI.CloseTab(null, "/Promotion/PromotionRuleList", null, true);
+                                Utils.alert("提交成功！", null, "succeed");
+                            }
+                            else {
+                                UI.Alert({
+                                    content: r.Message
+                                   
+                                });
+                            }
+                        });
+                    },
+                    cancel: true
+                });
+            });
+        });
+        function LoadEdit(flg) {
+
+            if (!flg) {
+                $("#divView").show();
+                $("#divEdit").hide();
+                $("#btnSave").hide();
+                $("#btnAudit").hide();
+                //  $("#btnCancel").hide();
+            }
+            else {
+                $("#divView").hide();
+                $("#divEdit").show();
+                $("#btnSave").show();
+                $("#btnAudit").show();
+                // $("#btnCancel").show();
+            }
+        }
+    </script>
+
+}

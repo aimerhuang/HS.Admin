@@ -1,0 +1,154 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList
+<div class="boxs m15_t">
+        <div class="boxs_tit head_m">
+            <h3>配送员信用额度维护</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool" style="width: 500px;">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td>查询条件</td>
+                                <td>
+                                    <input type="text" class="input_large m5_r" value="请输入用户名" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入用户名'" onfocus="this.select()" onclick="if (this.value == '请输入用户名') this.value = ''">
+                                    <select class="c9">
+                                        <option>全部库房</option>
+                                    </select>
+                                    <button class="btn btn_ht26" title="查询" id="search_btn">开始搜索</button>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!--配送员信息列表-->
+        <div class="boxs_con_c1">
+
+            <div class="boxs_list">
+                <!--/表格列表区-->
+                <table class="list_tit" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr>
+
+                            <td width="10%">销售单号</td>
+                            <td width="4%">状态</td>
+                            <td width="7%">仓库</td>
+                            <td width="8%">出库单</td>
+                            <td width="5%">客服</td>
+                            <td width="6%">收货人</td>
+                            <td width="7%">支付金额</td>
+                            <td width="5%">积分</td>
+                            <td width="4%">来源</td>
+                            <td width="10%">操作时间</td>
+                            <td width="10%">分配审单人</td>
+                            <td width="9%">配送/支付</td>
+                            <td width="8%" class="borde_r_none">操作</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <table class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0" id="credit_quota_main_table">
+                    <tbody>
+                        <tr>
+
+                            <td width="10%">DEW458899-445</td>
+                            <td width="4%">已发货</td>
+                            <td width="7%">成都总仓</td>
+                            <td width="8%">458852-4586</td>
+                            <td width="5%">完继强</td>
+                            <td width="6%">赵佳</td>
+                            <td width="7%">355.00</td>
+                            <td width="5%">355</td>
+                            <td width="4%">网站</td>
+                            <td width="10%">2013\05\08 10\12</td>
+                            <td width="10%">系统管理员</td>
+                            <td width="9%">货到付款</td>
+                            <td width="8%">
+                                <button class="btn btn_ht26"><span class="icon_pencil"></span></button>
+                            </td>
+                        </tr>
+                        <tr class="stag_color">
+
+                            <td width="10%">DEW458899-445</td>
+                            <td width="4%">已发货</td>
+                            <td width="7%">成都总仓</td>
+                            <td width="8%">458852-4586</td>
+                            <td width="5%">完继强</td>
+                            <td width="6%">赵佳</td>
+                            <td width="7%">355.00</td>
+                            <td width="5%">355</td>
+                            <td width="4%">网站</td>
+                            <td width="10%">2013\05\08 10\12</td>
+                            <td width="10%">系统管理员</td>
+                            <td width="9%">货到付款</td>
+                            <td width="8%">
+                                <button class="btn btn_ht26"><span class="icon_pencil"></span></button>
+
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td width="10%">DEW458899-445</td>
+                            <td width="4%">已发货</td>
+                            <td width="7%">成都总仓</td>
+                            <td width="8%">458852-4586</td>
+                            <td width="5%">完继强</td>
+                            <td width="6%">赵佳</td>
+                            <td width="7%">355.00</td>
+                            <td width="5%">355</td>
+                            <td width="4%">网站</td>
+                            <td width="10%">2013\05\08 10\12</td>
+                            <td width="10%">系统管理员</td>
+                            <td width="9%">货到付款</td>
+                            <td width="8%">
+                                <button class="btn btn_ht26"><span class="icon_pencil"></span></button>
+
+                            </td>
+                        </tr>
+                        <tr class="stag_color">
+
+                            <td width="10%">DEW458899-445</td>
+                            <td width="4%">已发货</td>
+                            <td width="7%">成都总仓</td>
+                            <td width="8%">458852-4586</td>
+                            <td width="5%">完继强</td>
+                            <td width="6%">赵佳</td>
+                            <td width="7%">355.00</td>
+                            <td width="5%">355</td>
+                            <td width="4%">网站</td>
+                            <td width="10%">2013\05\08 10\12</td>
+                            <td width="10%">系统管理员</td>
+                            <td width="9%">货到付款</td>
+                            <td width="8%">
+                                <button class="btn btn_ht26"><span class="icon_pencil"></span></button>
+
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+
+        </div>
+        
+            <div class="pagination clearfix">
+                <b class="fl"><span class="f12 c6 bold4">共</span><span class=" mr5 ml5 f12 c3">15</span><span class="f12 c6 bold4">页</span><span class="f12 c6 mr5 ml5 bold4">|</span><span class="f12 c6 bold4">每页显示</span><span class=" mr5 ml5 f12 c3">30</span><span class="f12 c6 ml5 bold4">条</span></b>
+                <div class="boxx fr clearfix">
+                    <a href="javascript:;" class="disabled mr10">上一页</a>
+                    <a href="javascript:;" class="hover">1</a>
+                    <a href="javascript:;">2</a>
+                    <a href="javascript:;">3</a>
+                    ...
+                    <a href="javascript:;" class="ml5">13</a>
+                    <a href="javascript:;">14</a>
+                    <a href="javascript:;">15</a>
+                    <a href="javascript:;" class="ml5 mr0">下一页</a>
+                </div>
+            </div>
+        
+    </div>

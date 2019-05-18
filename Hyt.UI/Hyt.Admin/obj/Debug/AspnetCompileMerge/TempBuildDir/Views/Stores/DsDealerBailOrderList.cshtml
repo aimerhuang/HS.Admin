@@ -1,0 +1,125 @@
+﻿@{
+    ViewBag.Title = "保证金订单管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>保证金订单管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="veralign_t fl">代理商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="agentSysNo"></select>
+                        </div>
+
+                        <span class="veralign_t fl">分销商</span>
+                        <div class="fl m10_l" style="margin-right: 10px">
+                            <select id="dealerSysNo"></select>
+                        </div>
+                        <div class="search_btn m10_l fl wd270">
+                            <input name="" type="text" class="input_ht28 wd240" id="Condition" value="搜索联系人、联系人方式..." title="搜索联系人、联系人方式..." maxlength="25" />
+                            <button class="btn btn_ht28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <div class="left_tool">
+                        @*<button class="btn btn_ht26 btn_blue" id="createBtn"><span class="icon icon_white icon_plus"></span><span class="m5_l">添加</span></button>*@
+                    </div>
+                </div>
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $("#agentSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+
+        $("#dealerSysNo").change(function () {
+            doSearch();
+        });
+
+        $("#Condition").defaultValue("搜索联系人、联系人方式...");
+        doSearch();
+    });
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Stores/DoDsDealerBailOrderQuery/?r=" + Math.random(), "none", function (p) {
+            if ($("#Condition").val() != "搜索联系人、联系人方式...") {
+                p.setParams("ContactName", $("#Condition").val());
+                p.setParams("ContactWay", $("#Condition").val());
+            }
+            p.setParams("SelectedAgentSysNo", $("#agentSysNo").val());
+            p.setParams("SelectedDealerSysNo", $("#dealerSysNo").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        doSearch();
+
+    }
+    //审核
+    function Audit(SysNo,Status) {
+        Utils.MaskStart($('#paging'));
+        Ajax.post("/Stores/Audit", "none", function (params) {
+            params.setParams("SysNo", SysNo);
+            params.setParams("Status", Status);
+        }, function (result) {
+            Utils.MaskStop();
+            if (result.Status) {
+                SuccessTip();
+            } else {
+                UI.tips.tip_alert('tips_shrot tips_warning', result.Message);
+            }
+            RefreshCurrentPage();
+        }
+      );
+    }
+    function GetDealersListByCreatedBy(DealerCreatedBy) {
+        $("#dealerSysNo").html("");
+        if (DealerCreatedBy != -1) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                doSearch();
+            });
+        } else {
+            $("#dealerSysNo").append("<option value='-1'>全部</option>");
+            doSearch();
+        }
+    }
+</script>
+

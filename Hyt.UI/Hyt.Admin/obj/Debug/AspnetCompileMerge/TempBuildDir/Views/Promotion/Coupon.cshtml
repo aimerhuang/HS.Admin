@@ -1,0 +1,641 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "优惠券";
+}
+@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer;
+@using Hyt.Model;
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.Transfer.CBSpCoupon
+@{
+    var isAdd = Model == null || Model.SysNo < 1;
+    var randomCode = ViewBag.randomCode;
+    var isCouponCard = (int)PromotionStatus.是否优惠卡.是;
+
+    var inputStyle = "";
+    if (Model.UsedQuantity > 0)
+    {
+        inputStyle = @"disabled='disabled' onfocus='this.blur()'";
+    }
+}
+
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js?v=1.1")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Plugins/Date/WdatePicker.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<form id="form1" onsubmit="return false;">
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>@(isAdd ? "新增" : "修改")优惠劵</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_detail_dispay">
+                    <div class="tit_con">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                            <tbody>
+                                <tr>
+                                    <td width="180" class="nameright"><span class="v_star">*</span>优惠劵代码</td>
+                                    <td width="350" class="border_right">
+                                        <input type="text" class="wd200 m10_r" id="CouponCode" name="CouponCode" save="CouponCode" value="@(isAdd?randomCode:Model.CouponCode)" maxlength="50" @inputStyle>
+                                        <span id="c_CouponCode" class="prompt">填写优惠券代码</span>
+                                    </td>
+                                    <td width="180" class="nameright"><span class="v_star">*</span>选择分销商</td>
+                                    <td>
+                                        <div>
+                                            <select id="agentSysNo" save="AgentSysNo"></select>
+                                            <select id="dealerSysNo" save="DealerSysNo"></select>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>优惠劵金额</td>
+                                    <td colspan="3">
+                                        <input type="text" class="wd600 m10_r" id="CouponAmount" name="CouponAmount" save="CouponAmount" value="@(isAdd?0:Model.CouponAmount)" @inputStyle>
+                                        <span id="c_CouponAmount" class="prompt">填写优惠金额</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>所需消费金额</td>
+                                    <td colspan="3">
+                                        <input type="text" class="wd600 m10_r" id="RequirementAmount" name="RequirementAmount" save="RequirementAmount" value="@(isAdd?0:Model.RequirementAmount)" @inputStyle>
+                                        <span id="c_RequirementAmount" class="prompt">填写所需消费金额</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright"><span class="v_star">*</span>有效开始时间</td>
+                                    <td class="border_right">
+                                        <div class="date_btn fl m10_r" style="width:180px;">
+                                            <input name="StartTime" id="StartTime" style="width:136px;" class="input_ht26 valid" save="StartTime" onfocus="UI.Date({el:'StartTime', dateFmt: 'yyyy-MM-dd HH:mm'})" type="text" value="@(isAdd?DateTime.Now.ToString("yyyy-MM-dd HH:mm"):Model.StartTime.ToString("yyyy-MM-dd HH:mm"))">
+                                            <button onclick="UI.Date({el:'StartTime', dateFmt: 'yyyy-MM-dd HH:mm'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                        </div>
+                                        <span id="c_StartTime" class="prompt">填写开始时间</span>
+                                    </td>
+                                    <td class="nameright" width="105"><span class="v_star">*</span>有效结束时间</td>
+                                    <td>
+                                        <div class="date_btn fl m10_r" style="width:180px;">
+                                            <input name="EndTime" id="EndTime" style="width:136px;" class="input_ht26 valid" save="EndTime" onfocus="UI.Date({el:'EndTime', dateFmt: 'yyyy-MM-dd HH:mm'})" type="text" value="@(isAdd?DateTime.Now.ToString("yyyy-MM-dd HH:mm"):Model.EndTime.ToString("yyyy-MM-dd HH:mm"))">
+                                            <button onclick="UI.Date({el:'EndTime', dateFmt: 'yyyy-MM-dd HH:mm'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                        </div>
+                                        <span id="c_EndTime" class="prompt">结束时间大于开始时间</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright">优惠劵类型</td>
+                                    <td class="border_right">
+                                        <select class="wd170" save="Type" id="Type">
+                                            <option value="10" @if (!isAdd && Model.Type == 10) { <text> selected="selected" </text>  }>系统</option>
+                                            <option value="20" @if (!isAdd && Model.Type == 20) { <text> selected="selected" </text>  }>私有</option>
+                                        </select>
+                                    </td>
+                                    <td class="nameright"><span class="customer"><span class="v_star">*</span>客户姓名</span></td>
+                                    <td colspan="3">
+                                        <div id="JS_outbox" class="customer search_btn fl fl m10_r" style="width:180px;">
+                                            <input type="text" id="customer_key" name="customer_key" autocomplete="off" class="input_ht26" style="width:136px;font-size:12px;" value="" maxlength="20" title="搜索会员姓名、手机...">
+                                            <button id="search_customer" class="btn btn_ht26" title="搜索" type="button"><span class="icon_search"></span></button>
+                                            <input type="hidden" id="customerID" name="customerID" value="@(isAdd?0:Model.CustomerSysNo)" />
+                                        </div>
+                                        @*<span id="c_customerID" class="customer prompt">搜索客户</span>*@
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright">优惠劵描述</td>
+                                    <td colspan="3"><input type="text" class="wd600 m10_r" save="Description" maxlength="200" value="@if (!isAdd){<text>@Model.Description</text>}" /></td>
+                                </tr>
+                                <tr>
+                                    <td valign="top" class="nameright">来源描述</td>
+                                    <td colspan="3">
+                                        <textarea class="wd600" save="SourceDescription" maxlength="200">
+                                            @if (!isAdd)
+                                            {<text>@Model.SourceDescription</text>}
+                                    </textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright"><span class="v_star">*</span>允许使用数量</td>
+                                <td class="border_right">
+                                    <input type="text" class="wd156 m10_r" id="UseQuantity" name="UseQuantity" save="UseQuantity" value="@(isAdd?1:Model.UseQuantity)">
+                                    <span id="c_UseQuantity" class="prompt">填写允许使用数量</span>
+                                </td>
+                                <td class="nameright">已使用数量</td>
+                                <td>
+                                    <input type="text" id="UsedQuantity" name="UsedQuantity" save="UsedQuantity" value="@(isAdd?0:Model.UsedQuantity)" class="m10_r" style="width:167px;" disabled="disabled" />
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">使用平台</td>
+                                <td colspan="3">
+                                    <input type="checkbox" id="WebPlatform" name="WebPlatform" @((PromotionStatus.商城使用.是.GetHashCode() == Model.WebPlatform) ? "checked" : "")> PC商城 　
+                                    <input type="checkbox" id="ShopPlatform" name="ShopPlatform" @((PromotionStatus.门店使用.是.GetHashCode() == Model.ShopPlatform) ? "checked" : "")> 门店 　
+                                    <input type="checkbox" id="MallAppPlatform" name="MallAppPlatform" @((PromotionStatus.手机商城使用.是.GetHashCode() == Model.MallAppPlatform) ? "checked" : "")> 手机商城 　
+                                    <input type="checkbox" id="LogisticsAppPlatform" name="LogisticsAppPlatform" @((PromotionStatus.物流App使用.是.GetHashCode() == Model.LogisticsAppPlatform) ? "checked" : "")> 物流App 　
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">是否优惠卡</td>
+                                <td colspan="3">
+                                    <input type="checkbox" id="IsCouponCard" name="IsCouponCard" @((isCouponCard == Model.IsCouponCard) ? "checked" : "")>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">促销:</td>
+                                <td colspan="3">
+                                    <input type="hidden" value="@(!isAdd?Model.PromotionSysNo:0)" id="PromotionSysNo" name="PromotionSysNo" class="wd156 m10_r" save="PromotionSysNo" />
+                                    <span id="PromotionName" class="m10_r">@(!isAdd ? Model.PromotionName : "")</span>
+                                    <button class="btn btn_ht28 m10_r" title="选择促销" id="loadPromotion" type="button">
+                                        <span class="icon_search"></span>
+                                        <span class="m5_l">选择促销</span>
+                                    </button>
+                                    <span id="c_PromotionSysNo" class="prompt">请选择促销</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="pagination align_c clearfix">
+                <input type="hidden" value="@(!isAdd?Model.SysNo:0)" save="SysNo" name="SysNo" id="SysNo" />
+                @if (isAdd || (Model != null && Model.Status == (int)PromotionStatus.优惠券状态.待审核))
+                {
+                    <button class="btn btn_blue btn_ht30 m10_r" id="saveCoupon">
+                        <span class="icon_save icon_white"></span>
+                        <span>保存</span>
+                    </button>
+                }
+                @if (Model != null && Model.Status == (int)PromotionStatus.优惠券状态.待审核)
+                {
+                    if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1004601))
+                    {
+                        <button class="btn btn_blue btn_ht30 m10_r" id="auditCoupon">
+                            <span class="icon_thumbs_up icon_white"></span>
+                            <span>审核</span>
+                        </button>
+                    }
+                }
+                @if (Model != null && (Model.Status == (int)PromotionStatus.优惠券状态.待审核 || (Model.Status == (int)PromotionStatus.优惠券状态.已审核 && Model.Type == 10)) && Model.UsedQuantity == 0)
+                {
+                    if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1004601))
+                    {
+                        <button class="btn btn_red btn_ht30 m10_r" id="cancelCoupon">
+                            <span class="icon_trash icon_white"></span>
+                            <span>作废</span>
+                        </button>
+                    }
+                }
+                @if (Model != null && Model.Status == (int)PromotionStatus.优惠券状态.已审核 && Model.Type == 10)
+                {
+                    <button class="btn btn_red btn_ht30 m10_r" id="calcelAuditCoupon">
+                        <span class="icon_share_alt icon_white"></span>
+                        <span>取消审核</span>
+                    </button>
+                }
+                <button class="btn btn_ht30 btn_blue" id="btnReturn"><span class="icon_share_alt icon_white"></span><span class="m5_l">返回</span></button>
+                &nbsp;
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+<script type="text/javascript">
+    var isAddEdit='@isAdd';
+    if(isAddEdit=="False")
+    {
+        var AgentID='@Model.AgentSysNo';
+        var DealerID='@Model.DealerSysNo';
+    }
+    $(document).ready(function (e) {
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $("#agentSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    if(isAddEdit=="False" && AgentID==item.SysNo){ 
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "' selected='selected'>" + item.DealerName + "</option>");
+                    }
+                    else{
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $('#dealerSysNo').change(function(){
+            $('#customer_key').attr('dealer',$(this).val());
+        });
+
+        $("#btnReturn").click(function() {
+            var url = '/Promotion/CouponList/';
+            window.location.href = url;
+        });
+        $("#form1").ajaxLoadingMask(true);
+        $("#CouponAmount, #RequirementAmount, #UseQuantity").numberInput();
+        @if (isAdd)
+        {
+            <text>
+        $("#customer_key").defaultValue("搜索会员姓名、手机...");
+        $('.customer').hide();
+        </text>
+        }
+        else if (Model.Type == 20)
+        {
+            if (!string.IsNullOrEmpty(Model.CustomerName))
+            {
+                @:$('#customer_key').val('@Model.CustomerName');
+                            }
+            <text>
+        $('#customerID').val('@Model.CustomerSysNo');
+        $('#PromotionName').text('@Model.PromotionName');
+        $('#PromotionSysNo').val(@Model.PromotionSysNo);
+        </text>
+        }
+        $('#Type').change(function () {
+            if ($(this).val() == '20')
+                $('.customer').show();
+            else
+                $('.customer').hide();
+        });
+        loadRule();
+
+        //选择会员自动完成
+        UI.AutoComplete("customer_key", {
+            postUrl: "/ajax/SearchCustomer?word={0}",
+            @if (isAdd)
+            {
+                @:top: 0,
+                                        @:left:0,
+                                    }
+            else
+            {
+                @:top: -231,
+                                        @:left: -656,
+                                    }
+            height: 200,
+            width: 380,
+            showHeader: true,
+            btn: $("#search_customer"),
+            columns: [
+                { header: "帐号", width: 100, render: function (data) { return data.Account } },
+                { header: "姓名", width: 100, render: function(data) { return data.Name } }, 
+                { header: "昵称", width: 100, render: function(data) { return data.NickName } }, 
+                { header: "手机号", width: 100, render: function(data) { return data.MobilePhoneNumber } }, 
+                { header: "会员ID", width: 80, render: function(data) { return data.SysNo } }
+            ],
+            callback: function(data) {
+                var Name=data.Name;
+                if(data.Name==null||data.Name=="")
+                {
+                    Name=data.NickName;
+                }
+                if ($("#customerID").val() != data.SysNo) {
+                    autoComplateCallBack(data.SysNo, Name);
+                } else {
+                    $("#customer_key").val(Name);
+                }
+            }
+        });
+
+        //加载促销
+        $("#loadPromotion").click(function() {
+            DAO.SelectPromotion({
+                multiple: false,
+                promotionType: 100,
+                callBack: function(a) {
+                    if ($(a).length > 0) {
+                        var name = $(a).get(0)[0].name;
+                        var sysNo = $(a).get(0)[0].sysNo;
+
+                        $.ajax({
+                            async: false,
+                            type: "POST",
+                            url: "/Promotion/IsValid",
+                            data: "sysNo=" + sysNo,
+                            success: function(ret) {
+                                if (!ret.Status) {
+                                    UI.Alert({
+                                        content: '该促销已过期，请重新选择绑定。'
+                                    });
+                                } else {
+                                    $('#PromotionName').text(name);
+                                    $('#PromotionSysNo').val(sysNo);
+                                    $('#c_PromotionSysNo').removeClass('error').addClass('success');
+                                }
+                            }
+                        });
+                    }
+                }
+            });
+        });
+        //自动完成后事件
+        function autoComplateCallBack(sysNo, name) {
+            $("#customerID").val(sysNo);
+            $("#customer_key").val(name);
+            //$('c_customer_key').removeClass('error').addClass('success');
+        }
+        var setting;
+        //加载验证规则
+        function loadRule() {
+            setting = $("#form1").validate({
+                rules: {
+                    CouponCode: {
+                        required: true,
+                        remote: {
+                            type: "post",
+                            url: "/Promotion/IsExsitCoupon",
+                            data: {
+                                sysNo: function () {
+                                    return $("#SysNo").val();
+                                },
+                                couponCode: function () {
+                                    return $("#CouponCode").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#c_CouponCode').text('填写优惠券代码');
+                                } else {
+                                    $('#c_CouponCode').text('优惠券代码已存在').delay(1500).show(function () {
+                                        $(this).text('填写优惠券代码').css('display', 'inline');
+                                    });
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    CouponAmount: { required: true, number: true },
+                    RequirementAmount: { required: true, number: true },
+                    txtMobilePhoneNumber: { required: true, isMobile: true, maxlength: 11 },
+                    StartTime: { required: true, dateCN: true },
+                    EndTime: { required: true, dateCN: true, compareDate: "#StartTime" },
+                    //customerID: { required: true, date: true },
+                    UseQuantity: { required: true, digits: true },
+                    UsedQuantity: { required: true, digits: true },
+                    PromotionSysNo: { required: true, digits: true, min: 1 }
+                },
+                errorPlacement: function (error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error');
+                },
+                success: function (label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success');
+                },
+                ignore: "",
+                onkeyup: false
+            });
+        };
+        function checkform() {
+            if ($('#Type').val() == '20' && $('#customerID').val()=='0') {
+                $('#c_customerID').addClass('error');
+                return false;
+            }
+            if (Date.parse($('#StartTime').val()) > Date.parse($('#EndTime').val())) {
+                $('#c_EndTime').addClass('error');
+                return false;
+            }
+
+            if ($("#WebPlatform").attr("checked")==undefined && $("#ShopPlatform").attr("checked")==undefined && $("#MallAppPlatform").attr("checked")==undefined && $("#LogisticsAppPlatform").attr("checked")==undefined) {
+                tips('tips_warning', "使用平台至少勾选一项。");
+                return false;
+            }
+
+            if (!$("#form1").valid())
+                return false;
+            else
+                return true;
+
+        }
+        //保存优惠券
+        $("#saveCoupon").click(function() {
+            if (!checkform()) return;
+
+            var requirementAmount = $("#RequirementAmount").val();
+            var couponAmount = $("#CouponAmount").val();
+            if (requirementAmount > 0) {
+                if (parseFloat(requirementAmount) <= parseFloat(couponAmount)) {
+                    $("#RequirementAmount").focus();
+                    tips('tips_warning', "所需消费金额须大于优惠券金额或所需消费金额为零。");
+                    return false;
+                }
+                doSave();
+            } else {
+
+                UI.Confirm({
+                    content: '当订单金额小于优惠券金额时，顾客不需要支付任何费用。确认“所需消费金额”为0吗?',
+                    ok: function() {
+                        doSave();
+                    }
+                });
+                return false;
+            }
+
+        });
+
+        function doSave()
+        {
+            Ajax.get("/Promotion/SaveCoupon", "save", function(p) {
+                if ($('#customerID').val() != '') {
+                    p.setParams("CustomerSysNo", $('#customerID').val());
+                }
+                var checked = @PromotionStatus.是否优惠卡.否.GetHashCode();
+                if ($("#IsCouponCard").attr("checked")) {
+                    checked = @isCouponCard;
+                }
+                p.setParams("IsCouponCard", checked);
+                if ($("#WebPlatform").attr("checked")) {
+                    p.setParams("WebPlatform", @PromotionStatus.商城使用.是.GetHashCode());
+                }
+                if ($("#ShopPlatform").attr("checked")) {
+                    p.setParams("ShopPlatform", @PromotionStatus.门店使用.是.GetHashCode());
+                }
+                if ($("#MallAppPlatform").attr("checked")) {
+                    p.setParams("MallAppPlatform", @PromotionStatus.手机商城使用.是.GetHashCode());
+                }
+                if ($("#LogisticsAppPlatform").attr("checked")) {
+                    p.setParams("LogisticsAppPlatform", @PromotionStatus.物流App使用.是.GetHashCode());
+                }
+
+            }, function(data) {
+                if (data.Status) {
+                    UI.Alert({
+                        icon: "succeed",
+                        content: '保存优惠券成功'
+                    });
+                    @if (isAdd){
+                        <text>
+                    window.setTimeout(function() {
+                        window.location.href = '/Promotion/CouponList';
+                    }, 2500);
+                    </text>
+                    }
+
+                } else {
+                    UI.Alert({ content: data.Message });
+                    //$("#saveCoupon").removeAttr('disabled');
+                }
+            });
+        }
+
+        //作废优惠券
+        $("#cancelCoupon").click(function () {
+            UI.Confirm({
+                content: '确定要作废优惠券吗？',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Promotion/CancelCoupon",
+                        data: "sysNo=" + $('#SysNo').val(),
+                        success: function (ret) {
+                            if (ret.Status) {
+                                UI.Alert({
+                                    icon: "succeed",
+                                    content: '作废优惠券成功'
+                                });
+                                window.setTimeout(function () {
+                                    window.location.href = '/Promotion/CouponList';
+                                }, 2500);
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        //审核优惠券
+        $("#auditCoupon").click(function() {
+            if (!checkform()) return;
+
+            var requirementAmount = $("#RequirementAmount").val();
+            var couponAmount = $("#CouponAmount").val();
+            var msg = "";
+            if (requirementAmount > 0) {
+                if (parseFloat(requirementAmount) <= parseFloat(couponAmount)) {
+                    $("#RequirementAmount").focus();
+                    tips('tips_warning', "所需消费金额须大于优惠券金额或所需消费金额为零。");
+                    return false;
+                }
+                msg = "确定要保存并审核优惠券吗?";
+            } else {
+                msg = "当订单金额小于优惠券金额时，顾客不需要支付任何费用。确认“所需消费金额”为0，并通过审核吗?";
+            }
+
+            UI.Confirm({
+                content: msg,
+                ok: function() {
+                    doAudit();
+                }
+            });
+
+        });
+
+        function doAudit() {
+            Ajax.postJosn("/Promotion/AuditCoupon", "save", function(p) {
+                if ($('#customerID').val() != '') {
+                    p.setParams("CustomerSysNo", $('#customerID').val());
+                }
+                var checked = @PromotionStatus.是否优惠卡.否.GetHashCode();
+                if ($("#IsCouponCard").attr("checked")) {
+                    checked = @isCouponCard;
+                }
+                p.setParams("IsCouponCard", checked);
+
+                if ($("#WebPlatform").attr("checked")) {
+                    p.setParams("WebPlatform", @PromotionStatus.商城使用.是.GetHashCode());
+                }
+                if ($("#ShopPlatform").attr("checked")) {
+                    p.setParams("ShopPlatform", @PromotionStatus.门店使用.是.GetHashCode());
+                }
+                if ($("#MallAppPlatform").attr("checked")) {
+                    p.setParams("MallAppPlatform", @PromotionStatus.手机商城使用.是.GetHashCode());
+                }
+                if ($("#LogisticsAppPlatform").attr("checked")) {
+                    p.setParams("LogisticsAppPlatform", @PromotionStatus.物流App使用.是.GetHashCode());
+                }
+            }, function(data) {
+                if (data.Status) {
+                    UI.Alert({
+                        icon: "succeed",
+                        content: '审核优惠券成功'
+                    });
+                    window.setTimeout(function() {
+                        window.location.href = '/Promotion/CouponList';
+                    }, 2500);
+                } else {
+                    UI.Alert({ content: data.Message });
+                }
+            });
+        }
+
+        //取消审核优惠券
+        $("#calcelAuditCoupon").click(function () {
+            UI.Confirm({
+                content: '确定要取消审核优惠券吗？',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Promotion/CalcelAuditCoupon",
+                        data: "sysNo=" + $('#SysNo').val(),
+                        success: function (ret) {
+                            if (ret.Status) {
+                                UI.Alert({
+                                    icon: "succeed",
+                                    content: '取消审核优惠券成功'
+                                });
+                                window.setTimeout(function () {
+                                    window.location.href = '/Promotion/CouponList';
+                                }, 2500);
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+        });
+        //日期比较
+        jQuery.validator.methods.compareDate = function (value, element, param) {
+            var startDate = jQuery(param).val();
+            var date1 = new Date(startDate.replace(/-/g, '\/'));
+            var date2 = new Date(value.replace(/-/g, '\/'));
+            return date1 < date2;
+        };
+        //数字比较
+        jQuery.validator.methods.compareNumber = function (value, element, param) {
+            var start = jQuery(param).val();
+            var num1 = parseFloat(start);
+            var num2 = parseFloat(value);
+            return num1 < num2;
+        };
+        //日期验证
+        jQuery.validator.addMethod("dateCN", function (value, element) {
+            value = value.replace(/-/g,'\/');
+            return this.optional(element) || !/Invalid|NaN/.test(new Date(value));
+        }, "日期格式错误");
+    });
+
+    function GetDealersListByCreatedBy(DealerCreatedBy) {
+        $("#dealerSysNo,#complexDealerSysNo").html("");
+        if (DealerCreatedBy != -1) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        if(isAddEdit=="False" && DealerID==item.SysNo){ 
+                            $("#dealerSysNo,#complexDealerSysNo").append("<option value='" + item.SysNo + "' selected='selected'>" + item.DealerName + "</option>");
+                        }
+                        else{
+                            $("#dealerSysNo,#complexDealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    }
+                });
+            });
+        } else {
+            $("#dealerSysNo,#complexDealerSysNo").append("<option value='-1'>全部</option>");
+        }
+    }
+</script>

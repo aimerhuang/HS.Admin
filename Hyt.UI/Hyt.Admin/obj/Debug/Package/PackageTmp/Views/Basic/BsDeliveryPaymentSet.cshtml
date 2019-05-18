@@ -1,0 +1,287 @@
+﻿@{
+    
+    ViewBag.Title = "配送支付设置";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all"/>
+
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript">
+		<!--
+    var settingPay = {
+        view: {
+            //addDiyDom: OnAddDiyTreeNodeDomPay,
+            selectedMulti: false,
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onClick: TreeNodeOnClickPay
+        }
+    };
+    var settingDelivery = {
+        view: {
+            //addDiyDom: OnAddDiyTreeNodeDomDelivery,
+            selectedMulti: true,
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        check: {
+            enable: true,
+        },
+        callback: {
+
+            //onClick: TreeNodeOnClickDelivery
+        }
+    };
+
+    var curSelectId = -1;
+    var isSave = false;//避免多余的保存操作
+    //点击节点事件
+
+    function TreeNodeOnClickPay(event, treeId, treeNode) {
+        
+        //判断点击的是不是叶子节点。如果不是叶子节点将不做任何操作
+        if (treeNode.children != null && treeNode.children.length != 0) {
+            myZTreeDelivery.expandNode(treeNode, true, true, true);
+            return;
+        }
+
+        //1,和上个不是选择同一节点，先保存上个修改。
+        if (treeNode.id == curSelectId)//选择的是同一节点
+            return;
+
+        if (curSelectId != -1) {
+            if (!isSave) { 
+                var zTreePre = myZTreeDelivery.getCheckedNodes(true); //getChangeCheckedNodes
+                var selectedId = "";
+                for (var i = 0; i < zTreePre.length; i++) {
+                    if (zTreePre[i].id != 1 || zTreePre[i].id != 2 || zTreePre[i].id != 3)//去掉父节点,只保存叶子节点
+                        selectedId += zTreePre[i].id + ",";
+                }
+
+                selectedId = selectedId.substr(0, selectedId.length - 1);
+
+                $.get('@Url.Action("CreateDeliveryPayment", "Basic")',
+                    { paymentSysNo: curSelectId, deliverySysNo: selectedId },
+                    function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                    });
+            }
+        }
+
+        curSelectId = treeNode.id;
+        isSave = false;
+        //2,获取结果，更新右边树的checkbox选中状态。
+
+        $.get('@Url.Action("GetDeliveryPayment", "Basic")',
+            { paymentSysNo: treeNode.id },
+            function (data) { //传递的字符串(,1,2,3,4,5,)
+                //未勾上的 包括则打上勾
+                var zTreeF = myZTreeDelivery.getCheckedNodes(false);
+                for (var i = 0; i < zTreeF.length; i++) {
+                    if (data.indexOf("," + zTreeF[i].id + ",") != -1) {
+                        myZTreeDelivery.checkNode(zTreeF[i], true);
+                    }
+                }
+                //已勾上的 不包括则取消勾
+                var zTreeT = myZTreeDelivery.getCheckedNodes(true);
+                for (var i = 0; i < zTreeT.length; i++) {
+                    if (data.indexOf("," + zTreeT[i].id + ",") == -1) {
+                        myZTreeDelivery.checkNode(zTreeT[i], false);
+                    }
+                }
+
+            });
+    }
+
+    function Save() {
+        if (curSelectId != -1) {
+            var zTreePre = myZTreeDelivery.getCheckedNodes(true); //getChangeCheckedNodes
+            var selectedId = "";
+            for (var i = 0; i < zTreePre.length; i++) {
+                if (zTreePre[i].id != 1 || zTreePre[i].id != 2 || zTreePre[i].id != 3)//去掉父节点,只保存叶子节点
+                    selectedId += zTreePre[i].id + ",";
+            }
+
+            selectedId = selectedId.substr(0, selectedId.length - 1);
+
+            $.get('@Url.Action("CreateDeliveryPayment", "Basic")',
+            { paymentSysNo: curSelectId, deliverySysNo: selectedId },
+            function (data) {
+                if (data.IsLogout) {
+                    eval(data.Callback);
+                    return;
+                }
+                if (data) {
+                    isSave = true;
+                    UI.Alert({ content: "保存成功" });
+                }
+                else { UI.Alert({ content: "保存失败" }); }
+            });
+
+        }
+    }
+
+    var myZTreePay, myZTreeDelivery;
+
+    //初始化ZTree
+
+    function InitZTreePay() {
+        markObject = $(".sortmanage_fl");
+        $.ajax({
+            url: '@Url.Action("GetPaymentZTreeList", "Basic")',
+                data: {
+                    all: true
+                },
+                success:
+                function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTreePay = $.fn.zTree.init($("#payCatetoryTree"),
+                        settingPay,
+                        response);
+
+                        //展开所有节点
+                        myZTreePay.expandAll(true);
+                    }
+
+                },
+
+                error:
+                function (httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    alert(error);
+                }
+            });
+        }
+
+        function InitZTreeDelivery() {
+            markObject = $(".sortmanage_fr");
+            $.ajax({
+                url: '@Url.Action("GetDeliveryTypeZTreeList", "Basic")',
+                data: { all: true },
+                success: function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTreeDelivery = $.fn.zTree.init($("#deliveryCatetoryTree"),
+                        settingDelivery,
+                        response);
+
+                        //展开所有节点
+                        myZTreeDelivery.expandAll(true);
+
+                    }
+
+                },
+                error:
+                function (httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    alert(error);
+                }
+            });
+        }
+
+        var markObject;
+        //AjaxLoader的mark对象
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //自举函数
+        $(document).ready(function () {
+            $("#treePanelDelivery").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelPay").css("height", $(window.parent.document).height() - 286 + "px");
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+
+            //初始化树
+            InitZTreePay();
+            InitZTreeDelivery();
+
+        });
+
+    </script>
+
+}
+
+
+
+<div class="case commodity_sortmanage">
+    <!--sortmanage_fl-->
+    <div class="clearfix">
+        <div class="sortmanage_fl">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitlePay" class="boxs_tit head_m">
+                    <h3>支付方式</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelPay" class="left p5" style="overflow: auto;">
+                        <ul id="payCatetoryTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- test -->
+        <!--sortmanage_fr-->
+        <div class="sortmanage_fr" style="margin-left: 370px;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleDelivery" class="boxs_tit head_m">
+                    <h3>配送方式</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelDelivery" class=" left p5" style="overflow: auto;">
+                        <ul id="deliveryCatetoryTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--提交按钮-->
+    <div class="pagination align_c clearfix" id="btn_Panel" style="margin-top: 5px; border: 1px solid #C1C1C1">
+      <button class="btn btn_ht28 wd70  f14 m5_r" id="btn_Save" onclick="Save()"><span class="icon_save"></span><span class="m5_l">保存</span></button>
+        <button class="btn btn_ht28 wd70  f14" onclick="window.location.href='/Basic/BsDeliveryPayment'"><span class="icon_share_alt"></span><span class="m5_l">返回</span></button>
+        @*  <button  class="btn btn_blue btn_ht28 wd70 bold f14 m5_r " onclick="Save()">保存</button>
+        <button onclick="window.location.href='/Basic/BsDeliveryPayment'" class="btn btn_ht28 bold f14 wd70"><span class="icon_share_alt"></span><span class="m5_l">返回</span></button>*@
+    </div>
+    <!-- test end -->
+</div>
+
+

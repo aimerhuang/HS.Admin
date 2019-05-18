@@ -1,0 +1,332 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.DsOrder
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+
+@{
+    ViewBag.Title = "OrderBrowse";
+
+
+    var mallName = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetmallName(Model.DealerMallSysNo);
+    var dealerSysNo = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetdealerSysNo(Model.DealerMallSysNo);
+    var dealerName = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetdealerName(Model.DealerMallSysNo);
+    var orderSysNo = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetorderSysNo(Model.DealerMallSysNo);
+    Hyt.Model.Transfer.CBDsOrder Info = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetUpOrderInfo(Model.DealerMallSysNo);
+    List<DsOrderItem> pdmodel = ViewBag.dealerOrderPdInfo;
+    var status = "";
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js?v=20140530")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4a129ccbf39c60f2eb556dba394e969d"></script>
+}
+<div id="tabboxs" class="@if (Request.QueryString["Dialog"] != null)
+                          {
+                              @:p10
+                                         } else { @: case
+                                         }
+     ">
+<div class=" head_tab">
+    <!--/大选项卡-->
+    <ul class="tabNav">
+        <li id="liBase" class="long"><a href="javascript:void(0);">升舱订单基本信息</a></li>
+        <li id="liOrder" class="" onclick="loadProductBtn(@dealerSysNo)"><a href="javascript:void(0);">订购商品</a></li>
+    </ul>
+</div>
+<div id="tabcon" class="boxs_con_c1 bg_f5">
+    <!--升舱订单基本信息-->
+    <div class="list" style="display: none;">
+        <!--按钮信息-->
+        <!--销售单详情-->
+        <div class="boxs_detail_dispay  @if (ViewBag.ReadOnly != null)
+                                                {
+                                                    @:p10_t
+                                                                                               } ">
+                    <div class=" tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>升舱订单</h5>
+        </div>
+        <div class="tit_con" style="display: block;">
+
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="9%" class="nameright">系统编号:</td>
+                        <td width="41%" class="borde_right">
+                            @Model.SysNo
+                        </td>
+                        <td width="9%" class="nameright">买家名称:</td>
+                        <td width="41%">@Model.BuyerNick</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">卖家名称:</td>
+                        <td class="borde_right">@Model.SellerNick</td>
+                        <td class="nameright">订单状态:</td>
+                        @{
+                            if (Model.Status == 10)
+                            {
+                                status = "升舱中";
+                            }
+                            if (Model.Status == 20)
+                            {
+                                status = "已发货";
+                            }
+                            if (Model.Status == 30)
+                            {
+                                status = "已完成";
+                            }
+                            if (Model.Status == -10)
+                            {
+                                status = "失败";
+                            }
+                        }
+                        <td>@status</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">付款时间:</td>
+                        <td class="borde_right">@Model.PayTime</td>
+                        <td class="nameright">升舱时间:</td>
+                        <td>
+                            @Model.UpgradeTime
+                        </td>
+                    </tr>
+                    @*<tr>
+                            <td class="nameright border_bnone">订购时间:</td>
+                            <td class="borde_right border_bnone">
+                                @Model.CreateDate.ToString("yyyy-MM-dd")
+                            </td>
+                            <td class="nameright border_bnone">销售单来源:</td>
+                            <td class="border_bnone">
+                               分销商升舱
+                            </td>
+                        </tr>*@
+                    <tr>
+                        <td class="nameright border_top">商城订单号:</td>
+                        <td class="border_top" colspan="3">
+                            【@dealerName】@Model.MallOrderId
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>收货信息</h5>
+        </div>
+        <div class="tit_con">
+            <!--查看视图_-->
+            <table id="tAddressView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="9%" class="nameright">收货人:</td>
+                        <td width="92%" colspan="3">
+                            @(Info.CustomerName == null ? "无" : Info.CustomerName)
+                        </td>
+                        @*<td rowspan="6">
+                            <div id="frameMap" style="width:100%; height:247px"></div>
+                        </td>*@
+                    </tr>
+
+                    <tr>
+                        <td width="9%" class="nameright">收货手机:</td>
+                        <td class="borde_right" width="92%" colspan="3">
+                            @(Info.MobilePhoneNumber==null?"无":Info.MobilePhoneNumber)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="9%" class="nameright">收货电话:</td>
+                        <td width="92%" colspan="3">
+                            @(Info.MobilePhoneNumber == null ? "无" : Info.MobilePhoneNumber)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="9%" class="nameright">地区:</td>
+                        <td class="borde_right" width="92%" colspan="3">
+                            @Model.Province,@Model.City,@Model.County
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="9%" class="nameright border_bnone">地址:</td>
+                        <td class=" border_bnone" width="92%" colspan="3">
+                            @(Model.StreetAddress == null ? "无" : Model.StreetAddress)
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>支付方式</h5>
+        </div>
+        <div class="tit_con" style="display: block;">
+            <table id="tPayView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+
+                        <td width="9%" class="nameright">支付方式:</td>
+                        <td>
+                            <span id="spanPayType">
+
+                            </span>
+                        </td>
+
+                        <td width="9%" class="nameright border_bnone">优惠券:</td>
+                        <td width="41%" class="borde_right border_bnone" id="tdCouponSysName"></td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>金额汇总</h5>
+        </div>
+        <div class="tit_con" style="display: block;">
+
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="9%" class="nameright">商品总额:</td>
+                        <td width="92%" colspan="3">
+                            <span id="spanProdcutAmount">
+                                &yen;@Model.Payment.ToString("N")
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">邮费:</td>
+                        <td colspan="3">
+                            <span id="spanTaxFee">
+                                &yen;@Model.PostFee.ToString("N")
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">升舱服务费:</td>
+                        <td colspan="3">
+                            <span id="spanFreight">
+                                &yen;@Model.ServiceFee.ToString("N")
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">优惠总金额:</td>
+                        <td colspan="3">
+                            <span id="expensesFee">
+                                &yen;@Model.DiscountAmount.ToString("N")
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_bnone">合计:</td>
+                        <td colspan="3" class=" border_bnone">
+                            <span id="spanCashPay">
+                                &yen;@Model.Payment.ToString("N")
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    </form>
+</div>
+<!--商品订购信息-->
+<div class="list" style="display: none;" id="divEditOrder">
+    @Html.Partial("DealerOrderPdInfo",pdmodel)
+</div>
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        //tab选项卡
+        $("#tabboxs").tab({ tabContentObj: "#tabcon" });
+        $("#tabboxs").tab({ tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_p10", tabContent: ".list2" });
+        $("#pName").defaultValue("后台显示名称(商品编号)");
+
+        //表格数据隐藏显示
+        var clickbox = $(".tit_dispay");
+        var btnup = clickbox.children(".more10r").children("span");
+        btnup.toggle(
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").hide();
+                $(this).removeClass("btn_tableup").addClass("btn_tabledown");
+            },
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").show();
+                $(this).removeClass("btn_tabledown").addClass("btn_tableup");
+            }
+        );
+
+    });
+    //加载编辑，查看视图
+    function LoadView(isEdit) {
+        if (isEdit) {
+            $("#tAddressEdit").show();
+            $("#tAddressView").hide();
+            $("#tDeliveryEdit").show();
+            $("#tDeliveryView").hide();
+            $("#tInvoiceEdit").show();
+            $("#tInvoiceView").hide();
+            $("#btnStart").hide();
+            $("#btnSave").show();
+            $("#btnBack").show();
+            $("#tPayView").hide();
+            $("#tPayEdit").show();
+            $("#btnChecked").hide();//隐藏审核
+            $("#btnCancel").hide();//隐藏作废
+            $('.tj').css("display", "");
+
+
+        }
+        else {
+            $("#tAddressEdit").hide();
+            $("#tAddressView").show();
+            $("#tDeliveryEdit").hide();
+            $("#tDeliveryView").show();
+            $("#tInvoiceEdit").hide();
+            $("#tInvoiceView").show();
+            $("#btnStart").show();
+            $("#btnSave").hide();
+            $("#btnBack").hide();
+            $("#tPayView").show();
+            $("#tPayEdit").hide();
+            $("#btnChecked").show();//隐藏审核
+            $("#btnCancel").show();//隐藏作废
+            $('.tj').css("display", "none");
+
+        }
+        loadProductBtn();
+    }
+    function loadProductBtn() {
+        var disabled = $("#btnStart").css("display") == "none";
+        if (disabled) {
+            $("#divEditOrder button").each(function () {
+                $(this).attr("disabled", null);
+                $(this).removeClass("disabled");
+            });
+        } else {
+            $("#divEditOrder button").each(function () {
+                if ($(this).attr("notdisable") != "1") {
+                    $(this).attr("disabled", "disabled");
+                    $(this).addClass("disabled");
+                }
+            });
+        }
+    }
+
+</script>

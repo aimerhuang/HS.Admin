@@ -1,0 +1,452 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.Transfer.CBFnPaymentVoucher
+
+@{
+    int row = 0;
+    ViewBag.Title = "付款单详情";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool IsCanEdit = Model.Status != (int)Hyt.Model.WorkflowStatus.FinanceStatus.付款单状态.已付款 && Model.Status != (int)Hyt.Model.WorkflowStatus.FinanceStatus.付款单状态.作废;
+     @Html.PrivilegeControl(PrivilegeCode.FN1004201, ".FN1004201")
+    }
+@section HeadJs{
+
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+}
+<!--以下是弹出框内容-->
+<div class="boxs_detail_dispay" id="JS_combox" style="display: none;">
+    <div class="tit_con wd300">
+        <form id="newPay">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="100" class="nameright border_left"><span class="v_star">*</span>付款方式</td>
+                        <td class="border_right">
+                        
+                            @Html.DropDownList("PaymentType", ViewBag.PayTypeList  as  List<SelectListItem>, new { @class = "wd165" })
+                            @Html.HiddenFor(m => m.TransactionSysNo)
+                            @Html.Hidden("PaymentVoucherSysNo", Model.SysNo)
+                            <input type="hidden" id="hidZZ" value="@((int)Hyt.Model.WorkflowStatus.FinanceStatus.付款单付款方式.转账)" />
+                            <span id="c_PaymentType" class="prompt m10_l">选择付款方式</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_left"><span class="v_star">*</span>付款金额</td>
+                        <td class="border_right">
+                            <input id="txtAmount" name="Amount" type="text" class="wd150 m10_r" maxlength="10">
+                            <span id="c_txtAmount" class="prompt m10_l">输入付款金额</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td class="nameright border_left">交易凭证号</td>
+                        <td class="border_right">
+                            <input id="txtVoucherNo" name="VoucherNo" type="text" class="wd150 m10_r" maxlength="20">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table id="tbBank" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone" style="display: none">
+                <tbody>
+                    <tr>
+                        <td class="nameright border_left" width="100"><span class="v_star">*</span>收款人开户姓名</td>
+                        <td class="border_right">
+                            <input id="txtRefundAccountName" name="RefundAccountName" type="text" class="wd150 m10_r" maxlength="10">
+                            <span id="c_txtRefundAccountName" class="prompt m10_l">填写开户姓名</span>
+
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_left" width="100"><span class="v_star">*</span>收款人开户行</td>
+                        <td class="border_right">
+                            <input id="txtRefundBank" name="RefundBank" type="text" class="wd150 m10_r" maxlength="50">
+                            <span id="c_txtRefundBank" class="prompt m10_l">填写开户行</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_left" width="100"><span class="v_star">*</span>收款人银行帐号</td>
+                        <td class="border_right">
+                            <input id="txtRefundAccount" name="RefundAccount" type="text" class="wd150 m10_r" maxlength="30">
+                            <span id="c_txtRefundAccount" class="prompt m10_l">填写银行帐号</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<!--弹出内容end-->
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>付款单</h3>
+        </div>
+        <div class="boxs_con_p10">
+             @{
+               
+                var hasComplete = Model.PaidAmount >= Model.PayableAmount ;
+            }
+            @if (IsCanEdit)
+{
+    <div class="boxs_tool boxs_toolbgnone p0_l" style="padding: 5px 10px 10px 10px;">
+        <div class="left_tool">
+            <button id="btnAdd" class="btn btn_blue btn_ht26 m10_r"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增明细</span></button>
+            @if (hasComplete)
+            {
+                <button id="btnComplete" class="btn btn_ht26 m10_r btn_blue" onclick="Complete(@Model.SysNo)"><span class="icon icon_ok icon_white"></span><span class="m5_l">完成付款</span></button>
+            }
+        </div>
+    </div>
+
+}
+            <div class="boxs_detail_dispay">
+                <div class="head_detail border_bnone">
+                    <h5>付款单详情</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1">
+                        <tbody>
+                            <tr>
+                                <td width="150" class="nameright">付款单编号:</td>
+                                <td width="40%" class="border_right">@Model.SysNo</td>
+                                <td width="150" class="nameright">付款单来源:</td>
+                                <td>
+                                    @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款来源类型), Model.Source)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">状态:</td>
+                                <td class="border_right">
+                                    @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款单状态), Model.Status)
+                                </td>
+                                <td class="nameright">来源单据编号:</td>
+                                <td>@Model.SourceSysNo</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">应付金额:</td>
+                                <td class="border_right">&yen;@Model.PayableAmount.ToString("N")
+                                    <input type="hidden" id="hidPayAmount" value="@((Model.PayableAmount - Model.PaidAmount))" />
+                                </td>
+                                <td class="nameright">收款人开户姓名:</td>
+                                <td>
+                                    @Model.RefundAccountName &nbsp;&nbsp;&nbsp;支付方式：@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款单付款方式), Model.PaymentType)
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">已付金额:</td>
+                                <td class="border_right red">&yen;@Model.PaidAmount.ToString("N")</td>
+                                <td class="nameright">收款人开户行:</td>
+                                <td>
+                                    @Model.RefundBank &nbsp;
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">待付金额:</td>
+                                <td class="border_right red">&yen;@((Model.PayableAmount - Model.PaidAmount).ToString("N"))
+                                    <input type="hidden" id="hidNeedPay" value="@((Model.PayableAmount - Model.PaidAmount))" />
+                                </td>
+                                <td class="nameright">收款人银行帐号:</td>
+                                <td>
+                                    @Model.RefundAccount &nbsp;
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="head_detail m10_t">
+                    <h5>付款单明细</h5>
+                </div>
+                <div class="boxs_detail border_lnone align_c">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1">
+                        <thead>
+                            <tr>
+                                <th width="60" class="border_lnone">付款方式</th>
+                                <th width="100">原收款方式</th>
+
+                                <th width="70">付款金额</th>
+                                <th width="100">交易凭证号</th>
+                                <th>付款信息</th>
+                                <th width="60">创建人</th>
+                                <th width="120">创建时间</th>
+                                <th width="70">付款确认人</th>
+                                <th width="120">付款确认时间</th>
+                                <th width="100">状态</th>
+                                @if (IsCanEdit)
+                                {
+                                    <th width="148">操作</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.VoucherItems != null)
+                            {
+                                foreach (Hyt.Model.FnPaymentVoucherItem item in Model.VoucherItems)
+                                {
+                                    row++;
+                                    <tr @{if (row % 2 == 0)
+                                        {<text>class='stag_color'</text>}}>
+                                        <td class="border_lnone">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款单付款方式), item.PaymentType)</td>
+                                        <td>
+                                            @{
+                                                var p = Hyt.BLL.Basic.PaymentTypeBo.Instance.GetEntity(item.OriginalPaymentTypeSysNo);
+                                                if (p != null)
+                                                {
+                                                    <text>@p.PaymentName</text>
+                                                }        
+                                            }
+                                        </td>
+
+                                        <td align="right" class="p10_r red">&yen;@item.Amount.ToString("N")</td>
+                                        <td>@item.VoucherNo</td>
+                                        <td class="p10_l" align="left">
+                                            @if (item.PaymentType == (int)Hyt.Model.WorkflowStatus.FinanceStatus.付款单付款方式.转账)
+                                            {
+                                                <p>姓名:@item.RefundAccountName</p>
+                                                <p>开户行:@item.RefundBank</p>
+                                                <p>帐号:@item.RefundAccount</p>
+                                            }
+
+                                        </td>
+                                        <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+                                        <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:ss")</td>
+                                        <td>
+                                            @if (item.PayerSysNo > 0)
+                                            {
+                                                <text>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.CreatedBy)</text>   
+                                            }
+                                        </td>
+                                        <td>
+                                            @if (item.PayDate > DateTime.MinValue)
+                                            {
+                                                <text>@item.CreatedDate.ToString("yyyy-MM-dd HH:ss")</text>   
+                                            }
+                                        </td>
+                                        <td id='@MvcHtmlString.Create("tdItem_" + item.SysNo)'>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款单明细状态), item.Status)</td>
+                                        @if (IsCanEdit)
+                                        {
+                                            <td>
+                                                @if (item.Status == (int) Hyt.Model.WorkflowStatus.FinanceStatus.付款单明细状态.待付款)
+                                                {
+                                                    <button name="Sure" class="btn btn_blue btn_ht26 m10_r FN1004201" type="button"  onclick=" Sure(@item.SysNo) "><span class="icon_ok icon_white"></span><span class="m5_l">确认</span></button><button name="Cancel" class="btn btn_red btn_ht26 FN1004201" type="button" onclick=" Cancel(@item.SysNo) "><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                                                }
+                                                @if (item.Status == (int)Hyt.Model.WorkflowStatus.FinanceStatus.付款单明细状态.已付款)
+                                                {<button name="UnSure" class="btn btn_red btn_ht26 m10_r FN1004201" type="button" onclick="UnSure(@item.SysNo)"><span class="icon_remove icon_white"></span><span class="m5_l">取消确认</span></button>}
+                                            </td>
+                                        }
+
+                                    </tr>
+                                }
+                            }
+                            @if (row < 1)
+                            {
+                                if (IsCanEdit)
+                                {
+                                    <tr>
+                                        <td colspan="11" class="align_l p10_l bgr_eb border_lnone ">暂无数据。</td>
+                                    </tr>
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="10" class="align_l p10_l bgr_eb border_lnone">暂无数据。</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@section FooterJs{
+
+    <script lang="javascript" type="text/javascript">
+        var setting;
+        $(document).ready(function (e) {
+            LoadRule();
+            $("#PaymentType").bind("change", function () {
+                var flg = this.value == $("#hidZZ").val();
+                if (flg) {
+                    $("#tbBank").css("display", "block");
+                    $('#txtRefundAccountName').rules('add', {
+                        required: true
+                    });
+                    $('#txtRefundBank').rules('add', {
+                        required: true
+
+                    });
+                    $('#txtRefundAccount').rules('add', {
+                        required: true
+                    });
+                    $('#txtRefundAccount').val('@Model.RefundAccount');
+                    $('#txtRefundBank').val('@Model.RefundBank');
+                    $('#txtRefundAccountName').val('@Model.RefundAccountName');
+                }
+                else {
+                    $("#tbBank").css("display", "none");
+                    $('#txtRefundAccount').rules('remove');
+                    $('#txtRefundBank').rules('remove');
+                    $('#txtRefundAccountName').rules('remove');
+                    $('#txtRefundAccount').val("");
+                    $('#txtRefundBank').val("");
+                    $('#txtRefundAccountName').val("");
+                }
+            });
+            $("#btnAdd").click(function () {
+                $("#PaymentType").val("");
+                UI.DialogBox({
+                    content: document.getElementById('JS_combox'), title: '新增付款单明细', padding: '10px', okVal: '保存', parent: false,
+                    ok: function () { return SaveFrom(); },
+                    width: 300, cancelVal: '取消',
+                    cancel: true,
+                    footerClass: 'aui_none'
+                })
+            });
+        });
+
+        //保存表单
+        function SaveFrom() {
+            if (!setting.form()) {
+                return false;
+            }
+            if (parseFloat($("#txtAmount").val()) > parseFloat($("#hidNeedPay").val())) {
+                UI.tips.tip_alert('tips_warning', '付款金额不能大于待付金额');
+                return false;
+            }
+            $.ajax({
+                url: '/Finance/AddVoucherItem',
+                type: 'POST',
+                cache: false,
+                data: $('#newPay').serialize(),
+                success: function (result) {
+                    if (!result.Status) {
+                        UI.DialogBox({ content: result.Message });
+                        return false;
+                    } else {
+                        $('#newPay')[0].reset();
+                        $("#tbBank").css("display", "none");
+                        location.reload();
+                        return true;
+
+                    }
+                }
+            });
+        }
+        //加载验证规则
+        function LoadRule() {
+            setting = $("#newPay").validate({
+                rules: {
+                    PaymentType: {
+                        required: true
+                    },
+                    Amount: {
+                        required: true,
+                        number: true,
+                        min: 0
+                    },
+                    RefundAccountName: {
+                        required: false
+                    },
+                    RefundAccountName: {
+                        required: false
+                    },
+                    RefundAccountName: {
+                        required: false
+                    },
+                    RefundBank: {
+                        required: false
+                    },
+                    RefundAccount: {
+                        required: false
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+                },
+                ignore: "",
+                debug: true
+            });
+        }
+        //作废
+        function Cancel(id) {
+            UI.Confirm({
+                content: "您确定要作废此付款明细?",
+                ok: function () {
+                    $.post('/Finance/CancelVoucherItem', { sysNo: id }, function (result) {
+                        if (!result.Status) {
+                            UI.Alert({ content: result.Message });
+                            return false;
+                        }
+                        else {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        }
+        //确认付款
+        function Sure(id) {
+            UI.Confirm({
+                content: "确认已付款?",
+                ok: function () {
+                    $.post('/Finance/ConfirmPaymentVoucherItem', { sysNo: id }, function (result) {
+                        if (!result.Status) {
+                            UI.Alert({ content: result.Message });
+                            return false;
+                        }
+                        else {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        }
+        //取消确认
+        function UnSure(id) {
+            UI.Confirm({
+                content: "您真的要取消确认?",
+                ok: function () {
+                    $.post('/Finance/CancelConfirmPaymentVoucherItem', { sysNo: id }, function (result) {
+                        if (!result.Status) {
+                            UI.Alert({ content: result.Message });
+                            return false;
+                        }
+                        else {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        }
+        //完成
+        function Complete(id) {
+            if (parseFloat($("#hidNeedPay").val()) > 0) {
+                UI.tips.tip_alert('tips_warning', '存在待付金额，不满足完成付款条件');
+                return;
+            };
+            UI.Confirm({
+                content: "当前操作不可恢复，您确认完成付款?",
+                ok: function () {
+
+                    $.post('/Finance/CompletePayment', { sysNo: id }, function (result) {
+                        if (!result.Status) {
+                            UI.Alert({ content: result.Message });
+                            return false;
+                        }
+                        else {
+                            location.reload();
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+}

@@ -1,0 +1,120 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+
+@{
+    ViewBag.Title = "快递单编辑";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#OverseaCarrierForm").validate({
+                rules: {
+                    OverseaTrackingNo: {
+                        required: true
+                         , maxlength: 100
+                    },
+                    ServiceCode: {
+                        required: true
+                    }
+                },
+                messages: {
+                    OverseaTrackingNo: {
+                        required: "包裹单号必填"
+                       , maxlength: "长度超出100个字"
+                    },
+                    ServiceCode: {
+                        required: "快件类型必填"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法    //$("#OverseaCarrierForm").serialize()
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#OverseaCarrierForm").valid()) {
+                                $.post('/Order/SendOrder', { "soOrderSysNo": $("#soOrderSysNo").val(), "OverseaTrackingNo": $.trim($("#OverseaTrackingNo").val()), "ServiceCode": $("#ServiceCode").val() }, function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doComplexSearch(1);
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="OverseaCarrierForm" name="OverseaCarrierForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>包裹单号</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="OverseaTrackingNo" id="OverseaTrackingNo" class="wd200" value="" maxlength="100" /><span class="prompt m10_l" id="c_OverseaTrackingNo">填写包裹单号</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>快线类型</td>
+                            <td width="80%" class="borde_right">
+                                <select id="ServiceCode" class="wd200">
+                                    <option value="US2CN">身份证快线</option>
+                                    <option value="US2HKQUICK">邮政快线</option>
+                                    <option value="US2CNTAX">关税补贴快线</option>
+                                </select><span class="prompt m10_l" id="c_ServiceCode">选择快线类型</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" id="soOrderSysNo" value="@ViewBag.soOrderSysNo" />
+            <input type="hidden" id="OverseaCarrier" value="@ViewBag.OverseaCarrier" />
+        </div>
+
+    </form>
+</div>

@@ -1,0 +1,247 @@
+﻿@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "配送结算单打印（分销）";
+}
+@using Hyt.BLL.Product
+@model Hyt.Model.Transfer.PrtDsDelivery
+<style type="text/css" id="style2">
+    .al_c { text-align: center!important; }
+    .al_l { text-align: left; }
+    .pd_lr5 { padding-left: 5px;padding-right: 5px; }
+</style>
+<div id="print">
+    <div id="divmain" class="divdisplay">
+        <div class="print_title">配送结算单(@Model.SysNo)</div>
+        <table class="main_tb">
+            <tr>
+                <td class="main_title">配送员：</td>
+                <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(Model.DeliveryUserSysNo)（@(Model.List.Count)单）</td>
+                <td class="main_title">配送时间：</td>
+                <td>@Model.CreatedDate.ToString("yyyy-MM-dd")</td>
+                <td class="main_title">出库仓库：</td>
+                <td>@Model.WareHouseName</td>
+            </tr>
+        </table>
+
+    </div>
+
+    <div id="divitem" class="divdisplay">
+        <table class="item_tb">
+            @if (null != Model && Model.List.Count > 0)
+            {
+                var i = 1;
+
+                foreach (var item in Model.List)
+                {
+                    var titleColumnSpan = 4;
+                      
+                    <tr>
+                        <td rowspan="@(item.PdList.Count + 4)">@i</td>
+                        <td rowspan="@(item.PdList.Count + 4)">@item.OrderSysNo
+                            <br />@item.NoteTypeName
+                        </td>
+                        <td>@item.ShopName </td>
+                        
+                        @if (Model.ParentSysNo == Hyt.Model.SystemPredefined.DeliveryType.第三方快递)
+                        {
+                            titleColumnSpan = 5;
+                        }
+                        <td class="al_l pd_lr5" colspan="@titleColumnSpan">@item.Name  @item.MobilePhoneNumber @item.PhoneNumber<br />@(item.AreaAllName)@item.StreetAddress</td>
+                    </tr>
+                
+                    <tr>
+                        <th class="al_c">商品名称</th>
+                        <th class="al_c" width="35">数量</th>
+                        <th class="al_c">单价</th>
+                        <th class="al_c">小计</th>
+                        <th class="al_c" width="60">支付方式</th>
+                        @if (Model.ParentSysNo == Hyt.Model.SystemPredefined.DeliveryType.第三方快递)
+                        {
+                            <th class="al_c">物流信息</th>
+                        }
+                    </tr>
+                
+                        if (null != item.PdList && item.PdList.Count > 0)
+                        {
+                                    var tdRowspan = string.Empty;
+                                    if (item.PdList.Count > 1)
+                                    {
+                                        tdRowspan = "rowspan=" + item.PdList.Count;
+                                    }
+                                    <tr>
+                                        <td class="al_l pd_lr5">@(item.PdList[0].ErpCode)★@item.PdList[0].MallOrderId<br />
+                                            @PdProductBo.Instance.GetProductEasName(item.PdList[0].ProductSysNo) </td>
+                                        <th>@item.PdList[0].ProductQuantity</th>
+                                        <th>@item.PdList[0].OriginalPrice.ToString("C")</th>
+                                        <th>@item.PdList[0].RealSalesAmount.ToString("C")</th>
+                                        <td @tdRowspan>@item.PdList[0].PaymentName</td>
+
+                                        @if (Model.ParentSysNo == Hyt.Model.SystemPredefined.DeliveryType.第三方快递)
+                                        {
+                                            <td class="al_c" @tdRowspan>@(item.DeliveryTypeName)*@item.ExpressNo</td>
+                                        }
+                                    </tr>
+                        
+                                    for (var j = 0; j < item.PdList.Count; j++)
+                                    {
+                                        if (j <= 0)
+                                        {
+                                            continue;
+                                        }
+                                        <tr>
+                                            <td class="al_l pd_lr5">@item.PdList[j].ErpCode★@(item.PdList[j].MallOrderId)<br />
+                                                @PdProductBo.Instance.GetProductEasName(item.PdList[j].ProductSysNo) </td>
+                                            <th>@item.PdList[j].ProductQuantity</th>
+                                            <th>@item.PdList[j].OriginalPrice.ToString("C")</th>
+                                            <th>@item.PdList[j].RealSalesAmount.ToString("C")</th>
+                                        </tr>
+                                    }
+
+                                    var spCoupon = Hyt.BLL.Order.SoOrderBo.Instance.GetCouponByOrderSysNo(item.OrderSysNo);
+                                    var couponRemark = string.Empty;//优惠卷备注
+                                    var stockOutRemark = string.Empty;//出库单备注
+                                    if (spCoupon != null && spCoupon.Any())
+                                    {
+                                        couponRemark = "【" + spCoupon[0].Description + "】";
+                                    }
+                                    if (!string.IsNullOrEmpty(item.StockOutRemarks))
+                                    {
+                                        stockOutRemark = "【" + item.StockOutRemarks + "】";
+                                    }
+                                    
+                                    var columnSpan = 5;
+                                    if (Model.ParentSysNo == Hyt.Model.SystemPredefined.DeliveryType.第三方快递)
+                                    {
+                                        columnSpan = 6;
+                                    }
+                                    <tr>
+                                        <td colspan="@columnSpan" style="text-align: right">出库金额：@item.StockOutAmount.ToString("C")  运费：@item.FreightAmount.ToString("C")  应收：@item.Receivable.ToString("C")  实收：&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="@columnSpan" style="text-align: left">备注：@stockOutRemark @couponRemark</td>
+                                    </tr>
+                        }
+                        i++;
+                }
+
+
+            }
+        </table>
+    </div>
+
+    <div id="divfoot" class="divdisplay">
+
+        <table class="foot_subtb">
+            <tr>
+                <td rowspan="7" style="width: 3%;">结算统计</td>
+                <td colspan="6" style="width: 85%;">订单统计</td>
+
+                <td style="width: 12%;"></td>
+            </tr>
+            <tr>
+                <td>订单类型</td>
+                <td>应送订单</td>
+                <td>实送订单</td>
+
+                <td>派送订单</td>
+                <td>应收款</td>
+                <td>实收款</td>
+
+                <td>备注</td>
+            </tr>
+            <tr>
+                <td>商城</td>
+                <td></td>
+                <td></td>
+                <td>商城</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>升舱订单</td>
+                <td></td>
+                <td></td>
+                <td>升舱订单</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>分销订单</td>
+                <td></td>
+                <td></td>
+                <td>分销订单</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>RMA派送</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <td>RMA取件</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+
+        </table>
+
+
+        <table class="foot_tb_settlement">
+            <tr>
+                <td>配货员(库管)：</td>
+                <td>配送人/交款人：</td>
+                <td>收货人(库管)：</td>
+                <td>收款人(内勤)：</td>
+            </tr>
+        </table>
+
+    </div>
+</div>
+
+@section FooterJs
+{
+    <script type="text/javascript">
+
+         
+
+        function CreatePrintPage() {
+            LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+            LODOP.PRINT_INIT("结算单打印");
+            LODOP.SET_PRINT_PAGESIZE(1, 0, 0, 'A4');
+
+            var strStyle = "<style>" + document.getElementById("style1").innerHTML + document.getElementById("style2").innerHTML + "</style>";
+            LODOP.ADD_PRINT_HTM(20, "4%", "92%", "BottomMargin:20px", strStyle + document.getElementById("print").innerHTML);
+
+            // LODOP.ADD_PRINT_TABLE(88, "5%", "90%", 275, strStyle + document.getElementById("divitem").innerHTML); //明细
+            // LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+            // LODOP.ADD_PRINT_HTM(20, "5%", "90%", 60, strStyle + document.getElementById("divmain").innerHTML);//头
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);//页眉页脚
+            //// LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            // LODOP.ADD_PRINT_HTM(365, "5%", "90%", 450, strStyle + document.getElementById("divfoot").innerHTML); //脚
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            // LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            LODOP.ADD_PRINT_TEXT(3, "86%", 135, 20, "第#页/共&页");
+            LODOP.SET_PRINT_STYLEA(0, "ItemType", 2);
+            LODOP.SET_PRINT_STYLEA(0, "Horient", 1);
+
+        }
+
+
+    </script>
+
+}

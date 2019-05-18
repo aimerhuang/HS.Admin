@@ -1,0 +1,55 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.OutboundReturn>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="110">一号仓的运单号</th>
+                <th width="110">被推送订单编号</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.OutboundReturn>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>@item.OutboundOrderNo</td>
+                <td>@item.soOrderSysNo</td>                
+                <td>
+                    @if (item.Code == "0")
+                    { 
+                        <button class="btn btn_ht26 btn_blue" onclick="Query('@{@item.OutboundOrderNo}')"><span class="icon_pencil icon_white"></span><span class="m5_l">运单追踪</span></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_ht26 btn_blue" disabled="disabled" style="background: #C1C1C1; border: 1px solid #C1C1C1; "><span class="icon_pencil icon_white"></span><span class="m5_l">运单追踪</span></button>
+                    }     
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

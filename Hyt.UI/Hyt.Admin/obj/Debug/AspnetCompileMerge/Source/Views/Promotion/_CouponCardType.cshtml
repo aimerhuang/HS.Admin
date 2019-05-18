@@ -1,0 +1,61 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.SpCouponCardType>
+@{
+    
+ @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.SP1006902, ".SP1006902")
+}
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="70">系统编号</th>
+                <th>类型名称</th>
+                <th width="140">起始时间</th>
+                <th width="140">截止时间</th>
+                <th width="50">状态</th>
+                <th width="140">最后更新时间</th>
+                <th class="borde_r_none" width="150">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                <tr>
+                    <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                int i = 0;
+                foreach (var item in Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    } 
+                <td>@item.SysNo</td>
+                <td>@item.TypeName</td>
+                <td>@item.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.EndTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.优惠券卡类型状态), item.Status)</td>
+                <td>@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    <button class="editUser btn btn_ht26 btn_blue m10_l SP1006902" onclick="Edit(@item.SysNo)">
+                        <span class="icon_pencil icon_white"></span><span class="m5_l">修改</span>
+
+                    </button>
+                    <button class="btn btn_ht26 m10_l btn_red SP1006902" onclick="Delete(@item.SysNo,this)"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,955 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.CBSpPromotion
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var promotionCode = ViewBag.PromotionCode;
+}
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/numbercontrol.js")" ></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<form id="form" method="POST" name="form">
+    <div class="case">
+        <div class="boxs" id="tabboxs" style="overflow: visible;">
+            <div class="head_tab">
+                <ul class="tabNav2">
+                    <li class="long menuon"><a href="javascript:void(0);">促销</a></li>
+                    <li class=""><a href="javascript:void(0);">促销赠品@{if (Model.PromotionGifts != null)
+                                                                     {@Html.Raw("(" + @Model.PromotionGifts.Count + ")")}}</a></li>
+                    <li class="" style="display:none"><a href="javascript:void(0);">促销叠加@{if (Model.PromotionOverlays != null)
+                                                                     {@Html.Raw("(" + @Model.PromotionOverlays.Length + ")")}}</a></li>
+                </ul>
+            </div>
+            <div id="tabcon" class="boxs_con_c1" id="tabcon">
+
+                <div class="list2">
+                    <div class="boxs_detail_dispay">
+                        <div class="tit_con">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                                <tbody>
+                                    <tr>
+                                        <td class="nameright" width="180"><span class="v_star">*</span>促销名称</td>
+                                        <td colspan="3">
+                                            <input type="text" name="Name" id="Name" save="Name" maxlength="50" value="@if (Model.Promotion != null)
+                                                                                                                       {@Model.Promotion.Name
+                                                                                                                       }" class="wd600"><span class="prompt m10_l" id="c_Name">填写促销名称</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"></td>
+                                        <td width="365" class="border_right">
+                                            <input type="checkbox"  name="IsUsePromotionCode" id="IsUsePromotionCode" save="IsUsePromotionCode"  value="@if (Model.Promotion != null)
+                                                                                                                                                        {@Model.Promotion.IsUsePromotionCode
+                                                                                                                                                        }" 
+                                           @if (Model.Promotion != null && Model.Promotion.IsUsePromotionCode == 1)
+                                           {@:checked="checked"
+                                          }" class="m10_r">是否使用促销码</td>
+                                        <td class="nameright" width="150">促销码</td>
+                                        <td>
+                                            <input type="text"  class="wd156" name="PromotionCode" id="PromotionCode" save="PromotionCode" maxlength="50"  @if (Model.Promotion == null || (Model.Promotion != null && Model.Promotion.IsUsePromotionCode == 0))
+                                                                                                                                                           {@:disabled="true"
+                                          }"  value="@if (Model.Promotion != null)
+                                                     {@Model.Promotion.PromotionCode
+                                                     }" ><span class="prompt m10_l" id="c_PromotionCode">填写促销码</span></td>
+
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright" valign="top"><span class="v_star">*</span>促销描述</td>
+                                        <td colspan="3">
+                                            <textarea class="wd600" name="Description" id="Description" save="Description">@if (Model.Promotion != null)
+                                                                                                                           {@Model.Promotion.Description
+                                                                                                                           }</textarea><span class="prompt m10_l" id="c_Description">填写促销描述</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>促销类型</td>
+                                        <td class="border_right">
+                                            <select class="wd170" name="PromotionType" id="PromotionType" save="PromotionType">
+                                                @{
+                                                    List<SelectListItem> lst = new List<SelectListItem>();
+                                                    Hyt.Util.EnumUtil.ToListItem<Hyt.Model.WorkflowStatus.PromotionStatus.促销应用类型>(ref lst);
+
+                                                    foreach (var item in lst)
+                                                    {
+                                                    <option  value="@item.Value" @if (Model.Promotion != null && Model.Promotion.PromotionType == int.Parse(item.Value))
+                                                                                 {
+                                                                                     @:selected="selected"
+                                                                                 }>@item.Text</option>
+                                                    }
+                                                    lst.Insert(0, new SelectListItem { Text = "--请选择--", Value = string.Empty });
+                                                }
+                                            </select>
+                                            <span class="prompt m10_l" id="c_PromotionType">选择促销类型</span>
+                                        </td>
+                                        <td class="nameright"><span class="v_star">*</span>促销展示前缀</td>
+                                        <td>
+                                            <input type="text" class="wd156" name="DisplayPrefix" id="DisplayPrefix" save="DisplayPrefix" maxlength="20" value="@if (Model.Promotion != null)
+                                                                                                                                                                {@Model.Promotion.DisplayPrefix
+                                                                                                                                                                }"><span class="prompt m10_l" id="c_DisplayPrefix">填写促销展示前缀</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright">活动主题URL</td>
+                                        <td colspan="3">
+                                            <input type="text" name="SubjectUrl"  id="SubjectUrl" save="SubjectUrl" maxlength="150" value="@if (Model.Promotion != null)
+                                                                                                                                           {@Model.Promotion.SubjectUrl
+                                                                                                                                           }" class="wd600"></td>
+                                </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>活动开始时间</td>
+                                        <td width="265" class="border_right">
+                                            <div class="date_btn fl">
+                                                <input type="text" name="StartTime"  id="StartTime" save="StartTime" maxlength="20" value="@if (Model.Promotion != null)
+                                                                                                                                           {@Model.Promotion.StartTime.ToString("yyyy-MM-dd HH:mm")
+                                                                                                                                           }" class="input_ht26">
+                                                <button onclick="UI.Date({el:'StartTime',dateFmt:'yyyy-MM-dd HH:mm'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l" id="c_StartTime">选择活动开始时间</span></td>
+                                        <td class="nameright" width="150"><span class="v_star">*</span>活动结束时间</td>
+                                        <td>
+                                            <div class="date_btn fl">
+                                                <input type="text" name="EndTime"  id="EndTime" save="EndTime" maxlength="20" value="@if (Model.Promotion != null)
+                                                                                                                                     {@Model.Promotion.EndTime.ToString("yyyy-MM-dd HH:mm")
+                                                                                                                                     }" class="input_ht26">
+                                                <button onclick="UI.Date({el:'EndTime',dateFmt:'yyyy-MM-dd HH:mm'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l" id="c_EndTime">结束日期不能小于开始日期</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>允许使用促销次数</td>
+                                        <td class="border_right">
+                                            <input type="text" name="PromotionUseQuantity"  class="number" id="PromotionUseQuantity" save="PromotionUseQuantity" maxlength="20" value="@if (Model.Promotion != null)
+                                                                                                                                                                                       {@Model.Promotion.PromotionUseQuantity
+                                                                                                                                                                                       }" class="wd156">
+                                            <span class="prompt m10_l" id="c_PromotionUseQuantity">填写允许使用促销次数</span></td>
+                                        <td class="nameright">促销已使用次数:</td>
+                                        <td>@if (Model.Promotion != null)
+                                            {@Model.Promotion.PromotionUsedQuantity}
+                                            else
+                                            {@Html.Raw("0")}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>用户使用次数限制</td>
+                                        <td class="border_right">
+                                            <input type="text" name="UserUseQuantity" class="number"  id="UserUseQuantity" save="UserUseQuantity" maxlength="7" value="@if (Model.Promotion != null)
+                                                                                                                                                                       {@Model.Promotion.UserUseQuantity
+                                                                                                                                                                       }" class="wd156"><span class="prompt m10_l" id="c_UserUseQuantity">填写用户使用次数限制</span></td>
+                                        <td class="nameright"><span class="v_star">*</span>促销优先级</td>
+                                        <td>
+                                            <input type="text" name="Priority" id="Priority" class="number" save="Priority" maxlength="7" value="@if (Model.Promotion != null)
+                                                                                                                                                 {@Model.Promotion.Priority
+                                                                                                                                                 }" class="wd156">
+                                            <span class="prompt m10_l" id="c_Priority">填写促销优先级</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">使用平台</td>
+                                        <td colspan="3">
+                                            <input type="checkbox" id="WebPlatform" name="WebPlatform" @((Model.Promotion != null && PromotionStatus.商城使用.是.GetHashCode()==Model.Promotion.WebPlatform)?"checked":"")> PC商城 　
+                                            <input type="checkbox" id="ShopPlatform" name="ShopPlatform" @((Model.Promotion != null && PromotionStatus.门店使用.是.GetHashCode()==Model.Promotion.ShopPlatform)?"checked":"")> 门店 　
+                                            <input type="checkbox" id="MallAppPlatform" name="MallAppPlatform" @((Model.Promotion != null && PromotionStatus.手机商城使用.是.GetHashCode()==Model.Promotion.MallAppPlatform)?"checked":"")> 手机商城 　
+                                            <input type="checkbox" id="LogisticsAppPlatform" name="LogisticsAppPlatform" @((Model.Promotion != null && PromotionStatus.物流App使用.是.GetHashCode()==Model.Promotion.LogisticsAppPlatform)?"checked":"")> 物流App 　
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>促销规则</td>
+                                        <td colspan="3"><span id="PromotionRuleName" name="PromotionRuleName">@if (Model.PromotionRule != null)
+                                                                                                              {@Model.PromotionRule.Name
+                                                                                                              } </span>
+                                            <button title="选择" class="btn btn_ht26 m10_l" onclick="selectRules();return false;"><span class="icon_tosee"></span><span class="m5_l">选择</span></button>
+                                            <span class="prompt m10_l" id="c_PromotionRuleSysNo">选择促销规则</span></td>
+                                        <input type="hidden" id="PromotionRuleSysNo" name="PromotionRuleSysNo" value="@if (Model.PromotionRule != null)
+                                                                                                                      {@Model.PromotionRule.SysNo}"/>
+                                        <input type="hidden" id="PromotionRuleType" name="PromotionRuleType" value="@if (Model.PromotionRule != null)
+                                                                                                                    {@Model.PromotionRule.RuleType}"/>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="boxs_detail border_lnone" id="ruleList" @if (Model.PromotionRuleKeyValues == null || Model.PromotionRuleKeyValues.Count == 0)
+                                                                            { @:style="display: none"
+                        }>
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lefte1 border_righte1">
+                                <thead>
+                                    <tr>
+                                        <th width="250" class="border_lnone">促销KEY</th>
+                                        <th width="134">促销VALUE</th>
+                                        <th>描述</th>
+                                        <th width="82" class="border_rnone hide">操作</th>
+                                        <th style="display: none">系统编号</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="RuleKeyValues_list">
+                                    @{
+                                        if (Model.PromotionRuleKeyValues != null)
+                                        {
+                                            int row = 0;
+                                            foreach (var item in Model.PromotionRuleKeyValues)
+                                            {
+                                                row++;
+                                        <tr  @{
+                                                if (row % 2 == 0)
+                                                {
+                                                             <text>class='stag_color'</text>
+                                                }
+                                                     }>
+                                            <td class="border_lnone">@item.RuleKey</td>
+                                            <td><input type="text" name="" class="wd100" id="@item.RuleKey" value="@item.RuleValue" /></td>
+                                            <td align="left" class="p10_l">@if (item.RuleKey == "product_sysno")
+                                                                           {
+                                                                               <button class="btn btn_ht28 m10_r" onclick="SelectProduct();return false;"><span class="icon_search"></span><span class="m5_l">选择商品</span></button>                                                                         
+                                                                           }
+                                                                               <span>@item.Description</span>
+</td>
+                                            <td class="border_rnone">
+                                                <button title="删除" class="btn btn_ht26 hide" type="button" onclick="DeleteItem(this) "><span class="icon_trash"></span><span class="m5_l">删除</span></button></td>
+                                            <td style="display: none">@item.SysNo</td>
+                                        </tr>
+                                            }
+                                        }
+                                        else
+                                        {
+                                        <tr>
+                                            <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                        </tr>
+                                        }}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="list2" style="display: none;">
+                    <div class="boxs_tool">
+                        <div class="left_tool">
+                        <button type="button"  id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m5_l btn_blue"><span class="icon_importing icon_white m10_l m5_r"></span><span>Excel赠品导入</span></button><button class="btn btn_ht26 m10_l" id="btnExport" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载模板</span></button><button class="btn btn_ht28 m10_l" onclick="selectProducts();return false;"><span class="icon_search"></span><span class="m5_l">选择赠品</span></button>
+                    <iframe id="ifrmImport" name="ifrmImport" src="@Url.Action("ImportPromotionGift")" class="hide"></iframe>
+                        </div>
+                    </div>
+                    <div class="boxs_listtabel">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_bnone">
+                            <thead>
+                                <tr>
+                                    <th width="100">商品编号</th>
+                                    <th>后台显示名称</th>
+                                    <th width="100">赠品原价</th>
+                                    <th width="134">加购价</th>
+                                    <th width="134">所需最小金额</th>
+                                    <th width="134">所需最大金额</th>
+                                    <th width="134">最大销售数量</th>
+                                    <th width="90">已销售数量</th>
+                                    <th width="82" class="border_rnone">操作</th>
+                                    <th style="display: none">系统编号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product_list">
+                                @{
+                                    if (Model.PromotionGifts != null)
+                                    {
+                                        int row = 0;
+                                        foreach (Hyt.Model.SpPromotionGift item in Model.PromotionGifts)
+                                        {
+                                            row++;
+                                    <tr  @{
+                                            if (row % 2 == 0)
+                                            {
+                                                     <text>class='stag_color'</text>
+                                            }
+                                             }>
+                                        <td>@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                                        <td>@item.ProductName</td>
+                                        <td class="align_r red p10_r">&yen;@{
+                                            var basePrice = Hyt.BLL.Web.PdProductBo.Instance.GetProductPrice(item.ProductSysNo, ProductStatus.产品价格来源.基础价格, 0);
+                                            if (basePrice != null)
+                                            {
+                                            @basePrice.Price
+                                            }
+                                        }</td>
+                                        <td>
+                                            <input type="text" class="wd60 number_input PurchasePrice"  name="PurchasePrice" maxlength="8" value="@item.PurchasePrice"/></td>
+                                        <td>
+                                            <input type="text" class="wd60 number_input RequirementMinAmount"  name="RequirementMinAmount" maxlength="8" value="@item.RequirementMinAmount"/></td>
+                                        <td>
+                                            <input type="text" class="wd60 number_input RequirementMaxAmount"  name="RequirementMaxAmount" maxlength="8" value="@item.RequirementMaxAmount"/></td>
+                                        <td>
+                                            <input type="text" class="wd60 number_input MaxSaleQuantity"  name="MaxSaleQuantity" maxlength="9" value="@item.MaxSaleQuantity"/></td>
+                                        <td class="align_r red p10_r">@item.UsedSaleQuantity</td>
+                                        <td class="border_rnone">
+                                            <button title="删除" class="btn btn_ht26" type="button" onclick=" DeleteItem(this) "><span class="icon_trash"></span><span class="m5_l">删除</span></button></td>
+                                        <td style="display: none">@item.ProductSysNo</td>
+                                    </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                    <tr>
+                                        <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                    </tr>
+                                    }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="list2" style="display: none;">
+                    <div class="boxs_tool">
+                        <div class="left_tool">
+                            <button class="btn btn_ht28" onclick="selectPromotion();return false;"><span class="icon_search"></span><span class="m5_l">选择促销</span></button>
+                        </div>
+                    </div>
+                    <div class="boxs_listtabel">
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_bnone">
+                            <thead>
+                                <tr>
+                                    <th width="100">促销系统编号</th>
+                                    <th style="min-width: 100px">促销名称名称</th>
+                                    <th style="min-width: 70px">促销描述</th>
+                                    <th width="82" class="border_rnone">操作</th>
+                                    <th style="display: none">系统编号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="promotion_list">
+                                @{
+                                    if (Model.PromotionOverlays != null)
+                                    {
+                                        int row = 0;
+                                        foreach (var id in Model.PromotionOverlays)
+                                        {
+                                            row++;
+                                            var promotion = @Hyt.BLL.Promotion.PromotionBo.Instance.GetModel(id);
+                                    <tr  @{
+                                            if (row % 2 == 0)
+                                            {
+                                                     <text>class='stag_color'</text>
+                                            }
+                                             }>
+                                        <td class="border_lnone">@id</td>
+                                        <td align="left" class="p10_l">@promotion.Name</td>
+                                        <td align="left" class="p10_l">@promotion.Description</td>
+                                        <td class="border_rnone">
+                                            <button title="删除" class="btn btn_ht26" type="button" onclick=" DeleteItem(this) "><span class="icon_trash"></span><span class="m5_l">删除</span></button></td>
+                                        <td style="display: none">@promotion.SysNo</td>
+                                    </tr>
+                                        }
+                                    }
+                                    else
+                                    {
+                                    <tr>
+                                        <td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                    </tr>
+                                    }}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="pagination align_c clearfix">
+                    @if (Model.Promotion != null && Model.Promotion.SysNo > 0)
+                    {
+                        if (Model.Promotion.Status == (int)PromotionStatus.促销状态.待审)
+                        {
+                            if(Model.Promotion != null && Model.Promotion.SysNo > 0 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1001601))
+                            {<button class="btn btn_blue btn_ht30 m10_r" onclick="save();return false; "><span class="icon_save icon_white"></span>
+<span>保存</span></button><button class="btn btn_orange btn_ht30 m10_r" onclick="audit();return false;"><span class="icon_white icon_thumbs_up"></span>
+<span>审核</span></button><button class="btn btn_red btn_ht30 m10_r" onclick=" invalid();return false; "><span class="icon_white icon_trash"></span>
+<span>作废</span></button><button class="btn btn_ht30" onclick=" expired();return false; "><span class="icon_white icon_time"></span>
+<span>过期</span></button>
+                            }
+                        } else
+                        {
+                            if (Model.Promotion.Status == (int)PromotionStatus.促销状态.已审 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1001601))
+                              {
+                                  <button class="btn btn_red btn_ht30" id="calcelAuditPromotion">
+                                      <span class="icon_white icon_share_alt"></span>
+<span>取消审核</span>
+                                  </button>
+                              }
+                            else
+                            {
+                                <script type="text/javascript">
+                                    $(function () {
+                                        $("input,select,button,textarea").attr("disabled", "true");
+                                    }) </script>
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        <button class="btn btn_blue btn_ht30 m10_r" onclick=" save();return false; ">
+                            <span class="icon_save icon_white"></span>
+<span>保存</span>
+                        </button>
+                    }&nbsp;
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="SysNo" name="SysNo" save="SysNo" value="@if (Model.Promotion != null)
+                                                                     {@Model.Promotion.SysNo
+                                                                     }"/>
+    <input type="hidden" id="Status" name="Status" save="Status" value="@if (Model.Promotion != null)
+                                                                        {@Model.Promotion.Status
+                                                                        }"/>
+    <input type="hidden" id="hasRuleKeyValue" value="0" />
+</form>
+<script type="text/javascript">
+    var curl = '/Promotion/Promotions';
+    $(function() {
+        UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_c1", tabContent: ".list2" });
+        LoadRule();
+        $("#IsUsePromotionCode").change(function() {
+            if ($(this).attr("checked")) {
+                $(this).val(1);
+                $("#PromotionCode").attr("disabled", false);
+                if($("#PromotionCode").val()==''){
+                    $("#PromotionCode").val('@promotionCode');
+                }
+            } else {
+                $(this).val(0);
+                $("#PromotionCode").val("");
+                $("#PromotionCode").attr("disabled", true);
+            }
+        });
+        $("textarea").textareaInput(200);
+        $("#form").ajaxLoadingMask(true);
+        $(".number_input,.number").numberInput();
+        //取消促销审核
+        $("#calcelAuditPromotion").click(function () {
+            UI.Confirm({
+                content: '确定要取消促销审核吗？',
+                ok: function () {
+                    Ajax.postJosn("/Promotion/CalcelAuditPromotion", "", function (p) {
+                        p.setParams("SysNo", $("#SysNo").val());
+                    }, function (ret) {
+                        if (ret.Status) {
+                            UI.CloseTab(null,curl,null,true);
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    });
+                }
+            });
+            return false;
+        });
+        $('#btnExport').click(function() {
+            window.location = '@Url.Action("ExportPromotionGift")';
+            return false;
+        });
+
+        $('#btnImport').click(function() {
+            if (window.frames["ifrmImport"].chooseFile) {
+                window.frames["ifrmImport"].chooseFile();
+            }
+        });
+    });
+
+    function maskStart() {
+        var obj = $('.case');
+        Utils.MaskStart(obj);
+        obj.find("button").attr("disabled", "disabled");
+        obj.find("input[type=button]").attr("disabled", "disabled");
+    }
+
+    function maskStop() {
+        var obj = $('.case');
+        Utils.MaskStop();
+        obj.find("button").removeAttr("disabled");
+        obj.find("input[type=button]").removeAttr("disabled");
+    }
+
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.status != "False") {
+            UI.tips.tip_alert("tips_success", res.message);
+            setTimeout(function () {
+                AddPromotionGiftItem(decodeURIComponent(res.data));
+            }, 1000);
+        } else
+            UI.tips.tip_alert("tips_wrong", decodeURIComponent(res.message));
+    }
+
+    //添加商品列表
+    function AddPromotionGiftItem(res) {
+        var rows = JSON.parse(res);
+        var content = '';
+        var i = $("#product_list").find("tr").length;
+        var noData = false; //是否有数据
+        $.each(rows, function(idx, item) {
+            var exist = false; //该商品是否已添加
+            $("#product_list").find("tr").each(function(i) {
+                if ($(this).find("td").eq(9).html()) {
+                    var productsysno = $(this).find("td").eq(9).html();
+                    if (productsysno == item.ProductSysNo) {
+                        //exist = true;
+                        $(this).remove();
+                    }
+                } else {
+                    noData = true;
+                }
+            });
+            if (!exist) {
+                var price = item.BasePrice;
+                content += '<tr id=""><td>' + item.ProductErpCode + '</td><td>' + item.ProductName + '</td>' + '<td class="red p10_r OriginalPrice" align="right">' + price.toPrice('&yen;')
+                        + '</td><td><input type="text" class="wd60 number_input PurchasePrice" value="'+item.PurchasePrice
+                        +'"  name="PurchasePrice" maxlength="10"/></td><td><input type="text" class="wd60 number_input RequirementMinAmount"  value="'+item.RequirementMinAmount
+                        + '" name="RequirementMinAmount" maxlength="10" /></td><td><input type="text" class="wd60 number_input RequirementMaxAmount"  value="'+item.RequirementMaxAmount
+                        + '"  name="RequirementMaxAmount" maxlength="10" /></td><td><input type="text" class="wd60 number_input MaxSaleQuantity"  value="'+item.MaxSaleQuantity
+                        + '"  name="MaxSaleQuantity" maxlength="10"/></td>' + '<td>0</td><td class="border_rnone"><button title="删除" class="btn btn_ht26" type="button" onclick="DeleteItem(this)"><span class="icon_trash"></span><span class="m5_l">删除</span></button></td><td style="display:none">' + item.ProductSysNo + '</td></tr>';
+            }
+        });
+        if (content == '' && noData) {
+            content = '<tr><td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td> </tr>';
+        }
+        if (noData) {
+            $('#product_list').html(content);
+        } else {
+            $('#product_list').append(content);
+        }
+        $(".number_input").numberInput();
+        DAO.InterlineStyle();
+    }
+
+    //挑选规则
+    function selectRules() {
+        DAO.SelectPromotionRule(function(rule) {
+            AddRuleItem(rule);
+        });
+    }
+
+    //添加规则列表
+    function AddRuleItem(row) {
+        var content = '';
+        $("#PromotionRuleName").html(row.name);
+        $("#PromotionRuleSysNo").val(row.sysNo);
+        $("#PromotionRuleType").val(row.ruleType);
+        var adminHtml = row.adminHtml;
+        var i = 0;
+        $.each(adminHtml, function(idx, item) {
+            if (item.Key) {
+                content += '<tr id=""><td class="border_lnone">' + item.Key + '</td><td><input id="'+item.Key+'" type="text" name="" class="wd100"></td>';
+                content +='<td align="left" class="p10_l">';
+                if(item.Key=='product_sysno'){
+                    content +='<button class="btn btn_green btn_ht20 m10_r" title="选择商品" onclick="SelectProduct();return false;"><p>+</p></button>';
+                }
+                content += '<span>' +item.Value + '</span></td>' + '<td class="border_rnone hide"><button title="删除" class="btn btn_ht26" type="button" onclick="DeleteItem(this)"><span class="icon_trash"></span><span class="m5_l">删除</span></button></td><td style="display:none">' + item.Key + '</td></tr>';
+                i++;
+            }
+        });
+        if (i > 0) {
+            $("#ruleList").show();
+            $('#RuleKeyValues_list').html(content);
+            DAO.InterlineStyle();
+            $("#hasRuleKeyValue").val(i);
+        } else {
+            $("#ruleList").hide();
+            $('#RuleKeyValues_list').empty();
+            $("#hasRuleKeyValue").val(0);
+        }
+    }
+
+    //挑选商品
+    function selectProducts() {
+        DAO.SelectProduct({
+            onselect: function(a) {
+                AddOrderItem(a);
+            }
+        });
+    }
+
+    //添加商品列表
+    function AddOrderItem(rows) {
+        var content = '';
+        var i = $("#product_list").find("tr").length;
+        var noData = false; //是否有数据
+        $.each(rows, function(idx, item) {
+            var exist = false; //该商品是否已添加
+            $("#product_list").find("tr").each(function(i) {
+                if ($(this).find("td").eq(9).html()) {
+                    var productsysno = $(this).find("td").eq(9).html();
+                    if (productsysno == item.pid) {
+                        exist = true;
+                    }
+                } else {
+                    noData = true;
+                }
+            });
+            if (!exist) {
+                var price = item.baseprice;
+                content += '<tr id=""><td>' + item.erp + '</td><td>' + item.name + '</td>' + '<td class="red p10_r OriginalPrice" align="right">' + price.toPrice('&yen;')
+                    + '</td><td><input type="text" class="wd60 number_input PurchasePrice"  name="PurchasePrice" maxlength="8" value="0"/></td>'
+                    +'<td><input type="text" class="wd60 number_input RequirementMinAmount" value="0"  name="RequirementMinAmount" maxlength="8" /></td>'
+                    +'<td><input type="text" class="wd60 number_input RequirementMaxAmount" value="0"  name="RequirementMaxAmount" maxlength="8" /></td>'
+                    +'<td><input type="text" class="wd60 number_input MaxSaleQuantity" value="0"  name="MaxSaleQuantity" maxlength="8"/></td>'
+                    + '<td>0</td><td class="border_rnone"><button title="删除" class="btn btn_ht26" type="button" onclick="DeleteItem(this)"><span class="icon_trash"></span><span class="m5_l">删除</span></button></td>'
+                    +'<td style="display:none">' + item.pid + '</td></tr>';
+            }
+        });
+        if (content == '' && noData) {
+            content = '<tr><td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td> </tr>';
+        }
+        if (noData) {
+            $('#product_list').html(content);
+        } else {
+            $('#product_list').append(content);
+        }
+        $(".number_input").numberInput();
+        DAO.InterlineStyle();
+    }
+
+    //挑选促销叠加
+
+    function selectPromotion() {
+        DAO.SelectPromotion({ IsOverlay: 1, promotionType: 0, callBack: function(a) { AddPromotionItem(a); } });
+    }
+
+    //添加促销叠加
+    function AddPromotionItem(rows) {
+        var content = '';
+        var noData = false; //是否有数据
+        $.each(rows, function(idx, obj) {
+            var item = obj[0];
+            var exist = false; //该商品是否已添加
+            $("#promotion_list").find("tr").each(function(i) {
+                if ($(this).find("td").eq(4).html()) {
+                    var productsysno = $(this).find("td").eq(4).html();
+                    if (productsysno == item.sysNo) {
+                        exist = true;
+                    }
+                } else {
+                    noData = true;
+                }
+            });
+            if (!exist) {
+                content += '<tr id=""><td class="border_lnone">' + item.sysNo + '</td><td align="left" class="p10_l">' + item.name + '</td>' + '<td align="left" class="p10_l">' + item.name + '</td>' + '<td class="border_rnone"><button title="删除" class="btn btn_ht26" type="button" onclick="DeleteItem(this)"><span class="icon_trash"></span><span class="m5_l">删除</span></button></td><td style="display:none">' + item.sysNo + '</td></tr>';
+            }
+        });
+        if (content == '' && noData) {
+            content = '<tr><td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td> </tr>';
+        }
+        if (noData) {
+            $('#promotion_list').html(content);
+        } else {
+            $('#promotion_list').append(content);
+        }
+        DAO.InterlineStyle();
+    }
+
+    //保存
+    function save() {
+        checkPromotionCode("/Promotion/SavePromotion",false);
+    }
+
+    //审核
+    function audit() {
+        UI.Confirm({
+            content: "确定要保存并通过审核该促销吗?",
+            ok: function() {
+                checkPromotionCode("/Promotion/AuditPromotion",true);
+            }
+        });
+    }
+
+    //验证促销码
+    function checkPromotionCode(url,isAudit) {
+
+        if ($("#IsUsePromotionCode").val() == 1) {
+            $.ajax({
+                url: "/Promotion/ExsitsPromotionCode",
+                data: JSON.stringify({ promotionCode: $("#PromotionCode").val(), promotionSysNo: $("#SysNo").val() }),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function(data) {
+                    if (data) {
+                        $("#PromotionCode").addClass("inputerror").focus();
+                        $("#c_PromotionCode").text("促销码不能重复");
+                        $("#c_PromotionCode").attr('class', 'error m10_l');
+                    } else {
+                        commonSave(url,isAudit);
+                    }
+                },
+                error: function() {
+                }
+            });
+        } else {
+            commonSave(url,isAudit);
+        }
+    }
+
+    function commonSave(url, isAudit) {
+        if ($("#WebPlatform").attr("checked") == undefined && $("#ShopPlatform").attr("checked") == undefined && $("#MallAppPlatform").attr("checked") == undefined && $("#LogisticsAppPlatform").attr("checked") == undefined) {
+            tips('tips_warning', "使用平台至少勾选一项。");
+            return false;
+        }
+
+        if ($("#IsUsePromotionCode").val() == 1) {
+            $("#PromotionCode").rules('add', {
+                required: true,
+            });
+        }
+        if (!setting.form()) {
+            return false;
+        }
+        var rulekeyvalue = getRuleKeyValue();
+        //if ($("#hasRuleKeyValue").val() > 0 && rulekeyvalue.length == 0) {
+        //    Utils.alert("请录入促销规则参数");
+        //    return false;
+        //}
+        var proucts = getProductData();
+        var isnull = false;
+        $.each(proucts, function(idx, obj) {
+            if (obj.MaxSaleQuantity == 0) {
+                isnull = true;
+                return;
+            }
+        });
+        if (isnull) {
+            Utils.alert("促销赠品最大销售数量不能为零");
+            return false;
+        }
+        if (proucts.length == 0 && $("#PromotionRuleType").val() == '@Convert.ToInt32(PromotionStatus.促销规则类型.满赠)') {
+            Utils.alert("促销赠品不能为空");
+            return false;
+        }
+
+        Ajax.postJosn(url, "save", function(p) {
+            var obj = Ajax.getInputValues("save");
+            if ($("#WebPlatform").attr("checked")) {
+                obj.WebPlatform = @PromotionStatus.商城使用.是.GetHashCode();
+            }
+            if ($("#ShopPlatform").attr("checked")) {
+                obj.ShopPlatform = @PromotionStatus.门店使用.是.GetHashCode();
+            }
+            if ($("#MallAppPlatform").attr("checked")) {
+                obj.MallAppPlatform = @PromotionStatus.手机商城使用.是.GetHashCode();
+            }
+            if ($("#LogisticsAppPlatform").attr("checked")) {
+                obj.LogisticsAppPlatform = @PromotionStatus.物流App使用.是.GetHashCode();
+            }
+            p.setParams("Promotion", obj);
+            p.setParams("PromotionOverlays", getPromotionData());
+            p.setParams("PromotionGifts", proucts);
+            var item = {
+                Name: $("#PromotionRuleName").html(),
+                SysNo: $("#PromotionRuleSysNo").val()
+            };
+            p.setParams("PromotionRule", item);
+            p.setParams("PromotionRuleKeyValues", rulekeyvalue);
+
+        }, function(ret) {
+            if (ret.Status) {
+                Utils.alert("提交成功！", null, "succeed");
+                if (isAudit || !$("#SysNo").val()) {
+                    UI.CloseTab(null, curl,null,true);
+                }
+            } else {
+                Utils.alert(ret.Message);
+            }
+        });
+    }
+    //作废
+    function invalid(parameters) {
+        UI.Confirm({
+            content: "您确定要作废此促销?",
+            ok: function () {
+                Ajax.postJosn("/Promotion/InvalidPromotion", "", function (p) {
+                    p.setParams("SysNo", $("#SysNo").val());
+                }, function (ret) {
+                    if (ret.Status) {
+                        UI.CloseTab(null,curl,null,true);
+                    } else {
+                        Utils.alert(ret.Message);
+                    }
+                });
+            }
+        });
+    }
+
+    //过期
+    function expired(parameters) {
+        UI.Confirm({
+            content: "您确定要过期此促销?",
+            ok: function () {
+                Ajax.postJosn("/Promotion/ExpiredPromotion", "", function (p) {
+                    p.setParams("SysNo", $("#SysNo").val());
+                }, function (ret) {
+                    if (ret.Status) {
+                        UI.CloseTab(null,curl,null,true);
+                    } else {
+                        Utils.alert(ret.Message);
+                    }
+                });
+            }
+        });
+
+    }
+
+    //删除商品明细
+    function DeleteItem(input) {
+        var tr = $(input).parents("tr");
+        tr.remove();
+    }
+    //获取促销赠品数据
+    function getProductData() {
+        var productItem = [];
+        $("#product_list").find("tr").each(function (i) {
+            var productsysno = $(this).find("td").eq(9).html();
+            var productname = $(this).find("td").eq(1).html();
+            var purchasePrice = $(this).find("td:eq(3)").find("input").val();
+            var requirementMinAmount = $(this).find("td:eq(4)").find("input").val();
+            var requirementMaxAmount = $(this).find("td:eq(5)").find("input").val();
+            var maxSaleQuantity = $(this).find("td:eq(6)").find("input").val();
+            var usedSaleQuantity = $(this).find("td:eq(7)").find("input").val();
+            if (productsysno) {
+                var item = {
+                    ProductSysNo: productsysno,
+                    ProductName: productname,
+                    PurchasePrice: purchasePrice,
+                    RequirementMinAmount: requirementMinAmount,
+                    RequirementMaxAmount: requirementMaxAmount,
+                    MaxSaleQuantity: maxSaleQuantity,
+                    UsedSaleQuantity: usedSaleQuantity
+                };
+                productItem.push(item);
+            }
+        });
+        return productItem;
+    }
+    //获取促销叠加数据
+    function getPromotionData() {
+        var items = [];
+        $("#promotion_list").find("tr").each(function (i) {
+            var overlayCode = $(this).find("td").eq(4).html();
+            if (overlayCode) {
+                items.push(overlayCode);
+            }
+        });
+        return items;
+    }
+    //获取促销叠加数据
+    function getRuleKeyValue() {
+        var Items = [];
+        $("#RuleKeyValues_list").find("tr").each(function (i) {
+            var ruleKey = $(this).find("td").eq(0).html();
+            var ruleValue = $(this).find("td").eq(1).find("input").val();
+            var description = $(this).find("td").eq(2).find('span').html();
+            //if (ruleValue) {
+            var item = {
+                RuleKey: ruleKey,
+                RuleValue: ruleValue,
+                Description: description
+            };
+            Items.push(item);
+            //}
+        });
+        return Items;
+    }
+    var setting;
+    //加载验证规则
+    function LoadRule() {
+        setting = $("#form").validate({
+            rules: {
+                Name: {
+                    required: true
+                },
+                Description:
+                {
+                    required: true
+                },
+                StartTime:
+                {
+                    required: true
+                },
+                EndTime:
+                {
+                    required: true,
+                    compareDate: "#StartTime"
+                },
+                DisplayPrefix: {
+                    required: true
+                },
+                //SubjectUrl:
+                //{
+                //    required: true
+                //},
+                PromotionType:
+                {
+                    required: true
+                },
+                PromotionUseQuantity: {
+                    required: true,
+                    number: true
+                },
+                UserUseQuantity:
+                {
+                    required: true,
+                    number: true
+                },
+                Priority:
+                {
+                    required: true,
+                    number: true
+                }, PromotionRuleSysNo: {
+                    required: true,
+                    min: 1
+                }
+            },
+            ignore: "",
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+            }
+        });
+    }
+    jQuery.validator.methods.compareDate = function (value, element, param) {
+        var startDate = jQuery(param).val();
+        var date1 = new Date(Date.parse(startDate.replace(new RegExp("-", "g"), "/")));
+        var date2 = new Date(Date.parse(value.replace(new RegExp("-", "g"), "/")));
+        return date1 < date2;
+    };
+
+    function SelectProduct() {
+        var selectproduct = [];
+
+        var keyValuePair=getRuleKeyValue();
+        for(var index in keyValuePair){
+            if(keyValuePair[index].RuleKey=='product_sysno'){
+                selectproduct=keyValuePair[index].RuleValue.split(';');
+            }
+        }
+        @*alert(2);
+        alert('@Model.Promotion.SysNo');
+
+        $.get('/Promotion/GetPromotionProductSysNos', { promotionSysNo: '@(Model.Promotion == null ? 0 : Model.Promotion.SysNo)' }, function(data) {
+            
+            if(data!=null){
+                for (var k = 0; k < data.length; k++) {
+                    selectproduct.push(data[k]);
+                }
+            }*@
+
+            var productSysNos='';
+            DAO.SelectProduct({
+                selectedProducts:selectproduct,
+                selectedIsReadOnly:false,
+                syncWebFront: true,
+                onselect: function(data) {
+                    if(data){
+                        for(var i=0;i<data.length;i++){
+
+                            if(productSysNos!="")
+                                productSysNos+=';';                           
+                            productSysNos+=data[i].pid
+                        }
+                    }
+                    $('#product_sysno').val(productSysNos);
+                }
+            });
+        //});
+    }
+</script>

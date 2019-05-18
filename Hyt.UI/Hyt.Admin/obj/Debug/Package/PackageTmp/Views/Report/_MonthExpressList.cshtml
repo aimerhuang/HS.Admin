@@ -1,0 +1,56 @@
+﻿@model List<Hyt.Model.Transfer.CBMonthExpress>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+    <thead>
+        <tr>
+            <th>月份</th>
+            <th>成功单量</th>
+            <th>失败单量</th>
+            <th> 总单量</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="4" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+            }
+            else
+            {
+                int i = 1;
+                foreach (var item in Model)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                 <td class="blue"><a href='javascript:UI.OpenCreatTab(" 快递100统计明细","/report/LgExpressDetail?StartTime=@(item.YearMonth+"-01")");'>@item.YearMonth</a></td>
+                                <td class="blue"><a href='javascript:UI.OpenCreatTab(" 快递100统计明细","/report/LgExpressDetail?IsSuccess=true&StartTime=@(item.YearMonth+"-01")");'>@item.SuccessFlgs</a></td>
+                                <td class="blue"><a href='javascript:UI.OpenCreatTab(" 快递100统计明细","/report/LgExpressDetail?IsSuccess=false&StartTime=@(item.YearMonth+"-01")");'>@item.FailFlgs</a></td>
+                <td>@item.AllFlgs</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+                if (i % 2 == 0)
+                {
+                    @Html.Raw("<tr>")
+                }
+                else
+                {
+                    @Html.Raw("<tr class='stag_color'>")
+                }
+                <td>合计</td>
+                <td>@Model.Sum(m => m.SuccessFlgs)</td>
+                <td>@Model.Sum(m => m.FailFlgs)</td>
+                <td>@Model.Sum(m => m.AllFlgs)</td>
+                @Html.Raw("</tr>")
+            }
+        }
+        </tbody>
+    </table>

@@ -1,0 +1,228 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBPrPurchase> 
+@Html.PrivilegeControl(PrivilegeCode.CG100103, ".CG100103")
+@*@Html.PrivilegeControl(PrivilegeCode.SO1099997, ".SO1099997")*@
+@Html.PrivilegeControl(PrivilegeCode.CGR100102, ".CGR100102")
+@*@Html.PrivilegeControl(PrivilegeCode.SO1099999, ".SO1099999")*@
+<!--/表格列表区-->
+<table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th class="wd40">序号</th>
+            <th class="wd40">编号</th>
+            <th class="wd100">采购单代码</th>
+            <th class="wd75">供应商</th>
+            <th width="100px">仓库</th>
+            <th width="120px">采购数量</th>
+            <th width="90">已入库数量</th>
+            <th width="116">采购总额</th>
+            <th width="60">创建时间</th>
+            <th width="90">制单人</th>
+            <th width="70">备注</th>
+            <th width="70">付款状态</th>
+            <th width="70">状态</th>
+            <th width="330">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (!Model.TData.Any())
+            {
+                <tr>
+                    <td colspan="12" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+            }
+            foreach (var master in (List<Hyt.Model.Transfer.CBPrPurchase>)Model.TData)
+            {
+                <tr>
+                    <td class="blue">@(Model.TData.IndexOf(master)+1)</td>
+                    <td class="blue" title="查看采购单:@master.SysNo"><a onclick="ShowInfo(@master.SysNo)">@master.SysNo</a></td>
+                    <td class="blue"><a href="javascript:ShowInfo(@master.SysNo);">@master.PurchaseCode</a></td>
+                    <td>@master.FName</td>
+                    <td>@master.BackWarehouseName</td>
+                    <td>@master.Quantity</td>
+                    <td>@master.EnterQuantity</td>
+                    <td>@master.TotalMoney</td>
+                    <td>@master.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@(Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(master.CreatedBy))</td>
+                    <td>@master.Remarks</td>
+                    <td>@((PurchaseStatus.采购单付款状态)master.PaymentStatus)</td>
+                    <td>@((PurchaseStatus.采购单状态)master.Status)</td>
+                    <td>
+                        @if (master.Status == (int)PurchaseStatus.采购单状态.待审核)
+{
+    <button class="btn btn_blue m10_r btn_ht26 SO1099999" type="button" onclick="ModifyInfo(@master.SysNo)">
+        <span class="icon icon_white icon_pencil"></span><span class="m5_l">修改</span>
+    </button>
+                            <button onclick="audit(@master.SysNo) " title="审核通过" class="btn btn_ht26 btn_blue CG100103" type="button"><span class="icon_white icon_audit"></span><span class="m5_l">审核通过</span></button>
+    <button onclick="Cancel(@master.SysNo)" type="button" class="btn btn_ht26 m10_r btn_red SO1099997"><span class="icon_forbidden m5_r icon_white"></span><span>删除</span></button>
+    <button class="btn m10_r btn_ht26 disabled CGR100102" type="button"><span class="icon icon_pencil"></span><span class="m5_l">退货</span></button>
+}
+                        else
+                        {
+                            <button class="btn m10_r btn_ht26 disabled SO1099999" type="button"><span class="icon icon_pencil"></span><span class="m5_l">修改</span></button>
+    <button title="审核通过" class="btn btn_ht26 disabled CG100103" type="button"><span class="icon icon_audit"></span><span class="m5_l">审核通过</span></button>
+    <button type="button" class="btn btn_ht26 m10_r disabled SO1099997"><span class="icon_forbidden m5_r icon"></span><span>删除</span></button>
+                            if (master.Status == (int)PurchaseStatus.采购单状态.已完成)
+                            {
+                                <button class="btn btn_blue m10_r btn_ht26 CGR100102" type="button" onclick="ModifyPurchaseReturnInfo(@master.SysNo)">
+                                    <span class="icon icon_white icon_pencil"></span><span class="m5_l">退货</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn m10_r btn_ht26 disabled CGR100102" type="button"><span class="icon icon_pencil"></span><span class="m5_l">退货</span></button>
+                            }
+                        }                                                                                            
+                        
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+        //订单详情
+        function OrderBrowse(orderSysNo) {
+            UI.DialogOpen('/Order/OrderView?id=' + orderSysNo + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+        }
+
+        //保存出库单按钮实例
+        var outstackBtn = null;
+
+        $(function () {
+            //表格加入隔行样式
+            DAO.InterlineStyle();          
+        });
+
+        function ModifyInfo(sysNo)
+        {        
+            window.location.href="/Purchase/PurchaseCreate?id="+sysNo+"&page=1";
+            event.stopPropagation();
+            return false;
+        }
+
+        //采购退货单 
+        function ModifyPurchaseReturnInfo(sysNo) {
+            window.location.href = "/Purchase/PurchaseReturnCreate?id=" + sysNo + "&page=1";
+            event.stopPropagation();
+            return false;
+        }
+
+    //采购退货单
+        function ShowInfo(sysno) {
+            var url = '/Purchase/PurchasePreview?id=' + sysno;
+            UI.DialogOpen(url, {
+                title: '采购单信息',
+                width: 830,
+                height: 600,
+                init: function () {
+                    this.button({ name: '关闭' });
+                }
+            }, false);
+        }
+
+        function OutStock(sysno, status, self) {
+            if (status != 10 || status == -10) {
+                return;
+            }
+
+            //保存当前出库按钮实例，便于后面的操作
+            outstackBtn = self;
+
+            var url = '/Warehouse/StockOut?sysno=' + sysno;
+            UI.DialogOpen(url, {
+                title: '商品出库',
+                width: 820,
+                height: 490,
+                resize: false,
+                init: function () {
+                    this.button({
+                        name: "出库",
+                        focus: true,
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+
+                            if (!iframe.document.body) {
+                                UI.Alert({
+                                    content: '数据加载中,请稍等.'
+                                });
+                                return false;
+                            }
+
+                            iframe.DoOutStock();
+                            return false;
+                        }
+                    },
+                    { name: "关闭" });
+                }
+            }, false);
+        }
+
+        //打印拣货单
+        function PickUpOrderPrint(sysno, status) {
+            if (status == -10 || status == 10) {
+                return;
+            }
+
+            //打印
+            var url = '/Print/Picking/' + sysno;
+            UI.DialogOpen(url, {
+                title: '打印拣货单',
+                width: 1000,
+                height: 720,
+                close: function () {
+                    //window.submitForm();
+                },
+                resize: false,
+                init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        //this.iframe.contentWindow.location.reload();
+                        this.iframe.contentWindow.location.href = url + "?isRefresh=" + Math.random();
+                    }
+                }
+            });
+        }
+
+        //打印包裹单
+        function PackagePrint(sysno, status, deliveryTypeSysNo) {
+            if (status == -10 || status == 10) {
+                return;
+            }
+
+            //打印
+            var url = '/Print/Pack?id=' + sysno + '&deliveryTypeSysNo=' + deliveryTypeSysNo;
+            UI.DialogOpen(url, {
+                title: '打印包裹单',
+                width: 1000,
+                height: 720,
+                close: function () {
+                    //window.submitForm();
+                },
+                resize: false,
+                init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        //this.iframe.contentWindow.location.reload();
+                        this.iframe.contentWindow.location.href = url + "&isRefresh=" + Math.random();
+                    }
+                }
+            });
+        }
+
+        function showDialogBox(msg) {
+            UI.Alert({
+                content: msg,
+                callback: function () {
+                    //UI.DialogOpener().location.reload();
+                    submitForm();
+                },
+                width: '200px'
+            });
+        }
+
+     
+
+    </script>
+

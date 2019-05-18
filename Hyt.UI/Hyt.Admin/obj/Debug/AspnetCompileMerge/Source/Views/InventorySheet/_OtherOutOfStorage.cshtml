@@ -1,0 +1,86 @@
+﻿@using Hyt.Model
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.InventorySheet.OtherOutOfStorage>
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="140">序号</th>
+                <th width="100">编号</th>
+                <th width="100">源单类型</th>
+                <th width="100">制单人名称</th>
+                <th width="100">审核日期</th>
+                <th width="100">创建日期</th>
+                <th width="100">出入库单状体</th>
+                <th width="250">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+
+                if (Model.TData != null && Model.TData.Count > 0)
+                {
+                    foreach (var item in Model.TData)
+                    {
+                        
+                        <tr @(Model.TData.IndexOf(item) % 2 == 0 ? "" : "class='stag_color'") class='stag_color'>
+                            <td>@(Model.TData.IndexOf(item) + 1)</td>
+                            <td>@item.Code</td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.InventorySheet.OtherOutOfStorageTypeEnum), item.Type)</td>
+                            <td>@item.SingleName</td>
+                            <td>@item.ToexamineTime</td>
+                            <td>@item.AddTime</td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.InventorySheet.OtherOutOfStorageStatusEnum), item.Status)</td>
+                            <td>
+                                @{
+                        <button class="btn btn_ht26 btn_blue m10_l" title="查看" data-id="60" name="detail" type="button" onclick="window.location.href = '/InventorySheet/EditOtherOutOfStorage?id=@item.SysNo&PageType=@(item.Type)'">
+                            <span class="icon_tosee icon_white"></span>
+                            <span class="m5_l">查看</span>
+                        </button>
+                        if (item.Status == (int)Hyt.Model.InventorySheet.OtherOutOfStorageStatusEnum.审核中)
+                        {
+
+                            <button class="btn btn_ht26  m10_l  " title="审核通过" type="button" onclick="CheckAtAllocation(@(item.SysNo))">
+                                <span class="icon_search"></span>
+                                <span class="m5_l">审核通过</span>
+                            </button>
+                        }
+}
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!--表格列结束-->
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script>
+    //审核入库
+    function CheckAtAllocation(sysNo, status) {
+        UI.Confirm({
+            content: '确认审核通过？',
+            ok: function () {
+                var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                $.post("/InventorySheet/CompleteOtherOutOfStorage", { "sysNo": sysNo }, function (data) {
+                    if (data.Message != "成功!") {
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    } else {
+                        doSearch(@(Model.CurrentPageIndex));
+                        UI.tips.tip_alert('tips_success', data.Message);
+                    }
+                    mask.Remove();
+                });
+            },
+            cancel: true
+        });
+    }
+
+
+</script>

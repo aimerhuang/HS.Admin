@@ -1,0 +1,221 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Util
+@model Hyt.Model.CrSmsQuestion
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户短信咨询";
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all"/> 
+    @Html.PrivilegeControl(PrivilegeCode.CR1004092  ,".CR1004092")       
+    @Html.PrivilegeControl(PrivilegeCode.CR1004093  ,".CR1004093")       
+    
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>   
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>   
+    <script>
+        function query() {
+            var parameter = {};
+            parameter.id = 1;
+            parameter.status = $("#Status").val();
+            parameter.stringParameter = $("#txt_stringParameter").val();
+            parameter.answer = $("#txt_answer").val();
+
+            Utils.MaskStart($('#paging'));
+            $.get('@Url.Action("CrSmsQuestion", "CRM")',
+                parameter,
+                function(response) {
+                    Utils.MaskStop();
+                    $('#paging').html(response);
+                }
+            );
+        }
+
+        //作废
+
+        function invalid(sysNo, obj) {
+            obj = $(obj);
+
+            if (obj.hasClass("disabled")) {
+                return false;
+            }
+
+            obj.attr("disabled", "disabled");
+            obj.addClass("disabled");
+            $.post('@Url.Action("InvalidCustomerSms", "Ajax")',
+                { sysNo: sysNo },
+                function(response) {
+
+                    if (response.Status == true) {
+                        obj.attr("disabled", null);
+                        obj.removeClass("btn_red");
+                        obj.prev().removeClass("btn_blue");
+                        obj.prev().addClass("disabled");
+                        UI.tips.tip_alert('tips_shrot tips_success', '短信咨询已禁用');
+                    } else {
+                        obj.attr("disabled", null);
+                        obj.removeClass("disabled");
+                        UI.tips.tip_alert('tips_shrot tips_warning', '短信禁用失败' + response.Message);
+                    }
+                }
+            );
+        }
+
+
+        //打开推送信息详情对话框
+
+        function openDetial(id, isView, obj) {
+
+            var para = {
+                id: "customerSmsContent",
+                width: 500,
+                height: 309,
+                title: '短信执行内容',
+                button: null
+            };
+
+            debugger
+            isView = isView || @(ViewBag.CanReply != null ? "false" : "true");
+
+            if (isView) {
+                para.button = [{ name: '关闭', focus: true }];
+                UI.DialogOpen('@Url.Action("CrSmsQuestionDetails", "CRM", new {isView = true})' + '&sysNo=' + id, para, false);
+            } else {
+                para.button = [{
+                    name: '回复',
+                    callback: replay,
+                    focus: true
+                }, { name: '关闭' }];
+                UI.DialogOpen('@Url.Action("CrSmsQuestionDetails", "CRM", new {isView = false})' + '&sysNo=' + id, para, false);
+            }
+
+        }
+
+        function replay() {
+            var $iframe = this.iframe.contentWindow;
+            $iframe.switchControlBottonsEnabled();
+            var data = $iframe.getDate();
+            if (data == false) {
+                $iframe.switchControlBottonsEnabled(true);
+                return false;
+            }
+
+            var obj = $("button:eq(0)", "#td_" + data.sysNo);
+
+            if (obj.hasClass("disabled")) {
+                return false;
+            }
+
+            obj.attr("disabled", "disabled");
+            obj.addClass("disabled");
+            obj.removeClass("btn_blue");
+
+            $.post('@Url.Action("AnswerCustomer", "Ajax")',
+                data,
+                function(response) {
+                    if (response.Status == true) {
+                        obj.next().attr("disabled", "disabled");
+                        obj.next().addClass("disabled");
+                        obj.next().removeClass("btn_red");
+                        UI.tips.tip_alert('tips_shrot tips_success', '回复成功！');
+                    } else {
+                        obj.attr("disabled", null);
+                        obj.addClass("btn_blue");
+                        obj.removeClass("disabled");
+                        UI.tips.tip_alert('tips_shrot tips_warning', '回复失败：' + response.Message);
+                    }
+                    $iframe.closeWindow();
+                }
+            );
+
+            return false;
+        }   
+        
+
+        function openSetting() {
+            
+            var para = {
+                id: "CrSmsQuestionExecutorSetting",
+                width: 500,
+                height: 309,
+                title: '短信执行人设置',
+                button: [{
+                    name: '确定',
+                    focus: true
+                }]
+            };
+
+            UI.DialogOpen('@Url.Action("CrSmsQuestionExecutorSetting", "CRM")', para, false);
+        }
+
+
+        $(function() {
+
+            $("#txt_stringParameter").keydown(function(e) {
+                if (e.keyCode == 13) {
+                    query();
+                }
+            });
+
+            query();
+
+            @if (ViewBag.OpenDetial != null)
+            {
+                if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.CR1004093))
+                {
+                    @:openDetial(@ViewBag.OpenDetial);
+                }
+                else
+                {
+                    @:openDetial(@ViewBag.OpenDetial,true);
+                }
+            }
+
+        });
+        //http://web.v3.huiyuanti.com:9211/Api/
+    </script>
+}  
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>短信咨询管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl">状态</span>
+                    <select class="select_ht28 fl wd80 m10_r m10_l" id="Status">
+                        <option selected="selected" value="0">全部</option> 
+                        @{
+                             var statusList = EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.短信咨询状态));
+                             foreach (var key in statusList.Keys)
+                             {
+                                 var selectListItem = statusList[key];
+                                   <option value="@key">@selectListItem</option>
+                             } 
+                         }
+                    </select>
+                    <input type="text" placeholder="回复人账号" class="wd120 fl m10_l m10_r" value="" id="txt_answer">
+                    <input type="text" placeholder="手机号码/咨询内容" class="wd120 fl m10_l m10_r" value="" id="txt_stringParameter">
+                    <button title="搜索" class="btn btn_ht28 fl" onclick="query()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>  
+                
+                 <div class="left_tool hide">
+                    <button class="btn btn_ht26 m10_r " onclick="openSetting()"><span class="icon icon_plus"></span><span class="m5_l">设置执行人</span></button>
+                </div>
+            </div>
+            <div class="boxs_list">
+                <div class="boxs_listtabel" id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

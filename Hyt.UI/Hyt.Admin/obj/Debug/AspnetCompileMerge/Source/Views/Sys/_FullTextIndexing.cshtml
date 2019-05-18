@@ -1,0 +1,101 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList<Hyt.Model.Transfer.CBPdProductIndex>
+@{
+    ViewBag.Title = "";
+    System.Web.Script.Serialization.JavaScriptSerializer serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+    
+    @Html.PrivilegeControl(PrivilegeCode.SY1001101,".SY1001101")
+}
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_none">
+    <thead>
+        <tr>
+            <th width="53" class="border_lnone">
+                <input type="checkbox" value="0" class="checkall" onclick="SetChecked(this.checked)"></th>
+
+            <th width="60">SysNo</th>
+            <th width="200">ProductName</th>
+           
+            <th width="80">Category</th>
+            <th width="80">AssociationCategory</th>
+             <th width="80">Attributes</th>
+            <th width="90">BrandSysNo</th>
+            <th width="80">BasicPrice</th>
+            <th width="80">Price</th>
+            <th width="80">ProductGroupCode</th>
+            <th width="80">DealerSysNos</th>
+            <th width="80">WarehouseSysNos</th>
+            <th width="79"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (!Model.TData.Any())
+            {
+            <tr>
+                <td colspan="8" class="align_l p10_l bgr_eb border_lnone">暂无数据。</td>
+            </tr>
+            }
+            int i = 0;
+            foreach (var item in Model.TData)
+            {
+
+                if (i % 2 == 0)
+                {
+            @Html.Raw("<tr>")
+                }
+                else
+                {
+            @Html.Raw("<tr class='stag_color'>")
+                }
+            <td>
+                <input type="checkbox" value="@item.SysNo" name="checkedList">
+            </td>
+          
+            <td>
+                @item.SysNo
+            </td> 
+            <td>
+                @item.ProductName
+            </td> 
+           
+            <td>
+                @item.Category
+            </td>
+            <td>
+                @item.AssociationCategory
+            </td>            
+             <td>
+                @item.Attributes
+            </td>   
+            <td>
+                @item.BrandSysNo
+            </td> 
+            <td>
+                @item.BasicPrice
+            </td>  
+            <td>
+                 @item.Price
+            </td>              
+            <td>
+                @item.ProductGroupCode
+            </td> 
+            <td>
+                @item.DealerSysNos
+            </td>   
+             <td>
+                @item.WarehouseSysNos
+            </td>           
+            <td >
+                <button onclick="javascript:View(@serializer.Serialize(item));return false;" class="btn btn_ht26 SY1001101" type="button"><span class="icon_tosee"></span><span class="m5_l">查看</span></button></td>                                         
+            @Html.Raw("</tr>")
+                i++;
+            }
+        }
+    </tbody>
+</table>
+
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

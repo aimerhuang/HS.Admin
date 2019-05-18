@@ -1,0 +1,236 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "分销商商城管理";
+    @Html.PrivilegeControl(PrivilegeCode.DS1006201, ".DS1006201")
+    @Html.PrivilegeControl(PrivilegeCode.DS1006301, ".DS1006301")
+    @Html.PrivilegeControl(PrivilegeCode.DS1006701, ".DS1006701")
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+ 
+            doSearch();
+            //快捷状态查询
+            $("#IsSelfSupport").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+            $("#DealerSysNo").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+            $("#Status").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+            $("#MallTypeSysNo").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+                //  setDefaultValue();
+            });
+
+            $("#ShopName").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+  
+        });
+
+        //查询列表
+        function doSearch() {
+            $.get('@Url.Action("DsDealerMall", "Distribution")?r=' + Math.random(),
+                {
+                    Status: $("#Status").val(),
+                    MallTypeSysNo: $("#MallTypeSysNo").val(),
+                    IsSelfSupport: $("#IsSelfSupport").val(),
+                    DealerSysNo: $("#DealerSysNo").val(),
+                    ShopName: $("#ShopName").val()
+                },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl m10_l">分销商</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 " id="DealerSysNo" name="DealerSysNo">
+                            <option value="">全部</option>
+                            @foreach (var item in (IList<Hyt.Model.Transfer.CBDsDealer>)ViewBag.DsDealer)
+                            {
+                                <option value="@item.SysNo">@item.DealerName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">商城类型</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 " id="MallTypeSysNo" name="MallTypeSysNo">
+                            <option value="">全部</option>
+                            @foreach (var item in (IList<Hyt.Model.DsMallType>)ViewBag.DsMallType)
+                            {
+                                <option value="@item.SysNo">@item.MallName</option>
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">是否自营</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 " id="IsSelfSupport" name="IsSelfSupport">
+                            <option value="">全部</option>
+   @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.是否自营)))
+                                    {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 " id="Status" name="Status">
+                            <option value="">全部</option>
+                            @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.分销商商城状态)))
+                                    {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">店铺名称</span>
+                    <div class="search_btn m10_l fl">
+                        <input name="ShopName" type="text" id="ShopName" class="input_ht28" autocomplete="off" value="" maxlength="20" placeholder="搜索店铺名称..." />
+                        <button class="btn btn_ht28 wd28" id="search_btn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m10_r DS1006201" onclick="Create()"><span class="icon icon_plus"></span><span class="m5_l">新建</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //新增弹出窗
+        function Create() {
+            var url = '@Url.Action("DsDealerMallAdd", "Distribution")';
+            UI.DialogOpen(url,
+                {
+                    title: '新建分销商商城',
+                    width: 500,
+                    height: 480,
+                    close: function () { window.doSearch(); },
+                    resize: false
+                },
+                false);
+        }
+
+        //修改弹出窗
+
+        function Update(sysno) {
+            var url = '@Url.Action("DsDealerMallUpdate", "Distribution")' + '?sysno=' + sysno;
+            UI.DialogOpen(url, { title: '修改分销商商城', width: 500, height: 480, close: function () { window.doSearch(); }, resize: false }, false);
+        }
+        //操作成功后执行的函数
+        function ExecSuccess(msg) {
+            UI.tips.tip_alert("tips_shrot tips_success", msg);
+            doSearch();
+        }
+        //查看分销商弹出窗
+
+        function Look(sysno) {
+            var url = '@Url.Action("DsDealerView", "Distribution")' + '?sysno=' + sysno;
+            UI.DialogOpen(url, { title: '查看分销商', width: 800, height: 267 }, false);
+        }
+        //分销商商城状态改变
+
+        function SetReverseStatus(sysno) {
+            var status, statusText;
+            if ($("#status" + sysno).text().indexOf("启用") >= 0)//状态取反
+            {
+                statusText = "禁用";
+                status = 0;
+            } else {
+                statusText = "启用";
+                status = 1;
+            }
+            UI.Confirm({
+                content: "您确定" + statusText + "吗？",
+                ok: function () {
+                    $.ajax({
+                        type: "Get",
+                        url: '@Url.Action("AjaxDsDealerMallUpdateStatus", "Distribution")',
+                        data: { sysNo: sysno, status: status },
+                        success: function (data) {
+                            if (data.IsLogout) {
+                                eval(data.Callback);
+                                return;
+                            }
+
+                            //页面显示变化
+                            if (data) {
+                                PageStatusChange(sysno, status);
+                                UI.tips.tip_alert('tips_shrot tips_success', statusText + '成功!');
+                            } else {
+                                UI.Alert({ content: "操作失败" });
+                            }
+                        },
+                        error: function () {
+                            UI.Alert({ content: "查询出错,请稍候再试" });
+                        }
+                    });
+                }
+            });
+        }
+
+        //页面显示变化,status为处理后要显示的
+
+        function PageStatusChange(sysno, status) {
+            if (status == 1) {
+                $("#status" + sysno).text("启用");
+                $("#btnStatus" + sysno).html("<span class=\"icon_ban_circle m5_r\"></span><span>禁用</span>");
+            } else {
+                $("#status" + sysno).text("禁用");
+                $("#btnStatus" + sysno).html("<span class=\"icon_check m5_r\"></span><span>启用</span>");
+            }
+            //<span class="icon_check m5_r"></span><span>启用</span>                               
+
+            //                
+        }
+    </script>
+}

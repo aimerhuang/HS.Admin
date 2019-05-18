@@ -1,0 +1,66 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.BLL.Sys
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBPdPriceHistory>
+@using Hyt.Model.SystemPredefined
+@Html.PrivilegeControl(PrivilegeCode.DS1007101, ".DS1007101")
+@Html.PrivilegeControl(PrivilegeCode.DS1007301, ".DS1007301")
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone" id="item_list">
+    <thead>
+        <tr>
+            <th class="wd75">商品编号</th>
+            <th class="align_l p10_lr">商品Erp编号</th>
+            <th class="align_l p10_lr">商品名称</th>
+            <th style="width: 124px;">申请时间</th>
+            <th style="width: 85px;">申请人</th>
+            <th style="width: 72px;">审批状态</th>
+            <th style="width: 79px;" class="border_rnone">操作</th>
+        </tr>
+    </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            const int pending = (int)ProductStatus.产品价格变更状态.待审;
+            if (Model.TotalItemCount > 0)
+            {
+                foreach (var item in Model.TData)
+                {
+                    var applyName = SyUserBo.Instance.GetUserName(item.ApplySysNo);
+                    var product = PdProductBo.Instance.GetProduct(item.ProductSysNo);
+            <tr>
+                <td>@product.SysNo</td>
+                <td class="align_l p10_l">@product.ErpCode</td>
+                <td class="align_l p10_l">@product.ProductName</td>
+                <td>@item.AuditDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@applyName</td>
+                <td>@((ProductStatus.产品价格变更状态)item.Status)</td>
+                <td>
+                    @if (item.Status == pending)
+                    {
+                        <button type="button" name="btnAudit" class="btn btn_ht26 DS1007301" title="审核" onclick=" audit('@item.RelationCode', @item.Status) "><span class="icon_audit"></span><span class="m5_l">审核</span></button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn_ht26 DS1007101" title="查看" onclick=" audit('@item.RelationCode', @item.Status) "><span class="icon_eye_open"></span><span class="m5_l">查看</span></button>
+                    }
+                </td>
+            </tr>
+                }
+
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="8">暂无数据</td>
+            </tr>
+            }
+          
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+    });
+</script>
+@{ Html.RenderPartial("_UrlPaging", Model); }

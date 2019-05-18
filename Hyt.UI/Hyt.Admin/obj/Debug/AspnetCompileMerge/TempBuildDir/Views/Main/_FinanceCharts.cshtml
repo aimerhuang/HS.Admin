@@ -1,0 +1,102 @@
+﻿
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/highcharts.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            var chart;
+            $(document).ready(function () {
+                //定义一个HighCharts
+
+                chart = new Highcharts.Chart({
+                    //配置chart选项
+                    colors: ['#fcb322', '#a5d16c'],
+                    chart: {
+                        borderRadius: 0,
+                        backgroundColor: '#ebebeb',
+                        renderTo: 'highcharts1',  //容器名，和body部分的div id要一致
+                        type: 'line'            //图表类型，这里选择折线图
+                    },
+                    //配置链接及名称选项
+                    credits: {
+                        enabled: false,
+                    },
+                    //配置标题
+                    title: {
+                        text: null
+                    },
+                    //配置副标题
+                    subtitle: {
+                        text: null
+                    },
+                    //配置x轴
+                    xAxis: {
+                        lineWidth: 1,
+                        lineColor: '#c0c0c0',
+                        categories: ['2', '4', '6', '8', '10', '12', '14', '16', '18', '20', '22', '24', '26', '28', '30']
+                    },
+                    // 配置y轴
+                    yAxis: {
+                        title: {
+                            text: null
+                        },
+                        min: 0,
+                        max: 10000,
+                        interval: 1000,
+                        tickInterval: 1000,
+                        lineWidth: 1,
+                        lineColor: '#c0c0c0',
+
+                        labels: {
+
+                            formatter: function () {
+                                return this.value;
+                            }
+                        }
+                    },
+                    //配置数据点提示框
+                    tooltip: {
+
+                        shared: true,
+                        crosshairs: true,
+                        borderRadius: 4,
+                    },
+                    legend: {
+                        align: 'center',
+                        borderWidth: 0
+                    },
+                    //配置数据列
+                    series: [{
+                        name: '选择月',
+                        marker: {
+                            symbol: 'circle'
+                        },
+                        data: [9000, 7, 8000, 9, 9000, 4100, 9000, 1124, 9000, 1078, 9000, 3458, 9000, 1268, 9000]
+                    }, {
+                        name: '对比月',
+                        data: [1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 1000, 1000, 1000, 1000, 1000, 1000]
+                    }]
+                });
+            });
+        });
+
+        </script>
+
+    <div class="boxs_tit head_m">
+        <span class="ra10 c6" style="line-height: 23px;">
+            <span class="fl">选择月</span>
+            <div class="date_btn120 m10_l m10_r fl">
+                <input type="text" name="" id="d111" class="input_ht26" value="">
+                <button onclick="UI.Date({el:'d111',dateFmt:'yyyy-MM'})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+            </div>
+            <span class="fl">对比月</span>
+            <div class="date_btn120 m10_l fl">
+                <input type="text" name="" id="d121" class="input_ht26" value="">
+                <button onclick="UI.Date({el:'d121',dateFmt:'yyyy-MM'})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+            </div>
+        </span>
+        <h3>销售统计</h3>
+    </div>
+    
+    <div class="boxs_con_c1 p10" id="highcharts1" style="height: 320px">
+    </div>
+

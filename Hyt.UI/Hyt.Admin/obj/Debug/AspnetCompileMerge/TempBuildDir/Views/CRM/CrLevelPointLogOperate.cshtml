@@ -1,0 +1,81 @@
+﻿@model Hyt.Model.CrCustomer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "调整客户等级积分";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    changeType: { required: true },
+                    quantity: { required: true, number: true },
+                    pointDescription: { required: true }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        function add() {
+            var from = $("#form");
+            $(from).submit();
+            if ($(from).valid()) {
+                $.post('/CRM/CrLevelPointLogOperate/', from.serialize(), function (data) {
+                    if (data.result) {
+                        UI.Dialog.opener.dialog(data.info);
+                        UI.Dialog.opener.doSearch();
+                        UI.Dialog.close();
+                    }
+                });
+            }
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<body class="bodynone">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tbody>
+              <tr>
+               <td width="60"  class="nameright border_rnone">客户帐号:</td>
+               <td class="border_right" colspan="3">@Model.Account</td>
+              </tr>
+              <tr>
+               <td width="60" class="nameright border_rnone"><span class="v_star">*</span>调整类型:</td>
+                  <td class="border_right border_rnone" colspan="3">
+                      <select id="changeType" name="changeType" class="select_ht28" onchange="doSearch()">
+                          <option value="">请选择</option>
+                          <option value="1">增加积分</option>
+                          <option value="-1">减少积分</option>
+                      </select>
+                      <span id="forchangeType" class="prompt m10_l">变更描述</span>
+                  </td>
+              </tr>
+              <tr>
+               <td width="60" class="nameright border_rnone"><span class="v_star">*</span>调整数量:</td>
+               <td class="border_right border_rnone" colspan="3"><input id="quantity" class="c3 valid" type="text" name="quantity"><span id="forquantity" class="prompt m10_l">调整数量</span></td>
+              </tr>
+              <tr>
+               <td width="60"  class="nameright border_rnone"><span class="v_star">*</span>变更描述:</td>
+               <td class="border_right" colspan="3">
+                <textarea id="pointDescription" class="input_xlarge" rows="2" name="pointDescription" cols="20" style="width: 250px; height: 50px;"></textarea><span id="forpointDescription" class="prompt m10_l">变更描述</span>
+               </td>
+              </tr>
+             </tbody>
+           </table>  
+   </div>
+  </div>  
+</div>
+</body>
+</form>

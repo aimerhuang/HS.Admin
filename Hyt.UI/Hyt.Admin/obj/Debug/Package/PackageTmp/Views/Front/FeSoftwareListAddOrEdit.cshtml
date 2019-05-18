@@ -1,0 +1,174 @@
+﻿@{
+    ViewBag.Title = "FeSoftwareListAddOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.FeSoftwareList
+<script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+<script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+<script type="text/javascript">
+    //序列化form为json数据
+    (function ($) {
+        $.fn.serializeJson = function () {
+            var serializeObj = {};
+            $(this.serializeArray()).each(function () {
+                serializeObj[this.name] = this.value;
+            });
+            return serializeObj;
+        };
+    })(jQuery);
+
+    $(function () {
+        $("#FeSoftwareListForm").validate({
+            rules: {
+                Name: {
+                    required: true,
+                    maxlength: 30
+                },
+                DownloadUrl: {
+                    required:true
+                },
+                SoftIcon: {
+                    min: 1
+                },
+                VersionNumber: {
+                    required:true
+                },
+                DisplayOrder: {
+                    required: true,
+                    min:0,
+                    digits:true
+                }
+            },
+            messages: {
+                Name: {
+                    required: "软件名称必填",
+                    maxlength: "长度超出30个字"
+                },
+                DownloadUrl: {
+                    required: "未上传软件"
+                },
+                SoftIcon: {
+                    min: "请选择软件图标"
+                },
+                VersionNumber: {
+                    required: "版本号必填"
+                },
+                DisplayOrder: {
+                    required: "显示序号必填",
+                    min:"最小值为零",
+                    digits: "必须为整数"
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#for' + el.attr('id')).attr('class', 'error m10_l');
+            },
+            success: function (label, el) {
+                $('#for' + el.attr('id')).attr('class', 'success m10_l');
+            },
+            ignore: ""
+        });
+
+        function initDialog() {
+            var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+            if (!api) return;
+            // 自定义按钮
+            api.button(
+                {
+                    name: '保存',
+                    callback: function () {
+                        if ($("#FeSoftwareListForm").valid()) {
+                            try {
+                                UI.Dialog.opener.SaveFeSoftwareList($("#FeSoftwareListForm").serializeJson());
+                            } catch (e) { };
+                            UI.Dialog.close();
+                            return false;
+                        } else {
+                            return false;
+                        }
+                    },
+                    focus: true
+                },
+                {
+                    name: '取消'
+                }
+            );
+        }
+        $("#btnUploadSoftware").click(function () {
+            DAO.Upload({
+                config: '@(Hyt.Model.SystemPredefined.UploadConfigAlias.UploadSoftwareConfigAlias)',
+                    callback: function (data) {
+                        $("#DownloadUrl").val(data[0].url);
+                        $("#showDownloadUrl").html("软件地址：" + data[0].url);
+                    }
+                })
+            });
+
+            initDialog();
+
+        });
+
+</script>
+<div class="caseout">
+    <form id="FeSoftwareListForm" name="FeSoftwareListForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>软件名称:</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Name" id="Name" class="wd200" value="@Model.Name" /><span id="forName" class="prompt m10_l">软件名称必填,30字以内</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>上传软件:</td>
+                            <td width="80%" class="borde_right">
+                                <button id="btnUploadSoftware" class="btn btn_blue btn_ht32 wd100 bold f14" type="button">上传</button>
+                                <span id="forDownloadUrl" class="prompt m10_l">点击按钮上传</span>
+                                <input type="hidden" value="@Model.DownloadUrl" id="DownloadUrl" name="DownloadUrl"  />
+                                <br />
+                                <span id="showDownloadUrl">@if(!string.IsNullOrEmpty(Model.DownloadUrl)){ @Html.Raw("软件地址：" + Model.DownloadUrl); }else{ @Html.Raw("还未上传软件");}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone" style="vertical-align: top;"><span class="v_star">*</span>软件图标:</td>
+                            <td width="80%" class="borde_right">
+                                <select name="SoftIcon" id="SoftIcon" class="select_ht28">
+                                    <option value="0" @if(@Model.SoftIcon == 0){ @Html.Raw("selected=\"selected\""); }>请选择</option>
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ForeStatus.软件列表状态)))
+                                        {
+                                            <option @if(Model.SoftIcon == dict.Key){ @Html.Raw("selected=\"selected\""); } value="@dict.Key">@dict.Value</option>
+                                        }
+                                     }
+                                </select>
+                                <span id="forSoftIcon" class="prompt m10_l">软件图标必选</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>版本号:</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="VersionNumber" id="VersionNumber" class="wd200" value="@Model.VersionNumber" /><span id="forVersionNumber" class="prompt m10_l">软件版本号</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>显示序号:</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="DisplayOrder" id="DisplayOrder" class="wd200" value="@Model.DisplayOrder" /><span id="forDisplayOrder" class="prompt m10_l">显示序号</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+            <input type="hidden" name="Index" value="@ViewBag.Index" />
+        </div>
+
+    </form>
+</div>

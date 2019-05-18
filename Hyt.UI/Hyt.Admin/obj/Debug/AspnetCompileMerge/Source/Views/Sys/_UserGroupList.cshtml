@@ -1,0 +1,49 @@
+﻿@model IEnumerable<Hyt.Model.SyUserGroup>
+@{
+    int row = 0;
+}
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="200" align="left" class="p10_l">用户组名称</th>
+            <th align="left" class="p10_l">用户组描述</th>
+            <th width="98">是否系统分组</th>
+            <th width="40">状态</th>
+            <th width="220">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (Hyt.Model.SyUserGroup item in Model)
+        {
+            row++;
+            <tr @{if (row % 2 == 0) { <text> class='odd_color' </text>  }}>
+                <td align="left" class="p10_l">@item.GroupName</td>
+                <td align="left" class="p10_l">@item.Description</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.是否系统分组), item.IsSystem)</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.用户组状态), item.Status)</td>
+                <td>
+                    @if (item.Status == 1)
+                    {
+                        if (item.IsSystem != 1)
+                        {
+                            <button class="btn btn_ht26 btn_red SY1007701" onclick="Disabled(@item.SysNo,true)"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button>
+                        }
+                    }
+                    else
+                    {
+                        if (item.IsSystem != 1)
+                        {
+                            <button class="btn btn_ht26 btn_blue SY1007701" onclick="Disabled(@item.SysNo,false)"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button>
+                        }
+                    }
+                    <button class="editUser btn btn_ht26 btn_blue m10_l SY1007201" onclick="Edit(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    @if (item.IsSystem != 1)
+                    {
+                        <button class="btn btn_ht26 m10_l btn_red SY1007401" onclick="Delete(@item.SysNo,this)"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

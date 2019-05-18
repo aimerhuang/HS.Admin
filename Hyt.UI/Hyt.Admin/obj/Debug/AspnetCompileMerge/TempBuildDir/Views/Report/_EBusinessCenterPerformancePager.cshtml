@@ -1,0 +1,55 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.RP_绩效_电商中心>
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th class="align_l p10_lr" rowspan="2">分销商</th>
+                <th class="align_l p10_lr" rowspan="2">商城类型</th>
+                <th class="align_l p10_lr" rowspan="2">店铺名称</th>
+                <th class="border_bnone" colspan="2">升舱金额</th>
+                <th class="border_bnone" colspan="2">升舱单量</th>
+            </tr>
+            <tr>
+                <th>百城达</th>
+                <th>第三方</th>
+                <th>百城达</th>
+                <th>第三方</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var mode = Model.TData as List<Hyt.Model.RP_绩效_电商中心>;
+                if (mode != null && mode.Count > 0)
+                {
+                    foreach (var item in (List<Hyt.Model.RP_绩效_电商中心>)Model.TData)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }else{
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                        <td class="align_l p10_lr">@item.分销商</td>
+                        <td class="align_l p10_lr">@item.商城类型</td>
+                        <td class="align_l p10_lr">@item.店铺名称</td>
+                        <td class="red">@Html.Raw(Hyt.Util.FormatUtil.FormatCurrency(item.升舱金额_百城达,0))</td>
+                        <td class="red">@Html.Raw(Hyt.Util.FormatUtil.FormatCurrency(item.升舱金额_第三方,0))</td>
+                        <td>@item.升舱单量_百城达</td>
+                        <td>@item.升舱单量_第三方</td>
+                        @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+                
+            }
+        </tbody>
+    </table>
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

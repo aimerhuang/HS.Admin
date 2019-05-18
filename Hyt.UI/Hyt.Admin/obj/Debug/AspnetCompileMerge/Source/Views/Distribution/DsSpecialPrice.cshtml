@@ -1,0 +1,114 @@
+﻿@using Hyt.Model.SystemPredefined
+@Html.PrivilegeControl(PrivilegeCode.DS1001101, ".DS1001101")
+@Html.PrivilegeControl(PrivilegeCode.DS1001201, ".DS1001201")
+
+<script type="text/javascript" src="~/Theme/scripts/UI.yui.js"> </script>
+<script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"> </script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.yui.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>分销商特殊价格管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">@Html.DropDownList("statusList")</div>
+                    <input id="txtSysNo" type="text" class="input_ht28 fl m10_r" maxlength="20" />
+                    <input id="txtName" type="text" class="input_ht28 fl m10_r wd200" maxlength="20" />
+                    <button id="search_btn" class="btn btn_ht28 fl" title="搜索"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+                <div class="left_tool">
+                    <button class="btn btn_ht26 DS1001201" id="btnNew" onclick=" insert() "><span class="icon icon_plus"></span><span class="m5_l">添加特殊价格</span></button>
+                </div>
+            </div>
+            <div class="boxs_list">
+                <div id="paging" />
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        //搜索框默认提示
+        $("#txtSysNo").defaultValue("商品或分销商编号...");
+        $("#txtName").defaultValue("商品名称或分销商名称...");
+        $("#statusList").attr("class", "select_ht28 m10_r");
+        quickSearch();
+    });
+
+    $("#statusList").change(function () {
+        quickSearch();
+    });
+    $("#search_btn").click(function () {
+        quickSearch();
+    });
+    $("#txtSysNo").keydown(function (e) {
+        var keycode = e.which;
+        if (keycode != 13) {
+            return;
+        }
+        quickSearch();
+    });
+    $("#txtName").keydown(function (e) {
+        var keycode = e.which;
+        if (keycode != 13) {
+            return;
+        }
+        quickSearch();
+    });
+
+    function quickSearch() {
+        var data = {};
+        var sysno = $("#txtSysNo").val();
+        if (sysno && sysno != "商品或分销商编号...") {
+            data.SysNo = $("#WarehouseSysNo").val();
+        }
+        var name = $("#txtName").val();
+        if (name && name != "商品名称或分销商名称...") {
+            data.Name = $("#SourceSysNo").val();
+        }
+        data.Status = $("#statusList").val();
+
+        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+        $.get('@Url.Action("GetDsSpecialPriceList", "Distribution")', data,
+             function (ret) {
+                 $('#paging').html(ret);
+                 mask.Remove();
+             });
+    }
+
+    function insert() {
+        var url = '@Url.Action("DsSpecialPriceAdd")';
+        UI.DialogOpen(url, {
+            title: '添加特殊价格',
+            width: 870,
+            height: 400,
+            resize: false,
+            init: function () {
+                this.button({
+                    name: "添加",
+                    focus: true,
+                    callback: function () {
+                        var iframe = this.iframe.contentWindow;
+                        if (!iframe.document.body) {
+                            UI.Alert({ content: '数据加载中,请稍等.' });
+                            return false;
+                        }
+                        iframe.insert();
+                        return false;
+                    }
+                },
+                    { name: "关闭" });
+            }
+        }, false);
+    }
+
+    function showTip(tip) {
+        UI.tips.tip_alert('tips_success', tip);
+        quickSearch();
+    }
+</script>

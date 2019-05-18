@@ -1,0 +1,84 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.PdProductStockInDetailList>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="110">入库单号</th>
+                <th width="110">入库时间</th>
+                <th width="100">状态</th>
+                <th width="100">推送状态</th>
+                <th width="50">操作</th>
+                @*<th width="80">推送</th>*@
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.PdProductStockInDetailList>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>@item.StockInNo</td>
+                <td>@item.StorageTime</td>
+                <td>
+                    @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.WarehouseStatus.入库单状态), item.Status)
+                </td>      
+                 <td>
+                    @(item.SendStatus == 1 ? "已推送" : "未推送")
+                </td>                           
+                <td style="text-align:left; padding-left:10px;">
+                    @if (item.Status == Convert.ToInt32(Hyt.Model.WorkflowStatus.WarehouseStatus.入库单状态.待入库))
+                    { 
+                        <button type="button" class="btn btn_ht26 btn_blue e" title="修改" onclick="openTab(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                        <button type="button" class="btn btn_ht26 btn_blue e" title="入库" onclick="openTabAudit(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">入库</span></button>
+                    }
+                    else
+                    {
+                        if (item.Status == Convert.ToInt32(Hyt.Model.WorkflowStatus.WarehouseStatus.入库单状态.部分入库))
+                        {
+                            <button type="button" class="btn btn_ht26 btn_blue e" title="入库" onclick="openTabAudit(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">入库</span></button> 
+                            <button type="button" class="btn btn_ht26 btn_blue e" title="查看" onclick="openTabView(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">查看</span></button>                       
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn_ht26 btn_blue e" title="查看" onclick="openTabView(@item.SysNo)"><span class=" icon_pencil icon_white"></span><span class="m5_l">查看</span></button>
+                        }
+                    }                   
+                </td>
+                @*<td>
+                    
+                    @if (item.Status == Convert.ToInt32(Hyt.Model.WorkflowStatus.WarehouseStatus.入库单状态.已入库) && item.SendStatus == 0)
+                    {
+                         <button class="btn btn_ht26 btn_blue" onclick="InboundCreate(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">推送</span></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_ht26 btn_blue" disabled="disabled" style="background: #C1C1C1; border: 1px solid #C1C1C1; "><span class="icon_pencil icon_white"></span><span class="m5_l">推送</span></button>
+                    } 
+                </td>*@                
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

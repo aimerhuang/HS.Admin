@@ -1,0 +1,451 @@
+﻿@using Hyt.BLL.Product
+@model Hyt.Admin.Models.ReturnEdit
+@{
+    //普通(10),团购(20),秒杀(30),抢购(40),拍卖(50),组合(60),赠品(90)
+    var dics = new Dictionary<int, string[]>();
+    dics.Add(10, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"普通\" class=\"tagfull-inner\">普通</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(20, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"团购\" class=\"tagfull-inner\">团购</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(30, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"秒杀\" class=\"tagfull-inner\">秒杀</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(40, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"抢购\" class=\"tagfull-inner\">抢购</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(50, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"拍卖\" class=\"tagfull-inner\">拍卖</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(60, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"组合\" class=\"tagfull-inner\">组合</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(90, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"赠品\" class=\"tagfull-inner\">赠品</div><div class=\"tagfull-arrow\"></div></div>" });
+}
+@*换货编辑公共控件*@
+<div class="tit_con">
+
+    @{Html.RenderAction("RmaOrderInfo", new { id = Model.OrderSysNo });}
+</div>
+<form method="POST" id="form1" name="form1">
+    <div class="border_left border_right border_bottom">
+        <div class="tit_dispay m10_t border_bottom">
+            <h5>换货明细数据</h5>
+        </div>
+        @foreach (var outStore in Model.ReturnEditOutStore)
+        {
+            <div class="boxs_tool">
+                <div class="left_tool line30">
+                    <span class=" m10_r">出库单编号:</span>@outStore.SysNo<span class="m10_l m10_r">出库单金额:</span><span class="red">&yen;@outStore.StockOutAmount.ToString("0.00")</span><span class="m10_l m10_r">出库单状态:</span><span class="red">@outStore.StatusName</span><span class="m10_l"></span>@outStore.SignTime.ToString("yyyy-MM-dd HH:mm")
+                </div>
+            </div>
+        
+            <div class="boxs_listtabel">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_bnone">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" value="checkall" name="checkall" class="checkall hide" id="checkall"></th>
+                            <th width="100">商品编号</th>
+                            <th>后台显示名称</th>
+                            <th width="100">商品原单价</th>
+                            <th width="100">购买数量</th>
+                            <th width="100">实际销售金额</th>
+                            <th width="100">可换数量</th>
+                            <th width="116">换货数量</th>
+                            <th width="160">换货原因</th>
+                            <th style="display: none">商品号</th>
+                        </tr>
+                    </thead>
+                    <tbody class="product_list">
+                        @{int i = 0;
+                          foreach (var item in outStore.ReturnWhStockOutItemEx)
+                          {
+                              if (i % 2 == 0)
+                              {
+                            @Html.Raw("<tr>")
+                              }
+                              else
+                              {
+                            @Html.Raw("<tr class='stag_color'>")
+                              }              
+                            <td>
+                                <input type="checkbox" value="@item.StockOutItemSysNo" onclick='quantityChange($(this).closest("tr").find(".ReturnQuantity").get(0), 2);' class="checktd" @if (item.RmaQuantity > 0)
+                                                                                                                                                                                          {@:checked="checked"
+                                        }  name="SysNo"  ></td>
+                            <td>@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                            <td align="left" class="p10_lr">
+                                @if (item.ProductSalesType > 10)
+                                {
+                                    @Html.Raw(dics[item.ProductSalesType][0]);
+                                }
+                                @PdProductBo.Instance.GetProductEasName(item.ProductSysNo)
+                            </td>
+                            <td align="right" class="red p10_r">&yen;@item.OriginalPrice.ToString("0.00")</td>
+                            <td>@item.ProductQuantity</td>
+                            <td align="right" class="red p10_r">&yen;@item.RealSalesAmount.ToString("0.00")</td>
+                            <td>@item.ProductQuantityAble</td>
+                            <td>
+                                <input type="text" class="wd60 number_input ReturnQuantity"  name="ReturnQuantity"  value="@item.RmaQuantity"/></td>
+                            <td>
+                                <select class="wd150" name="RmaReason">
+                                    <option value="15天无理由退换货"  @if (item.RmaReason == "15天无理由退换货")
+                                                               {@:selected="selected"
+                                                                 } >48小时无理由退换货</option>
+                                    <option value="产品质量问题" @if (item.RmaReason == "产品质量问题")
+                                                           {@:selected="selected"
+                                                             }>产品质量问题</option>
+                                    <option value="产品与描述不符"  @if (item.RmaReason == "产品与描述不符")
+                                                             {@:selected="selected"
+                                                               }>产品与描述不符</option>
+                                    <option value="其它" @if (item.RmaReason == "其它")
+                                                            { @: selected="selected"
+                                                                                                           }>
+                                    其它
+                                    </option>
+
+
+
+                                </select>
+                            </td>
+                            <td style="display: none">@item.ProductSysNo</td>
+                            @Html.Raw("</tr>")
+                                                             i++;
+                          }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="88" class="nameright border_bnone"><span class="v_star">*</span>商品入库仓库</td>
+                        @if (Model.WhWarehouseList != null)
+                        {
+                            <td colspan="3" class="border_bnone">
+                                <select class="wd230" id="WarehouseSysNo" name="WarehouseSysNo" save="WarehouseSysNo">
+                                    @foreach (var WhWarehouse in Model.WhWarehouseList)
+                                    {
+                                        <option value="@WhWarehouse.SysNo" @if (WhWarehouse.SysNo == Model.WarehouseSysNo)
+                                                                           {
+                                                                                @:selected="selected"
+                                                                            } >@WhWarehouse.WarehouseName</option>
+                                    }
+                                </select>
+                            </td>
+                        }
+                        else
+                        {
+                            <td colspan="3" class="border_bnone">
+                                <input type="text" id="WarehouseSys"
+                                         name="WarehouseSys"  readonly="readonly" value="@Model.WarehouseName">
+                                <input type="hidden" id="WarehouseSysNo" save="WarehouseSysNo" name="WarehouseSysNo" value="@Model.WarehouseSysNo">
+                                <span id="c_WarehouseSysNo" class="prompt m10_l">选择商品入库仓库</span>
+                            </td>
+                        }
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="border_left border_right m10_t">
+        <div class="tit_dispay border_bottom">
+            <h5>取件信息</h5>
+        </div>
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                <tbody>
+                    <tr>
+                        <td width="88" class="nameright border_bnone"><span class="v_star">*</span>取件方式</td>
+                        <td colspan="3" class="border_bnone">
+                            <select class="wd230" id="PickUpShipTypeSysNo" name="PickUpShipTypeSysNo" save="PickUpShipTypeSysNo">
+                                <option></option>
+                            </select><span id="c_PickUpShipTypeSysNo" class="prompt m10_l">选择取件方式</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_con hide" id="pickUpAddressDiv">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="88" class="nameright"><span class="v_star">*</span>联系人</td>
+                        <td width="45%" class="border_right">
+                            <input type="text" class="input_xlarge" name="Name" id="Name" pickup="Name" maxlength="20" value="@if (Model.PickUpAddress != null)
+                                                                                                                              {@Model.PickUpAddress.Name}" /><span id="c_Name" class="prompt m10_l">填写联系人</span></td>
+                        <td width="88" class="nameright"><span class="v_star">*</span>预约时间</td>
+                        <td>
+                            <div class="date_btn120 m10_r fl" style="width: 160px;">
+                                <input type="text" name="PickUpTime" id="PickUpTime" style="width:116px;" class="input_ht26" value="@Model.PickUpTime" save="PickUpTime" search="PickUpTime" onfocus="UI.Date({el:'PickUpTime', dateFmt: 'yyyy-MM-dd HH:mm',minDate: '%y-%M-%d'})">
+                                <button onclick="UI.Date({el:'PickUpTime', dateFmt: 'yyyy-MM-dd HH:mm',minDate: '%y-%M-%d'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                            </div>
+                            <span id="c_PickUpTime" class="prompt">填写预约时间</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright"><span class="v_star">*</span>联系人手机</td>
+                        <td class="border_right">
+                            <input type="text" class="input_xlarge"  name="MobilePhoneNumber" id="MobilePhoneNumber" pickup="MobilePhoneNumber" maxlength="15"  value="@if (Model.PickUpAddress != null)
+                                                                                                                                                                       {@Model.PickUpAddress.MobilePhoneNumber}" />
+                            <span id="c_MobilePhoneNumber" class="prompt m10_l">填写联系人手机</span></td>
+                        <td class="nameright">联系人电话</td>
+                        <td>
+                            <input type="text" class="input_xlarge" name="PhoneNumber"  maxlength="15" id="PhoneNumber" pickup="PhoneNumber" value="@if (Model.PickUpAddress != null)
+                                                                                                                                                    {@Model.PickUpAddress.PhoneNumber}" /></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright"><span class="v_star">*</span>取件地区</td>
+                        <td colspan="3">
+                            <select class="wd120 m10_r" id="dpdCountry">
+                            </select>国家
+                            <select class="wd120 m10_r" id="dpdProvince" name="dpdProvince">
+                                @*<option>请选择省份</option>*@
+                            </select>省
+                            <select class="wd120 m10_r m10_l" id="dpdCity" name="dpdCity">
+                                @*<option>请选择市/州</option>*@
+                            </select>市/地区
+                            <select class="wd120 m10_r m10_l" id="dpdArea" name="dpdArea" pickup="AreaSysNo">
+                                @*<option>请选择区/县</option>*@
+                            </select>区/县<span id="c_dpdArea" class="prompt m10_l">选择取件地区</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_bnone"><span class="v_star">*</span>取件地址</td>
+                        <td colspan="3" class="border_bnone">
+                            <input type="text" class="wd600"  name="StreetAddress" id="StreetAddress" maxlength="100" pickup="StreetAddress" value="@if (Model.PickUpAddress != null)
+                                                                                                                                                    {@Model.PickUpAddress.StreetAddress}"/><span id="c_StreetAddress" class="prompt m10_l">填写取件地址</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_dispay">
+            <h5>收货信息</h5>
+        </div>
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="88" class="nameright"><span class="v_star">*</span>联系人</td>
+                        <td width="45%" class="border_right">
+                            <input type="text" class="input_xlarge" name="ReceiveName"  id="ReceiveName"  Receive="Name" maxlength="25" value="@if (Model.SoReceiveAddress != null)
+                                                                                                                                               {@Model.SoReceiveAddress.Name}" /><span id="c_ReceiveName" class="prompt m10_l">填写联系人</span></td>
+                        <td width="88" class="nameright"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright"><span class="v_star">*</span>联系人手机</td>
+                        <td class="border_right">
+                            <input type="text" class="input_xlarge"  name="ReceiveMobilePhoneNumber"  id="ReceiveMobilePhoneNumber" Receive="MobilePhoneNumber" maxlength="15"  value="@if (Model.SoReceiveAddress != null)
+                                                                                                                                                                                       {@Model.SoReceiveAddress.MobilePhoneNumber}" />
+                            <span id="c_ReceiveMobilePhoneNumber" class="prompt m10_l">填写联系人手机</span></td>
+                        <td class="nameright">联系人电话</td>
+                        <td>
+                            <input type="text" class="input_xlarge" name="ReceivePhoneNumber"  maxlength="15"  id="ReceivePhoneNumber" Receive="PhoneNumber" value="@if (Model.SoReceiveAddress != null)
+                                                                                                                                                                    {@Model.SoReceiveAddress.PhoneNumber}" /></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright"><span class="v_star">*</span>收货地区</td>
+                        <td colspan="3">
+                            <select class="wd120 m10_r" id="rdpdCountry">
+                            </select>国家
+                            <select class="wd120 m10_r" id="rdpdProvince" name="rdpdProvince">
+                                @*<option>请选择省份</option>*@
+                            </select>省
+                            <select class="wd120 m10_r m10_l" id="rdpdCity" name="rdpdCity">
+                                @*<option>请选择市/州</option>*@
+                            </select>市/地区
+                            <select class="wd120 m10_r m10_l" id="rdpdArea" name="rdpdArea" receive="AreaSysNo">
+                                @*<option>请选择区/县</option>*@
+                            </select>区/县<span id="c_rdpdArea" class="prompt m10_l">选择收货地区</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_bnone"><span class="v_star">*</span>收货地址</td>
+                        <td colspan="3" class="border_bnone">
+                            <input type="text" class="wd600"  name="ReceiveStreetAddress"  id="ReceiveStreetAddress"  maxlength="100" Receive="StreetAddress" value="@if (Model.SoReceiveAddress != null)
+                                                                                                                                                                     {@Model.SoReceiveAddress.StreetAddress}"/><span id="c_ReceiveStreetAddress" class="prompt m10_l">填写收货地址</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="88" class="nameright" valign="top">顾客备注</td>
+                        <td>
+                            <textarea class="wd600" rows="" cols="" name="RMARemark" id="RMARemark" save="RMARemark">@Model.RMARemark</textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright" valign="top">对内备注</td>
+                        <td>
+                            <textarea class="wd600" rows="" cols="" name="InternalRemark" id="InternalRemark" save="InternalRemark">@Model.InternalRemark</textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    var setting;
+    $(function () {
+        //取件地区
+        setDefaultArea($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), "@if (Model.PickUpAddress != null)
+                                                                         {@Model.PickUpAddress.AreaSysNo}");
+        //收货地区
+        setDefaultArea($("#rdpdCountry"), $("#rdpdProvince"), $("#rdpdCity"), $("#rdpdArea"), "@if (Model.SoReceiveAddress != null)
+                                                                            {@Model.SoReceiveAddress.AreaSysNo}");
+        //绑定取件方式
+        getPickUp('@Model.HandleDepartment', '@Model.PickUpShipTypeSysNo');
+        //仓库变化事件
+        $("#WarehouseSysNo").change(function () { getPickUp('@Model.HandleDepartment', '@Model.PickUpShipTypeSysNo'); });
+        UI.Numbercontrol({
+            numberinputselect: "input.number_input", minNumber: 0, maxNumber: 100, step: 1, eventType: "click", cutActiveNum: function (obj) {
+                quantityChange(obj, 2);
+            }, addActiveNum: function (obj) {
+                quantityChange(obj, 2);
+            }
+        });
+        //点击选择仓库
+        $("#WarehouseSys").bind("click", function () {
+            DAO.SelectWhareHouseDialog({
+                callBack: function (data) {
+                    if (data.length > 0) {
+                        $("#WarehouseSys").val(data[0].name);
+                        $("#WarehouseSysNo").val(data[0].id);
+                        getPickUp('@Model.HandleDepartment', '@Model.PickUpShipTypeSysNo');
+                    }
+                }
+            });
+        });
+        //加载验证规则
+        LoadRule();
+        //根据商品列表checkbox启用禁用录入框
+        setInputDisable();
+        //文本框录入字数长度限制
+        $("textarea").textareaInput(400);
+    });
+    //根据取件方式显示取件地址
+    function displayPickupShipType(obj) {
+        if (obj.val() == '@Hyt.Model.SystemPredefined.PickupType.百城当日取件' || obj.val() == '@Hyt.Model.SystemPredefined.PickupType.普通取件'
+                             || obj.val() == '@Hyt.Model.SystemPredefined.PickupType.加急取件' || obj.val() == '@Hyt.Model.SystemPredefined.PickupType.定时取件') {
+            $("#pickUpAddressDiv").removeClass("hide");
+        } else {
+            $("#pickUpAddressDiv").addClass("hide");
+        }
+    }
+    //加载验证规则
+    function LoadRule() {
+        setting = $("#form1").validate({
+            rules: {
+                PickUpShipTypeSysNo: {
+                    min: 1,
+                    required: true
+                },
+                WarehouseSysNo: {
+                    min: 1,
+                    required: true
+                },
+                ReceiveName: {
+                    required: true
+                },
+                ReceiveMobilePhoneNumber: {
+                    required: true,
+                    isMobile: true
+                },
+                rdpdArea: {
+                    min: 1,
+                    required: true
+                },
+                ReceiveStreetAddress: {
+                    required: true
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+            },
+            ignore: "",
+            debug: true
+        });
+    }
+    //页面校验退货商品数据
+    function checkForm(productJson) {
+        var res = {};
+        res["satus"] = 0;
+        if (productJson.length == 0 || productJson[0].ReturnWhStockOutItemEx.length == 0) {
+            res["satus"] = -1;
+            res["message"] = "请先选择换货商品及数量";
+        } else {
+            $.each(productJson, function (idx, obj) {
+                $.each(obj.ReturnWhStockOutItemEx, function (i, item) {
+                    if (item.RmaQuantity == 0 && res["satus"] != -1) {
+                        res["satus"] = -1;
+                        res["message"] = "换货数量不能为零";
+                    }
+                    if (item.RmaReason == 0 && res["satus"] != -1) {
+                        res["satus"] = -1;
+                        res["message"] = "换货原因不能为空";
+                    }
+                });
+            });
+        }
+        return res;
+    }
+    //保存(审核)换货单
+    function saveExchanges(postUrl, locationUrl,isAudit) {
+        var productData = getProductData(2);
+        var res = checkForm(productData);
+        if (res.satus == -1) {
+            Utils.alert(res.message);
+            return false;
+        }
+        var pickUpShipTypeSysNo = $("#PickUpShipTypeSysNo").val();
+        if (pickUpShipTypeSysNo == '@Hyt.Model.SystemPredefined.PickupType.百城当日取件' || pickUpShipTypeSysNo == '@Hyt.Model.SystemPredefined.PickupType.普通取件'
+            || pickUpShipTypeSysNo == '@Hyt.Model.SystemPredefined.PickupType.加急取件' || pickUpShipTypeSysNo == '@Hyt.Model.SystemPredefined.PickupType.定时取件') {
+            $("#Name").rules('add', {
+                required: true
+            });
+            $("#PickUpTime").rules('add', {
+                required: true
+            });
+            $("#MobilePhoneNumber").rules('add', {
+                required: true,
+                isMobile: true
+            });
+            $("#dpdArea").rules('add', {
+                min: 1,
+                required: true
+            });
+            $("#StreetAddress").rules('add', {
+                required: true
+            });
+        }
+        if (!setting.form()) {
+            return false;
+        }
+        Ajax.postJosn(postUrl, "save", function (p) {
+            p.setParams("SysNo", "@Model.SysNo");
+            p.setParams("HandleDepartment", "@Model.HandleDepartment");
+            p.setParams("ReturnEditOutStore", productData);
+            p.setParams("PickUpAddress", getPickUpShipAddress());
+            p.setParams("SoReceiveAddress", getSoReceiveAddress());
+
+        }, function (ret) {
+            if (ret.StatusCode == 0) {
+                if (isAudit) {
+                    location.reload();
+                } else {
+                    UI.Confirm({
+                        content: '成功生成换货单！点击[确定]进入该换货单详情',
+                        ok: function () {
+                            UI.CloseTab(null, "/rma/RMADetail/?sysNo=" + ret.Data, " 换货:" + ret.Data);
+                        },
+                        cancel: function () {
+                            UI.CloseTab(null, locationUrl);
+                        }
+                    });
+                }
+            } else {
+                Utils.alert(ret.Message);
+            }
+        });
+    }
+</script>

@@ -1,0 +1,237 @@
+﻿@using Hyt.BLL.Order
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBSoOrder>
+
+@helper GetStockOut(int stockSysNo, int status)
+{
+    if (stockSysNo == 0)
+    {
+        @MvcHtmlString.Create("<span class='icon_info_sign icon_gray' title='缺货'></span> <span class='c6'>缺货</span>");
+    }
+}
+<style>
+    table th {
+        white-space: nowrap;
+    }
+
+    table td {
+        padding: 0 5px;
+    }
+
+    .nowrap {
+        white-space: nowrap;
+    }
+    .iconbeizhu {
+        display: block;
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        background: url(/Theme/images/icons/biaozhi.png) no-repeat;
+        background-position: -221px -39px;
+    }
+    .iconhave {
+        cursor: pointer; display: block;
+        width: 20px;
+        height: 20px;
+        background: url(/Theme/images/icons/biaozhi.png) no-repeat;
+        background-position: -200px -39px;
+    }
+</style>
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table class="list_tit border_rnone border_bnone" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+              
+                <th width="25">
+                    <span style="">本页</span>
+                    <input name="sysNo"  type="checkbox" class="checkall" value="" />
+                    <span style="color: #ff0000; display: none">全选</span>
+                    <input name="sysNolist" style="display:none" type="checkbox" class="sysNolist" value="" />
+                    <input name="IdList" type="hidden" class="IdList" id="IdList" value="@Model.IdData" />
+                    <input name="Count" type="hidden" class="Count" id="Count" value="@Model.TotalItemCount" />
+                </th>
+                <th>标识</th>
+                <th>订单号</th>
+                <th>订单编号</th>
+                <th>仓库</th>
+                @*<th width="7%">出库单</th>*@
+                <th width="90">会员账号</th>
+                <th width="90">收货人</th>
+                <th>收货电话</th>
+                <th>配送方式</th>
+                <th>支付方式</th>
+                <th>支付金额</th>
+                @*<th>积分</th>*@
+                <th>来源</th>
+                @*<th width="8%" style="display:none">操作时间</th>*@
+                <th>下单时间</th>
+                <th>支付状态</th>
+                <th>支付时间</th>
+                <th>分销商</th>
+                <th>审核人</th>
+                <th>状态</th>
+                @*<th>推送状态</th>*@
+               <th>支付</th>
+                @*<th>海关</th>
+                  <th>物流</th>
+                  <th>商检</th>*@
+                <th>标记</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="14" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CBSoOrder>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+
+                <td>
+                    <input name="sysNo" type="checkbox" class="checktd" value="@item.SysNo" job="@item.JobSysNo" malltypesysno="@item.MallTypeSysNo" />
+                </td>
+                <td>@Html.Raw(SoOrderBo.Instance.GetMallImg(item.ImgFlag, item.MallTypeSysNo))</td>
+                <td class="blue nowrap"><a onmouseover="GetOrderLogs('@item.SysNo', this) " onmouseout=" HidOrderStatus() " href="javascript:OrderBrowse(@item.SysNo);">@item.SysNo</a></td>
+                <td class="nowrap">@item.OrderNo</td>
+                <td>@item.BackWarehouseName @GetStockOut(item.WhStockOutSysNo, item.Status)</td>
+                @*<td width="7%">@item.WhStockOutSysNo</td>*@
+                <td class="blue"><a href="javascript:void(0)" onclick="browseUserInfo(@item.CustomerId)">@item.CustomerAccount</a></td>
+                <td>@item.ReceiveName</td>
+                <td class="nowrap">@item.ReceiveTel</td>
+                <td class="nowrap">@item.DeliveryTypeName</td>
+                <td class="nowrap">@item.PaymentName</td>
+                <td class="red p10_r nowrap" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.CashPay, 2))</td>
+                @*<td class="nowrap">@item.Point</td>*@
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(OrderStatus.销售单来源), item.OrderSource)</td>
+                <td>@item.CreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(OrderStatus.销售单支付状态), item.PayStatus)</td>
+
+                if (string.IsNullOrWhiteSpace(item.PaymentDate.ToString()))
+                {
+                    <td> @item.PayTime</td>
+                }
+                else
+                {
+                    <td>@item.PaymentDate</td>
+                }
+
+                <td class="align_l p10_lr">@item.DealerName</td>
+                <td>@item.AuditorName</td>
+                <td class="nowrap">
+                    @if ((int)OrderStatus.销售单状态.出库待接收 == item.Status)
+                    {
+                        <a href="javascript:void(0)" style="text-decoration:underline;color:#2592DB;" onclick="QueryLogistics(@item.SysNo)">@Hyt.Util.EnumUtil.GetDescription(typeof(OrderStatus.销售单状态), item.Status)</a>
+                    }
+                    else
+                    {
+                        @Hyt.Util.EnumUtil.GetDescription(typeof(OrderStatus.销售单状态), item.Status);
+                    }
+                </td>
+                @*<td>@item.CustomsPayStatus</td>*@
+                <td>
+                 @if (string.IsNullOrWhiteSpace(item.DeliveryRemarks))
+                 {
+
+                      <i class="iconbeizhu" data-beizhu="@item.DeliveryRemarks" onclick="EditBeizhu(@item.SysNo, this)"></i>
+                        @*<a><img onclick="EditBeizhu(@item.SysNo, this)" src="~/Theme/images/icons/biaozhi02.png" /></a>*@
+
+                    }
+                    else
+                    {
+
+
+                        <i class="iconhave" data-beizhu="@item.DeliveryRemarks" onclick="EditBeizhu(@item.SysNo, this)" onmouseover="GetBeizhuLogs('@item.SysNo', this) " onmouseout="    HidOrderStatus() "></i>
+                        
+                    }
+             </td>
+                <td>
+                    @if ((int)OrderStatus.销售单状态.已完成 == item.Status || (int)OrderStatus.销售单状态.出库待接收 == item.Status)
+                    {
+                        <button class="btn btn_ht26 btn_blue disabled"><span class="icon_ok icon_white"></span><span class="m5_l">发货</span></button>
+                    }
+                    else if ((int)OrderStatus.销售单状态.待创建出库单 == item.Status && (int)OrderStatus.销售单状态.作废 != item.Status)
+                    {
+                        <button class="btn btn_ht26 btn_blue" onclick="Ship(@item.SysNo,'@item.DeliveryTypeName')"><span class="icon_share icon_white"></span><span class="m5_l">发货</span></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_ht26 btn_blue disabled"><span class="icon_pause icon_white"></span><span class="m5_l">发货</span></button>
+                    }
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+
+            </tbody>
+
+        </table>
+    </div>
+
+
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }
+
+    <script type="text/javascript">
+        $(function () {
+            //查找已被选中项，checkedsysnolist(Query.cshtml中全局变量) 王耀发 2015-11-03
+            if (checkedsysnolist != '') {
+                var orderSysNos = checkedsysnolist.split(',');
+                var count=$("#Count").val();
+                var flag = true;
+                $("input.checktd").each(function () {
+                    var SysNo = $(this).val();
+                    if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                        $(this).attr("checked", true);
+                    } else {
+                        flag = false;
+                    }
+                });
+                if (flag) {
+                    $("input.checkall").attr("checked", true);
+                    if (orderSysNos.length == count) {
+                        $("input.sysNolist").attr("checked", true);
+                    }else
+                    {
+                        $("input.sysNolist").attr("checked", false);
+                    }
+                   
+                }
+                else {
+                    $("input.sysNolist").attr("checked", false);
+                }
+            }
+        });
+
+        function browseUserInfo(sysNo) {
+            UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+                title: '会员信息',
+                width: '698px',
+                height: '489px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+
+
+    </script>

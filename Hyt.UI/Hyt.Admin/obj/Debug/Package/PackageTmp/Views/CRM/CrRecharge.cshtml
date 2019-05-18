@@ -1,0 +1,209 @@
+﻿@{
+    ViewBag.Title = "CrRecharge";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@section HeadCss
+{
+    <style type="text/css">
+        #divMsg dl dt, #divMsg dl dd {
+            width: 100%;
+        }
+
+        #divMsg dl dd {
+            color: red;
+        }
+
+            #divMsg dl dd span {
+                width: 100px;
+                text-align: right;
+                display: block;
+                float: left;
+                color: #000;
+            }
+
+        #divMsg .msg_context_box {
+            max-height: 100px;
+            overflow: auto;
+        }
+    </style>
+}
+
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+}
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>会员充值记录</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">支付方式</span>
+                    <div class="m10_l fl">
+                        <select name="paytype" id="paytype" class="select_ht28">
+                            <option value="-1" selected="selected">全部</option>
+                            @foreach (var item in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.CommonEnum.PayCode)))
+                            {
+                                <option value="@item.Key">@item.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="search_btn wd200 m10_l fl">
+                        <input name="" type="text" id="name" class="input_ht28" value="姓名/昵称/手机..." onclick="$(this).select()" />
+                        <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                </div>
+                <!--功能按钮结束-->
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+
+<div style="display: none;z-index: 9; background-color: White; position: absolute;" id="divMsg">
+</div>
+
+<script type="text/javascript">
+    //选中的记录SysNo列项
+    var checkedsysnolist = [];
+
+    //高级搜索
+    //UI.searchbox($("#JS_btnSearch"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+    $("#name").defaultValue("姓名/昵称/手机...");
+
+    var currentSearchType = 1;
+
+    var curpage = 1;
+    //查询列表
+    function doSearch(id) {
+        checkedsysnolist = [];
+        var name;
+        if ($("#name").val() != "姓名/昵称/手机...") {
+            name = $.trim($("#name").val());
+        }
+        currentSearchType = 1;
+        curpage = id;
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("CrRecharge", "CRM")',
+            { id: id, KeyWord: name, RePaymentId: $('#paytype').val() },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+
+    //查询当前用户所有记录
+    function Check(customerSysNo) {
+        $.get('@Url.Action("CrRecharge", "CRM")',
+            { id: 1, CustomerSysNo: customerSysNo },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+
+    //查询按钮
+    $("#btnSearch").click(function () {
+        doSearch(1);
+    });
+
+    //支付方式
+    $('#paytype').change(function () {
+        doSearch(1);
+    });
+
+    Array.prototype.indexOf = function (val) {
+        for (var i = 0; i < this.length; i++) {
+            if ($.trim(this[i]) == $.trim(val)) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function (val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") != "checked") {
+                    $(this).attr("checked", "checked");
+                    checkedsysnolist.push($(this).val());
+                }
+            });
+        } else {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") == "checked") {
+                    $(this).removeAttr("checked");
+                    checkedsysnolist.remove($(this).val());
+                }
+            });
+        }
+    });
+
+    $("#paging table tbody input:checkbox").live('click', function () {
+        if ($(this).attr("checked")) {
+            checkedsysnolist.push($(this).val());
+        } else {
+            checkedsysnolist.remove($(this).val());
+        }
+    });
+
+    function HidePriceInfo() {
+        $("#divMsg").hide();
+    }
+
+    $(function () {
+        doSearch();
+    });
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+</script>
+
+<script type="text/javascript">
+    //操作成功后执行的函数
+    function ExecSuccess(msg) {
+        UI.tips.tip_alert("tips_shrot tips_success", msg);
+        doSearch();
+    }
+
+    //页面显示变化,status为处理后要显示的
+    function PageStatusChange(sysno, status) {
+        if (status == 1) {
+            $("#status" + sysno).text("启用");
+            $("#btnStatus" + sysno).html("<span class=\"icon_ban_circle m5_r\"></span><span>禁用</span>");
+        } else {
+            $("#status" + sysno).text("禁用");
+            $("#btnStatus" + sysno).html("<span class=\"icon_check m5_r\"></span><span>启用</span>");
+        }
+    }
+</script>

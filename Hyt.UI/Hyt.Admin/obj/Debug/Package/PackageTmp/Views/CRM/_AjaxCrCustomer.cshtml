@@ -1,0 +1,70 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@using Hyt.Util
+@model PagedList<CBCrCustomer>
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="97">帐号</th>
+                <th width="46">等级</th>
+                <th style="text-align: left; text-indent: 10px;">姓名</th>
+                <th style="text-align: left; text-indent: 10px;">分销商</th>
+                <th style="text-align: left; text-indent: 10px;">代理商</th>
+                <th width="72">可提返利</th>
+                
+                <th width="72">冻结返利</th>
+                <th width="72">累计返利</th>
+                <th width="72">等级积分</th>
+                <th width="72">经验积分</th>
+                <th width="59">会员币</th>
+                <th width="59">邮箱</th>
+                <th width="59">手机</th>
+                <th width="46">状态</th>
+                <th width="72">收货地址</th>
+                <th width="338">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+    @{
+        if (Model.TotalItemCount > 0)
+        {
+            var row = 1;
+            string cs = string.Empty;
+            foreach (var item in (List<CBCrCustomer>) Model.Data)
+            {
+                cs = row%2 == 0 ? "stag_color" : string.Empty;
+                <tr class="@cs">
+                    <td class="ft_underl"><span class="blue"><a href="#" onclick=" Detail(@item.SysNo); ">@item.Account</a></span></td>
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" LevelLog(@item.SysNo,'@item.Account') ">@item.LevelName</a></span></td>
+                    <td style="text-align: left; text-indent: 10px;">@item.Name</td>
+                    <td style="text-align: left; text-indent: 10px;">@item.DealerName</td>
+                    <td style="text-align: left; text-indent: 10px;">@item.AgentName</td>
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" CrLevelPointLog(@item.SysNo,'@item.Account')">@item.Brokerage</a></span></td>                    
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" CrLevelPointLog(@item.SysNo,'@item.Account')">@item.BrokerageFreeze</a></span></td>
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" CrLevelPointLog(@item.SysNo,'@item.Account')">@item.BrokerageTotal</a></span></td>
+
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" CrLevelPointLog(@item.SysNo,'@item.Account')">@item.LevelPoint</a></span></td>
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" CrExperiencePointLog(@item.SysNo)">@item.ExperiencePoint</a></span></td>
+                    <td class="ft_underl"><span class="blue"><a href="javascript:void(0)" onclick=" CrExperienceCoinLog(@item.SysNo)">@item.ExperienceCoin</a></span></td>
+
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.邮箱状态), item.EmailStatus)</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.手机状态), item.MobilePhoneStatus)</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.会员状态), item.Status)</td>
+                    <td class="ft_underl"><span class="blue"><a href="#" onclick=" AddressDetail(@item.SysNo); ">查看</a></span></td>
+                    <td><button type="button" class="btn btn_ht26 btn_blue m5_r m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004102.ToString())" onclick="CrOrder('@item.Account')"><span class="icon_tosee icon_white"></span><span class="m5_l">历史订单</span></button><button type="button" class="btn btn_ht26 btn_blue m5_r m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004202.ToString())" onclick="CrPassword(@item.SysNo)"><span class="icon_cog icon_white"></span><span class="m5_l">重置密码</span></button>@{if (item.Status == (int) Hyt.Model.WorkflowStatus.CustomerStatus.会员状态.有效){<button type="button" class="btn btn_ht26 btn_red m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004601.ToString())" onclick=" UpdateStatus(@item.SysNo) "><span class="icon icon_forbidden icon_white"></span><span class="m5_l">无效</span></button>}else{<button type="button" class="btn btn_ht26 m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004601.ToString())" onclick=" UpdateStatus(@item.SysNo) "><span class="icon icon_audit"></span><span class="m5_l">有效</span></button>}}<button type="button" class="btn btn_ht26 btn_blue m5_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004201.ToString())" onclick=" CrCustomerEdit(@item.SysNo); "><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button></td>
+                </tr>
+                row++;
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="12">暂无数据</td>
+            </tr>
+        }
+    }
+        </tbody>
+    </table>
+    @{Html.RenderPartial("_UrlPaging", Model); }
+</div>

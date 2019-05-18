@@ -1,0 +1,57 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@model PagedList<CBDsEasAssociation> 
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th class="p10_lr" style="display:none">编号</th>
+                <th class="align_l p10_lr">商城名称</th>
+                <th class="align_l p10_lr">店铺名称</th>
+                <th class="align_l p10_lr">店铺帐号</th>
+                <th class="align_l p10_lr">卖家昵称</th>
+                <th width="92">EAS编号</th>
+                <th width="46">状态</th>
+                <th width="120">创建时间</th>
+                <th width="150">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var list = Model.TData as List<CBDsEasAssociation>;
+                if (list == null || list.Count == 0)
+                {
+                    <tr>
+                        <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                else
+                {
+                    var i = 1;
+                    foreach (var item in list)
+                    {
+                        <tr @if (i%2 == 0)
+                            {
+                                @:class="stag_color"
+                            }>
+                            <td style="display:none">@item.SysNo</td>
+                            <td class="align_l p10_lr">@item.MallName</td>
+                            <td class="align_l p10_lr">@item.ShopName</td>
+                            <td class="align_l p10_lr">@item.ShopAccount</td>
+                            <td class="align_l p10_lr">@item.SellerNick</td>
+                            <td class="align_l p10_lr">@item.Code</td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof (Hyt.Model.WorkflowStatus.DistributionStatus.分销商EAS关联状态), item.Status)</td>
+                            <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td class="p10_lr"><button class="btn btn_blue btn_ht26" onclick="openWin(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button class="btn btn_red btn_ht26 m10_l" onclick="del(@item.SysNo)"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                }
+            }
+              
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }

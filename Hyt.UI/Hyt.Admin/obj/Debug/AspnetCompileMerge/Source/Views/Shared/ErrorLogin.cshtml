@@ -1,0 +1,68 @@
+﻿@{
+
+}
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>登录超时</title>
+    <style>
+        BODY
+        {
+            color: #000000;
+            background-color: white;
+            font-family: Verdana;
+            margin-left: 0px;
+            margin-top: 0px;
+        }
+
+        A
+        {
+            color: green;
+            text-decoration: underline;
+        }
+
+        .heading1
+        {
+            background-color: #F9F1E9;
+            line-height: 22px;
+            border: #E5BD93 1px solid;
+            color: #000;
+            font-family: Tahoma;
+            font-size: 14px;
+            font-weight: normal;
+            margin: 20px;
+            padding: 10px;
+        }
+
+        .msg
+        {
+            background: url('/theme/images/sorry.jpg') no-repeat;
+            padding: 20px 0px 30px 120px;
+            margin-top: 15px;
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<script type="text/javascript" src="/Theme/scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js"></script>
+<script type="text/javascript" src="/Theme/scripts/DAO.yui.js"></script>
+<body>
+    <script>
+        var currentUrlPath = '@HttpContext.Current.Request.Url.AbsolutePath';
+        function login() { if (window.location != window.top.location) { DAO.LoginBox(currentUrlPath); } else window.top.location.href = '/Account/Login' }; login();
+        function refresh() { window.location.href = currentUrlPath; }
+    </script>
+    <div class="msg">
+        <p class="heading1">
+            登录超时，请重新登录!，登录成功后，刷新该页面!如登录框未弹出
+                [<a href='javascript:;' onclick='login()'>请点此登录</a>] 
+                [<a href='javascript:;' onclick='refresh()'>刷新该页 </a>]
+        </p>
+    </div>
+
+</body>
+</html>

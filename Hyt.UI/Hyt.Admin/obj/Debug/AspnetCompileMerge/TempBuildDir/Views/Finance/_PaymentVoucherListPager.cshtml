@@ -1,0 +1,51 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBPaymentVoucher>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="100">付款单编号</th>
+                
+                <th width="">单据来源</th>
+                <th width="120">单据来源编号</th>
+                <th width="140">应付金额</th>
+                <th width="140">已付金额</th>
+                <th width="140">待付金额</th>
+                <th width="120">创建时间</th>
+                <th width="120">确认时间</th>
+                <th width="90">状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBPaymentVoucher>)Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    <td class="blue"><a href="javascript:Open(@item.SysNo);">@item.SysNo</a></td>
+                    
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款来源类型), item.Source) </td>
+                    <td class="blue"><a href="javascript:OpenSource(@item.Source,@item.SourceSysNo,@item.SysNo);">@item.SourceSysNo</a></td>
+                    <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.PayableAmount,2))</td>
+                    <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.PaidAmount,2))</td>
+                    <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.DebtAmount,2)) </td>
+                    <td>@(item.CreatedDate==DateTime.MinValue?"":item.CreatedDate.ToString("yyyy-MM-dd HH:mm")) </td>
+                    <td>@(item.PayDate==DateTime.MinValue?"":item.PayDate.ToString("yyyy-MM-dd HH:mm")) </td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.付款单状态), item.Status)</td>
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

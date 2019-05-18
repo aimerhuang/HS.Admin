@@ -1,0 +1,370 @@
+﻿@{
+    ViewBag.Title = "商品选择";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}               
+@section headjs{
+    @*    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>*@
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+
+        var arrSelected = [];
+        var isSingleSelect = @((ViewBag.SingleSelect == true) ? "true" : "false");
+//被选中数组
+
+        //将一个值从选中数组中移除;
+
+        function removeValueFromArr(value) {
+
+            //遍历数组
+            for (var i = 0; i < arrSelected.length; i++) {
+
+                if (arrSelected[i] == value) {
+                    arrSelected.splice(i, 1); //移除
+                    i--;
+                }
+            }
+        }
+
+        //查询列表
+
+        function doSearch() {
+
+            var name;
+
+            //判断字段中是否是有效数据，如果是默认文字将视为无效
+            if ($("#name").val() != "后台显示名称/ERP编号") {
+                name = $("#name").val();
+            }
+
+            //读取商品分类系统编号
+            var categorySysNo = $("#txt_aprentProductCategory").attr("pdcategory");
+
+            //如果没有定义属性将视为没有选择分类
+            categorySysNo = (categorySysNo != null) ? parseInt(categorySysNo) : 0;
+
+            var para = {
+                id: 1,
+                categorySysNo: categorySysNo,
+                filter: name,
+                isSelector: true,
+                selectedProductList: arrSelected,
+                isshop:false
+            };
+
+            if ($("#hdf_ProductSysNo").val().length > 0) {
+                para.productsysno = $("#hdf_ProductSysNo").val();
+            }
+
+            if ($("#hdf_subfilter").val().length > 0) {
+                para.subfilter = $("#hdf_subfilter").val();
+            }
+
+            para.single = @(ViewBag.SingleSelect == true ? "true" : "false");
+
+
+            @if (ViewBag.SubFilterValue != null)
+            {
+                @:para.@Html.Raw(ViewBag.SubFilterValue);
+            }
+            @if (ViewBag.CustomerSysNo != null)
+            {
+                @:para.CustomerSysNo = @ViewBag.CustomerSysNo
+            }
+            @if (ViewBag.WarehouseSysNo != null)
+            {
+                @:para.WarehouseSysNo = @ViewBag.WarehouseSysNo
+            }
+            @if (ViewBag.dealerSysNo != null)
+            {
+                @:para.dealerSysNo = @ViewBag.dealerSysNo
+            }            
+             @if(Request.QueryString["isshop"]!=null&&Request.QueryString["isshop"].ToString()=="true")
+            {
+                @:para.isshop =true;
+            }
+
+            //调用action执行查询生产结果html
+            $.get('@ViewBag.Data',
+                para, //id=1表示分页查询的是第一页
+                function(data) {
+                    $('#paging').html(data); //将结果填充到数据集中
+                });
+        }
+
+
+        //已选定的商品进行数据查询绑定
+        //主：该方法主要那个用于第一次加载时外部传入的已选择商品列表
+
+        function doSelectSearch() {
+            var data = { selectedProductList: JSON.stringify(arrSelected) };
+            $.post('@Url.Action("GetGetSelectedProductList", "Product")',
+                data,
+                function(result) {
+                    $('#pagingSelected').html(result); //填充数据
+                });
+        }
+
+        //加载事件
+        $(function() {
+
+            //添加预设置选中值
+            if (!!window.top._ActiveSelectedProductList) {
+                arrSelected = window.top._ActiveSelectedProductList;
+            }
+
+            //设置默认参数
+            $("#name").defaultValue("后台显示名称/ERP编号");
+
+            //查询按钮点击事件
+            $("#searchBtn").click(function() {
+                doSearch();
+            });
+
+            $("#name").keyup(function(event) {
+                if (event.keyCode == 13) {
+                    doSearch();
+                }
+            });
+
+
+            //已选商品选项卡下--删除已选择商品选项
+            $("#btnRemove").click(function() {
+                if ($("#pagingSelected input:checkbox:checked").length == 0) {
+                    UI.Alert({ content: '请选择要移除的商品' });
+                    return;
+                }
+                UI.Confirm({
+                    content: '确定要移除被选中的商品吗?',
+                    ok: function() {
+                        $("#pagingSelected input:checkbox:checked").each(function() {
+
+                            var value = $(this).val();
+                            removeValueFromArr(value); //从结果数组中移除
+                            $(this).closest("tr").remove(); //从结果表单中移除
+
+                            //判断是还有结果，如果没有将显示无数据
+                            if ($("#pagingSelected tbody tr").length == 0) {
+                                $("#pagingSelected tbody").append(NoDataTemplate.getMultiLine());
+                            }
+                        });
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+            //商品选择checkbox点击事件
+            $("#paging input:checkbox").live("click", function() {
+                var value = $(this).val();
+
+                //判读是否被选择中
+                if (!!$(this).attr("checked")) {
+
+                    //如果显示时无数据，将该行移除
+                    if (!!$("#tr_noData"))
+                        $("#tr_noData").remove();
+
+                    //查找到tr并克隆一个
+                    var newTr = $(this).parent().parent().clone(false);
+
+                    if ($("#pagingSelected tbody tr td input[value='" + $(this).attr("value") + "']").length > 0)
+                        return;
+
+                    $("input[type='checkbox']", newTr).attr("checked", null); //初始化克隆的数据行
+                    $("#pagingSelected tbody").append(newTr); //添加到已选择列表
+                    UI.tips.tip_alert('tips_shrot tips_success', '添加到列表！'); //显示提示
+
+                    if (isSingleSelect) {
+                        CallBack();
+                    }
+
+                } else {
+
+                    //如果是取消选择将从结果集中移除
+                    removeValueFromArr(value); //从数组中移除
+                    $("#pagingSelected tbody tr input[value='" + value + "']").parent().parent().remove(); //将选择的行中已选择列表中移除
+                    UI.tips.tip_alert('tips_shrot tips_wrong', '从列表中移除！'); //显示提示
+
+                    //如果没有数据将显示无数据行
+                    if ($("#pagingSelected tbody tr").length == 0) {
+                        $("#pagingSelected tbody tr").append(NoDataTemplate.getMultiLine());
+                    }
+                }
+            });
+
+            //页面初始化函数
+            var initPage = function() {
+                doSearch(); //执行第一次查询
+                //doSelectSearch(); //将预置值查询绑定
+            };
+
+            InitAjaxLoading();
+            initPage();
+
+            //弹出商品类别 
+            //2013-06-26 邵斌 修改：调用真实数据
+            var options = {
+                onlyLeaftSelect: false,
+                margin: {
+                    vertical: 0,
+                    horizontal: 0
+                },
+                zIndex: 5,
+                callBack: doSearch
+            };
+            DAO.SelectProductCategory($("#JS_outbox"), $("#txt_aprentProductCategory"), options);
+        });
+
+        //商品选择组件回调函数,组合数据到结果集
+
+        function CallBack() {
+            /*
+            返回数据样本
+            [{ProductSysNo:1},{ProductSysNo:2},{GroupSysNo:"组系统编号(组合,团购主表系统编号)",PromotionSysNo:"促销系统编号"}]*/
+
+            var result = []; //结果集
+            //在已选择列表中读取已选择商品系统编号,系统编号保存在checkbox的系统编号
+            $("#pagingSelected input[type='checkbox']").each(function(i, e) {
+                if (!!$(e).val()) {
+                    var res = {};
+                    if ($(e).attr("GroupSysNo") > 0) {
+                        res["GroupSysNo"] = $(e).attr("GroupSysNo");
+                        res["PromotionSysNo"] = $(e).attr("PromotionSysNo");
+                    } else {
+                        res["ProductSysNo"] = $(e).val();
+                    }
+                    //selectedIds.push($(e).val());
+                    result.push(res);
+                }
+            });
+
+            //如果有结果将从数据库中取值
+            if (result.length > 0) {
+                UI.Dialog.opener._ActiveSelectProductCallBack(result);
+                UI.Dialog.close();
+            } else {
+                UI.Dialog.opener._ActiveSelectProductCallBack([]);
+                return true;
+            }
+            return false;
+        }
+
+        //无数据html模板
+
+        function NoDataTemplate() {
+            /*
+            <tr id="tr_noData" class="odd_color trhover">
+                <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+            */
+        }
+
+        //用于检测是否为补单页面调用，从而设置样式
+        $(function() {
+            if (window.top.frames["feature_boxs"] && window.top.frames["feature_boxs"].isAdditionalOrders) {
+                $("#tool_boxs").hide();
+                $("#tabcon").css("border-top", "0px solid #fff");
+            }
+        });
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function() {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $("#paging"),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function() {
+                ajaxLoadingMask.Remove();
+            });
+        }
+
+    </script>
+}
+<div class="caseout">
+    @Html.Hidden("hdf_ProductSysNo", (int)ViewBag.ProductSysNo)
+    @Html.Hidden("hdf_subfilter", (string)ViewBag.SubFilter)
+    <div class="boxs" id="tabboxs3">
+    @*    <div class="head_tab">
+            <ul class="tabNav">
+                <li><a href="javascript:void(0);">商品列表</a></li>
+                <li class="menuon_white"><a href="javascript:void(0);">已选商品</a></li>
+            </ul>
+        </div>*@
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+
+                <!--工具条开始-->
+                <div class="boxs_tool" id="tool_boxs">
+
+                    <!--搜索开始-->
+                    <div class="right_tool clearfix">
+                        <div class="fl p10_r">
+                            分类 
+                        </div>
+                        <div class="search_btn fl" id="JS_outbox">
+                            @if (ViewBag.CategoryModel == null)
+                            {
+                                <input id="txt_aprentProductCategory" name="txt_aprentProductCategory" type="text" value="选择上级分类" class="input_ht28 wd150" readonly="readonly" />
+                            }
+                            else
+                            {
+                                var category = ViewBag.CategoryModel as Hyt.Model.PdCategory;
+                                <input id="txt_aprentProductCategory" name="txt_aprentProductCategory" type="text" value="@category.CategoryName" pdcategory="@category.SysNo" class="input_ht28 wd150" readonly="readonly" />                           
+                            }
+                            <button title="选择分类" class="btn btn_ht28" id="btn_selectCategory">
+                                <span class="icon_th_list"></span>
+                            </button>
+                        </div>
+                        
+                        
+
+                        <div class="search_btn m10_l fl">
+                            <input name="Name" type="text" id="name" class="input_ht28" value="后台显示名称/ERP编号">
+                            <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索" onclick="doSearch()"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <!--搜索结束-->
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_listtabel" id="paging">
+                </div>
+            </div>
+          <div class="list" style="display: none">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="btnRemove"><span class="icon icon_exitstore"></span><span class="m5_l">移除选中项</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+
+                </div>
+                <!--工具条结束-->
+              <div class="boxs_listtabel" id="pagingSelected">
+                  <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                    <thead>
+                        <tr>
+                            <th width="35">
+                                &nbsp;
+                            </th>
+                            <th width="150px" class="p10_lr">商品编号</th>
+                            <th class="p10_lr">商品名称</th>
+                            <th width="68px" class="p10_lr">商品类型</th>
+                            <th width="52px" class="p10_lr">商品分类</th>
+                            <th width="68px" class="p10_lr">基础价格</th>          
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+              </div>
+            </div>
+        </div>
+    </div>
+</div>

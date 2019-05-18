@@ -1,0 +1,289 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品咨询";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchProductSysNoTxt = "请输入商品编号...";
+        var searchProductNameTxt = "请输入商品名称...";
+
+        $(function () {
+            UI.CheckAllbox(".boxs_listtabel", ".checkall");
+            //设置默认参数
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        search();
+                        break;
+                }
+            });
+        });
+        /// <summary>
+        /// 回复、查看咨询信息
+        /// </summary>
+        /// <param name="Type">类型</param>
+        /// <param name="sysNo">商品咨询编号</param>
+
+        function addOrEdit(type, sysNo) {
+            var url, title;
+            if (type != 0) {
+                title = "回复咨询信息";
+            } else {
+                title = "查看咨询信息";
+            }
+            UI.DialogOpen("/Front/CrCustomerQuestionUpdate/" + sysNo, {
+                title: title,
+                width: '730px',
+
+                init: function() {
+                }
+            });
+        }
+
+
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+
+        function refresh(id) {
+            var json = { id: id };
+            $.get('/Front/CrCustomerQuestion/', json, function(data) {
+                $('#paging').html(data);
+            });
+        }
+
+        function ChkDate(str) {
+            var pattern = /^(\d{4})(\-)(\d{1,2})(\-)(\d{1,2})$/;
+            return pattern.test(str);
+        }
+
+        function search() {
+            AjaxStart();
+            var searchProductName = $("#searchName").val();
+
+            var json = {};
+            json.id = 1;
+            if ($.trim(searchType) != "") {
+                json.type = searchType
+            }
+
+            if ($.trim(searchStatu) != "") {
+                json.staus = searchStatu
+            }
+            if ($.trim(searchProductName) != "" && searchProductName != searchProductNameTxt) {
+                json.productName = searchProductName;
+            }
+
+            $.get('/Front/CrCustomerQuestion/', json, function(data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+        function searchClass() {
+            AjaxStart();
+            var searchProductNo = $("#searchNo").val();
+            var searchProductName = $("#searchNames").val().trim();
+            var searchBeginDate = $("#beginDate").val();
+            var searchEndDate = $("#endDate").val();
+            var searchType = $("#type").val();
+            var searchStatu = $("#statu").val();
+            var json = {};
+            json.id = 1;
+
+            if ($.trim(searchType) != "") {
+                json.type = searchType;
+            }
+            if ($.trim(searchStatu) != "") {
+                json.staus = searchStatu;
+            }
+
+            if ($.trim(searchProductNo) != "" && searchProductNo != searchProductSysNoTxt) {
+                json.productSysNo = searchProductNo;
+            }
+            if ($.trim(searchProductName) != "" && searchProductName != searchProductNameTxt) {
+                json.productName = searchProductName;
+            }
+            //if (ChkDate(searchBeginDate) && ChkDate(searchEndDate)) {
+            json.beginDate = searchBeginDate;
+            json.endDate = searchEndDate;
+            //}
+            $.get('/Front/CrCustomerQuestion/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+        
+        function search() {
+            AjaxStart();
+            var searchProductName = $("#searchName").val();
+            var searchBeginDate = $("#beginDate").val();
+            var searchEndDate = $("#endDate").val();
+            var searchType = $("#type").val();
+            var searchStatu = $("#statu").val();
+            var json = {};
+            json.id = 1;
+
+            if ($.trim(searchType) != "") {
+                json.type = searchType;
+            }
+            if ($.trim(searchStatu) != "") {
+                json.staus = searchStatu;
+            }
+
+            if ($.trim(searchProductName) != "" && searchProductName != searchProductNameTxt) {
+                json.productName = searchProductName;
+            }
+            $.get('/Front/CrCustomerQuestion/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+
+        function select(ctrid, obj) {
+            $("#" + ctrid).attr("value", $(obj).val());
+        }
+    </script>
+}
+<form id="form" method="Get" action="@Url.Action("CrCustomerQuestion")">
+<!--高级搜索-->
+<div class="search_box" id="JS_search">
+  <div class="search_title clearfix"> <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+  <div class="search_body">
+    <table width="100%">
+      <tr>
+        <td width="25%" align="right" class="c3">商品编号</td>
+        <td width="75">
+            <input name="searchNo" type="text" id="searchNo" class="wd156" value="请输入商品编号..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入商品编号...'" onfocus="this.select()" onclick="if (this.value == '请输入商品编号...') this.value = ''" />
+        </td>
+      </tr>
+      <tr>
+        <td width="25%" align="right" class="c3">商品名称</td>
+        <td width="75">
+            <input name="searchNames" type="text" id="searchNames" class="wd156" value="请输入商品名称..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入商品名称...'" onfocus="this.select()" onclick="if (this.value == '请输入商品名称...') this.value = ''" />
+        </td>
+      </tr>
+      <tr>
+        <td width="25%" align="right" class="c3">咨询类别</td>
+        <td width="75">
+         <select id="type" name="type" class="wd170" onchange="select('types',this);">
+             <option value="-1">全部</option>
+             @{
+                 foreach (var dict in (IDictionary<int, string>)ViewBag.TypeList)
+                 {
+                     <option value="@dict.Key">@dict.Value</option>
+                 }
+             }
+         </select>
+        </td>
+      </tr>
+      <tr>
+        <td width="25%" align="right" class="c3">咨询状态</td>
+        <td width="75">
+         <select id="statu" name="statu" class="wd170" onchange="select('status',this);">
+             <option value="-1">全部</option>
+             @{
+                 string sel;
+                 foreach (var dict in (IDictionary<int, string>)ViewBag.StatusList)
+                 {
+                     sel = dict.Key == (int)Hyt.Model.WorkflowStatus.CustomerStatus.会员咨询状态.待回复 ? "selected='selected'" : string.Empty;
+                     <option value="@dict.Key" @sel>@dict.Value</option>
+                 }
+             }
+         </select>
+        </td>
+      </tr>
+        <tr>
+            <td width="25%" align="right" class="c3 h_else">评论时间</td>
+            <td>
+                <div class="date_btn">
+                    <input id="beginDate" name="beginDate" type="text" class="input_ht26" onFocus="var EndDate = $dp.$('beginDate'); UI.Date({ onpicked: function () { beginDate.focus(); }, maxDate: '#F{$dp.$D(\'endDate\')}', dateFmt: 'yyyy-MM-dd HH:mm' })" />
+                    <button type="button" class="btn btn_ht26" onclick="UI.Date({ el: 'beginDate', dateFmt: 'yyyy-MM-dd HH:mm' })" title="日历">
+                        <span class="icon_calendar"></span>
+                    </button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td width="25%" align="right" class="c3 h_else">&nbsp; </td>
+            <td>
+                <div class="date_btn">
+                <input id="endDate" name="endDate" type="text" class="input_ht26" onFocus="UI.Date({ minDate: '#F{$dp.$D(\'beginDate\')}', dateFmt: 'yyyy-MM-dd HH:mm' })" />
+                <button type="button" class="btn btn_ht26" onclick="UI.Date({ el: 'endDate', dateFmt: 'yyyy-MM-dd HH:mm' })" title="日历">
+                <span class="icon_calendar"></span>
+                </button>
+                </div>
+            </td>
+        </tr>
+    </table>
+  </div>
+  <div class="search_foot">
+    <button title="开始查询" type="button" class="btn btn_blue btn_ht30 bold" onclick="searchClass()">开始查询</button><button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+  </div>
+</div>
+
+<div class="case">
+<div class="boxs">
+	<div class="boxs_tit head_m"><h3>商品咨询</h3></div>
+
+	<div class="boxs_con_c1">
+        <!--搜索-->
+        <div class="boxs_tool">
+            <div class="right_tool">
+                <span class="veralign_t fl">咨询类别</span>
+                <div class="m10_l fl">
+                 <select id="types" name="types" class="select_ht28"  onchange="select('type',this);searchClass();">
+                     <option value="-1">全部</option>
+                     @{
+                         foreach (var dict in (IDictionary<int, string>)ViewBag.TypeList)
+                         {
+                              <option value="@dict.Key">@dict.Value</option>
+                         }
+                     }
+                 </select>
+                </div>
+                <span class="m10_l veralign_t fl">咨询状态</span>
+                <div class="m10_l fl">
+                 <select id="status" name="status" class="select_ht28" onchange="select('statu',this);searchClass();">
+                     <option value="-1">全部</option>
+                     @{
+                         foreach (var dict in (IDictionary<int, string>)ViewBag.StatusList)
+                         {
+                             sel = dict.Key == (int)Hyt.Model.WorkflowStatus.CustomerStatus.会员咨询状态.待回复 ? "selected='selected'" : string.Empty;
+                             <option value="@dict.Key" @sel>@dict.Value</option>
+                         }
+                     }
+                 </select>
+                </div>
+                <span class="veralign_t m10_l fl">商品名称</span>
+                <div class="search_btn m10_l fl">
+                  <input name="searchName" type="text" maxlength="15" id="searchName" class="input_ht28" value="请输入商品名称..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入商品名称...';$('#searchName').val($(this).val());" onclick="if (this.value == '请输入商品名称...') this.value = ''" />
+                  <button type="button" title="搜索" class="btn btn_ht28 wd28" onclick="search()"><span class="icon_search"></span></button>
+                </div>
+                <button type="button" id="searchProduct" title="高级搜索" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+            </div>
+        </div>
+
+        <div class="boxs_list">
+          <!--/表格列表区-->
+          <div class="boxs_listtabel">
+          @{Html.RenderPartial("_AjaxCrCustomerQuestion", Model); }
+          </div>
+        </div>
+  </div>
+</div>
+</div>
+</form>
+<script type="text/javascript">
+    UI.searchbox($("#searchProduct"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+</script>

@@ -1,0 +1,83 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBWhWarehouse>
+@Html.PrivilegeControl(PrivilegeCode.WH1002301, ".WH1002301")
+
+
+        <!--/表格列表区-->
+        <table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th width="111">系统编号</th>
+                    <th width="111">前台仓库名称</th>
+                    <th width="131">后台仓库名称</th>
+                    <th width="72">仓库类型</th>
+                    <th width="92">仓库ERP编号</th>
+                    <th width="118">售后库位ERP编号</th>
+                    <th class="align_l p10_lr">地址</th>
+                    <th width="100">库存数量</th>
+                    <th width="72">联系人</th>
+                    <th class="wd100">电话</th>
+                    <th width="72">是否自营</th>
+                    <th width="46">状态</th>
+                    <th width="300">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (!Model.TData.Any())
+                    {
+                    <tr>
+                        <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in (List<Hyt.Model.CBWhWarehouse>)Model.TData)
+                        {
+                    <tr>
+                        <td>@item.SysNo</td>
+                        <td class="blue"><a onclick="ShowInfo(@item.SysNo);">@item.WarehouseName</a></td>
+                        <td>@item.BackWarehouseName</td>
+                        <td>@((WarehouseStatus.仓库类型)item.WarehouseType)</td>
+                        <td class="align_l p10_lr">@item.ErpCode</td>
+                        <td>@item.ErpRmaCode</td>
+                        <td class="align_l p10_lr">@item.StreetAddress</td>
+                        <td>@item.SumStockQuantity</td>
+                        <td>@item.Contact</td>
+                        <td>@item.Phone</td>
+                        <td>@((WarehouseStatus.是否自营)item.IsSelfSupport)</td>
+                        <td  id="status@(item.SysNo)">@((WarehouseStatus.仓库状态)item.Status)</td>
+                        <td>
+                            <button id="btnStatus@(item.SysNo)" class="btn btn_blue btn_ht26 WH1002301" type="button" onclick="SetReverseStatus(@item.SysNo) ">
+                                @if (item.Status == (int)Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态.禁用)
+                                {
+                                    <span class="icon_check m5_r icon_white"></span><span>启用</span>                               
+                                }
+                                else
+                                {
+                                    <span class="icon_ban_circle m5_r icon_white"></span><span>禁用</span>
+                                }
+                            </button>
+                            <button class="btn btn_blue btn_ht26 m10_l WH1002302" onclick="stockin(@item.SysNo)" title="入库"><span class="icon_pencil icon_white"></span><span class="m5_l">入库</span></button>
+                            <button class="btn btn_blue btn_ht26 m10_l WH1002303" onclick="stock(@item.SysNo)" title="库存"><span class="icon_pencil icon_white"></span><span class="m5_l">库存</span></button>
+                            <button class="btn btn_blue btn_ht26 m10_l WH1002301" onclick="edit(@item.SysNo)" title="修改"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                        </td>
+
+                    </tr>
+                        }
+                    }
+                 
+                }
+            </tbody>
+        </table>
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+
+    <script type="text/javascript">
+        $(function () {
+            //表格加入隔行样式
+            DAO.InterlineStyle();
+        });
+
+    </script>
+

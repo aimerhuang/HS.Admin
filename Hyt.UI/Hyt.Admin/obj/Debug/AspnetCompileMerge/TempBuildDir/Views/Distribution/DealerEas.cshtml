@@ -1,0 +1,209 @@
+﻿@using Hyt.Admin.Controllers
+@using Hyt.BLL.MallSeller
+@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "分销商EAS关联管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    @Html.PrivilegeControl(PrivilegeCode.DS100901, ".DS100901")
+
+    bool addEnable = false;
+    var allDsEasAssociation = DsEasBo.Instance.GetAllDsEasAssociation();
+    var allDsDealerMall = DsEasBo.Instance.GetAllMall();
+    if (allDsDealerMall != null && allDsDealerMall.Count > 0)
+    {
+        var count = allDsDealerMall.Count(i => i.Status == (int)Hyt.Model.WorkflowStatus.DistributionStatus.分销商商城状态.启用 && !allDsEasAssociation.Contains(i.SysNo));
+        addEnable = count > 0;
+    }
+}
+
+@helper LoadMallType()
+{
+    var list = ViewBag.DsMallType as List<SelectListItem>;
+    if (list != null && list.Count > 0)
+    {
+    @list.SelectItemListToString(null, null)
+    }
+}
+
+<link href="~/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all" />
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">商城类型</td>
+                <td width="75%">
+                    <select class="wd170" searchitem="MallTypeSysNo">
+                        <option selected="selected">全部</option>
+                        @LoadMallType()
+                    </select></td>
+            </tr>
+            <tr>
+                <td align="right">店铺名称</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchitem="ShopName" /></td>
+            </tr>
+            <tr>
+                <td align="right">店铺帐号</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchitem="ShopAccount" /></td>
+            </tr>
+            <tr>
+                <td align="right">状态</td>
+                <td>
+                    <select class="wd170" searchItem="Status">
+                        <option selected="selected">全部</option>
+                        @MvcHtmlString.Create(MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.DistributionStatus.分销商EAS关联状态>(null, null).ToString())
+                    </select></td>
+            </tr>
+            <tr>
+                <td align="right">卖家昵称</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchitem="SellerNick" /></td>
+            </tr>
+            <tr>
+                <td align="right">EAS编号</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchitem="Code" /></td>
+            </tr>
+            <tr>
+                <td align="right">创建时间</td>
+                <td>
+                    <div class="date_btn">
+                        <input type="text" value="" id="d12" name="" class="input_ht26" searchitem="StartDate" onclick="UI.Date({ el: 'd12' })">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d12'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">&nbsp;</td>
+                <td>
+                    <div class="date_btn">
+                        <input type="text" value="" id="d13" name="" class="input_ht26" searchitem="EndDate" onclick="UI.Date({ el: 'd13' })">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d13'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="JS_btnSearch">开始查询</button>
+        <button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+<div class="case">
+
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>分销商EAS关联管理</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="JS_gaoji1"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+
+                </div>
+                <!--搜索结束-->
+
+               
+                <!--功能按钮开始--> 
+                @if (addEnable)
+                { 
+                    <div class="left_tool">
+                        <button class="btn btn_blue btn_ht26 m10_r" id="btnAdd"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增</span></button>
+                    </div>
+                }
+                <!--功能按钮结束-->
+
+
+            </div>
+            <!--工具条结束-->
+
+            <!--数据-->
+            <div id="paging"></div>
+    </div>
+</div>
+</div>
+<!--数据结束-->
+<input type="hidden" id="PageSize" searchitem="PageSize" value="10">
+
+<script type="text/javascript">
+    function openWin(sysNo) {
+        var prompt = sysNo ? "修改商城信息" : "新增商城信息";
+        var height = sysNo ? 226 : 186;
+        UI.DialogOpen('/Distribution/DealereasDetail/?sysNo=' + sysNo, {
+            width: 650,
+            height: height,
+            title: prompt,
+            init: function () {
+                this.button({
+                    name: "保存",
+                    callback: function () {
+                        var iframe = this.iframe.contentWindow;
+                        iframe.CallBack();
+                        return false;
+                    },
+                    focus: true
+                }, {
+                    name: '关闭'
+                });
+            }
+        });
+    }
+    //删除
+    function del(sysNo) {
+        UI.Confirm({
+            content: "确定要删除吗",
+            ok: function () {
+                Ajax.post("/Distribution/Delete", "", function (p) {
+                    p.setParams("sysNo", sysNo);
+                }, function (data) {
+                    if (!data.Status) {
+                        UI.Alert({ content: data.Message });
+                    } else {
+                        window.location.reload();
+                    }
+                })
+            }
+        });
+    }
+    $(document).ready(function () {
+        //高级查询
+        UI.searchbox($("#JS_gaoji1"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+        
+        doSearch(1);
+
+        $("#JS_btnSearch").click(function() {
+            doSearch(1);
+        });
+        //伪回调
+        window._EasCallBack = function (data) {
+            window.location.reload();
+        };
+        $("#btnAdd").click(function() {
+            openWin();
+        });
+
+        //查询列表
+        function doSearch(currentPage) {
+            Ajax.get("/Distribution/Query/?r=" + Math.random(), "searchItem", function(p) {
+                p.setParams("PageIndex", currentPage);
+            }, function(data) {
+                $('#paging').html(data);
+                //$("#PageIndex").val(parseInt(currentPage) + 1);
+            });
+        }
+    });
+</script>

@@ -1,0 +1,57 @@
+﻿@using Hyt.BLL.Sys
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBSyJobPool>
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="98">订单销售单号</th>
+            <th width="140">优先级</th>
+           @* <th width="98">分配会员名</th>
+            <th class="wd100">系统编号</th>
+            <th width="98">用户系统编号</th>*@
+            <th width="98">任务类型</th>
+            <th width="46">状态</th>
+            <th class="align_l p10_lr">任务描述</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.CBSyJobPool item in Model.TData)
+            {
+            <tr>
+                <td class="blue ">
+                    <a  href="javascript:void(0)" onclick="javascript:UI.OpenCreatTab('任务详情','@item.JobUrl')">@item.TaskSysNo</a>
+                </td>
+                <td>@SyJobPoolPriorityBo.Instance.GetPriorityName(item.Priority)</td>
+          @*      <td>@item.ExecutorSysName</td>
+                <td>@item.SysNo</td>
+                <td>@item.ExecutorSysNo</td>*@
+                <td>@((Hyt.Model.WorkflowStatus.SystemStatus.任务对象类型)item.TaskType)</td>
+                <td>
+                    @((Hyt.Model.WorkflowStatus.SystemStatus.任务池状态)item.Status)
+                </td>
+                <td class="align_l p10_lr">@item.JobDescription</td>
+            </tr>                      
+                      
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+
+</script>

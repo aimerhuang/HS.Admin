@@ -1,0 +1,731 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Model.CBWhWarehouse
+@Html.PrivilegeControl(PrivilegeCode.WH1002301, ".WH1002301")
+@Html.PrivilegeControl(PrivilegeCode.WH1002201, ".WH1002201")
+@{
+    if (Model == null)
+    {
+        return;
+    }
+}
+@section HeadCss{
+    <link href="~/Theme/Plugins/ZTree/skin.css" rel="stylesheet" type="text/css" media="all" />
+}
+@section HeadJs{
+    <script type="text/javascript" src="~/Theme/scripts/tab.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/selectcontrol.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/search.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+    <script src="~/Theme/scripts/showpic.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/ZTree/ZTree.yui.js"> </script>
+    <script>
+        //ztree设置
+        var setting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            check: {
+                enable: true,
+                chkStyle: "checkbox",
+                autoCheckTrigger: true,
+                chkboxType: { "Y": "ps", "N": "ps" }
+            },
+            callback: {
+                onCheck: zTreeOnClick
+            }
+        };
+
+        // 点击事件
+        function zTreeOnClick(event, treeId, treeNode) {
+            if (treeNode.checked) {
+                //新增地区
+                //if ($("#item_list td:contains(" + treeNode.name + ")").length > 0) {
+                //    return;
+                //}
+                if (!treeNode.isParent) {
+                    var row;
+                    var cs;
+                    row = $("#item_list tbody tr").length;
+                    cs = row % 2 == 0 ? "stag_color" : "";
+                    var name = treeNode.getParentNode().getParentNode().name + treeNode.getParentNode().name + treeNode.name;
+                    var newRow = "<tr class=\"" + cs + "\">"
+                        + "<td class=border_lnone><input onclick='checkAreaClick($(this))' class='clsArea' type='checkbox' value='' name='" + treeNode.id + "' id='" + treeNode.id + "' checked='checked'/></td><td class='align_l p10_lr'>" + name + "</td></tr>";
+                    $("#item_list tr:last").after(newRow);
+                }
+            } else {
+                //删除地区
+                //$("#item_list tr:contains(" + treeNode.name + ")").remove();
+                $("#item_list").find("input[name='" + treeNode.id + "']").parents("tr").remove();
+            }
+
+        }
+
+        var myZTree;
+        //初始化地区树
+        function InitAreaTree() {
+            $.ajax({
+                url: '@Url.Action("GetAreaTree", "Basic")',
+                data: { all: true },
+                success: function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTree = $.fn.zTree.init($("#tree"),
+                            setting,
+                            response);
+
+                        //默认为收起所以节点
+                        myZTree.ExpandAllStatus = false;
+                        LoadWhArea();
+                    }
+
+                },
+                error: function (httpRequest, txtStatus, error) {
+                    //失败处理逻辑
+                    alert(error);
+                }
+            });
+
+        }
+
+        //加载已保存的仓库覆盖地区
+        function LoadWhArea() {
+            //var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            $.getJSON('@Url.Action("GetWhWarehouseArea")', { warehouseSysNo: '@Model.SysNo' }, function (data) {
+                if (data != null) {
+                    var row = 1;
+                    var allDefault = true;
+                    $.each(data, function () {
+                        //var areaName = this.AreaName;
+                        var id = this.SysNo;
+                        var arrAreaNames = this.FullName.split("_");
+                        var fullAreaName = arrAreaNames.join("");
+                        var areaName = arrAreaNames[2];
+                        var cs = row % 2 == 0 ? "stag_color" : "";
+                        var ck = this.IsDefault == 1 ? "checked='checked'" : "";
+                        if (ck == "") allDefault = false;
+                        var newRow = "<tr class=\"" + cs + "\"><td class=border_lnone><input onclick='checkAreaClick($(this))' class='clsArea' type='checkbox' value='' name='" + id + "' id='" + id + "' " + ck + " /></td><td class='align_l p10_lr'>" + fullAreaName + "</td></tr>";
+                        $("#item_list tbody tr:last").after(newRow);
+
+                        var nodes = myZTree.getNodesByParam('id', id, null);
+                        if (nodes.length == 0) {
+                            return;
+                        }
+                        if (nodes[0].id == id) {
+                            myZTree.checkNode(nodes[0], true, true);
+                        }
+                        row++;
+                    });
+                    if (!allDefault) {
+                        $("#checkall").attr("checked", false);
+                    }
+
+                }
+                //mask.Remove();
+            });
+        }
+
+        //检测是否是从弹出层中显示
+        $(function () {
+            if (UI.DialogOpener().isNewWarehouse) {
+                $("#toolsArea").hide();
+            }
+        });
+
+        function insertOrUpdate() {
+            $("#toolsArea").find("button").click();
+        }
+    </script>
+}
+<div>
+    <form id="form">
+        <div class="caseout">
+            <div id="tabboxs" class="boxs m10_t">
+                <div class="head_tab head_tabsmall m10_t">
+                    <ul class="tabNav2">
+                        <li class="menuon">仓库信息编辑</li>
+                        <li class="">仓库服务地区选择</li>
+                    </ul>
+                </div>
+                <div class="boxs_con_p10">
+                    <!--仓库服务地区选择tab-->
+                    <div class="list2" id="list2_div">
+                        <!--工具条-->
+                        <div class="boxs_tool boxs_toolbgnone" id="toolsArea">
+                            @{
+                                if (Model.SysNo == 0)
+                                {
+                                    <button onclick="insert()" type="button" class="btn btn_ht26 WH1002201"><span class="icon icon_plus"></span><span class="m5_l">新增仓库</span></button>
+                                }
+                                else
+                                {
+                                    <button onclick="update(@Model.SysNo)" type="button" class="btn btn_ht26 WH1002301"><span class="icon icon_save"></span><span class="m5_l">保存仓库</span></button>
+                                }
+                            }
+
+
+                        </div>
+                        <div class="boxs_detail_dispay">
+                            <div class="tit_dispay border_left border_right">
+                                <h5>仓库信息</h5>
+                            </div>
+                            <div class="tit_con ">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tr>
+                                        <td style="width: 11%;" class="nameright border_rnone"><span class="v_star">*</span>仓库名称</td>
+                                        <td style="width: 39%;">
+                                            <input id="txtWarehouseName" maxlength="50" type="text" name="txtWarehouseName" value="@Model.WarehouseName" class="wd200" />
+                                            <span id="fortxtWarehouseName" class="prompt m10_l">字数限制，1-50个</span>
+                                        </td>
+                                        <td style="width: 11%;" class="nameright border_rnone"><span class="v_star">*</span>后台仓库名称</td>
+                                        <td style="width: 39%;" >
+                                            <input id="txtBackWarehouseName" maxlength="50" type="text" name="txtBackWarehouseName" value="@Model.BackWarehouseName" class="wd200" />
+                                            <span id="fortxtBackWarehouseName" class="prompt m10_l">字数限制，1-50个</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>仓库类型</td>
+                                        <td class="border_right1">
+                                            @Html.DropDownList("warehouseTypeList")
+                                            <span id="forwarehouseTypeList" class="prompt m10_l">仓库类型</span>
+                                        </td>
+
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                                        <td>
+                                            @Html.DropDownList("statusList")
+                                            <span id="forstatusList" class="prompt m10_l">仓库状态</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>仓库ERP编号</td>
+                                        <td class="border_right1">
+                                            <input id="txtErpCode" type="text" maxlength="20" name="txtErpCode" value="@Model.ErpCode" />
+                                            <span id="fortxtErpCode" class="prompt m10_l">字数限制，1-20个</span>
+                                        </td>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>售后库位ERP编号</td>
+                                        <td>
+                                            <input id="txtErpRmaCode" maxlength="20" type="text" name="txtErpRmaCode" value="@Model.ErpRmaCode" />
+                                            <span id="fortxtErpRmaCode" class="prompt m10_l">字数限制，1-20个</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">联系人</td>
+                                        <td class="border_right1">
+                                            <input id="txtContract" type="text" maxlength="20" name="txtContract" value="@Model.Contact" />
+                                            <span id="fortxtContract" class="prompt m10_l">字数限制，0-20个</span>
+                                        </td>
+                                        <td class="nameright border_rnone">联系电话</td>
+                                        <td>
+                                            <input id="txtPhone" name="txtPhone" type="text" maxlength="22" value="@Model.Phone" />
+                                            <span id="fortxtPhone" class="prompt m10_l">字数限制，0-22个</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>地区</td>
+                                        <td colspan="3">
+                                            <div class="fl">
+                                                <select style="width: 100px; margin-right: 10px;" class="c3" id="dpdCountry" name="dpdCountry"></select><span class="c6">国家</span>
+                                                <select style="width: 100px; margin-right: 10px;" class="c3" id="dpdProvince" name="dpdProvince"></select><span class="c6">省</span>
+                                                <select style="width: 100px; margin-left: 10px; margin-right: 10px;" class="c3" name="dpdCity" id="dpdCity"></select><span class="c6">市/地区</span>
+                                                <select style="margin-left: 10px; margin-right: 10px;" class="c3 wd200" id="dpdArea" name="dpdArea"></select><span class="c6">区/县</span><span id="fordpdArea" class="prompt m10_l">所在地区</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone"><span class="v_star">*</span>街道地址</td>
+                                        <td colspan="3">
+                                            <input id="txtStreetAddress" type="text" name="txtStreetAddress" maxlength="100" class="input_xxlarge" value="@Model.StreetAddress" />
+                                            <span id="fortxtStreetAddress" class="prompt m10_l">字数限制，1-100字</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">坐标</td>
+                                        <td colspan="3">
+                                            <span class="c6 m5_r">经度</span><input class="disabled" readonly="readonly" id="tbxLongitude" type="text" value="@Model.Longitude" />
+                                            <span class="c6 m5_r m5_l">纬度</span><input id="tbxLatitude" readonly="readonly" class="disabled" type="text" value="@Model.Latitude" />
+                                            <button class="btn btn_ht26" id="mapbtn" type="button"><span class="icon_globe"></span><span class="m5_l">定位到地图</span></button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">是否自营</td>
+                                        <td>
+                                            <select id="IsSelfSupport" name="IsSelfSupport">
+                                                <option @(Model.SysNo > 0 ? (Model.IsSelfSupport == 0 ? "selected='selected'" : "") : "") value="0">否</option>
+                                                <option @(Model.SysNo > 0 ? (Model.IsSelfSupport == 1 ? "selected='selected'" : "") : "selected='selected'") value="1">是</option>
+                                            </select>
+                                        </td>
+                                        <td style="width: 11%;" class="nameright border_rnone"><span id="dealerTd">对应经销商</span></td>
+                                        <td style="width: 38%;" class="border_right1">
+                                            @Html.DropDownList("dsDealerList")
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">物流</td>
+                                        <td colspan="3">
+                                            <select id="Logistics" style="width:150px;">
+                                                <option value="-1">请选择</option>
+                                                @{
+                                                    var larray = Enum.GetValues(typeof(Hyt.Model.CommonEnum.物流代码));
+                                                    foreach (Hyt.Model.CommonEnum.物流代码 item in larray)
+                                                    {
+                                                        if (item.GetHashCode() == Model.Logistics)
+                                                        {
+                                                            <option selected="selected" value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>  
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>                                                           
+                                                        }
+                                                    }
+                                                }
+                                            </select>&nbsp;&nbsp;&nbsp;
+                                            海关
+                                            <select id="Customs" style="width:150px;">
+                                                <option value="-1">请选择</option>
+                                                @{
+                                                    var carray = Enum.GetValues(typeof(Hyt.Model.CommonEnum.海关));
+                                                    foreach (Hyt.Model.CommonEnum.海关 item in carray)
+                                                    {
+                                                        if (item.GetHashCode() == Model.Customs)
+                                                        {
+                                                            <option selected="selected" value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.CommonEnum.海关),item.GetHashCode())</option>  
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.CommonEnum.海关),item.GetHashCode())</option>                                                           
+                                                        }                                                    
+                                                    }
+                                                }
+                                            </select>&nbsp;&nbsp;&nbsp;
+                                            商检
+                                            <select id="Inspection" style="width:150px;">
+                                                <option value="-1">请选择</option>
+                                                @{
+                                                    var iarray = Enum.GetValues(typeof(Hyt.Model.CommonEnum.商检));
+                                                    foreach (Hyt.Model.CommonEnum.商检 item in iarray)
+                                                    {
+                                                        if (item.GetHashCode() == Model.Inspection)
+                                                        {
+                                                            <option selected="selected" value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>  
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>                                                           
+                                                        } 
+                                                    }
+                                                }
+                                            </select>&nbsp;&nbsp;&nbsp;
+                                            供应链
+                                            <select id="Supply" style="width:150px;">
+                                                <option value="-1">请选择</option>
+                                                @{
+                                                    var sarray = Enum.GetValues(typeof(Hyt.Model.CommonEnum.供应链代码));
+                                                    foreach (Hyt.Model.CommonEnum.供应链代码 item in sarray)
+                                                    {
+                                                        if (item.GetHashCode() == Model.Supply)
+                                                        {
+                                                            <option selected="selected" value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>
+                                                        }
+                                                        else
+                                                        {
+                                                             <option value="@item.GetHashCode()">@Hyt.Util.EnumUtil.GetDescription(item)</option>
+                                                        }
+                                                     }
+                                                }
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">物流仓库编码</td>
+                                        <td colspan="3">
+                                            <input id="txtLogisWarehouseCode" type="text" name="txtLogisWarehouseCode" maxlength="100" class="input_large" value="@Model.LogisWarehouseCode" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">仓库/门店图片</td>
+                                        <td colspan="3">
+                                            <a id="btnWarehouseImage" href="javascript:;">
+                                                <img id="warehouseImage" style="width:50px; height:50px;" onmouseover="picShow(this,this.src)" onmouseout="closeLayerCity()" onerror="this.src='/Theme/images/addpic.png';"
+                                                     src="@(string.IsNullOrWhiteSpace(Model.ImgUrl) ? "/Theme/images/addpic.png" : Model.ImgUrl)" dn="warehouseImage" class="bordergary">
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                </table>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <!--仓库信息输入tab-->
+
+                    <div class="list2 clearfix">
+                        <!--地区树-->
+                        <div class="outtree_fl">
+                            <div class="head_detail">
+                                <h5>地区列表</h5>
+                            </div>
+                            <div class="comp5">
+                                <div>
+                                    <ul id="tree" class="ztree"></ul>
+                                </div>
+                            </div>
+                        </div>
+                        <!--已选择地区列表-->
+                        <div class="outtree_fr " style="height: 400px;" id="wharea">
+                            <div class="boxs outtree_fr_intro">
+                                <div class="head_detail">
+                                    <h5>服务地区(<span class="red1">打勾表示当前仓库为该地区的默认仓库</span>）</h5>
+                                </div>
+                                <div class="boxs_detail border_right border_bottom">
+                                    <div class="detail_con line35" style="height: 410px; overflow: auto;">
+                                        <table id="item_list" width="100%" border="0" cellspacing="0" class="border_rnone" cellpadding="0">
+                                            <thead>
+                                                <tr>
+                                                    <th width="53" class="border_lnone">
+                                                        <input type="checkbox" checked="checked" id="checkall" />
+                                                    </th>
+                                                    <th class=" align_l p10_lr">地区名称</th>
+
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr />
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="boxs outtree_fr_order m10_t">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    $("#form").validate({
+        rules: {
+            txtWarehouseName: { required: true, maxlength: 50 },
+            txtBackWarehouseName: { required: true, maxlength: 50 },
+            txtErpCode: { required: true, maxlength: 20 },
+            txtErpRmaCode: { required: true, maxlength: 20 },
+            txtStreetAddress: { required: true, maxlength: 100 },
+            warehouseTypeList: { required: true },
+            statusList: { required: true },
+            dpdArea: { min: 1 },
+            dpdCity: { min: 1 },
+            dpdProvince: { min: 1 },
+            dpdCountry: { min: 1 },
+            txtContract: { maxlength: 20 },
+            txtPhone: { maxlength: 22, isPhone: true }
+        },
+        errorPlacement: function (error, el) {
+            $('#for' + el.attr('id')).attr('class', 'error m10_l');
+        },
+        success: function (label, el) {
+            $('#for' + el.attr('id')).attr('class', 'success m10_l');
+        }
+    });
+
+    $(document).ready(function () {
+        $("#warehouseTypeList").attr("class", "wd100 select_ht28");
+        $("#statusList").attr("class", "wd100 select_ht28");
+        $("#dsDealerList").attr("class", "select_ht28");
+        //设置选择项
+        $("#warehouseTypeList").find("option[value=@Model.WarehouseType]").attr("selected", "true");
+        $("#statusList").find("option[value=@Model.Status]").attr("selected", "true");
+        $("#dsDealerList").find("option[value=@ViewBag.DealerSysNo]").attr("selected", "true");
+
+        Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), {
+            a: '@(Model.AreaSysNo)',
+            callback: function () {
+            }
+        });
+
+        UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_p10", tabContent: ".list2" });
+        //初始化地区树
+        InitAreaTree();
+        //上传仓库图片
+        $("#btnWarehouseImage").click(function (e) {
+            DAO.Upload({
+                config: '@Hyt.Model.SystemPredefined.UploadConfigAlias.DefaultConfigAlias',
+                callback: function (data) {
+                    $("#warehouseImage").attr("src", '@(Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer)' + data[0].url);
+                },
+                cancel: $.noop()
+            });
+        });
+        //坐标设置
+        $("#mapbtn").click(function () {
+            var url = '@Url.Action("WarehouseMap", "Basic")' + '?address=' + $("#txtStreetAddress").val() + '&city=' + $("#dpdCity").find("option:selected").text();
+            UI.DialogOpen(url, { title: '仓库地图位置', width: 800, height: 370, close: function () { }, resize: false }, false);
+
+        });
+        // 全选设置
+        $("#checkall").click(function () {
+            var all = $("#checkall").attr("checked");
+            if (all == "checked") { // 全选
+                $(".clsArea").attr("checked", true);
+            } else { // 取消全选
+                $(".clsArea").attr("checked", false);
+            }
+        });
+        $("#IsSelfSupport").change(function() {
+            setDealerTd();
+        });
+        setDealerTd();
+    });
+
+    function setDealerTd() {
+        if ($("#IsSelfSupport").val() == 1) {
+            $("#dealerTd,#dsDealerList").hide();
+            $("#dsDealerList").val(0);
+        } else {
+            $("#dealerTd,#dsDealerList").show();
+        }
+    }
+
+    //设置经纬度
+    function SetMapValue(longitude, latitude) {
+        $("#tbxLongitude").val(longitude);
+        $("#tbxLatitude").val(latitude);
+    }
+    //新增仓库
+    function insert() {
+
+        var areaSysNo = getSelectedArea();
+
+        var isHidden = $("#list2_div").is(":hidden");
+        var status;
+        if (isHidden) {
+            $("#list2_div").show();
+            status = $("#form").valid();
+            $("#list2_div").hide();
+        } else {
+            status = $("#form").valid();
+        }
+        if (!status) {
+            UI.Alert({
+                content: "请确认仓库基础信息已填写完整！"
+            });
+        }
+        if (status) {
+            UI.Confirm({
+                content: '确认新增仓库吗？',
+                padding: '10px 20px',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("WarehouseInsert", "Basic")',
+                        data: {
+                            ErpCode: $("#txtErpCode").val(),
+                            ErpRmaCode: $("#txtErpRmaCode").val(),
+                            WarehouseName: $("#txtWarehouseName").val(),
+                            BackWarehouseName: $("#txtBackWarehouseName").val(),
+                            StreetAddress: $("#txtStreetAddress").val(),
+                            Contact: $("#txtContract").val(),
+                            Phone: $("#txtPhone").val(),
+                            Status: $("#statusList").val(),
+                            WarehouseType: $("#warehouseTypeList").val(),
+                            AreaSysNo: $("#dpdArea").val(),
+                            Longitude: $("#tbxLongitude").val(),
+                            Latitude: $("#tbxLatitude").val(),
+                            ImgUrl: $("#warehouseImage").attr("src"),
+                            areaSysNos: areaSysNo,
+                            IsSelfSupport: $("#IsSelfSupport").val(),
+                            dealerSysNo: $("#dsDealerList").val(),
+                            Logistics: $("#Logistics").val(),
+                            Customs: $("#Customs").val(),
+                            Inspection: $("#Inspection").val(),
+                            Supply: $("#Supply").val(),
+                            LogisWarehouseCode: $('#txtLogisWarehouseCode').val()
+                },
+                        chche: false,
+                        success: function (ret) {
+                            if (ret.Status) {
+                                UI.tips.tip_alert('tips_shrot tips_success', ret.Message);
+
+                                //UI.CloseDialog();
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function () {
+                            UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                        }
+                    });
+                },
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }
+    }
+
+    //修改仓库信息
+    function update(sysno) {
+        var areaSysNo = getSelectedArea();
+
+        var isHidden = $("#list2_div").is(":hidden");
+        var status;
+        if (isHidden) {
+            $("#list2_div").show();
+            status = $("#form").valid();
+            $("#list2_div").hide();
+        } else {
+            status = $("#form").valid();
+        }
+
+        if (!status) {
+            UI.Alert({
+                content: "请确认仓库基础信息已填写完整！"
+            });
+        }
+
+        if (status) {
+            UI.Confirm({
+                content: '确认修改仓库信息吗？',
+                padding: '10px 20px',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("WarehouseUpdate", "Basic")',
+                        data: {
+                            SysNo: sysno,
+                            ErpCode: $("#txtErpCode").val(),
+                            ErpRmaCode: $("#txtErpRmaCode").val(),
+                            WarehouseName: $("#txtWarehouseName").val(),
+                            BackWarehouseName: $("#txtBackWarehouseName").val(),
+                            StreetAddress: $("#txtStreetAddress").val(),
+                            Contact: $("#txtContract").val(),
+                            Phone: $("#txtPhone").val(),
+                            Status: $("#statusList").val(),
+                            WarehouseType: $("#warehouseTypeList").val(),
+                            AreaSysNo: $("#dpdArea").val(),
+                            Longitude: $("#tbxLongitude").val(),
+                            Latitude: $("#tbxLatitude").val(),
+                            ImgUrl: $("#warehouseImage").attr("src"),
+                            areaSysNos: areaSysNo,
+                            IsSelfSupport: $("#IsSelfSupport").val(),
+                            dealerSysNo: $("#dsDealerList").val(),
+                            Logistics: $("#Logistics").val(),
+                            Customs: $("#Customs").val(),
+                            Inspection: $("#Inspection").val(),
+                            Supply: $("#Supply").val(),
+                            LogisWarehouseCode: $('#txtLogisWarehouseCode').val()
+                        },
+                        chche: false,
+                        success: function (ret) {
+                            if (ret.IsLogout) {
+                                DAO.LoginBox();
+                                return;
+                            }
+                            if (ret.Status) {
+                                UI.tips.tip_alert('tips_shrot tips_success', ret.Message);
+                                //setTimeout(UI.CloseDialog(), 5000);
+
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function () {
+                            UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                        }
+                    });
+                },
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }
+    }
+
+    //获取已选择的仓库覆盖地区
+    function getSelectedArea() {
+        var areaSysNo = "";
+        $('#item_list tr').each(function (trindex) {
+            if (trindex > 1) {
+                areaSysNo += $("#item_list tr:eq(" + trindex + ") input:eq(0)").attr("id") + ":";
+                if ($("#item_list tr:eq(" + trindex + ") :checkbox").attr("checked") == "checked") {
+                    areaSysNo += "1,";
+                } else {
+                    areaSysNo += "0,";
+                }
+            }
+        });
+
+        return areaSysNo.substr(0, areaSysNo.length - 1);
+    }
+
+    //地区复选框点击
+    function checkAreaClick(thisobj) {
+
+        if ($(thisobj).attr("checked") != "checked")
+            $("#checkall").attr("checked", false);
+    }
+    //图片显示
+    function picShow(obj, src) {
+        if (src.indexOf("/Theme/images/addpic.png") < 0)//没有时返回-1
+        { showp(obj, src); }
+    }
+    @*
+    //保存已选择的仓库覆盖地区
+    function saveSelectedArea() {
+        var warehouseSysNo = @Model.SysNo;
+        if (warehouseSysNo == 0) {
+            UI.tips.tip_alert('tips_warning', '请先保存仓库数据之后再进行操作。');
+            return;
+        }
+
+        var areaSysNo = "";
+        $('#item_list tr').each(function (trindex) {
+            if (trindex > 1) {
+                areaSysNo += $("#item_list tr:eq(" + trindex + ") input:eq(0)").attr("id") + ":";
+                if ($("#item_list tr:eq(" + trindex + ") :checkbox").attr("checked") == "checked") {
+                    areaSysNo += "1,";
+                } else {
+                    areaSysNo += "0,";
+                }
+            }
+        });
+
+        //if (areaSysNo.length == 0) {
+        //    UI.tips.tip_alert('tips_warning', '没有选择任何地区进行保存。');
+        //    return;
+        //}
+
+        UI.Confirm({
+            content: '确认保存所有已选择地区吗？',
+            padding: '10px 20px',
+            ok: function() {
+                areaSysNo = areaSysNo.substr(0, areaSysNo.length - 1);
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("WarehouseAreaSave", "Basic")',
+                    data: {
+                        areaSysNo: areaSysNo,
+                        warehouseSysNo: '@Model.SysNo'
+                    },
+                    chche: false,
+                    success: function(ret) {
+                        if (ret) {
+                            UI.tips.tip_alert('tips_shrot tips_success', "保存成功！");
+                        } else {
+                            UI.tips.tip_alert('tips_warning',"保存失败");
+                        }
+                    },
+                    error: function() {
+                        UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                    }
+                });
+            },
+            cancelVal: '关闭',
+            cancel: true
+        });
+
+    }
+    *@
+</script>

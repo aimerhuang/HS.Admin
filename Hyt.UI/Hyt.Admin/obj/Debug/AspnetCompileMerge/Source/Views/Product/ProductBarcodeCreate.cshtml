@@ -1,0 +1,223 @@
+﻿@{
+    ViewBag.Title = "商品条码管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.PdProductBarcode
+
+@section HeadCss{
+    <style type="text/css">
+        .boxs_detail {
+            border: none;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        .boxs_detail_dispay .boxs_detail table {
+            border-bottom: #d6d6d6 solid 1px;
+            border-right: #d6d6d6 solid 1px;
+            border-top: none !important;
+            border-left: none !important;
+        }
+
+            .boxs_detail_dispay .boxs_detail table tr th {
+                border-top: #d6d6d6 solid 1px;
+                border-left: #d6d6d6 solid 1px;
+                border-bottom: none !important;
+                border-right: none !important;
+            }
+
+            .boxs_detail_dispay .boxs_detail table tr td {
+                border-top: #d6d6d6 solid 1px;
+                border-left: #d6d6d6 solid 1px;
+                border-bottom: none !important;
+                border-right: none !important;
+                text-align: center;
+            }
+        .btn span{vertical-align:inherit;}
+    </style>
+}
+
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            
+
+            $("#ProductBarcodForm").validate({
+                rules: {
+                    Barcode: {
+                        required: true
+                    },
+                    ProductQuantity: {
+                        required: true,
+                        min: 1
+                    },
+                    ProductSysNo: {
+                        required: true,
+                        min: 1
+                    }
+                },
+                messages: {
+                    Barcode: {
+                        required: "商品条码必填"
+                    },
+                    ProductQuantity:{
+                        required: "商品数量不能为0",
+                        min: "父级编号必须是大于零的整数"
+                    },
+                    ProductSysNo: {
+                        required: "请选择商品",
+                        min: "父级编号必须是大于零的整数"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    $('#for' + element.attr('id')).attr('class', 'error m10_l');
+
+                },
+                success: function (span, element) {
+                    $('#for' + element.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+
+            function generalFormData() {
+                var data = $("#ProductBarcodForm").serializeArray();
+                return data;
+            }
+
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                //alert(api.ProductSysNo);
+                if (!api) return;
+                // 自定义按钮
+                api.button([
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#ProductBarcodForm").valid()) {
+                                var data = generalFormData();
+                                //if (data == false) {
+                                //    return false;
+                                //}
+                                $.post('/Product/ProductBarcodeCreate/', data, function (result) {
+
+                                    if (result.Status) {
+                                        UI.tips.tip_alert("tips_success", "保存成功");
+                                        setTimeout(function () {
+                                            try {
+                                                UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage);
+                                            } catch (e) {
+                                            };
+                                            UI.Dialog.close();
+                                        }, 1000);
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                            if (result.StatusCode == -2) {
+                                                $("#name").focus();
+                                            }
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                     {
+                         name: '取消'
+                     }
+                ]
+                );
+            }
+
+            //选择商品
+            $("#btn_selectPdProduct").click(function () {
+                DAO.SelectPdProductList({
+                    callBack: function (res) {
+                        if (res != null && res.sysno != null) {
+                            $("#ProductSysNo").val(res.sysno);
+                            //validatePdProduct.element($("#txt_Barcode"));
+                        }
+                    }
+                });
+            })
+
+            initDialog();
+
+            
+        });
+
+    </script>
+}
+<div class="caseout">
+
+    <div class="boxs_detail_dispay boxs_con_c2  ">
+        <div class="tit_con">
+            <form id="ProductBarcodForm" name="ProductBarcodForm" action="">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone border_lnone">
+                    <tbody>
+                        @if (Model.SysNo > 0)
+                        {
+                            @*<tr>
+                                <td width="25%" class="nameright border_rnone">是否已关联商品</td>
+                                <td width="75%" class="border_rnone">
+                                    <span class="m10_l">@(ViewBag.isexis == true ? "是" : "否")</span>
+                                </td>
+                            </tr>*@
+                        }
+                        <tr>
+                            <td width="25%" class="nameright border_rnone">商品条码前缀</td>
+                            <td width="75%" class="border_rnone">
+                                <input type="text" name="Prefix" class="wd200" value="@(Hyt.Model.SystemPredefined.Constant.CUSTOMIZE_BARCODE)" maxlength="30" disabled="disabled" />
+                                <span class="prompt m10_l">固定不能修改</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="red1">*</span>商品条码</td>
+                            <td class="border_rnone">
+                                <input type="text" name="Barcode" id="Barcode" value="@Model.Barcode" class="wd200" maxlength="30" />
+                                <span id="forBarcode" class="prompt m10_l">唯一不可重复</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="red1">*</span>商品数量</td>
+                            <td class="border_rnone">
+                                <input type="text" name="ProductQuantity" id="ProductQuantity" value="@Model.ProductQuantity" class="wd200" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"
+                                       onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'0')}else{this.value=this.value.replace(/\D/g,'')}" />
+                                <span id="forProductQuantity" class="prompt m10_l">大于或等于0的正整数</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="red1">*</span>商品编号</td>
+                            <td class="border_bnone">
+                                <input class="m10_r" id="ProductSysNo" name="ProductSysNo" type="text" style="width:120px" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}"
+                                       onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^0-9]/g,'0')}else{this.value=this.value.replace(/\D/g,'')}" value="@Model.ProductSysNo" />
+                                <a tabindex="5" id="btn_selectPdProduct" class="btn btn_ht26 m10_r" title="选择商品" style="line-height:26px; padding:0 6px;"><span class="icon_th_list" style="vertical-align:use-script"></span><span class="m5_l">选择商品</span></a>
+                                <span id="forProductSysNo" class="prompt m10_l">选择商品</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="hidden" name="SysNo" value="@Model.SysNo" />
+                <input type="hidden" name="CreatedBy" value="@Model.CreatedBy" />
+                <input type="hidden" name="CreatedDate" value="@Model.CreatedDate" />
+            </form>
+
+
+        </div>
+
+    </div>
+</div>

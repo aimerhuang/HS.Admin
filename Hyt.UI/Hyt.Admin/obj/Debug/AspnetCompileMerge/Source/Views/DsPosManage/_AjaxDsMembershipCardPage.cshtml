@@ -1,0 +1,57 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model.Transfer
+@using Hyt.Util
+@model PagedList<Hyt.Model.Pos.CBDsMembershipCard>
+
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                
+                <th width="40">编号</th>
+                <th>所属经销商</th>
+                <th>会员卡号</th>
+                <th>会员名称</th>
+                <th>联系电话</th>
+                <th>生日</th>
+                
+                <th>积分</th>
+                
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData.Count > 0)
+                {
+                    var Index = 0;
+                    string cs = string.Empty;
+                    foreach (var item in Model.TData)
+                    {
+                        cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                        <tr class="@cs">
+                            <td>@item.SysNo</td>
+                            <td>@item.DealerName</td>
+                            <td>@item.CardNumber</td>
+                            <td>@item.UserName</td>
+                            <td>@(item.LinkTele)</td>
+                            <td>@(item.Birthday!=null?item.Birthday.Value.ToString("MM-dd"):"")</td>
+                            <td>@(item.PointIntegral)</td>
+                            
+                        </tr>
+                        Index++;
+                    }
+                }
+                else
+                {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <!--分页开始-->
+    <div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+    <!--分页结束-->
+</div>

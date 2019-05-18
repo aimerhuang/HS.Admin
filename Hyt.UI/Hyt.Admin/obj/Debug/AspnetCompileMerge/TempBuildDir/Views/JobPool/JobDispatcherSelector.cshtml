@@ -1,0 +1,234 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客服工作量设置";
+}
+@using Hyt.BLL.Sys
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@{
+    var jobTypes = EnumUtil.ToDictionary(typeof(SystemStatus.任务对象类型));
+    var jobs = (List<SyJobDispatcher>)Hyt.BLL.Sys.SyJobDispatcherBo.Instance.GetAll();
+    var userlist = SyUserBo.Instance.GetSyUserByGroupSysNo(UserGroup.客服组);
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<div class="case" style="padding: 10px;">
+    <div class="boxs">
+        <div class="boxs_tit head_m border_bnone">
+            <h3>客服工作量设置</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <div class="boxs_list">
+                <div class="boxs_listtabel">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="55">姓名</th>
+                                @{
+                                    foreach (var k in jobTypes)
+                                    {
+                                        <th>@k.Value</th>
+                                    }
+                                }
+                                <th width="90">可处理优先级</th>
+                                <th width="150">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+                                if (!userlist.Any())
+                                {
+                                    <tr>
+                                        <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                    </tr>
+                                }
+                                int i = 0;
+                                //所有客服
+                                foreach (var syUser in userlist)
+                                {
+                                    string prioritys=string.Empty;
+                                    if (i % 2 == 0)
+                                    {
+                                        @Html.Raw("<tr>")
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw("<tr class='stag_color'>")
+                                    }
+                                    <td>@syUser.UserName</td>
+                                    foreach (var k in jobTypes)
+                                    {
+                                        var job = Hyt.Admin.Controllers.JobPoolController.GetTaskInfo(syUser.SysNo, k.Key, jobs);
+                                        if (job!=null && !string.IsNullOrEmpty(job.Prioritys) && string.IsNullOrEmpty(prioritys))
+                                        {
+                                            prioritys = job.Prioritys;
+                                        }
+                                        var maxTaskQuantity = job != null ? job.MaxTaskQuantity : 0;
+                                        var status=job != null && job.Status==1;
+                                        string statustext = status ? "<span style='color: red'>(开)</span>" : "(关)";
+                                        <td><input  name="txtAddTaskType_@syUser.SysNo" taskType="@k.Key" value="@maxTaskQuantity" class="hide wd50 number_input" maxlength="4" type="text"  style="width:40px;">&nbsp;<input type="checkbox" class="hide" "@if (status)
+                                                                                                                                                                                                                                                            {
+                                                                                                                                                                                                                                                                @:checked="checked"
+                                                                                                                                                                                                                                                            }"/><span>@maxTaskQuantity  @Html.Raw(statustext)</span></td>
+                                       
+                                    }
+                                    <td><input  id="txtAddPrioritys_@syUser.SysNo" onfocus="GetTip(this);" onblur="HidTip();"  name="txtAddPrioritys" class="wd70 hide" maxlength="50" multiple="ok" type="text" value="@prioritys"/><span>@prioritys</span></td>
+                                    <td><button  class="btn btn_blue btn_ht26" onclick="btnSave(@syUser.SysNo,this)" type="button"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button  class="btn btn_ht26 m10_l" style="display: none" id="btnCancel" onclick="cancel(@syUser.SysNo,this)" type="button"><span class="icon_cancelAudit"></span><span class="m5_l">取消</span></button></td>
+                                    @Html.Raw("</tr>")
+                                    i++;
+                                }
+                                 
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+ <div style="z-index: 9; background-color:#666; color: #fff; position: absolute;display: none; padding:2px 5px;" id="divtip">多个优先级请用英文分号分隔
+ </div>
+<script type="text/javascript">
+    var integer = /^\+?[0-9][0-9]*$/;
+    
+    $(function () {
+        function initDialog() {
+            var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+            if (!api) return;
+            // 自定义按钮
+            api.button(
+                {
+                    name: '重置任务',
+                    callback: function () {
+                        $.post('/JobPool/ResetJobDispatcher',null, function (result) {
+                            if (result.Status) {
+                                try {
+                                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功');
+                                } catch (e) { };
+                            } else {
+                                var message = "操作失败";
+                                if (!!result && !!result.Message) {
+                                    message = result.Message;
+                                }
+                                UI.tips.tip_alert("tips_wrong", message);
+                            }
+                        });
+                        return false;
+                    },
+                    focus: true
+                },
+                {
+                    name: '关闭'
+                }
+            );
+        }
+
+        initDialog();
+    });
+    //数字校验
+    function NumberInput(obj) {
+        var val = obj.replace(/[^\.\d]/g, '');
+        if (integer.test(val) && val > 0) {
+            return val;
+        } else {
+            return 0;
+        }
+    }
+    function GetTip(obj) {
+        $("#divtip").css("display", "inline");
+        var offset = $(obj).position();
+        $("#divtip").css("top", offset.top+22);
+        $("#divtip").css("left", offset.left);
+    }
+
+    //隐藏订单日志
+    function HidTip() {
+        $("#divtip").hide();
+    }
+    
+    //取消
+    function cancel(userId, obj) {
+        var btn = $(obj).prev();
+        var isEdit = false;
+        if (btn.attr("isEdit")) {
+            isEdit = btn.attr("isEdit") == "true";
+        }
+        if (isEdit) {
+            btn.attr("isEdit", false);
+            btn.parents('tr').find('td > span').removeClass('hide');
+            btn.parents('tr').find('td > input').addClass('hide');
+            btn.children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+            btn.children('span').eq(1).text('修改');
+            $(obj).hide();
+            $(obj).next().show();
+        }
+    }
+    //保存
+    function btnSave(userId, btn) {
+        var isEdit = false;
+        if ($(btn).attr("isEdit")) {
+            isEdit = $(btn).attr("isEdit") == "true";
+        }
+        if (!isEdit) {
+            $(btn).parents('tr').find('td > span').addClass('hide');
+            $(btn).parents('tr').find('td > input').removeClass('hide');
+            $(btn).children('span').eq(0).attr('class', 'icon_save').addClass("icon_white");
+            $(btn).children('span').eq(1).text('保存');
+            $(btn).attr("isEdit", true);
+            $(btn).next().show();
+        } else {
+            var inputName = "txtAddTaskType_" + userId;
+            var prioritysId= "#txtAddPrioritys_" + userId;
+            var prioritys = $(prioritysId).val();
+            var testRule = /^\d+(;\d+)*$/;
+            if (prioritys!="" && !testRule.test(prioritys)) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '可处理优先级必须是数字，多个优先级请用英文分号分隔');
+                return false;
+            }
+            $(prioritysId).next("span").html(prioritys);
+            var sets = [];
+            $("[name='" + inputName + "']").each(function () {
+                var obj = $(this);
+                var num = NumberInput(obj.val());
+                var status = obj.next("input")[0].checked ? 1 : 0;
+                obj.val(num);
+                var statusText = status == 1 ? "<span style='color: red'>(开)</span>" : "(关)";
+                obj.next().next("span").html(num + statusText);
+                var taskType = obj.attr("taskType");
+                var quartity = obj.val();
+                if (integer.test(quartity)) {
+                    sets.push({ SysNo: 0, UserSysNo: userId, TaskType: taskType, MaxTaskQuantity: quartity, Status: status });
+                }
+            });
+
+            $.ajax({
+                url: "@Url.Content("/JobPool/SaveJobDispatcher/")",
+                data: JSON.stringify({ userSysNo: userId, sets: sets, prioritys: prioritys }),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if (data.Status == true) {
+                        UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                        $(btn).attr("isEdit", false);
+                        $(btn).parents('tr').find('td > span').removeClass('hide');
+                        $(btn).parents('tr').find('td > input').addClass('hide');
+                        $(btn).children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+                        $(btn).children('span').eq(1).text('修改');
+                        $(btn).next().hide();
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                    }
+                },
+                error: function () {
+                }
+            });
+        }
+    }
+</script>

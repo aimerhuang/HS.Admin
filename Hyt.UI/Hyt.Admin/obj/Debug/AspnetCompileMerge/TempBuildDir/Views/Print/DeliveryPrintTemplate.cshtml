@@ -1,0 +1,521 @@
+﻿@model IList<Hyt.Model.Transfer.CBLgDeliveryPrintTemplate>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "快递打印模板管理";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Print/LodopFuncs.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+}
+<div class="caseout">
+
+    <!--工具条开始-->
+    <div class="boxs_tool">
+
+        <!--搜索开始-->
+        <div class="right_tool clearfix">
+
+            <span class="veralign_t fl m10_l">打印模板</span>
+            <div class="fl m10_l">
+                <select class="select_ht28" id="DeliveryPrintTemplateKV" name="DeliveryPrintTemplateKV">
+                    @if (Model != null && Model.Count > 0)
+                    {
+                        foreach (var item in Model)
+                        {
+                        <option value='@item.SysNo'>@item.Name</option>
+                        }
+                    }
+                    else
+                    {<option value='0'>无模板</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn_ht26 m5_r" id="btn_create" onclick="Create()"><span class="icon icon_plus"></span><span class="m5_l">新建</span></button>
+            <button class="btn btn_ht26 m5_r" id="btn_edit" onclick="Edit()"><span class="icon_pencil"></span><span class="m5_l">编辑</span></button>
+            <button class="btn btn_ht26 m5_r" id="btn_save" onclick="Save()"><span class="icon_save"></span><span class="m5_l">保存</span></button>
+            <button class="btn btn_ht26 m5_r" id="btn_cancelcreate" onclick="UnCreate();"><span class="icon_remove"></span><span class="m5_l">取消新建</span></button>
+            <button class="btn btn_ht26 m5_r" id="canceledit" onclick="UnEdit();"><span class="icon_remove"></span><span class="m5_l">取消编辑</span></button>
+            @* <button class="btn btn_ht26" id="btn_del" onclick="Delete();"><span class="icon_trash"></span><span class="m5_l">删除</span></button>*@
+        </div>
+    </div>
+    <div class="boxs_detail_dispay">
+        <div class="tit_con" style="display: block;">
+            <form id="form1" name="form1" action="">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 8%;min-width:60px" class="nameright border_rnone ">快递名称：</td>
+                            <td style="width: 42%" class="border_right">
+                                @ViewBag.DeliveryTypeName
+                                <input type="hidden" id="DeliveryTypeSysNo" name="DeliveryTypeSysNo" value="@ViewBag.DeliveryTypeSysNo" />
+                            </td>
+                            <td style="width: 8%;min-width:60px" class="nameright border_rnone"><span class="v_star">*</span>模板名称</td>
+                            <td style="width: 42%">
+                                <span id="TemplateNameText" status="unedit"></span>
+                                <input type="text" value="" status="edit" id="TemplateName" maxlength="100" name="TemplateName" class="wd156">
+                                <span id="forTemplateName" class="prompt m10_l" status="edit">模板名称,长度1-100</span>
+                                <input type="hidden" id="TemplateSysNo" name="TemplateSysNo" value="0" />
+                            </td>
+
+                        </tr>
+
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                            <td class="border_right">
+                                <span id="statusText" status="unedit"></span>
+                                <select id="status" name="status" class="select_ht28" status="edit">
+                                    <option value="1">启用</option>
+                                    <option value="0">禁用</option>
+                                </select>
+                                <span id="forstatus" class="prompt m10_l" status="edit">模板状态</span>
+
+                            </td>
+
+                            <td class="nameright border_rnone">背景图</td>
+                            <td>
+                                <span id="BackGroundImageText" status="unedit"></span>
+                                <input type="text" id="BackGroundImage" status="edit" name="BackGroundImage" maxlength="150" class="c3 disabled" readonly="readonly" />
+                                <button class="btn btn_ht26 m5_l" status="edit" type="button" onclick="ImgUpload();" id="btnUpload"><span class="icon_upload"></span><span class="m5_l">上传图片</span></button>
+                                <span id="forBackGroundImage" status="edit" class="prompt m10_l">图片地址,长度1-150</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+
+                            <td colspan="4" style="border-left: none;">
+                                <div class="boxs" id="tabboxs">
+                                    <div class="head_tab">
+                                        <ul id="tabNav">
+                                            <li class="menuon_white" onclick="ShowView();" id="li1">可视化编辑</li>
+                                            <li class="" onclick="ShowCode();" id="li2">源码视图</li>
+                                        </ul>
+                                    </div>
+                                    <div class="boxs_con_c1">
+                                        <div class="list" id="div1" style="padding-right: 5px; padding-left: 5px;">
+                                            <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width="99%" height="565">
+
+                                                <param name="Caption" value="内嵌显示区域">
+                                                <param name="Border" value="0">
+                                                <param name="Color" value="#C0C0C0">
+                                                <embed id="LODOP_EM" type="application/x-print-lodop" width="100%" height="565" pluginspage="~/Theme/Plugins/Print/install_lodop32.exe">
+                                            </object>
+                                        </div>
+                                        <div class="list" id="div2" style="display: none; padding: 5px;">
+                                            @*<textarea id="txtcode" class="disabled" readonly="readonly" name="txtcode" maxlength="2000" style="width: 99%; border: none; height: 565px;"></textarea>*@
+                                            <textarea id="txtcode" class="disabled"  name="txtcode" maxlength="2000" style="width: 99%; border: none; height: 565px;"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+</div>
+<div id="divbg" style="display: none;">
+    <div style="width: 100%; height: 100%; background-color: #C0C0C0"></div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //声明为全局变量
+        var LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        //新建或修改
+        var IsNew = true;
+        //当前状态
+        var CanEdit = true;
+        //当前点击到的是源码还是视图，默认视图
+        var IsView = true;        
+        $(function() {
+            Init();//直接加载打印设计
+            $("#DeliveryPrintTemplateKV").change(function() {
+                LoadSingle();
+            });
+        });
+        //加载模板
+        function LoadSingle() {
+            var sysno = $("#DeliveryPrintTemplateKV").val();
+            $.get('@Url.Action("GetDeliveryPrintTemplate")', { templateSysNo: sysno }, function(data) {
+                if (data.IsLogout) {
+                    eval(data.Callback);
+                    return;
+                }
+                $("#TemplateName").val(data.Name);
+                $("#status").find("option[value=" + data.Status + "]").attr("selected", "true");               
+                $("#BackGroundImage").val(data.BackGroundImage);
+
+                SyncText();
+                
+                $("#TemplateSysNo").val(data.SysNo);
+                $("#txtcode").val(data.Template);
+                eval($("#txtcode").val());
+                Preview();
+            });
+        }
+        //预览
+        function Preview() {
+            LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+            LODOP.SET_SHOW_MODE("HIDE_PBUTTIN_PREVIEW", 1);
+            LODOP.SET_SHOW_MODE("HIDE_SBUTTIN_PREVIEW", 1);
+            LODOP.SET_SHOW_MODE("HIDE_QBUTTIN_PREVIEW", 1);
+            LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+            LODOP.PREVIEW();
+        }
+        //可编辑和不可编辑文本同步
+        function SyncText() {
+            $("#TemplateNameText").html($("#TemplateName").val());
+            $("#statusText").html($("#status").find("option:selected").text());               
+            $("#BackGroundImageText").html($("#BackGroundImage").val());
+           
+        }
+
+        //初始加载模板内容
+        function Init() {
+            if ($("#DeliveryPrintTemplateKV").val() != "0") {
+                $('#status').find('option[value=@(Model.Count > 0 ? Model[0].Status : 0)]').attr('selected', 'true');
+                $("#TemplateName").val('@(Model.Count > 0 ? Model[0].Name : "")');
+                $("#TemplateSysNo").val(@(Model.Count > 0 ? Model[0].SysNo : 0));
+                $("#BackGroundImage").val('@(Model.Count > 0 ? Model[0].BackgroundImage : "")');
+
+                SyncText();
+                
+                $("#txtcode").val(initTemplate.getMultiLine());
+                if ($("#txtcode").val().length > 10) {
+                    //LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+                    eval($("#txtcode").val());
+                } else {
+                    CreatePrintPage();
+                }
+
+                UnEdit();
+            } else {
+                //还没有任何模板
+                Create();
+                $("#btn_cancelcreate").hide();
+            }
+
+        }
+        //模板代码
+        function initTemplate() {
+            /*           
+             @Html.Raw(Model.Count > 0 ? Model[0].Template : "")
+            */
+        }
+
+        //图片上传 
+        function ImgUpload() {
+            $("#div1").css("visibility", "hidden");
+            DAO.Upload({
+                callback: function(data) {
+                    if (data[0].url > 150) {
+                        ShowAlert('图片地址过长，请联系系统管理员处理',"warning");
+                    } else {
+                        $("#div1").css("visibility", "visible");
+                        var fileServer = '@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer';
+                        $("#BackGroundImage").val(data[0].url);
+                        var reg = new RegExp("src='.*'", "m");
+                        var valcode = $("#txtcode").val().replace(reg, "src='" + fileServer + data[0].url + "'");
+                        $("#txtcode").val(valcode);
+                        LODOP.ADD_PRINT_SETUP_BKIMG("<img border='0' src='" + fileServer + data[0].url + "'>");
+                        LODOP.SET_SHOW_MODE("BKIMG_IN_PREVIEW", 1);
+
+                        $("#BackGroundImage").focus();
+                    }
+                },
+                cancel: function() {
+                    $("#div1").css("visibility", "visible");
+                }
+            });
+        }
+
+        //新建
+        function Create() {
+            $("#status").find("option[value=1]").attr("selected", "true");
+            $("#TemplateName").val("");
+            $("#BackGroundImage").val("");
+            $("#div1").show();
+            $("#div2").hide();
+
+            IsView = true;
+            $("#li1").addClass("menuon_white");
+            $("#li2").removeClass("menuon_white");
+            CreatePrintPage();
+            LODOP.SET_SHOW_MODE("DESIGN_IN_BROWSE", 1);
+            LODOP.PRINT_DESIGN();
+            NewEdit();
+        }
+        //取消新建
+        function UnCreate() {
+            LoadSingle();
+            UnEdit();
+        }
+
+        //编辑，改为可编辑状态
+        function Edit() {
+            IsNew = false;
+            if (IsView) {
+                LODOP.SET_SHOW_MODE("DESIGN_IN_BROWSE", 1);
+                LODOP.PRINT_DESIGN();               
+            }
+            EditStatus();
+
+            $("#btn_create").hide();
+            $("#btn_edit").hide();
+            $("#btn_save").show();
+            $("#canceledit").show();
+            $("#btn_cancelcreate").hide();
+        }
+        //新增时页面状态
+        function NewEdit() {
+            IsNew = true;
+            EditStatus();
+            $("#btn_create").hide();
+            $("#btn_edit").hide();
+            $("#btn_save").show();
+            $("#canceledit").hide();
+            $("#btn_cancelcreate").show();
+
+        }
+        //页面编辑状态
+        function EditStatus() {
+            CanEdit = true;
+            $("[status='edit']").each(function() {
+                $(this).show();
+            });
+            $("[status='unedit']").each(function() {
+                $(this).hide();
+            });
+
+            $("#DeliveryPrintTemplateKV").addClass("disabled");
+            $("#DeliveryPrintTemplateKV").attr("disabled", "disabled");
+
+        }
+
+        //不可编辑状态
+        function UnEdit() {
+            $("[status='edit']").each(function() {
+                $(this).hide();
+            });
+            $("[status='unedit']").each(function() {
+                $(this).show();
+            });
+
+            $("#DeliveryPrintTemplateKV").removeClass("disabled");
+            $("#DeliveryPrintTemplateKV").removeAttr("disabled");
+
+            IsNew = false;
+            CanEdit = false;
+            $("#btn_edit").show();
+            $("#btn_create").show();
+            $("#btn_save").hide();
+            $("#canceledit").hide();
+            $("#btn_cancelcreate").hide();
+            if (IsView) {
+                Preview();
+            }
+
+        }
+
+        //添加模板后 打印模板下拉框添加此模板
+        function AddToKV(newSysNo) {
+            if ($("#DeliveryPrintTemplateKV").val() != "0") {
+                $("#DeliveryPrintTemplateKV").prepend("<option value='" + newSysNo + "'>" + $("#TemplateName").val() + "</option>");
+            } else {
+                $("#DeliveryPrintTemplateKV").html("<option value='" + newSysNo + "'>" + $("#TemplateName").val() + "</option>");
+            }
+            $("#DeliveryPrintTemplateKV").find("option[value=" + newSysNo + "]").attr("selected", "true");
+            $("#TemplateSysNo").val(newSysNo);
+        }
+
+        //保存 更新或新建
+        function Save() {
+            if ($("#form1").valid()) {
+                getProgram();
+                var d = $("#form1").serialize();
+                if (IsNew) {
+                    //新建
+                    $.post('@Url.Action("DeliveryPrintTemplateCreate")', d, function(data, status) {
+                        if (!data) {
+                            ShowAlert("新增打印模板失败","warning");
+                        } else {
+                            UnEdit();
+                            SyncText();
+                            ShowAlert("新增打印模板成功","succeed");
+                            AddToKV(data);
+                        }
+                    });
+
+                } else {
+                    //更新                  
+                    $.post('@Url.Action("DeliveryPrintTemplateUpdate")', d, function(data, status) {
+                        if (!data) {
+                            ShowAlert("修改打印模板失败","warning");
+                        } else {
+                            UnEdit();
+                            SyncText();
+                            ShowAlert("修改打印模板成功","succeed");
+                            $("#DeliveryPrintTemplateKV").find("option:selected").text($("#TemplateName").val());
+                        }
+                    });
+                }
+            }
+
+        }
+
+        //初始代码
+        function CreatePrintPage() {
+            var initName = '初始源码'; //配送方式名称+模板名称 唯一
+            var imgUrl = '';
+            //if (imgUrl.length == 0) {
+            //    imgUrl = '/Theme/images/print/ttk.jpg';
+            //}
+            var fromName = '寄件人姓名';
+            var fromTel = '寄件人电话';
+            var fromAddress = '寄件人地址';
+            var fromCity = '寄件人省市区';
+
+            var toName = '收件人姓名';
+            var toTel = '收件人固定电话';
+            var toAddress = '收件人地址';
+            var toCity = '收件人省市区';
+            var toMobile = '收件人手机号码';
+            var stockOutSysNo = '出库单系统编号';
+            var printTime = '发货时间';
+            var electronicName = '电子产品';
+            var orderSysno = '订单编号';
+            var dsOrderSysno = '升舱订单号';
+            //LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+
+            LODOP.PRINT_INIT(initName);
+
+            LODOP.SET_PRINT_PAGESIZE(1, 2330, 1280, ''); //参考 23.30cm×12.80cm 和默认打印机有关，支持的最大宽度和高度
+            LODOP.SET_PRINT_STYLE("FontSize", 12); //默认12px
+            LODOP.ADD_PRINT_SETUP_BKIMG("<img border='0' src='" + imgUrl + "'>");
+            LODOP.SET_SHOW_MODE("BKIMG_LEFT", 1);
+            LODOP.SET_SHOW_MODE("BKIMG_IN_PREVIEW", 1);
+
+            LODOP.ADD_PRINT_TEXT(100, 110, 120, 20, fromName);
+            LODOP.ADD_PRINT_TEXT(140, 110, 160, 20, "商城");
+            LODOP.ADD_PRINT_TEXT(175, 110, 280, 30, fromCity);
+            LODOP.ADD_PRINT_TEXT(200, 110, 280, 30, fromAddress);
+            LODOP.ADD_PRINT_TEXT(260, 285, 120, 20, fromTel);
+            LODOP.ADD_PRINT_TEXT(100, 480, 120, 20, toName);
+            LODOP.ADD_PRINT_TEXT(175, 480, 300, 30, toCity);
+            LODOP.ADD_PRINT_TEXT(200, 480, 300, 30, toAddress);
+            LODOP.ADD_PRINT_TEXT(245, 480, 120, 20, toMobile);
+            LODOP.ADD_PRINT_TEXT(250, 670, 120, 20, toTel);
+            LODOP.ADD_PRINT_TEXT(300, 670, 120, 20, stockOutSysNo);
+            LODOP.ADD_PRINT_TEXT(302,282,120,20,printTime);
+            LODOP.ADD_PRINT_TEXT(306,484,120,20,electronicName);
+            LODOP.ADD_PRINT_TEXT(402,282,120,20,orderSysno);
+            LODOP.ADD_PRINT_TEXT(406,484,120,20,dsOrderSysno);
+            // LODOP.ADD_PRINT_HTM("0%","0%","100%","100%",document.getElementById("divbg").innerHTML);//背景色解决方案1.
+
+        }
+        //显示视图
+        function ShowView() {
+            if (!IsView) {
+                $("#div1").show();
+                $("#div2").hide();
+
+                $("#li1").addClass("menuon_white");
+                $("#li2").removeClass("menuon_white");
+                LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+                eval($("#txtcode").val());
+                if (CanEdit) {
+                    LODOP.SET_SHOW_MODE("DESIGN_IN_BROWSE", 1);
+                    LODOP.PRINT_DESIGN();
+                } else {
+                    LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+                    LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+                    LODOP.PREVIEW();
+                }
+                IsView = true;
+            }
+        }
+        //显示代码
+        function ShowCode() {
+            if (IsView) {
+                $("#div2").show();
+                $("#div1").hide();
+                //$("#div1").css("visibility", "hidden");     
+                //$("#div2").css("visibility", "visible");     
+
+                $("#li2").addClass("menuon_white");
+                $("#li1").removeClass("menuon_white");
+                getProgram();
+                IsView = false;
+            }
+        }
+        //从视图获得代码
+        function getProgram() {
+            if (IsView) {
+                LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+                $("#txtcode").val(LODOP.GET_VALUE("ProgramCodes", 0));
+            }
+        }
+        //弹窗
+        function ShowAlert(msg,iconpic) {
+            $("#div1").css("visibility", "hidden");
+            UI.Alert({
+                content: msg,
+                icon:iconpic,
+                callback: function() {
+                    $("#div1").css("visibility", "visible");
+                }
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        //验证
+        $().ready(function() {
+            $("#form1").validate({
+                rules: {
+                    // 选择框
+                    status: {
+                        required: true,
+                    },                   
+                    BackGroundImage: {
+                        maxlength: 150,
+                    },
+                    TemplateName: {
+                        required: true,
+                        maxlength: 100,
+                        remote: {
+                            url: '@Url.Action("TemplateNameCheck")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                templateName: $("#TemplateName").val(),
+                                sysNo: $("#TemplateSysNo").val(),
+                            },
+                            dataFilter: function (data, type) {
+                                if (data=="true") {
+                                    $('#forTemplateName').text('模板名称,长度1-100');
+                                } else {
+                                    $('#forTemplateName').text('模板名称已存在');
+                                }
+                                return data;
+                            }
+                        }
+                     }
+                },
+                errorPlacement: function(error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function(label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+    </script>
+}

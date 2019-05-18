@@ -1,0 +1,140 @@
+﻿@model Hyt.Model.FeAdvertItem
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "添加/修改广告内容";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $.post("/Distribution/GetDealersListByCurUser", {}, function (data) {
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#DealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                $("#DealerSysNo").val($("#hDealerSysNo").val());
+            });
+            //日期时间验证   
+            jQuery.validator.addMethod("isDate", function (value, element) {
+                var tel = /^((((1[6-9]|[2-9]\d)\d{2})-(0?[13578]|1[02])-(0?[1-9]|[12]\d|3[01]))|(((1[6-9]|[2-9]\d)\d{2})-(0?[13456789]|1[012])-(0?[1-9]|[12]\d|30))|(((1[6-9]|[2-9]\d)\d{2})-0?2-(0?[1-9]|1\d|2[0-8]))|(((1[6-9]|[2-9]\d)(0[48]|[2468][048]|[13579][26])|((16|[2468][048]|[3579][26])00))-0?2-29-)) (20|21|22|23|[0-1]?\d):[0-5]?\d:[0-5]?\d$/;
+                return this.optional(element) || (tel.test(value));
+            }, "请正确填写您的时间");
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    ImageUrl: {required: true, rangelength: [1, 200]},
+                    LinkUrl: { required: true, rangelength: [1, 200]},
+                    LinkTitle: { required: true, rangelength: [1, 100] },
+                    BeginDate: { required: true, isDate: true },
+                    EndDate: { required: true, isDate: true },
+                    OpenType: "required",
+                    DisplayOrder: { required: true, number: true },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        function addOrEdit() {
+            var from = $("#form");
+            $(from).submit();
+            if ($(from).valid()) {
+                var ajax = {
+                    url: '/Front/FeAdvertItemAddOrEditAndImg', data: from.serialize(), type: 'POST', dataType: 'json', cache: false,
+                    success: function (json, statusText) {
+                        if (json.result) {
+                            UI.Dialog.opener.tip_alert('tips_shrot tips_success', json.info);
+                            UI.Dialog.opener.refresh(1);
+                            UI.Dialog.close();
+                        } else {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.close();
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    }
+                };
+                $.ajax(ajax);
+            }
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <input type="hidden" id="hidMid" name="hidMid" value="@ViewBag.mid"/>
+          <table width="100%" border="0" cellspacing="0" cellpadding="0">
+          <tr>
+              <td width="60" class="nameright border_rnone"><span class="v_star">*</span>经销商</td>
+              <td>
+                  <select id="DealerSysNo" name="DealerSysNo">
+
+                  </select>
+                  <span id="for_DealerSysNo" class="prompt m10_l">经销商</span>
+                  <input type="hidden" id="hDealerSysNo" value="@Model.DealerSysNo" />
+              </td>
+          </tr>
+           <tr>
+                <td width="60" class="nameright border_rnone"><span class="v_star">*</span>图片路径</td>
+                <td>@Html.TextBoxFor(m => m.ImageUrl, new { @class = "input_xlarge  icon_picture" })<button class="btn btn_ht26 m5_l" type="button" onclick="DAO.Upload({config:'@(Hyt.Model.SystemPredefined.UploadConfigAlias.AdImageConfigAlias)',callback:function(data){ $('#ImageUrl').val(data[0].url); }})"><span class="icon_upload"></span><span class="m5_l">上传文件</span></button><span id="for_ImageUrl" class="prompt m10_l">图片路径,1-200字符</span></td>
+           </tr>
+           <tr>
+                <td width="60" class="nameright border_rnone"><span class="v_star">*</span>链接地址</td>
+                <td>@Html.TextBoxFor(m => m.LinkUrl, new { @class = "input_xlarge" })<span id="for_LinkUrl" class="prompt m10_l">链接地址,1-200字符</span></td>
+           </tr>
+           <tr>
+                <td width="60" class="nameright border_rnone"><span class="v_star">*</span>链接标题</td>
+                <td>@Html.TextBoxFor(m => m.LinkTitle, new { @class = "input_xlarge" })<span id="for_LinkTitle" class="prompt m10_l">链接标题,1-100字符</span></td>
+           </tr>
+           <tr>
+                <td width="60" class="nameright border_rnone"><span class="v_star">*</span>开始时间</td>
+                <td>
+                    <div class="date_btn fl" style="width: 180px">
+                        <input id="BeginDate" name="BeginDate" type="text" class="input_large" style="width: 165px" value="@if (Model.SysNo > 0) { @Model.BeginDate.ToString("yyyy-MM-dd HH:mm:ss"); }" ><button onclick="UI.Date({el:'BeginDate',maxDate: '#F{$dp.$D(\'EndDate\')}',dateFmt:'yyyy-MM-dd HH:mm:ss',disabledDates:['%y-%M-%d {%H-1}\:..\:..','%y-%M-%d {%H+1}\:..\:..']})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span id="for_BeginDate" class="prompt m10_l">开始时间</span>
+                </td>
+           </tr>
+           <tr>
+                <td width="60" class="nameright border_rnone"><span class="v_star">*</span>结束时间</td>
+                <td>
+                    <div class="date_btn fl" style="width: 180px">
+                    <input id="EndDate" name="EndDate" type="text" class="input_large" style="width: 165px" value="@if (Model.SysNo > 0) { @Model.EndDate.ToString("yyyy-MM-dd HH:mm:ss"); }" ><button onclick="UI.Date({el:'EndDate',minDate: '#F{$dp.$D(\'BeginDate\')}',dateFmt:'yyyy-MM-dd HH:mm:ss',disabledDates:['%y-%M-%d {%H-1}\:..\:..','%y-%M-%d {%H+1}\:..\:..']})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span id="for_EndDate" class="prompt m10_l">结束时间</span>
+                </td>
+           </tr>
+           <tr>
+                <td width="60" class="nameright border_rnone"><span class="v_star">*</span>打开方式</td>
+                <td>
+                <select id="OpenType" name="OpenType">
+                <option value="">请选择</option>
+                @{
+                  string sel;
+                  foreach (var dict in (IDictionary<int, string>)ViewBag.OpenList)
+                  {
+                     sel = dict.Key == @Model.OpenType ? "selected='selected'" : string.Empty;
+                     <option value="@dict.Key" @sel>@dict.Value</option>
+                     }
+                }
+                </select>
+                <span id="for_OpenType" class="prompt m10_l">打开方式</span>
+               </td>
+           </tr>
+           <tr>
+            <td width="60" class="nameright border_rnone"><span class="v_star">*</span>排序号</td>
+            <td>@Html.TextBoxFor(m => m.DisplayOrder, new { @class = "input_xlarge" })<span id="for_DisplayOrder" class="prompt m10_l">用于显示排序的数字编号</span></td>
+           </tr>
+          </table>
+   </div>
+  </div>  
+</div>
+</form>

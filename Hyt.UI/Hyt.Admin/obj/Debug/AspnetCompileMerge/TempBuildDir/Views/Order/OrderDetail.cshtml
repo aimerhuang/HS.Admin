@@ -1,0 +1,1927 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.SoOrder
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "订单详情";
+    bool IsCanEdit = ViewBag.IsCanEdit ?? false;//可操作视图
+    bool IsLocked = ViewBag.IsLocked ?? false;  //是否在任务池中被锁定
+    bool IsDisabled = ViewBag.TaskType != 0 && ((ViewBag.ExecutorSysNo == null || ViewBag.ExecutorSysNo == 0) || (ViewBag.ExecutorSysNo != ViewBag.CurrentSysNo));  //当前用户不是任务执行者，需禁用
+    @Html.PrivilegeControl(PrivilegeCode.SO1002201, ".SO1002201")
+    @Html.PrivilegeControl(PrivilegeCode.SO1003601, ".SO1003601")
+    @Html.PrivilegeControl(PrivilegeCode.SO1003501, ".SO1003501")
+
+    //太平洋保险
+    decimal ExpensesFee = 0M;
+    ExpensesFee = Hyt.BLL.Order.SoOrderOtherExpensesBo.Instance.GetExpensesFee(Model.SysNo);
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js?v=20140530")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4a129ccbf39c60f2eb556dba394e969d"></script>
+}
+<div id="tabboxs" class="@if (Request.QueryString["Dialog"] != null)
+                          {
+                              @:p10
+                               } else { @: case
+                               }
+     ">
+<div class=" head_tab">
+    <!--/大选项卡-->
+    <ul class="tabNav">
+        <li id="liBase" class="long"><a href="javascript:void(0);">销售单基本信息</a></li>
+        <li id="liOrder" class="" onclick="loadProductBtn()"><a href="javascript:void(0);">订购商品</a></li>
+        <!--待出库--部分出库-->
+        @if (IsCanEdit && (Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待创建出库单 || Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.部分创建出库单))
+        {
+            <li id="liOutStore" class=""><a href="javascript:erpLoad();">出库分配</a></li>
+        }
+        <li id="liRelatedCertificate" class=""><a href="javascript:void(0);">相关凭证</a></li>
+        <li id="liLog" class=""><a href="javascript:void(0);">操作日志</a></li>
+    </ul>
+</div>
+<div id="tabcon" class="boxs_con_c1 bg_f5">
+    <!--销售单基本信息-->
+    <div class="list" style="display: none;">
+        <!--按钮信息-->
+        <form id="form1" action="/Order/SaveOrder" method="post">
+            <input type="hidden" id="txtEditOrderModel" name="txtEditOrderModel" />
+            @if (ViewBag.ReadOnly == null)
+            {
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool" style="width: 400px;">
+                        &nbsp;
+                    </div>
+                    @if (IsLocked)
+                    {
+                        <div style="margin-bottom: 10px;" class="red_bg">
+                            <ul>
+                                <li>
+                                    提示消息：该订单已被锁定，如需操作请联系管理员解锁
+                                </li>
+                            </ul>
+                        </div>
+                    }
+                    <div class="tool">
+                        @if (IsCanEdit && Model.Status == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待审核)
+                        {
+                            <button id="btnStart" class="btn btn_blue btn_ht26  m10_r" type="button" onclick=" LoadView(true) " @if (IsDisabled) { @: disabled="disabled"
+                                                                                                                                                               }>
+                                <span class="icon icon_edit icon_white"></span><span class="fr m5_l">编辑销售单</span>
+                            </button>
+                            <button id="btnSave" class="btn btn_blue btn_ht26   m10_r SO1002201" type="button" style="display: none"><span class="icon  icon_ok icon_white"></span><span class="fr m5_l">保存更新</span></button>
+                            <button id="btnBack" class="btn btn_ht26  m10_r" type="button" style="display: none" onclick=" LoadView(false) "><span class="icon icon_share_alt"></span><span class="fr m5_l">取消</span></button>
+                            <button id="btnChecked" class="btn btn_blue btn_ht26  m10_r SO1003601" type="button" @if (IsDisabled) { @: disabled="disabled"
+                                                                                                                                                }>
+                                <span class="icon icon_thumbs_up icon_white"></span><span class="fr m5_l">审核</span>
+                            </button>
+                            <button id="btnCancel" class="btn btn_red btn_ht26  m10_r SO1003501" type="button" @if (IsDisabled) { @: disabled="disabled"
+                                                                                                                                               }>
+                                <span class="icon  icon_trash icon_white"></span><span class="fr m5_l">作废</span>
+                            </button>
+                        }
+                        @if (IsCanEdit && (Model.Status == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待创建出库单 || Model.Status == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待支付))
+                        {
+                            <button id="btnUnchecked" class="btn btn_blue btn_ht26  m10_r SO1003601" type="button" @if (IsDisabled) { @: disabled="disabled"
+                                                                                                                                                  }>
+                                <span class="icon icon_share_alt icon_white"></span><span class="fr m5_l">取消审核</span>
+                            </button>
+                        }
+                        @if (IsCanEdit)
+                        {
+                            <button class="btn btn_ht26  m10_r" type="button" onclick=" javascript:window.location.href = '/Order/OrderDetail?id=' + $('#SysNo').val(); "><span class="icon  icon_refresh"></span><span class="fr m5_l">刷新</span></button>
+                            if (IsDisabled && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SO1003601))
+                            {
+                                @:<input type="checkbox" id="force" class="force" />  <label for="force" class="force">强制执行</label>
+                                }
+                        }
+
+                        <!--
+                            <button id="btnClose" class="btn btn_ht26 " type="button" onclick="closewin()"><span class="icon  icon_share_alt"></span><span class="fr m5_l">关闭</span></button>
+                            -->
+
+                    </div>
+
+
+                </div>
+            }
+            <!--销售单详情-->
+            <div class="boxs_detail_dispay  @if (ViewBag.ReadOnly != null)
+                                                {
+                                                    @:p10_t
+                                                                 } ">
+                    <div class=" tit_dispay">
+                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                <h5>销售单</h5>
+            </div>
+            <div class="tit_con" style="display: block;">
+
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="9%" class="nameright">销售单号:</td>
+                            <td width="41%" class="borde_right">
+                                @Html.DisplayFor(m => m.SysNo)
+                                @Html.HiddenFor(m => m.SysNo)
+                                @Html.HiddenFor(m => m.CustomerSysNo)
+                                @Html.Hidden("Ticks", Model.Stamp.Ticks)
+                                @Html.HiddenFor(m => m.Status)
+                                @Html.HiddenFor(m => m.Customer.LevelSysNo)
+                                @Html.HiddenFor(m => m.TransactionSysNo)
+                                <input type="hidden" id="hidFlg" value="@ViewBag.Flg" />
+                            </td>
+                            <td width="9%" class="nameright">会员用户名:</td>
+                            <td width="41%">@Html.DisplayFor(m => m.Customer.Account)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">销售单状态:</td>
+                            <td class="borde_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单状态), Model.Status)</td>
+                            <td class="nameright">会员姓名:</td>
+                            <td>@Html.DisplayFor(m => m.Customer.Name)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">付款状态:</td>
+                            <td class="borde_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态), Model.PayStatus)</td>
+                            <td class="nameright">会员等级:</td>
+                            <td>
+                                @{
+                                    if (Model.Customer != null)
+                                    {
+                                        var crLevel = Hyt.BLL.CRM.CrCustomerLevelBo.Instance.GetCustomerLevel(Model.Customer.LevelSysNo);
+                                        if (crLevel != null)
+                                        { @Html.Raw(crLevel.LevelDescription);
+                                        }
+                                    }
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_bnone">订购时间:</td>
+                            <td class="borde_right border_bnone">
+                                @Model.CreateDate.ToString("yyyy-MM-dd")
+                            </td>
+                            <td class="nameright border_bnone">销售单来源:</td>
+                            <td class="border_bnone">
+                                @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单来源), Model.OrderSource)
+                                @if (Model.OrderSource == Hyt.Model.WorkflowStatus.OrderStatus.销售单来源.RMA下单.GetHashCode())
+                                {
+                                    var rma = Hyt.BLL.RMA.RmaBo.Instance.GetRcReturnEntity(Model.OrderSourceSysNo);
+                                    if (rma != null)
+                                    {
+                                        <span class="blue"> <a href="javascript:OpenOrderView(@rma.OrderSysNo)">(@(("原订单") + rma.OrderSysNo))</a></span>
+                                        <script language="javascript" type="text/javascript">
+                                            function OpenOrderView(id) {
+                                                UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+                                            }
+                                        </script>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                        @if (ViewBag.DsOrder != null)
+                        {
+                            <tr>
+                                <td class="nameright border_top">商城订单号:</td>
+                                <td class="border_top" colspan="3">
+                                    @Html.Raw(
+                                            string.Format("【{0}】 {1}", ((DsDealerMall)ViewBag.DealerMall).ShopName, ((DsOrder)ViewBag.DsOrder).MallOrderId)
+                                            )
+
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="tit_dispay">
+                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                <h5>收货信息</h5>
+            </div>
+            <div class="tit_con">
+                <!--查看视图_-->
+                <table id="tAddressView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+
+                            <td width="9%" class="nameright">收货人:</td>
+                            <td width="41%">
+                                @Html.DisplayFor(m => m.ReceiveAddress.Name)
+
+                            </td>
+                            <td rowspan="6">
+                                <div id="frameMap" style="width:100%; height:247px"></div>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td width="9%" class="nameright">收货手机:</td>
+                            <td class="borde_right">
+                                @Html.DisplayFor(m => m.ReceiveAddress.MobilePhoneNumber)
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="9%" class="nameright">收货电话:</td>
+                        <td>
+                            @Html.DisplayFor(m => m.ReceiveAddress.PhoneNumber)
+                    </td>
+                </tr>
+                <tr>
+                    <td width="9%" class="nameright">邮编:</td>
+                    <td>
+                        @Html.DisplayFor(m => m.ReceiveAddress.ZipCode)
+                    </td>
+                </tr>
+                <tr>
+                    <td width="9%" class="nameright">地区:</td>
+                    <td class="borde_right">
+                        @ViewBag.AddressDetatil
+                    </td>
+                </tr>
+
+                <tr>
+                    <td width="9%" class="nameright border_bnone">地址:</td>
+                    <td class=" border_bnone">
+                        @Html.DisplayFor(m => m.ReceiveAddress.StreetAddress)
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright border_bnone">身份证:</td>
+                <td class=" border_bnone">
+                    @Html.DisplayFor(m => m.ReceiveAddress.IDCardNo) &nbsp;&nbsp;&nbsp;<a href="@(string.IsNullOrEmpty(Html.DisplayFor(m => m.ReceiveAddress.IDCardImgs.Split(';')[0]).ToString()) == false ? (Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer + Html.DisplayFor(m => m.ReceiveAddress.IDCardImgs.Split(';')[0])) : "javascript:void();")" target="_Blank" style="text-decoration: underline;">正面</a>&nbsp;&nbsp;&nbsp;<a href="@(string.IsNullOrEmpty(Html.DisplayFor(m => m.ReceiveAddress.IDCardImgs.Split(';')[0]).ToString()) == false ? (Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer + Html.DisplayFor(m => m.ReceiveAddress.IDCardImgs.Split(';')[1])) : "javascript:void();")" target="_Blank" style="text-decoration: underline;">反面</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!--编辑视图-->
+    <table id="tAddressEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+        <tbody>
+            <tr>
+                <td widths="9%" class="nameright"><span class="v_star">*</span>可选地址</td>
+                <td width="41%" class="borde_right">
+                    <select id="customerReceiveAddress" name="ReceiveAddressSysNo" class=" wid">
+                        <option value="0">默认地址</option>
+                    </select>
+                </td>
+                <td width="9%" class="nameright"><span class="v_star">*</span>收货人</td>
+                <td width="41%">
+                    @Html.HiddenFor(m => m.ReceiveAddress.SysNo)
+                    @Html.TextBoxFor(m => m.ReceiveAddress.Name, new { @class = "input_xlarge m10_r", maxlength = 50 })
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright"><span class="v_star">*</span>收货手机</td>
+                <td width="41%" class="borde_right">
+                    @Html.TextBoxFor(m => m.ReceiveAddress.MobilePhoneNumber, new { @class = "input_xlarge m10_r", maxlength = 50 })
+                </td>
+                <td width="9%" class="nameright">收货电话</td>
+                <td width="41%">
+                    @Html.TextBoxFor(m => m.ReceiveAddress.PhoneNumber, new { @class = "input_xlarge m10_r", maxlength = 15 })
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright"><span class="v_star">*</span>地区</td>
+                <td width="41%" class="borde_right">
+                    <select id="dpdCountry" style="width: 116px; margin-right: 10px;" name="dpdCountry" onchange="javascript:AreaChange(false)"></select>
+                    <span class="c6">国家</span>
+                    <select id="dpdProvince" style="width: 116px; margin-right: 10px;" name="dpdProvince" onchange="javascript:AreaChange(false)"></select>
+                    <span class="c6">省</span>
+                    <select id="dpdCity" class="c3" style="width: 116px; margin-right: 10px;" name="dpdCity" onchange="javascript:AreaChange(false)"></select><span class="c6">市/州</span>
+                    <select id="dpdArea" name="dpdArea" class="c3 " style="width: 116px;" name="dpdArea" onchange="javascript:AreaChange(true)"></select>
+                    @Html.HiddenFor(m => m.ReceiveAddress.AreaSysNo)
+                </td>
+                <td width="9%" class="nameright">邮编</td>
+                <td width="41%">
+                    @Html.TextBoxFor(m => m.ReceiveAddress.ZipCode, new { @class = "input_xlarge m10_r", maxlength = 10 })
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright"><span class="v_star">*</span>地址</td>
+                <td colspan="3">
+                    @Html.TextBoxFor(m => m.ReceiveAddress.StreetAddress, new { @class = "input_xxlarge m10_r", maxlength = 100 })
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright">身份证</td>
+                <td colspan="3">
+                    @Html.TextBoxFor(m => m.ReceiveAddress.IDCardNo, new { @class = "input_xlarge m10_r", maxlength = 100 })
+                </td>
+            </tr>
+            <tr style="display:none;">
+                <td width="9%" class="nameright"><span class="v_star">*</span>身份证正反面</td>
+                <td colspan="3">
+                    @Html.TextBoxFor(m => m.ReceiveAddress.IDCardImgs, new { @class = "input_xlarge m10_r", maxlength = 100 })
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="tit_dispay">
+    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+    <h5>配送信息</h5>
+</div>
+<div class="tit_con" style="display: block;">
+    <!--查看视图-->
+    <table id="tDeliveryView" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tbody>
+            <tr>
+                <td width="9%" class="nameright">配送方式:</td>
+                <td class="borde_right" colspan="3">
+
+                    <span id="spanDeliveryType">
+                        @{
+                            var DeliveryType = Hyt.BLL.Order.SoOrderBo.Instance.GetDeliveryType(Model.DeliveryTypeSysNo);
+                            if (DeliveryType != null)
+                            {
+                                <text>@DeliveryType.DeliveryTypeName</text>
+                            }
+                        }
+                    </span>
+                </td>
+
+            </tr>
+            <tr>
+                <td width="9%" class="nameright">仓库:</td>
+                <td width="41%" >
+                    <span id="spanCurrectWarehouseName">@ViewBag.DefaultWarehouseName</span>
+                </td>
+                <td width="9%" class="nameright">太平洋保险(是否参保):</td>
+                <td width="20%">
+                    @if (ExpensesFee == 1)
+                    {
+                        <text>是</text>
+                    }
+                    else
+                    {
+                        <text>否</text>
+                    }
+                </td>
+            </tr>
+
+            <tr>
+                <td width="9%" class="nameright">配送时间段:</td>
+                <td width="41%" class="borde_right">
+
+                    <span id="spanDeliveryTime"></span>
+                </td>
+                <td width="9%" class="nameright">送货前联系:</td>
+                <td width="20%">
+                    @if (Model.ContactBeforeDelivery == 1)
+                    {
+                        <text>是</text>
+                    }
+                    else
+                    {
+                        <text>否</text>
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright">配送备注:</td>
+                <td width="91%" colspan="3">
+                    @Html.DisplayFor(m => m.DeliveryRemarks)
+                </td>
+            </tr>
+
+
+            <tr>
+                <td width="9%" class="nameright">会员留言:</td>
+                <td width="92%" colspan="3">@Html.DisplayFor(m => m.CustomerMessage)</td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright border_bnone">对内备注:</td>
+                <td width="92%" colspan="3" class=" border_bnone">@Html.DisplayFor(m => m.InternalRemarks)</td>
+            </tr>
+        </tbody>
+    </table>
+    <!--编辑视图-->
+    <table id="tDeliveryEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+        <tbody>
+        
+            <tr>
+                <td width="9%" class="nameright"><span class="v_star">*</span>配送方式</td>
+                <td class="borde_right" colspan="3">
+                    @Html.Hidden("DefaultDeliveryTypeSysNo", Model.DeliveryTypeSysNo)
+                    <select id="DeliveryTypeSysNo" name="DeliveryTypeSysNo" class="wid m10_r" onchange="DeliveryTypeChange(this.value,@Model.PayTypeSysNo)"></select>
+                    <span id="spanWarn" class="v_star" style="display:none">（当前地址不支持配送）</span>
+                </td>
+
+            </tr>
+
+
+            <tr>
+                <td width="9%" class="nameright"><span class="v_star">*</span>仓库</td>
+                <td width="92%" colspan="3">
+                    @Html.HiddenFor(m => m.DefaultWarehouseSysNo)
+                    <input id="DefaultWarehouseName" name="DefaultWarehouseName" type="text" class="input_xlarge" contenteditable="false" value="@ViewBag.DefaultWarehouseName" onfocus="this.blur()" readonly="readonly">
+                    <button id="btnSelectWarehouse" class="btn btn_ht26" type="button"><span class="icon_search"></span></button>
+                </td>
+            </tr>
+
+        
+
+            <tr>
+                <td width="9%" class="nameright">配送时间段</td>
+                <td width="41%" class="borde_right">
+                    @Html.Hidden("DefaultDeliveryTime", Model.DeliveryTime)
+                    <select id="DeliveryTime" name="DeliveryTime" class="wid">
+                        <option value="一周之内全天可送达" selected="selected">一周之内全天可送达</option>
+                        <option value="周一至周五送货">周一至周五送货</option>
+                        <option value="双休日及公众假期送货">双休日及公众假期送货</option>
+                    </select>
+
+                </td>
+                <td width="9%" class="nameright">送货前联系</td>
+                <td width="41%">
+                    @Html.Hidden("DefaultContactBeforeDelivery", Model.ContactBeforeDelivery)
+                    <input type="radio" value="1" name="ContactBeforeDelivery" id="contact_yes" /><label for="contact_yes" class="m10_r"> 是</label>
+                    <input type="radio" value="0" name="ContactBeforeDelivery" id="contact_no" /><label for="contact_no"> 否</label>
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright">配送备注</td>
+                <td width="92%" colspan="3">
+                    @Html.TextBoxFor(m => m.DeliveryRemarks, new { @class = "input_xxlarge", maxlength = 200 })
+                </td>
+            </tr>
+
+
+            <tr>
+                <td width="9%" class="nameright">会员留言</td>
+                <td width="92%" colspan="3">
+                    @Html.TextBoxFor(m => m.CustomerMessage, new { @class = "input_xxlarge", maxlength = 200 })
+
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright">对内备注</td>
+                <td width="92%" colspan="3">
+                    @Html.TextBoxFor(m => m.InternalRemarks, new { @class = "input_xxlarge", maxlength = 200 })
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="tit_dispay">
+    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+    <h5>支付方式</h5>
+</div>
+<div class="tit_con" style="display: block;">
+    <table id="tPayView" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tbody>
+            <tr>
+
+                <td width="9%" class="nameright">支付方式:</td>
+                <td>
+                    <span id="spanPayType">
+                        @{
+                            var payT = Hyt.BLL.Basic.PaymentTypeBo.Instance.GetEntity(Model.PayTypeSysNo);
+                            if (payT != null)
+                            {
+                                <text>@payT.PaymentName</text>
+                            }
+                        }
+                    </span>
+                </td>
+
+                <td width="9%" class="nameright border_bnone">优惠券:</td>
+                <td width="41%" class="borde_right border_bnone" id="tdCouponSysName"></td>
+
+            </tr>
+        </tbody>
+    </table>
+    <table id="tPayEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+        <tbody>
+            <tr>
+                <td width="9%" class="nameright"><span class="v_star">*</span>支付方式</td>
+                <td width="41%">
+                    @Html.Hidden("DefaultPayTypeSysNo", Model.PayTypeSysNo)
+                    <select id="PayTypeSysNo" name="PayTypeSysNo" class="wid m10_r">
+                        @if (payT != null)
+                        {
+                            <option value="@payT.SysNo" selected>@payT.PaymentName</option>
+                        }
+                    </select>
+                </td>
+                <td width="9%" class="nameright">优惠券</td>
+                <td width="41%" class="borde_right" colspan="3">
+                    <select class="wid" name="CouponSysNo" id="ddlCoupon" onchange="RefreshCart(true)">
+                        <option value="">请选择</option>
+                    </select>
+                    <span id="spanDesc" class="tagfull-inner" style="display:none"></span>
+                </td>
+
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+<div class="tit_dispay">
+    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+    <h5>发票信息</h5>
+</div>
+<div class="tit_con" style="display: block;">
+    <!--查看视图-->
+    <table id="tInvoiceView" width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tbody>
+            <tr>
+                <td width="9%" class="nameright">发票:</td>
+                <td width="41%" class="borde_right">
+                    @if (Model.InvoiceSysNo == 0)
+                    {
+                        <text>无</text>
+                    }
+                    else
+                    {
+                        var invoiceType = Hyt.BLL.Finance.FnInvoiceBo.Instance.GetFnInvoiceType(Model.OrderInvoice.InvoiceTypeSysNo);
+                        if (invoiceType != null)
+                        {
+                            <text>@invoiceType.Name</text>
+                        }
+                    }
+                </td>
+                <td width="9%" class="nameright">发票抬头:</td>
+                <td width="41%">
+                    @Html.DisplayFor(m => m.OrderInvoice.InvoiceTitle)
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright border_bnone">发票备注:</td>
+                <td width="92%" colspan="3" class=" border_bnone">
+                    @Html.DisplayFor(m => m.OrderInvoice.InvoiceRemarks)
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <!--编辑视图-->
+    <table id="tInvoiceEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+        <tbody>
+            <tr>
+                <td width="9%" class="nameright">发票</td>
+                <td width="41%" class="borde_right">
+                    @{
+                        List<SelectListItem> InvoiceTypeList = new List<SelectListItem>();
+                        if (ViewBag.InvoiceTypeList != null)
+                        {
+                            InvoiceTypeList = ViewBag.InvoiceTypeList;
+                        }
+                    }
+                    @Html.DropDownListFor(m => m.OrderInvoice.InvoiceTypeSysNo, InvoiceTypeList, new { @class = "wid", })
+                </td>
+                <td width="9%" class="nameright">发票抬头</td>
+                <td width="41%">
+                    @Html.TextBoxFor(m => m.OrderInvoice.InvoiceTitle, new { @class = "input_xlarge m10_r", maxlength = 100 })
+                </td>
+            </tr>
+            <tr>
+                <td width="9%" class="nameright">发票备注</td>
+                <td width="92%" colspan="3">
+
+                    @Html.TextBoxFor(m => m.OrderInvoice.InvoiceRemarks, new { @class = "input_xxlarge m10_r", maxlength = 200 })
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+<div class="tit_dispay">
+    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+    <h5>金额汇总</h5>
+</div>
+<div class="tit_con" style="display: block;">
+
+    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+        <tbody>
+            <tr>
+                <td width="9%" class="nameright">商品总额:</td>
+                <td width="92%" colspan="3">
+                    @Html.HiddenFor(m => m.ProductAmount)
+                    <span id="spanProdcutAmount">
+                        &yen;@Model.ProductAmount.ToString("N")
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">税费:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.TaxFee)
+                    <span id="spanTaxFee">
+                        &yen;@Model.TaxFee.ToString("N")
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">运费:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.FreightAmount)
+                    <span id="spanFreight">
+                        &yen;@Model.FreightAmount.ToString("N")
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">太平洋保险:</td>
+                <td colspan="3">
+                    <input name="expensesFee" value="@ExpensesFee" type="hidden">
+                    <span id="expensesFee">
+                        &yen;@ExpensesFee.ToString("N")
+                    </span>
+                </td>
+            </tr>
+            @*<tr>
+                <td class="nameright">折扣金额:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.ProductDiscountAmount)
+                    <span id="spanDiscountAmount">
+                        &yen;@((Model.ProductDiscountAmount + Model.OrderDiscountAmount).ToString("N"))
+                    </span>
+                </td>
+            </tr>*@
+            <tr>
+                <td class="nameright">运费调价金额:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.FreightChangeAmount)
+                    <span id="spanFreightDiscountAmount">
+                        &yen;@Model.FreightChangeAmount.ToString("N")
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">优惠劵金额:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.CouponAmount)
+                    <span id="spanCouponAmount">
+                        &yen;@((Model.CouponAmount).ToString("N"))
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">商品优惠金额:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.ProductDiscountAmount)
+                    <span id="spanProductDiscountAmount">
+                        &yen;@((Model.ProductDiscountAmount).ToString("N"))
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">订单优惠金额:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.OrderDiscountAmount)
+                    <span id="spanOrderDiscountAmount">
+                        &yen;@((Model.OrderDiscountAmount).ToString("N"))
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright">调价金额:</td>
+                <td colspan="3">
+                    @Html.HiddenFor(m => m.ProductChangeAmount)
+                    <span id="spanProductChangeAmount">
+                        &yen;@Model.ProductChangeAmount.ToString("N")
+                    </span>
+                </td>
+            </tr>
+            <tr>
+                <td class="nameright border_bnone">合计:</td>
+                <td colspan="3" class=" border_bnone">
+                    @Html.HiddenFor(m => m.CashPay)
+                    <span id="spanCashPay">
+                        &yen;@Model.CashPay.ToString("N")
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+</div>
+        </form>
+</div>
+<!--商品订购信息-->
+<div class="list" style="display: none;" id="divEditOrder">
+    @{Html.RenderPartial("CartHtmlForEditOrder", ViewData["EditOrderModel"]);}
+</div>
+<!--出库分配-->
+@if (IsCanEdit && (Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待创建出库单 || Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.部分创建出库单))
+{
+    <div class="list" style="display: none;">
+        @{Html.RenderPartial("_OutStock", ViewData["OrderItems"]);}
+    </div>
+}
+<!--相关凭证-->
+<div class="list" style="display: none;">
+    @*    @{Html.RenderPartial("_AssociatedCredentials", ViewData["WhStockOut"]);}*@
+    @{Html.RenderPartial("_AssociatedCredentials", Model);}
+</div>
+<div class="list" style="display: none;">
+    @{Html.RenderPartial("_OrderLog", ViewData["LogList"]);}
+</div>
+    </div>
+<!--数据分页-->
+</div>
+<!--弹出选择赠品-->
+<div id="tbPromotionGift" class="boxs_con_c1" style="display: none; vertical-align: top; height: 400px; overflow: auto">
+    <!--工具条开始-->
+    <div class="boxs_tool">
+
+        <!--搜索开始-->
+        <div class="right_tool clearfix">
+            <div class="search_btn m10_l fl">
+                <input name="pName" type="text" id="pName" class="input_ht28" value="后台显示名称(商品编号)">
+                <button class="btn btn_ht28 wd28" id="searchProductBtn" title="搜索"><span class="icon_search"></span></button>
+            </div>
+        </div>
+        <!--搜索结束-->
+    </div>
+    <!--工具条结束-->
+    <div class="boxs_listtabel">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th width="120px" class="p10_lr">商品编号</th>
+                    <th width="200px" class="p10_lr">后台显示名称</th>
+                    <th width="68px" class="p10_lr">加购价</th>
+                    <th width="90">操作</th>
+                </tr>
+            </thead>
+            <tbody id="tbData"></tbody>
+            <tbody id="tbNoData" style="display: none">
+                <tr>
+                    <td class='align_l p10_l bgr_eb' colspan='4'>暂无数据。</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <script type="text/javascript">
+        //搜索赠品
+        $("#searchProductBtn").click(function () {
+            var productName = $(this).prev().val();
+            var tb = $(this).parents().find("#tbData");
+            var notb = $(this).parents().find("#tbNoData");
+            tb.show();
+            notb.hide();
+            if (productName) {
+                if (productName == '' || productName == '后台显示名称(商品编号)') {
+                    tb.find("tr").show();
+                } else {
+                    var obj = [];
+                    tb.find(".search").each(function (i) {
+                        if ($(this).text().toLowerCase().indexOf(productName.toLowerCase()) >= 0 || $(this).text().toLowerCase().indexOf(productName.toLowerCase()) >= 0) {
+                            obj.push($(this).parent());
+                        }
+                    });
+                    if (obj.length > 0) {
+                        tb.find("tr").hide();
+                        $.each(obj, function (idx, item) {
+                            item.show();
+                        });
+                    } else {
+                        tb.hide();
+                        notb.show();
+                    }
+                }
+            }
+            return false;
+        });
+    </script>
+</div>
+
+<input type="hidden" id="cancelStockoutText" value="@ViewBag.CancelOrderText" />
+<input type="hidden" id="OrderSysNo" value="@Model.SysNo" />
+@Html.Hidden("hide_Name", Model.ReceiveAddress.Name)
+@Html.Hidden("hide_MobilePhoneNumber", Model.ReceiveAddress.MobilePhoneNumber)
+@Html.Hidden("hide_PhoneNumber", Model.ReceiveAddress.PhoneNumber)
+@Html.Hidden("hide_ZipCode", Model.ReceiveAddress.ZipCode)
+@Html.Hidden("hide_StreetAddress", Model.ReceiveAddress.StreetAddress)
+@section FooterJs{
+    <script type="text/javascript">
+    //订单修改 购物车相关js begin
+
+    //添加商品到购物车
+    function AddProductToCart(products){
+
+        $.ajax({
+            url: '/Order/EditOrderAddProduct',
+            type: 'post',
+            cache: false,
+            data: { editOrderModel: $("#txtEditOrderModel").val(), products: JSON.stringify(products) },
+            dataType: 'html',
+            success: function (html) {
+                showEditOrder(html);
+            }
+        });
+
+    }
+
+    //刷新购物车
+    function RefreshCart(isUpdata)
+    {
+        var v_DeliveryTypeSysNo=null;
+        if($("#DeliveryTypeSysNo").val()!="0")
+        {
+            v_DeliveryTypeSysNo=$("#DeliveryTypeSysNo").val();
+        }
+        var v_AreaNo=null;
+        if($("#dpdArea").val()!="-1")
+        {
+            v_AreaNo=$("#dpdArea").val();
+        }
+        $.ajax({
+            url: '/Order/EditOrderChangeCouponCode',
+            type: 'post',
+            cache: false,
+            data: {
+                editOrderModel: $("#txtEditOrderModel").val(),
+                newcouponCode: $("#ddlCoupon").val(),
+                expensesAmount:$('input[name="expensesFee"]').val(),//获取太平洋保险费用
+                newDeliveryTypeSysNo:v_DeliveryTypeSysNo,
+                newAreaNo:v_AreaNo,
+                isUpdataDB:isUpdata
+            },
+            dataType: 'html',
+            success: function (html) {
+                showEditOrder(html);
+            }
+        });
+    }
+
+    //点击修改按钮
+    function editCart(btn){
+        var tr = $(btn).parent().parent();
+        var tdQuantity = tr.find(".tdQuantity");
+        var tdChangeAmount = tr.find(".tdChangeAmount");
+        if(tdQuantity.length > 0){
+            tdQuantity.find("input").show().val(tdQuantity.find("span").text());
+            tdQuantity.find("span").hide();
+        }
+        if(tdChangeAmount.length > 0){
+            tdChangeAmount.find("input").show().val(tdChangeAmount.find("span").text());
+            tdChangeAmount.find("span").hide();
+        }
+        var buttons = $(btn).parent().find("button");
+        buttons[0].style.display = "none";
+        buttons[1].style.display = "";
+        buttons[2].style.display = "";
+    }
+    //删除商品 或者 删除组
+    function delCart(btn){
+        var groupcode = $(btn).attr("groupcode") || "";
+        var promotionsysno = $(btn).attr("promotionsysno") || "";
+        var productsysno = $(btn).attr("productsysno") || 0;
+        UI.Confirm({
+            content: "确定要删除此商品吗?",
+            ok: function() {
+                $.ajax({
+                    url: '/Order/EditOrderRemoveProduct',
+                    type: 'post',
+                    cache: false,
+                    data: { editOrderModel: $("#txtEditOrderModel").val(), productSysNo: productsysno, groupCode: groupcode, promotionSysNo: promotionsysno },
+                    dataType: 'html',
+                    success: function(html) {
+                        showEditOrder(html);
+                    }
+                });
+            },
+            cancel: function() {
+            }
+        });
+    }
+
+    //保存修改商品数量调 或者 保存修改组商品数量
+    function SaveEdit(btn){
+        var WarehouseSysNo = $("#DefaultWarehouseSysNo").val();
+        if(WarehouseSysNo == ""){
+            alert("请选择仓库");
+        }else{
+            var groupcode = $(btn).attr("groupcode") || "";
+            var promotionsysno = $(btn).attr("promotionsysno") || "";
+            var productsysno = $(btn).attr("productsysno") || 0;
+            var tr = $(btn).parent().parent();
+            var quantity = Number(tr.find(".tdQuantity input").val()) || 0;
+            var changeAmount = Number(tr.find(".tdChangeAmount input").val()) || 0;
+
+            if(quantity <= 0){
+                tips('tips_warning', '数量不允许小于零！')
+                return;
+            }
+
+            var o_salesprice=$(btn).attr("salesprice");
+            if(o_salesprice!=null)
+            {
+                var salesprice = Number(o_salesprice) || 0;
+                if(Math.abs(changeAmount)>salesprice)
+                {
+                    tips('tips_warning', '调价不能超过购买价格！')
+                    return;
+                }
+            }
+
+            $.ajax({
+                url: '/Order/EditOrderUpdateQuantity',
+                type: 'post',
+                cache: false,
+                data: { editOrderModel: $("#txtEditOrderModel").val(), groupCode: groupcode, promotionSysNo: promotionsysno,quantity:quantity,productsysno:productsysno,changeAmount:changeAmount},
+                dataType: 'html',
+                success: function(html) {
+                    showEditOrder(html);
+                    tips('tips_warning', '您修改了商品明细！请点击“销售单明细信息”下面的“保存更新”按钮。')
+                }
+            });
+
+
+            //var json = JSON.stringify({ ProductSysNo: productsysno, WarehouseSysNo: WarehouseSysNo,Quantity: quantity});
+            //$.ajax({
+            //    url: '/Order/JudgeOrderProductStock',
+            //    type: 'POST',
+            //    cache: false,
+            //    data: json,
+            //    contentType: 'application/json; charset=utf-8',
+            //    success: function (data) {
+            //        if(data.Status){
+            //            $.ajax({
+            //                url: '/Order/EditOrderUpdateQuantity',
+            //                type: 'post',
+            //                cache: false,
+            //                data: { editOrderModel: $("#txtEditOrderModel").val(), groupCode: groupcode, promotionSysNo: promotionsysno,quantity:quantity,productsysno:productsysno,changeAmount:changeAmount},
+            //                dataType: 'html',
+            //                success: function(html) {
+            //                    showEditOrder(html);
+            //                    tips('tips_warning', '您修改了商品明细！请点击“销售单明细信息”下面的“保存更新”按钮。')
+            //                }
+            //            });
+            //        }else{
+            //            alert(data.Message);
+            //        }
+            //    }
+            //});
+        }
+    }
+
+    //取消修改
+    function cancelEdit(btn){
+        var tr = $(btn).parent().parent();
+        var tdQuantity = tr.find(".tdQuantity");
+        var tdChangeAmount = tr.find(".tdChangeAmount");
+        if(tdQuantity.length > 0){
+            tdQuantity.find("input").hide();
+            tdQuantity.find("span").show();
+        }
+        if(tdChangeAmount.length > 0){
+            tdChangeAmount.find("input").hide();
+            tdChangeAmount.find("span").show();
+        }
+        var buttons = $(btn).parent().find("button");
+        buttons[0].style.display = "";
+        buttons[1].style.display = "none";
+        buttons[2].style.display = "none";
+    }
+    //刷新页面数据
+    function showEditOrder(html){
+        //优惠券列表绑定
+        $("#ddlCoupon").html($("#ddlValidCoupon").html());
+        $("#txtEditOrderModel").val($("#divEditOrderModel").text());
+        $("#divEditOrder").html(html);
+        $("#spanProdcutAmount").html($("#divPrice").attr("ProductAmount"));
+        $("#ProductAmount").val($("#divPrice").attr("ProductAmount"));
+        $("#spanTaxFee").html($("#divPrice").attr("TaxFee"));
+        $("#TaxFee").val($("#divPrice").attr("TaxFee"));
+        $("#spanFreight").html($("#divPrice").attr("FreightAmount"));
+        $("#Freight").val($("#divPrice").attr("FreightAmount"));
+        $("#spanCouponAmount").html($("#divPrice").attr("CouponAmount"));
+        $("#CouponAmount").val($("#divPrice").attr("CouponAmount"));
+        $("#spanProductDiscountAmount").html($("#divPrice").attr("ProductDiscountAmount"));
+        $("#ProductDiscountAmount").val($("#divPrice").attr("ProductDiscountAmount"));
+        $("#spanOrderDiscountAmount").html($("#divPrice").attr("OrderDiscountAmount"));
+        $("#OrderDiscountAmount").val($("#divPrice").attr("OrderDiscountAmount"));
+        $("#spanProductChangeAmount").html($("#divPrice").attr("ProductChangeAmount"));
+        $("#ProductChangeAmount").val($("#divPrice").attr("ProductChangeAmount"));
+        $("#spanCashPay").html($("#divPrice").attr("CashPay"));
+        $("#CashPay").val($("#divPrice").attr("CashPay"));
+
+        var selectitem = $("#ddlCoupon").find("option:selected");//显示优惠券描述
+        $("#spanDesc").hide();
+        if (selectitem.val() != "" && selectitem.attr("title") != "" && selectitem.attr("title") !=undefined) {
+            $("#spanDesc").show();
+            $("#spanDesc").html(selectitem.attr("title"));
+        }
+        //CalculateFreight();
+        GetOrderStamp();
+    }
+    //计算运费
+    function CalculateFreight()
+    {
+        var data={};
+        data.productSysNoAndNumber="";
+
+        $("#tbItems").find("tr").each(function(){
+            var json=eval("("+$(this).attr("json")+")");
+            if(data.productSysNoAndNumber!="")
+                data.productSysNoAndNumber+=",";
+            data.productSysNoAndNumber+=json.ProductSysNo+'_'+$(this).find("td.tdQuantity").find("span").text();
+        });
+        data.deliveryTypeSysNo=$("#DeliveryTypeSysNo").val();
+        data.warehouseSysNo=$("#DefaultWarehouseSysNo").val();
+        data.asreaSysNo=$("#dpdCity").val();
+        $.post('/Ajax/CalculateFreight',data,function(result){
+            if(result.Freigh>=0){
+
+                $("#span_Freight").html(result.Freigh);
+                $("#spanFreight").html("&yen;" + result.Freigh);
+                $("#FreightAmount").val($("#span_Freight").html());
+
+                var CashPay = $("#ProductAmount").val() * 1.00 - $("#CouponAmount").val() * 1.00 - $("#ProductDiscountAmount").val() * 1.00 - $("#FreightDiscountAmount").val() * 1.00 + $("#FreightAmount").val() * 1.00 + $("#ProductChangeAmount").val() * 1.00;
+
+                $("#spanCashPay").html("&yen;" + CashPay);
+                $("#CashPay").val(CashPay);
+
+                $("#span_JiFen").html(CashPay - $("#ProductChangeAmount").val() * 1.00);
+                $("#span_TotalAmount").html($("#span_JiFen").html());
+
+            }else{
+                $("#FreightAmount").val(-1);
+            }
+
+        });
+    }
+    //刷新时间搓
+    function GetOrderStamp()
+    {
+        $.get('/Order/GetOrderStamp', {sysNo:$("#SysNo").val()},function(result)
+        {
+            if(result.Status)
+            {
+                $("#Ticks").val(result.Message)
+
+            }
+        });
+    }
+    //选择赠品 2013-9-23 创建 by ywb
+    var giftDialog;
+    function choiceGift(btn) {
+
+        var choicedProductSysNo = 0;
+        var span = $(btn).prev();
+        if (span.length > 0) {
+            choicedProductSysNo = span.attr("productsysno") || 0;
+        }
+        var gifts = JSON.parse($(btn).attr("json").replaceAll("{YH}", "\""));
+        choiceGiftDialog(gifts, function(gift) {
+            $.ajax({
+                url: '/Order/ChangeGift',
+                type: 'post',
+                cache: false,
+                data: { editOrderModel: $("#txtEditOrderModel").val(), delGift: choicedProductSysNo , addGift: gift.ProductSysNo, promotionSysNo: gift.PromotionSysNo },
+                dataType: 'html',
+                success: function(html) {
+                    showEditOrder(html);
+                    giftDialog.close();
+                }
+            });
+
+        });
+
+    }
+    //显示选择赠品对话框
+    function choiceGiftDialog(gifts, callback) {
+
+        var template = "<tr {0}>"
+            + "<td class='search p10_lr '>{1}</td>"
+            + "<td class='search align_l p10_lr '>{2}</td>"
+            + "<td class='align_r p10_lr red'>{3}</td>"
+            + "<td class='align_c p10_lr'>"
+            + "<button class='btn btn_ht26' json=\"{4}\"><span class='icon_search'></span><span class='m5_l'>选择</span></button>"
+            + "</td>"
+            + "</tr>";
+        var content = "";
+        if (gifts.length > 0) {
+            $(gifts).each(function (i) {
+                var rowClass = i % 2 == 0 ? "" : "class='stag_color'";
+                content += template.format(rowClass,this.ProductErpCode, this.ProductName, this.PurchasePrice, JSON.stringify(this).replaceAll("\"", "{YH}"));
+            });
+
+        } else {
+            content = "<tr>"
+                + "<td class='align_l p10_l' colspan='4'>暂无商品</td>"
+                + "</tr>";
+        }
+        $("#tbData").html(content);
+        $("#tbData button").click(function() { callback(JSON.parse($(this).attr("json").replaceAll("{YH}", "\""))); });
+
+        giftDialog = UI.DialogBox({ title: "选择赠品", width: '491px', content: document.getElementById('tbPromotionGift'), padding: '10px', footerClass: 'aui_none' });
+    }
+    //订单修改 购物车相关js end
+    function closewin()
+    {
+        art.dialog.close();
+    }
+    $(document).ready(function (e) {
+        $("#tabboxs").ajaxLoadingMask();
+        //优惠券列表绑定
+        $("#ddlCoupon").html($("#ddlValidCoupon").html());
+        $('.tj').css("display","none");
+        var flg=$("#hidFlg").val();
+        if(flg=="1")
+        {
+            tips('tips_success','操作成功！')
+        }
+        else if(flg=="-1")
+        {
+            tips('tips_wrong','数据保存失败！')
+        }
+        else if(flg=="-2")
+        {
+            tips('tips_warning','订单数据已经被其他人员修改，请先刷新订单数据！')
+        }
+        //tab选项卡
+        $("#tabboxs").tab({ tabContentObj: "#tabcon" });
+        $("#tabboxs").tab({ tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_p10", tabContent: ".list2" });
+        $("#pName").defaultValue("后台显示名称(商品编号)");
+
+        //表格数据隐藏显示
+        var clickbox = $(".tit_dispay");
+        var btnup = clickbox.children(".more10r").children("span");
+        btnup.toggle(
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").hide();
+                $(this).removeClass("btn_tableup").addClass("btn_tabledown");
+            },
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").show();
+                $(this).removeClass("btn_tabledown").addClass("btn_tableup");
+            }
+        );
+        //绑定验证设置
+        LoadVerificationSetting();
+        $("#btnSelectWarehouse").click(function(){
+            UI.DialogOpen('/Order/SelectWarehouse?defaultWarehouse='+$("#DefaultWarehouseSysNo").val()+'&DeliveryTypeSysNo='+$("#DeliveryTypeSysNo").val()+"&CityID="+$("#dpdCity").val(), {
+                title: '选择仓库',
+                ok: function () {
+                    var iframe = this.iframe.contentWindow;
+                    if (!iframe.document.body) {
+                        alert('iframe还没加载完毕呢')
+                        return false;
+                    };
+                    var DefaultWarehouseName = iframe.document.getElementById('WarehouseName').value;
+                    var DefaultWarehouseSysNo = iframe.document.getElementById('SysNo').value;
+                    //判断订单商品库存是否存在 王耀发 2015-12-25 创建
+                    var json = JSON.stringify({ OrderSysNo: $("#OrderSysNo").val(), WarehouseSysNo: DefaultWarehouseSysNo });
+                    $.ajax({
+                        url: '/Order/JudgeOrderStock',
+                        type: 'POST',
+                        cache: false,
+                        data: json,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if(data.Status){
+                                $("#DefaultWarehouseName").val(DefaultWarehouseName);
+                                $("#DefaultWarehouseSysNo").val(DefaultWarehouseSysNo);
+                                //$("#DefaultWarehouseName").val(iframe.document.getElementById('WarehouseName').value);
+                                //$("#DefaultWarehouseSysNo").val(iframe.document.getElementById('SysNo').value);
+                                //CalculateFreight();
+                            }else{
+                                alert(data.Message);
+                            }
+                        }
+                    });
+                    return true;
+                },
+                cancel: true
+            });
+        });
+        //审核
+        $("#btnChecked").click(function(){
+            //缺货订单，无出库仓库的不允许审核通过
+            if($("#spanCurrectWarehouseName").text()=="")
+            {
+                tips('tips_warning','请先选择仓库并保存！');
+                return;
+            }
+            UI.Confirm({
+                content: "确认审核通过?",
+                ok: function () {
+                    if($("#tbItems tr").length>0)
+                    {
+                        $.post('/Order/AuditOrder',{OrderID:$("#SysNo").val(),Ticks:$("#Ticks").val()}, function(data) {
+                            if(data.Status)
+                            {
+                                successandrefresh();
+                            }
+                            else
+                            {
+                                tips('tips_warning',data.Message);
+                            }
+                        });
+                    }
+                    else
+                    {
+                        tips('tips_warning','商品列表不能为空！')
+                    }
+
+                },
+                cancel: true
+            });
+        });
+        //作废
+        $("#btnCancel").click(function() {
+            var html = '<div>'
+                 + '<div style="float: left; padding: 22px 7px 0 0; "><span class="v_star">*</span>作废原因</div>'
+                 + '<div style="float: left">'
+                 + '<textarea style="height: 60px; width: 205px"></textarea>'
+                 + '</div>'
+                 + '<div style="clear: both;"/>'
+                 + '</div>'
+                 + '<div style="height:20px;padding-left:52px">'
+                 + '<span class="prompt m10_l" name="tips">作废原因必须输入</span>'
+                 + '</div>'
+                 + '<div style="text-align:right;margin-top:3px; padding-right: 3px">'
+                 + '<select style="width:136px"></select>&nbsp;&nbsp;'
+                 + '最多输入<span style="color:red;font-weight:bold">50</span>字'
+                 + '</div>';
+
+            //获取作废文本信息
+            var words = $("#cancelStockoutText").val().split("|");
+            var options = "<option value='0'>选择作废原因</option>";
+            for (var i = 0; i < words.length; i++) {
+                options += "<option value='1|" + words[i] + "'>" + words[i] + "</option>";
+            }
+
+            var div = document.createElement("div");
+            div.innerHTML = html;
+
+            $(div).find("textarea").keyup(function(e) { //绑定输入文本域keyup事件，用于检测输入的文字是否超出
+                var txt = $(this).val();
+                var wordLimit = 50;
+
+                if (txt.length <= wordLimit) {
+                    var num = wordLimit - txt.length;
+                    $(div).children("div").last().children("span").text(num);
+                } else {
+                    $(this).val(txt.substr(0, wordLimit));
+                }
+                if (!txt) {
+                    $(div).find("span[name='tips']").removeClass().addClass("error").addClass("m10_l");
+                    $(this).addClass("inputerror");
+                } else {
+                    $(div).find("span[name='tips']").removeClass().addClass("success").addClass("m10_l");
+                    $(this).removeClass();
+                }
+            }).end().find("select").append(options)
+                .change(function() { //绑定下拉选择作废原因事件
+                    var status_txt = this.value.split("|");
+                    var textarea = $(div).find("textarea");
+                    if (status_txt[0] == "0") {
+                        textarea.val("");
+                    } else {
+                        textarea.val(status_txt[1]);
+                    }
+                    textarea.triggerHandler("keyup");
+                });
+            UI.DialogBox({
+                title: "订单作废",
+                width: 320,
+                height: 130,
+                content: div,
+                cancel: true,
+                ok: function() {
+
+                    var obsoleteReason = $(div).find("textarea").val();
+                    if (!obsoleteReason) {
+                        $(div).find("span[name='tips']").removeClass().addClass("error").addClass("m10_l");
+                        $(div).find("textarea").addClass("inputerror");
+                        return false;
+                    }
+
+                    $.post('/Order/CancelOrder',{OrderID:$("#SysNo").val(),Ticks:$("#Ticks").val(),obsoleteReason:obsoleteReason}, function(data) {
+                        if(data.success)
+                        {
+                            successandrefresh();
+                        }
+                        else
+                        {
+                            if(data.message!=null)
+                            {
+                                tips('tips_warning',data.message);
+                            }
+                            else
+                            {
+                                tips('tips_warning',"操作失败");
+                            }
+                        }
+                    })
+
+                },
+                cancel: true
+            });
+        });
+        $(".tool *:disabled").addClass("disabled");
+        //强制执行
+        $("#force").click(function() {
+            @{ var content = !string.IsNullOrEmpty(ViewBag.ExecutorName) ? "订单当前处理人是<b class='red1'>" + ViewBag.ExecutorName + "</b>" : "该订单尚未分配"; }
+            UI.Confirm({
+                content: "@Html.Raw(content)，确认要强制执行吗?",
+                ok: function() {
+                    $.get('/JobPool/UpdateExecutorSysNo', { taskType:@{
+                            var taskType = ViewBag.TaskType == null ? 0 : ViewBag.TaskType;
+                                                                             @MvcHtmlString.Create(taskType.ToString());
+                                                                         }
+                            , taskSysNo: $("#SysNo").val() }, function(data) {
+                                $(".tool *:disabled").removeClass("disabled");
+                                $(".tool *").removeAttr("disabled");
+                                if( $("#btnCreateOustStock")!=null)
+                                {
+                                    $("#btnCreateOustStock").removeClass("hide");
+                                }
+                                if( $("#btnSelectMallGift")!=null)
+                                {
+                                    $("#btnSelectMallGift").removeClass("hide");
+                                }
+                                $(".force").hide();
+                                GetOrderStamp();//刷新当前页面时间戳
+                            });
+                },
+                cancel: function() {
+                    $("#force").attr('checked',false);
+                }
+            });
+        });
+        //取消审核
+        $("#btnUnchecked").click(function(){
+            UI.Confirm({
+                content: "确认取消审核?",
+                ok: function () {
+                    $.post('/Order/UnAuditOrder',{OrderID:$("#SysNo").val(),Ticks:$("#Ticks").val()}, function(data) {
+                        if(data.success)
+                        {
+                            successandrefresh();
+                        }
+                        else
+                        {
+                            tips('tips_warning',"操作失败");
+                        }
+                    });
+                },
+                cancel: true
+            });
+        });
+        //提交保存
+        $("#btnSave").click(function(){
+            VerificationData();
+            $("#form1").submit();
+
+        });
+        //加载地区信息
+        LoadAddress($("#ReceiveAddress_AreaSysNo").val());
+        //加载收货地址列表
+        loadCustomerReceiveAddress($("#CustomerSysNo").val());
+        //加载配送方式
+        ReloadMapPoint($("#ReceiveAddress_AreaSysNo").val(),$("#DefaultDeliveryTypeSysNo").val());
+        //加载支付方式
+        LoadPayTypeList($("#DefaultDeliveryTypeSysNo").val(),$("#DefaultPayTypeSysNo").val());
+        BindOtherData();
+        $("#ReceiveAddress_StreetAddress").bind("change", function () {
+            $("#DefaultWarehouseName").val("");
+            $("#DefaultWarehouseSysNo").val("");
+            //加载配送方式
+            ReloadMapPoint($("#ReceiveAddress_AreaSysNo").val(),$("#DefaultDeliveryTypeSysNo").val());
+        });
+        SelectMallGift();
+    });
+    function SelectMallGift()
+    {
+        var parent = artDialog.open.origin;		// 父页面window对象
+        //升仓赠品
+        $("#btnSelectMallGift").click(function(){
+            UI.DialogOpen('/Order/MallGifts?orderid='+$("#SysNo").val()+"&Ticks="+$("#Ticks").val()+"&TransactionSysNo="+$("#TransactionSysNo").val(), {
+                title: '升舱赠品',
+                width: 900,
+                height: 600,
+                button: [
+                       {
+                           name: '保存',
+                           callback: function () {
+                               var $iframe = this.iframe.contentWindow;
+                               $iframe.Save(parent);
+                               return false;
+                           }
+                       },
+                       {
+                           name: '关闭',
+                           focus: true,
+                           callback: function () {
+                               return true
+                           }
+                       }
+                ]
+
+            });
+        });
+    }
+    function successandrefresh()
+    {
+        tips('tips_success','操作成功！');
+        window.setTimeout(function(){window.location.href="/Order/OrderDetail?id="+$("#SysNo").val()}, 1000);
+    }
+    //加载验证设置
+    function LoadVerificationSetting()
+    {
+        $("#form1").validate({
+            rules: {
+                'ReceiveAddress.StreetAddress': {
+                    required: true,
+                    maxlength: 100
+                },
+                'ReceiveAddress.Name': {
+                    required: true,
+                    maxlength: 100
+                },
+                'ReceiveAddress.MobilePhoneNumber':
+                   {
+                       required: true,
+                       isMobile: true,
+                       maxlength: 11
+                   },
+                dpdArea:
+                  {
+                      min: 1
+                  },
+                DeliveryTypeSysNo:
+                  {
+                      min: 1
+                  },
+                DefaultWarehouseName: {
+                    required: true
+                },
+                PayTypeSysNo:
+                {
+                    min: 1
+                },
+                'ReceiveAddress.PhoneNumber':
+                 {
+                     isPhone:true
+                 },
+                'ReceiveAddress.ZipCode':
+                 {
+                     isZipCode:true
+                 }
+            },
+            messages: {
+                'ReceiveAddress.StreetAddress':{
+                    required: "请输入送货地址",
+                    maxlength: "输入超出长度"
+                },
+                'ReceiveAddress.Name': {
+                    required: "收货人",
+                    maxlength: "输入超出长度"
+                },
+                'ReceiveAddress.MobilePhoneNumber': {
+                    required: "请输入手机号码",
+                    isMobile: "请输入有效的手机号码",
+                    maxlength: "输入超出长度"
+                },
+                dpdArea:
+                 {
+                     min: "请选择区县"
+                 },
+                DeliveryTypeSysNo:
+                 {
+                     min: "请选择配送方式"
+                 },
+                DefaultWarehouseName: {
+                    required: "请选择仓库"
+                },
+                PayTypeSysNo:
+                 {
+                     min: "请选择支付方式"
+                 },
+                'ReceiveAddress.PhoneNumber':
+                {
+                    isPhone:"请输入正确格式的收货电话"
+                },
+                'ReceiveAddress.ZipCode':
+                 {
+                     isZipCode:"请输入正确格式的邮编"
+                 }
+            }
+        });
+    }
+    //加载编辑，查看视图
+    function LoadView(isEdit)
+    {
+        if(isEdit)
+        {
+            $("#tAddressEdit").show();
+            $("#tAddressView").hide();
+            $("#tDeliveryEdit").show();
+            $("#tDeliveryView").hide();
+            $("#tInvoiceEdit").show();
+            $("#tInvoiceView").hide();
+            $("#btnStart").hide();
+            $("#btnSave").show();
+            $("#btnBack").show();
+            $("#tPayView").hide();
+            $("#tPayEdit").show();
+            $("#btnChecked").hide();//隐藏审核
+            $("#btnCancel").hide();//隐藏作废
+            $('.tj').css("display","");
+
+
+        }
+        else
+        {
+            $("#tAddressEdit").hide();
+            $("#tAddressView").show();
+            $("#tDeliveryEdit").hide();
+            $("#tDeliveryView").show();
+            $("#tInvoiceEdit").hide();
+            $("#tInvoiceView").show();
+            $("#btnStart").show();
+            $("#btnSave").hide();
+            $("#btnBack").hide();
+            $("#tPayView").show();
+            $("#tPayEdit").hide();
+            $("#btnChecked").show();//隐藏审核
+            $("#btnCancel").show();//隐藏作废
+            $('.tj').css("display","none");
+
+        }
+        loadProductBtn();
+    }
+
+    function loadProductBtn() {
+        var disabled = $("#btnStart").css("display")=="none";
+        if (disabled) {
+            $("#divEditOrder button").each(function() {
+                $(this).attr("disabled", null);
+                $(this).removeClass("disabled");
+            });
+        } else {
+            $("#divEditOrder button").each(function() {
+                if( $(this).attr("notdisable")!="1")
+                {
+                    $(this).attr("disabled", "disabled");
+                    $(this).addClass("disabled");
+                }
+            });
+        }
+    }
+    //验证数据
+    function 	VerificationData()
+    {
+        //构造发票信息
+        var invoiceInfo=$("#OrderInvoice_InvoiceTypeSysNo").val();
+        $("#ReceiveAddress_AreaSysNo").val($("#dpdArea").val());
+        if(invoiceInfo!="0")
+        {
+            $('#OrderInvoice_InvoiceTitle').rules('add',{
+                required: true,
+                messages:{
+                    required: '请输入发票抬头'
+                }
+            });
+            $('#OrderInvoice_InvoiceRemarks').rules('add',{
+                required: true,
+                messages:{
+                    required: '请输入发票备注'
+                }
+            });
+        }
+        else
+        {
+            $('#OrderInvoice_InvoiceTitle').rules('remove');
+            $('#OrderInvoice_InvoiceRemarks').rules('remove');
+        }
+    }
+    //是否清空配送方式数据
+    function AreaChange(load)
+    {
+        $("#DefaultWarehouseName").val("");
+        $("#DefaultWarehouseSysNo").val("");
+        var a=$("#dpdArea").val();
+        if(load&&a!=-1)
+        {
+            ReloadMapPoint(a,null);
+        }
+        else
+        {
+            $("#DeliveryTypeSysNo").empty();
+            $("<option></option>")
+                  .val(0)
+                  .text("--请选择--")
+                  .appendTo($("#DeliveryTypeSysNo"));
+        }
+    }
+    //绑定配送方式
+    function LoadDeliveryTypeList(currectAreaNo, defaultItem) {
+       
+        $("#DeliveryTypeSysNo").empty();
+        $("<option></option>")
+              .val(0)
+              .text("--请选择--")
+              .appendTo($("#DeliveryTypeSysNo"));
+     
+        $.getJSON('@Url.Content("/Ajax/LoadDeliveryTypeByAreaAndMap")' + '?i=' + new Date(), { areaNo: $('#dpdArea').val(), cityNo: $('#dpdCity').val(), x: map_x, y: map_y }, function (data) {
+            //设置默认值
+            $.each(data, function (i, item) {
+             
+                if (i < 1) {
+                    if (item.IsInMap) {
+                        $("#spanWarn").hide();
+                    }
+                    else {
+                        $("#spanWarn").show();
+                    }
+                }
+                var text = item.Text;
+                var val = item.Value;
+                if (defaultItem != null && val == defaultItem) {
+                    $("#spanDeliveryType").html(text.replace("&nbsp;",""));
+                }
+                if (item.optgroup) {
+                    $("<optgroup></optgroup>").attr("label",  item.label)
+                     .appendTo($("#DeliveryTypeSysNo"));
+                }
+                else
+                {
+                    if (defaultItem != null && val == defaultItem) {
+                        $("<option></option>")
+                        .val(val)
+                        .html(text).attr("selected", "selected")
+                        .attr("warehouseno", item.WarehouseNo)
+                        .attr("warehousename", item.WarehouseName)
+                        .appendTo($("#DeliveryTypeSysNo"));
+                        //绑定配送方式
+                    }
+                    else {
+                        $("<option></option>")
+                       .val(val)
+                       .html(text)
+                        .attr("warehouseno", item.WarehouseNo)
+                        .attr("warehousename", item.WarehouseName)
+                       .appendTo($("#DeliveryTypeSysNo"));
+                    }
+                }
+                
+                //出库单配送方式
+                @if (IsCanEdit && (Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待创建出库单 || Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.部分创建出库单))
+                   {
+                       if (Model.PayStatus == Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态.已支付.GetHashCode())
+                       {
+                            @:addOutStockDeliveryTypeOption(item,defaultItem,true);
+                                          
+                                                           }
+                       else
+                       {
+                            @:addOutStockDeliveryTypeOption(item,defaultItem,false);
+                                                           }
+
+                   }
+
+            });
+        });
+    }
+    //配送方式变动
+    function DeliveryTypeChange(currecDeliverySysNo,defaultItem)
+    {
+        $("#DefaultWarehouseName").val("");
+        $("#DefaultWarehouseSysNo").val("");
+        LoadPayTypeList(currecDeliverySysNo,defaultItem);
+        //未支付，更改配送方式，刷新购物车
+        @if (Model.PayStatus != (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态.已支付)
+            {
+                  <text>RefreshCart(false);</text>
+            }
+        var WarehouseNo = $("#DeliveryTypeSysNo").find("option:selected").attr("warehouseno");//加盟商当日达
+        var WarehouseName = $("#DeliveryTypeSysNo").find("option:selected").attr("warehousename");//加盟商当日达
+        if (WarehouseNo!=null&&WarehouseNo != "0")
+        {
+            $("#DefaultWarehouseSysNo").val(WarehouseNo);
+            $("#DefaultWarehouseName").val(WarehouseName);
+            return;
+        }
+        var m_deliveryTypeSysNo= $("#DeliveryTypeSysNo").val();
+        if (m_deliveryTypeSysNo != "0") {
+            $.getJSON('@Url.Content("/Ajax/GetDefaultWarehouse")' + '?i=' + new Date(), { areaSysNo: $('#dpdArea').val(), deliveryTypeSysNo: m_deliveryTypeSysNo }, function (result) {
+                if (result.Status) {
+                    $("#DefaultWarehouseName").val(result.Message);
+                    $("#DefaultWarehouseSysNo").val(result.StatusCode);
+                }
+            });
+        }
+    }
+    //绑定支付方式
+    function LoadPayTypeList(currecDeliverySysNo,defaultItem)
+    {
+        //已支付不能改支付方式
+        @if (Model.PayStatus == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态.已支付)
+            {
+                <text>return;</text>
+            }
+        $("#PayTypeSysNo").empty();
+        $("<option></option>")
+              .val(0)
+              .text("--请选择--")
+              .appendTo($("#PayTypeSysNo"));
+        //全部加载
+        $.getJSON('@Url.Content("~/Ajax/LoadPayTypeListByDeliverySysNo")', {deliverySysNo:currecDeliverySysNo},function (data) {
+            //设置默认值
+            $.each(data, function (i, item) {
+                var text = item["text"];
+                var val = item["value"];
+                if (defaultItem != null && val == defaultItem) {
+                    $("<option></option>")
+                    .val(val)
+                    .text(text).attr("selected", "selected")
+                    .appendTo($("#PayTypeSysNo"));
+                    $("#spanPayType").text(text);
+
+                }
+                else {
+                    $("<option></option>")
+                   .val(val)
+                   .text(text)
+                   .appendTo($("#PayTypeSysNo"));
+                }
+            });
+        });
+    }
+    //绑定配送前是否联系
+    function BindOtherData() {
+        var isContact =$("#DefaultContactBeforeDelivery").val();
+        if (isContact == "1") {
+            $("#contact_yes").attr("checked", true);
+        }
+        else {
+            $("#contact_no").attr("checked", true);
+        }
+        var x=$("#DefaultDeliveryTime").val();
+
+        $("#DeliveryTime").val(x);
+        if(x!="0")
+        {
+            $("#spanDeliveryTime").text($("#DeliveryTime").find("option:selected").text());
+        }
+        $("#spanInvoiceType").text($("#InvoiceType").find("option:selected").text());
+    }
+    //加载地区下拉
+    function LoadAddress(a) {
+        Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), { a: a, callback: function (type) { } });
+    }
+    //加载会员收货地址
+    function loadCustomerReceiveAddress(sysno) {
+        var content = '<option value="0">默认地址</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "@Url.Content("~/Ajax/LoadCustomerAddress?sysNo=")" + sysno,
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                });
+                $('#customerReceiveAddress').html(content);
+                if (document.getElementById('customerReceiveAddress').options.length > 1)
+                    $("#customerReceiveAddress").bind("change", function () {
+                        if (this.value != '0') {
+                            searchCustomerReceiveAddress(this.value);
+                        }
+                        else {
+                            //加载默认收货地址
+                            LoadDefaultAddress();
+                        }
+                    });
+            }
+        });
+    }
+    //加载默认收货地址
+    function LoadDefaultAddress() {
+        @if (Model.ReceiveAddress != null)
+           {
+            <text>
+        $("#ReceiveAddress_Name").val($("#hide_Name").val());
+        $("#ReceiveAddress_MobilePhoneNumber").val($("#hide_MobilePhoneNumber").val());
+        $("#ReceiveAddress_PhoneNumber").val($("#hide_PhoneNumber").val());
+        $("#ReceiveAddress_ZipCode").val($("#hide_ZipCode").val());
+        $("#ReceiveAddress_StreetAddress").val($("#hide_StreetAddress").val());
+        //设置省市联动
+        LoadAddress(@Model.ReceiveAddress.AreaSysNo);
+        //加载配送方式
+        ReloadMapPoint(@Model.ReceiveAddress.AreaSysNo,null);
+        </text>
+           }
+    }
+    //查询收货地址
+    function searchCustomerReceiveAddress(sysno) {
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "@Url.Content("~/Ajax/SearchCustomerReceiveAddress?sysNO=")" + sysno,
+            success: function (row) {
+                if (row) {
+                    $("#ReceiveAddress_Name").val(row.Name);
+                    $("#ReceiveAddress_MobilePhoneNumber").val(row.MobilePhoneNumber);
+                    $("#ReceiveAddress_PhoneNumber").val(row.PhoneNumber);
+                    $("#ReceiveAddress_ZipCode").val(row.ZipCode);
+                    $("#ReceiveAddress_StreetAddress").val(row.StreetAddress);
+                    //地区编号AreaSysNo
+                    LoadAddress(row.AreaSysNo);
+                    //加载配送方式
+                    ReloadMapPoint(row.AreaSysNo,null);
+                }
+            }
+        });
+    }
+
+    var isLoad = false;
+    function erpLoad() {
+        if (!isLoad) {
+            isLoad = true;
+            @if (IsCanEdit && (Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待创建出库单 || Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.部分创建出库单))
+                {
+                    @:GetErpStock();
+                                            }
+        }
+    }
+    var map_x=0;
+    var map_y=0;
+    //刷新地图点
+    function ReloadMapPoint(currectAreaNo,defaultItem) {
+        var dpdArea = $("#dpdArea");
+        var dpdCity = $("#dpdCity");
+        var dpdProvince = $("#dpdProvince");
+        var address = $("#ReceiveAddress_StreetAddress").val();
+        var a_No = dpdArea.val();
+        var a_Name = dpdArea.find("option:selected").text();
+        var local = "";
+        if (a_No != "-1") {
+            var c_Name = dpdCity.find("option:selected").text();
+            var c_No = dpdCity.val();
+            if (c_Name == "北京" || c_Name == "重庆" || c_Name == "上海" || c_Name == "天津") {
+                local = c_Name + "市";
+            }
+            else {
+                local = dpdProvince.find("option:selected").text() + "省" + c_Name + "市";
+            }
+            var myGeo = new BMap.Geocoder();
+            LoadDeliveryTypeList(currectAreaNo, defaultItem);
+            if(myGeo!=null&&myGeo!=undefined&&address!="")
+            {
+               
+                myGeo.getPoint( address, function (point) {
+                    if (point) {
+                        map_x = point.lng;
+                        map_y = point.lat;
+                    }
+                    else {
+                        map_x = 0;
+                        map_y = 0;
+                    }
+                   
+                    LoadDeliveryTypeList(currectAreaNo, defaultItem);
+                    var option={
+                        mapdiv:$("#frameMap"),
+                        cityNo:dpdCity.val(),
+                        cityName:dpdCity.find("option:selected").text(),
+                        mapX:map_x,
+                        mapY:map_y
+                    };
+                    UI.ShowBaiduMap(option);//展示百度地图
+                }, local);
+            }
+            else
+            {
+                map_x = 0;
+                map_y = 0;
+                
+                LoadDeliveryTypeList(currectAreaNo, defaultItem);
+                var option={
+                    mapdiv:$("#frameMap"),
+                    cityNo:dpdCity.val(),
+                    cityName:dpdCity.find("option:selected").text(),
+                    mapX:map_x,
+                    mapY:map_y
+                };
+                UI.ShowBaiduMap(option);//展示百度地图
+            }
+        }
+    }
+    window.onload=function()
+    {
+        //当待出库时出库商品选项卡默认显示
+        @if (IsCanEdit && (Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.待创建出库单 || Model.Status == (Int16)Hyt.Model.WorkflowStatus.OrderStatus.销售单状态.部分创建出库单))
+             {
+              @:$("#liOutStore").click();
+                                  @:erpLoad();
+                                }
+
+    }
+    </script>
+}

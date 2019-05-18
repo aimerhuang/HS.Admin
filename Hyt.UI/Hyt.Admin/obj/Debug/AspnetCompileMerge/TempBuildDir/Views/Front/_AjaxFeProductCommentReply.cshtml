@@ -1,0 +1,60 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<CBFeProductCommentReply>
+
+ <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone">
+                            <thead>
+                                <tr>
+                                    <th width="60">回复者</th>
+                                    <th>回复内容</th>
+                                    <th width="46">状态</th>
+                                    <th width="174">操作</th>
+                                </tr>
+                            </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            const int audit = (int)ForeStatus.商品评论回复状态.已审;
+            const int invalid = (int)ForeStatus.商品评论回复状态.作废;
+            const int pending = (int)ForeStatus.商品评论回复状态.待审;
+            if (Model.TotalItemCount >0)
+            {
+
+                foreach (var item in Model.TData)
+                {
+            <tr>
+                <td  style="text-align: center">@item.Name</td>
+                <td class="align_l p5_l">@item.ReplyContent</td>
+                <td  style="text-align: center">@EnumUtil.GetDescription(typeof(ForeStatus.商品评论回复状态), item.Status)</td>
+                <td  style="text-align: center">
+
+
+                    @{
+                    if (item.Status == audit)
+                    {
+                        <button type="button"  class="btn btn_ht26 m10_r FE1001603 FE1002603" title="取消审核" onclick="setReplyAudit(@item.SysNo,@pending)"><span class="icon_cancelAudit"></span><span class="m5_l">取消审核</span></button><button type="button" class="btn btn_ht26 disabled FE1001401 FE1002501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    else if (item.Status == invalid)
+                    {
+                        <button type="button" class="btn btn_ht26 disabled m10_r FE1001603 FE1002603" title="审核"><span class="icon_audit"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 disabled FE1001401 FE1002501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    else
+                    {
+                        <button type="button"  class="btn btn_ht26 m10_r FE1001603 FE1002603"  title="审核" onclick="setReplyAudit(@item.SysNo, @audit)"><span class="icon_audit"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 FE1001401 FE1002501" title="作废" onclick="setReplyAudit(@item.SysNo, @invalid)"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    }
+                </td>
+            </tr>
+                }
+            }
+              else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="4">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+<div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>

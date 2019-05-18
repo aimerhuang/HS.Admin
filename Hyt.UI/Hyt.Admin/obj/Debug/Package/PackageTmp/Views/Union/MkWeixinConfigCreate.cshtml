@@ -1,0 +1,251 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.MkWeixinConfig
+@{
+    ViewBag.Title = "回复配置编辑";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@using Hyt.BLL.Authentication;
+@using Hyt.Model.Transfer;
+
+
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/selectcontrol.js"> </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#MkWeixinConfigForm").validate({
+                rules: {
+                    AgentSysNo: {
+                        required: true                        
+                    },
+                    DealerSysNo: {
+                        required: true
+                    },
+                    Token: {
+                        required: true
+                         , maxlength: 10
+                    },
+                    AppId: {
+                        required: true
+                        , maxlength: 30
+                    },
+                    AppSecret: {
+                        required: true
+                        , maxlength: 32
+                    },
+                    FollowText: {
+                        required: true
+                        , maxlength: 200
+                    },
+                    MessageText: {
+                        required: true
+                        , maxlength: 200
+                    }
+                },
+                messages: {
+                    AgentSysNo: {
+                        required: "AgentSysNo必填"
+                    },
+                    DealerSysNo: {
+                        required: "DealerSysNo必填"
+                    },
+                    Token: {
+                        required: "Token必填"
+                       , maxlength: "长度超出10个字"
+                    },
+                    AppId: {
+                        required: "AppId必填"
+                       , maxlength: "长度超出30个字"
+                    },
+                    AppSecret: {
+                        required: "AppSecret必填"
+                        , maxlength: "长度超出32个字"
+                    },
+                    FollowText: {
+                        required: "关注回复文本必填"
+                        , maxlength: "长度超出200个字"
+                    },
+                    MessageText: {
+                        required: "消息回复文本"
+                        , maxlength: "长度超出200个字"
+                    },
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#MkWeixinConfigForm").valid()) {
+                                $.post('/Union/SaveMkWeixinConfig/', $("#MkWeixinConfigForm").serialize(), function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doSearch();
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="MkWeixinConfigForm" name="MkWeixinConfigForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">代理商</td>
+                            <td width="80%" class="borde_right" colspan="3">
+                                @{
+                                    var info = AdminAuthenticationBo.Instance.GetCurrentUserInfo();
+                                    string Type; //ZD(总代理),D(代理),F(分销商)
+                                    int TypeSysNo; //传入的对应类型系统编号
+                                    if (!info.IsBindAllDealer)
+                                    {
+                                        //判断是否绑定分销商
+                                        if (!info.IsBindDealer)
+                                        {
+                                            Type = "D";
+                                            TypeSysNo = info.Base.SysNo;
+                                        }
+                                        else
+                                        {
+                                            Type = "F";
+                                            TypeSysNo = info.Dealer.SysNo;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        Type = "ZD";
+                                        TypeSysNo = 0;
+                                    }
+                                    string dename = "分销商";
+                                    <select name="AgentSysNo" id="AgentSysNo" class="{required:true,messages:{required:'请选择代理商'}} wd200">
+                                        @{
+                                            IList<CBDsDealer> AgentList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDaiLiShangList(Type, TypeSysNo);
+                                            foreach (CBDsDealer item in AgentList)
+                                            {
+                                                if (Model.AgentSysNo == item.SysNo)
+                                                {
+                                                    <option value="@item.SysNo" selected="selected">@item.DealerName</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.SysNo">@item.DealerName</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                    @Html.Raw("&nbsp;&nbsp;") @dename
+                                    <select name="DealerSysNo" id="DealerSysNo" class="{required:true,messages:{required:'请选择分销商'}} wd200">
+                                        @{
+                                            int AgentSysNo = 1;
+                                            if (ViewBag.ProductSysNo != null)
+                                            {
+                                                AgentSysNo = Hyt.BLL.Web.PdProductBo.Instance.GetProductEntity(ViewBag.ProductSysNo).AgentSysNo;
+                                            }
+
+                                            IList<DsDealer> DealerList = Hyt.BLL.Distribution.DsDealerBo.Instance.GetDealersListByCreatedBy(AgentSysNo, Type, TypeSysNo);
+                                            foreach (DsDealer item in DealerList)
+                                            {
+                                                if (Model.DealerSysNo == item.SysNo)
+                                                {
+                                                    <option value="@item.SysNo" selected="selected">@item.DealerName</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@item.SysNo">@item.DealerName</option>
+                                                }
+                                            }
+                                        }
+                                    </select>
+}
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>微信Token</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Token" id="Token" class="wd200" value="@if (Model.Token != null)
+                                                                                                            {@Model.Token}" maxlength="10" /><span class="prompt m10_l" id="c_Token">填写微信Token</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>AppId</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="AppId" id="AppId" class="wd200" value="@if (Model.AppId != null)
+                                                                                                            {@Model.AppId}" maxlength="30" /><span class="prompt m10_l" id="c_AppId">填写AppId</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>AppSecret</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="AppSecret" id="AppSecret" class="wd200" value="@if (Model.AppSecret != null)
+                                                                                                            {@Model.AppSecret}" maxlength="32" /><span class="prompt m10_l" id="c_AppSecret">填写AppSecret</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>关注回复文本</td>
+                            <td colspan="3">
+                                <textarea class="wd250" name="FollowText" id="FollowText">@if (Model.FollowText != null){@Model.FollowText}</textarea>
+                                <span class="prompt m10_l" id="c_FollowText">关注回复文本</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>消息回复文本</td>
+                            <td colspan="3">
+                                <textarea class="wd250" name="MessageText" id="MessageText">@if (Model.MessageText != null){@Model.MessageText}</textarea>
+                                <span class="prompt m10_l" id="c_MessageText">消息回复文本</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>

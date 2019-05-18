@@ -1,0 +1,47 @@
+﻿@model List<Hyt.Model.DsUser>
+@{
+    int row = 0;
+}
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th>序号</th>
+            <th >账号</th>
+            <th>用户姓名</th>
+            <th>状态</th>
+            <th width="250">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+    <tbody>
+        @if (null != Model && Model.Count > 0)
+{
+
+    foreach (Hyt.Model.DsUser item in Model)
+    {
+        row++;
+        <tr @{if (row % 2 == 0) { <text> class='odd_color' </text> }}>
+            <td>@row</td>
+            <td>@Html.Raw(item.Account)</td>
+            <td>@Html.Raw(item.Name)</td>
+            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.分销商账号状态), item.Status)</td>
+            <td>
+                @if (item.Status == 1)
+                {<button class="btn btn_ht26 btn_red " onclick="Disabled(@item.SysNo,0)"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button>}
+                else
+                {<button class="btn btn_ht26 btn_blue " onclick="Disabled(@item.SysNo,1)"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button>}
+                <button class="editUser btn btn_ht26 btn_blue m10_l " onclick="showdiv(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                <button class="btn btn_ht26 m10_l SY1008201 btn_blue" onclick="ResetPwd(@item.SysNo)"><span class="icon_asterisk icon_white"></span><span class="m5_l">重置密码</span></button>
+            </td>
+        </tr>
+    }
+}
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="5">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>

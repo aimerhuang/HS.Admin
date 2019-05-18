@@ -1,0 +1,14 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "退款";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+}
+<div id="tabboxs" class="case">
+    <div id="tabcon" class="boxs_con_c1">
+        <div class="list">
+            @{Html.RenderAction((string)ViewBag.RMAUrl, new { id = ViewBag.SysNo });}
+        </div>
+    </div>
+</div>

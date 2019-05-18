@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "团购管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script><script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+            <h3>团购列表</h3>
+        </div>
+        <div class="boxs_con_c1">
+        	<div class="boxs_tool">
+                <div class="right_tool">
+                    <select  class="select_ht28 fl wd150" searchItem="Statuses">
+                        <option>全部</option>
+                        @ViewBag.Statuses
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn_blue btn_ht26" type="button" onclick="openTab()"><span class="icon icon_plus icon_white"></span><span class="m5_l">新建团购</span></button>
+                </div>
+            </div>
+            <div class="boxs_list" id="paging">
+        	</div>
+            
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("[searchItem='Statuses']").change(function () {
+            doSearch(1);
+        });
+
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+        doSearch(1);
+    });
+
+    function doSearch(id) {
+        Ajax.get("/Promotion/DoGroupShoppingPaging/?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("id", id);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+    function openTab(sysNo) {
+        var url = "/Promotion/GroupShoppingCreate/";
+        var text = "";
+        if (sysNo != undefined) {
+            url += sysNo;
+             text = "修改团购：" + sysNo;
+        } else {
+            text = "新建团购";
+        }
+        UI.OpenCreatTab(text, url);
+    }
+    
+</script>

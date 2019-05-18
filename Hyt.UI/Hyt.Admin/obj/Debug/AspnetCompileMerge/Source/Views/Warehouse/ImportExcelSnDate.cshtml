@@ -1,0 +1,24 @@
+﻿<form id="formImport" action="@Url.Action("ImportExcelSnDate")" method="POST" enctype="multipart/form-data">
+    <!-- upload with excel format -->
+    <input type="file" id="txtUploadSndate" name="txtUploadSndate" class="hide" accept=".csv,application/vnd.ms-excel" />
+</form>
+
+<script>
+    $(document).ready(function() {
+        $('#txtUploadSndate').change(function () {
+            //must to do the submit (not ajax) to post the data(uploaded file)
+            window.parent.maskStart();
+            formImport.submit();
+
+        });
+        //not (undefined/''/null)
+        if ('@ViewBag.result') {
+            window.parent.maskStop();
+            window.parent.importCallBack(decodeURIComponent('@ViewBag.result'));
+        }
+    });
+
+    function chooseFile() {
+        $("#txtUploadSndate").click();
+    }
+</script>

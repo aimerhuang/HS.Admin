@@ -1,0 +1,215 @@
+﻿@model Hyt.Model.SyRole
+@{
+    ViewBag.Title = "SyRoleCreate";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all"/>
+    <style type="text/css">
+        .basebox1 {
+            padding: 10px 0;
+        }
+
+        .basebox1 table tr td {
+        border-right: none !important;
+        border-bottom: none !important;
+        }
+
+        .usergroup {
+        background-color: #f5f5f5;
+        padding: 10px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: 200px;
+        }
+
+        .usergroup dl {
+        float: left;
+        }
+
+        .usergroup dl dt {
+        margin-bottom: 5px;
+        }
+
+        .usergroup dl.operate {
+        padding: 10px 36px 0 36px;
+        }
+
+        .usergroup dl.operate dd {
+            margin-top: 40px;
+        }
+
+        .usermenu {
+            background-color: #f5f5f5;
+            padding: 5px 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 188px;
+        }
+    </style>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+}
+<div class="caseout" id="bd">
+    <form id="form">
+        <div class="boxs" id="tabboxs3">
+            <div class="head_tab">
+                <ul class="tabNav">
+                    <li><a>基本信息</a></li>
+                    <li><a>角色菜单权限</a></li>
+                </ul>
+            </div>
+            <div class="boxs_con_c1" id="tabcon">
+                <div class="list">
+                    <div class="boxs_detail_dispay">
+                        <div class="tit_con basebox1">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lnone border_tnone">
+                                <tbody>
+                                    <tr>
+                                        <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>角色名称</td>
+                                        <td width="80%">
+                                            <input type="text" id="RoleName" name="RoleName" save="RoleName" value="@Model.RoleName" class="wd270"  maxlength="20"/><span id="c_RoleName" class="prompt m10_l">输入1-20个字符</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone" valign="top">角色描述</td>
+                                        <td>
+                                            <textarea class="wd270" save="Description">@Model.Description</textarea><span id="c_Description" class="prompt m10_l">输入1-200个字符</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone" valign="top">状态</td>
+                                        <td>
+                                            <label>
+                                                <input id="status1" name="status" class="m10_r" type="radio" value="1" @if (Model.Status == 1)
+                                                                                           {@:checked ="checked"
+                                                                                     }/>有效</label>&nbsp;&nbsp;<label><input id="status2"  name="status"  class="m10_r m10_l" type="radio" value="0" @if (Model.Status == 0)
+                                                                                                                         {@:checked ="checked"
+                                                                                                                                                             }/>无效</label></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list">
+                    <div class="usermenu" style="height:488px;">
+                        <div class="zTreeDemoBackground left">
+                            <ul id="treeMenu" class="ztree"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="SysNo" save="SysNo" value="@Model.SysNo"/>
+        <input type="hidden" id="CreatedBy" save="CreatedBy" value="@Model.CreatedBy"/>
+         <input type="hidden" id="CreatedDate" save="CreatedDate" value="@Model.CreatedDate"/>
+    </form>
+</div>
+<script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js?skin=default"></script>
+
+<script type="text/javascript">
+    //tab选项卡
+    $(function () {
+        UI.Tab({ tabNavBox: '#tabboxs3', tabContentObj: "#tabcon", onActiveTab: function (index, obj) { } });
+        initDialog();
+        LoadRule();
+        LoadMeun();
+        $("#bd").ajaxLoadingMask(true);
+        $("textarea").textareaInput(100);
+    });
+    //加载菜单
+    var zTreeObj;
+    function LoadMeun() {
+        var ztreeSetting = {
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            check: {
+                enable: true,
+                chkboxType: { "Y": "ps", "N": "ps" }
+            }
+        };
+        $.ajax({
+            url: '/Sys/GetTreeListByRoleSysNo?id=' + $("#SysNo").val(),
+            success: function (response) {
+                if (response != null) {
+                    zTreeObj = UI.ZTree.init($("#treeMenu"), ztreeSetting, response);
+                }
+            }
+        });
+    }
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+        api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+		    {
+		        name: '保存',
+		        callback: function () {
+		            $('#RoleName').rules('add', {
+		                required: true
+		            });
+		            if (!setting.form()) {
+		                $(".tabNav li:first").click();
+		                return false;
+		            }
+		            var selectedMenu = zTreeObj.getCheckedNodes(true);
+		            var groupMeuns = new Array();
+		            for (var i = 0; i < selectedMenu.length; i++) {
+		                var m = {
+		                    RoleSysNo: 0,
+		                    MenuID: selectedMenu[i].id.replace("m_", "").replace("p_", ""),
+		                    MenuType: selectedMenu[i].nodetype,
+		                };
+		                groupMeuns.push(m);
+		            }
+		            if ($("#SysNo").val()== 0 && groupMeuns.length == 0) {
+		                Utils.alert("请选择角色权限");
+		                return false;
+		            }
+		            Ajax.postJosn("/Sys/SaveRole", "save", function (p) {
+		                var status = 0;
+		                if ($("#status1").attr("checked")) {
+		                    status = 1;
+		                }
+		                p.setParams("Status", status);
+		                p.setParams("groupMeuns", groupMeuns);
+		            }, function (ret) {
+		                if (ret.Status) {
+		                    UI.DialogOpener().doSearch();
+		                    UI.CloseDialog();
+		                } else {
+		                    Utils.alert(ret.Message);
+		                }
+		            });
+		            return false;
+		        },
+		        focus: true
+		    },
+		    {
+		        name: '取消'
+		    }
+	);
+    };
+    var setting;
+    //加载验证规则
+    function LoadRule() {
+        setting = $("#form").validate({
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+            },
+            ignore: ""
+        });
+    }
+</script>
+

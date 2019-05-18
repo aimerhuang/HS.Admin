@@ -1,0 +1,440 @@
+﻿@model Hyt.Model.Parameter.ParaSyTask
+@{
+    ViewBag.Title = "TaskInfo";
+}
+@section HeadJs{
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/jquery.validate.yui.js"></script>
+}
+<form id="inputForm" name="inputForm" onsubmit="javascript:return false;">
+    <div class="caseout">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>常规</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_detail_dispay">
+                    <div class="tit_con">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td width="10%" class="nameright"><span class="v_star">*</span>任务名称</td>
+                                    <td width="90%" colspan="3">
+                                        <input class="input_xlarge" name="TaskName" type="text" value="@Model.Config.TaskName">
+                                        <span class="prompt m10_l">任务名称</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="10%" class="nameright"><span class="v_star">*</span>类型名称</td>
+                                    <td width="90%" colspan="3">
+                                        <select  style="width:284px" name="TypeName">
+                                            <option value="">请选择任务类型</option>
+                                            @foreach (var type in ViewBag.Types)
+                                            {
+                                                if (Model.Config.TypeName == type.Key.FullName)
+                                                {
+                                                    <option selected="selected" value="@type.Key.FullName">@type.Key.Name [@type.Value]</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@type.Key.FullName">@type.Key.Name [@type.Value]</option>
+                                                }
+                                            }
+                                        </select>
+                                        <span class="prompt m10_l">类型名称</span>
+                                        <span class="c9 m10_l">[ 自动获取实现了ITask的任务类型 ]</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="10%" class="nameright">执行参数</td>
+                                    <td width="90%" colspan="3">
+                                        <input class="input_xlarge" name="Contextdata" type="text" value="@Model.Config.Contextdata">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="10%" class="nameright border_bnone">任务描述</td>
+                                    <td width="90%" class="border_bnone" colspan="3"><input class="input_xxlarge" type="text"  name="TaskDescription" value="@Model.Config.TaskDescription" /></td>
+                                </tr>
+
+                            </tbody></table>
+                    </div>
+        
+                </div>
+            </div>
+        </div>
+  
+        <div class="boxs m10_t">
+            <div class="boxs_tit head_m">
+                <h3>触发器</h3>
+            </div>
+            <div class="boxs_con_c1">
+      
+                <!--工具条开始-->
+                <div class="boxs_tool"> 
+                    <!--功能按钮开始-->
+                    <div class="left_tool clearfix">
+                        <span class="fl m10_r  m2_t">开始时间</span>
+                        <div class="date_btn m10_r fl">
+                            <input type="text" value="@Html.Raw(Model.Config.StartTime==default(DateTime)?DateTime.Now:Model.Config.StartTime)" class="input_ht26" id="StartTime" name="StartTime">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'StartTime',dateFmt:'yyyy-MM-dd HH:mm:ss'});" ><span class="icon_calendar"></span></button>
+                        </div>
+                        <span class="fl m10_l m10_r m2_t">
+                            @Html.CheckBox("EnabledEndTime", Model.Config.EnabledEndTime == 1, new {value=1})  过期时间
+                        </span>
+                        <div class="date_btn fl">
+                            <input type="text" value="@Model.Config.EndTime" class="input_ht26" id="EndTime" name="EndTime">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndTime',minDate:$(StartTime).val(),dateFmt:'yyyy-MM-dd HH:mm:ss'})" ><span class="icon_calendar"></span></button>
+                        </div>
+                    </div>
+                    <!--功能按钮结束-->
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_detail_dispay">
+                    <div class="tit_dispay">
+                        <h5>基本</h5>
+                    </div>
+                    <div class="tit_con clearfix">
+                        <ul class="timestip">
+                            <li><input name="Timetype" type="radio" value="0" /> 间隔执行</li>
+                            <li><input name="Timetype" type="radio" value="2" /> 按天执行</li>
+                            <li><input name="Timetype" type="radio" value="3" /> 按周执行</li>
+                            <li><input name="Timetype" type="radio" value="4" /> 按月执行</li>
+                        </ul>
+                        <div class="list3">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody><tr>
+                                           <td width="100" class="nameright">时间段</td>
+                                           <td  colspan="3">
+                                               <div class="date_btn120 m10_r fl">
+                                                   <input type="text" value="@Model.StartTimeQuantum" class="input_ht26" id="StartTimeQuantum" name="StartTimeQuantum">
+                                                   <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'StartTimeQuantum',dateFmt:'HH:mm:ss'})" ><span class="icon_time"></span></button>
+                                               </div>
+                                               <span class="fl m10_r"> - </span>
+                                               <div class="date_btn120 m10_r fl">
+                                                   <input type="text" value="@Model.EndTimeQuantum" class="input_ht26" id="EndTimeQuantum" name="EndTimeQuantum">
+                                                   <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndTimeQuantum',dateFmt:'HH:mm:ss'})" ><span class="icon_time"></span></button>
+                                               </div>
+                                               <span class="prompt m10_l">可以指定执行时间段</span>   
+              
+                                           </td>
+                                       </tr>
+                                    <tr>
+                                        <td class="nameright">间隔时间</td>
+                                        <td colspan="3">
+                                            <input class="input_large" name="IntervalTime" max="28800" min="1" value="@Model.IntervalTime" id="IntervalTime" type="text">
+                                            <span class="prompt m10_l">最大间隔28800秒</span>           
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright">&nbsp;</td>
+                                        <td colspan="3"><span class="red">提示：间隔多少秒执行一次(循环执行)</span></td>
+                                    </tr>
+                                </tbody></table>
+                        </div>
+                        <div class="list3">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                    <tr>
+                                        <td width="100" class="nameright">时分秒</td>
+                                        <td colspan="3">
+                                            <div class="date_btn120 m10_r fl">
+                                                <input type="text" value="@Model.DayExecuteTime" class="input_ht26" id="DayExecuteTime" name="DayExecuteTime">
+                                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'DayExecuteTime',dateFmt:'HH:mm:ss'})" ><span class="icon_time"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l">执行时间(时分秒)</span>    
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright">&nbsp;</td>
+                                        <td colspan="3"><span class="red">提示：每天到达这个固定时间点执行</span></td>
+                                    </tr>
+                                </tbody></table>
+                        </div>
+                        <div class="list3">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                    <tr>
+                                        <td width="100" class="nameright">指定日期</td>
+                                        <td colspan="3">
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="1" checked="checked" />&nbsp;星期一</span>
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="2" />&nbsp;星期二</span>
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="3" />&nbsp;星期三</span>
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="4" />&nbsp;星期四</span>
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="5" />&nbsp;星期五</span>
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="6" />&nbsp;星期六</span>
+                                            <span class="m5_r"><input name="DayOfWeek" type="radio" value="0" />&nbsp;星期日</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright">时间(时分秒)</td>
+                                        <td colspan="3">
+                                            <div class="date_btn120 m10_r fl">
+                                                <input type="text" value="@Model.DayOfWeekExecuteTime" class="input_ht26" id="DayOfWeekExecuteTime" name="DayOfWeekExecuteTime">
+                                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'DayOfWeekExecuteTime',dateFmt:'HH:mm:ss'})" ><span class="icon_time"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l">执行时间(时分秒)</span> 
+                                        </td>
+                                    </tr>
+                                </tbody></table>
+                        </div>
+                        <div class="list3">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                                <tbody>
+                                    <tr>
+                                        <td width="100" class="nameright">月</td>
+                                        <td>
+                                            <div class="re" id="moonobj">           
+                                                <input id="Month" class="wd120" value="@Model.Config.Month" name="Month" type="text"> <button class="btn btn_ht26">选择</button>
+                                                <div class="moonbox hide">
+                                                    <ul class="clearfix">
+                                                        <li><input name="" type="checkbox" value="1" class="m5_r"  />一月</li>
+                                                        <li><input name="" type="checkbox" value="2" class="m5_r" />二月</li>
+                                                        <li><input name="" type="checkbox" value="3" class="m5_r" />三月</li>
+                                                        <li><input name="" type="checkbox" value="4" class="m5_r" />四月</li>
+                                                        <li><input name="" type="checkbox" value="5" class="m5_r" />五月</li>
+                                                        <li><input name="" type="checkbox" value="6" class="m5_r" />六月</li>
+                                                        <li><input name="" type="checkbox" value="7" class="m5_r" />七月</li>
+                                                        <li><input name="" type="checkbox" value="8" class="m5_r" />八月</li>
+                                                        <li><input name="" type="checkbox" value="9" class="m5_r" />九月</li>
+                                                        <li><input name="" type="checkbox" value="10" class="m5_r" />十月</li>
+                                                        <li><input name="" type="checkbox" value="11" class="m5_r" />十一月</li>
+                                                        <li><input name="" type="checkbox" value="12" class="m5_r" />十二月</li>
+                                                    </ul>
+                                                    <div class="tc m5_t"><button id="checkmoon" class="btn btn_ht26 btn_blue">确定</button>&nbsp;<button class="btn btn_ht26">取消</button></div>
+                                                </div>
+                                                <span class="prompt m10_l">执行的月份</span>
+                                                <span class="c9 m10_l">[ 可下拉多选 ]</span>
+                                            </div>
+                                            @*<div class="date_btn120 m10_r fl">
+                                                <input type="text" value="" class="input_ht26" id="MonthExecuteTime" name="StartTimeQuantum">
+                                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'MonthExecuteTime',dateFmt:'MM'})" ><span class="icon_calendar"></span></button>
+                                            </div>*@
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright">天</td>
+                                        <td>              
+                                            <div class="date_btn120 m10_r fl">
+                                                <input type="text" value="@Model.MonthOfDayExecuteTime" class="input_ht26" id="MonthOfDayExecuteTime" name="MonthOfDayExecuteTime">
+                                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'MonthOfDayExecuteTime',dateFmt:'dd'})" ><span class="icon_calendar"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l">执行的天数</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright">时间</td>
+                                        <td>
+                                            <div class="date_btn120 m10_r fl">
+                                                <input type="text" value="@Model.MonthHmsExecuteTime" class="input_ht26" id="MonthHmsExecuteTime" name="MonthHmsExecuteTime">
+                                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'MonthHmsExecuteTime',dateFmt:'HH:mm:ss'})" ><span class="icon_time"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l">执行的时间</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+          
+                        </div>
+          
+                    </div>
+                    <div class="tit_dispay" style="border-top:none;">
+                        <h5>高级</h5>
+                    </div>
+                    <div class="tit_con">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td width="100" class="nameright">
+                                        @Html.CheckBox("IsAgain", Model.Config.IsAgain == 1, new {value=1})
+                                    </td>
+                                    <td width="250">如果任务执行失败，按以下频率重新启动</td>
+                                    <td>按原配置周期执行</td>
+                                </tr>
+                                <tr>
+                                    <td class="nameright border_bnone">&nbsp;</td>
+                                    <td class="border_bnone">尝试重新启动最大次数</td>
+                                    <td class="border_bnone">
+                                        <input class="wd80" name="MaxAgainCount" type="text" value="@Model.Config.MaxAgainCount">
+                                        <span class="prompt m10_l">最大次数</span>
+                                    </td>
+                                </tr>
+
+                            </tbody></table>
+                    </div>
+        
+                </div>
+      
+            </div>
+        </div>
+    </div>
+    <input name="SysNo" type="hidden" value="@Model.Config.SysNo" />
+    <input name="Status" type="hidden" value="@Model.Config.Status" />
+    <input name="CreateTime" type="hidden" value="@Model.Config.CreateTime" />
+    <input name="LastExecuteTime" type="hidden" value="@Model.Config.LastExecuteTime" />
+</form>
+<script type="text/javascript">
+    
+    (function ($) {
+        $.fn.serializeJson = function () {
+            var serializeObj = {};
+            $(this.serializeArray()).each(function () {
+                serializeObj[this.name] = this.value;
+            });
+            return serializeObj;
+        };
+    })(jQuery);
+
+    $(function() {
+        UI.Tab({ tabNavBox: '.boxs_detail_dispay', tabNavObj: '.timestip', tabContentObj: ".tit_con", tabContent: ".list3", tabNavBtn: "li>input" });
+        var Moonobj = $('#moonobj');
+        var Clickobj = $('button', Moonobj);
+        var Conobj = $('.moonbox', Moonobj);
+        var Checkmoonobj = $('#checkmoon', Moonobj);
+        var Inputobj = $('#Month', Moonobj);
+
+        Clickobj.bind('click', function() {
+            if (Conobj.hasClass('hide')) {
+                Conobj.removeClass('hide');
+            } else {
+                Conobj.addClass('hide');
+            }
+        });
+        Checkmoonobj.click(function() {
+            var str = '';
+            Conobj.find('input').each(function(index, element) {
+                if ($(this).attr('checked') == 'checked') {
+                    str += $(this).val() + ',';
+                }
+            });
+            str = str.substring(0, str.length - 1);
+            Inputobj.val(str);
+        });
+        //默认当前选项卡
+        var currentType = '@Model.Config.Timetype';
+        var listNav = $('.timestip li>input');
+        var contents = $('.boxs_detail_dispay .list3');
+        $(contents[0]).attr("style", "display:none");
+        listNav.each(function(i) {
+            if ($(this).val() == currentType) {
+                $(this).attr("checked", "checked");
+                $(contents[i]).attr("style", "display:block");
+             }
+        });
+        //默认星期
+        var dayOfWeek = '@Model.Config.DayOfWeek';
+        $("input[name='DayOfWeek']").each(function () {
+            if ($(this).val() == dayOfWeek) {
+                $(this).attr("checked", "checked");
+            }
+        });
+    
+    });
+    
+    //验证
+    $(function () {
+        $("#inputForm").validate({
+            rules: {
+                TaskName: {
+                    required: true,
+                    maxlength: 20
+                },
+                TypeName: {
+                    required: true
+                },
+                MaxAgainCount: {
+                    required: false,
+                    digits: "只能输入整数"
+                },
+                IntervalTime: {
+                    required: false,
+                    digits: "只能输入整数"
+                },
+                Timetype: {
+                    required: true
+                },
+                DayExecuteTime: {}, DayOfWeekExecuteTime: {},
+                Month:{},MonthOfDayExecuteTime:{},MonthHmsExecuteTime:{}
+            },
+            errorPlacement: function (error, element) {
+                element.next('span').first().attr('class', 'error m10_l');
+                
+            },
+            success: function (s, element) {
+                element.siblings('span').first().attr('class', 'success m10_l');
+                //console.log($('input[name="Timetype"]:checked').val());
+                if ($(element).attr("name") == "Timetype") {
+                    switch ($('input[name="Timetype"]:checked').val()) {
+                        case "0":
+                            this.rules.IntervalTime.required = true;
+                            break;
+                        case "2":
+                            this.rules.DayExecuteTime.required = true;
+                            break;
+                        case "3":
+                            this.rules.DayOfWeekExecuteTime.required = true;
+                            break;
+                        case "4":
+                            this.rules.Month.required = true;
+                            this.rules.MonthOfDayExecuteTime.required = true;
+                            this.rules.MonthHmsExecuteTime.required = true;
+                            break;
+                    }
+                }
+            }
+        });
+        $("#inputForm").ajaxLoadingMask(true);
+        initDialog();
+    });
+    function initDialog() {
+        var parent = artDialog.open.origin,//art.dialog.parent,  // 父页面window对象
+            api = art.dialog.open.api;	// 	art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    if ($("#inputForm").valid()) {
+                        var config = $("#inputForm").serializeJson();
+                        var model =
+                        {
+                            Config: config,
+                            StartTimeQuantum: $('#StartTimeQuantum').val(),
+                            EndTimeQuantum: $('#EndTimeQuantum').val(),
+                            IntervalTime: $('#IntervalTime').val(),
+                            DayExecuteTime: $('#DayExecuteTime').val(),
+                            DayOfWeekExecuteTime: $('#DayOfWeekExecuteTime').val(),
+                            MonthOfDayExecuteTime: $('#MonthOfDayExecuteTime').val(),
+                            MonthHmsExecuteTime: $('#MonthHmsExecuteTime').val()
+                        };
+                        //console.log(model);
+                         $.ajax({
+                            url: '@Url.Action("AddTaskInfo")',
+                            data: JSON.stringify(model),
+                            dataType: "json",
+                            type: "POST",
+                            cache: false,
+                            contentType: 'application/json; charset=utf-8',
+                            success: function (data) {
+                                if (data.Status) {
+                                    parent.Refresh(data.Message);
+                                } else {
+                                    UI.Alert({
+                                        content: '操作失败。' + data.Message
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    return false;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+</script>
+

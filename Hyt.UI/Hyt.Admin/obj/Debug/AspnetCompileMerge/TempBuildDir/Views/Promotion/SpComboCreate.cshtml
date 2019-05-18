@@ -1,0 +1,553 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.SpCombo
+@{
+    ViewBag.Title = "新建套餐";
+}
+<link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all" />
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+<script type="text/javascript" src=" @Url.Content("~/Theme/Plugins/Editor/kindeditor.min.js") "></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/numbercontrol.js")"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<style type="text/css">
+    .basebox1 {
+        padding: 10px 0;
+    }
+
+        .basebox1 table tr td {
+            border-right: none !important;
+            border-bottom: none !important;
+        }
+
+    .usergroup {
+        background-color: #f5f5f5;
+        padding: 10px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+        height: 200px;
+    }
+
+        .usergroup dl {
+            float: left;
+        }
+
+            .usergroup dl dt {
+                margin-bottom: 5px;
+            }
+
+            .usergroup dl.operate {
+                padding: 10px 36px 0 36px;
+            }
+
+                .usergroup dl.operate dd {
+                    margin-top: 40px;
+                }
+
+    .zTreeDemoBackground {
+        padding-left: 100px;
+        padding-top: 20px;
+        padding-bottom: 10px;
+    }
+
+    .usermenu {
+        background-color: #f5f5f5;
+        padding: 5px 20px;
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
+</style>
+
+<div class="case">
+    <form id="form" method="POST" name="form">
+        <div class="boxs" id="tabboxs" style="overflow: visible;">
+            <div class="head_tab">
+                <ul class="tabNav2">
+                    <li class="long menuon"><a href="javascript:void(0);">套餐信息</a></li>
+                    <li class=""><a href="javascript:void(0);">套餐明细</a></li>
+                </ul>
+            </div>
+            <div id="tabcon" class="boxs_con_c1" id="tabcon">
+
+                <div class="list2">
+                    <div class="boxs_detail_dispay">
+                        <div class="tit_con">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                                <tbody>
+                                    <tr>
+                                        <td class="nameright" width="180"><span class="v_star">*</span>团购分销商</td>
+                                        <td>
+                                            <select name="DealerSysNo" id="DealerSysNo" save="DealerSysNo">
+                                                @{
+                                                    if (ViewBag.DealerList != null)
+                                                    {
+                                                        foreach (Hyt.Model.DsDealer Dealer in ViewBag.DealerList)
+                                                        {
+                                                            if (Dealer.SysNo == Model.DealerSysNo)
+                                                            {
+                                                                <option value="@Dealer.SysNo" selected="selected">@Dealer.DealerName</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@Dealer.SysNo">@Dealer.DealerName</option>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <span class="prompt m10_l" id="c_DealerSysNo">选择团购分销商</span>
+                                        </td>
+                                        <td class="nameright" width="180"><span class="v_star">*</span>团购仓库</td>
+                                        <td>
+                                            <select name="WarehouseSysNo" id="WarehouseSysNo" save="WarehouseSysNo">
+                                                @{
+                                                    if (ViewBag.WhWareHouseList != null)
+                                                    {
+                                                        foreach (Hyt.Model.WhWarehouse WhWarehouse in ViewBag.WhWareHouseList)
+                                                        {
+                                                            if (WhWarehouse.SysNo == Model.WarehouseSysNo)
+                                                            {
+                                                                <option value="@WhWarehouse.SysNo" selected="selected">@WhWarehouse.BackWarehouseName</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@WhWarehouse.SysNo">@WhWarehouse.BackWarehouseName</option>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <span class="prompt m10_l" id="c_WarehouseSysNo">选择团购仓库</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright" width="150"><span class="v_star">*</span>套餐名称</td>
+                                        <td width="300">
+                                            <input type="text" name="Title" id="Title" save="Title" maxlength="50" value="@Model.Title" />
+                                            <span class="prompt m10_l" id="c_Title">填写套餐名称</span>
+                                        </td>
+                                        <td class="nameright" width="150"><span class="v_star">*</span>促销名称</td>
+                                        <td width="300">
+                                            <select name="PromotionSysNo" save="PromotionSysNo">
+                                                @{
+                                                    if (ViewBag.PromotionList != null)
+                                                    {
+                                                        foreach (Hyt.Model.SpPromotion Promotion in ViewBag.PromotionList)
+                                                        {
+                                                            if (Promotion.SysNo == Model.PromotionSysNo)
+                                                            {
+                                                                <option value="@Promotion.SysNo" selected="selected">@Promotion.Name</option>
+                                                            }
+                                                            else
+                                                            {
+                                                                <option value="@Promotion.SysNo">@Promotion.Name</option>
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            </select>
+                                            <span class="prompt m10_l" id="c_PromotionSysNo">填写促销名称</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>起始时间</td>
+                                        <td>
+                                            <div class="date_btn fl">
+                                                <input type="text" name="StartTime" id="StartTime" save="StartTime" readonly="true" class="input_ht26" value="@if (Model.SysNo > 0 && Model.StartTime != null)
+                                                                                                                                                                      { @Model.StartTime.ToString("yyyy-MM-dd HH:mm");
+                                                                                                                                                                      }">
+                                                <button onclick="UI.Date({el:'StartTime',dateFmt:'yyyy-MM-dd HH:mm'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l" id="c_StartTime">选择起始时间</span>
+                                        </td>
+                                        <td class="nameright"><span class="v_star">*</span>结束时间</td>
+                                        <td>
+                                            <div class="date_btn fl">
+                                                <input type="text" name="EndTime" id="EndTime" save="EndTime" readonly="true" class="input_ht26" value="@if (Model.SysNo > 0 && Model.EndTime != null)
+                                                                                                                                                                { @Model.EndTime.ToString("yyyy-MM-dd HH:mm");
+                                                                                                                                                                }">
+                                                <button onclick="UI.Date({el:'EndTime',dateFmt:'yyyy-MM-dd HH:mm'});return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                            </div>
+                                            <span class="prompt m10_l" id="c_EndTime">选择结束时间</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright"><span class="v_star">*</span>套餐数</td>
+                                        <td>
+                                            <input type="text" name="ComboQuantity" id="ComboQuantity" maxlength="8" save="ComboQuantity" value="@if (Model.SysNo > 0)
+                                                                                                                                                    {
+                                                                                                                                                    @Model.ComboQuantity
+                                                                                                                                                    }" class="wd156"><span class="prompt m10_l" id="c_ComboQuantity">填写套餐数</span>
+                                        </td>
+                                        <td class="nameright"><span class="v_star">*</span>已销售数</td>
+                                        <td>
+                                            <input type="text" name="SaleQuantity" id="SaleQuantity" maxlength="8" save="SaleQuantity" value="@if (Model.SysNo > 0)
+                                                                                                                                                    {
+                                                                                                                                                    @Model.SaleQuantity
+                                                                                                                                                    }" class="wd156"><span class="prompt m10_l" id="c_MinQuantity">填写已销售数</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="list2" style="display: none;">
+                    <div class="boxs_tool">
+                        <div class="left_tool">
+                            <button class="btn btn_ht28" onclick="selectProducts($('#WarehouseSysNo').val(), $('#DealerSysNo').val()); return false;"><span class="icon_search"></span><span class="m5_l">挑选商品</span></button>
+                        </div>
+                    </div>
+                    <div class="boxs_listtabel">
+                        <table id="tbProductList" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_bnone">
+                            <thead>
+                                <tr>
+                                    <th width="200">商品编号</th>
+                                    <th width="200">商品名称</th>
+                                    <th width="200">优惠金额</th>
+                                    <th width="94">是否是主商品</th>
+                                    <th width="82" class="border_rnone">操作</th>
+                                    <th style="display: none">商品编号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product_list">
+                                @{
+                                    if (ViewBag.SpComboItemList != null)
+                                    {
+                                        int i = 0;
+                                        foreach (Hyt.Model.SpComboItem item in ViewBag.SpComboItemList)
+                                        {
+                                            if (i % 2 == 0)
+                                            {
+                                                @Html.Raw("<tr>")
+                                            }
+                                            else
+                                            {
+                                                @Html.Raw("<tr class='stag_color'>")
+                                            }
+
+                                        <td>@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                                        <td>@item.ProductName</td>
+                                        <td>
+                                            <input type="text" class="wd60 number_input DiscountAmount" name="DiscountAmount" maxlength="10" value="@item.DiscountAmount" />
+                                        </td>
+                                        <td>
+                                            <select class="IsMaster">
+                                                @{
+                                            var array = Enum.GetValues(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.是否是套餐主商品));
+                                            foreach (Hyt.Model.WorkflowStatus.PromotionStatus.是否是套餐主商品 master in array)
+                                            {
+                                                if (master.GetHashCode() == item.IsMaster)
+                                                {
+                                                    <option value="@master.GetHashCode()" selected="selected">@master.ToString()</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@master.GetHashCode()">@master.ToString()</option>
+                                                }
+                                            }
+                                                }
+                                            </select>
+
+                                        </td>
+                                        <td class="border_rnone">
+                                            <button title="删除" class="btn btn_ht26" type="button" onclick="DeleteOrderItem(this);return false;"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+                                        </td>
+                                        <td style="display: none">@item.ProductSysNo</td>
+                                        @Html.Raw("</tr>")
+                                            i++;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                                        </tr>
+                                    }
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="pagination align_c clearfix">
+                        @if (Model != null && Model.SysNo > 0)
+                        {
+                            if (Model.Status == (int)PromotionStatus.组合套餐状态.待审核)
+                            {
+                                if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.SP1006601))
+                                { <button class="btn btn_blue btn_ht32 bold f14 m10_r" onclick="save();return false;">保存</button><button class="btn btn_orange btn_ht32 bold f14 m10_r" onclick=" audit();return false; ">审核</button><button class="btn btn_red btn_ht32 bold f14 m10_r" onclick=" invalid();return false; ">作废</button>
+                                }
+                            }
+                            else
+                            {
+                                if (Model.Status == (int)PromotionStatus.组合套餐状态.已审核)
+                                {
+                                    <button class="btn btn_red btn_ht32 bold f14" id="calcelAuditCombo">取消审核</button>
+                                }
+                                else
+                                {
+                                    <script type="text/javascript">
+                                        $(function () {
+                                            $("input,select,button,textarea").attr("disabled", "true");
+                                        }) </script>
+                                }
+                            }
+                        }
+                        else
+                        {
+                            <button class="btn btn_blue btn_ht32 bold f14" onclick="save();return false;">保存</button>
+
+                        }&nbsp;
+                    </div>
+                </div>
+            </div>
+            <input type="hidden" id="SysNo" name="SysNo" save="SysNo" value="@Model.SysNo" />
+            <input type="hidden" id="Status" name="Status" save="Status" value="@Model.Status" />
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        var curl = '/Promotion/SpComboList';
+
+        $(function () {
+            UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_c1", tabContent: ".list2" });
+
+            LoadRule();
+            $("#form").ajaxLoadingMask(true);
+            //取消审核套餐
+            $("#calcelAuditCombo").click(function () {
+                UI.Confirm({
+                    content: '确定要取消套餐审核吗？',
+                    ok: function () {
+                        Ajax.postJosn("/Promotion/CalcelAuditCombo", "", function (p) {
+                            p.setParams("SysNo", $("#SysNo").val());
+                        }, function (ret) {
+                            if (ret.Status) {
+                                UI.CloseTab(null, curl, null, true);
+                                //Utils.alert("提交成功！", null, "succeed");
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        });
+                    }
+                });
+                return false;
+            });
+
+        });
+
+        //挑选商品
+        function selectProducts(warehouseSysNo, dealerSysNo) {
+            DAO.SelectProduct({
+                associationAttr: {
+                    warehouseSysNo: warehouseSysNo, dealerSysNo: dealerSysNo
+                },
+                onselect: function (a) {
+                    AddOrderItem(a);
+                }
+            });
+
+        }
+        //添加商品列表
+        function AddOrderItem(rows) {
+            var content = '';
+            var i = $("#product_list").find("tr").length;
+            var noData = false; //是否有数据
+            $.each(rows, function (idx, item) {
+                var exist = false;  //该商品是否已添加
+                $("#product_list").find("tr").each(function (i) {
+                    if ($(this).find("td").eq(5).html()) {
+                        var productsysno = $(this).find("td").eq(5).html();
+                        if (productsysno == item.pid) {
+                            exist = true;
+                        }
+                    } else {
+                        noData = true;
+                    }
+                });
+                if (!exist) {
+                    content += '<tr id=""><td>' + item.erp + '</td><td>' + item.name + '</td>' +
+                        '<td><input type="text" class="wd60 number_input DiscountAmount"  name="DiscountAmount" maxlength="10" value="0"/></td><td><select name="IsMaster"><option value="0">否</option><option value="1">是</option></select></td>' +
+                        '<td class="border_rnone"><button title="删除" class="btn btn_ht26 " type="button" onclick="DeleteOrderItem(this)"><span class="icon_trash"></span><span class="m5_l">删除</span></button></td><td style="display:none">' + item.pid + '</td></tr>';
+                }
+            });
+            if (content == '' && noData) {
+                content = '<tr><td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td> </tr>';
+            }
+            if (noData) {
+                $('#product_list').html(content);
+            } else {
+                $('#product_list').append(content);
+            }
+            DAO.InterlineStyle({ tableid: 'tbProductList' });
+        }
+        function save() {
+            commonSave("/Promotion/SaveCombo");
+        };
+
+        //审核
+        function audit() {
+            UI.Confirm({
+                content: "确定要审核通过该套餐吗?",
+                ok: function () {
+                    commonSave("/Promotion/AuditCombo");
+                }
+            });
+        }
+        function commonSave(url) {
+            if (!setting.form()) {
+                return false;
+            }
+            var products = getProductData();
+
+            if (products.length == 0) {
+                Utils.alert("请选择套餐商品");
+                return false;
+            }
+            //判断套餐商品是否设置主商品
+            var vIsMaster = false;
+            $("#product_list").find("tr").each(function (i) {
+                var obj = $(this).find("td:eq(3)").find("select");
+                if (obj.val() == 1) {
+                    vIsMaster = true;
+                    return false;
+                }
+            })
+            if (!vIsMaster) {
+                Utils.alert("请设置套餐商品的主商品");
+                return false;
+            }
+            Ajax.postJosn(url, "save", function (p) {
+                p.setParams("spComboItemList", products);
+            }, function (ret) {
+                if (ret.Status) {
+                    UI.CloseTab(null, curl, null, true);
+                    //Utils.alert("提交成功！", null, "succeed");
+                } else {
+                    Utils.alert(ret.Message);
+                }
+            });
+        }
+        //作废
+        function invalid(parameters) {
+            UI.Confirm({
+                content: "您确定要作废此套餐?",
+                ok: function () {
+                    Ajax.postJosn("/Promotion/InvalidComboBo", "", function (p) {
+                        p.setParams("SysNo", $("#SysNo").val());
+                    }, function (ret) {
+                        if (ret.Status) {
+                            UI.CloseTab(null, curl, null, true);
+                            //Utils.alert("提交成功！", null, "succeed");
+                            //UI.Alert({
+                            //    content: '提交成功!', icon: "succeed", callback: function () {
+                            //        location.href = curl;
+                            //    }, width: '200px'
+                            //});
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    });
+                }
+            });
+        }
+
+        //删除商品明细
+        function DeleteOrderItem(input) {
+            var tr = $(input).parents("tr");
+            tr.remove();
+        }
+
+        $('#WarehouseSysNo,#DealerSysNo').live('change', function () {
+            $("#product_list").find("tr").find("td").find("button").each(function (i) {
+                DeleteOrderItem($(this));
+            });
+        });
+
+        //获取商品列表数据
+        function getProductData() {
+            var orderItem = [];
+            $("#product_list").find("tr").each(function (i) {
+                var productsysno = $(this).find("td").eq(5).html();
+                var productname = $(this).find("td").eq(1).html();
+                var discountamount = $(this).find("td:eq(2)").find("input").val();
+                var ismaster = $(this).find("td:eq(3)").find("select").val();
+
+                if (productsysno) {
+                    var item = {
+                        ProductSysNo: productsysno,
+                        ProductName: productname,
+                        DiscountAmount: discountamount,
+                        IsMaster: ismaster
+                    };
+                    orderItem.push(item);
+                }
+            });
+            return orderItem;
+        }
+        //只能选取一个主商品 王耀发 2016-2-1 创建
+        $("#product_list").find("tr").find("td").find("select").live('change', function () {
+            if ($(this).val() == 1)
+            {
+                $("#product_list").find("tr").each(function (i) {
+                    var obj = $(this).find("td:eq(3)").find("select");
+                    if (obj.val() == 1) {
+                        obj.val(0);
+                    }
+                })
+                $(this).val(1);
+            } 
+        });
+
+        var setting;
+        //加载验证规则
+        function LoadRule() {
+            setting = $("#form").validate({
+                rules: {
+                    Title: {
+                        required: true
+                    },
+                    PromotionSysNo: {
+                        required: true
+                    },
+                    StartTime:
+                    {
+                        required: true
+                    },
+                    EndTime:
+                    {
+                        required: true,
+                        compareDate: "#StartTime"
+                    },
+                    ComboQuantity: {
+                        required: true,
+                        number: true
+                    },
+                    SaleQuantity:
+                    {
+                        required: true,
+                        number: true
+                    }
+                },
+                ignore: "",
+                errorPlacement: function (error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        }
+        jQuery.validator.methods.compareDate = function (value, element, param) {
+            var startDate = jQuery(param).val();
+            var date1 = new Date(Date.parse(startDate.replace(new RegExp("-", "g"), "/")));
+            var date2 = new Date(Date.parse(value.replace(new RegExp("-", "g"), "/")));
+            return date1 < date2;
+        };
+    </script>

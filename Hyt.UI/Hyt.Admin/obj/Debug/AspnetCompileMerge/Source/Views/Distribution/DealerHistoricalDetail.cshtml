@@ -1,0 +1,86 @@
+﻿@{
+    ViewBag.Title = "分销商预存款往来账";
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Plugins/Dialog/Dialog.yui.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+            $("#btn_search").click(function () {
+                doSearch();
+            });
+            $("#Status,#Source").change(function () {
+                doSearch();
+            });
+        });
+
+        function doSearch() {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            var data = {};
+            data.SysNo = $("#hidSysNo").val();
+            data.StartTime = $("#StartTime").val();
+            data.EndTime = $("#EndTime").val();
+            data.Source = $("#Source").val();
+            data.Status = $("#Status").val();
+            data.IsBindDealer = true;
+            data.DealerSysNo = '@ViewBag.DealerSysNo';
+            data.SelectedDealerSysNo = '@ViewBag.DealerSysNo';
+            $.get('@Url.Action("DealerHistoricalDetail", "Distribution")', data,
+               function (ret) {
+                   $('#paging').html(ret);
+                   mask.Remove();
+               });
+        }
+
+        //订单详情
+        function OrderBrowse(orderSysNo) {
+            @{
+                @:OpenOrderView(orderSysNo);
+            }
+        }
+
+        function OpenOrderView(id) {
+            UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 1000, height: 700 }, false);
+        }
+    </script>
+}
+<input id="hidSysNo" type="hidden" value="@ViewBag.SysNo" />
+<div class="case">
+    <div class="boxs_tit head_m">
+        @*<span class="ra10 c6">
+            <button class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href='/Distribution/DealerList'" type="button"><span class="icon_share_alt icon_white"></span><span class="m5_l">返回</span></button>
+        </span>*@
+        <h3>分销商财务明细</h3>
+    </div>
+
+    <div class="boxs_con_c1">
+        <div class="boxs_tool">
+            <div class="right_tool clearfix">
+                <span class="veralign_t fl">单据来源</span>
+                @Html.DropDownList("Source", ViewBag.Source as SelectList, htmlAttributes: new { @class = "select_ht28  m10_l m10_r fl wd100" })
+                <span class="veralign_t fl">状态</span>
+                @Html.DropDownList("Status", ViewBag.Status as SelectList, htmlAttributes: new { @class = "select_ht28  m10_l m10_r fl wd100" })
+                <div class="m10_r fl">
+                    <span class="veralign_t fl">日期范围</span>
+                    <div class="date_btn120 fl m10_l m10_r">
+                        <input type="text" class="Wdate" id="StartTime" onfocus="WdatePicker({maxDate:'#F{$dp.$D(\'EndTime\',{d:0});}'})" />
+                        <button type="button" title="日历" class="btn btn_ht26" onclick="var max=$('#EndTime').val();UI.Date({ el: 'StartTime',maxDate:max });"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span class="veralign_t fl">-</span>
+                    <div class="date_btn120 fl m10_l m10_r">
+                        <input type="text" class="Wdate" id="EndTime" onfocus="WdatePicker({minDate:'#F{$dp.$D(\'StartTime\',{d:0});}'})" />
+                        <button type="button" title="日历" class="btn btn_ht26" onclick="var min=$('#StartTime').val();UI.Date({ el: 'EndTime',minDate:min });"><span class="icon_calendar"></span></button>
+                    </div>
+                </div>
+                <button type="button" title="搜索" class="btn btn_ht28 fl btn_blue" id="btn_search"><span class="icon_search icon_white"></span><span class="m5_l">搜索</span></button>
+            </div>
+        </div>
+        <div class="boxs_list">
+            <div id="paging" class="boxs_listtabel">
+            </div>
+        </div>
+    </div>
+</div>

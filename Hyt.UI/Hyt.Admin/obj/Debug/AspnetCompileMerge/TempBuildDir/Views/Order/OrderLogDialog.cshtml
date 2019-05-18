@@ -1,0 +1,209 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.Transfer.CBDsDealer
+
+@{
+    ViewBag.Title = "订单发货";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#OrderLogForm").validate({
+                rules: {
+                    pfreight_no: {
+                        required: true
+                         , maxlength: 50
+                    },
+                    express_num: {
+                        required: true
+                         , maxlength: 50
+                    },
+                    sender_name: {
+                        required: true
+                         , maxlength: 25
+                    },
+                    sender_city: {
+                        required: true
+                         , maxlength: 25
+                    },
+                    sender_address: {
+                        required: true
+                         , maxlength: 50
+                    },
+                    sender_phone: {
+                        required: true
+                         , maxlength: 50
+                    },
+                    sender_country_code: {
+                        required: true
+                         , maxlength: 50
+                    },
+                    goods_gweight: {
+                        required: true
+                        , number: true
+                    }
+
+                },
+                messages: {
+                    pfreight_no: {
+                        required: "总运单号必填"
+                       , maxlength: "长度超出50个字"
+                    },
+                    express_num: {
+                        required: "快件单号必填"
+                       , maxlength: "长度超出50个字"
+                    },
+                    sender_name: {
+                        required: "发件人姓名必填"
+                       , maxlength: "长度超出25个字"
+                    },
+                    sender_city: {
+                        required: "发件人城市必填"
+                       , maxlength: "长度超出25个字"
+                    },
+                    sender_address: {
+                        required: "发件人地址必填"
+                       , maxlength: "长度超出50个字"
+                    },
+                    sender_phone: {
+                        required: "发件人电话必填"
+                       , maxlength: "长度超出50个字"
+                    },
+                    sender_country_code: {
+                        required: "发件人国别必填"
+                       , maxlength: "长度超出50个字"
+                    },
+                    goods_gweight: {
+                        required: "重量必填"
+                       , number: "重量必须为数值"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法    //$("#OrderLogForm").serialize()
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#OrderLogForm").valid()) {
+                                $.post('/Ajax/PushOrderToLog', $("#OrderLogForm").serialize(), function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doComplexSearch(1);
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+
+
+
+
+
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="OrderLogForm" name="OrderLogForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>总运单号：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="hidden" name="orderId" id="orderId" value="@ViewBag.orderId" />
+                                <input type="hidden" name="code" id="code" value="@ViewBag.code" />
+                                <input type="text" name="pfreight_no" id="pfreight_no" class="wd200" value="" maxlength="50" /><span class="prompt m10_l" id="c_pfreight_no">填写总运单号</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>快件单号：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="express_num" id="express_num" class="wd200" value="" maxlength="50" /><span class="prompt m10_l" id="c_express_num">填写快件单号</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>发件人姓名：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="sender_name" id="sender_name" class="wd200" value="@Model.DealerName" maxlength="25" /><span class="prompt m10_l" id="c_sender_name">填写发件人姓名</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>发件人城市：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="sender_city" id="sender_city" class="wd200" value="@Model.AreaAllName.Split('-')[1].ToString().Trim()" maxlength="25" /><span class="prompt m10_l" id="c_sender_city">填写发件人城市</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>发件人地址：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="sender_address" id="sender_address" class="wd300" value="@Model.StreetAddress" maxlength="50" /><span class="prompt m10_l" id="c_sender_address">填写发件人地址</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>发件人电话：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="sender_phone" id="sender_phone" class="wd200" value="@Model.MobilePhoneNumber" maxlength="50" /><span class="prompt m10_l" id="c_sender_phone">填写发件人电话</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>发件人国别：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="sender_country_code" id="sender_country_code" class="wd200" value="142" maxlength="50" /><span class="prompt m10_l" id="c_sender_country_code">填写发件人国别</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>重量(KG)：</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="goods_gweight" id="goods_gweight" class="wd200" value="" maxlength="50" /><span class="prompt m10_l" id="c_goods_gweight">填写重量</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </form>
+</div>

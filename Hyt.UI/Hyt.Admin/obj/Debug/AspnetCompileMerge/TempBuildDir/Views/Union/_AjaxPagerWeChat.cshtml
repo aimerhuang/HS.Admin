@@ -1,0 +1,59 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBMkWeixinQuestion>
+
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone ">
+    <thead>
+        <tr>
+
+            <th width="53">
+            <input class="checkall" name="" type="checkbox" value=""></th>
+            <th width="46">编号</th>
+            <th width="200">微信号</th>
+            <th class="align_l p10_lr">消息</th>
+            <th width="110">时间</th>
+            <th width="60">新消息</th>
+            <th width="80">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBMkWeixinQuestion item in Model.TData)
+            {
+            <tr>
+                <td>
+                <input name="subCheck" type="checkbox" value="@(item.WeixinId)"></td>
+                <td>@item.SysNo</td>
+                <td>@item.ShowName</td>
+                <td class="align_l p10_lr">@item.Messages</td>
+                <td>@item.MessagesTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.NewsNum</td>
+                <td>
+                    <button class="btn btn_ht26 UN1007201" onclick="Look('@item.WeixinId')"><span class="icon_tosee"></span><span class="m5_l">查看</span></button></td>
+            </tr>                      
+                   
+            }
+
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+    //Check选择
+    UI.CheckAllbox(".boxs_listtabel", ".checkall");
+</script>

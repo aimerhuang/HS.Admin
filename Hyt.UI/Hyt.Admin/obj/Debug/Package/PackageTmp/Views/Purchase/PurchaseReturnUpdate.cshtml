@@ -1,0 +1,647 @@
+﻿@model Hyt.Model.PrPurchaseReturn
+@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "修改采购退货单";
+    var imgUrl = Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer + "Product/Image240/";
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+    <link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+    <style type="text/css">
+        .thumb {
+            position: relative;
+        }
+
+            .thumb img {
+                padding: 4px;
+                top: 0;
+                left: 0;
+                height: 30px;
+            }
+    </style>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+    <script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+    @*<script src="~/Theme/scripts/jquery.min.js"></script>*@
+    <script type="text/template" id="purchaseItem">
+        <tr id="tr_{%=this.pid%}">
+            <td>
+                <div class="thumb">
+                    <img alt="{%=this.name%}" src="{%=imgUrl%}{%=this.pid%}.jpg">
+                </div>
+                <input type="hidden" value="0" name="SysNo" />
+                <input type="hidden" value="0" name="EnterQuantity" />
+                <input type="hidden" value="" name="PurchaseCode" />
+            </td>
+            <td class="align_l p10_lr">{%=this.erp%}</td>
+            <td name="inventory_{%=this.pid%}" id="eas_{%=this.pid%}" class="align_l p10_lr">
+                {%=this.name%}
+            </td>
+            <td>
+                <input type="text" value="1" sysno="{%=this.pid%}" name="Quantity" class="number_input wd40" id="input_quantity_{%=this.pid%}" />
+            </td>
+            <td class="red p10_r">0</td>
+            <td>
+                <input type="text" value="{%=this.baseprice%}" sysno="{%=this.pid%}" name="Money" class="number_input wd40" id="input_money_{%=this.pid%}">
+            </td>
+            <td class="red align_l p10_lr" name="money_count">¥{%=this.baseprice%}</td>
+            <td>
+                <input type="text" value="" sysno="{%=this.pid%}" name="Remarks" class="number_input wd300 align_l" id="input_remarks_{%=this.pid%}">
+            </td>
+            <td>
+                <button sysno="{%=this.pid%}" type="button" class="btn btn_ht26"><span sysno="{%=this.pid%}" class="icon_trash"></span></button>
+            </td>
+        </tr>
+    </script>
+
+
+}
+@using ((Ajax.BeginForm("PurchaseReturnUpdate", "Purchase", null, new AjaxOptions { HttpMethod = "POST" }, new { id = "ajaxForm" })))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <span class="ra10 c6">
+                    <button class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href='/Purchase/PurchaseReturnList/'" type="button"><span class="icon_share_alt icon_white"></span><span class="m5_l">返回采购退货单管理</span></button>
+                </span>
+                <h3>修改采购退货单</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <form id="form1" novalidate="novalidate">
+                    <div class="boxs_detail_dispay" id="main_div">
+                        <div group="64" id="accordion_497131" accourdindex="0">
+                            <div class="tit_dispay">
+                                <h5><span class=""></span>采购退货单信息</h5>
+                            </div>
+                            <div class="tit_con attributebox" title="采购退货单信息">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td class="nameright wd100"><span class="v_star">*</span>出库仓库</td>
+                                            <td width="300">
+                                                @ViewBag.WarehouseName
+                                            </td>
+                                            <td class="nameright wd100"><span class="v_star">*</span>采购单代码</td>
+                                            <td width="300">
+                                                @ViewBag.PurchaseCode
+                                            </td>
+                                            <td class="wd115"></td>
+                                            <td><span id="deliveryman_credit" class="red" data-price="0"></span></td>
+                                        </tr>
+                                        @*<tr>
+                        <td class="nameright wd100"><span class="v_star">*</span>入库仓库</td>
+                        <td width="300">
+                            <input type="text" id="choose_warehouse" value="" name="WarehouseSysNo" class="wd200" />
+                        </td>
+                        <td class="nameright wd70"><span class="v_star">*</span>供应商</td>
+                        <td width="300">
+                            <select id="choose_deliveryman" name="DeliveryUserSysNo" class="wd200">
+                                <option value="0">--请选择--</option>
+                                @foreach (var item in (List<Hyt.Model.Procurement.PmManufacturer>)ViewBag.ManufacturerList)
+                                {
+                                    <option value="@item.SysNo" @(Model.ManufacturerSysNo == item.SysNo ? "Selected=\"Selected\"" : "")>@item.FName</option>
+                                }
+
+                            </select>
+                        </td>
+                        <td class="wd115"></td>
+                        <td><span id="deliveryman_credit" class="red" data-price="0"></span></td>
+                    </tr>*@
+                                        <tr>
+                                            <td class="nameright border_bnone" valign="top">备注</td>
+                                            <td colspan="5" class="border_bnone">
+                                                <textarea id="remarks" name="Remarks" style="width: 98%" maxlength="200">@Model.Remarks</textarea>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="tit_dispay">
+                            <h5>采购退货单详情</h5>
+                        </div>
+                        <div class="tit_con">
+                            <table border="0" cellpadding="0" cellspacing="0">
+                                <tbody>
+                                    <tr>
+                                        <td class="nameright border_bnone">
+                                            @*<button type="button" class="btn btn_ht28 m5_r btn_blue" id="choose_product" title="添加借货商品">添加采购商品</button>*@
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="boxs_listtabel">
+                            <table width="100%" border="0" id="item_list" name="ItemList" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                                <thead>
+                                    <tr>
+                                        <th class="border_bnone wd60">商品图片</th>
+                                        <th class="border_bnone wd200 align_l p10_lr">产品编码</th>
+                                        <th class="border_bnone align_l p10_lr">产品名称</th>
+                                        @*<th class="border_bnone wd90">可退货数量</th>*@
+                                        <th class="border_bnone wd90">退货数量</th>
+                                        @*<th class="border_bnone" width="116">已出库数量</th>*@
+                                        <th class="border_bnone wd70">采购价</th>
+                                        <th class="border_bnone wd100">总价</th>
+                                        @*<th class="border_bnone wd400">备注</th>*@
+                                        <th class="border_bnone" width="48">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="main_body">
+                                    @if (Model.SysNo > 0 && Model.PurchaseReturnDetails != null)
+                                    {
+                                        foreach (var item in Model.PurchaseReturnDetails)
+                                        {
+                                            Hyt.Model.PdProduct Product = Hyt.BLL.Product.PdProductBo.Instance.GetProductBySysNo(item.ProductSysNo);
+                                            Hyt.Model.PrPurchaseDetails PurchaseDetail = Hyt.BLL.Purchase.PrPurchaseDetailsBo.Instance.GetPurchaseDetailByPurAndProSysNo(Model.PurchaseSysNo, item.ProductSysNo);
+                                            <tr id="tr_@item.ProductSysNo">
+                                                <td>
+                                                    <div class="thumb"><img alt="@item.ProductSysNo" src="@imgUrl@(item.ProductSysNo).jpg"></div>
+                                                    <input type="hidden" value="@item.SysNo" name="SysNo" />
+                                                    @*<input type="hidden" value="@item.EnterQuantity" name="EnterQuantity" />
+                                                    <input type="hidden" value="@item.ErpCode" name="PurchaseCode" />*@
+                                                </td>
+                                                <td class="align_l p10_lr">@Product.ErpCode</td>
+                                                <td name="inventory_@(item.ProductSysNo)" id="eas_@(item.ProductSysNo)" class="align_l p10_lr">@(Product.ProductName)</td>
+
+                                                <td>
+                                                    <input type="text" 
+                                                           data-totalquantity="@item.ReturnQuantity"
+                                                           data-qealquantity="0"
+                                                           data-sysno="@item.SysNo"
+                                                           data-pid="@item.ProductSysNo" 
+                                                           value="@item.ReturnQuantity" sysno="@item.ProductSysNo" name="Quantity" class="number_input wd40" id="input_quantity_@item.ProductSysNo" />
+                                                </td>
+
+                                                    @*<td class="red p10_r">@item.EnterQuantity</td>*@
+                                                <td><input type="text" value="@PurchaseDetail.Money" sysno="@item.ProductSysNo" name="Money" class="number_input wd40" id="input_money_@item.ProductSysNo"></td>
+                                                <td class="red align_l p10_lr" name="money_count">¥@item.ReturnTotalMoney</td>
+                                                @*<td><input type="text" value="@item.Remarks" sysno="@item.ProductSysNo" name="Remarks" class="number_input wd300 align_l" id="input_remarks_@item.ProductSysNo"></td>*@
+                                                <td><button sysno="@item.ProductSysNo" type="button" class="btn btn_ht26"><span sysno="@item.ProductSysNo" class="icon_trash"></span></button></td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td align="right" colspan="9" class="border_top">
+                                            <span>合计数量:</span>
+                                            <span class="m10_r" id="sum_num">
+                                                @(Model.SysNo > 0 ? Model.ReturnQuantity : 0)
+                                            </span>
+                                            <span>合计金额:</span>
+                                            <span class="p10_r red" id="sum_price" data-price="0">
+                                                ¥@(Model.SysNo > 0 ? Model.ReturnTotalMoney : 0.00M)
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+
+                    </div>
+                </form>
+                <div class="pagination align_c clearfix tit_dispay">
+                    @*<span id="span_pass" class="wd100">
+                            <input id="forcibly_pass" type="checkbox" name="IsEnforceAllow" /><span class="m5_r red">是否强制放行</span>
+                        </span>*@
+                    &nbsp;
+                    @if (Model.SysNo > 0)
+                    {
+                        <button class="btn btn_blue btn_ht32 bold f14 m10_r" type="button" title="修改采购退货单" id="create_btn">修改采购退货单</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_blue btn_ht32 bold f14 m10_r" type="button" title="创建采购退货单" id="create_btn">创建采购退货单</button>
+                    }
+
+                    <button class="btn btn_ht32 bold f14" type="button" title="返回" id="return_btn" onclick="window.location.href = '/Purchase/PurchaseReturnList/'">返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(function () {
+        $("#item_list").delegate("input[name='Quantity']", "blur", function () {
+            var totalquantity = $(this).attr("data-totalquantity");
+            var qealquantity = $(this).attr("data-qealquantity");
+            var val = $(this).val();
+            if (val == '' || isNaN(val)) {
+                $(this).val(totalquantity - qealquantity);
+            }
+            if (checkRate(val) && val > 0) {
+                var count = qealquantity * 1 + val * 1;
+                if (count > totalquantity) {
+                    $(this).val(totalquantity - qealquantity);
+                }
+            }
+        });
+    });
+</script>
+
+<script type="text/javascript">
+
+        var imgUrl = "@imgUrl";
+        //#region 数字控件需要使用
+        Function.prototype.getMultiLine = function () {
+            var lines = new String(this);
+            lines = lines.substring(lines.indexOf("/*") + 3, lines.lastIndexOf("*/"));
+            return lines;
+        };
+        //#region 本页面操作类--PagerOperation
+        var PagerOperation = {};
+        var DelSysNos = [];
+        //初始化事件
+        PagerOperation.InitializeEvent = function () {
+
+            $("img").error(function () {
+                $(this).unbind("error").attr("src", "/Theme/images/noimage.jpg?v=1");
+            });
+            $("div.thumb").hover(function () {
+                var $img=$(this).find("img");
+                var left = (parseFloat($img.width())+8) + "px";
+                $(this).append("<img class='thumbMax' src='" + $img.attr("src") + "' style='position:absolute;left:" + left + ";top:0px;height:auto;z-index:99999;'/>");
+            }, function () {
+                $(this).find(".thumbMax").remove();
+            });
+
+            var $inputs = $("#main_body input[name='Quantity'],#main_body input[name='Money']");
+
+            try {
+                $inputs.numberInput();
+            } catch (e) {}
+
+            //采购数和采购价的计算事件
+            $inputs.unbind("blur").bind("blur", function () {
+                $(this).css("border", "1px solid #ccc");
+                var $tr = $(this).parent().parent("tr");
+                var $money_count = $tr.children("td[name='money_count']");
+                var para = PagerOperation.getItemParam($tr);
+                $money_count.text(PagerOperation.priceToString(para.mc));
+                PagerOperation.showTotalPrice();
+            });
+        };
+        //重置表格交替行样式
+        PagerOperation.setTableCss = function () {
+            //重置表格交替行样式
+            DAO.InterlineStyle();
+        };
+        //#endregion
+        $(function () {
+            PagerOperation.InitializeEvent();
+            PagerOperation.disable();
+            PagerOperation.setTableCss();
+            //#region 初始化--表格中的数字控件
+            UI.Numbercontrol(PagerOperation.getNumberBoxParam());
+            //#endregion
+            //#region 初始化--数字选择框--检测最大输入事件，以及--删除按钮--事件
+            $("#main_body").delegate("input[product_num]", "keyup", function (e) {
+                PagerOperation.setTableStatus(e.target);
+                PagerOperation.showTotalPrice();
+            });
+            $("#main_body").delegate("button[type='button']", "click", function (e) {
+                var self = $(e.target), sysno = self.attr("sysno");
+
+                UI.Confirm({
+                    content: "确定删除吗？",
+                    cancel: true,
+                    ok: function () {
+                        PagerOperation.deleteProduct(sysno);
+                        self.parents("tr").remove();
+                        PagerOperation.showTotalPrice();
+                    }
+                });
+            });
+            //#endregion
+
+            //提交新采购单
+            $("#create_btn").click(function () {
+
+                var $tr = $("#main_body").children("tr");
+                for (var i = 0; i < $tr.length; i++)
+                {
+                    var $_tr = $tr.eq(i);
+                    var $quantity = $_tr.find("input[name='Quantity']");
+                    var $money = $_tr.find("input[name='Money']");
+
+                    if ($.trim($quantity.val())=="") {
+                        $quantity.focus().css("border", "1px solid red");
+                        return false;
+                    }
+                    if ($.trim($money.val()) == "") {
+                        $money.focus().css("border", "1px solid red");
+                        return false;
+                    }
+                }
+
+                PagerOperation.CreateProductLeng();
+
+            });
+
+            //修改下拉列表框为select2
+            UI.SelectWhareHouse($("#choose_warehouse"),0,null,"@ViewBag.WarehouseName");
+            $("#choose_warehouse").val("@(Model.WarehouseSysNo <=0 ? "" : Model.WarehouseSysNo.ToString())");
+            //#region 初始化--仓库下拉框--事件
+            $("#choose_warehouse").change(function (e) {
+                PagerOperation.disable();
+                var self = $(e.target);
+                var val = self.val();
+            });
+            //#endregion
+
+            //#region 初始化--配送员下拉框--事件
+            $("#choose_deliveryman").change(function (e) {
+
+            });
+            //#endregion
+
+            //#region 初始化--选择商品按钮--事件
+            $("#choose_product").click(function () {
+                //获取采购系统编号
+                var deliverymanSysNo = $("#choose_deliveryman").val();
+                //获取已添加的商品系统编号
+                var isAddedSysno = PagerOperation.getAddedProductSysNos();
+                var warehouseSysNo = $("#choose_warehouse").val();
+
+                if (warehouseSysNo == null || warehouseSysNo == undefined || warehouseSysNo=="") {
+                    tips('tips_warning', '请选择入库仓库！');
+                    return;
+                }
+
+                DAO.SelectProduct({
+                    selectedProducts: isAddedSysno,
+                    onselect: function (result) {
+                        if (result) {
+                            PagerOperation.createTableAndSaveData(result);
+                            PagerOperation.InitializeEvent();
+                            PagerOperation.showTotalPrice();
+                        }
+                    }
+                });
+            });
+            //#endregion
+        });
+
+        //#region 保存页面数据--PageData
+        //  数组中包含的类有如下属性：
+        //   ProductLendItemSysNo:借货单明细系统编号,
+        //   ProductSysNo:商品编号,
+        //   ProductName:商品名称,
+        //   ProductNum:仓库中的商品存货数量,
+        //   ProductOrderNum:商品订购数量（由页面控件设置）,
+        //   Price:会员等级价格
+        var PageData = [];
+
+        //获取采购单项需计算的参数
+        PagerOperation.getItemParam = function (tr) {
+            var para = {};
+            var $tr = tr;
+            var $quantity = $tr.find("input[name='Quantity']");
+            var $money = $tr.find("input[name='Money']");
+
+            para.q = $quantity.val() == "" ? 0 : $quantity.val();
+            para.m = $money.val() == "" ? 0 : $money.val();
+            para.mc = parseFloat(para.q) * parseFloat(para.m);
+            return para;
+        };
+        //获取设置--数字输入框控件参数--
+        PagerOperation.getNumberBoxParam = function () {
+
+        };
+
+        //获取已添加的商品系统编号
+        PagerOperation.getAddedProductSysNos = function () {
+            var arr = [];
+            $("#main_body").children("tr").each(function () {
+                arr.push($.trim($(this).attr("id").replace("tr_","")));
+            });
+            return arr;
+            //return this.convertArrayToObject(arr);
+        };
+
+        //将数组转换为以数组索引为key的对象集合
+        PagerOperation.convertArrayToObject = function (/*待转换数组*/array) {
+            var convertObj = {};
+            var len = array.length;
+            for (var i = 0; i < len; i++) {
+                convertObj[i] = array[i];
+            }
+            return convertObj;
+        };
+
+        //创建订单表格，并保存服务端返回的数据
+        PagerOperation.createTableAndSaveData = function (item) {
+            var trs = [];
+            for (var i = 0; i < item.length; i++) {
+                if ($("#tr_"+item[i].pid).length<=0) {
+                    trs.push(myTempl($("#purchaseItem").html(), item[i]));
+                }
+            }
+            $("#main_body").append(trs.join(""));
+            this.setTableCss();
+        };
+        PagerOperation.getEasInfo = function () {
+
+        };
+
+
+        //检查历史价格
+        PagerOperation.checkProductPrice = function (list) {
+            //var productSysNo = item.pid;
+        };
+        PagerOperation.CreateProductLeng = function () {
+            var model = { PurchaseReturnDetails: [], delSysNos: [] };
+            model.PurchaseReturnDetails = PagerOperation.getOrderInformation();
+            model.DelSysNos = DelSysNos;
+            if (model.PurchaseReturnDetails.length > 0) {
+                model.WarehouseSysNo = "@Model.WarehouseSysNo";
+                model.PurchaseSysNo = "@Model.PurchaseSysNo";
+                model.Remarks = $("#remarks").val();
+                //model.ReturnTotalMoney = PagerOperation.stringToPrice($("#sum_price").text());
+                model.SysNo = "@Model.SysNo";
+
+                @*model.SysNo = "@Model.SysNo";
+                model.PaymentStatus = "@Model.PaymentStatus";
+                model.PurchaseCode = "@Model.PurchaseCode";*@
+                @*model.Status = "@Model.Status";*@
+                @*model.WarehousingStatus = "@Model.WarehousingStatus";
+                model.EnterQuantity = "@Model.EnterQuantity";*@
+                var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                var option = {
+                    url: '@Url.Action("PurchaseReturnUpdate")',
+                    type: 'POST',
+                    data: JSON.stringify(model),
+                    contentType: 'application/json',
+                    success: function (ret) {
+                        mask.Remove();
+                        if (ret.StatusCode < 0) {
+                            UI.Alert({ content: ret.Message });
+                        } else {
+                            tips('tips_success', '操作成功！');
+                            window.setTimeout(window.location.href = '/Purchase/PurchaseReturnList/', 1000);
+                        }
+                    },
+                    error: function () {
+                        mask.Remove();
+                    }
+                };
+                $.ajax(option);
+            } else {
+                tips('tips_warning', '请添加需要退货的商品！');
+            }
+        };
+
+        //检查商品是否已添加(已添加：true；未添加：false)
+        PagerOperation.isProductAdd = function (/*待添加商品编号*/productSysno) {
+            var len = PageData.length;
+            for (var i = 0; i < len; i++) {
+                if (PageData[i].pid == productSysno) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        //将价格字符串数字转为float类型（返回如：0.00）
+        PagerOperation.stringToPrice = function (/*待转换的价格字符串，如[¥0.00]*/price) {
+            if (price) {
+                if (checkRate(price)) {
+                    return window.parseFloat(price);
+                } else {
+                    var tmp = price.replace("¥", "").replace(/,/g, "");
+                    return window.parseFloat(tmp);
+                }
+            }
+        };
+
+        //将价格转换为指定格式的字符串（返回如：¥0.00）
+        PagerOperation.priceToString = function (/*待转换的价格，如[0.00]*/price) {
+            if (price) {
+                var priceArr = (price.toFixed(2) + "").split(".");
+                var num = priceArr[0], arr = [], status = 0, len = num.length - 1;
+
+                for (var i = len; i >= 0; i--) {
+                    arr.push(num[i]);
+                    status++;
+                    if (status == 3) {
+                        if ((len + 1) > 3) arr.push(",");
+                        status = 0;
+                    }
+                }
+                var str = arr.reverse().join("");
+                return str.charAt(0) === ',' ? "¥" + str.slice(1, arr.reverse().join("").length) + "." + priceArr[1] : "¥" + str + "." + priceArr[1];
+            }
+            return "¥00.000";
+        };
+
+        //保存指定商品的订购数量
+        PagerOperation.saveProductOrderNum = function (/*商品系统编号*/sysno, /*订购数量*/num) {
+            var len = PageData.length;
+            for (var i = 0; i < len; i++) {
+                if (PageData[i].pid == sysno) {
+                    PageData[i].lendQuantity = num;
+                    break;
+                }
+            }
+        };
+
+        //根据数字文本框的值，设置表格的状态，并保存订购数量
+        PagerOperation.setTableStatus = function (/*输入数字的文本框对象*/text) {
+
+        };
+
+        //删除指定的商品
+        PagerOperation.deleteProduct = function (/*商品系统编号*/sysno) {
+            var len = PageData.length;
+            var sysNo = $("#tr_" + sysno).find("input[name='SysNo']").val();
+            if(sysNo!="0"){
+                DelSysNos.push(sysNo);
+            }
+        };
+
+        //计算订购商品中金额
+        PagerOperation.computeTotalPrice = function () {
+            var obj = {};
+            var sum = 0.00;
+            var totalNum = 0;
+            $("#main_body").children("tr").each(function () {
+                var para = PagerOperation.getItemParam($(this));
+                sum = sum +parseFloat(para.mc);
+                totalNum +=parseInt(para.q);
+            });
+            obj.totalPrice = sum; //总金额
+            obj.totalNum = totalNum; //总订购数量
+            return obj;
+        };
+
+        //设置总金额显示
+        PagerOperation.showTotalPrice = function () {
+            var obj = this.computeTotalPrice();
+            $("#sum_price").text(this.priceToString(obj.totalPrice)).attr("data-price", obj.totalPrice);
+            $("#sum_num").text(obj.totalNum);
+        };
+
+    //获取订单商品信息集合
+    /*
+        PagerOperation.getOrderInformation = function () {
+            var orderInformations = [];
+            $("#main_body").children("tr").each(function () {
+                var $tr = $(this);
+                var $quantity = $tr.find("input[name='Quantity']");
+                var $money = $tr.find("input[name='Money']");
+                var $remarks = $tr.find("input[name='Remarks']");
+                var $sysNo = $tr.find("input[name='SysNo']");
+                var $enterQuantity = $tr.find("input[name='EnterQuantity']");
+                var $purchaseCode = $tr.find("input[name='PurchaseCode']");
+                var orderInformation = {};
+                orderInformation.ProductSysNo =$.trim($(this).attr("id").replace("tr_",""));
+                orderInformation.ProductName =$.trim($("#eas_" + orderInformation.ProductSysNo).text());
+                orderInformation.Quantity = $quantity.val();
+                orderInformation.Money = $money.val();
+                orderInformation.Remarks = $remarks.val();
+                orderInformation.SysNo = $sysNo.val();
+                orderInformation.ErpCode = $tr.children("td").eq(1).text();
+                orderInformation.EnterQuantity = $enterQuantity.val();
+                orderInformation.PurchaseCode = $purchaseCode.val();
+                orderInformations.push(orderInformation);
+            });
+            return orderInformations;
+        };
+        */
+        PagerOperation.getOrderInformation = function () {
+            var orderInformations = [];
+            $("#main_body").children("tr").each(function () {
+                var $tr = $(this);
+                var $quantity = $tr.find("input[name='Quantity']");
+                var $money = $tr.find("input[name='Money']");
+                var $sysNo = $tr.find("input[name='SysNo']");
+                var orderInformation = {};
+                orderInformation.ProductSysNo = $.trim($(this).attr("id").replace("tr_", ""));
+                orderInformation.ReturnQuantity = $quantity.val();
+                orderInformation.ReturnTotalMoney = ($quantity.val() * 1.00 * $money.val()).toFixed(2);
+                orderInformation.OutQuantity = 0;
+                orderInformation.Payment = 0;
+                orderInformation.SysNo = $sysNo.val();
+                orderInformations.push(orderInformation);
+            });
+            return orderInformations;
+        };
+        //#endregion
+
+        //开启页面功能
+        PagerOperation.enable = function () {
+            //$("#choose_product,#create_btn,#remarks").removeAttr("disabled").removeClass("disabled");
+        };
+        //关闭页面功能
+        PagerOperation.disable = function () {
+            //$("#choose_product,#create_btn,#remarks").attr("disabled", "disabled").addClass("disabled");
+        };
+
+</script>

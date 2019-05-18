@@ -1,0 +1,97 @@
+﻿@using Hyt.BLL.Authentication
+@model Hyt.Model.Parameter.ParaCallCenterIndex
+@{
+    ViewBag.Title = "Index";
+}
+
+@section HeadJs
+{
+    <script type="text/javascript">
+        /*
+         //li删除事件
+        $(".delx").live("click", function () {
+            DelectEvent($(this).parent());
+            //冒泡
+            return false;
+        });
+        */
+        $(document).ready(function() {
+            //show customerInfo page according to the customer phonenumber binding and syuser
+            //CRM/CrCustomerDetail?sysNo=1069&_=1375409757430
+                                                            @*            var url = '/CRM/CrCustomerDetail?sysNo=' + '@Model.SSO_data.OperatorId' + '&_=' + '@Model.Phone';
+            UI.OpenCreatTab("会员信息", url);*@
+
+            //#region variables
+            var url = {
+                urlMemberInfo: "/callcenter/customer?phone=@Model.Phone",
+                urlOrderRecord: '/Order/Query?customersysno=@ViewBag.cusSysNo',//todo 过滤会员信息
+                urlPhoneOrder: '/Order/OrderCreate?customersysno=@ViewBag.cusSysNo',
+                urlPhoneRMA: '/RMA/RmaNewList?customersysno=@ViewBag.cusSysNo',
+                urlRMARecord: '/RMA/RmaEditList?customersysno=@ViewBag.cusSysNo',
+                //urlPhoneRecord: '',//removed
+                urlSue: '/crm/CrComplaint?mobilePhoneNumber=@Model.Phone',
+                urlQuery: '/Front/CrCustomerQuestion',
+                urlCallRecords: '/crm/CrCustomerCallRecord?id=@ViewBag.cusSysNo',
+            };
+
+            //#endregion
+            $('#frmMemberInfo').attr('src',url['urlMemberInfo']);
+
+            $('ul li').first().css('margin-left', '0px');
+            $('ul li').click(function() {
+                $(this).addClass('menuon');
+                var obj = $(this);
+                $('ul li').not($(this)).removeClass('menuon');
+                //lazy loading iframe
+                var frmId = 'frm' + $(this).attr('id').replace('li', '');
+
+                if ($('#' + frmId).length > 0) {
+                    $('#' + frmId).removeClass().addClass('block');
+                    //hide others
+                    $('#iframewrap').children().not('#' + frmId).removeClass().addClass('hide');
+                    return false;
+                }
+                //set and load
+                $('#frmMemberInfo').clone().empty().attr('id', frmId).attr('src', url[frmId.replace('frm', 'url')]).removeClass().addClass('block').appendTo($('#iframewrap'));
+                //$('<p>test</p>').appendTo($('#iframewrap'));
+                $('#iframewrap').children().not('#'+frmId).removeClass().addClass('hide');
+                
+                return false;
+            });
+
+        });
+    </script>
+
+}
+
+<div class="py_rf" style="margin-left: 0px">
+    <div class="tabstate">
+      
+        <div class="tabtop" id="carousel_con">
+            <div class="clearfix" style="display:block;float:left;line-height:37px;padding:0 15px 0 15px;">登录账号:@ViewBag.cusAccount</div>
+            <div class="arrow a_l" id="left_scroll" style="display: none;"></div>
+            <div class="arrow a_r" id="right_scroll" style="display: none;"></div>
+            <div id="carousel_inner"> 
+                <ul class="clearfix" id="carousel_ul" style="left: 0px;">
+                   
+                     
+                    <li id="liMemberInfo" class="menuon"><a>会员信息</a></li>
+                    <li id="liOrderRecord"><a>订单记录</a></li>
+                    <li id="liPhoneOrder"><a>电话下单</a></li>
+                    <li id="liPhoneRMA"><a>电话退换货</a></li>
+                    <li id="liRMARecord"><a>退换货记录</a></li>
+                    @*<li id="liPhoneRecord"><a>电话记录</a></li>*@
+                    <li id="liSue"><a>投诉</a></li>
+                    <li id="liQuery"><a>咨询</a></li>
+                    <li id="liCallRecords"><a>通话记录</a></li>
+                </ul>
+               
+            </div>
+        </div>
+    </div>
+    
+    <div class="iframepage" id="iframewrap">
+        <iframe id="frmMemberInfo" class="block" width="100%" frameborder="0" scrolling-x="no" height="628px"/>
+    
+    </div>
+</div>

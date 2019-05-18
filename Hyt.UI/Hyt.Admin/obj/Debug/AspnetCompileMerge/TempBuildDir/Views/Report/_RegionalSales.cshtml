@@ -1,0 +1,77 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@model PagedList<Hyt.Model.Transfer.CBRptRegionalSales>
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" id="tableResult" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="50" rowspan="2">序号</th>
+                <th class="align_l p10_lr" rowspan="2">办事处</th>
+                <th class="border_bnone" colspan="3">客户所在省市区(县)</th>
+                <th class="border_bnone" colspan="2">单量</th>
+                <th class="border_bnone" colspan="2">金额</th>
+            </tr>
+            <tr>
+                <th>省</th>
+                <th>市</th>
+                <th>区(县)</th>
+                <th>百城达</th>
+                <th>第三方</th>
+                <th>百城达</th>
+                <th>第三方</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                var total = (CBRptRegionalSales)ViewBag.Model;
+                int i = 0;
+                var mode = Model.TData as List<Hyt.Model.Transfer.CBRptRegionalSales>;
+                if (mode != null && mode.Count > 0)
+                {
+                    foreach (var item in (List<Hyt.Model.Transfer.CBRptRegionalSales>)Model.TData)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }
+                        else
+                        {
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                    <td>@item.RowNumber</td>
+                    <td class="align_l p10_lr">@item.AreaName</td>
+                    <td class="align_l p10_lr">@item.Province</td>
+                    <td class="align_l p10_lr">@item.City</td>
+                    <td class="align_l p10_lr">@item.Area</td>
+                    <td>@item.CountOfHytBcd</td>
+                    <td>@item.CountOfHytDsf</td>
+                    <td align="right" class="red p10_r">@Html.Raw(Hyt.Util.FormatUtil.FormatCurrency(item.SummationOfHytBcd, 2))</td>
+                    <td align="right" class="red p10_r">@Html.Raw(Hyt.Util.FormatUtil.FormatCurrency(item.SummationOfHytDsf, 2))</td>
+                    @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr id='trNodata'><td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+
+            }
+            <thead>
+                <tr>
+                    <td colspan="4"></td>
+                    <td align="right" class="red p10_r">
+                        <span style="color:#000;">合计:</span>
+
+                    </td>
+                    <td>@total.CountOfHytBcd</td>
+                    <td>@total.CountOfHytDsf</td>
+                    <td align="right" class="red p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(total.SummationOfHytBcd, 2))</td>
+                    <td align="right" class="red p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(total.SummationOfHytDsf, 2))</td>
+                </tr>
+            </thead>
+            </tbody>
+        </table>
+    </div>
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

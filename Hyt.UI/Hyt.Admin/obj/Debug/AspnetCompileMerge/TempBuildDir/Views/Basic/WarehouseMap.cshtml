@@ -1,0 +1,110 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "定位地图";   
+}
+<script src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+
+<div class="caseout">
+    <div class="boxs">
+ 
+        <div class="boxs_con_c1">
+       
+            <div class="boxs_tool border_bottom">
+                <!--/工具条-->
+                <div class=" clearfix">                  
+                    <div class="fl ">
+                        <span class="c6 m5_r">经度</span><input id="tbxLongitude" type="text" value="" /><span class="c6 m5_r m5_l">纬度</span><input id="tbxLatitude" type="text" value="" />
+                    </div>
+                </div>
+            </div>
+            <!--/百度地图区-->
+            <div class="boxs" style="width: 100%; height: 300px; overflow: hidden;" id="allmap"></div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    // 百度地图API功能
+    var mp = new BMap.Map("allmap");
+    //mp.centerAndZoom("北京市", 12);
+    //mp.enableScrollWheelZoom();
+
+
+    // 创建地址解析器实例
+    var gc = new BMap.Geocoder();
+    mp.addEventListener("click", function (e) {
+        $("#tbxLongitude").val(e.point.lng);
+        $("#tbxLatitude").val(e.point.lat);
+        mp.clearOverlays();
+
+        var marker = new BMap.Marker(e.point);  // 创建标注
+        mp.addOverlay(marker);              // 将标注添加到地图中
+
+        ShowLabel(e.point);
+    });
+    Load();//进入页面就加载
+
+    //显示文本标注
+    function ShowLabel(point) {
+        gc.getLocation(point, function (rs) {
+            var addComp = rs.addressComponents;
+            var address = addComp.city + addComp.district + addComp.street + addComp.streetNumber; //
+            //$("#txtStreetAddress").val(address);
+            var opts = {
+                position: point,    // 指定文本标注所在的地理位置
+                offset: new BMap.Size(30, -30)    //设置文本偏移量
+            };
+            var label = new BMap.Label(address, opts);  // 创建文本标注对象
+            label.setStyle({
+                color: "red",
+                fontSize: "12px",
+                height: "20px",
+                lineHeight: "20px",
+                fontFamily: "微软雅黑"
+            });
+            mp.addOverlay(label);
+        });
+    }
+    function Load() {
+
+        // 将地址解析结果显示在地图上,并调整地图视野       
+        gc.getPoint('@ViewBag.Address', function (point) {
+            if (point) {
+                mp.clearOverlays();
+                $("#tbxLongitude").val(point.lng);
+                $("#tbxLatitude").val(point.lat);
+                mp.centerAndZoom(point, 16);
+                mp.addOverlay(new BMap.Marker(point));
+                ShowLabel(point);
+            }
+        }, '@ViewBag.City');
+    }
+
+</script>
+<script type="text/javascript">
+    (function () {
+        var opener = art.dialog.opener, // 父页面window对象
+            api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+        if (!api) return;
+
+        // 操作对话框
+        api.title('定位地图')
+            // 自定义按钮
+            .button(
+                {
+                    name: '确定',
+                    callback: function () {
+                        opener.window.SetMapValue($("#tbxLongitude").val(), $("#tbxLatitude").val());
+                    }
+
+                },
+                   {
+                       name: '取消'
+                   }
+               );
+    })();
+</script>

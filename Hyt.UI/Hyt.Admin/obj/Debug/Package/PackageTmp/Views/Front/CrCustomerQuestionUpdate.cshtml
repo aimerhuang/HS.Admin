@@ -1,0 +1,175 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "查看咨询信息";
+    @Html.PrivilegeControl(PrivilegeCode.CR1002601, "button.CR1002601")
+    @Html.PrivilegeControl(PrivilegeCode.CR1002501, "button.CR1002501")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var buttonReplyStatus = @(AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.CR1002501)==true?"false":"true");
+        var buttonInvalidStatus = @(AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.CR1002501)==true?"false":"true");
+        $(function () {
+            api = UI.Dialog.open.api;//对话框api,这里可以操作对话框
+            $window = UI.Dialog.opener;//触发对话框页面的window对象
+            var Type = @Model.Status;
+            if(Type==10){
+                api.button({
+                        name: '回复',
+                        focus: true,
+                        disabled:buttonReplyStatus,
+                        callback: function () {
+                            addOrEdit();
+                            return false;
+                        }
+                    }, {
+                        name: '作废',
+                        disabled:buttonInvalidStatus,
+                        callback: function () {
+                            repeal();
+                            return false;
+                        }
+                    }, {
+                        name: '关闭'
+                    });
+            }else if(Type==20){
+                api.button({
+                        name: '作废',
+                        disabled:buttonInvalidStatus,
+                        callback: function () {
+                            repeal();
+                            return false;
+                        }
+                    }, {
+                        name: '关闭'
+                    });
+            }else{
+                api.button({
+                    name: '关闭'
+                });
+            }
+
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    answer: "required",
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function addOrEdit() {
+            var from = $("#form");
+            if ($(from).valid()) {
+                var ajax = {
+                    url: '/Front/CrCustomerQuestionAddOrEdit', data: from.serialize(), type: 'POST', dataType: 'json', cache: false,
+                    success: function (json, statusText) {
+                        if (json.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (json.result) {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.opener.searchClass(1);
+                            UI.Dialog.close();
+                        } else {
+                            UI.Dialog.opener.dialog(json.info);
+                            UI.Dialog.close();
+                        }
+                    },
+                    error: function (XMLHttpRequest, textStatus, errorThrown) {
+                    }
+                };
+                $.ajax(ajax);
+            }
+        }
+        function repeal() {
+            var from = $("#form");
+            UI.Confirm({
+                content: '您确定要此操作吗？',
+                ok: function () {
+                    $.post('@Url.Action("CrCustomerQuestionUpdateStatus", "Front")', from.serialize(), function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.result) {
+                            dialog(data.info);
+                            UI.Dialog.opener.searchClass();
+                            UI.Dialog.close();
+                            return true;
+                        } else {
+                            dialog(data.info);
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout" style="width: 710px;">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tbody>
+                  <tr>
+                      <td width="20%"  class="nameright border_rnone">咨询商品：</td>
+                      <td width="30%" class="border_right" colspan="3">@Model.ProductName</td>
+                  </tr>
+                  <tr>
+                      <td width="20%"  class="nameright border_rnone">咨询类别：</td>
+                      <td width="30%" class="border_right" colspan="3">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.会员咨询类型),Model.QuestionType)</td>
+                  </tr>
+                  <tr>
+                      <td width="20%"  class="nameright border_rnone">咨询人：</td>
+                      <td width="30%" class="border_right">@Model.MobilePhoneNumber</td>
+                      <td width="20%"  class="nameright border_rnone">咨询时间：</td>
+                      <td width="30%">@Model.QuestionDate.ToString("yyyy-MM-dd HH:mm")</td>
+                  </tr>
+                  <tr>
+                      <td width="20%"  class="nameright border_rnone">咨询内容</td>
+                      <td width="30%" class="border_right" colspan="3">
+                          <textarea class="input_xlarge" disabled="disabled" rows="2" cols="20" style="width: 350px; height: 87px;">@Model.Question</textarea>
+                      </td>
+                  </tr>
+                  @{
+                      if (Model.AnswerSysNo>0){
+                      <tr>
+                          <td width="20%"  class="nameright border_rnone">回复人：</td>
+                          <td width="30%" class="border_right">@Model.UserName</td>
+                          <td width="20%"  class="nameright border_rnone">回复时间：</td>
+                          <td width="30%">@Model.AnswerDate.ToString("yyyy-MM-dd HH:mm")</td>
+                      </tr>
+                      }
+                  }
+                  <tr>
+                      <td width="20%"  class="nameright border_rnone"><span class="v_star">*</span>回复内容</td>
+                      <td width="30%" class="border_right" colspan="3">
+                          @if((int)Hyt.Model.WorkflowStatus.CustomerStatus.会员咨询状态.待回复 == Model.Status){
+                              <textarea id="answer" class="input_xlarge" rows="2" name="answer" cols="20" style="width: 350px; height: 87px;">@Model.Answer</textarea><span id="for_answer" class="prompt m10_l">回复内容,1-200字符</span>
+                          }else{
+                              <textarea id="answer" class="input_xlarge" disabled="disabled" rows="2" name="answer" cols="20" style="width: 350px; height: 87px;">@Model.Answer</textarea>
+                          }
+                      </td>
+                  </tr>
+             </tbody>
+           </table>  
+   </div>
+  </div>  
+</div>
+</form>

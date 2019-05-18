@@ -1,0 +1,83 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "添加企业用户";
+
+@Html.PrivilegeControl(PrivilegeCode.SY1008101, ".SY1008101")
+@Html.PrivilegeControl(PrivilegeCode.SY1008201, ".SY1008201")
+@Html.PrivilegeControl(PrivilegeCode.SY1008701, ".SY1008701")
+}
+@model Hyt.Infrastructure.Pager.PagedList<CBEnterpriseUser>
+<link href="~/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all" />
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<script type="text/javascript">
+    function search() {
+        Utils.MaskStart($(".case"));
+        var para = $("#para").val().trim();
+        Ajax.get("/Sys/SSOUserList?r=" + Math.random(), "Search", function (p) {
+            if (!isNaN(para)) {
+                p.setParams("Key", para);
+            }
+            else if (para && para != "请输入企业编号/用户姓名/账号/手机号") {
+                p.setParams("Key", para);
+            }
+        }, function (data) {
+            Utils.MaskStop();
+            $('#paging').html(data);
+        });
+    }
+
+    var searchNameTxt = "请输入企业编号/用户姓名/账号/手机号";
+    $(function () {
+        $("#para").focus(function () {
+            if ($("#para").val() == searchNameTxt) {
+                $("#para").val("");
+            }
+        });
+        $("#para").blur(function () {
+            if ($("#para").val() == "") {
+                $("#para").val(searchNameTxt);
+            }
+        });
+        $("#para").keydown(function (e) {
+            var keycode = e.which;
+            if (keycode != 13) {
+                return;
+            }
+            search();
+        });
+    });
+
+</script>
+
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>添加企业用户</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="right_tool">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <input class="input_ht28" name="para" id="para" style="width: 250px" maxlength="50" type="text" value="请输入企业编号/用户姓名/账号/手机号" />
+                        <button onclick="search()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+            </div>
+            <!--表格列开始-->
+            <div id="paging">
+                @{Html.RenderPartial("_SSOUserList", Model);}
+            </div>
+            <!--表格列结束-->
+        </div>
+
+    </div>
+</div>
+
+

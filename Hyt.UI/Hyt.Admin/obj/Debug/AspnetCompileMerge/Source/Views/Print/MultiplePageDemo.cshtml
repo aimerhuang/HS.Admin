@@ -1,0 +1,128 @@
+﻿@{
+    ViewBag.Title = "多页打印演示";
+    Layout = "~/Views/Shared/_Print.cshtml";
+}
+<h2><font color="#009999">超多页打印演示：</font></h2>
+
+<p>&nbsp;&nbsp;&nbsp; 当打印页数超级多（上千页）时，如果用单页循环打印，会因为在操作系统中产生太多的</p>
+
+<p>打印任务而影响性能；如果用NewPage分页方式打印，则会因为一次性占用太多的系统资源而</p>
+<p>需要等待很长时间...</p>
+
+<p>
+    &nbsp;&nbsp;&nbsp;
+    解决问题的办法是采用折中处理，既分组完成，每组完成一部分，循环执行组打印。
+</p>
+
+<p>下面演示一组打印预览20页，分5组循环实现100页的学位证书套打：</p>
+
+<p>（在分组打印模板中，需要用ADD_PRINT_TEXTA函数，为每一个对象起个类名）</p>
+
+<p>
+    &nbsp; <font size="2">
+        <input type="button" value="打印维护(模板)" onclick=" MySetup()">
+        <input type="button" value="打印预览(20页)" onclick="MyPREVIEW()">
+        <input type="button" value="批量打印100页" onclick="MyPrint()">
+    </font>
+</p>
+<script language="javascript" type="text/javascript">
+    var LODOP; //声明为全局变量
+    function MySetup() {
+        LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        SetLoop();//设置打印格式
+        CreateOnePage(0);//创建1页
+        LODOP.PRINT_SETUP();
+    };
+    window.onload = function MyPREVIEW() {
+ 
+      
+            LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+            LODOP.PRINT_INITA(0, 0, 881, 484, "包裹单");
+            LODOP.NewPage();
+
+            LODOP.SET_PRINT_PAGESIZE(1,2330,1280,"");
+            LODOP.ADD_PRINT_SETUP_BKIMG("<img border='0' src=''>");
+            LODOP.SET_SHOW_MODE("BKIMG_LEFT",1);
+            LODOP.SET_SHOW_MODE("BKIMG_IN_PREVIEW",true);
+            LODOP.SET_PRINT_STYLE("FontSize",12);
+            LODOP.ADD_PRINT_TEXT(90,100,120,20,"品胜数码旗舰店");
+            LODOP.ADD_PRINT_TEXT(114,100,160,20,"品胜集团");
+            LODOP.ADD_PRINT_TEXT(136,100,300,20,"");
+            LODOP.ADD_PRINT_TEXT(156,100,300,40,"快递员辛苦了，烦请及时送达给我们尊贵的顾客，谢谢");
+            LODOP.ADD_PRINT_TEXT(90,230,120,20,"18980876153");
+            LODOP.ADD_PRINT_TEXT(205,100,120,20,"黄水丽");
+            LODOP.ADD_PRINT_TEXT(250,100,300,20,"江西宜春宜丰县");
+            LODOP.ADD_PRINT_TEXT(270,100,300,40,"同安乡 同安卫生院");
+            LODOP.ADD_PRINT_TEXT(205,230,120,20,"15279895679");
+            LODOP.ADD_PRINT_TEXT(205,350,120,20,"");
+            LODOP.ADD_PRINT_TEXT(406,682,120,20,"789372");
+            LODOP.ADD_PRINT_TEXT(406,594,88,20,"2014-07-14");
+            LODOP.ADD_PRINT_TEXT(406,534,70,20,"745114");
+
+            LODOP.NewPage();
+
+            LODOP.SET_PRINT_PAGESIZE(1,2330,1280,"");
+            LODOP.ADD_PRINT_SETUP_BKIMG("<img border='0' src=''>");
+            LODOP.SET_SHOW_MODE("BKIMG_LEFT",1);
+            LODOP.SET_SHOW_MODE("BKIMG_IN_PREVIEW",true);
+            LODOP.SET_PRINT_STYLE("FontSize",12);
+            LODOP.ADD_PRINT_TEXT(90,100,120,20,"配点数码配件专营店");
+            LODOP.ADD_PRINT_TEXT(114,100,160,20,"品胜集团");
+            LODOP.ADD_PRINT_TEXT(136,100,300,20,"");
+            LODOP.ADD_PRINT_TEXT(156,100,300,40,"快递员辛苦了，烦请及时送达给我们尊贵的顾客，谢谢");
+            LODOP.ADD_PRINT_TEXT(90,230,120,20,"18010508953");
+            LODOP.ADD_PRINT_TEXT(205,100,120,20,"陈柒平");
+            LODOP.ADD_PRINT_TEXT(250,100,300,20,"江西宜春宜丰县");
+            LODOP.ADD_PRINT_TEXT(270,100,300,40,"新昌镇宜丰县行政大楼205（政法委）");
+            LODOP.ADD_PRINT_TEXT(205,230,120,20,"15079551616");
+            LODOP.ADD_PRINT_TEXT(205,350,120,20,"");
+            LODOP.ADD_PRINT_TEXT(406,682,120,20,"789383");
+            LODOP.ADD_PRINT_TEXT(406,594,88,20,"2014-07-14");
+            LODOP.ADD_PRINT_TEXT(406,534,70,20,"745102");
+
+
+            LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+            LODOP.SET_SHOW_MODE("HIDE_QBUTTIN_PREVIEW", 1);
+            LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+            LODOP.PREVIEW();
+    };
+    function MyPrint() {
+        LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        if (!confirm("下面的演示会产生大量的实际打印操作，确定继续吗？")) return;
+        LODOP.SELECT_PRINTER();
+        for (i = 1; i <= 5; i++) {
+            SetLoop();
+            for (j = 1; j <= 20; j++) {
+                CreateOnePage((i-1)*20+j);
+            };
+            LODOP.SET_PRINT_MODE("task", "打印任务" + i);//创建打印任务
+            LODOP.PRINT();
+        };
+    };
+    function CreateOnePage(num) {
+        LODOP.NewPage();
+        //打印
+        LODOP.ADD_PRINT_TEXT(112, 111, 120, 20, "寄件人姓名");
+        LODOP.ADD_PRINT_TEXT(141, 111, 160, 20, "品胜集团");
+        LODOP.ADD_PRINT_TEXT(173, 110, 280, 20, "");
+        LODOP.ADD_PRINT_TEXT(202, 111, 280, 40, "快递员辛苦了，烦请及时送达给我们尊贵的顾客，谢谢");
+        LODOP.ADD_PRINT_TEXT(113, 236, 120, 20, "15928914770");
+        LODOP.ADD_PRINT_TEXT(113, 476, 120, 20, "收件人姓名");
+        LODOP.ADD_PRINT_TEXT(174, 477, 300, 20, "四川 成都 高新区");
+        LODOP.ADD_PRINT_TEXT(199, 477, 300, 40, "中和大道三段");
+        LODOP.ADD_PRINT_TEXT(111, 608, 120, 20, "15928914770");
+        LODOP.ADD_PRINT_TEXT(138, 609, 120, 20, "");
+        LODOP.ADD_PRINT_TEXT(406, 682, 120, 20, num);
+        LODOP.ADD_PRINT_TEXT(406, 594, 88, 20, "2014-07");
+        LODOP.ADD_PRINT_TEXT(406, 534, 70, 20, "330013");
+    };
+    function SetLoop() {
+        LODOP.PRINT_INITA(0, 0, 881, 484, "发货单");
+        LODOP.SET_PRINT_PAGESIZE(1, 2330, 1280, "");//设置页面长宽
+        LODOP.ADD_PRINT_SETUP_BKIMG("<img border='0' src=''>");
+        LODOP.SET_SHOW_MODE("BKIMG_LEFT", 1);
+        LODOP.SET_SHOW_MODE("BKIMG_IN_PREVIEW", true);
+        LODOP.SET_PRINT_STYLE("FontSize", 12);
+    }
+</script>
+

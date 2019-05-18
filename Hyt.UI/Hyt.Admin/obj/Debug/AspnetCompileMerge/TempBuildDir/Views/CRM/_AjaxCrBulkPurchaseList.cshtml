@@ -1,0 +1,64 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<CBCrBulkPurchase>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th style="width: 85px">联系人</th>
+            <th>公司名称</th>
+            <th style="width: 124px">提交时间</th>
+            <th style="width: 124px">处理时间</th>
+            <th style="width: 85px">处理人</th>
+            <th style="width: 60px">状态</th>
+            <th style="width: 79px" class="borde_r_none">操作</th>
+        </tr>
+    </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            if (Model.TotalItemCount > 0)
+            {
+                int row = 1;
+                string cs = string.Empty;
+                foreach (var item in Model.TData)
+                {
+                    cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                    string strHandleDate = item.HandleDate.ToString("yyyy-MM-dd HH:mm");
+            <tr class="@cs">
+                <td style="text-align: left; text-indent: 10px;">@item.ContactName</td>
+                <td style="text-align: left; text-indent: 10px;">@item.CompanyName</td>
+                <td>@item.CommitDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@(strHandleDate!="0001-01-01 00:00"?strHandleDate:"")</td>
+                <td>@item.Handler</td>
+                <td>@EnumUtil.GetDescription(typeof(CustomerStatus.大宗采购状态), item.Status)</td>
+                <td>
+                    @{
+                    if (@item.Status == (int)CustomerStatus.大宗采购状态.待处理)
+                    {
+                        <button type="button" class="btn btn_ht26 btn_blue CR1004082" title="处理" onclick=" edit(@item.SysNo,@item.Status) "><span class="icon_pencil icon_white"></span><span class="m5_l">处理</span></button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn_ht28 btn_blue CR1004082" title="查看" onclick=" edit(@item.SysNo,@item.Status) "><span class="icon_pencil icon_white"></span><span class="m5_l">查看</span></button>
+                    }
+                    }
+
+                </td>
+            </tr>
+                    row++;
+                }
+
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="7">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+
+

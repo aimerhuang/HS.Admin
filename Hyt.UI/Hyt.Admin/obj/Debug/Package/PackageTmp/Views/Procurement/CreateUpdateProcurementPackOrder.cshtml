@@ -1,0 +1,401 @@
+﻿@{
+    ViewBag.Title = "CreateUpdateProcurementPackOrder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    @{
+        if (!string.IsNullOrEmpty((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryCompanyName))
+        {
+            @Html.Raw(".htn_Control{ display:none; }")
+        }
+    }
+</style>
+<div class="p10">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                <tbody>
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>货运公司名:</td>
+                        <td>
+                            @{
+                                if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo == 0)
+                                {
+                                    <input type="text" id="gd_DeliveryCompanyName" onclick="ShowLogisticsCompanyList()" name="gd_DeliveryCompanyName" maxlength="100" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryCompanyName)" />
+                                }
+                                else
+                                {
+                                    @((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryCompanyName)
+                                }
+                            }
+
+                        </td>
+                        <td width="107" class="nameright"><span class="v_star">*</span>包裹编号:</td>
+                        <td >
+                            <input type="text" id="gd_PaketNumber" name="gd_PaketNumber" maxlength="100" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PaketNumber)" />
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td width="107" class="nameright"><span class="v_star">*</span>集装箱名称:</td>
+                        <td>
+                            @{
+                                if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo == 0)
+                                {
+                                    <input type="text" id="gd_DeliveryContainer" onclick="ShowContainerList()" name="gd_DeliveryContainer" maxlength="100" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryContainer)" />
+                                }
+                                else
+                                {
+                                    @((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryContainer)
+                                }
+                            }
+
+                        </td>
+                        <td width="107" class="nameright"><span class="v_star">*</span>货运编号:</td>
+                        <td>
+                            @{
+                                if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo==0)
+                                {
+                                    <input type="text" id="gd_DeliveryNumber" name="gd_DeliveryNumber" maxlength="100" value="@((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryNumber)" />
+                                }
+                                else
+                                { 
+                                    @((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_DeliveryNumber)
+                                }
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="107" class="nameright">制单人员:</td>
+                        <td>
+                            @((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).CurrentName)</td>
+                        <td width="107" class="nameright">制单时间:</td>
+                        <td>
+                           @((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).CurrentTime)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="p10">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                <tr>
+                    <td>
+                        <h1>采购订单明细</h1>
+                    </td>
+                    <td align="right">
+                        @{
+                            if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PSysNo == 0)
+                            {
+                                <button class="btn btn_blue btn_ht26 agree m10_r htn_Control" onclick="OpenPurchaseProductList()">
+                                    <span class="m5_l">添加商品</span>
+                                </button>
+                            }
+                        }
+                        
+                    </td>
+                </tr>
+                
+                <tr>
+                    <td colspan="2">
+                        <div class="boxs_detail m10_t">
+                            <div id="paging">
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0"  id="table_ProList">
+                                    <thead>
+                                        <tr>
+                                            <th>商品编号</th>
+                                            <th>商品名称</th>
+                                            <th>单位</th>
+                                            <th>规格</th>
+                                            @{
+                                                if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo == 0)
+                                                {
+                                                    if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PSysNo == 0)
+                                                    {
+                                                        <th> @Html.Raw("库存数量");</th>
+                                                    }
+                                                    else
+                                                    {
+                                                        <th>
+                                                            @Html.Raw("订购数量");
+                                                        </th>
+                                                        <th>已配送数量</th>
+                                                        <th>剩余数量</th>
+                                                    }
+                                                }
+                                            }
+                                            <th>配送数量</th>
+                                            @{
+                                                if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo == 0)
+                                                {
+                                                    if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PSysNo == 0)
+                                                    {
+                                                        <th> @Html.Raw("操作");</th>
+                                                    }
+                                                }
+                                            }
+                                        </tr>
+                                    </thead>
+                                    <tbody id="protbody">
+                                        @{
+                                            foreach (var tempMod in (ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).ListItems)
+                                            {
+
+                                                <tr id="@(tempMod.gdi_PointItemSysNo)">
+                                                    <td>
+                                                        @(tempMod.gdi_GoodSysNo)
+
+                                                    </td>
+                                                    <td style="text-align:left;">@tempMod.Cb_ProName</td>
+                                                    <td>@tempMod.Cb_Unit</td>
+                                                    <td>@tempMod.Cb_Spec</td>
+                                                    
+                                                 
+                                                    @{
+                                                        if ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo == 0)
+                                                        {
+                                                            <td>@(@tempMod.Poi_ProQuity )</td>
+                                                            <td>@(tempMod.gdi_SendQuity)</td>
+                                                            <td>@(@tempMod.Poi_ProQuity - tempMod.gdi_SendQuity)</td>
+                                                            <td><input name="ipt_SendQuity"
+                                                                   pointitemsysno="@(tempMod.gdi_PointItemSysNo)"
+                                                                   goodssysno="@(tempMod.gdi_GoodSysNo)"
+                                                                   type="text"
+                                                                   value="@(@tempMod.Poi_ProQuity - tempMod.gdi_SendQuity)" /> </td>
+                                                        }
+                                                        else
+                                                        {
+                                                            <td>@(tempMod.gdi_SendQuity)</td>
+                                                        }
+                                                    }
+                                                   
+                                                </tr>
+
+                                            }
+                                        }
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="p10" align="center">
+    @{
+            if (((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).ListItems.Count > 0 && (ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).SysNo == 0)
+                ||
+                ((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PSysNo == 0))
+            {
+                <button class="btn btn_blue btn_ht26 agree m10_r htn_Control" onclick="SaveDeliveryPackOrder()"><span class="m5_l">保存</span></button>
+            }
+        }
+    <button class="btn btn_blue btn_ht26 agree m10_r " onclick="window.location.href = document.referrer"><span class="m5_l">返回</span></button>
+</div>
+
+<script type="text/javascript">
+    ///保存配送公司信息
+    function SaveDeliveryPackOrder() {
+        var pSysNo = "@((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PSysNo)";
+        var companyName = $("#gd_DeliveryCompanyName").val();
+        var deliveryNumber = $("#gd_DeliveryNumber").val();
+        var packNumber = $("#gd_PaketNumber").val();
+        var containerName = $("#gd_DeliveryContainer").val();
+        var proList = "";
+
+        if (companyName == "" || deliveryNumber == "")
+        {
+            UI.Alert({ content: "请完善相关内容！" });
+            return;
+        }
+        $("input[name='ipt_SendQuity']").each(
+            function ()
+            {
+                var pointSysNo = $(this).attr("pointitemsysno");
+                var goodssysno = $(this).attr("goodssysno");
+                var quity = $(this).val();
+                if (proList != "")
+                {
+                    proList += ",";
+                }
+                proList += pointSysNo + "_" + goodssysno + "_" + quity;
+            }
+        );
+        $.ajax({
+            url: '/Procurement/SaveDeliveryPackOrderData',
+            type: 'post',
+            async: false,
+            data: {
+                pSysNo: pSysNo,
+                companyName: companyName,
+                deliveryNumber: deliveryNumber,
+                containerName: containerName,
+                proList: proList,
+                packNumber: packNumber,
+                gdType:@(((ViewBag.Order as Hyt.Model.Procurement.CBPmGoodsDelivery).gd_PSysNo == 0)?"2":"1")
+            },
+            dataType: 'json',
+            success: function (json) {
+                if (json.Status) {
+                    window.location.href = "/Procurement/GetPointsOrderPager";
+                }
+                else {
+                    UI.Alert({ content: json.Msg });
+                }
+            }
+        });
+    }
+
+    ///弹出框对象
+    var artDialog = null;
+    ///获取物流公司列表
+    function ShowLogisticsCompanyList() {
+        $.ajax({
+            url: '/Procurement/GetLogisticsCompanyList',
+            type: 'post',
+            async: false,
+            dataType: 'json',
+            success: function (json) {
+                var strList = "";
+                for (var i = 0; i < json.length; i++) {
+                    strList += "<div style=\"padding:10px; cursor: pointer;\" onclick=\"SelectLogisticsCompany('" + json[i].LCName + "')\" >";
+                    strList += json[i].LCName;
+                    strList += "</div>";
+                    strList += "<hr/>";
+                }
+                artDialog = art.dialog({ content: "<div style=\"height:300px; width:200px;\" valign=\"top\">" + strList + "</div>", width: 200, height: 300, title: "国际物流公司" });
+            }
+        });
+    }
+    ///将物流公司填入物流公司名输入框
+    function SelectLogisticsCompany(txt) {
+        $("#gd_DeliveryCompanyName").val(txt);
+        if (artDialog != null) {
+            artDialog.close();
+        }
+    }
+
+    ///获取物流公司列表
+    function ShowContainerList() {
+        $.ajax({
+            url: '/Procurement/GetContainerList',
+            type: 'post',
+            async: false,
+            dataType: 'json',
+            success: function (json) {
+                var strList = "";
+                for (var i = 0; i < json.length; i++) {
+                    strList += "<div style=\"padding:10px; cursor: pointer;\" onclick=\"SelectContainer('" + json[i].CName + "')\" >";
+                    strList += json[i].CName + "<br/>" + json[i].CType + "-" + json[i].CubeType + "<br/>" + json[i].CSLong + "X" + json[i].CSWidth + "X" + json[i].CSHeight;
+                    strList += "</div>";
+                    strList += "<hr/>";
+                }
+                artDialog = art.dialog({ content: "<div style=\"height:300px; width:200px;\" valign=\"top\">" + strList + "</div>", width: 200, height: 300, title: "集装箱类型" });
+            }
+        });
+    }
+    ///将物流公司填入物流公司名输入框
+    function SelectContainer(txt) {
+        $("#gd_DeliveryContainer").val(txt);
+        if (artDialog != null) {
+            artDialog.close();
+        }
+    }
+    ///打开采购商品列表
+    var proList = [];
+    ///弹出商品选中框选择商品
+    ///弹出商品选中框
+    function OpenPurchaseProductList() {
+        
+        ///返回值{sysno:sysno, name:name}
+        ///调用例子 DAO.SelectBrand({ callback: function (data) { alert(data.sysno + '/'+data.name) } });
+        var options = {
+            callBack: function (data) {
+               
+                var html = $.trim($("#protbody").html());
+                var strHtml = "";
+                for (var i = 0; i < data.length; i++) {
+                    var b = false;
+                    for (var j = 0; j < proList.length; j++) {
+                        if (data[i].ProSysNo == proList[j]) {
+                            b = true;
+                            break;
+                        }
+                       
+                    }
+                    if (!b) {
+                        proList.push(data[i].ProSysNo);
+                    }
+                    else {
+                        data.splice(data[i]);
+                        i--;
+                    }
+                }
+                //alert(proList.length);
+                for (var i = 0 ; i < data.length ; i++) {
+                    flag = true;
+                    $("tbody#protbody tr").each(function () {
+                        if ($.trim($(this).attr('id')) == $.trim(data[i].ProSysNo)) {
+                            flag = false;
+                        }
+                    });
+                    if (flag) {
+                        strHtml += '<tr id="0"><td>' + data[i].ProSysNo + '</td>  <td>' + data[i].ProName + '</td><td  style=\"text-align:left;\">' +
+                           
+                            data[i].Unit + '</td><td>' +
+                            data[i].Spec + '</td><td>' +
+                            data[i].WareNum + '</td><td>' +
+                             '<input type="text" value="1" name="ipt_SendQuity" pointitemsysno="0" goodssysno="' + data[i].ProSysNo + '" style=\"width:50px;text-align:right;\" /></td>';
+                        
+                        strHtml += '<td align="center"><button class="btn btn_blue btn_ht26 agree m10_r " onclick=\"DeleteItemRow(this)\"><span class="m5_l">删除</span></button></td>';
+                    }
+                }
+                if (html == "") {
+                    $("#protbody").html(strHtml);
+                } else {
+                    $("#protbody").html(html + strHtml);
+                }
+            }
+        };
+
+        //伪回调
+        window.top._ActivePdProductSelectorCallBack = function (data) {
+            $.isFunction(options.callBack) && options.callBack.call(window, data);
+        };
+        UI.DialogOpen('/Procurement/ProcurementGoodsSelector', {
+            width: '1300px',
+            height: '600px',
+            title: '选择商品',
+            init: function () {
+                this.button(
+                    {
+                        name: '确认',
+                        callback: function () {
+                            var $iframe = this.iframe.contentWindow;
+                            $iframe.CallBack();
+                        },
+                        focus: true
+                    }, {
+                        name: '取消'
+                    }
+                );
+            }
+        }, false);
+    }
+    function DeleteItemRow(ele) {
+        var tab = $("#table_ProList")[0];
+        var row = ele.parentNode.parentNode;
+        var index = row.rowIndex;//rowIndex属性为tr的索引值，从0开始
+        tab.deleteRow(index);  //从table中删除
+
+        proList.splice($.inArray(parseInt($.trim($(row.children[0]).text())), proList), 1);
+    }
+</script>

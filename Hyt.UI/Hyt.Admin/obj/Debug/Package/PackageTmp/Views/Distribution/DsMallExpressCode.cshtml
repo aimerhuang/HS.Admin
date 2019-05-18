@@ -1,0 +1,175 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "分销商城快递代码";
+    @Html.PrivilegeControl(PrivilegeCode.DS1012201, ".DS1012201")
+    @Html.PrivilegeControl(PrivilegeCode.DS1012301, ".DS1012301")
+    @Html.PrivilegeControl(PrivilegeCode.DS1012401, ".DS1012401")
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#mallType").change(function () {
+                searchMallExpressCode();
+            });
+
+            $("#deliveryType").change(function () {
+                searchMallExpressCode();
+            });
+
+            $("#expressCode").keydown(function (e) {
+                var keycode = e.which;
+                if (keycode != 13) {
+                    return;
+                }
+                searchMallExpressCode();
+            });
+        });
+
+        function searchMallExpressCode() {
+            Utils.MaskStart($(".case"));
+            var expressCode = $.trim($("#expressCode").val());
+            Ajax.get("/Distribution/DsMallExpressCode?r=" + Math.random(), "Search", function (p) {
+                p.setParams("MallTypeSysNo", $("#mallType").val());
+                p.setParams("DeliveryTypeSysNo", $("#deliveryType").val());
+                if (expressCode && expressCode != "第三方快递代码") {
+                    p.setParams("ExpressCode", $.trim($("#expressCode").val()));
+                }
+            }, function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">商城名称</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="mallType" name="mallType">
+                            <option value="0">全部</option>
+                            @{
+                                var mallType = ViewBag.MallType as IList<Hyt.Model.DsMallType>;
+                                if (mallType != null && mallType.Count > 0)
+                                {
+                                    foreach (var item in mallType)
+                                    {
+                                        <option value="@item.SysNo">@item.MallName</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">配送方式</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 wd100" id="deliveryType" name="deliveryType">
+                            <option value="0">全部</option>
+                            @{
+                                var deliveryType = ViewBag.DeliveryType as IList<Hyt.Model.LgDeliveryType>;
+                                if (deliveryType != null && deliveryType.Count > 0)
+                                {
+                                    var selectDeliveryType = deliveryType.Where(t => t.ParentSysNo == 3).AsEnumerable();
+                                    foreach (var item in selectDeliveryType)
+                                    {
+                                        <option value="@item.SysNo">@item.DeliveryTypeName</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="search_btn m10_l fl" style="width:220px;">
+                        <input name="expressCode" type="text" style="width:200px;" id="expressCode" class="input_ht28" autocomplete="off" maxlength="20" placeholder="搜索第三方快递代码..." />
+                        <button onclick="searchMallExpressCode()" class="btn btn_ht28 wd28" id="search_btn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m10_r DS1012201" onclick="CreateMallExpressCode()"><span class="icon icon_plus"></span><span class="m5_l">新建</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                    @{Html.RenderPartial("_AjaxPagerDsMallExpressCode", Model);}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //新增弹出窗
+        function CreateMallExpressCode() {
+            var url = '@Url.Action("DsMallExpressCodeAdd", "Distribution")' + "?r=" + Math.random();
+            UI.DialogOpen(url,
+                {
+                    title: '新建经销商城快递代码',
+                    width: 520,
+                    height: 230,
+                    close: function () { },
+                    resize: false
+                },
+                false);
+        }
+
+        function UpdateMallExpressCode(sysNo) {
+            var url = '@Url.Action("DsMallExpressCodeUpdate", "Distribution")' + "?r=" + Math.random() + "&sysNo=" + sysNo;
+            UI.DialogOpen(url,
+                {
+                    title: '修改经销商城快递代码',
+                    width: 520,
+                    height: 230,
+                    close: function () { },
+                    resize: false
+                },
+                false);
+        }
+
+        function DeleteMallExpressCode(id) {
+            UI.Confirm({
+                content: "确认删除?",
+                ok: function () {
+                    $.post('/Distribution/DeleteDsMallExpressCode?r=' + Math.random(), { sysNo: id }, function (r) {
+                        if (r.Status) {
+                            ExecSuccess("操作成功");
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        //操作成功后执行的函数
+        function ExecSuccess(msg) {
+            UI.tips.tip_alert("tips_shrot tips_success", msg);
+            searchMallExpressCode();
+        }
+
+        //function SuccessTip() {
+        //    UI.Prompt.Success("操作成功");
+        //    Utils.MaskStart($("#paging"));
+        //    searchMallExpressCode();
+        //}
+    </script>
+}

@@ -1,0 +1,80 @@
+﻿@model Hyt.Model.UnAdvertisement
+@using Hyt.BLL.Product
+@using Hyt.BLL.Union
+@using Hyt.Model.WorkflowStatus
+@{
+    ViewBag.Title = "查看联盟广告";
+}
+<div class="caseout">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                    <td width="80" class="nameright border_lnone">联盟网站</td>
+                    <td class="border_right" width="150">
+                        @{
+                            var unionSite = UnUnionSiteBo.Instance.GetModel(Model.UnionSiteSysNo);
+                            if (unionSite != null)
+                            {
+                            @unionSite.SiteName
+                            }
+                        }
+                    </td>
+                    <td class="nameright" width="80">状态</td>
+                    <td class="border_right" width="150">
+                        @((UnionStatus.联盟广告状态)Model.Status)
+                    </td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone" width="80">有效访问Url</td>
+                    <td class="border_right" colspan="3">
+                        @Model.AccessUrl
+                    </td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone">联盟通知代码</td>
+                    <td class="border_right" colspan="3">
+                        @Model.NotificationCode
+                    </td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone" valign="top">广告类型</td>
+                    <td class="border_right" colspan="3">
+                        @((UnionStatus.联盟广告类型)Model.AdvertisementType)
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <div class="head_detail m10_t">
+        <h5>商品信息</h5>
+    </div>
+    <div class="boxs_detail border_lnone">
+        <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+            <thead>
+                <tr>
+                    <th width="140" class="border_lnone">商品编号</th>
+                    <th class="align_l p10_lr">商品名称</th>
+                    <th class="wd50">状态</th>
+                </tr>
+            </thead>
+            <tbody id="item_body">
+                @if (Model.ItemList != null && Model.ItemList.Any())
+                {
+                    foreach (var item in Model.ItemList)
+                    {
+                        var product = PdProductBo.Instance.GetProduct(item.ProductSysNo);
+                        if (product != null)
+                        {
+                    <tr>
+                        <td class='border_lnone'>@product.SysNo</td>
+                        <td class='align_l p10_lr'><span class='p10_l'>@product.ProductName</span></td>
+                        <td>@((UnionStatus.CPS商品状态)item.Status)</td>
+                    </tr>
+                        }
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

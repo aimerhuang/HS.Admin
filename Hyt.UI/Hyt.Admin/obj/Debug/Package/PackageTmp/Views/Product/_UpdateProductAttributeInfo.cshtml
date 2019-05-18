@@ -1,0 +1,422 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model IList<CBPdProductAtttributeReadRelation>
+
+<!--工具条开始-->
+<div class="boxs_tool boxs_toolbgnone p0">
+    <!--功能按钮开始-->
+    <div class="left_tool">
+        <button class="btn btn_blue btn_ht28 m10_r" id="btnAddGroup" title="添加分组"><span class="icon_plus icon_white"></span><span class="m5_l">添加分组</span></button>
+    </div>
+    <!--功能按钮结束-->
+    
+</div>
+<!--工具条结束-->
+<form id="attributeForm" action="" onsubmit="return false;" method="post">
+    <div class="boxs_detail_dispay" id="attributePanel">
+        @{Html.RenderPartial("_GenerateProductAttributeGroup", Model); }
+        <!--editModel-->
+        <div class="align_c m10_t" id="footConainter">
+        <button class="btn btn_blue btn_ht30" id="btnSave_Attribute"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;&nbsp;
+        <button class="btn btn_green btn_ht30" id="btnSaveToNext_Attribute"><span class="icon_save icon_white"></span><span class="m5_l">保存 进入下一步</span></button>
+        </div>
+        <input type="hidden" id="hidProductType" value="@Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.文本类型.GetHashCode(),@Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.选项类型.GetHashCode(),@Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.图片类型.GetHashCode()" />
+
+    </div>
+</form>
+
+<script type="text/javascript">
+    var attributeValid;
+    function AttributeFormValid(){
+        attributeValid = $("#attributeForm").validate({
+        onsubmit: false,
+        errorPlacement: function (error, element) {
+            if (element.hasClass("imgsrc") || element.hasClass("imgdes")) {
+                element.closest("div").find('span').attr('class', 'error m10_l');
+                return;
+            }
+            element.closest("td").find('span').attr('class', 'error m10_l');
+
+        },
+        success: function (span, element) {
+            if (element.hasClass("imgsrc") || element.hasClass("imgdes")) {
+                element.closest("div").find('span').attr('class', 'success m10_l');
+                return;
+            }
+            element.closest("td").find('span').attr('class', 'success m10_l');
+        }
+    });
+    }
+
+    //商品属性类型
+    var productAttributeType = $("#hidProductType").val().split(",");
+    Array.prototype.inArray = function (value) {
+        var mark = false;
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] == value) {
+                mark = true;
+            }
+        }
+        return mark;
+    }
+
+    function GetAttributeByCategory(productSysNo) {
+        try{
+            if($("#attributePanel").attr("init") == undefined){
+                $.get('/Product/GetCategoryProductAttributeByProductSysNo/', { productSysno: productSysNo }, function (result) {
+                    $("#footConainter").before(result);
+                    $("#attributePanel").attr("init", true);
+                }, "html");
+            }
+        } catch (e) {  }
+    }
+
+    $("#btnAddGroup").click(function () {
+        var arr = [];
+        $(".AttributeGroupSysNo").each(function () {
+            var sysno = parseInt($(this).val());
+            if (sysno > 0) {
+                arr.push(sysno);
+            }
+        });
+
+        DAO.SelectAttributeGroup({
+            arrAttributeGroupIds: arr, initDisabled: true, callBack: function (data) {                
+                var arrGroupid = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (arr.inArray(data[i].SysNo)) {
+                        continue;
+                    }
+                    arrGroupid.push(data[i].SysNo);
+                }
+                var ajaxData = [{ name: 'listSysno', value: JSON.stringify(arrGroupid) }];
+                $.get('/Product/UpdateProductAttributeInfo/', ajaxData, function (result) {
+                    $("#footConainter").before(result);
+                    AttributeFormValid();
+                    initUpDownButton();
+                });
+            }
+        });
+    });
+
+    $(".btnDeleteGroup").live("click", function () {
+        var obj = $(this);
+        UI.Confirm({
+            content: '确定要删除分组吗?',
+            ok: function () {
+                obj.closest("div").parent().remove();
+                UI.Prompt.Success('操作成功');
+                initUpDownButton();
+            },
+            cancelVal: '取消',
+            cancel: true
+        });
+    });
+
+    //添加属性
+    $(".sb_add").live("click", function () {
+        
+        if (isReadOnly) {
+            return false;
+        }
+
+        var obj = $(this);
+        var arr = [];
+        $(this).closest("table").find(".SysNo").each(function () {
+            var sysno = parseInt($(this).val());
+            if (sysno > 0) {
+                arr.push(sysno);
+            }
+        });
+        DAO.SelectAttribute({
+            arrAttributeIds: arr, initDisabled: true, callBack: function (data) {
+                var arrAttribute = [];
+                for (var i = 0; i < data.length; i++) {
+                    if (arr.inArray(data[i].SysNo)) {
+                        continue;
+                    }
+                    arrAttribute.push(data[i].SysNo);
+                }
+                var ajaxData = [{ name: 'listSysno', value: JSON.stringify(arrAttribute) }];
+                $.get('/Product/AddProductAttribute/', ajaxData, function (result) {
+                    obj.closest("tr").before(result);
+                    AttributeFormValid();
+                    initUpDownButton();
+                });
+            }
+        });
+    });
+
+    $(".picUpload").live("click", function () {
+        
+        if (isReadOnly) {
+            return;
+        }
+
+        var obj = $(this);
+        DAO.Upload({
+            callback: function (data) {
+                alert(data[0].url);
+                if (!!data && data.length > 0) {
+                    obj.attr("src",'@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer' + data[0].url);
+                    obj.closest("tr").find(".imgsrc").val(data[0].url);
+                }
+
+            }
+        })
+    });
+
+    $(".picUpload_AttrOpt").live("click", function () {
+
+        if (isReadOnly) {
+            return;
+        }
+
+        var obj = $(this);
+        DAO.Upload({
+            callback: function (data) {
+                if (!!data && data.length > 0) {
+                    obj.attr("src", '@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer' + data[0].url);
+                    obj.parent().children(".imgsrc").val(data[0].url);
+                }
+
+            }
+        })
+    });
+
+    $(".AttributeOptionsTr").live("mouseenter", function () {
+        $(this).find(".deleteAttribute").show();
+        $(this).find(".btnUp").show();
+        $(this).find(".btnDown").show();
+        $(this).find(".btnEdit").show();
+    }).live("mouseleave", function () {
+        $(this).find(".deleteAttribute").hide();
+        $(this).find(".btnUp").hide();
+        $(this).find(".btnDown").hide();
+        $(this).find(".btnEdit").hide();
+    });
+
+    $(".btnUp").live("click", function () {
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        var objRow = $(this).closest("tr");
+        var index = $(this).closest("table").find("tr").index(objRow);
+        if (index > 1) {
+            objRow.insertBefore(objRow.prev());
+        }
+        resetRowClass($(this));
+    });
+
+    $(".btnDown").live("click", function () {
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        var objRow = $(this).closest("tr");
+        var index = $(this).closest("table").find("tr").index(objRow);
+        var length = $(this).closest("table").find("tr").length;
+        if (index < length - 1) {
+            objRow.insertAfter(objRow.next());
+        }
+        resetRowClass($(this));
+    });
+
+    $(".btnGroupUp").live("click", function () {
+        
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        var objDiv = $(this).closest("div").parent();
+        var index = $("#footConainter").parent().children("div").index(objDiv);
+        var length = $("#footConainter").parent().children("div").length;
+        if (index > 0) {
+            objDiv.insertBefore(objDiv.prev());
+        }
+        resetRowClass();
+    });
+
+    $(".btnGroupDown").live("click", function () {
+       
+        if ($(this).hasClass("disabled")) {
+            return;
+        }
+        var objDiv = $(this).closest("div").parent();
+        var index = $("#footConainter").parent().children("div").index(objDiv);
+        var length = $("#footConainter").parent().children("div").length;
+        if (index < length - 1) {
+            objDiv.insertAfter(objDiv.next());
+        }
+        resetRowClass();
+    });
+    //重置样式
+    function resetRowClass(obj) {
+        if (!!obj) {
+            var table = obj.closest("table");
+            table.find("button").removeClass("disabled");
+            var lastIndex = table.find("tr").length - 2;
+            table.find("tr:eq(" + lastIndex + ")").find(".icon_arrow_down").parent().addClass("disabled");
+            table.find("tr:eq(1)").find(".icon_arrow_up").parent().addClass("disabled");
+        }
+
+        $(".btnGroupUp,.btnGroupDown").removeClass("disabled");
+        var lastGroupIndex = $("#footConainter").parent().children("div").length - 2;
+        $("#footConainter").parent().children("div:eq(0)").find(".btnGroupUp").addClass("disabled");
+        $("#footConainter").parent().children("div:eq(" + lastGroupIndex + ")").find(".btnGroupDown").addClass("disabled");
+
+    }
+
+    function initUpDownButton()
+    {
+        $("#attributeForm").find("table").each(function () {
+            var table = $(this);
+            table.find("button").removeClass("disabled");
+            var lastIndex = table.find("tr").length - 2;
+            table.find("tr:eq(" + lastIndex + ")").find(".icon_arrow_down").parent().addClass("disabled");
+            table.find("tr:eq(1)").find(".icon_arrow_up").parent().addClass("disabled");
+        });
+        resetRowClass();
+
+    }
+
+    $(function () {
+        $(".attributebox").Accordion();
+
+        var arrAdd = [], arrDelete = [], arrUpdate = [];
+
+        $(".deleteAttribute").live("click", function () {
+            var ProductAttributeSysno = parseInt($(this).find(".ProductAttributeSysno").val());
+            var obj = $(this);
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function () {
+                    if (ProductAttributeSysno > 0) {
+                        arrDelete.push({ ProductAttributeSysno: ProductAttributeSysno });
+                    }
+                    obj.closest("tr").remove();
+                    UI.Prompt.Success('操作成功');
+                    AttributeFormValid();
+                    initUpDownButton();
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+
+        });
+
+        $(".btnEdit").live("click", function () {
+            var url = '/Product/ProductAttributeCreate?sysno=' + $(this).parent().children(".SysNo").val();
+            UI.DialogOpen(url, {
+                title: '属性组详细信息',
+                width: '520px',
+                height: '350px'               
+            }, false);
+        });
+
+        $("#btnSave_Attribute, #btnSaveToNext_Attribute").click(function () {
+
+            var obj = $(this);
+            try {
+                var result = $("#attributeForm").valid();;
+                if (!result)
+                {
+                    return false;
+                }
+            } catch (e) { }
+            arrAdd = [];
+            //保存对应属性项的图片 2016-6-13 王耀发 创建
+            var AttributeOptionImageList = "";
+            $(".AttributeOptionsTr").each(function () {
+                
+                var ProductAttributeSysno = parseInt($(this).find(".ProductAttributeSysno").val());
+                var type = $(this).find(".AttributeType").val();
+                if (type == productAttributeType[1]) {
+                    AttributeOptionSysNo = $(this).find("select").val();
+                    AttributeText = $(this).find("select").find("option:selected").text();
+                    AttributeImage = "";
+                    var AttributeOptionImage = "";
+                    $(this).find(".AttributeOptionDiv").each(function () {
+                        var productsysno = $(this).attr("productsysno");
+                        if (productsysno == "0") {
+                            productsysno = $("#hdf_ProductSysNo").val();
+                        }
+                        var attributeoptionsysno = $(this).attr("attributeoptionsysno");
+                        var isimage = $("#Isimage_N_" + attributeoptionsysno).attr("checked") == "checked" ? "0" : "1";
+                        var imgsrc = $("#AttributeOptionImage_" + attributeoptionsysno).children(".imgsrc").val();
+                        if (AttributeOptionImage == "")
+                        {
+                            AttributeOptionImage = productsysno + ',' + attributeoptionsysno + ',' + isimage + ',' + imgsrc;
+                        } else {
+                            AttributeOptionImage += ';' + productsysno + ',' + attributeoptionsysno + ',' + isimage + ',' + imgsrc;
+                        }                        
+                    })    
+                    if (AttributeOptionImageList == "")
+                        AttributeOptionImageList = AttributeOptionImage;
+                    else
+                        AttributeOptionImageList += '|' + AttributeOptionImage;
+
+                } else if (type == productAttributeType[2]) {
+                    AttributeOptionSysNo = 0;
+                    AttributeText = $(this).find(".AttributeValue").find("input.imgdes").val();
+                    AttributeImage = $(this).find(".AttributeValue").find("input.imgsrc").val();
+                } else {
+                    AttributeOptionSysNo = 0;
+                    AttributeText = $(this).find(".AttributeValue").find("input").val();
+                    AttributeImage = "";
+                }
+                var objPA = {};
+                objPA.AttributeSysNo = $(this).find(".SysNo").val();
+                objPA.AttributeName = $(this).find(".AttributeName").text().replace("*","");
+                objPA.AttributeGroupSysNo = $.trim($(this).closest("table").find(".AttributeGroupSysNo").val());
+                objPA.AttributeOptionSysNo = AttributeOptionSysNo;
+                objPA.AttributeText = AttributeText;
+                objPA.AttributeImage = AttributeImage;
+                objPA.AttributeType = $.trim($(this).find(".AttributeType").val());
+                arrAdd.push(objPA);
+            });
+
+            var data = [{ name: 'items', value: JSON.stringify(arrAdd) }, { name: 'productSysno', value: $("#hdf_ProductSysNo").val() }, { name: 'attributeOptionImageList', value: AttributeOptionImageList }];
+            $.post('/Product/SaveProductAttribute/', data, function (result) {
+                if (result.Status) {
+
+                    UI.Prompt.Success('保存成功');
+
+                    if (obj.attr("id") == "btnSaveToNext_Attribute")
+                    {
+                        prodctEditTab.Active('5');
+                    }
+                    
+                    $("#attrASTable").attr("loaded", null);
+                } else {
+                    var message = "保存失败";
+                    if (!!result && !!result.Message) {
+                        message = result.Message;
+                    }
+                    UI.Alert({ content: message });
+                }
+            });
+        });
+
+        function initSaveButton()
+        {
+            if (!editModel) {
+                $("#btnSaveToNext_Attribute").show();
+                $("#btnSave_Attribute").hide();
+            } else {
+                $("#btnSaveToNext_Attribute").hide();
+                $("#btnSave_Attribute").show();
+            }
+        }
+
+        function initAtrribute() {
+            //添加form验证
+            AttributeFormValid();
+            //初始化上移下移按钮状态
+            initUpDownButton();
+            //初始化保存按钮状态
+            initSaveButton();
+        }
+        initAtrribute();
+    });
+</script>
+<!-- 商品属性维护 END -->

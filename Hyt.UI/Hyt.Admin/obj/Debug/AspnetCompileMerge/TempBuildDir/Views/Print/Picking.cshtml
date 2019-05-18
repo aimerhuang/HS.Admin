@@ -1,0 +1,199 @@
+﻿@model Hyt.Model.Transfer.CBPrtPicking
+@using Hyt.BLL.Product
+@using Hyt.Model.SystemPredefined;
+@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "拣货（出库）单打印";
+}
+
+<div id="print">
+    <div id="divmain" class="divdisplay">
+        <div class="print_title">商城配货单</div>
+        <div class="mtop_title">会员名称：@Model.Name</div>
+        <table class="main_tb">
+            <tr>
+                <td class="main_title" style="width: 18%">出库单号：</td>
+                <td style="width: 32%">@Model.SysNo</td>
+                <td class="main_title" style="width: 18%">订单号：</td>
+                <td style="width: 32%">@Model.OrderSysNO</td>
+
+            </tr>
+            <tr>
+
+                <td class="main_title">发货仓库：</td>
+                <td>@Model.WarehouseName</td>
+                <td class="main_title">店铺：</td>
+                <td>@Model.ShopName</td>
+
+            </tr>
+            <tr>
+                <td class="main_title">出库时间：</td>
+                <td>@Model.StockOutDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td class="main_title">下单时间：</td>
+                <td>@Model.SoCreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+            </tr>
+            <tr>
+                <td class="main_title">收货人：</td>
+                <td>@Model.ReceiveName</td>
+                <td class="main_title">支付方式：</td>
+                <td>@if (Model.PaymentType == (int)Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型.到付)
+                    {
+                    <span>@Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型.到付</span>  
+                    }
+                    else
+                    {
+                    <span>@Model.PaymentName</span> 
+                    }
+                </td>
+            </tr>
+            <tr>
+                <td class="main_title">收货电话：</td>
+                <td>@Model.MobilePhoneNumber  @Model.PhoneNumber</td>
+                <td class="main_title">货到付款金额：</td>
+                <td>@Model.Receivable.ToString("C")</td>
+            </tr>
+            <tr>
+                <td class="main_title">地址：
+                </td>
+                <td colspan="3">@ViewBag.Prov@ViewBag.City<b>@ViewBag.Area</b>@Model.StreetAddress</td>
+            </tr>
+        </table>
+    </div>
+
+
+    <div id="divitem" class="divdisplay">
+        <table class="item_tb">
+            <thead>
+                <tr>
+                    <th style="width: 82px">商品编号</th>
+                    <th>后台显示名称</th>
+                    <th style="width: 66px">单价</th>
+                    <th style="width: 46px">数量</th>
+                    <th style="width: 90px">金额</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (null != Model && Model.List.Count > 0)
+                {
+                    foreach (var item in Model.List)
+                    {
+                    <tr style="height: 20px;">
+                        <td>@item.ErpCode</td>
+                        <td class="auto_left">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                        <th>@item.OriginalPrice.ToString("C")</th>
+                        <th>@item.ProductQuantity</th>
+                        <th>@item.RealSalesAmount.ToString("C")</th>
+                    </tr>
+                    }
+                }
+
+            </tbody>
+
+            <tr class="item_allcount">
+                <th colspan="3" style="text-align: right;">合计：  
+                </th>
+                <th>@Model.QuantityCount
+                </th>
+                <th>@Model.MoneyCount.ToString("C")
+                </th>
+            </tr>
+
+        </table>
+    </div>
+
+    <div id="divfoot" class="divdisplay">
+        <table class="foot_tb">
+            <tr>
+                <td colspan="4" style="text-align: left;">销售备注：@Model.SoRemarks
+
+                </td>
+            </tr>
+            <tr>
+                <td>拣货员：________ 扫描包装员：________ 发货员：________ 签收人：________ 日期：________</td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    @Html.Raw(Constant.PRINT_ADVERTISING_SLOGAN)
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div id="divslide" class="slide divdisplay">
+    白<br />
+    联<br />
+    ︵<br />
+    库<br />
+    管<br />
+    ︶<br />
+    <br />
+    红<br />
+    联<br />
+    ︵<br />
+    财<br />
+    务<br />
+    ︶<br />
+    <br />
+    黄<br />
+    联<br />
+    ︵<br />
+    结<br />
+    算<br />
+    ︶<br />
+    <br />
+    蓝<br />
+    联<br />
+    ︵<br />
+    客<br />
+    户<br />
+    ︶
+</div>
+
+
+@section FooterJs
+{
+    <script type="text/javascript">
+  
+        function CreatePrintPage() {
+            LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+            LODOP.PRINT_INIT("拣货单打印");
+            LODOP.SET_PRINT_PAGESIZE(1, 2100, 1400, '');
+
+            var strStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+
+            LODOP.ADD_PRINT_HTM(16, "5%", "85%", "BottomMargin:16px", strStyle + document.getElementById("print").innerHTML);
+            // LODOP.ADD_PRINT_TABLE(213, "5%", "85%", 235, strStyle + document.getElementById("divitem").innerHTML); //明细 高度调
+            // LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+            // LODOP.ADD_PRINT_HTM(20, "5%", "85%", 190, strStyle + document.getElementById("divmain").innerHTML);//头
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);//页眉页脚
+            //// LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            // LODOP.ADD_PRINT_HTM(450, "5%", "85%", 100, strStyle + document.getElementById("divfoot").innerHTML); //脚 top调
+            //// LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            // LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+
+            LODOP.ADD_PRINT_HTM(20, "91%", "3%", "95%", strStyle + document.getElementById("divslide").innerHTML); //侧边 
+            LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+            //LODOP.ADD_PRINT_TEXT(454, 96, "76.25%", 20, "广告信息");
+            //LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 4);
+            //LODOP.SET_PRINT_STYLEA(0, "FontSize", 12);
+            //LODOP.SET_PRINT_STYLEA(0, "FontColor", "#FF0000");
+            //LODOP.SET_PRINT_STYLEA(0, "Alignment", 2);
+            //LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+            //LODOP.SET_PRINT_STYLEA(0, "Horient", 3);
+            LODOP.ADD_PRINT_TEXT(3, "85%", 135, 20, "第#页/共&页");
+            LODOP.SET_PRINT_STYLEA(0, "ItemType", 2);
+            LODOP.SET_PRINT_STYLEA(0, "Horient", 1);
+
+            LODOP.ADD_PRINT_BARCODE(60, "6%", 360, 40, "Code39", "@Model.SysNo"); //后面输出的在顶层        
+            LODOP.SET_PRINT_STYLEA(0, "ShowBarText", 0);
+
+        }
+
+    </script>
+}
+

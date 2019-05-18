@@ -1,0 +1,123 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@{
+    ViewBag.Title = "订单审核";
+    @Html.PrivilegeControl(PrivilegeCode.SO1002201, ".SO1002201")
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case" id="bd">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+           <h3>订单审核</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                     <div class="fl m10_l">
+                         <select name="status" id="status" search="Status"  class="select_ht28">
+                                    <option value="1" selected="selected">待审核订单</option>
+                                    <option value="2">待出库订单</option>
+                                    <option value="3">今日订单</option>
+                                    <option value="4">缺货订单</option>
+                                    <option value="0">全部</option>
+                                </select>
+                         </div>
+                     <div class="search_btn m10_l fl wd270">
+                         <input name="" type="text" class="input_ht28 "  style="width:227px" id="Condition" value="搜索订单号、会员姓名、收货人手机..." maxlength="30" />
+                         <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                </div>
+                <div class="left_tool" >
+                    <button class="btn btn_blue btn_ht26 m10_l SO1002201"  id="createBtn"><span class="icon icon_plus icon_white"></span><span class="m5_l">创建订单</span></button><button class="btn btn_ht26 m10_l"  id="exportBtn" style="display:none"><span class="icon_download_alt"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+            </div>
+            <div id="paging">
+            </div>
+
+        </div>
+    </div>
+</div>
+ <div style="z-index: 9; background-color: White; position: absolute;" id="divOrderDetail">
+ </div>
+<script type="text/JavaScript">
+    $(function () {
+        doSearch(1);
+
+        //查询条件变化时执行
+        $("[Search]").filter("[Search='Status']").change(function () { doSearch(1); });
+
+        //查询订单
+        $("#searchBtn").click(function() {
+            doSearch(1);
+        });
+        //创建订单
+        $("#createBtn").click(function() {
+            var url = '/Order/OrderCreate';
+            UI.OpenCreatTab("新建订单", "/Order/OrderCreate");
+        });
+      
+        //查询录入框点击事件
+        $("#Condition").defaultValue("搜索订单号、会员姓名、收货人手机...");
+    });
+
+    //查询列表
+    function doSearch(currentPage) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Order/SearchMyOrder?r=" + Math.random(), "Search", function (p) {
+            if ($("#Condition").val() != "搜索订单号、会员姓名、收货人手机...") {
+                p.setParams("Condition", $("#Condition").val());
+            } else {
+                p.setParams("Condition","");
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    //取得选中的订单号
+    function getSelectedIds() {
+        var ids = '';
+        $('input.checktd').each(function () {
+            if ($(this).attr("checked")) {
+                if (ids == '')
+                    ids += $(this).val();
+                else
+                    ids += ("," + $(this).val());
+            }
+        });
+        return ids;
+    }
+   
+    //取得订单日志
+    function GetOrderLogs(soSysno, obj) {
+        $.ajax({
+            type: "POST",
+            url: "/Order/GetOrderLogs",
+            data: "soSysNo=" + soSysno,
+            success: function (content) {
+                if (content != null && content != "") {
+                    $("#divOrderDetail").html(content);
+                    $("#divOrderDetail").css("display", "inline");
+                    var offset = $(obj).position();
+                    $("#divOrderDetail").css("top", offset.top - 10);
+                    $("#divOrderDetail").css("left", offset.left + 40);
+                    $(document).one("click", function () { HidOrderLogs(); });
+                }
+            }
+        });
+    }
+    
+    //隐藏订单日志
+    function HidOrderLogs() {
+        $("#divOrderDetail").hide();
+    }
+
+    //订单详情
+    function OrderBrowse(orderSysNo) {
+        UI.OpenCreatTab("订单:" + orderSysNo, '/Order/OrderDetail/' + orderSysNo);
+    }
+</script>

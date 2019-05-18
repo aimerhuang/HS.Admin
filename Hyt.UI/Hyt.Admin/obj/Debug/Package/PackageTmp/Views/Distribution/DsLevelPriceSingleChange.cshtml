@@ -1,0 +1,244 @@
+﻿@using Hyt.Model
+@model IList<Hyt.Model.CBPdPrice>
+
+@{
+    ViewBag.Title = "添加分销商调价申请";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" type="text/css" media="all"/>
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+}
+<form id="formAddPriceHistory" name="formAddPriceHistory" action="" onsubmit="return false;">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="head_detail border_bnone">
+                <h5>商品信息</h5>
+            </div>
+            @{
+                var product = ViewBag.Product as CBPdProduct;
+                if (product != null)
+                {
+                <div class="tit_con">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                            <td style="width: 20%;" class="nameright border_rnone">商品编号:</td>
+                            <td style="width: 30%;" class="border_right">@product.SysNo</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;" class="nameright border_rnone">商品名称:</td>
+                            <td style="width: 30%;">@product.ProductName</td>
+                        </tr>
+                        <tr>
+                            <td style="width: 20%;" class="nameright border_rnone">商品编号:</td>
+                            <td style="width: 30%;">@product.ErpCode</td>
+                        </tr>
+                    </table>
+                </div>
+                }
+            }
+
+            <div id="express">
+                <div class="head_detail m10_t border_bnone">
+                    <div class="more10r m5_t"></div>
+                    <h5>快捷调价</h5>
+                </div>
+                <div class="tit_con">
+                    <div class="boxs_detail m10_t">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone border_lnone">
+                            <tr>
+                                <td class="align_c border_rnone border_lnone" width="111"><span>统一调价</span></td>
+                                <td class="align_c red border_rnone" width="104">
+                                    <select id="multi_select">
+                                        <option value="1">提高</option>
+                                        <option value="-1">降低</option>
+                                    </select>
+                                </td>
+                                <td class="align_c border_rnone" width="106">
+                                    <input id="multi" name="multi" class="{number:true,min:0,messages:{number:'',min:''}} wd40" name="0" type="text" value="0" data="0">
+                                </td>
+                                <td class="align_c" width="51">元</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="boxs_detail m10_t">
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_lnone">
+                            <thead>
+                                <tr>
+                                    <th class="align_c border_rnone border_lnone wd100"><span>价格名称</span></th>
+                                    <th class="align_c border_rnone wd100">原等级价格</th>
+                                    <th class="align_c border_rnone wd100">新等级价格</th>
+                                    <th class="align_c border_right1 wd60">&nbsp;</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ChangePricePanel">
+                                @{
+                                    foreach (var m in Model)
+                                    {
+                                    <tr>
+                                        <td class="border_rnone border_bnone border_lnone">@m.PriceName</td>
+                                        <td class="border_rnone border_bnone">
+                                            <span class="red p10_r">@m.Price.ToString("C")</span>
+                                        </td>
+                                        <td class="border_rnone border_bnone">
+                                            <input id="@m.SysNo" name="@m.SysNo" type="text" value="@m.Price" data="@m.Price" sourcesysno="@m.SourceSysNo" pricesource="@m.PriceSource" class="{number:true,min:0,messages:{number:'',min:''}} wd40">
+                                        </td>
+                                        <td class="border_bnone">元</td>
+                                    </tr>
+                                    }
+                                }
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--提交按钮-->
+        <div class="pagination align_c clearfix hide">
+            <button id="btnSave" class="btn btn_blue btn_ht32 bold f14">保存</button>&nbsp;
+                <button class="btn btn_ht32 bold f14">取消</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#multi").bind("change", OnChangeMultiNumber);
+    });
+    function OnChangeMultiNumber() {
+        $("#multi").val(parseFloat($(this).val()));
+        var selectValue = $("#multi_select").val();
+        $("#ChangePricePanel input").each(function () {
+            switch (selectValue) {
+                case "1":
+                    $(this).val(parseFloat($(this).val()) + parseFloat($("#multi").val()));
+                    break;
+                case "-1":
+                    $(this).val(parseFloat($(this).val()) - parseFloat($("#multi").val()));
+                    break;
+            }
+
+        });
+    }
+    /*******************************
+        * 保存商品调价申请回调
+        *******************************/
+    function SaveCallback() {
+        //验证数据
+        if (!$("#formAddPriceHistory").valid()) {
+            UI.tips.tip_alert("tips_warning", "输入错误, 价格必须是大于0的数字！");
+            return false;
+        }
+
+        //查找所有预期修改的价格申请，并组合成结果数组
+        var inputItems;
+        inputItems = $("input", $("#ChangePricePanel")); //价格输入值
+        var expectPriceArray = BuildPdPriceHistoryList(inputItems);
+
+        //如果结果集长度是0者不做任何操作
+        if (expectPriceArray.length == 0) {
+            UI.tips.tip_alert("tips_warning", "没有要更新或保存的数据！");
+            return false;
+        }
+        var productSysNo = "[" + @ViewBag.Product.SysNo + "]";
+        UI.Confirm({
+            content: '确认新增等级价格申请吗？',
+            padding: '10px 20px',
+            ok: function () {
+                $.ajax({
+                    url: '@Url.Action("SaveProductPrice")',
+                    data: { priceHistories: JSON.stringify(expectPriceArray), productSysNoList: productSysNo },
+                    dataType: "json",
+                    type: "POST",
+                    success: function (ret) {
+                        if (ret.StatusCode == undefined) {
+                            UI.tips.tip_alert('tips_warning', ret);
+                            return;
+                        }
+                        if (ret.Status) {
+                            UI.DialogOpener().showTip(ret.Message);
+                            UI.Dialog.close();
+                        } else {
+                            UI.tips.tip_alert('tips_warning', ret.Message);
+                        }
+                    },
+                    error: function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        UI.tips.tip_alert('tips_wrong', error);
+
+                    },
+                });
+            },
+            cancelVal: '关闭',
+            cancel: true
+        });
+    }
+
+    /*******************************
+        * 生产调价结果申请数字
+        *******************************/
+
+    function BuildPdPriceHistoryList(inputArray) {
+        var expectPriceArray = new Array(); //预期结果集
+        var tempPrice = null; //价格缓存，用于价格验证
+
+        var tempObj; //结果对象
+        var inputObj; //输入框对象
+        for (var i = 0; i < inputArray.length; i++) {
+            inputObj = $(inputArray[i]);
+            //对象为空将跳过
+            if (inputObj.length == 0) {
+                continue;
+            }
+
+            //判断是否有值<=0
+            if (inputObj.val().length <= 0)
+                continue;
+
+            //组合调价申请对象(PdPriceHistory)
+            tempObj = {
+                SysNo: 0,
+                PriceSysNo: 0,
+                OriginalPrice: 0,
+                ApplyPrice: 0,
+                ApplySysNo: 0,
+                ApplyDate: "@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")",
+                Opinion: "",
+                Auditor: 0,
+                AuditDate: "@((new DateTime()).ToString("yyyy-MM-dd HH:mm:ss"))",
+                Status: 1
+            };
+            tempObj.OriginalPrice = inputObj.attr("data"); //获取原价
+            tempObj.PriceSysNo = inputObj.attr("id"); //获取系统编号（input控件ID就是价格的系统编号）
+            tempObj.SourceSysNo = inputObj.attr("sourcesysno"); //来源编号
+            tempObj.PriceSource = inputObj.attr("pricesource"); //来源编号类型
+            tempObj.ApplyPrice = parseFloat(inputObj.val());
+
+            //验证会员等级价格 
+            if (tempObj.PriceSource == "@((int)Hyt.Model.WorkflowStatus.ProductStatus.产品价格来源.会员等级价)") {
+                //价格对比，只能从第二个价格开始
+                if (tempPrice != null && tempObj.ApplyPrice > tempPrice.ApplyPrice) {
+                    UI.Alert({
+                        content: "会员等级价设置不正确，价格必须从高到底设置",
+                        width: 250
+                    });
+                    return null;
+                }
+                tempPrice = tempObj;
+            }
+
+
+            //如果价格有改动才添加到预期调价列表中
+            if (tempObj.OriginalPrice != tempObj.ApplyPrice)
+                expectPriceArray.push(tempObj);
+        }
+
+
+        return expectPriceArray;
+    }
+
+</script>

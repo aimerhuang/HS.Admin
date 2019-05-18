@@ -1,0 +1,94 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "优惠券管理";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>优惠券管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool clearfix">
+                    <span class="fl">客户姓名</span>
+                    <input type="text" class="wd40 fl m5_l m10_r" value="" search="CustomerName">
+                    
+                    <span class="fl">使用平台</span>
+                    <select class="select_ht28 fl wd80 m10_r m5_l" search="UsePlatform" id="UsePlatform">
+                        <option value="">全部</option>
+                        @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.PromotionStatus.促销使用平台>(null, null).ToString())
+                    </select>
+
+                    <span class="fl">优惠劵类型</span>
+                    <select class="select_ht28 fl wd60 m10_r m5_l" search="Type" id="Type">
+                        <option selected="selected">全部</option>
+                        @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.PromotionStatus.优惠券类型>(null, null).ToString())
+                    </select>
+                    <span class="fl">描述</span>
+                    <input type="text" class="wd50 fl m5_l m10_r" value="" search="Description">
+                    <span class="fl">状态</span>
+                    <select class="select_ht28 fl wd60 m10_r m5_l" search="Status"  id="Status">
+                        <option selected="selected">全部</option>
+                        @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.PromotionStatus.优惠券状态>(null, null).ToString())
+                    </select>
+                    <span class="fl">有效时间</span>
+                    <div class="date_btn120 m5_l m5_r fl">
+                        <input type="text" onfocus="UI.Date({el:'StartTime'})" search="StartTime" value="" class="input_ht26" id="StartTime" name="StartTime">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'StartTime'})"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span class="fl">-</span>
+                    <div class="date_btn120 m5_l m10_r fl">
+                        <input type="text" onfocus="UI.Date({el:'EndTime'})" search="EndTime" value="" class="input_ht26" id="EndTime" name="EndTime">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndTime'})"><span class="icon_calendar"></span></button>
+                    </div>
+                    <button title="搜索" class="btn btn_ht28 fl" onclick="doSearch();return false;"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+                
+                <div class="left_tool">
+                    <button onclick="addCoupon();return false;" class="btn btn_blue btn_ht26 ">
+                        <span class="icon icon_plus icon_white"></span><span class="m5_l">新增优惠券</span>
+                    </button>
+                </div>
+            </div>
+            <div id="paging"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch();
+        $("#UsePlatform,#Type,#Status").change(function () {
+            doSearch();
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Promotion/DoCouponQuery?r=" + Math.random(), "Search", function (p) {
+            p.setParams("PageSize", 10);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    function addCoupon() {
+        //var url = '/Promotion/Coupon';
+        //window.location.href = url;
+        //UI.OpenCreatTab("新建优惠券", url);
+        UI.OpenCreatTab('新建优惠券', '@Url.Action("Coupon")');
+    };
+    function editCoupon(sysNo) {
+        //var url = '/Promotion/Coupon/'+sysNo;
+        //window.location.href = url;
+        //UI.OpenCreatTab("编辑优惠券:" + sysNo, url);
+        UI.OpenCreatTab('编辑优惠券:' + sysNo, '@Url.Action("Coupon/")' + sysNo);
+    };
+</script>

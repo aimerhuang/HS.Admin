@@ -1,0 +1,148 @@
+﻿@using Hyt.BLL.Basic
+@model Hyt.Model.BsOrganization
+@{
+    ViewBag.Title = "修改组织机构";
+}
+@section HeadJs
+{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#organization_form").validate({
+                rules: {
+                    Name: { required: true, maxlength: 50 },
+                    Code: { required: true },
+                    Status: { required: true },
+                    DisplayOrder: { required: true, digits: true }
+                },
+                messages: {
+                    PaymentName: {
+                        required: "组织机构名称必填",
+                        maxlength: "长度超出50个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('span').attr('class', 'error m10_l');
+
+                },
+                success: function (span, element) {
+                    element.parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function getModel() {
+            var model = {};
+            model.SysNo = $("#hidSysNo").val();
+            model.Name = $("#Name").val();
+            model.Code = $("#Code").val();
+            model.parentSysNo = $("#ParentSysNo").val();
+            model.Status = $("#Status").val();
+            model.DisplayOrder = $("#DisplayOrder").val();
+            model.Description = $("#Description").val();
+            return model;
+        }
+
+        function submitOrganization() {
+            if ($("#organization_form").valid()) {
+                UI.Confirm({
+                    content: '您确定要修改组织机构吗？',
+                    ok: function () {
+                        var model = getModel();
+                        if (model) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("OrganizationEdit", "Basic")",
+                                data: JSON.stringify(model),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function (ret) {
+                                    mask.Remove();
+                                    if (ret.IsLogout) { eval(ret.Callback); return; }
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('组织机构修改成功', model.SysNo);
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function () {
+                                    mask.Remove();
+                                }
+                            });
+                        } else {
+                            UI.Alert({
+                                content: '数据错据,请检查重试!'
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+}
+@if (Model != null)
+{
+    <input id="hidSysNo" type="hidden" value="@Model.SysNo" />
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <form id="organization_form" action="" method="post">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>机构名称</td>
+                                <td width="80%">
+                                    <input type="text" class="wd270" id="Name" name="Name" value="@Model.Name" /><span id="c_address" class="prompt m10_l">组织机构名称</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>机构代码</td>
+                                <td width="80%">
+                                    <input type="text" class="wd270" id="Code" name="Code" value="@Model.Code" /><span id="c_area" class="prompt m10_l">机构代码</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone">父级机构</td>
+                                <td width="80%">
+                                    @if (Model.ParentSysNo > 0)
+                                    {
+                                        var organization = OrganizationBo.Instance.GetEntity(Model.ParentSysNo);
+                                        if (organization != null)
+                                        {
+                                        @organization.Name
+                                        @Html.Hidden("ParentSysNo", Model.ParentSysNo)
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <span>无</span>
+                                        @Html.Hidden("ParentSysNo", 0)
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>显示顺序</td>
+                                <td width="80%">
+                                    <input type="text" id="DisplayOrder" name="DisplayOrder" class="wd70" value="@Model.DisplayOrder" /><span id="c_absa" class="prompt m10_l">数字越大排序越靠前</span></td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone" valign="top"><span class="v_star">*</span>状态</td>
+                                <td width="80%">
+                                    @Html.DropDownList("Status")
+                                    <span id="c_displayorder" class="prompt m10_l m5_l">用于显示启用</span></td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone" valign="top">备注</td>
+                                <td width="80%">
+                                    <textarea class="" id="Description" name="Description" maxlength="200" style="width: 320px;">@Model.Description</textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+
+}

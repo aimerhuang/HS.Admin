@@ -1,0 +1,114 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model IList<CBPdProductAtttributeRead>
+
+@foreach (var item in Model){
+<tr class="AttributeOptionsTr">
+    <td class="nameright AttributeName" width="150px"><span class="v_star">*</span>@item.AttributeName</td>
+    <td width="400px" class="AttributeValue">
+        @if(item.AttributeType == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.选项类型)
+        {
+            <select id="AttributeOption_Sel" class="wd170 m10_r {min:1,messages:{required:'选项比选1'}}" name="@item.AttributeGroupSysNo@Html.Raw("_")@item.SysNo">
+                  <option value="0">全部</option>
+                    @{
+                        foreach (var dict in item.AttributeOptionList)
+                        {
+                            <option value="@dict.SysNo" @if(item.AttributeOptionSysNo==dict.SysNo){ @Html.Raw("selected");} >@dict.AttributeText</option>
+                        }
+                    }
+            </select>  <span class="prompt m10_l">选项必选</span>
+            
+            <br/>
+            foreach (var dict in item.AttributeOptionList)
+            {
+                PdProductAttributeOption Data = Hyt.BLL.Product.PdProductAttributeOptionBo.Instance.GetByProOptionSysNo(item.ProductSysNo, dict.SysNo);
+                if(Data != null)
+                { 
+                    <div class="AttributeOptionDiv" id='AttributeOptionDiv_@dict.SysNo' productsysno="@item.ProductSysNo" attributeoptionsysno="@dict.SysNo" style="padding-top:10px;@if(item.AttributeOptionSysNo == dict.SysNo){@Html.Raw("display:block");} else{@Html.Raw("display:none;");}">
+                        是否图片
+                        <span style="margin-left:15px;">否</span>
+                        <input name='IsImage_@dict.SysNo' type="radio" id='Isimage_N_@dict.SysNo' value="0" @if(Data.IsImage == 0 || Data.IsImage == null){@Html.Raw("checked='checked'")} />
+                        <span style="margin-left:15px;">是</span>
+                        <input name='IsImage_@dict.SysNo' type="radio" id='IsImage_Y_@dict.SysNo' value="1" @if (Data.IsImage == 1) { @Html.Raw("checked='checked'") } />
+
+                        <div id='AttributeOptionImage_@dict.SysNo' class="m10_r imgbox" style="padding-top:5px;">
+                            <img src="@if (string.IsNullOrEmpty(Data.AttributeOptionImage))
+                                      {@Html.Raw("../Theme/images/addpic.png") }
+                                            else { @Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer@Data.AttributeOptionImage }" class="picUpload_AttrOpt" width="80" height="80" />
+                            <input style="width:1px;height:1px;border:none;" value="@Data.AttributeOptionImage" class="imgsrc" name="@item.SysNo@Html.Raw("_")@dict.SysNo" />
+                            <span class="prompt m10_l" style="position:relative;left:-5px;">图片上传</span>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="AttributeOptionDiv" id='AttributeOptionDiv_@dict.SysNo' productsysno="@item.ProductSysNo" attributeoptionsysno="@dict.SysNo" style="padding-top:10px;@if(item.AttributeOptionSysNo == dict.SysNo){@Html.Raw("display:block");} else{@Html.Raw("display:none;");}">
+                        是否图片
+                        <span style="margin-left:15px;">否</span>
+                        <input name='IsImage_@dict.SysNo' type="radio" id='Isimage_N_@dict.SysNo' value="0" checked='checked' />
+                        <span style="margin-left:15px;">是</span>
+                        <input name='IsImage_@dict.SysNo' type="radio" id='IsImage_Y_@dict.SysNo' value="1"/>
+
+                        <div id='AttributeOptionImage_@dict.SysNo' class="m10_r imgbox" style="padding-top:5px;">
+                            <img src="../Theme/images/addpic.png" class="picUpload_AttrOpt" width="80" height="80" />
+                            <input style="width:1px;height:1px;border:none;" value="" class="imgsrc" name="@item.SysNo@Html.Raw("_")@dict.SysNo" />
+                            <span class="prompt m10_l" style="position:relative;left:-5px;">图片上传</span>
+                        </div>
+                    </div>                    
+                }
+            }
+        }
+        else if (item.AttributeType == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品属性类型.图片类型)
+        {
+            <div class="m10_r imgbox">
+                <img src="@if(string.IsNullOrEmpty(item.AttributeImage)){@Html.Raw("../Theme/images/addpic.png") }
+                          else { @Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer@item.AttributeImage }" class="picUpload" width="80" height="80" />
+                <input style="width:1px;height:1px;border:none;" value="@item.AttributeImage" class="required imgsrc" name="@item.AttributeGroupSysNo@Html.Raw("_")@item.SysNo" />
+                <span class="prompt m10_l" style="position:relative;left:-5px;">图片必须上传</span>
+            </div>
+            <div class="m5_t">
+                <input style="width: 72px;" value="@item.AttributeText" class="required imgdes " name="@item.AttributeGroupSysNo@Html.Raw("_")@item.SysNo@Html.Raw("_des")" type="text" />
+
+                <span class="prompt m10_l">图片描述必填</span>
+            </div>
+            }
+            else
+            {
+            <input class="required wd156 m10_r" value="@item.AttributeText" name="@item.AttributeGroupSysNo@Html.Raw("_")@item.SysNo" type="text" />
+            <span class="prompt m10_l">属性值必填</span>
+            }
+    </td> 
+    <td>
+        @if(item.IsRelationFlag==(int)Hyt.Model.WorkflowStatus.ProductStatus.是否用做关联属性.是)
+        {
+           @Html.Raw("关联属性："+((Hyt.Model.WorkflowStatus.ProductStatus.是否用做关联属性)item.IsRelationFlag).ToString())
+        }   
+        &nbsp;&nbsp;
+       @* @if (item.Status == (int) Hyt.Model.WorkflowStatus.ProductStatus.商品属性状态.禁用)
+        {
+            @Html.Raw("状态："+Hyt.Model.WorkflowStatus.ProductStatus.商品属性状态.禁用.ToString())
+        }*@
+    </td>
+    <td>
+        <input type="hidden" class="ProductAttributeSysno" value="@item.ProductAttributeSysno" />
+        <input type="hidden" class="SysNo" value="@item.SysNo" />
+        <input type="hidden" class="AttributeType" value="@item.AttributeType" />
+         <button class="btn btn_ht26 btnUp" type="button" style="display: none;"><span class="icon_arrow_up"></span><span class="m5_l">上移</span></button>
+         <button class="btn btn_ht26 m10_l btnDown" type="button" style="display: none;"><span class="icon_arrow_down"></span><span class="m5_l">下移</span></button>
+        <button class="btn btn_ht26 m10_l deleteAttribute" title="删除属性" style="display: none;"><span class="icon_minus_sign"></span><span class="m5_l">删除属性</span></button>
+        <button class="btn btn_ht26 m10_l btnEdit" title="编辑属性" style="display: none;"><span class="icon_minus_sign"></span><span class="m5_l">编辑属性</span></button>
+    </td>
+</tr>
+}
+
+<script type="text/javascript">
+    $("#AttributeOption_Sel").live('change', function () {
+        $(".AttributeOptionDiv").hide();
+        var id = $(this).val();
+        if (id != "0")
+        {
+            $("#AttributeOptionDiv_" + id).show();
+        }
+    })
+</script>

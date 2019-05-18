@@ -1,0 +1,41 @@
+﻿<div class="py_fl">
+  	<div class="py_fl_box f14">
+    	<dl>
+      	<dt><a>流程帮助视频</a><span class="m5_l i_close"></span></dt>
+        <dd>
+          <ul>
+
+
+            <li @{if (ViewData["nav"].ToString() == "index") { @Html.Raw("class=\"active\""); } }><a>新增订单</a></li>
+            <li @{if (ViewData["nav"].ToString() == "upgrade") {  @Html.Raw("class=\"active\""); } }><a>升舱服务</a></li>
+            <li><a>商品上架</a></li>
+            <li><a>订单管理</a></li>
+            <li><a>仓库管理</a></li>
+          </ul>
+        </dd>
+      	<dt><a>功能帮助视频</a><span class="m5_l i_close"></span></dt>
+        <dd>
+          <ul>
+            <li><a>22</a></li>
+            <li><a>22</a></li>
+            <li><a>22</a></li>
+          </ul>
+        </dd>
+      	<dt><a>帮助文档下载</a></dt>
+      </dl>
+    </div>
+  </div>
+<script type="text/javascript">
+var objCom=$('.py_fl_box');
+var objClick=objCom.find('dl > dt');
+objClick.toggle(
+	function(){
+		$(this).children('span').removeClass('i_close').addClass('i_open');
+		$(this).next('dd').show();
+	},
+	function(){
+		$(this).children('span').removeClass('i_open').addClass('i_close');
+		$(this).next('dd').hide();
+	}
+);
+</script>

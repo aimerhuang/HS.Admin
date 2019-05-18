@@ -1,0 +1,569 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Grand.Service.EC.Core.SMS.Contract</name>
+    </assembly>
+    <members>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus">
+            <summary>
+            会员状态
+            </summary>
+            <remarks>2013-09-10 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.是否默认地址">
+            <summary>
+            是否默认地址
+            数据表:CrReceiveAddress 字段:IsDefault
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.大宗采购状态">
+            <summary>
+            大宗采购状态
+            数据表:CrBulkPurchase 字段:Status
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.邮箱状态">
+            <summary>
+            邮箱状态
+            数据表:CrCustomer 字段:EmailStatus
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.手机状态">
+            <summary>
+            手机状态
+            数据表:CrCustomer 字段:MobilePhoneStatus
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.性别">
+            <summary>
+            性别
+            数据表:CrCustomer 字段:Gender
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.婚姻状况">
+            <summary>
+            婚姻状况
+            数据表:CrCustomer 字段:MaritalStatus
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.注册来源">
+            <summary>
+            注册来源
+            数据表:CrCustomer 字段:RegisterSource
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.会员状态">
+            <summary>
+            会员状态
+            数据表:CrCustomer 字段:Status
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.等级是否固定">
+            <summary>
+            等级是否固定
+            数据表:CrCustomer 字段:IsLevelFixed
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.经验积分是否固定">
+            <summary>
+            经验积分是否固定
+            数据表:CrCustomer 字段:IsExperiencePointFixed
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.惠源币是否固定">
+            <summary>
+            惠源币是否固定
+            数据表:CrCustomer 字段:IsExperienceCoinFixed
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.是否接收邮件">
+            <summary>
+            是否接收邮件
+            数据表:CrCustomer 字段:IsReceiveEmail
+            </summary>
+            <remarks>2013-08-27 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.是否接收短信">
+            <summary>
+            是否接收短信
+            数据表:CrCustomer 字段:IsReceiveShortMessage
+            </summary>
+            <remarks>2013-08-27 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.是否是公共账户">
+            <summary>
+            是否是公共账户
+            数据表:CrCustomer 字段:IsPublicAccount
+            </summary>
+            <remarks>2013-08-27 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.会员投诉类型">
+            <summary>
+            会员投诉类型
+            数据表:CrComplaint 字段:ComplainType
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.会员投诉状态">
+            <summary>
+            会员投诉状态
+            数据表:CrComplaint 字段:Status
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.会员投诉回复类型">
+            <summary>
+            会员投诉回复类型
+            数据表:CrComplaintReply 字段:ReplyerType
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.会员咨询类型">
+            <summary>
+            会员咨询类型
+            数据表:CrCustomerQuestion 字段:QuestionType
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.会员咨询状态">
+            <summary>
+            会员咨询状态
+            数据表:CrCustomerQuestion 字段:Status
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.商品浏览方式">
+            <summary>
+            商品浏览方式
+            数据表:CrBrowseHistory 字段:BrowseType
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.通知类型">
+            <summary>
+            通知类型
+            数据表:CrNotice 字段:NoticeType
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.通知方式">
+            <summary>
+            通知方式
+            数据表:CrNotice 字段:NoticeWay
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.站内信状态">
+            <summary>
+            站内信状态
+            数据表:CrSiteMessage 字段:Status
+            </summary>
+            <remarks>2013-06-18 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.惠源币是否可用于支付货款">
+            <summary>
+            惠源币是否可用于支付货款
+            数据表:CrCustomerLevel 字段:CanPayForProduct
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.惠源币是否可用于支付服务">
+            <summary>
+            惠源币是否可用于支付服务
+            数据表:CrCustomerLevel 字段:CanPayForService
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.惠源币变更类型">
+            <summary>
+            惠源币变更类型
+            数据表:CrExperienceCoinLog 字段:ChangeType
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.经验积分变更类型">
+            <summary>
+            经验积分变更类型
+            数据表:CrExperiencePointLog 字段:PointType
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.可用积分变更类型">
+            <summary>
+            可用积分变更类型
+            数据表:CrAvailablePointLog 字段:PointType
+            </summary>
+            <remarks>2013-10-31 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.等级积分日志变更类型">
+            <summary>
+            等级积分日志变更类型
+            数据表:CrLevelPointLog 字段:ChangeType
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.等级日志变更类型">
+            <summary>
+            等级日志变更类型
+            数据表:CrLevelLog 字段:ChangeType
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.购物车是否锁定">
+            <summary>
+            购物车是否锁定
+            数据表:CrShoppingCartItem 字段:IsLock
+            </summary>
+            <remarks>2013-08-16 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.购物车是否过期重置">
+            <summary>
+            购物车是否过期重置
+            数据表:CrShoppingCartItem 字段:IsExpireReset
+            </summary>
+            <remarks>2013-08-16 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.购物车商品来源">
+            <summary>
+            购物车商品来源
+            数据表:CrShoppingCartItem 字段:Source
+            </summary>
+            <remarks>2013-08-16 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.商品销售类型">
+            <summary>
+            商品销售类型
+            数据表:CrShoppingCartItem 字段:ProductSalesType
+            </summary>
+            <remarks>2013-08-16 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.是否选中">
+            <summary>
+            是否选中
+            数据表:CrShoppingCartItem 字段:IsChecked
+            </summary>
+            <remarks>2013-08-27 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.意见反馈类型来源">
+            <summary>
+            意见反馈类型来源
+            数据表:CrFeedbackType 字段:Source
+            </summary>
+            <remarks>2013-08-16 吴文强 创建</remarks>
+            <remarks>2014-05-04 余勇 添加 CRM客服系统</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.CustomerStatus.积分更新目标">
+            <summary>
+            积分更新目标对象
+            指定更新数据表
+            </summary>
+            <remarks>2013-07-03 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus">
+            <summary>
+            日志状态
+            </summary>
+            <remarks>2013-09-10 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.系统日志来源">
+            <summary>
+            系统日志来源
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.SysLogLevel">
+            <summary>
+            日志级别
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.系统日志目标类型">
+            <summary>
+            系统日志目标类型(更多类型可在开发过程中添加此枚举)
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="F:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.系统日志目标类型.WeChatAutoReplyConfig">
+            WeChat huangwei
+             <summary>
+             微信自动回复配置
+             </summary>
+        </member>
+        <member name="F:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.系统日志目标类型.WeChatKeyWordsMgm">
+            <summary>
+            微信关键词管理
+            </summary>
+        </member>
+        <member name="F:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.系统日志目标类型.微信">
+            <summary>
+            微信
+            </summary>
+        </member>
+        <member name="F:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.系统日志目标类型.未捕获异常">
+            <summary>
+            未捕获异常
+            </summary>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.业务类型">
+            <summary>
+            业务类型
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.LogStatus.绩效日志状态">
+            <summary>
+            业务类型
+            </summary>
+            <remarks>2013-06-21 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms">
+            <summary>
+            短信表
+            </summary>
+            <remarks>
+            2013-10-08 杨浩 T4生成
+            </remarks>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.SysNo">
+            <summary>
+            系统编号
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.SmsContent">
+            <summary>
+            短信内容
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.Priority">
+            <summary>
+            优先级
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.Status">
+            <summary>
+            状态待发(10),已发(20),作废(-10)
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.ErrorQuantity">
+            <summary>
+            发送失败次数
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.ExpectSendTime">
+            <summary>
+            期望发送时间
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.HandleTime">
+            <summary>
+            处理时间
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.CreatedBy">
+            <summary>
+            创建人
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.CreatedDate">
+            <summary>
+            创建时间
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.LastUpdateBy">
+            <summary>
+            最后更新人
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NcSms.LastUpdateDate">
+            <summary>
+            最后更新时间
+            </summary>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NotificationStatus">
+            <summary>
+            通知状态
+            </summary>
+            <remarks>2013-10-08 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NotificationStatus.短信发送状态">
+            <summary>
+            短信发送状态
+            数据表:NcSms 字段:Status
+            </summary>
+            <remarks>2013-10-08 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NotificationStatus.邮件类型">
+            <summary>
+            邮件类型
+            数据表:NcEmail 字段:MailType
+            </summary>
+            <remarks>2013-10-08 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.NotificationStatus.邮件发送状态">
+            <summary>
+            邮件发送状态
+            数据表:NcEmail 字段:Status
+            </summary>
+            <remarks>2013-10-08 吴文强 创建</remarks>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig">
+            <summary>
+            短信模板
+            </summary>
+            <remarks>2016-1-20 杨浩 创建</remarks>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.SmsTemplates">
+            <summary>
+            短信模板列表
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.SmsProviderName">
+            <summary>
+            短信提者名称
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.Account">
+            <summary>
+            账号
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.Userid">
+            <summary>
+            用户Id
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.Sign">
+            <summary>
+            签名
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateConfig.SignPosition">
+            <summary>
+            签名位置（0：在短信内容后面 1：短信内容前面）
+            </summary>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateInfo">
+            <summary>
+            短信模板详情
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateInfo.Key">
+            <summary>
+            短信模板版key
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SmsTemplateInfo.Content">
+            <summary>
+            短信模板内容
+            </summary>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog">
+            <summary>
+            
+            </summary>
+            <remarks>
+            2013-08-27 杨合余 T4生成
+            </remarks>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.SysNo">
+            <summary>
+            系统编号
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.LogLevel">
+            <summary>
+            日志级别:10:Debug,20:Info,30:Warn,40:Error,50:Fata
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.Source">
+            <summary>
+            来源:前台(10),后台(20),商城IphoneApp(31),商城Andro
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.TargetType">
+            <summary>
+            操作目标类型:枚举值见('系统日志目标类型‘)
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.TargetSysNo">
+            <summary>
+            操作目标系统编号
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.Exception">
+            <summary>
+            异常信息
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.OperatorName">
+            <summary>
+            操作人姓名
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.Operator">
+            <summary>
+            操作人
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.LogIp">
+            <summary>
+            操作人IP
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.LogDate">
+            <summary>
+            操作时间
+            </summary>
+        </member>
+        <member name="P:Grand.Service.EC.Core.SMS.Contract.DataContract.Model.SySystemLog.Message">
+            <summary>
+            日志内容
+            </summary>
+        </member>
+        <member name="T:Grand.Service.EC.Core.SMS.Contract.ISMSService">
+            <summary>
+            短信服务
+            </summary>
+            <remarks>2014-08-12 杨浩 创建</remarks>
+        </member>
+        <member name="M:Grand.Service.EC.Core.SMS.Contract.ISMSService.SendMessage(System.String,System.String,System.String,System.String)">
+            <summary>
+            发送短信消息
+            </summary>
+            <param name="type">短信类型</param>
+            <param name="mobile">接收手机号码</param>
+            <param name="parameter">短信模板中的参数列表(半角逗号分隔例:实例,实例2...实例3)</param>
+            <param name="sign">短信签名(默认为空否则签名为动态传入)</param>
+            <returns></returns>
+            <remarks>2016-02-16 杨浩 创建</remarks>
+        </member>
+        <member name="M:Grand.Service.EC.Core.SMS.Contract.ISMSService.GetBalance">
+            <summary>
+            获取余额
+            </summary>
+            <returns></returns>
+            <remarks>2016-02-16 杨浩 创建</remarks>
+        </member>
+    </members>
+</doc>

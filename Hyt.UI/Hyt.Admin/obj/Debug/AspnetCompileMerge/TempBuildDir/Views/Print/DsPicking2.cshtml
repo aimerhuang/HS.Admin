@@ -1,0 +1,215 @@
+﻿@model Hyt.Model.Transfer.PrtDsPicking
+@{
+    Layout = "~/Views/Shared/_PrintWh.cshtml";
+    ViewBag.Title = "拣货（出库）单打印";
+    if (Model == null)
+    {
+        return;
+    }
+}
+
+<style type="text/css" id="style2">
+    .bw { width: 1210px; margin: 0 auto; }
+    body, div, p, span, h1, h2, h3, h4, h5, h6, ol, ul, li, b, dl, dt, dd, em, i, form, input { margin: 0; padding: 0; list-style: none; }
+    li{line-height:15px}
+    /*h1,h2,h3,h4,h5,h6{font-family:"微软雅黑","黑体","华文细黑";}*/
+    .slide { font-size: 12px; padding-top: 5px; padding-bottom: 5px; }
+    .bg_f5 { background: #f5f5f5; }
+    td { word-break: break-all; }
+    * { margin: 0; }
+    img { border: none; }
+    .imgbox img { border: #ddd solid 1px; padding: 2px; }
+    h1, h2 { font-size: 16px; }
+    h2 { font-weight: normal; }
+    h3, h4 { font-size: 14px; }
+    h4 { font-weight: normal; }
+    h5, h6 { font-size: 12px; }
+    h6 { font-weight: normal; }
+    .fl { float: left; }
+    .fr { float: right; }
+    .print_title2 { font-size: 26px;text-align: center;font-weight: bold;margin-bottom: 15px;}
+    body { font-family: "微软雅黑"; font-size: 14px; line-height: 22px; }
+    .clear { clear: both; height: 0; line-height: 0; }
+    /*.deliverybox2 { background: url(/Theme/images/delivery02.png) no-repeat; width: 1058px; height: 618px; margin: 0 auto; overflow: hidden; }*/
+    .deliverybox2 .dcon { margin: 0 0 0 0px; position: relative; }
+    .dcon_b1 { width: 100%; }
+        .dcon_b1 .w1 { width: 200px; }
+        .dcon_b1 .w2 { width: 200px; }
+        .dcon_b1 .w3 { width: 200px; }
+    .dcon_b2 { margin-top: 10px; }
+        .dcon_b2 table { text-align: center; }
+            .dcon_b2 table thead th { border-bottom: #000 solid 2px; }
+        .dcon_b2 table { border-bottom: #000 solid 2px; }
+            .dcon_b2 table tbody { line-height: 28px; }
+        .dcon_b2 .total { }
+    .dcon_b3 { width: 100%; margin-top: 0px; font-weight: bold; }
+        .dcon_b3 .remark { margin-bottom: 15px; }
+</style>
+
+<div id="print">
+    <div class="deliverybox2">
+        <div class="dcon" id="dcon">
+            <div id="dcon_b1">
+                <div class="print_title2">
+                    @if (Model.WarehouseSysNo == 59)
+                    {
+                        @("销售出库单")
+                    }
+                    else
+                    {
+                        @(" 深圳信营国际电子商务有限公司")
+                        <br />
+                        @("销售出库单")
+                    }</div>
+                <div class="dcon_b1">
+                    <div class="fl w1">
+                        店铺名称：@Model.ShopName<br />
+                        店铺账号：@Model.ShopAccount<br />
+                        支付方式：@if (Model.PaymentType == (int)Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型.到付)
+                             {
+                                 @Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型.到付
+                             }
+                             else
+                             {
+                                 @Model.PaymentName
+                             }<br />
+                         第三方订单号：@Model.MallOrderId
+                    </div>
+                    <div class="fl w2">
+                        订购单号：@Model.OrderSysNO<br />
+                        收货人姓名：@Model.ReceiveName<br />
+                        订购日期：@Model.SoCreatedDate.ToString("yyyy-MM-dd HH:mm")<br />
+                        发货仓库：@Model.BackWarehouseName<br />
+                        金蝶单据：@ViewBag.KisVoucherNo
+                    </div>
+                    <div class="fr w3">
+                        出库单号：@Model.SysNo<br />
+                        收货人电话：@Model.MobilePhoneNumber<br />
+                        地区：@ViewBag.Prov<text>省</text>@ViewBag.City<text>市</text>@ViewBag.Area<br />
+                        快递方式：@Model.DeliveryTypeName
+
+                    </div>
+                    <div class="clear"></div>
+                    <div>收货地址：@Model.StreetAddress</div>
+                </div>
+            </div>
+            <div id="dcon_b2">
+                <div class="dcon_b2">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <thead>
+                            <tr>
+                                <th width="40">序号</th>
+                                <th width="130">编号</th>
+                                <th width="130">条形码</th>
+                                <th>名称</th>
+                                <th width="60">数量</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (null != Model && Model.List.Count > 0)
+                            {
+                                var i = 1;
+                                foreach (var item in Model.List)
+                                {
+                                <tr style="height: 20px;">
+                                    <td>@i</td>
+                                    <td>@item.ErpCode</td>
+                                    <td>@item.Barcode</td>
+                                    <td class="auto_left">
+                                        @Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(item.ProductSysNo)
+                                        @*@item.ProductName*@
+                                    </td>
+                                    <td>@item.ProductQuantity</td>
+                                </tr>
+                                    i++;
+                                }
+                            }
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+            <div id="dcon_b3">
+                <div class="dcon_b3">
+                    <div class="remark">
+                        备注：@Html.Raw(Model.DeliveryRemarks)
+                    </div>
+                    <div class="remark">
+                        对内备注：@Html.Raw(Model.SoOrder.InternalRemarks)
+                    </div>
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td>拣货员：</td>
+                            <td>扫描包装员：</td>
+                            <td>发货员：</td>
+                            <td>日期：</td>
+                            <td>业务员：@ViewBag.DaiLiName </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divslide" class="slide divdisplay">
+    @*<ul>
+        <li>白</li>
+        <li>联</li>
+        <li>︵</li>
+        <li>库</li>
+        <li>管</li>
+        <li>︶</li>
+        <li>红</li>
+        <li>联</li>
+        <li>︵</li>
+        <li>财</li>
+        <li>务</li>
+        <li>︶</li>
+        <li>黄</li>
+        <li>联</li>
+        <li>︵</li>
+        <li>结</li>
+        <li>算</li>
+        <li>︶</li>
+        <li>蓝</li>
+        <li>联</li>
+        <li>︵</li>
+        <li>客</li>
+        <li>户</li>
+        <li>︶</li>
+    </ul>*@
+</div>
+
+<script type="text/javascript">
+
+    function CreatePrintPage() {
+        LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        LODOP.PRINT_INIT("拣货单打印");
+        LODOP.SET_PRINT_PAGESIZE(1, 2180, 1480, '');
+
+        var strStyle = "</style>" + "<style>" + document.getElementById("style2").innerHTML + "</style>";
+
+        //LODOP.ADD_PRINT_HTM(120, "5%", "85%", "BottomMargin:30px", strStyle + document.getElementById("print").innerHTML);
+        LODOP.ADD_PRINT_HTM(90, "7%", "92%", "58%", strStyle + document.getElementById("dcon").innerHTML);
+        LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);
+
+        /*LODOP.ADD_PRINT_HTM(30, "5%", "85%", "BottomMargin:30px", strStyle + document.getElementById("dcon_b1").innerHTML);
+
+        LODOP.ADD_PRINT_TABLE(10, 0, "85%", "BottomMargin:30px", strStyle + document.getElementById("dcon_b2").innerHTML);
+        LODOP.SET_PRINT_STYLEA(0, "ItemType", 0);
+        LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 1);
+        LODOP.ADD_PRINT_HTM(10, 0, "85%", "BottomMargin:30px", strStyle + document.getElementById("dcon_b3").innerHTML);
+        LODOP.SET_PRINT_STYLEA(0, "LinkedItem", 2);
+
+        LODOP.ADD_PRINT_HTM(20, "95%", "3%", "95%", strStyle + document.getElementById("divslide").innerHTML); //侧边 
+        LODOP.SET_PRINT_STYLEA(0, "ItemType", 1);
+        LODOP.SET_PRINT_STYLEA(0, "Vorient", 3);*/
+        
+        LODOP.ADD_PRINT_TEXT(6, "80%", 135, 20, "单号（@(Model.SysNo)）第#页/共&页");
+        LODOP.SET_PRINT_STYLEA(0, "ItemType", 2);
+        LODOP.SET_PRINT_STYLEA(0, "Horient", 1);
+    }
+
+</script>
+

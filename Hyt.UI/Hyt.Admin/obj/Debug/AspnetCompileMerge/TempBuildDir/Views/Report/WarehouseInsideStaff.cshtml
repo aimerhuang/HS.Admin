@@ -1,0 +1,180 @@
+﻿@{
+    ViewBag.Title = "仓库内勤绩效报表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+    <style>
+        #paging > #pagination { border-width:1px 0 0 0;}
+    </style>
+}
+@section headjs{
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            update({ dateCalculated: $("#txtTime").val() });
+
+            var offset = $("#warehouseChoose").offset();
+
+            //绑定选择仓库文本框
+            $("#warehouseChoose").click(function() {
+                $("#warehouseList").css({
+                    "top": (offset.top + $(this).height() + 5) + "px",
+                    "left": offset.left + "px"
+                }).show();
+            });
+            //绑定选择仓库按钮
+            $("#warehouseChooseBtn").click(function() {
+                $("#warehouseChoose").triggerHandler("click");
+            });
+
+            $("#btnOk").click(function() {
+                setControlShowWarehouse();
+                $("#warehouseList").hide();
+            });
+
+            $("#btnCancel").click(function() {
+                $("#warehouseList").hide();
+            });
+
+            //绑定查询按钮
+            $("#btnSearch").click(function() {
+                $.ajax({
+                    url: "@Url.Action("SetWhSelected")",
+                    type: "post",
+                    dataType: "text",
+                    data: { "whSelected": $("#warehouseHide").val() },
+                    success: function() {
+                        var sendData = {};
+                        sendData.dateCalculated = $("#txtTime").val();
+                        update(sendData);
+                    }
+                });
+            });
+
+            //导出excel按钮
+            $("#export_excel_btn").click(function() {
+                //设置导出excel条件
+                $("#warehouseSysNos").val(getCheckedWarehouses().join());
+                $("#date").val($("#txtTime").val());
+                exportExcelForm.submit();
+            });
+        });
+
+        //设置控件显示仓库
+
+        function setControlShowWarehouse() {
+            var ids = getCheckedWarehouses().join();
+            var names = getCheckedWarehouseNames();
+            if (names.length > 2) {
+                $("#warehouseChoose").val("已选择" + names.length + "个仓库");
+            } else {
+                if (!names.length) {
+                    $("#warehouseChoose").val("请选择仓库");
+                } else {
+                    $("#warehouseChoose").val(names.join());
+                }
+            }
+            $("#warehouseHide").val(ids);
+        }
+
+        //查询表格
+
+        function update(searchData) {
+            var ajaxLoadingMask = UI.Mask({
+                obj: $("#createDeliverMainDiv"),
+                zindex: 1000
+            });
+            $.get('@Url.Action("WarehouseInsideStaff", "Report")' + '?o=' + Math.random(),
+                searchData,
+                function(data) {
+                    $('#paging').empty().append(data);
+                    ajaxLoadingMask.Remove();
+                });
+        }
+
+        //分页开始时执行的方法
+        function tableBegin() {
+            $.ajax({
+                url: "@Url.Action("SetWhSelected")",
+                 type: "post",
+                 dataType: "text",
+                 data: { "whSelected": $("#warehouseHide").val() },
+                 success: function () {
+                     AjaxStart();
+                 }
+             });
+        }
+    </script>
+}
+<div class="case" id="createDeliverMainDiv">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>仓库内勤绩效报表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                
+               
+                <div class="right_tool clearfix"  >
+                  
+                    <span class="veralign_t fl">仓库</span>
+                    <div class="fl m10_l" style="margin-right: 10px;">
+                        <div class="date_btn" >
+                            <input type="text" class="input_ht26" id="warehouseChoose" name="sysno"  value="请选择仓库" readonly="readonly" />
+                            <button type="button" title="仓库"  class="btn btn_ht26" id="warehouseChooseBtn">
+                                <span class="icon_th_list"></span>
+                            </button>
+                        </div>
+                        <input type="hidden" id="warehouseHide"/>
+                    </div>
+                                
+                    <span class="veralign_t fl">统计月份</span>
+                    <div class="fl m10_l">
+                        <div class="date_btn" >
+                            <input type="text" id="txtTime" name="start_date" class="input_ht26"   value="@DateTime.Now.ToString("yyyy-MM")"  />
+                            <button type="button" title="日历"  class="btn btn_ht26" onclick="UI.Date({el:'txtTime',dateFmt:'yyyy-MM'})">
+                                <span class="icon_calendar"></span>
+                            </button>
+                        </div>
+                    </div>
+                                
+                    <button class="btn btn_ht28 m10_l fl" title="搜索" id="btnSearch"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+                
+                <!--/工具条按钮-->
+                <div class="left_tool" id="feature_area">
+                    <button class="btn btn_ht26 m10_r" id="export_excel_btn" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+            </div>  
+
+            <!--仓库内勤绩效信息列表-->
+            <div class="boxs_list" id="paging">
+                    
+            </div>
+        </div>
+
+        
+    </div>
+</div>
+
+@*选择仓库弹出框*@
+<div id="warehouseList" style="width: 282px; vertical-align:top; position: absolute; display: none">
+    @{
+        Html.RenderAction("WarehouseTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel" >取消</button>
+    </div>
+</div>
+
+@*用于导出excel*@
+<div style="display: none">
+    <form id="exportExcelForm" action="@Url.Action("ExportWarehouseInsideStaff")" method="POST">
+        <input type="text" id="warehouseSysNos" name="warehouseSysNos"/>
+        <input type="text" id="date" name="date"/>
+    </form>
+</div>

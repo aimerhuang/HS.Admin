@@ -1,0 +1,227 @@
+﻿@using Hyt.Admin.Controllers
+@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "分销商商城同步日志";
+    @Html.PrivilegeControl(PrivilegeCode.EAS1001101, ".EAS1001101")
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+}
+
+<div id="JS_search" class="search_box" style="right:-267px;">
+    <div class="search_title clearfix">
+        <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+    </div>
+    <div class="search_body">
+        <form id="form1">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td width="28%" align="right">状态</td>
+                        <td width="72%">
+                            <select class="wd170" search="Status" id="StatusType" name="Status">
+                                <option value="" selected="selected">全部</option>
+                                @MvcHtmlString.Create(MvcCreateHtml.EnumToString<Hyt.Model.CommonEnum.状态>(null, null).ToString())
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">接口类型</td>
+                        <td width="72%">
+                            <select name="Name" search="Name" class="wd170">
+                                <option value="" selected="selected">全部</option>
+                                <option value="10" >发货</option>
+                                <option value="20">订单</option>
+                            </select>
+                        </td>
+                    </tr>
+                    
+                    <tr>
+                        <td align="right">订单号</td>
+                        <td>
+                            <input type="text" search="OrderId" name="OrderId" value="" class="wd156">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">同步日期</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" class="input_ht26" id="LastsyncBeginTime" search="LastsyncBeginTime" name="LastsyncBeginTime" onclick="UI.Date({ el: 'LastsyncBeginTime', dateFmt: 'yyyy-MM-dd 00:00:00', readOnly: true });">
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'LastsyncBeginTime', dateFmt: 'yyyy-MM-dd 00:00:00' })"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">&nbsp;</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" class="input_ht26" id="LastsyncEndDate" search="LastsyncEndDate" name="LastsyncEndDate" onclick="UI.Date({ el: 'LastsyncEndDate',dateFmt: 'yyyy-MM-dd 23:59:59', readOnly: true });">
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'LastsyncEndDate', dateFmt: 'yyyy-MM-dd 23:59:59' })"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+              
+               
+           
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" id="searchBtn" class="btn btn_blue btn_ht30 bold">开始查询</button><button type="reset" title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>分销商商城同步日志</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="outbtn2"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <div class="left_tool">
+                    <button class="btn btn_red btn_ht26" id="invalidBtn" status="0"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>                   
+                </div>
+            </div>
+
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+    <div style="z-index: 9; background-color: #000; opacity: 0.85; filter: alpha(opacity=85); color: white; position: absolute; width: 300px; padding: 5px; display: none;border-radius:4px; -moz-border-radius:4px;-webkit-border-radius:4px;" id="divMsg">
+    </div>
+</div>
+@*选择仓库弹出框*@
+<div id="warehouseList" style="width: 282px; vertical-align:top; position: absolute; display: none">
+    @{
+        Html.RenderAction("WarehouseTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>
+<script src="~/Theme/scripts/jquery.min.js"></script>
+<script type="text/javascript">
+
+ 
+    $(document).ready(function (e) {
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        //作废
+        $("#invalidBtn").click(function () {
+            var ids = new Array();
+            $('input.checktd').each(function () {
+                if ($(this).attr("checked")) {
+                    var mSysNo = $(this).val();
+                    ids.push(mSysNo);
+                }
+            });
+            if (ids.length == 0) {
+                Utils.alert("请先选择Kis单据！");
+                return false;
+            }
+            UI.DialogBox({
+                width: 300,
+                height: 120,
+                title: "作废原因",
+                content: '<textarea id="txtInvalidReasons" style="width: 280px; height: 100px; word-break: break-all; word-wrap: break-word;"></textarea>',
+                padding: '10px',
+                button: [{
+                    name: '保存',
+                    callback: function () {
+                        var remarks = parent.$("#txtInvalidReasons").val();
+                        Ajax.postJosn("", "", function (p) {
+                            p.setParams("sysNos", ids);
+                            p.setParams("remarks", remarks);
+                            p.setParams("r", Math.random());
+                        }, function (data) {
+                            //UI.Alert({ content: data.Message });
+                            UI.tips.tip_alert('tips_shrot tips_success', data.Message);
+                            //if (data.Status)
+                            doSearch($("#pageIndex").val());
+                        });
+                    }
+                }, { name: '取消' }
+                ]
+            });
+            return false;
+        });
+    });
+
+    function Open(id) {
+        UI.OpenCreatTab('Kis日志编号:' + id, '/Sys/EasDetailList/?sysNo=' + id);
+    }
+    $(document).ready(function () {
+        doSearch(1);
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch(1);
+            return false;
+        });
+    });
+
+    //查询列表
+    function doSearch(pageIndex) {
+        Ajax.get("/Distribution/DoDsMallSyncLogQuery", "search", function (p) {
+            //p.setParams("HandleDepartment",20);
+            p.setParams("Id", pageIndex);
+   
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+    //查询条件变化时执行
+    $("#StatusType").change(function () {
+        //doSearch();
+    });
+ 
+
+   
+    function hideMsg() {
+        $("#divMsg").css("display", "none");
+    }
+    //显示
+    function showMsg(obj, content) {
+        if (content != null && content != "") {
+            $("#divMsg").html(content);
+            $("#divMsg").css("display", "block");
+            var offset = $(obj).position();
+            $("#divMsg").css("top", offset.top - 10);
+            $("#divMsg").css("left", offset.left + 40);
+        }
+    }
+ 
+    function selectWharehouse() {
+        DAO.SelectWhareHouseDialog({
+            chkStyle: 'checkbox',
+            isAllWh: true,
+            callBack: function (list) {
+                if (list) {
+                    var ids = [];
+                    var names = [];
+                    for (var i = 0; i < list.length; i++) {
+                        var data = list[i];
+                        if (data) {
+                            ids.push(data.id);
+                            names.push(data.name);
+                        }
+                    }
+                    if (ids.length > 0) {
+                        $('#warehouse_sysno').val(names.join());
+                        $('#WarehouseSysNo').val(ids.join());
+                    }
+                }
+            }
+        });
+    }
+</script>

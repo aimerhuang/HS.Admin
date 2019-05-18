@@ -1,0 +1,1836 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Pisen.Service.Share.SSO.Contract</name>
+    </assembly>
+    <members>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest">
+            <summary>
+            添加，修改企业权限组请求
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest.Id">
+            <summary>
+            ID
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest.GroupName">
+            <summary>
+            组名
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest.Status">
+            <summary>
+            状态:启用(1),禁用(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest.PrivilegeList">
+            <summary>
+            权限ID列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupResponse">
+            <summary>
+            添加企业权限组输出
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupResponse.PrivilegeGroupId">
+            <summary>
+            权限组ID
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser">
+            <summary>
+            企业用户信息
+            </summary>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.Id">
+            <summary>
+            用户ID
+            </summary>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.UserName">
+            <summary>
+            用户姓名
+            </summary>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.MobilePhoneNumber">
+            <summary>
+            用户电话号码
+            </summary>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.LastLoginIP">
+            <summary>
+            最后登录IP
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.LastLoginDate">
+            <summary>
+            最后登陆时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUser.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest">
+            <summary>
+            企业用户应用授权
+            </summary>
+            <remarks>2014-10-08 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest.EnterpriseNo">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest.EnterpriseUserId">
+            <summary>
+            企业用户ID
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest.AppKey">
+            <summary>
+            应用APPKEY
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest.BeginTime">
+            <summary>
+            开始时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest.EndTime">
+            <summary>
+            结果时间
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest">
+            <summary>
+            企业用户信息
+            </summary>
+            <remarks>2014-09-18 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.Password">
+            <summary>
+            用户密码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.UserName">
+            <summary>
+            用户姓名
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEmailExistResponse">
+            <summary>
+            通过企业用户邮箱检查企业用户是否存在
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEmailExistResponse.IsExistEnterpriseUserEmail">
+            <summary>
+            通过企业用户账户检查企业用户是否存在
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest">
+            <summary>
+            <para>企业用户分页查询请求参数。</para>
+            <para>如果需要“模糊”查询关键字，直接使用Key字段，查询包括企业编号、用户姓名、账号、手机号，字段间关系为“或”关系。</para>
+            <para>如果需要“精确”查询企业编号、用户姓名、账号（手机号），请分别对各个字段赋值，各字段间关系为“并且”关系。</para>
+            </summary>
+            <remarks>2014-09-24 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.PageIndex">
+            <summary>
+            页索引，默认1
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.PageSize">
+            <summary>
+            页大小，默认10
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.Status">
+            <summary>
+            用户状态，默认-1
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.EnterpriseNO">
+            <summary>
+            企业编号（非企业主键ID），必填
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.PrivilegeGroupId">
+            <summary>
+            权限组ID（即角色ID），默认-1
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.UserName">
+            <summary>
+            用户真实姓名，默认为空
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.Account">
+            <summary>
+            用户账号，默认为空
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.MobilePhoneNumber">
+            <summary>
+            用户手机号，默认为空
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest.Key">
+            <summary>
+             模糊查询关键字，包括企业编号、用户姓名、账号、手机号，默认为空
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserResetPasswordResponse">
+             <summary>
+            通过手机重置客户密码 是否重置成功
+             </summary>
+             <remarks>2014-07-22 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserResetPasswordResponse.IsResetPasswordSuccess">
+            <summary>
+            企业用户是否重置密码成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseStatus">
+            <summary>
+            企业状态
+            </summary>
+            <remarks>2014-09-18 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserStatus">
+            <summary>
+            企业用户状态
+            </summary>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegePermissionSource">
+            <summary>
+            MsPrivilegePermission Source
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegePermissionTarget">
+            <summary>
+            MsPrivilegePermission Target
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerStatus">
+            <summary>
+            客户状态
+            </summary>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroupIsDefault">
+            <summary>
+            权限组是否内置
+            </summary>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroupStatus">
+            <summary>
+            权限组状态
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.MenuStatus">
+            <summary>
+            用户菜单状态
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePageListResponse">
+            <summary>
+            企业分页对象
+            </summary>
+            <remarks>2014-10-15 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePageListResponse.TotalCount">
+            <summary>
+            查询总数
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePageListResponse.EnterpriseList">
+            <summary>
+            当前分页列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise">
+            <summary>
+            企业
+            </summary>
+            <remarks>2014-10-15 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise.Id">
+            <summary>
+            企业ID（主键）
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise.CompanyName">
+            <summary>
+            企业名称
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise.Contacts">
+            <summary>
+            联系人
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise.ContactNumber">
+            <summary>
+            联系电话
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise.Status">
+            <summary>
+            状态:启用(1),禁用(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Enterprise.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeGroupListResponse">
+            <summary>
+            获取企业权限组
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeGroupListResponse.PrivilegeGroupList">
+            <summary>
+            权限组列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse">
+            <summary>
+            权限组
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.GroupName">
+            <summary>
+            组名
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.Status">
+            <summary>
+            状态:启用(1),禁用(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.IsDefault">
+            <summary>
+            是否内置
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterprisePrivilegeResponse.PrivilegeList">
+            <summary>
+            权限列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserListResponse">
+            <summary>
+            根据关键字获取用户列表返回对象
+            </summary>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserListResponse.EnterpriseUserList">
+            <summary>
+            用户列表
+            </summary>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserMenuListResponse">
+            <summary>
+            用户功能功能菜单
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserMenuListResponse.UserMenuList">
+            <summary>
+            功能菜单列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPageListResponse">
+            <summary>
+            取得企业用户分页列表
+            </summary>
+            <remarks>2014-09-24 唐田 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPageListResponse.EnterpriseUserList">
+            <summary>
+            企业用户分页列表
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPageListResponse.TotalCount">
+            <summary>
+            查询企业用户总数
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPrivilegeGroupResponse">
+            <summary>
+            企业用户权限组
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPrivilegeGroupResponse.PrivilegeGroupList">
+            <summary>
+            权限组
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPrivilegeListResponse">
+            <summary>
+            用户功能功能权限
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserPrivilegeListResponse.UserPrivilegeList">
+            <summary>
+            功能权限列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse">
+            <summary>
+            企业用户信息
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.UserName">
+            <summary>
+            用户姓名
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.LastLoginIP">
+            <summary>
+            最后登录IP
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.LastLoginDate">
+            <summary>
+            最后登陆时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserResponse.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup">
+            <summary>
+            权限组
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.GroupName">
+            <summary>
+            组名
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.Status">
+            <summary>
+            状态:启用(1),禁用(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.IsDefault">
+            <summary>
+            是否内置
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroup.PrivilegeList">
+            <summary>
+            权限列表
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.Privilege">
+            <summary>
+            权限
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.ParentId">
+            <summary>
+            父级Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.AppKey">
+            <summary>
+            AppKey
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.Code">
+            <summary>
+            代码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.Privilege.Status">
+            <summary>
+            状态
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu">
+            <summary>
+            功能菜单
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.ParentId">
+            <summary>
+            父级Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.AppKey">
+            <summary>
+            AppKey
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.MenuIcon">
+            <summary>
+            菜单图标
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.MenuName">
+            <summary>
+            菜单名
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.MenuUrl">
+            <summary>
+            菜单地址
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.Privilege">
+            <summary>
+            权限Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.Priority">
+            <summary>
+            优先级
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserMenu.Status">
+            <summary>
+            状态:启用(1),禁用(0)
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege">
+            <summary>
+            功能权限
+            </summary>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.ParentId">
+            <summary>
+            父级Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.AppKey">
+            <summary>
+            AppKey
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.Name">
+            <summary>
+            名称
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.Code">
+            <summary>
+            代码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.Description">
+            <summary>
+            描述
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.UserPrivilege.Status">
+            <summary>
+            状态
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.ValidateEnterpriseUserAuthorizeResponse">
+             <summary>
+            验证客户是否授权
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.ValidateEnterpriseUserAuthorizeResponse.IsValidateEnterpriseUserAuthorize">
+            <summary>
+            验证企业用户是否授权
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAccountExistResponse">
+             <summary>
+            通过企业用户账户检查企业用户是否存在
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAccountExistResponse.IsExistEnterpriseUserAccount">
+            <summary>
+            通过企业用户账户检查企业用户是否存在
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerAccountExistResponse">
+             <summary>
+            通过客户账户检查客户是否存在
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerAccountExistResponse.IsExistAccount">
+            <summary>
+            检查客户账户是否存在
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerEditPasswordResponse">
+            <summary>
+            修改密码 是否修改成功
+            </summary>
+            <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerEditPasswordResponse.IsEditPasswordSucceed">
+            <summary>
+            密码是否修改成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest">
+            <summary>
+            客户登录
+            </summary>
+            <remarks>2014-06-04 吴文强 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.CustomerId">
+            <summary>
+            客户Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.AppKey">
+            <summary>
+            AppKey
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.LoginIp">
+            <summary>
+            登录Ip
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.MachineId">
+            <summary>
+            机器Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.AuthorizeCode">
+            <summary>
+            授权码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.Account">
+            <summary>
+            账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest.AuthorizeExpiresTime">
+            <summary>
+            授权过期时间
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginResponse">
+            <summary>
+            客户登录
+            </summary>
+            <remarks>2014-06-04 吴文强 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerPhoneExistResponse">
+             <summary>
+            通过客户手机检查客户是否存在
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerPhoneExistResponse.IsExistPhone">
+            <summary>
+            检查手机号码是否存在
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest">
+            <summary>
+            客户注册
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.Password">
+            <summary>
+            用户密码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterResponse">
+            <summary>
+            客户是否注册成功
+            </summary>
+            <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterResponse.IsRegisterSucceed">
+            <summary>
+            是否注册成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdResponse">
+            <summary>
+            客户注册，存在账号返回Id，不存在账号注册并返回Id
+            </summary>
+            <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdResponse.Id">
+            <summary>
+            返回 Id
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerResetPasswordResponse">
+             <summary>
+            通过手机重置客户密码是否成功
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerResetPasswordResponse.IsResetPasswordSuccess">
+            <summary>
+            重置密码是否成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditPasswordResponse">
+             <summary>
+            是否修改密码成功
+             </summary>
+             <remarks>2014-07-22 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditPasswordResponse.IsEnterpriseUserEditPassword">
+            <summary>
+            修改密码是否成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest">
+            <summary>
+            企业用户登录
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.EnterpriseUserId">
+            <summary>
+            客户Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.AppKey">
+            <summary>
+            AppKey
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.LoginIp">
+            <summary>
+            登录Ip
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.MachineId">
+            <summary>
+            机器Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.AuthorizeCode">
+            <summary>
+            授权码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.Account">
+            <summary>
+            账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.AuthorizeExpiresTime">
+            <summary>
+            授权过期时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest.EnterpriseNo">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginResponse">
+            <summary>
+            企业用户登录
+            </summary>
+            <remarks>2014-09-18 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPhoneExistResponse">
+             <summary>
+            通过企业用户手机检查企业用户是否存在
+             </summary>
+             <remarks>2014-07-22 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPhoneExistResponse.IsExistEnterpriseUserPhone">
+            <summary>
+            检查企业用户是否存在
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest">
+            <summary>
+            企业用户注册
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.Password">
+            <summary>
+            用户密码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.UserName">
+            <summary>
+            用户姓名
+            </summary>
+            <remarks>2014-06-26 唐田 添加</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterResponse">
+             <summary>
+            企业用户注册是否成功
+             </summary>
+             <remarks>2014-07-22 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterResponse.EnterpriseUserId">
+            <summary>
+            企业用户ID
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterResponse.IsEnterpriseUserRegister">
+            <summary>
+            是否注册成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse">
+            <summary>
+            客户信息
+            </summary>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.LastLoginIP">
+            <summary>
+            最后登录IP
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.LastLoginDate">
+            <summary>
+            最后登陆时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByAccountResponse.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerIdByAccountResponse.Id">
+            <summary>
+            返回 Id
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse">
+            <summary>
+            企业数据请求
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.UserName">
+            <summary>
+            用户姓名
+            </summary>
+            <remarks>2014-06-26 唐田 添加</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.LastLoginIP">
+            <summary>
+            最后登录IP
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.LastLoginDate">
+            <summary>
+            最后登陆时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByAccountResponse.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse">
+            <summary>
+            企业用户信息
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.UserName">
+            <summary>
+            用户姓名
+            </summary>
+            <remarks>2014-06-26 唐田 添加</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.LastLoginIP">
+            <summary>
+            最后登录IP
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.LastLoginDate">
+            <summary>
+            最后登陆时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetEnterpriseUserByIdResponse.EnterpriseNO">
+            <summary>
+            企业编号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.OpenIdCustomerBindingResponse">
+             <summary>
+            第三方账号绑定
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.OpenIdCustomerBindingResponse.IsBindingOpenIdCustomer">
+            <summary>
+            绑定第三方账号
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.OpenIdCustomerExistResponse">
+             <summary>
+            第三方账号是否绑定客户
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.OpenIdCustomerExistResponse.IsExistOpenIdCustomer">
+            <summary>
+            第三方账号是否绑定客户
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.OpenIdCustomerLoginResponse">
+             <summary>
+            第三方账号登录
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.OpenIdCustomerLoginResponse.IsLoginOpenIdCustomer">
+            <summary>
+            是否第三方账户登录
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse">
+            <summary>
+            客户信息
+            </summary>
+            <remarks>2014-06-10 吴文强 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.Id">
+            <summary>
+            Id
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.Password">
+            <summary>
+            密码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.LastLoginIP">
+            <summary>
+            最后登录IP
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.LastLoginDate">
+            <summary>
+            最后登陆时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.GetCustomerByIdResponse.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest">
+            <summary>
+            客户注册
+            </summary>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.Account">
+            <summary>
+            用户账号
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.Password">
+            <summary>
+            用户密码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.EmailAddress">
+            <summary>
+            电子邮箱
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.IsValidateEmail">
+            <summary>
+            邮箱状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.MobilePhoneNumber">
+            <summary>
+            手机号码
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.IsValidateMobilePhone">
+            <summary>
+            手机状态:是(1),否(0)
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.RegisterDate">
+            <summary>
+            注册时间
+            </summary>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest.Status">
+            <summary>
+            状态:有效(1),无效(0)
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.ResetPasswordReponse">
+             <summary>
+            后台重置密码 是否成功
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.ResetPasswordReponse.IsResetPasswordSucceed">
+            <summary>
+            重置密码是否成功
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.DataContract.ValidateCustomerAuthorizeResponse">
+             <summary>
+            验证客户是否授权
+             </summary>
+             <remarks>2014-07-21 杨吉林 创建</remarks>
+        </member>
+        <member name="P:Pisen.Service.Share.SSO.Contract.DataContract.ValidateCustomerAuthorizeResponse.IsAuthorize">
+            <summary>
+            验证客户是否授权
+            </summary>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.ICustomerService">
+            <summary>
+            Sso客户服务
+            </summary>
+            <remarks>2014-04-09 吴文强 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.GetCustomerByAccount(System.String)">
+            <summary>
+            通过客户账号获取客户信息
+            </summary>
+            <param name="account">用户账号</param>
+            <returns>客户信息</returns>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.GetCustomerById(System.Int32)">
+            <summary>
+            获取客户信息
+            </summary>
+            <param name="customerId">客户id</param>
+            <returns>客户信息</returns>
+            <remarks>2014-06-10 吴文强 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.GetCustomerIdByAccount(System.String,System.String)">
+            <summary>
+            根据账号密码获取客户Id
+            </summary>
+            <param name="account">账号</param>
+            <param name="password">密码</param>
+            <returns>客户Id</returns>
+            <remarks>2014-06-06 吴文强 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerLogin(Pisen.Service.Share.SSO.Contract.DataContract.CustomerLoginRequest)">
+            <summary>
+            客户登录
+            </summary>
+            <param name="customerLoginRequest">客户登录请求</param>
+            <returns>客户信息</returns>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerRegister(Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterRequest)">
+            <summary>
+            客户注册
+            </summary>
+            <param name="customerRegisterRequest">客户注册数据</param>
+            <returns>是否成功</returns>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerRegisterReturnId(Pisen.Service.Share.SSO.Contract.DataContract.CustomerRegisterReturnIdRequest)">
+            <summary>
+            客户注册，存在账号返回Id，不存在账号注册并返回Id
+            </summary>
+            <param name="customerRegisterRequest">客户注册数据</param>
+            <returns>注册用户Id</returns>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerEditPassword(System.Int32,System.String,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="customerId">客户ID</param>
+            <param name="oldPassword">原密码(未加密字符串)</param>
+            <param name="newPassword">新密码(加密字符串)</param>
+            <returns>是否修改成功</returns>
+            <remarks>2014-06-04 陶辉 创建</remarks>
+            <remarks>2014-06-05 周唐炬 实现</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.ResetPassword(System.Int32,System.String)">
+            <summary>
+            后台重置密码
+            </summary>
+            <param name="customerId">客户ID</param>
+            <param name="newPassword">新密码(加密字符串)</param>
+            <returns>是否修改成功</returns>
+            <remarks>2014-004-15 周唐炬 实现</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerPhoneExist(System.String)">
+            <summary>
+            通过客户手机检查客户是否存在
+            </summary>
+            <param name="phone">客户手机</param>
+            <returns>是否存在</returns>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerAccountExist(System.String)">
+            <summary>
+            通过客户账户检查客户是否存在
+            </summary>
+            <param name="account">客户账户</param>
+            <returns>是否存在</returns>
+            <remarks>2014-06-04 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.ValidateCustomerAuthorize(System.Int32,System.String,System.String,System.String)">
+            <summary>
+            验证客户授权
+            </summary>
+            <param name="customerId">客户ID</param>
+            <param name="appKey">Appkey</param>
+            <param name="machineId">机器码</param>
+            <param name="authorizeCode">授权码</param>
+            <returns>返回是否授权</returns>
+            <remarks>2014-06-13 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.ICustomerService.CustomerResetPassword(System.String,System.String)">
+            <summary>
+            通过手机重置客户密码
+            </summary>
+            <param name="phone">手机号</param>
+            <param name="password">新密码</param>
+            <returns>是否重置成功</returns>
+            <remarks>2014-06-18 周唐炬 创建</remarks>
+        </member>
+        <member name="T:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService">
+            <summary>
+            Sso客户服务
+            </summary>
+            <remarks>2014-04-09 吴文强 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserByEnterpriseUserId(System.Int32)">
+            <summary>
+            获取企业用户信息
+            </summary>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <returns>企业用户信息</returns>
+            <remarks>2014-10-08 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUser(System.String,System.String)">
+            <summary>
+            获取企业用户信息
+            </summary>
+            <param name="account">企业用户账号</param>
+            <param name="password">企业用户密码</param>
+            <returns>企业用户信息</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserEdit(Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserEditRequest)">
+            <summary>
+            修改企业用户
+            </summary>
+            <param name="enterpriseUserEditResponse">企业用户</param>
+            <returns>结果</returns>
+            <remarks>2014-09-18 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserById(System.Int32,System.Int32)">
+            <summary>
+            获取企业用户信息
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <returns>客户信息</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserByAccount(System.Int32,System.String)">
+            <summary>
+            通过企业用户账号获取企业用户信息
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="account">企业用户账号</param>
+            <returns>企业用户信息</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserLogin(Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserLoginRequest)">
+            <summary>
+            企业用户登录
+            </summary>
+            <param name="enterpriseUserLoginRequest">企业用户登录请求</param>
+            <returns>企业用户信息</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserRegister(Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserRegisterRequest)">
+            <summary>
+            企业用户注册
+            </summary>
+            <param name="enterpriseUserRegisterRequest">企业用户注册数据</param>
+            <returns>是否成功</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserEditPassword(System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            修改密码
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="oldPassword">原密码(加密字符串),修改密码前进行一次原密码校验</param>
+            <param name="newPassword">新密码(加密字符串)</param>
+            <returns>是否修改成功</returns>
+            <remarks>2014-06-05 周唐炬 实现</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserPhoneExist(System.String)">
+            <summary>
+            通过企业用户手机检查企业用户是否存在
+            </summary>
+            <param name="phone">企业用户手机</param>
+            <returns>是否存在</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserAccountExist(System.String)">
+            <summary>
+            通过企业用户账户检查企业用户是否存在
+            </summary>
+            <param name="account">企业用户账户</param>
+            <returns>是否存在</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserEmailExist(System.String)">
+            <summary>
+            通过企业用户邮箱检查企业用户是否存在
+            </summary>
+            <param name="email">企业用户邮箱</param>
+            <returns>是否存在</returns>
+            <remarks>2014-06-24 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.ValidateEnterpriseUserAuthorize(System.Int32,System.String,System.String,System.String)">
+            <summary>
+            验证客户授权
+            </summary>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="appKey">Appkey</param>
+            <param name="machineId">机器码</param>
+            <param name="authorizeCode">授权码</param>
+            <returns>返回是否授权</returns>
+            <remarks>2014-06-13 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserResetPassword(System.Int32,System.String,System.String)">
+            <summary>
+            通过手机重置客户密码
+            </summary>
+            <param name="enterpriseNo">企业编号(无企业编号默认传0)</param>
+            <param name="phone">手机号</param>
+            <param name="password">新密码</param>
+            <returns>是否重置成功</returns>
+            <remarks>2014-06-18 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserListBlur(System.String,System.Int32)">
+            <summary>
+            根据关键字查询用户列表
+            关键字可以是用户账号、姓名或者手机号
+            </summary>
+            <param name="keyString">查询关键字</param>
+            <param name="size">列表大小（最大20）</param>
+            <returns>用户列表对象</returns>
+            <remarks>2014-07-30 唐田 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserPageList(Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserPageListRequest)">
+            <summary>
+            取得企业用户分页列表
+            </summary>
+            <param name="request">查询参数对象</param>
+            <returns>分页列表对象</returns>
+            <remarks>2014-09-24 唐田 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserList(System.Int32)">
+            <summary>
+            获取企业用户列表
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <returns>企业用户列表</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserPrivilegeList(System.Int32,System.Int32)">
+            <summary>
+            获取企业用户权限列表
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <returns>企业权限列表</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserMenuList(System.Int32,System.Int32,System.String)">
+            <summary>
+            获取企业用户菜单列表
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="appKey">应用key</param>
+            <returns>企业权限列表</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserPrivilegeGroupRelation(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            企业用户关联权限组
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="privilegeGroupId">企业权限组ID</param>
+            <returns>结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterpriseUserPrivilegeGroup(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            获取企业用户权限组列表
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="loadPrivile">载入权限</param>
+            <returns>企业用户权限组列表</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserPrivilegeGroupRemove(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            企业用户解除权限组绑定
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="privilegeGroupId">权限组ID</param>
+            <returns>结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterprisePrivilegeGroupCreate(Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest)">
+            <summary>
+            添加企业权限组
+            </summary>
+            <param name="enterprisePrivilegeGroupRequest">企业权限组数据</param>
+            <returns>添加结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterprisePrivilegeGroupEdit(Pisen.Service.Share.SSO.Contract.DataContract.EnterprisePrivilegeGroupRequest)">
+            <summary>
+            修改企业权限组
+            </summary>
+            <param name="enterprisePrivilegeGroupRequest">企业权限组数据</param>
+            <returns>结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterprisePrivilegeGroupRemove(System.Int32,System.Int32)">
+            <summary>
+            移除企业权限组
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="privilegeGroupId">企业权限组ID</param>
+            <returns>结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterprisePrivilegeRemove(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            移除企业权限组权限
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="privilegeGroupId">企业权限组ID</param>
+            <param name="privilegeId">权限ID</param>
+            <returns>结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterprisePrivilegeRelation(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            企业权限组关联权限
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="privilegeGroupId">企业权限组ID</param>
+            <param name="privilegeId">权限ID</param>
+            <returns>结果</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterprisePrivilegeGroupList(System.Int32,System.Boolean)">
+            <summary>
+            获取企业权限组
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="loadPrivile">载入权限</param>
+            <returns>企业权限组</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterprisePrivilegeByPrivilegeGroupId(System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            获取企业权限组
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="privilegeGroupId">企业权限组ID</param>
+            <param name="loadPrivile">载入权限</param>
+            <returns>企业权限组权限</returns>
+            <remarks>2014-09-17 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserStatusChange(System.Int32,System.Int32,Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserStatus)">
+            <summary>
+            企业用户状态变更
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="enterpriseUserId">企业用户ID</param>
+            <param name="status">企业用户状态</param>
+            <returns>结果</returns>
+            <remarks>2014-09-23 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterprisePrivilegeGroupStatusChange(System.Int32,System.Int32,Pisen.Service.Share.SSO.Contract.DataContract.PrivilegeGroupStatus)">
+            <summary>
+            权限组状态变更
+            </summary>
+            <param name="enterpriseNo">企业编号</param>
+            <param name="privilegeGroupId">企业权限组ID</param>
+            <param name="status">企业权限组状态</param>
+            <returns>结果</returns>
+            <remarks>2014-09-23 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.EnterpriseUserAuthorizePermission(Pisen.Service.Share.SSO.Contract.DataContract.EnterpriseUserAuthorizePermissionRequest)">
+            <summary>
+            企业用户应用授权
+            </summary>
+            <param name="enterpriseUserAuthorizePermissionRequest">企业用户应用授权请求</param>
+            <returns>结果</returns>
+            <remarks>2014-10-08 周唐炬 创建</remarks>
+        </member>
+        <member name="M:Pisen.Service.Share.SSO.Contract.IEnterpriseUserService.GetEnterprisePageList(System.String,System.Int32,System.Int32)">
+            <summary>
+            获取企业列表
+            </summary>
+            <param name="key">查询关键字(企业名称、联系人、电话)</param>
+            <param name="pageIndex">当前页</param>
+            <param name="pageSize">分页大小（最大值50）</param>
+            <returns>企业列表</returns>
+            <remarks>2014-10-14 周唐炬 创建</remarks>
+        </member>
+    </members>
+</doc>

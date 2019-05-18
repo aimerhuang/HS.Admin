@@ -1,0 +1,553 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品库存";
+}
+@section headjs{
+<link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js?v=2"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+<script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+<script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+}
+<!--高级搜索开始-->
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <form id="exportExecl" action="@Url.Action("ExportProductStocks")" method="get" target="pifrmExport">
+            <input type="hidden" id="WarehouseSysNo" name="WarehouseSysNo" value=@ViewData["WarehouseSysNo"] />
+            <input type="hidden" id="ProductSysNos" name="ProductSysNos" value="" />
+            <table width="100%">
+                <tr>
+                    <td width="25%" align="right">商品编号</td>
+                    <td width="75%">
+                        <input id="ErpCode" name="ErpCode" type="text" class="wd156" value="">
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">后台名称</td>
+                    <td width="75%">
+                        <input type="text" id="EasName" name="EasName" value="" class="wd156" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td width="25%" align="right">条形码</td>
+                    <td width="75%">
+                        <input id="Barcode" name="Barcode" type="text" class="wd156" value="" />
+                    </td>
+                </tr>
+
+                <tr>
+                    <td width="25%" align="right">状态</td>
+                    <td width="75%" id="btn_selectCategory">
+                        <select id="Status" name="Status" class="wd100"><option value="全部">全部</option><option value="已入库">已入库</option><option value="未入库">未入库</option></select>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td width="25%" align="right">库存数量</td>
+                    <td width="75" class="h_else">
+                        <input id="From_StockQuantity" name="From_StockQuantity" type="text" class="wd100" value="" />
+                    </td>
+                </tr>
+                <tr>
+                    <td align="center" colspan="2">到</td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">&nbsp;</td>
+                    <td width="75" class="h_else">
+                        <input id="To_StockQuantity" name="To_StockQuantity" type="text" class="wd100" value="" />
+                    </td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" id="btnComplexSearch" class="btn btn_blue btn_ht30 bold">开始查询</button>
+        <button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+<!--高级搜索结束-->
+
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品库存</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl" title="上调为正数,下调为负数,如上调百分之10,则输入10,反之下调则输入-10。">批量调整销售价</span>
+                    <div class="fl m10_l" title="上调为正数,下调为负数,如上调百分之10,则输入10,反之下调则输入-10。">
+                        <input type="number" id="SalesPrice" style="width:50px" value="0">%
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl m10_r" onclick="EditSalesPrice()" title="上调为正数,下调为负数,如上调百分之10,则输入10,反之下调则输入-10。" type="button">
+                        <span class="icon icon_pencil"></span>
+                        <span>批量调价</span>
+                    </button>
+
+
+                    <span class="veralign_t fl">仓库</span>
+                    <div class="fl m10_l">
+                        <input type="text" id="warehouse" style="width:180px">
+                    </div>     
+                                               
+                    @*<button id="searchBtn" title="搜索" class="btn btn_ht28 fl m10_l" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>*@
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="JS_btnSearch" type="button"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <div class="left_tool">
+                    <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue" style="display:none;"><span class="icon_importing icon_white m5_r"></span><span>Excel库存导入</span></button>
+
+                    <button type="button" id="btnImportSn" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue" style="display:none;"><span class="icon_importing icon_white m5_r"></span><span>根据条形码导入库存</span></button>
+                    <button type="button" id="btnImportSnDate" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon_importing icon_white m5_r"></span><span>导入库存日期</span></button>
+                    <button type="button" id="btnExport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon icon_share icon_white"></span><span class="m5_l">Excel商品导出</span></button>
+                    <button class="btn btn_blue btn_ht26 m10_r" onclick="SynchronizeKisStock(this)" style="display:none;"><span class="icon_repeat icon_white"></span><span class="m5_l">同步Kis库存</span></button>
+                    <iframe id="pifrmImport" name="pifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                    <iframe id="pifrmImportSn" name="pifrmImportSn" src="@Url.Action("ImportExcelSn")" class="hide"></iframe>
+                    <iframe id="btnImportSnDate" name="btnImportSnDate" src="@Url.Action("ImportExcelSnDate")" class="hide"></iframe>
+                    <iframe id="pifrmExport" name="pifrmExport" src="" class="hide"></iframe>
+                </div>
+            </div>
+            <div>
+
+                @*<div class="fl m10_l">
+                    <div class="select2-container wd100" id="s2id_warehouse" style="width: 180px">
+                    <a tabindex="-1" class="select2-choice select2-default" href="javascript:void(0)">   <span class="select2-chosen" id="select2-chosen-1">选择仓库</span>
+                        <abbr class="select2-search-choice-close"></abbr>   <span role="presentation" class="select2-arrow"><b role="presentation"></b></span></a>
+                    <label class="select2-offscreen" for="s2id_autogen1"></label><input type="text" role="button" aria-haspopup="true" class="select2-focusser select2-offscreen" aria-labelledby="select2-chosen-1" id="s2id_autogen1"></div>
+                    <input type="text" style="width: 180px; display: none;" id="warehouse" class="wd100" tabindex="-1" title="">
+                </div>*@
+          
+            </div>
+
+            <div id="paging" class="boxs_list">
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+@*<script src="~/Theme/scripts/jquery.min.js"></script>*@
+<script type="text/javascript">
+
+    function SynchronizeKisStock(obj) {
+        var pids = "";
+        $("#paging table tbody input:checkbox").each(function () {
+            if ($(this).attr("checked")) {
+                if (pids == "")
+                    pids = $(this).attr("pid");
+                else
+                    pids += "," + $(this).attr("pid");
+            }
+        });
+
+        $(obj).attr("disabled", "disabled").addClass("disabled").find("span").next().html("等待");
+        Ajax.get("/ajax/SynchronizeKisStock", "", function (p) {
+            p.setParams("r", Math.random());
+            p.setParams("warehouseSysNo", $("#WarehouseSysNo").val())          
+            p.setParams("pids", pids);
+
+        }, function (data) {
+            UI.Alert({ content: data.Message });
+            $(obj).removeAttr("disabled").removeClass("disabled").find("span").next().html("同步Kis库存");
+            doSearch($("#pageIndex").val());
+        });
+    }
+    //高级搜索
+    UI.searchbox($("#JS_btnSearch"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+    $(function () {
+        changeBtnCreateShop();
+        //修改下拉列表框为select2
+        //$("#shopSysNo").select2();
+        UI.SelectWhareHouse($("#warehouse"), 0, null, "@(ViewBag.WarehouseName)");
+   
+        $("#warehouse").change(function () {
+            $("#WarehouseSysNo").val($(this).val());
+        }).addClass("wd100");
+    });
+    //根据选择的下单门店是否自营，确定显示或隐藏“提交快递送达”按钮
+    function changeBtnCreateShop() {
+        var txt = $("#shopSysNo option:selected").text();
+
+    }
+
+    //获取并设置erp仓库库存
+    function GetErpStock() {
+
+        var erpCode = [];
+        $(".erpCode").each(function (i) {
+            erpCode.push($(this).text());
+        });
+        var erpWarehouseSysNo = $("#WarehouseSysNo").val();
+        if (erpCode.length > 0 && erpWarehouseSysNo != '') {
+            $.ajax({
+                global: false,
+                url: '/Order/GetInventory',
+                data: JSON.stringify({ erpCode: erpCode, erpWarehouseSysNo: erpWarehouseSysNo }),
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                type: "POST",
+                cache: false,
+                success: function (data, textStatus, jqXhr) {
+                    if (textStatus == "success") {
+                        if ($(data).length > 0) {
+                            $(".jrow").each(function (i) {
+                                var This = $(this);
+                                var number = "<font style='color:red'>无数据</font>";
+                                $(data).each(function (i) {
+                                    var That = this;
+                                    if (That.MaterialNumber == This.find(".erpCode").text()) {
+                                        number = "<font style='color:" + (That.Quantity <= 0 ? "red" : "green") + "'>" + That.Quantity + "</font>";
+                                    }
+                                });
+                                This.find(".stock").html(number);
+                            });
+                        } else {
+                            SetAllErpStock("无数据");
+                        }
+                    } else {
+                        SetAllErpStock(textStatus);
+                    }
+                },
+                error: function (httpRequest, txtStatus, error) {
+                    SetAllErpStock(txtStatus);
+                    //UI.tips.tip_alert('tips_warning', "获取erp库存出错：" + txtStatus);
+                },
+                timeout: 3000
+
+            });
+        }
+    }
+
+    function SetAllErpStock(content) {
+        $(".stock").html("<font style='color:red'>" + content + "</font>");
+    }
+
+
+    //选中的记录SysNo列项
+    var checkedsysnolist = [];
+
+    //开始查询
+    $("#btnComplexSearch").click(function () {
+        doSearch();
+    });
+
+    $(function () {
+        doSearch();
+        @*$('#btnExport').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });*@
+
+        $('#btnImport').click(function () {
+            if (window.frames["pifrmImport"].chooseFile) {
+                window.frames["pifrmImport"].chooseFile();
+            }
+        });
+
+        $('#btnImportSn').click(function () {
+            if (window.frames["pifrmImportSn"].chooseFile) {
+                window.frames["pifrmImportSn"].chooseFile();
+            }
+        });
+
+        $('#btnImportSnDate').click(function () {
+            if (window.frames["btnImportSnDate"].chooseFile) {
+                window.frames["btnImportSnDate"].chooseFile();
+            }
+        });
+    });
+    //列表数据显示
+    function doSearch(pageIndex) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Warehouse/DoPdProductStockQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("ErpCode", $("#ErpCode").val());
+            p.setParams("Barcode", $("#Barcode").val());
+            p.setParams("EasName", $("#EasName").val());
+            p.setParams("From_StockQuantity", $("#From_StockQuantity").val());
+            p.setParams("To_StockQuantity", $("#To_StockQuantity").val());
+            p.setParams("WarehouseSysNo", $("#WarehouseSysNo").val());
+            p.setParams("Status", $("#Status").val());
+            if(pageIndex)
+                p.setParams("id", pageIndex);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.indexOf('成功') !== -1) {
+            UI.tips.tip_alert("tips_success", res);
+            setTimeout(function () {
+                doSearch();
+            }, 1000);
+        } else
+            UI.tips.tip_alert("tips_wrong", res);
+
+    }
+
+    Array.prototype.indexOf = function (val) {
+        for (var i = 0; i < this.length; i++) {
+            if ($.trim(this[i]) == $.trim(val)) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function (val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") != "checked") {
+                    $(this).attr("checked", "checked");
+                    checkedsysnolist.push($(this).val());
+                }
+            });
+        } else {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") == "checked") {
+                    $(this).removeAttr("checked");
+                    checkedsysnolist.remove($(this).val());
+                }
+            });
+        }
+    });
+
+
+
+    $("#paging table tbody input:checkbox").live('click', function () {
+        if ($(this).attr("checked")) {
+            checkedsysnolist.push($(this).val());
+        } else {
+            checkedsysnolist.remove($(this).val());
+        }
+    });
+
+    //导出商品 王耀发 2015-12-38 创建
+    $('#btnExport').click(function () {
+        //if (checkedsysnolist.length == 0) {
+        //    UI.Alert({ content: '请勾选要导出的商品' });
+        //    return false;
+        //}
+        //var productStockSysNos = checkedsysnolist;
+
+        var pids = "";
+        $("#paging table tbody input:checkbox").each(function () {
+            if ($(this).attr("checked")) {
+                if (pids == "")
+                    pids = $(this).attr("pid");
+                else
+                    pids += "," + $(this).attr("pid");
+            }
+        });
+        $("#ProductSysNos").val(pids);
+        //alert($("#JS_search").serialize());
+        $("#exportExecl").submit();
+        //window.location = '@Url.Action("ExportProductStocks")' + "?warehouseSysNo=" + $("#WarehouseSysNo").val() + "&productStockSysNos=" + JSON.stringify(productStockSysNos);
+    });
+
+    //取消
+    function cancel(stockId, obj) {
+        var btn = $(obj).prev();
+        var isEdit = false;
+        if (btn.attr("isEdit")) {
+            isEdit = btn.attr("isEdit") == "true";
+        }
+        if (isEdit) {
+            btn.attr("isEdit", false);
+            btn.parents('tr').find('td > span').removeClass('hide');
+            btn.parents('tr').find('td > input[name != sysNo]').addClass('hide');
+            btn.children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+            btn.children('span').eq(1).text('修改');
+            $(obj).hide();
+            $(obj).next().show();
+        }
+    }
+    //保存
+    function btnSave(stockId, btn) {
+        var isEdit = false;
+        if ($(btn).attr("isEdit")) {
+            isEdit = $(btn).attr("isEdit") == "true";
+        }
+        if (!isEdit) {
+            $(btn).parents('tr').find('td > span').addClass('hide');
+            $(btn).parents('tr').find('td > input[name != sysNo]').removeClass('hide');
+            $(btn).children('span').eq(0).attr('class', 'icon_save').addClass("icon_white");
+            $(btn).children('span').eq(1).text('保存');
+            $(btn).attr("isEdit", true);
+            $(btn).next().show();
+        }
+        else {
+            var inputName = "txtBarcode_" + stockId;
+            var Barcode = $.trim($("input[name='" + inputName + "']").val());
+            inputName = "txtCustomsNo_" + stockId;
+            var CustomsNo = $.trim($("input[name='" + inputName + "']").val());
+            inputName = "txtCostPrice_" + stockId;
+            var CostPrice = $.trim($("input[name='" + inputName + "']").val());
+            inputName = "txtStockQuantity_" + stockId;
+            var StockQuantity = $.trim($("input[name='" + inputName + "']").val());
+            var ProductSku = $.trim($("input[name='txtProductSku_" + stockId + "']").val());
+            var InStockTime = $.trim($("input[name='txtInStockTime_" + stockId + "']").val());
+            //alert(InStockTime);
+            var Remark = $.trim($("input[name='txtRemark_" + stockId + "']").val());
+            //alert(Remark);
+            var testRule = /^(([0-9]+\.[0-9]*[0-9][0-9]*)|([0-9]*[0-9][0-9]*\.[0-9]+)|([0-9]*[0-9][0-9]*))$/;
+            if (CostPrice != "" && !testRule.test(CostPrice)) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '采购价格必须是数值');
+                return false;
+            }
+            if (StockQuantity != "" && !testRule.test(StockQuantity)) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '库存数量必须是数值');
+                return false;
+            }
+            Ajax.post("/Warehouse/UpdateProductStockInfo/?r=" + Math.random(), "none", function (p) {
+                p.setParams("Barcode", Barcode);
+                p.setParams("CustomsNo", CustomsNo);
+                p.setParams("CostPrice", CostPrice);
+                p.setParams("StockQuantity", StockQuantity);
+                p.setParams("SysNo", stockId);
+                p.setParams("ProductSku", ProductSku);
+                p.setParams("InStockTime", InStockTime);
+                p.setParams("Remark", Remark);
+            }, function (data) {
+                if (data.Status == true) {
+                    doSearch();
+                    UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                }
+            });
+        }
+    }
+
+    function btnSaveStock(stockProductId, btn) {
+        var isEdit = false;
+        if ($(btn).attr("isEdit")) {
+            isEdit = $(btn).attr("isEdit") == "true";
+        }
+        if (!isEdit) {
+            $(btn).parents('tr').find('td > span').addClass('hide');
+            $(btn).parents('tr').find('td > input[name != sysNo]').removeClass('hide');
+            $(btn).children('span').eq(0).attr('class', 'icon_save').addClass("icon_white");
+            $(btn).children('span').eq(1).text('保存');
+            $(btn).attr("isEdit", true);
+            $(btn).next().show();
+        }
+        else {
+            var inputName = "txtBarcode_" + stockProductId;
+            var Barcode = $.trim($("input[name='" + inputName + "']").val());
+            inputName = "txtCustomsNo_" + stockProductId;
+            var CustomsNo = $.trim($("input[name='" + inputName + "']").val());
+            inputName = "txtCostPrice_" + stockProductId;
+            var CostPrice = $.trim($("input[name='" + inputName + "']").val());
+            inputName = "txtStockQuantity_" + stockProductId;
+            var StockQuantity = $.trim($("input[name='" + inputName + "']").val());
+            var ProductSku = $.trim($("input[name='txtProductSku_" + stockProductId + "']").val());
+            var InStockTime = $.trim($("input[name='txtInStockTime_" + stockProductId + "']").val());
+            //alert(InStockTime);
+            var Remark = $.trim($("input[name='txtRemark_" + stockProductId + "']").val());
+            //alert(Remark);
+            var testRule = /^(([0-9]+\.[0-9]*[0-9][0-9]*)|([0-9]*[0-9][0-9]*\.[0-9]+)|([0-9]*[0-9][0-9]*))$/;
+            if (CostPrice != "" && !testRule.test(CostPrice)) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '采购价格必须是数值');
+                return false;
+            }
+            if (StockQuantity != "" && !testRule.test(StockQuantity)) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '库存数量必须是数值');
+                return false;
+            }
+            Ajax.post("/Warehouse/CreateProductStockInfo/?r=" + Math.random(), "none", function (p) {
+                p.setParams("WarehouseSysNo", $("#WarehouseSysNo").val());
+                p.setParams("PdProductSysNo", stockProductId);
+                p.setParams("Barcode", Barcode);
+                p.setParams("CustomsNo", CustomsNo);
+                p.setParams("CostPrice", CostPrice);
+                p.setParams("StockQuantity", StockQuantity);
+                p.setParams("ProductSku", ProductSku);
+                p.setParams("InStockTime", InStockTime);
+                p.setParams("Remark", Remark);
+            }, function (data) {
+                if (data.Status == true) {
+                    doSearch();
+                    UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                }
+            });
+        }
+    }
+    //取消
+    function cancelStock(obj) {
+        var btn = $(obj).prev();
+        var isEdit = false;
+        if (btn.attr("isEdit")) {
+            isEdit = btn.attr("isEdit") == "true";
+        }
+        if (isEdit) {
+            btn.attr("isEdit", false);
+            btn.parents('tr').find('td > span').removeClass('hide');
+            btn.parents('tr').find('td > input[name != sysNo]').addClass('hide');
+            btn.children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+            btn.children('span').eq(1).text('入库');
+            $(obj).hide();
+            $(obj).next().show();
+        }
+    }
+
+
+    ///批量调价
+    var EditSalesPrice = function () {
+        var SalesPrice = $("#SalesPrice").val(); //调价百分比
+        if (SalesPrice == 0) {
+            UI.tips.tip_alert('tips_shrot tips_wrong', '需要调整的价格百分比不能为0。');
+            return;
+        }
+        var pids = new Array();
+        $("#paging table tbody input:checkbox").each(function () {
+            if ($(this).attr("checked")) {
+                pids.push($(this).attr("pid"));
+            }
+        });
+
+        if (pids.length == 0) {
+            UI.tips.tip_alert('tips_shrot tips_wrong', '请勾选需要调价的商品。');
+            return;
+        }
+
+        Ajax.post("/Product/EditSalesPrice/?r=" + Math.random(), "none", function (p) {
+            p.setParams("pids", pids.toString());
+            p.setParams("warehouse", $("#warehouse").val());
+            p.setParams("SalesPrice", SalesPrice);
+        }, function (data) {
+            if (data.Status) {
+                doSearch();
+                UI.tips.tip_alert('tips_shrot tips_success', '批量调价成功!');
+
+            } else {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '批量调价失败。');
+            }
+        });
+
+    }
+</script>
+
+

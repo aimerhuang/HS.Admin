@@ -1,0 +1,49 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.rp_ShopNewCustomerDetail>
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th class="align_l p10_l">仓库</th>
+                <th width="90">内勤姓名</th>
+                <th width="90">客户姓名</th>
+                <th width="90">客户手机</th>
+                <th width="90">消费金额</th>
+                <th width="140">注册时间</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var mode = Model.TData as List<Hyt.Model.rp_ShopNewCustomerDetail>;
+                if (mode != null && mode.Count > 0)
+                {
+                    foreach (var item in (List<Hyt.Model.rp_ShopNewCustomerDetail>)Model.TData)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }else{
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                        <td class="align_l p10_lr">@item.Warehousename</td>
+                        <td>@item.IndoorStaffName</td>
+                        <td>@item.CustomerName</td>
+                        <td>@item.MobilePhoneNumber</td>
+                        <td class="red align_r p10_lr">@Html.Raw(Hyt.Util.FormatUtil.FormatCurrency(item.Amount,0))</td>
+                        <td>@item.RegisterDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+                
+            }
+        </tbody>
+    </table>
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

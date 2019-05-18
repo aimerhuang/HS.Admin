@@ -1,0 +1,39 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<LgFreightModule>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="30px">选择</th>
+            <th width="" class="align_l p10_lr">模板代码</th>
+            <th width="" class="align_l p10_lr">模板名称</th>
+            <th width="60px">状态</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            int i = 0;
+            foreach (var item in Model.TData)
+            {
+                if (i % 2 == 0)
+                {
+                    @Html.Raw("<tr  class='stag_color'>")
+                }
+                else
+                {
+                    @Html.Raw("<tr>")
+                }
+                i++;
+            <td width="30px">
+                <input name="sysNo" type="radio" value="@item.SysNo" /></td>
+            <td width="" class="align_l p10_lr">@item.ModuleCode</td>
+            <td width="" class="align_l p10_lr">@item.ModuleName</td>
+            <td width="60px">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.运费模板状态), item.Status)</td>
+            @Html.Raw("</tr>")
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,198 @@
+﻿@{
+    ViewBag.Title = "分销商等级价格管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBPdProductDetail>
+@using Hyt.Model.SystemPredefined
+@Html.PrivilegeControl(PrivilegeCode.DS1005101,".DS1005101") 
+@Html.PrivilegeControl(PrivilegeCode.DS1005201,".DS1005201") 
+@Html.PrivilegeControl(PrivilegeCode.DS1005301,".DS1005301") 
+
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>分销商等级价格管理</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                  
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="m10_l fl">
+                        <select name="status" id="status" class="select_ht28">
+                            <option value="-1" selected="selected">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="search_btn wd200 m10_l fl">
+                        <input type="text" id="name" class="input_ht28" value="搜索商品编号或名称..." />
+                        <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r  DS1005301" id="btnChangePrice" title="批量调价"><span class="icon icon_pencil"></span><span class="m5_l">批量调价</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+               
+            </div>
+            <!--表格列结束-->
+
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $("#name").defaultValue("搜索商品编号或名称...");
+    var currentSearchType = 1;
+
+    var curpage = 1;
+    //查询列表
+    function doSearch() {       
+        var name;
+        if ($("#name").val() != "搜索商品编号或名称...") {
+            name = $("#name").val();
+        }
+        
+        Ajax.get("/Distribution/DsLevelPrice", "Search", function (p) {
+            if (!isNaN(name)) {
+                p.setParams("SysNo", name);
+            }else{
+                p.setParams("ProductName", name);
+            }
+            if ($("#status").val() >= 0) {
+                p.setParams("Status", $("#status").val());
+            }
+        }, function (data) {
+            if (data.IsLogout) {
+                DAO.LoginBox();
+                return;
+            }
+            $('#paging').html(data);
+        });
+    }
+    function showTip(tip) {
+        UI.tips.tip_alert('tips_success', tip);
+        doSearch();
+    }
+    //查询按钮
+    $("#btnSearch").click(function () {
+        doSearch();
+    });
+
+    $("#status").change(function () {
+        doSearch();
+    });
+    $("#name").keydown(function (e) {
+        var keycode = e.which;
+        if (keycode != 13) {
+            return;
+        }
+        doSearch();
+    });
+
+    DAO.SelectProductCategory($("#complexCategory"), $("#complexCategory"), {
+        margin: {
+            vertical: 8,         //垂直位置
+            horizontal: -30        //水平位置
+        },
+        callBack: function (data) {
+            if (data.length == 0)
+            {
+                $("#complexCategorySysno").val("0");
+                $("#complexCategory").val("选择分类");               
+                return;
+            }
+            if (!!data) {
+                $("#complexCategorySysno").val(data[0].id);
+            }
+        }
+    
+    });
+
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled") {
+                    $(this).attr("checked", "checked");
+                }
+            });
+        } else {
+            $("#paging input:checkbox").removeAttr("checked");
+        }
+    });
+
+    $("#btnChangePrice").click(function() {
+        var arrSysno = [];
+
+        $("#paging input:checkbox:checked").each(function() {
+            if ($(this).attr("id") == "checkall") {
+                return;
+            }
+            arrSysno.push($(this).val());
+        });
+        if (arrSysno.length == 0) {
+            UI.Alert({ content: '请勾选要调价的商品' });
+            return;
+        }
+        UI.DialogOpen("/Distribution/ShowLevelPriceMultiChange?productSysNoList=" + arrSysno, {
+            title: "商品调价申请",
+            width: 420,
+            footerClass: "align_c clearfix",
+            resize: true,
+            init: function() {
+                this.button(
+                    {
+                        name: '保存',
+                        callback: function() {
+                            var $iframe = this.iframe.contentWindow;
+
+                            $iframe.SaveCallback();
+                            return false;
+                        },
+                        focus: true
+                    }, {
+                        name: '取消',
+                        callback: function() {
+                            return true;
+                        }
+                    }
+                );
+            }
+        }, false);
+    });
+
+    doSearch();
+
+</script>

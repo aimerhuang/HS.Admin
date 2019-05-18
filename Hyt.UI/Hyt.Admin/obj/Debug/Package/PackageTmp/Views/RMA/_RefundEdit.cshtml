@@ -1,0 +1,238 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.RcRefundReturn
+@{
+
+    //普通(10),团购(20),秒杀(30),抢购(40),拍卖(50),组合(60),赠品(90)
+    var dics = new Dictionary<int, string[]>();
+    dics.Add(10, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"普通\" class=\"tagfull-inner\">普通</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(20, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"团购\" class=\"tagfull-inner\">团购</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(30, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"秒杀\" class=\"tagfull-inner\">秒杀</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(40, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"抢购\" class=\"tagfull-inner\">抢购</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(50, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"拍卖\" class=\"tagfull-inner\">拍卖</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(60, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"组合\" class=\"tagfull-inner\">组合</div><div class=\"tagfull-arrow\"></div></div>" });
+    dics.Add(90, new string[] { "<div class=\"tagfull fr\"><div datatitle=\"赠品\" class=\"tagfull-inner\">赠品</div><div class=\"tagfull-arrow\"></div></div>" });
+}
+<div class="tit_con">
+    @{Html.RenderAction("RmaOrderInfo", new { id = Model.OrderSysNo });}
+</div>
+<form method="POST" id="form1" name="form1">
+    <div class="border_left border_right border_bottom">
+        <div class="tit_dispay m10_t border_bottom">
+            <h5>退款明细数据</h5>
+        </div>
+        <div class="boxs_listtabel">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+                    <thead>
+                        <tr>
+                            <th width="50">
+                                <input type="checkbox" value="checkall" name="checkall" class="checkall hide" id="checkall">
+                            </th>
+                            <th width="100">商品编号</th>
+                            <th>后台显示名称</th>
+                            <th width="100">商品原单价</th>
+                            <th width="80">购买数量</th>
+                            <th width="100">实际销售金额</th>
+                            <th width="80">可退数量</th>
+                            <th width="80">退货数量</th>
+                            <th width="92">自定义价格</th>
+                            <th width="92">退款金额</th>
+                            <th width="170">退货原因</th>
+                            <th style="display: none">商品号</th>
+                            <th style="display: none">订单明细编号</th>
+                        </tr>
+                    </thead>
+                    @*<tbody class="product_list">
+                        @{
+                        foreach (var item in outStore.ReturnWhStockOutItemEx)
+                        {
+                            <tr>
+                                <td>
+                                    <input type="checkbox" class="StockOutItemSysNo" value="@item.StockOutItemSysNo" onclick='chkStockOutItemSysNoClick($(this));' @if (item.RmaQuantity > 0) { @: checked="checked"
+                                                                                                                                                                     } name="SysNo">
+                                </td>
+                                <td>@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                                <td align="left" class="p10_lr">
+                                    @if (item.ProductSalesType > 10)
+                                    {
+                                        @Html.Raw(dics[item.ProductSalesType][0]);
+                                    }
+                                    <span>@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</span>
+                                </td>
+                                <td align="right" class="red p10_r">&yen;@item.OriginalPrice.ToString("0.00")</td>
+                                <td>@item.ProductQuantity</td>
+                                <td align="right" class="red p10_r">&yen;@item.RealSalesAmount.ToString("0.00")</td>
+                                <td class="ProductQuantityAble">@item.ProductQuantityAble</td>
+                                <td>
+                                    <input type="text" class="wd60 number_input ReturnQuantity" name="ReturnQuantity" maxlength="10" value="@item.RmaQuantity" />
+                                </td>
+                                <td>
+                                    <input type="checkbox" class="CustomPrice" name="CustomPrice" @if (item.ReturnPriceType == (int)Hyt.Model.WorkflowStatus.RmaStatus.商品退款价格类型.自定义价格) { @: checked="checked"
+                                                                                                                                                                                                                                                                                } />
+                                </td>
+                                <td>
+                                    <input type="text" class="wd60 RefundAmount" name="RefundAmount" id="txtRefundAmount@(item.StockOutItemSysNo)" value="@item.RefundAmount" maxlength="10" />
+                                </td>
+                                <td>
+                                    <select class="wd150 RmaReason" name="RmaReason">
+                                        <option value="15天无理由退换货" @if (item.RmaReason == "15天无理由退换货") { @: selected="selected"
+                                                                                                                                                                                                                 }>
+                                            48小时无理由退换货
+                                        </option>
+                                        <option value="产品质量问题" @if (item.RmaReason == "产品质量问题") { @: selected="selected"
+                                                                                                                                                                                                             }>
+                                            产品质量问题
+                                        </option>
+                                        <option value="产品与描述不符" @if (item.RmaReason == "产品与描述不符") { @: selected="selected"
+                                                                                                                                                                                                               }>
+                                            产品与描述不符
+                                        </option>
+                                    </select>
+                                </td>
+                                <td style="display: none" class=".ProductSysNo">@item.ProductSysNo</td>
+                                <td style="display: none" class=".OrderItemSysNo">@item.OrderItemSysNo</td>
+                            </tr>
+                        }
+                        }
+                    </tbody>*@
+
+                    </table>
+                </div>
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                <tr>
+                    <td width="100" class="nameright">应退金额:</td>
+                    <td width="100" class="red p10_r">&yen;<span id="tdOrginAmount">@Model.OrginAmount</span></td>
+                    <td width="100" class="nameright">应退会员币:</td>
+                    <td id="tdOrginCoin" class="p10_r">@Model.OrginCoin</td>
+                    <td width="100" class="nameright">应扣回积分:</td>
+                    <td id="tdOrginPoint" class="p10_r">@Model.OrginPoint</td>
+                    <td width="100" class="nameright">扣回优惠卷:</td>
+                    <td class="red p10_r">&yen;<span id="tdCouponAmount">@Model.CouponAmount</span></td>
+                </tr>
+                <tr>
+                    <td width="100" class="nameright"><span class="v_star">*</span>实退商品金额:</td>
+                    <td><input type="text" id="txtRefundProductAmount" name="txtRefundProductAmount" value="@Model.RefundTotalAmount" class="input_medium" maxlength="10" save="RefundProductAmount" readonly="readonly" /></td>
+                </tr>
+                <tr>
+                    <td class="nameright">实退会员币</td>
+                    <td id="tdRefundCoin">@Model.RefundCoin</td>
+                    <td class="nameright">实扣回积分</td>
+                    <td id="tdRefundPoint">@Model.RefundPoint</td>
+                    <td class="nameright">积分现金补偿金额</td>
+                    <td class="red p10_r">&yen;<span id="tdRedeemAmount">@Model.RedeemAmount</span></td>
+                    <td></td>
+                    <td></td>
+                </tr>
+                <tr>
+                    <td class="nameright">实退总金额</td>
+                    <td colspan="7" class="red f16 bold">&yen;<span id="tdRefundTotalAmount">@Model.RefundTotalAmount</span></td>
+                </tr>
+                <tr>
+                    <td class="nameright border_bnone"><span class="v_star">*</span>退款方式</td>
+                    <td colspan="7" class="border_bnone">
+                        <select class="wd230" id="RefundType" name="RefundType" save="RefundType"></select><span id="c_RefundType" class="prompt m10_l">选择退款方式</span>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+        <div class="tit_con hide" id="bankDiv">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td class="nameright" width="100"><span class="v_star">*</span>开户银行</td>
+                        <td class="border_right" colspan="3">
+                            <input type="text" value="@Model.RefundBank" id="RefundBank" name="RefundBank" maxlength="50" class="input_xlarge" save="RefundBank"><span id="c_RefundBank" class="prompt m10_l">填写开户银行</span>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="nameright"><span class="v_star">*</span>开户银行帐号</td>
+                        <td class="border_right">
+                            <input type="text" id="RefundAccount" name="RefundAccount" maxlength="30" value="@Model.RefundAccount" class="input_xlarge" save="RefundAccount"><span id="c_RefundAccount" class="prompt m10_l">填写开户银行帐号</span>
+                        </td>
+
+                    </tr>
+                    <tr>
+                        <td class="nameright"><span class="v_star">*</span>退款开户人</td>
+                        <td class="border_right">
+                            <input type="text" id="RefundAccountName" name="RefundAccountName" maxlength="10" value="@Model.RefundAccountName" class="input_xlarge" save="RefundAccountName"><span id="c_RefundAccountName" class="prompt m10_l">填写退款开户人</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="border_left border_right border_top m10_t">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="100" class="nameright" valign="top">顾客备注</td>
+                        <td>
+                            <textarea class="wd600" rows="" cols="" name="RMARemark" id="RMARemark" save="RMARemark">@Model.RMARemark</textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright" valign="top">对内备注</td>
+                        <td>
+                            <textarea class="wd600" rows="" cols="" name="InternalRemark" id="InternalRemark" save="InternalRemark">@Model.InternalRemark</textarea>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    //显示退款方式
+    $(function () {
+        getRefundType('@Convert.ToInt32(Hyt.Model.WorkflowStatus.RmaStatus.退换货退款方式.至银行卡)', '@Model.OrderSysNo', '@Model.HandleDepartment', '@Model.RefundType', null);
+    });
+    //保存退款单
+    function saveReturn(postUrl, locationUrl, isAudit) {
+        var productData = getProductData(1);
+
+        var refundNum = parseFloat($("#txtRefundProductAmount").val());
+
+        //退款为负数
+        if (refundNum < 0) {
+            Utils.alert("实退总金额不能为负数");
+            return;
+        }
+        SavePost(productData, postUrl, locationUrl, isAudit);
+
+    }
+    function SavePost(productData, postUrl, locationUrl, isAudit) {
+        Ajax.postJosn(postUrl, "Save", function (p) {
+            p.setParams("SysNo", "@Model.SysNo");
+            p.setParams("OrginPoint", $("#tdOrginPoint").text());
+            p.setParams("CouponAmount", $("#tdCouponAmount").text());
+            p.setParams("OrginCoin", $("#tdOrginCoin").text());
+            p.setParams("OrginAmount", $("#tdOrginAmount").text().toDecimal());
+            p.setParams("RedeemAmount", $("#tdRedeemAmount").text());
+            p.setParams("RefundCoin", $("#tdRefundCoin").text());
+            p.setParams("RefundPoint", $("#tdRefundPoint").text());
+            p.setParams("RefundTotalAmount", $("#tdRefundTotalAmount").text().toDecimal());
+        }, function (ret) {
+            if (ret.StatusCode == 0) {
+                if (isAudit) {
+                    location.reload();
+                } else {
+                    UI.Confirm({
+                        content: '成功生成退货单！点击[确定]进入该退货单详情',
+                        ok: function () {
+                            UI.CloseTab(null, "/rma/RefundDetail/?sysNo=" + ret.Data, " 退款:" + ret.Data);
+                        },
+                        cancel: function () {
+                            UI.CloseTab(null, locationUrl);
+                        }
+                    });
+                }
+            } else {
+                Utils.alert(ret.Message);
+            }
+        });
+    }
+</script>

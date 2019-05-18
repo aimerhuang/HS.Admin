@@ -1,0 +1,93 @@
+﻿@using Hyt.BLL.CRM
+@using Hyt.BLL.Logistics
+@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.LgPickUp>
+
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th class="wd75">取件单号</th>
+            <th width="120">取件方式</th>
+            <th class="wd75">入库单编号</th>
+            <th class="align_l p10_lr">仓库</th>
+            <th class="align_l p10_lr">取件地址</th>
+            <th width="92">创建人</th>
+            <th width="120">创建时间</th>
+            <th width="56">状态</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TData != null && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td class="blue"><a href="#" name="item_sysno" class="blue">@item.SysNo</a></td>
+                <td>@LgPickUpTypeBo.Instance.GetPickupTypeName(item.PickupTypeSysNo)</td>
+                <td class="blue"><a href="#" name="item_stockinsysno" class="blue">@item.StockInSysNo</a></td>
+                <td class="align_l p10_lr">@WhWarehouseBo.Instance.GetWarehouseName(item.WarehouseSysNo)</td>
+                <td class="align_l p10_lr">
+                    @{
+                var address = Hyt.BLL.Order.SoOrderBo.Instance.GetOrderReceiveAddress(item.PickupAddressSysNo);
+                if (address != null)
+                {
+                        @address.StreetAddress
+                }
+                else
+                {
+                        @Html.Raw("无取件地址")
+                }
+                    }
+                </td>
+                <td>@SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@((LogisticsStatus.取件单状态)item.Status)</td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        //表格加入隔行样式
+        var options = {
+            tab: 'item_list',//隔行样式的表格ID
+            style: 'stag_color',//样式名称class
+            row: 1//样式开始的行
+        };
+        DAO.InterlineStyle(options);
+
+        $("#item_list").delegate("a[name='item_sysno']", "click", function () {
+            var url = '/Logistics/PickupInvoiceDetails/' + $(this).text();
+            UI.DialogOpen(url, {
+                title: '取件单明细',
+                width: 1000,
+                height: 608,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+
+        $("#item_list").delegate("a[name='item_stockinsysno']", "click", function () {
+            var url = '/Warehouse/InStockDetails?sysNo=' + $(this).text();
+            UI.DialogOpen(url, {
+                title: '入库单明细',
+                width: 1000,
+                height: 608,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+    });
+</script>

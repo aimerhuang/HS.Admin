@@ -1,0 +1,93 @@
+﻿@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+}
+<div class="boxs_detail_dispay" id="div_productMainInof">
+    <div class="tit_con">
+        <form  id="inputForm" onsubmit="return false;">
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                <tbody>
+                    <tr>
+                        <td width="150" class="nameright">包装类型</td>
+                        <td>
+                            <select id="sel_unit">
+                                <option value="罐装">罐装</option>
+                                <option value="袋装">袋装</option>
+                                <option value="包装">包装</option>
+                                <option value="盒装">盒装</option>
+                                <option value="瓶装">瓶装</option>
+                                <option value="组">组</option>
+                                <option value="箱">箱</option>
+                                <option value="套装">套装</option>
+                            </select>
+                            <span class="prompt m10_l">包装类型</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>规格</td>
+                        <td>
+                            <input tabindex="10" dn="VolumeValue" id="txt_spec" name="txt_spec" class="wd50 m10_r" type="text" /><text id="lbl_spec">罐装</text>
+                            <span class="prompt m10_l">规格名称,只支持正整数</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="150" class="nameright"><span class="v_star">*</span>价格</td>
+                        <td>
+                            <input tabindex="10" dn="VolumeValue" id="txt_price" name="txt_price" class="wd100 m10_r" type="text" />
+                            <span class="prompt m10_l">规格价格,只支持整数(小数)</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<!-- 商品主信息维护 END -->
+
+<script type="text/javascript">
+
+    $(function () {
+        $("#inputForm").validate({
+            rules: {
+                txt_spec: {
+                    required: true,
+                    number: true
+                },
+                txt_price: {
+                    required: true,
+                    number: true
+                }
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+        initDialog();
+    });
+
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    if ($("#inputForm").valid()) {
+                        UI.Dialog.opener.AddPdProductSpecRtn($("#sel_unit").val(), $("#txt_spec").val(), $("#txt_price").val());
+                    }
+                    return true;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+</script>

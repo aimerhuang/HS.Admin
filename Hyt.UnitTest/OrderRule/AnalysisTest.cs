@@ -366,7 +366,7 @@ namespace Hyt.UnitTest.OrderRule
        public void TestParseCommand() {
            var orderData = new BLL.OrderRule.OrderData();
            orderData.Order = new Model.SoOrder();
-           orderData.Order.OrderAmount = 50
+           orderData.Order.OrderAmount = 50;
            orderData.Order.CustomerMessage = "请发圆通快递";
            orderData.OrderItems = new List<SoOrderItem>();
            orderData.OrderItems.Add(new SoOrderItem()

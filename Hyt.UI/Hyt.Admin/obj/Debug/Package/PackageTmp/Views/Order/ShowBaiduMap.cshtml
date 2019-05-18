@@ -1,0 +1,111 @@
+﻿@model Hyt.Model.Transfer.CBBaiduMap
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, html, #allmap {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+        }
+    </style>
+    <script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+    <title>百度地图</title>
+</head>
+<body>
+    <div id="allmap"></div>
+    @Html.HiddenFor(m=>m.LocalX)
+    @Html.HiddenFor(m => m.LocalY)
+    @Html.HiddenFor(m => m.CityName)
+    @Html.HiddenFor(m=>m.CityNo)
+</body>
+</html>
+<script language="javascript" type="text/javascript">
+    var map = new BMap.Map("allmap");            // 创建Map实例
+    var mapx = $("#LocalX").val();
+    var mapy = $("#LocalY").val();
+    var CityName = $("#CityName").val();
+    var CityNo=$("#CityNo").val();
+    /*自定义*/
+    var setMap = {
+        /*绘画不规则多边形*/
+        Boundary: function (points) {
+            var ply = new BMap.Polygon(points, { strokeColor: "red", strokeWeight: 5, strokeOpacity: 0.6 }); //建立多边形覆盖物
+            map.addOverlay(ply);  //添加覆盖物  
+        },
+    }
+    $(document).ready(function (e) {
+      
+        if (mapx && mapx != "0")
+        {
+            point = new BMap.Point(mapx, mapy);
+            map.centerAndZoom(point, 11);
+            marker = new BMap.Marker(point);
+            map.addOverlay(marker);
+            marker.setAnimation(BMAP_ANIMATION_BOUNCE); //跳动的动画
+        }
+        else
+        {
+            map.centerAndZoom(encodeURIComponent(CityName), 11);
+        }
+         if (CityNo && CityNo != "") {
+             $.ajax({
+                 type: "POST",
+                 url: '@Url.Action("GetDeliveryScope", "Logistics")',
+                 data: "areaSysNo=" + CityNo,
+                 chche: false,
+                 success: function (data) {
+                     showPolygon(data);
+                 }
+             });//自营百城当日达
+             $.ajax({
+                 type: "POST",
+                 url: '@Url.Action("GetWhDeliveryScope", "Logistics")',
+                 data: "areaSysNo=" + CityNo,
+                 chche: false,
+                 success: function (data) {
+                     showJiaMengPolygon(data);
+                 }
+             });//加盟商百城当日达
+         }
+        map.enableScrollWheelZoom();
+        map.addControl(new BMap.NavigationControl({ anchor: BMAP_ANCHOR_TOP_RIGHT, type: BMAP_NAVIGATION_CONTROL_SMALL }));  //右上角，仅包含平移和缩放按钮
+     });
+    //显示自营百城当日达区域信息
+    function showPolygon(data) {
+        if (data == null) {
+            return;
+        }
+        for (var i = 0; i < data.length ; i++) {
+            setMap.Boundary(data[i].MapScope);    //分割后的区域输出
+        }
+    }
+    //显示加盟商配送区域
+    function showJiaMengPolygon(data) {
+        if (data == null) {
+            return;
+        }
+        for (var i = 0; i < data.length ; i++) {
+            
+            var ply = new BMap.Polygon(data[i].MapScope, { strokeColor: "blue", strokeWeight: 2, strokeOpacity: 0.6 }); //建立多边形覆盖物
+            map.addOverlay(ply);  //添加覆盖物 
+
+            var opts = {
+                position: ply.getPath()[0],    // 指定文本标注所在的地理位置
+                offset: new BMap.Size(30, 0)    //设置文本偏移量
+            }
+            var label = new BMap.Label(data[i].WarehouseName, opts);  // 创建文本标注对象
+            label.setStyle({
+                color: "blue",
+                fontSize: "10px",
+                height: "20px",
+                lineHeight: "20px",
+                fontFamily: "微软雅黑"
+            });
+            map.addOverlay(label);
+        }
+    }
+</script>

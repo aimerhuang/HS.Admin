@@ -1,0 +1,571 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.BLL.Authentication;
+@using Hyt.BLL.Sys;
+@using Hyt.Model;
+@model Hyt.Model.Transfer.CBDsDealer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改分销商";
+   
+    var dpt=ViewBag.DealerPayType  as DsDealerPayType;
+    
+    var extensions=(StoreExtensions)ViewBag.Extensions;
+    @Html.PrivilegeControl(PrivilegeCode.DS1002302, ".DS1002302")
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/selectcontrol.js"> </script>
+}
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>代理商</td>
+                            <td class="border_right1">
+                                @{
+                                    <select id="AgentSysNo" name="AgentSysNo" class="wd170">
+                                        @{
+                                            var info = AdminAuthenticationBo.Instance.GetCurrentUserInfo();
+                                            if (info.IsBindAllDealer)
+                                            {
+                                                //代理商用户组:4
+                                                IList<SyUser> items = SyUserBo.Instance.GetSyUserByGroupSysNo(4);
+                                                foreach (SyUser item in items)
+                                                {
+                                                    if (item.SysNo == Model.CreatedBy)
+                                                    {
+                                                        <option value="@item.SysNo" selected="selected">@item.UserName</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.SysNo">@item.UserName</option>                                                        
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                var IsHasAgentGroup = SyUserGroupBo.Instance.IsHasAgentGroup(info.Base.SysNo);
+                                                if (IsHasAgentGroup)
+                                                {
+                                                    <option value="@info.Base.SysNo">@info.Base.UserName</option>                                                   
+                                                }
+                                            }
+                                        }
+                                    </select>
+                                    <span id="forAgentSysNo" class="prompt m10_l">代理商</span>
+                                }
+
+                            </td>
+                            <td colspan="2"></td>
+                        </tr>
+                        <tr>
+
+                            <td style="width: 10.5%" class="nameright border_rnone"><span class="v_star">*</span>名称</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                <input type="text" id="DealerName" maxlength="50" value="@Model.DealerName" name="DealerName" class="wd156">
+                                <span id="forDealerName" class="prompt m10_l">字数限制,1-50字</span>
+                                <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+                            </td>
+                            @*<td style="width: 10.5%" class="nameright border_rnone">名称：</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                @Model.DealerName
+                                <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+                                <input type="hidden" id="DealerName" name="DealerName" value="@Model.DealerName" />
+                            </td>*@
+                            <td style="width: 10.5%" class="nameright border_rnone"><span class="v_star">*</span>系统账号</td>
+                            <td style="width: 39.5%">
+                                <input type="text" id="Account" maxlength="20" value="@Model.Account" name="Account" class="wd156">
+                                <span id="forAccount" class="prompt m10_l">关联系统登录账号</span>
+                                <input type="hidden" id="UserSysNo" name="UserSysNo" value="@Model.UserSysNo" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>等级</td>
+                            <td class="border_right1">
+                                <select id="LevelSysNo" name="LevelSysNo" class="wd170">
+                                    @foreach (var item in (IList<Hyt.Model.DsDealerLevel>)ViewBag.DsDealerLevel)
+                                    {
+                                        <option value="@item.SysNo">@item.LevelName</option>
+                                    }
+                                </select>
+                                <span id="forLevelSysNo" class="prompt m10_l">分销商等级</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                            <td>
+                                <select id="status" name="status" class="wd170">
+                                   @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态)))
+                                    {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                                </select>
+                                <span id="forstatus" class="prompt m10_l">分销商状态</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">支付商户编号</td>
+                            <td>
+                                <input type="text" id="PayAppKey" name="PayAppKey" value="@dpt.AppKey" class="wd156" maxlength="30" />
+                                <span id="forPayAppKey" class="prompt m10_l">字数限制，1-30个</span>
+                            </td>
+                            <td class="nameright border_rnone">支付商户密钥</td>
+                            <td>
+                                <input type="text" id="PayAppSecret" name="PayAppSecret" value="@dpt.AppSecret" class="wd156" maxlength="50" />
+                                <span id="forPayAppSecret" class="prompt m10_l">字数限制，1-50个</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">联系人</td>
+                            <td class="border_right1">
+                                <input type="text" id="Contact" name="Contact" value="@Model.Contact" maxlength="20" class="wd156">
+                                <span id="forContact" class="prompt m10_l">字数限制,0-20个字</span>
+                            </td>
+                            <td class="nameright border_rnone">电子邮箱</td>
+                            <td>
+                                <input type="text" id="EmailAddress" value="@Model.EmailAddress" name="EmailAddress" maxlength="100" class="wd156">
+                                <span id="forEmailAddress" class="prompt m10_l">邮箱格式,0-100字</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">座机号码</td>
+                            <td class="border_right1">
+                                <input type="text" id="PhoneNumber" value="@Model.PhoneNumber" name="PhoneNumber" maxlength="20" class="wd156">
+                                <span id="forPhoneNumber" class="prompt m10_l">字数限制,0-20个字</span>
+                            </td>
+                            <td class="nameright border_rnone">手机号码</td>
+                            <td>
+                                <input type="text" id="MobilePhoneNumber" value="@Model.MobilePhoneNumber" name="MobilePhoneNumber" maxlength="11" class="wd156">
+                                <span id="forMobilePhoneNumber" class="prompt m10_l">0-11个数字</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">商城编号</td>
+                            <td class="border_right1">
+                                <input id="ErpCode" type="text" maxlength="20" name="ErpCode" value="@Model.ErpCode" class="wd156" />
+                                <span id="forErpCode" class="prompt m10_l">字数限制，1-20个</span>
+                            </td>
+                            <td class="nameright border_rnone">商城名称</td>
+                            <td>
+                                <input id="ErpName" maxlength="50" type="text" name="ErpName" value="@Model.ErpName" class="wd156" />
+                                <span id="forErpName" class="prompt m10_l">字数限制，1-50个</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">三级分销</td>
+                            <td class="border_right1">
+                                @{
+                                    if (@Model.ThreeLevels == 1)
+                                    {
+                                        <input type="checkbox" id="ThreeLevels" name="ThreeLevels" value="@Model.ThreeLevels" checked="checked" />
+                                    }
+                                    else
+                                    {
+                                        <input type="checkbox" id="ThreeLevels" name="ThreeLevels" value="@Model.ThreeLevels" />
+                                    }
+                                }
+                                <span id="forThreeLevels" class="prompt m10_l">三级分销</span>
+                                <span class="DS1002302">
+                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;是否为批发商&nbsp;
+                                    @{
+                                        if (@Model.IsWholeSaler == 1)
+                                        {
+                                            <input type="checkbox" id="IsWholeSaler" name="IsWholeSaler" value="@Model.IsWholeSaler" checked="checked" />
+                                        }
+                                        else
+                                        {
+                                            <input type="checkbox" id="IsWholeSaler" name="IsWholeSaler" value="@Model.IsWholeSaler" />
+                                        }
+                                    }
+                                    <span id="forIsWholeSaler" class="prompt m10_l">是否为批发商</span>
+                                </span>
+                            </td>
+                            <td class="nameright border_rnone">PC域名</td>
+                            <td>
+                                <input id="PcHost" maxlength="30" type="text" name="PcHost" value="@Model.PcHost" class="wd156" />
+                                <span id="forPcHost" class="prompt m10_l">字数限制，1-30个</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>地区</td>
+                            <td colspan="3">
+                                <select style="width: 120px; margin-right: 10px;" class="c3" id="CountrySysNo" name="CountrySysNo">
+                                </select><span class="c6">国家</span>
+                                <select style="width: 120px; margin-right: 10px;" class="c3" id="ProvinceSysNo" name="ProvinceSysNo">
+                                </select><span class="c6">省</span>
+                                <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="CitySysNo" name="CitySysNo">
+                                </select><span class="c6">市/地区</span>
+                                <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="AreaSysNo" name="AreaSysNo">
+                                </select><span class="c6">区/县</span>
+                                <span id="forAreaSysNo" class="prompt m10_l">所在地区</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">街道地址</td>
+                            <td colspan="3">
+                                <input type="text" id="StreetAddress" value="@Model.StreetAddress" name="StreetAddress" class="input_xxlarge input_w" maxlength="200">
+                                <span id="forStreetAddress" class="prompt m10_l">字数限制,0-200个字</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">Logo</td>
+                            <td colspan="3">
+                                <input type="text" id="ImageUrl" value="@Model.ImageUrl"  name="ImageUrl" class="input_xxlarge input_w" maxlength="200">
+                                <button class="btn btn_ht26 m5_l" type="button" onclick="DAO.Upload({config:'@(Hyt.Model.SystemPredefined.UploadConfigAlias.DealerImageConfigAlias)',callback:function(data){ $('#ImageUrl').val(data[0].url); }})"><span class="icon_upload"></span><span class="m5_l">上传文件</span></button><span id="forImageUrl" class="prompt m10_l">Logo,1-200字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">Ico</td>
+                            <td colspan="3">
+                                <input type="text" id="IcoUrl" value="@Model.IcoUrl" name="IcoUrl" class="input_xxlarge input_w" maxlength="200">
+                                <button class="btn btn_ht26 m5_l" type="button" onclick="DAO.Upload({config:'@(Hyt.Model.SystemPredefined.UploadConfigAlias.DealerIcoConfigAlias)',callback:function(data){ $('#IcoUrl').val(data[0].url); }})"><span class="icon_upload"></span><span class="m5_l">上传文件</span></button><span id="forIcoUrl" class="prompt m10_l">Ico,1-200字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">微信公众号二维码</td>
+                            <td colspan="3">
+                                <input type="text" id="WxQrCode" value="@Model.WxQrCode" name="WxQrCode" class="input_xxlarge input_w" maxlength="200">
+                                <button class="btn btn_ht26 m5_l" type="button" onclick="DAO.Upload({config:'@(Hyt.Model.SystemPredefined.UploadConfigAlias.DealerWxQrCodeConfigAlias)',callback:function(data){ $('#WxQrCode').val(data[0].url); }})"><span class="icon_upload"></span><span class="m5_l">上传文件</span></button><span id="forWxQrCode" class="prompt m10_l">微信公众号二维码,1-200字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 10.5%" class="nameright border_rnone">AppID</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                <input type="text" id="AppID" value="@Model.AppID" maxlength="50" name="AppID" class="wd156">
+                                <span id="forAppID" class="prompt m10_l">字数限制，1-50个</span>
+                            </td>
+                            <td style="width: 10.5%" class="nameright border_rnone">AppSecret</td>
+                            <td style="width: 39.5%">
+                                <input type="text" id="AppSecret" value="@Model.AppSecret" maxlength="50" name="AppSecret" class="wd156">
+                                <span id="forAppSecret" class="prompt m10_l">字数限制，1-50个</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td style="width: 10.5%" class="nameright border_rnone">微信公众账号</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                <input type="text" id="WeiXinNum" value="@Model.WeiXinNum" maxlength="50" name="WeiXinNum" class="wd156">
+                                <span id="forWeiXinNum" class="prompt m10_l">字数限制，1-50个</span>
+                            </td>
+                            <td style="width: 10.5%" class="nameright border_rnone">域名</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                <input type="text" id="DomainName" value="@Model.DomainName" maxlength="50" name="DomainName" class="wd156">
+                                <span id="forDomainName" class="prompt m10_l">字数限制，1-50个</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">标题</td>
+                            <td colspan="3">
+                                <input type="text" id="Title" value="@Model.Title" maxlength="200" name="Title" class="input_xxlarge input_w">
+                                <span id="forTitle" class="prompt m10_l">字数限制，1-200个</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">关键字</td>
+                            <td colspan="3">
+                                <input type="text" id="Keyword" value="@Model.Keyword" maxlength="200" name="Keyword" class="input_xxlarge input_w">
+                                <span id="forKeyword" class="prompt m10_l">字数限制，1-200个</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">描述</td>
+                            <td colspan="3">
+                                <input type="text" id="Description" value="@Model.Description" maxlength="500" name="Description" class="input_xxlarge input_w">
+                                <span id="forDescription" class="prompt m10_l">字数限制，1-500个</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="nameright border_rnone">客服代码</td>
+                            <td colspan="3">
+                                <textarea  id="ExtensionsCustomerService" maxlength="5000" name="ExtensionsCustomerService" class="input_xxlarge input_w">@(Hyt.Util.Security.UnEscape(extensions.CustomerServiceCode))</textarea>
+                                    <span id="forExtensionsCustomerService" class="prompt m10_l">字数限制，1-5000个</span>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //省市区三级联动
+        Area($("#CountrySysNo"), $("#ProvinceSysNo"), $("#CitySysNo"), $("#AreaSysNo"), {
+            a: '@Model.AreaSysNo',
+            callback: function (type) {
+            }
+        });
+        //设置选择项
+        window.onload = function () {
+            $("#LevelSysNo").find("option[value=@Model.LevelSysNo]").attr("selected", "true");
+            $("#status").find("option[value=@Model.Status]").attr("selected", "true");
+        };
+
+
+        //验证
+        $().ready(function () {
+            $("#form1").validate({
+                rules: {
+                    AgentSysNo: { required: true, },
+                    // 选择框
+                    LevelSysNo: {
+                        required: true,
+                    },
+                    status: {
+                        required: true,
+                    },
+                    //文本
+                    Contact: {
+                        maxlength: 20,
+                    },
+                    EmailAddress: {
+                        email: true,
+                    },
+                    PhoneNumber: {
+                        maxlength: 20,
+                    },
+                    MobilePhoneNumber: {
+                        number: true,
+                        maxlength: 11,
+                    },
+                    ProvinceSysNo: { min: 1, },
+                    CitySysNo: { min: 1, },
+                    AreaSysNo: { min: 1, },
+                    DealerName: {
+                        rangelength: [1, 50],
+                        required: true,
+                        remote: {
+                            url: '@Url.Action("IsCanAddDsDealerName")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式
+                            data: {
+                                //要传递的数据
+                                dealerName: $.trim($("#dealerName").val()),
+                                sysNo: '@Model.SysNo',
+                            },
+                            dataFilter: function (data, type) {
+                                var rdata = eval('(' + data + ')');
+                                $('#fordealerName').text(rdata.Message);                                
+                                return rdata.Status.toString(); //是否通过验证关键点
+                            }
+                        }
+                    },
+                    Account: {
+                        required: true,
+                        remote: {
+                            url: '@Url.Action("IsRightContactSysUser")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                account: $("#Account").val(),
+                                sysNo: '@Model.SysNo',
+                            },
+                            dataFilter: function (data, type) {
+                                var rdata = eval('(' + data + ')');
+                                $('#forAccount').text(rdata.Message);
+                                if (rdata.Status)//赋予userSysNo
+                                    $('#UserSysNo').val(rdata.StatusCode);
+                                return rdata.Status.toString();
+                            }
+                        }
+                    },
+                    ImageUrl: {
+                        //required: true,
+                        rangelength: [1, 200]
+                    },
+                    IcoUrl: {
+                        //required: true,
+                        rangelength: [1, 200]
+                    },
+                    AppID: {
+                        //required: true,
+                        remote: {
+                            url: '@Url.Action("IsCanAddAppID")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                appID: $("#appID").val(),
+                                sysNo: '@Model.SysNo',
+                            },
+                            dataFilter: function (data, type) {
+                                var rdata = eval('(' + data + ')');
+                                $('#forAppID').text(rdata.Message);
+                                return rdata.Status.toString();
+                            }
+                        }
+                    },
+                    AppSecret: {
+                        //required: true,
+                        remote: {
+                            url: '@Url.Action("IsCanAddAppSecret")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                appSecret: $("#appSecret").val(),
+                                sysNo: '@Model.SysNo',
+                            },
+                            dataFilter: function (data, type) {
+                                var rdata = eval('(' + data + ')');
+                                $('#forAppSecret').text(rdata.Message);
+                                return rdata.Status.toString();
+                            }
+                        }
+                    },
+                    WeiXinNum: {
+                        //required: true,
+                        remote: {
+                            url: '@Url.Action("IsCanAddWeiXinNum")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                weiXinNum: $("#weiXinNum").val(),
+                                sysNo: '@Model.SysNo',
+                            },
+                            dataFilter: function (data, type) {
+                                var rdata = eval('(' + data + ')');
+                                $('#forWeiXinNum').text(rdata.Message);
+                                return rdata.Status.toString();
+                            }
+                        }
+                    },
+                    DomainName: {
+                        //required: true,
+                        remote: {
+                            url: '@Url.Action("IsCanAddDomainName")',     //后台处理程序
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                domainName: $("#domainName").val(),
+                                sysNo: '@Model.SysNo',
+                            },
+                            dataFilter: function (data, type) {
+                                var rdata = eval('(' + data + ')');
+                                $('#forDomainName').text(rdata.Message);
+                                return rdata.Status.toString();
+                            }
+                        }
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        (function () {
+            var opener = art.dialog.opener, // 父页面window对象
+                api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('修改分销商')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定修改吗？",
+                                    ok: function () {
+                                        var model = getModel();
+                                        $.ajax({
+                                            url: "@Url.Action("AjaxDsDealerUpdate")"+"?PayAppKey="+$("#PayAppKey").val()+"&PayAppSecret="+$("#PayAppSecret").val() ,
+                                            data: JSON.stringify(model),
+                                            contentType: 'application/json',
+                                            type: "post",
+                                            success: function (ret) {
+                                                if (ret.Status) {
+                                                    //判断微信AppID、AppSecret是否合法 
+                                                    //王耀发 2016-5-10 创建
+                                                    $.ajax({
+                                                        type: "POST",
+                                                        url: "/Distribution/GetCallBackIp",
+                                                        data: "DealerSysNo=" + ret.StatusCode,
+                                                        success: function (content) {
+                                                            if (content.Status) {
+                                                                UI.DialogOpener().ExecSuccess("修改分销商成功");
+                                                                UI.Dialog.close();
+                                                            } else {
+                                                                UI.tips.tip_alert('tips_shrot tips_wrong', content.Message);
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                else {
+                                                    var mess = "修改分销商失败";
+                                                    if (ret.Message && ret.Message != "") {
+                                                        mess = ret.Message;
+                                                    }
+                                                    UI.tips.tip_alert('tips_shrot tips_wrong', mess);
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.tips.tip_alert('tips_shrot tips_wrong', "操作出错！");
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '关闭'
+                    }
+                );
+
+            function getModel() {
+                var model = {};
+                model.SysNo = $("#SysNo").val();
+                model.DealerName = $("#DealerName").val();
+                model.UserSysNo = $("#UserSysNo").val();
+                model.LevelSysNo = $("#LevelSysNo").val();
+                model.Contact = $("#Contact").val();
+                model.Status = $("#status").val();
+                model.EmailAddress = $("#EmailAddress").val();
+                model.PhoneNumber = $("#PhoneNumber").val();
+                model.MobilePhoneNumber = $("#MobilePhoneNumber").val();
+                model.AreaSysNo = $("#AreaSysNo").val();
+                model.StreetAddress = $("#StreetAddress").val();
+                model.ErpCode = $("#ErpCode").val();
+                model.ErpName = $("#ErpName").val();
+                model.ImageUrl = $("#ImageUrl").val();
+                model.IcoUrl = $("#IcoUrl").val();
+                model.AppID = $("#AppID").val();
+                model.AppSecret = $("#AppSecret").val();
+                model.WeiXinNum = $("#WeiXinNum").val();
+                model.DomainName = $("#DomainName").val();
+                model.Title = $("#Title").val();
+                model.Keyword = $("#Keyword").val();
+                model.Description = $("#Description").val();
+                model.ThreeLevels = $("#ThreeLevels").attr("checked") ? 1 : 0;
+                model.PcHost = $("#PcHost").val();
+                model.WxQrCode = $("#WxQrCode").val();
+                model.Token = "156235123";
+                model.IsWholeSaler = $("#IsWholeSaler").attr("checked") ? 1 : 0;
+                model.CreatedBy = $("#AgentSysNo").val();
+                model.Extensions = "{\"CustomerServiceCode\":\"" + escape($("#ExtensionsCustomerService").val()) + "\"}";
+                return model;
+            }
+        })();
+
+    </script>
+}

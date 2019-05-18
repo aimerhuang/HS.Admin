@@ -1,0 +1,301 @@
+﻿@using Hyt.Model;
+@model IList<BsArea>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "百城当日达管理";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1002101, ".LG1002101")  
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1002201, ".LG1002201")  
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1002401, ".LG1002401")  
+}
+<link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+<script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+<!--加载鼠标绘制工具-->
+<script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+<style>
+    .wraper { float: left; position: relative; }
+    .list { position: absolute; top: 27px; width: 161px; height: 196px; overflow: auto; position: absolute; border: 1px solid #ccc; display: none; background: none repeat scroll 0 0 #f1f1f1; float: left; z-index: 1000000; }
+        .list ul li { padding-left: 10px; padding-top: 2px; padding-bottom: 2px; border-bottom: 1px solid #dddddd; }
+            .list ul li span { margin-left: 10px; }
+    ul { list-style: none outside none; }
+</style>
+<script>
+    var allPolygon = [];//所有的多边形
+    /*自定义*/
+    var setMap = {
+        /*绘画不规则多边形*/
+        Boundary: function (points) {
+            var ply = new BMap.Polygon(points, { strokeWeight: 2, strokeColor: "#ff0000" }); //建立多边形覆盖物
+            map.addOverlay(ply);  //添加覆盖物 
+            showdeletemenu(ply);
+            allPolygon.push(ply);//添加到内存数组
+
+        },
+    }
+    var showdeletemenu=function(obj)
+    {
+        //创建右键菜单
+        var plyMenu = new BMap.ContextMenu();
+        plyMenu.addItem(new BMap.MenuItem('删除', removePolygon.bind(obj)));
+        obj.addContextMenu(plyMenu);
+    }
+    var removePolygon = function (e, ee, Polygon) {
+        map.removeOverlay(Polygon);
+        allPolygon.splice($.inArray(Polygon, allPolygon), 1);//从内存中移除多边形
+    }
+</script>
+
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool border_bottom">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">省份</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="Province" name="Province">
+                            @if (Model != null)
+                            {
+                                foreach (var item in Model)
+                                {
+                                <option value="@item.SysNo" >@item.AreaName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <span class="fl m10_l">城市</span>
+                    <div class="fl m10_l LG1002101">
+                        <select class="select_ht28" id="City">
+                            <option value="0">请选择</option>
+                        </select>
+                    </div>
+
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m10_r LG1002201" onclick="SaveCity();">
+                        <span class="icon_save"></span><span class="m5_l">保存区域</span>
+
+                    </button>
+                    <button class="btn btn_ht26 m10_r LG1002401" onclick="resetCityArea();"><span class="icon_trash"></span><span class="m5_l">删除区域信息</span></button>
+                </div>
+            </div>
+            <!--/百度地图区-->
+            <div class="boxs" style="width: 100%; overflow: hidden;" id="allmap"></div>
+        </div>
+
+    </div>
+</div>
+ <script type="text/javascript">
+         var map = new BMap.Map("allmap");
+         var myCity = new BMap.LocalCity();
+         //实例化鼠标绘制工具
+         var drawingManager = new BMapLib.DrawingManager(map, {
+             isOpen: false, //是否开启绘制模式
+             enableDrawingTool: true, //是否显示工具栏
+             drawingToolOptions: {
+                 drawingModes: [BMAP_DRAWING_POLYGON, BMAP_DRAWING_MARKER],//隐藏工具栏一些工具
+                 anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+                 offset: new BMap.Size(5, 5), //偏离值
+                 scale: 0.8 //工具栏缩放比例
+             }
+         });
+
+         drawingManager.addEventListener("polygoncomplete", function (e, overlay) {
+             // alert(overlay);
+             showdeletemenu(overlay);
+             allPolygon.push(overlay);//添加多边形到内存数组
+
+         });
+         drawingManager.addEventListener("polylinecomplete", function (e, overlay) {
+             // alert(overlay);
+             showdeletemenu(overlay);
+         });
+         drawingManager.addEventListener("circlecomplete", function (e, overlay) {
+             // alert(overlay);
+             showdeletemenu(overlay);
+         });
+         drawingManager.addEventListener("markercomplete", function (e, overlay) {
+             // alert(overlay);
+             showdeletemenu(overlay);
+         });
+         drawingManager.addEventListener("rectanglecomplete", function (e, overlay) {
+            // alert(overlay);
+             showdeletemenu(overlay);
+         });
+          $(function () {
+             $("#allmap").css("height", $(window.parent.document).height() - 277 + "px");
+             OrientateCity();
+             //map.centerAndZoom("北京市");
+             //map.enableScrollWheelZoom();
+             //省份改变时加载城市
+             $("#Province").change(function () {
+                 if ($("#Province").val() == "0")
+                     return;
+                 LoadCity();
+
+             });
+             //城市改变时加载地图
+             $("#City").change(function () {
+                 if ($("#City").val() == "0")
+                     return;
+                 showCityArea();
+             });
+
+         });
+
+         //定位地图初始城市
+        function OrientateCity() {
+             //ip定位当前城市
+             myCity.get(myFun);
+             function myFun(result) {
+                 $.ajax({
+                     type: "POST",
+                     url: '@Url.Action("GetAreaByName", "Basic")',
+                     data: "areaName=" + result.name.replace(" ", "市"),
+                     chche: false,
+                     success: function (ret) {
+                         if (ret.ParentSysNo == 0) {
+                             //定位到北京
+                             LoadCity();
+                         } else {
+                             //下拉框设置省和市
+                             $("#Province").find("option[value=" + ret.ParentSysNo + "]").attr("selected", "true");
+                             LoadCity(ret.SysNo);//异步原因传入
+                         }
+
+                     }
+                 });
+             }
+         }
+
+         //重置地图，清除地图标识
+         function resetPoint() {
+             map.clearOverlays();
+             drawingManager.close();
+             allPolygon = [];//清除多边形数组
+         }
+
+         //保存百城当日达区域信息
+         function SaveCity() {
+
+             //检查是否已选城市
+             if ($("#City").val() == "0") {
+                 UI.Alert({ content: "请先选择城市" });
+                 return;
+             }
+             var overlen = allPolygon.length;
+
+             var positions = "";
+             $.each(allPolygon, function (index, ply) {
+                 var points = ply.getPath();
+                 if (points != undefined && points.length>2)//至少要3点才能成为区域
+                 {
+                     var content = "";
+                     for (var i = 0; i < points.length; i++) {
+                         if (!(isNaN(points[i].lng) || isNaN(points[i].lat))) {
+                             content += (points[i].lng + "," + points[i].lat + ";\n");
+                         }
+                     }
+                     if(positions!="")
+                     {
+                         positions=positions+ "|";
+                     }
+                     positions = positions+content;
+                 }
+             });
+
+          // alert(positions);
+
+             $.post('@Url.Action("SaveDeliveryScope")', { areaSysNo: $("#City").val(), mapScopes: positions }, function (data) {
+                 if (data) {
+                     UI.Alert({ content: "保存成功", icon: "succeed" });
+                 } else {
+                     UI.Alert({ content: "保存失败" });
+                 }
+             });
+
+         }
+
+         //显示某城已有的送货区域信息
+         function showPolygon(data) {
+
+             if (data == null) {
+                 return;
+             }
+
+             for (var i = 0; i < data.length ; i++) {
+                 setMap.Boundary(data[i].MapScope);    //分割后的区域输出
+             }
+
+         }
+         //删除某城市百城当日达送货区域信息
+         function resetCityArea() {
+             //检查是否已选城市
+             if ($("#City").val() == "0") {
+                 UI.Alert({ content: "请先选择要重置的城市" });
+                 return;
+             }
+
+             UI.Confirm({
+                 content: "重置将清除已设置的区域信息，您确定吗？",
+                 ok: function () {
+                     $.post('@Url.Action("DeleteDeliveryScope")', { areaSysNo: $("#City").val() }, function (data) {
+                         if (data) {
+                             resetPoint();
+                             UI.Alert({ content: "重置成功", icon: "succeed" });
+                         } else {
+                             UI.Alert({ content: "重置失败" });
+                         }
+                     }
+                     );
+                 }
+             });
+
+         }
+
+         function LoadCity(sysno) {
+             var strHtml = '';// '<option value="0" selected="selected">请选择</option>';
+             $.ajax({
+                 type: "POST",
+                 url: '@Url.Action("GetAreaList", "Basic")',
+                 data: "parentSysNo=" + $("#Province").val(),
+                 chche: false,
+                 success: function (data) {
+                     if (data.length > 0) {
+                         for (var i = 0; i < data.length; i++) {
+                             strHtml += '<option value="' + data[i].SysNo + '">' + data[i].AreaName + '</option>';
+                         }
+                     }
+                     $("#City").html(strHtml);
+                     if(sysno>0)
+                     {$("#City").find("option[value=" + sysno + "]").attr("selected", "true");}
+                     showCityArea();
+                 }
+             });
+         }
+         //显示已设置的百城当日达区域
+         function showCityArea() {
+             //检查是否已选城市
+             if ($("#City").val() != "0") {
+                 resetPoint();//换城市先重置地图
+                 map.centerAndZoom(encodeURIComponent($("#City").find("option:selected").text()), 12);
+                 map.enableScrollWheelZoom();
+                 $.ajax({
+                     type: "POST",
+                     url: '@Url.Action("GetDeliveryScope", "Logistics")',
+                     data: "areaSysNo=" + $("#City").val(),
+                     chche: false,
+                     success: function (data) {
+                         showPolygon(data);
+                     }
+                 });
+
+             }
+         }
+    </script>
+
+

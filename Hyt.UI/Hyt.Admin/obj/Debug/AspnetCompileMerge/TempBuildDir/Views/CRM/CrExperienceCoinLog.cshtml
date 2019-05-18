@@ -1,0 +1,107 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList<Hyt.Model.CBCrExperienceCoinLog>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户惠源币日志";
+}
+    @Html.PrivilegeControl(PrivilegeCode.CR1004205, "button."+PrivilegeCode.CR1004205.ToString())
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var customerSysNo = @ViewBag.CustomerSysNo;  //客户系统编号
+        //调整客户惠源币
+        @*function CrExperienceCoinLogOperate() {
+            UI.DialogOpen('/CRM/CrExperienceCoinLogOperate?customerSysNo=' + customerSysNo, {
+                title: '调整客户惠源币',
+                width: '528px',
+                height: '260px',
+                disabled:@(AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.CR1004205)?"false":"true"),
+                init: function () {
+                    this.button(
+                        {
+                            name: '保存',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+                                iframe.add();
+                                return false;
+                            }, focus: true
+                        },
+                        {
+                            name: '关闭'
+                        }
+                    );
+                }
+            }, false);
+        }*@
+        function dialog() {
+            UI.tips.tip_alert('tips_success', '保存成功');
+        }
+        //客户惠源币变更详情
+        function CrLevelLogDetail(sysNo) {
+            UI.DialogOpen('/CRM/CrExperienceCoinLogDetail?sysNo=' + sysNo, {
+                title: '客户惠源币变更详情',
+                width: '383px',
+                height: '260px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+        function searchExperienceCoinLog() {
+            AjaxStart();
+            var selChangeType = $("#selChangeType").val();
+
+            var search = { id: 1, customerSysNo:customerSysNo, changeType:selChangeType };
+           
+            $.get('/CRM/CrExperienceCoinLog/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+<style type="text/css">
+    .pagination {
+        margin-left: 0;
+    }
+</style>
+<form id="form" name="form" action="">
+    <div class="caseout">
+        <!--工具条开始-->
+        <div class="boxs_tool boxs_toolbgnone p0">
+            <!--搜索开始-->
+            <div class="right_tool clearfix">
+                <span class="veralign_t fl">变更类型</span>
+                <div class="fl m10_l">
+                    <select class="select_ht28" id="selChangeType" name="selChangeType" onchange="searchExperienceCoinLog()">
+                        <option value="0">全部</option>
+                        @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                            {
+                            <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </div>
+            </div>
+            <!--搜索结束-->
+            <!--功能按钮开始-->
+            <div class="left_tool">
+                @*<button type="button" class="btn btn_ht26 m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004205.ToString())" onclick="CrExperienceCoinLogOperate()"><span class="icon icon_pencil"></span><span class="m5_l">调整惠源币</span></button>*@
+            </div>
+            <!--功能按钮结束-->
+        </div>
+        <!--工具条结束-->
+
+        <!--列表开始-->
+        <div class="boxs_listtabel" id="paging">
+            @{Html.RenderPartial("_AjaxCrExperienceCoinLog", Model); }
+        </div>
+    </div>
+</form>

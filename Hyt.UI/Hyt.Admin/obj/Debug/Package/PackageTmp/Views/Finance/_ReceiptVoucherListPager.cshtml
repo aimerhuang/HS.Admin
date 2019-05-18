@@ -1,0 +1,91 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBFnReceiptVoucher>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="53">
+                    <input name="" type="checkbox" class="checkall" value="" />
+                </th>
+                <th class="wd75">收款单编号</th>
+
+                <th class="align_l p10_lr">收入类型</th>
+                <th width="80px">单据来源</th>
+                <th class="wd75">单据来源编号</th>
+                <th class="wd100">应收金额</th>
+                <th class="wd100">实收金额</th>
+                <th width="80px">确认人</th>
+                <th width="116px">确认时间</th>
+                <th width="116px">创建时间</th>
+                <th width="68px">状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBFnReceiptVoucher>)Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>
+                        <input name="" type="checkbox" class="checktd"  value="@item.SysNo" /></td>
+                <td class="blue"><a href="javascript:openTab(@item.SysNo)">@item.SysNo</a></td>
+                   
+                <td class="align_l p10_lr">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款单收入类型), item.IncomeType)</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款来源类型), item.Source) </td>
+                <td class="blue"><a href="javascript:OpenSource(@item.Source,@item.SourceSysNo);">@item.SourceSysNo</a></td>
+                <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.IncomeAmount, 2))</td>
+                <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.ReceivedAmount, 2))</td>
+                <td>@(item.ConfirmedDate > DateTime.MinValue ? item.Confirmer : "") </td>
+                <td width="150">@(item.ConfirmedDate == DateTime.MinValue ? "" : item.ConfirmedDate.ToString("yyyy-MM-dd HH:mm")) </td>
+                <td width="150">@(item.CreatedDate == DateTime.MinValue ? "" : item.CreatedDate.ToString("yyyy-MM-dd HH:mm")) </td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款单状态), item.Status)</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<script>
+    function openTab(id) {
+        var tabId=UI.OpenCreatTab('收款单:' + id, '/Finance/ReceiptVoucherDetail/' + id);
+    }
+    $(function () {
+        //全选
+        $("input.checkall").click(function () {
+            var state = $(this).attr("checked");
+            if (state) {
+                state = true;
+            } else {
+                state = false;
+            }
+            $("input.checktd").each(function () { $(this).attr("checked", state); });
+        });
+        $("input.checktd").change(function () {
+            var checkAll=true;
+            if (!$(this).attr("checked")) {
+                $("input.checkall").attr("checked",null);
+            }else{
+                $("input.checktd").each(function() {
+                    if (!$(this).attr("checked") && checked) {
+                        checkAll = false;
+                    }
+                });
+                if (checkAll) {
+                    $("input.checkall").attr("checked", true);
+                }
+            }
+        });
+    });
+</script>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,165 @@
+﻿@{
+    ViewBag.Title = "添加商品调价申请";
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" type="text/css" media="all"/>
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+}
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.SY1008101, ".SY1008101")
+
+<form id="formAddPriceHistory" name="formAddPriceHistory" action="" onsubmit="return false;">
+    <div class="boxs p10" style="width: 440px;">
+        <div class="boxs_con_c1">
+            <div class="boxs_detail_dispay">
+                <div id="express">
+                    <div class="tit_dispay border_tnone">
+                        <div class="more10r m5_t"></div>
+                        <h5>快捷调价</h5>
+                    </div>
+                    <div class="tit_con">
+                        <table id="expressPricePanel" width="438" border="0" cellspacing="0" cellpadding="0">
+                            <tbody>
+                                <tr>
+                                    <td widt="80" align="right" class="noborder"><span>统一调价</span></td> 
+                                    <td width="100" align="center" class="noborder">
+                                        <input id="multi" name="multi" class="{number:true,messages:{number:'价格必须是大于0的数字'}} wd24" name="0" type="text" value="100" data="0" style="width:80%;">
+                                    </td>
+                                    <td width="20" align="left" class="noborder">%</td>
+                                    <td style="color:#F00;">*请填写@(ViewBag.SalePriceLower)到@(ViewBag.SalePriceUpper)之间数字</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div style="padding: 15px;">
+                    <p style="color:#f00;">备注说明：</p>
+                    <p>统一调价填写说明：分销商价格=总部价格*统一调价%</p>
+                    <p>例如：</p>
+                    <p>总部价格为100元，统一调价为110%</p>
+                    <p>分销商价格=100*110%=110元</p>
+                </div>
+                @*<div style="padding: 15px;">
+                    <span>请选择类别：</span>
+                    <span>
+                        <span>
+                            <select id="lb" onchange="Searchlb()">
+                                @{
+                                    List<Hyt.Model.PdCategory> weightList = Hyt.BLL.Product.PdCategoryBo.Instance.GetCategoryListByParentName(0).ToList();
+                                    foreach (var item in weightList)
+                                    {
+                                        <option id="@item.SysNo">@item.CategoryName</option>
+                                    }
+                                }
+                            </select>
+                        </span>  
+                    </span>  
+                </div>*@
+            </div>
+
+            <!--提交按钮-->
+            <div class="pagination align_c clearfix hide">
+                <button id="btnSave" class="btn btn_blue btn_ht32 bold f14">保存</button>&nbsp;
+                <button class="btn btn_ht32 bold f14">取消</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    function Searchlb() {
+        //获取选中项的分类编号
+        var lbSysNo = $("#lb option:selected").attr("id");
+        $.ajax({
+            type: "POST",
+            url: "/Ajax/Getlb",
+            data: { lbSysNo: lbSysNo },
+            contentType: "application/json;charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                alert(data)
+            }, async: false
+        })
+    }
+    //查询列表
+    function doSearch(id) {
+        checkedsysnolist = [];
+        checkedspsysnopricelist = [];
+        checkedsysnopricelist = [];
+
+        var haschangeprice = $('#chkHasChangePrice').val();
+        //if ($('#chkHasChangePrice').is(':checked')) {
+        //    haschangeprice = 1;
+        //}
+
+        var name;
+        if ($("#name").val() != "后台显示名称/商品编号...") {
+            name = $.trim($("#name").val());
+        }
+        currentSearchType = 1;
+        curpage = id;
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("SpecialPriceProductList", "Distribution")',
+            { id: id, ProductName: name, Status: $("#status").val(), CanFrontEndOrder: -1, IsFrontDisplay: -1, MainStatus: $("#mainstatus").val(), SelectedDealerSysNo: $("#dealerSysNo").val(), HasChangePrice: haschangeprice },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+
+            });
+
+    }
+    $(function () {
+        //保存按钮事件
+        $("#btnSave").bind("click", SaveCallback);
+    });
+    function SaveCallback() {
+        var multi = parseFloat($("#multi").val());
+        var SalePriceUpper = parseFloat('@ViewBag.SalePriceUpper');
+        var SalePriceLower = parseFloat('@ViewBag.SalePriceLower');
+        if (multi < SalePriceLower || multi > SalePriceUpper || isNaN(multi)) {
+            UI.Alert({ content: '请填写' + SalePriceLower + "到" + SalePriceUpper + "之间数字" });
+            return;
+        }
+        var ProductSysNos = "@ViewBag.Products";
+        UI.Confirm({
+            content: "您确定更新吗？",
+            ok: function () {
+                if (multi == null) {
+                    UI.Alert({ content: '请添加需要调整的价格' });
+                    return;
+                }
+                var data = { ProductSysNos: ProductSysNos, DealerSysNo: '@ViewBag.dealerSysNo', Percentage: multi };
+                $.ajax({
+                    type: "POST",
+                    url: "/Ajax/UpdateDealerPrice",
+                    data: data,
+                    success: function (data) {
+                        if (!data.Status) {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        } else {
+                            //回调方法
+                            if ($.isFunction(parent._ActivePriceHistoryCallBack))
+                                parent._ActivePriceHistoryCallBack(data.Message);
+                            //刷新页面数据
+                            $.get('@Url.Action("SpecialPriceProductList", "Distribution")',
+                            { id: id, ProductName: name, Status: $("#status").val(), CanFrontEndOrder: -1, IsFrontDisplay: -1, MainStatus: $("#mainstatus").val(), SelectedDealerSysNo: $("#dealerSysNo").val(), HasChangePrice: haschangeprice },
+                            function (data) {
+                                Utils.MaskStop();
+                                $('#paging').html(data);
+
+                            });
+                        }
+                    }
+                });
+            }
+        })
+    }
+    function Close() {
+        //关闭对话框
+        UI.Dialog.close();
+    }
+</script>

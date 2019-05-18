@@ -1,0 +1,58 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CrSellBusinessGrade>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="110">等级名称</th>
+                <th width="110">最低升级条件</th>
+                <th width="110">等级升级上限</th>
+                <th width="110">直接推荐人返利比例</th>
+                <th width="110">间1推荐人返利比例</th>
+                <th width="110">间2推荐人返利比例</th>
+                <th width="60">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CrSellBusinessGrade>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+
+                <td>@item.Name</td>
+                <td>@item.MinCondition</td>
+                <td>@item.MaxCondition</td>
+                <td>@item.Direct</td>
+                <td>@item.Indirect1</td>
+                <td>@item.Indirect2</td>                               
+                <td>
+                    <button class="btn btn_ht26 btn_blue" onclick="Edit(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button> 
+                    <button class="btn btn_ht26 m10_l btn_red" onclick="Delete(@item.SysNo, this) "><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>              
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

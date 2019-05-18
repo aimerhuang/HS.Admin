@@ -1,0 +1,184 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "物流App下载";
+}
+<div class="case clearfix appbg1">
+	<h1 class="appdowntit f_wr blue">欢迎来到应用下载中心</h1>
+  <div class="appdowncon c6 m10_t">我们在这里将业务所需所有插件以及应都汇总在这里，并不断更新！您可以点击下边任何一个插件或应用进行下载安装，如有问题请<span class="blue"><a>反馈给我们</a></span>！</div>
+	<div class="appdownlist">
+  	<ul>
+    	<li></li>
+    	<li></li>
+    	<li title="打印控件" txtcon="如果您没有打印控件请这里下载吧！"><a class="printli" ></a></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li title="商城-百城通" txtcon="百城通：是百城当日达送货员必备法宝之一，他将提供指定送货员当日所有业务，包括我的配送、配送地图、现场下单、现场补单，数据实时更新！">
+        <a class="androidli"></a>
+        <div class="opened">
+        	<div class="close">×</div>
+          <div class="androiddown"></div>
+        </div>
+      </li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    	<li></li>
+    </ul>
+  </div>
+  
+  <div class="appmoble">
+
+  	<div class="appmoblepic">
+    	<ul class="appmoblepic_con">
+      	<li><img src="../Theme/images/apppic01.png" width="290" height="490" /></li>
+      	<li><img src="../Theme/images/apppic02.png" width="290" height="490" /></li>
+      	<li><img src="../Theme/images/apppic03.png" width="290" height="490" /></li>
+      	<li><img src="../Theme/images/apppic04.png" width="290" height="490" /></li>
+      	<li><img src="../Theme/images/apppic05.png" width="290" height="490" /></li>
+      	<li><img src="../Theme/images/apppic06.png" width="290" height="490" /></li>
+      </ul>
+  
+      <ul class="appmoble_control">
+        <li class="active"></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+        <li></li>
+      </ul>      
+    </div>
+
+<script type="text/javascript">
+    /* 动画加载
+    $(document).ready(function(e) {
+        window.setTimeout(appmoble,1000);
+        
+        function appbg1(){
+            $('.appbg1').addClass('appbg1_start');
+        }
+        function appdown(){
+            $('.appdown').addClass('appdown_start');	
+        }
+        function appmoble(){
+        $('.appmoble').addClass('appmoble_start');
+        }
+        function appfooter(){
+        $('.appfooter').addClass('appfooter_start');
+        }
+    
+    });
+    */
+    //下载中心
+    $(function () {
+        var appdowntitObj = $('.appdowntit');
+        var appdownconObj = $('.appdowncon');
+        var appdownlistObjli = $('.appdownlist > ul >li');
+        appdownlistObjli.bind('click', function () {
+            //判断是不是点击的androidli图标
+            if ($(this).children('a').hasClass('androidli')) {
+                addappmoble();
+                if ($(this).children('div[class=opened]').css('width') != '0px') {
+                    return false;
+                }
+            } else {
+                appdownlistObjli.children('div[class=opened]').animate({ 'width': '0' }, '200');
+                cosappmoble();
+            }
+            $(this).children('div[class=opened]').animate({ 'width': '339' }, '200');
+            //文字的加载
+            var apptitle = $(this).attr('title') != null ? $(this).attr('title') : '欢迎来到应用下载中心';
+            var appcon = $(this).attr('txtcon') != null ? $(this).attr('txtcon') : '我们在这里将业务所需所有插件以及应都汇总在这里，并不断更新！您可以点击下边任何一个插件或应用进行下载安装，如有问题请<span class="blue"><a>反馈给我们</a></span>！'
+            appdowntitObj.html(apptitle);
+            appdownconObj.html(appcon);
+
+        });
+        //点击X关闭时
+        appdownlistObjli.find('.close').click(function () {
+            $(this).parents('div[class=opened]').animate({ 'width': '0' }, '200');
+            cosappmoble();
+            return false;
+        });
+        //手机图片载入
+        function addappmoble() {
+            $('.appmoble').addClass('appmoble_start');
+        }
+        //手机图片退出
+        function cosappmoble() {
+            $('.appmoble').removeClass('appmoble_start');
+        }
+    })
+
+    //加载图片轮换
+    $(function () {
+        var Appmoblepic = $('.appmoblepic');
+        var Appmoblepic_con = $(".appmoblepic_con", Appmoblepic);
+        var Appmoble_control = $(".appmoble_control", Appmoblepic);
+        var Liobj = Appmoble_control.children('li');
+        var index = 0, hander = null;
+        Appmoblepic_con.css('width', Liobj.length * 290);
+        //给Liobj绑定事件
+        Liobj.bind('mouseover', function () {
+            var _index = Liobj.index($(this));
+            Liobj.removeClass('active');
+            $(this).addClass('active');
+            RemoveHander();
+            //判断元素是否正处于动画状态
+            if (!$(Appmoblepic_con).is(":animated")) {
+                moveoffset(_index);
+            }
+        });
+        //鼠标进入清除定时器
+        Appmoblepic_con.bind({
+            mouseenter: function () {
+                RemoveHander();
+            },
+            mouseleave: function () {
+                hander = window.setInterval(automove, 3000);
+            }
+        })
+        //定时器的创建开始
+        hander = window.setInterval(automove, 3000);
+        function automove() {
+            if (index < Liobj.length - 1) {
+                index = index + 1;
+            } else {
+                index = 0;
+            }
+            Liobj.removeClass('active').eq(index).addClass('active');
+            Appmoblepic_con.animate({ left: '-' + (index * 290) + 'px' }, 'show', function () { });
+        }
+        function RemoveHander() {
+            if (hander != null) {
+                window.clearInterval(hander);
+            }
+        }
+        //定时器的创建结束
+
+        function moveoffset(index) {
+            //判断这个是不是数字
+            if (!isNaN(index)) {
+                Appmoblepic_con.animate({ left: '-' + (index * 290) + 'px' }, 'show', function () { });
+            }
+        }
+    });
+</script>
+  </div>
+
+</div>

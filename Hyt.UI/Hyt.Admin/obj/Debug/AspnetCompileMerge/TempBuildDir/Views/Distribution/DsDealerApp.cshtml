@@ -1,0 +1,346 @@
+﻿@using Hyt.BLL.Distribution
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.DsDealerApp
+@{
+    ViewBag.Title = "分销商App管理";
+}
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+            // 字母数字验证
+            jQuery.validator.addMethod("maxStrLength", function (value, element, param) {
+                value = value.replace(/[^\x00-\xff]/g, 'xxx'); //将中文转为字母
+                return this.optional(element) || this.getLength($.trim(value), element) <= param;
+            }, "字母长度超长");
+            
+            //设置默认参数
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        search();
+                        break;
+                }
+            });
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    AppName: {
+                        required: true,
+                        maxStrLength: 50,
+                        nickName:true
+                    },
+                    AppKey:{
+                        required: true,
+                        maxStrLength: 50,
+                        letterAndNumber:true
+                    },
+                    AppSecret: {
+                        required: true,
+                        maxStrLength: 64,
+                        letterAndNumber: true
+                    },
+                    MaxRelevance: {
+                        required: true,
+                        digits: true
+                    }
+                }, messages: {
+                    AppName: {
+                        maxStrLength: "长度不能超出50个字符",
+                        nickName: "名称只能由中文，英文字母、数字和下划线组成"
+                    },
+                    AppKey: {
+                        maxStrLength: "长度不能超出50个字符",
+                        letterAndNumber: "只能录入字母和数字"
+                    },
+                    AppSecret: {
+                        maxStrLength: "长度不能超出64个字符",
+                        letterAndNumber: "只能录入字母和数字"
+                    },
+                    MaxRelevance: {
+                        digits: "必须为整数"
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                    $('#for' + el.attr('id')).text(error.text());
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        //打开新增页面
+        function openAdd() {
+            initForm({ MallTypeSysNo: "", SysNo: "", AppName: "", MallName: "", AppKey: "", AppSecret: "", MaxRelevance: "", Status: 1, Extend: "" });
+            openWin("添加AppKey", "DivApp", function () {
+                var from = $("#form");
+                if ($(from).valid()) {
+                    $.get('@Url.Action("AjaxDsDealerAppIsRepeat", "Distribution")', from.serialize(),
+                        function (ret) {
+                            if (ret.Status) {
+                                UI.Confirm({
+                                    id: 'dialog_DsApp',
+                                    content: '该App已存在，是否允许重复添加？',
+                                    ok: function () {
+                                        save();
+                                    },
+                                    width: '230px'
+                                });
+
+                            } else {
+                                save();
+                            }
+                        });
+                }
+            });
+        }
+        //新增保存
+        function save() {
+            Utils.MaskStart($('body'));
+            var ajax = {
+                url: '/Distribution/AjaxDsDealerAppCreate',
+                data: $("#form").serialize(),
+                type: 'POST',
+                dataType: 'json',
+                cache: false,
+                success: function (json, statusText) {
+                    if (json.Status) {
+                        initForm({ MallTypeSysNo: "", SysNo: "", AppName: "", MallName: "", AppKey: "", AppSecret: "", MaxRelevance: "", Status: 1, Extend: "" });
+                        doSearch();
+                        UI.tips.tip_alert("tips_success", "提交成功");
+                        //diologBox.close();
+                    } else {
+                        dialog(json.Message);
+                    }
+                    Utils.MaskStop();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                }
+            };
+            $.ajax(ajax);
+        }
+        //打开修改页面
+        function openEdit(obj) {
+            initForm(obj);
+            $("#MallTypeSysNo").attr("disabled", "disabled");
+            openWin("修改AppKey", "DivApp", function () {
+                var from = $("#form");
+                if ($(from).valid()) {
+                    $.get('@Url.Action("AjaxDsDealerAppIsRepeat", "Distribution")', from.serialize(),
+                        function (ret) {
+                            if (ret.Status) {
+                                UI.Confirm({
+                                    id: 'dialog_DsApp',
+                                    content: '该App已存在，是否允许重复添加？',
+                                    ok: function () {
+                                        edit(form);
+                                    },
+                                    width: '230px'
+                                });
+                            } else {
+                                edit();
+                            }
+                        });
+                }
+            });
+        };
+        //编辑保存
+        function edit() {
+            Utils.MaskStart($('body'));     
+            var ajax = {
+                url: '/Distribution/AjaxDsDealerAppUpdate',
+                data: $("#form").serialize(),
+                type: 'POST',
+                dataType: 'json',
+                cache: false,
+                success: function (json, statusText) {
+                    if (json.Status) {
+                        doSearch();
+                        UI.tips.tip_alert("tips_success", "提交成功");
+                        diologBox.close();
+                    } else {
+                        dialog(json.Message);
+                    }
+                    Utils.MaskStop();
+                },
+                error: function (XMLHttpRequest, textStatus, errorThrown) {
+                }
+            };
+            $.ajax(ajax);
+        }
+        //启用（禁用）
+        function changeStatus(sysNo, status) {
+            var title = "启用";
+            if (status == 1) {
+                title = "禁用";
+            }
+            UI.Confirm({
+                content: '您确定要' + title + '该AppKey？',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: "/Distribution/AjaxDsDealerAppUpdateStatus",
+                        data: "sysNo=" + sysNo,
+                        success: function (ret) {
+                            if (ret.Status) {
+                                doSearch();
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        }
+                    });
+                }
+            });
+        }
+        //初始化
+        function initForm(obj) {
+            $("#MallTypeSysNo").find("option[value=" + obj.MallTypeSysNo + "]").attr("selected", "true");
+            $("#SysNo").val(obj.SysNo);
+            $("#AppName").val(obj.AppName);
+            $("#MallName").val(obj.MallName);
+            $("#AppKey").val(obj.AppKey);
+            $("#AppSecret").val(obj.AppSecret);
+            $("#MaxRelevance").val(obj.MaxRelevance);
+            $("#Status").val(obj.Status);
+            $("#MallTypeSysNo").removeAttr("disabled");
+            $("#Extend").val(obj.Extend);
+        }
+
+        var diologBox;
+
+        //打开提交页面
+        function openWin(title, id, fn) {
+            diologBox = UI.DialogBox({
+                title: title,
+                content: document.getElementById(id),
+                padding: '0px',
+                drag: false,
+                parent: false,
+                button: [
+                    {
+                        name: '保存',
+                        width: '730px',
+                        callback: function () {
+                            if ($.isFunction(fn)) fn();
+                            return false;
+                        },
+                        focus: true
+                    }, {
+                        name: '取消'
+                    }
+                ]
+            });
+        }
+
+        //查询列表
+        function doSearch() {
+            Utils.MaskStart($('#paging'));
+            Ajax.get("/Distribution/DsDealerAppQuery?r=" + Math.random(), "Search", function (p) {
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+            });
+        }
+
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m"><h3>分销商App管理</h3></div>
+
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r" id="createBtn" onclick="openAdd(); return false;"><span class="icon icon_plus"></span><span class="m5_l">新增</span></button>
+                </div>
+            </div>
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+</div>
+<div class="outbox6" id="DivApp" style="display: none; width: 650px;">
+    <div class="boxs p10">
+        <div class="boxs_detail_dispay boxs_con_c1">
+            <div class="tit_con">
+                <form id="form" name="form" action="">
+                    <input type="hidden" id="SysNo" name="SysNo" />
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="bd_none">
+                        <tbody>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>商城类型</td>
+                                <td width="30%" class="border_right">
+                                    <select id="MallTypeSysNo" name="MallTypeSysNo" class="wd170">
+                                        @{
+                                            var mallList = DsMallTypeBo.Instance.GetDsMallTypeList();
+                                            foreach (var item in mallList)
+                                            {
+                                                <option value="@item.SysNo">@item.MallName</option>
+                                            }
+                                        }
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>APPKEY名称</td>
+                                <td width="30%" class="border_right">
+                                    <input type="text" id="AppName" name="AppName" maxlength="50" class="wd156">
+                                    <span id="forAppName" class="prompt m10_l">必填</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>APPKEY</td>
+                                <td width="30%" class="border_right">
+                                    <input type="text" id="AppKey" name="AppKey" maxlength="50" class="wd156">
+                                    <span id="forAppKey" class="prompt m10_l">必填</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>AppSecret</td>
+                                <td width="30%" class="border_right">
+                                    <input type="text" id="AppSecret" name="AppSecret" maxlength="64" class="wd156">
+                                    <span id="forAppSecret" class="prompt m10_l">必填</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>可使用次数</td>
+                                <td width="30%" class="border_right">
+                                    <input type="text" id="MaxRelevance" name="MaxRelevance" maxlength="8" class="wd156">
+                                    <span id="forMaxRelevance" class="prompt m10_l">必填</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>状态</td>
+                                <td width="30%" class="border_right">
+                                    <select id="Status" name="Status" class="wd170">
+                                        <option value="1" selected="">启用</option>
+                                        <option value="0">禁用</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="20%" class="nameright border_rnone"><span class="v_star"></span>扩展配置</td>
+                                <td width="30%" class="border_right">
+                                    <textarea class="input_w" name="Extend" maxlength="5000" id="Extend"></textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

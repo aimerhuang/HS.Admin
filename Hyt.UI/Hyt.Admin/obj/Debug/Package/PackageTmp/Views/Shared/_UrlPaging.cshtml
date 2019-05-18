@@ -1,0 +1,59 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList
+
+@{
+    var ajaxOptions = new AjaxOptions { UpdateTargetId = "paging"};
+    if (Model.IsLoading)
+    {
+        <script type="text/javascript" >
+            function AjaxStart() {
+                window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+            }
+
+            function AjaxStop() {
+                cover.Remove();
+            }
+        </script>
+        ajaxOptions = new AjaxOptions {UpdateTargetId = "paging", OnBegin = Model.OnBegin, OnComplete = Model.OnComplete};
+    }
+    if (Model.Style == PagedList.StyleEnum.Default)
+    {
+        <div id="pagination" class="pagination clearfix ">
+            <b class="fl">
+                <span class="f12 c6 bold4">共</span>
+                <span class=" m5_r m5_l f12 c3">@Model.TotalItemCount</span>
+                <span class="f12 c6 bold4">条</span><span class="f12 c6 m5_r m5_l bold4">|</span>
+                <span class="f12 c6 bold4">每页显示</span>
+                <span class=" m5_r m5_l f12 c3">@Model.PageSize</span>
+                <span class="f12 c6 m5_l bold4">条</span>
+            </b>
+            <div class="boxx fr clearfix" id="pager">
+                @Html.AjaxPager(Model,
+                                new PagerOptions()
+                                    {
+                                        PageIndexParameterName = "id",
+                                        CurrentPagerItemWrapperFormatString = "<a class=\"hover\">{0}</a>",
+                                        DisabledCss = "disabled"
+                                    },
+                                ajaxOptions
+                     )
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="pagebox border_top">
+            <div class="page_con fr clearfix">
+                @Html.AjaxPager(Model,
+                                new PagerOptions()
+                                    {
+                                        PageIndexParameterName = "id",
+                                        CurrentPagerItemWrapperFormatString = "<a class=\"hover\">{0}</a>",
+                                        DisabledCss = "disabled"
+                                    },
+                                ajaxOptions
+                     )
+            </div>
+        </div>
+    }
+}

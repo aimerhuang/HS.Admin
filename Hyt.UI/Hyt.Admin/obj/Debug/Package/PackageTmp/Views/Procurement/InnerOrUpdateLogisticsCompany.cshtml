@@ -1,0 +1,119 @@
+﻿@{
+    ViewBag.Title = "InnerOrUpdateLogisticsCompany";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+<form id="inputForm" name="inputForm" action="">
+    <div class="p10">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="107" class="nameright"><span class="v_star">*</span>物流公司名称:</td>
+                            <td colspan="3">
+                                <input type="text" id="LCName" name="LCName" maxlength="50"
+                                       value="@((ViewBag.LogisticsCompany as Hyt.Model.Procurement.PmLogisticsCompany).LCName)" />
+                                <span class="prompt m10_l">物流公司名称</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright">物流类型:</td>
+                            <td colspan="3">
+                                <select id="LCType">
+                                    <option value="陆运"
+                                            @((ViewBag.LogisticsCompany as Hyt.Model.Procurement.PmLogisticsCompany).LCType == "陆运" ? "selected" : "")>
+                                        陆运
+                                    </option>
+                                    <option value="海运"
+                                            @((ViewBag.LogisticsCompany as Hyt.Model.Procurement.PmLogisticsCompany).LCType == "海运" ? "selected" : "")>
+                                        海运
+                                    </option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="107" class="nameright">备注:</td>
+                            <td colspan="3">
+                                <textarea id="LCDis" style="width:95%;" rows="10">@((ViewBag.LogisticsCompany as Hyt.Model.Procurement.PmLogisticsCompany).LCDis)</textarea>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="p10" align="center">
+        <button class="btn btn_blue btn_ht26 agree m10_r " onclick="SaveOrUpdateManufacturer()"><span class="m5_l">保存</span></button>
+        <button class="btn btn_blue btn_ht26 agree m10_r " onclick="window.location.href = 'BaseProcumentPageList'"><span class="m5_l">返回</span></button>
+    </div>*@
+</form>
+<script type="text/javascript">
+    $(function () {
+        $("#inputForm").validate({
+            rules: {
+                LCName: {
+                    required: true,
+                    maxlength: 50
+                }
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+        initDialog();
+    });
+
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    if ($("#inputForm").valid()) {
+                        
+                        $.ajax({
+                            url: '/Procurement/SaveOrUpdateLogisticsCompany',
+                            type: 'post',
+                            async: false,
+                            data: {
+                                SysNo: "@((ViewBag.LogisticsCompany as Hyt.Model.Procurement.PmLogisticsCompany).SysNo)",
+                                LCName: $("#LCName").val(),
+                                LCType: $("#LCType").val(),
+                                LCDis: $("#LCDis").val()
+                            },
+                            dataType: 'json',
+                            success: function (json) {
+                                if (json.Status) {
+                                    Utils.alert(json.Msg, function () {
+                                        UI.CloseDialog();
+                                    }, "succeed");
+                                }
+                                else {
+                                    UI.Alert({ content: json.Msg });
+                                }
+                            }
+                        });
+                    }
+                    return false;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+</script>

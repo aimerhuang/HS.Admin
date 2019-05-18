@@ -1,0 +1,436 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品项管理 ";
+    @Html.PrivilegeControl(PrivilegeCode.FE1009202, "button.FE1009202")
+    @Html.PrivilegeControl(PrivilegeCode.FE1009602, "button.FE1009602")
+    @Html.PrivilegeControl(PrivilegeCode.FE1009501, "button.FE1009501")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/DAO.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+    var searchNameTxt = "请输入商品项名称...";
+    var searchNoTxt = "请输入商品项编号...";
+    var mid = @ViewBag.Mid;
+
+    function GetDealersListByCreatedBy(DealerCreatedBy) {
+        $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+            $("#dealerSysNo").html("");
+            //$("#dealerSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            searchClass();
+        });
+    }
+
+    $(function() {
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+
+        UI.CheckAllbox(".boxs_listtabel", ".checkall");
+        //$("body").keydown(function(event) {
+        //    switch (event.keyCode) {
+        //        case 13:
+        //            searchClass();
+        //            break;
+        //    }
+        //});
+        $("#dealerSysNo").change(function () {
+            if($(this).val() == 0){
+                $("#InStepFeProductItem").hide();
+            }else{
+                $("#InStepFeProductItem").show();
+            }
+            searchClass();
+        });
+    });
+
+    function addOrEdit(sysNo,currentPage) {
+        var url, title;
+        url = "/Front/FeProductItemUpdate/" + sysNo;
+        title = "修改商品项";
+
+        UI.DialogOpen(url, {
+            title: title,
+            width: '470px',
+            height: '105px',
+            init: function() {
+                this.button(
+                    {
+                        name: '保存',
+                        callback: function() {
+                            var iframe = this.iframe.contentWindow;
+                            iframe.addOrEdit(currentPage);
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: "取消"
+                    }
+                );
+            }
+        });
+    }
+    var Products = [];
+
+    function getProducts() {
+        var data = [];
+        $.each(Products, function(i, item) {
+            data.push(item.ProductSysNo);
+        });
+        return data;
+    }
+
+    function SelectProduct() {
+        //var mid = @ViewBag.Mid;
+        var selectproduct = [];
+
+        $.get('/Front/FeProductItemProduct/', { groupSysNo: mid,dealersysno:$("#dealerSysNo").val() }, function(data) {
+            for (var k = 0; k < data.length; k++) {
+                selectproduct.push(data[k].ProductSysNo);
+            }
+            DAO.SelectProduct({
+                associationAttr: {
+                    dealerSysNo: $("#dealerSysNo").val()
+                },
+                selectedProducts:selectproduct,
+                selectedIsReadOnly:true,
+                syncWebFront: true,
+                onselect: function(data) {
+                    var result = [];
+
+                    var josn = {};
+                    for (var i = 0; i < data.length; i++) {
+                        result[i] = data[i].pid;
+                    }
+                    result.push(josn);
+
+                    $.ajax({
+                        url: '/Front/FeProductItemInsert/?mid=' + mid,
+                        data: JSON.stringify({dealersysno:$("#dealerSysNo").val(), collocation: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function(res) {
+                            if (res.result) {
+                                searchClass();
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', res.info);
+                            }
+
+                        }
+                    });
+                }
+            });
+        });
+
+
+
+
+    }
+
+    function dialog(content) {
+        UI.Alert({
+            content: content
+        });
+    }
+
+    function tip_alert(mode, context) {
+        UI.tips.tip_alert(mode, context);
+    }
+
+    /// <summary>
+    /// 更新状态
+    /// </summary>
+    /// <param name="mode">方式</param>
+    /// <param name="status">状态=[0,1]</param>
+    /// <param name="sysNo">商品项编号</param>
+
+    function UpdateStatus(content, status, sysNo,currentPage) {
+        var result = [];
+
+        var json = {};
+        json.sysNo = sysNo;
+        json.status = status;
+        result.push(json);
+
+        UI.Confirm({
+            content: content,
+            ok: function() {
+                $.ajax({
+                    url: "/Front/UpdateFeProductItemStatus/",
+                    data: JSON.stringify({ collocation: result }),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.result) {
+                            UI.tips.tip_alert('tips_success', data.info);
+                            refresh(currentPage);
+                            UI.Dialog.close();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.info);
+                            UI.Dialog.close();
+                        }
+                    }
+                });
+            },
+            cancel: true
+        });
+    }
+
+    //批量更新
+
+    function UpdateFeProductItemStatus() {
+        var result = [];
+        $("#collocationASTable tbody input:checkbox:checked").each(function() {
+            var json = {};
+            json.sysNo = $(this).val();
+            json.status = @((int) Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.已审);
+            result.push(json);
+        });
+        if (result.length == 0) {
+            UI.Alert({ content: '请选择批量审核的商品项数据' });
+            return;
+        }
+
+        UI.Confirm({
+            content: "确定要批量启用商品项吗？",
+            ok: function() {
+                $.ajax({
+                    url: "/Front/UpdateFeProductItemStatusAll/",
+                    data: JSON.stringify({ collocation: result }),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.result) {
+                            UI.tips.tip_alert('tips_success', data.info);
+                            refresh(1);
+                            UI.Dialog.close();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.info);
+                            UI.Dialog.close();
+                        }
+                    }
+                });
+            },
+            cancel: true
+        });
+    }
+
+        function refresh(id) {
+            id=id||1;
+        var json = { id: id, groupSysNo: @ViewBag.Mid };
+        var searchStatus = $("#status").val();
+        if ($.trim(searchStatus) != "") {
+            json.status = searchStatus;
+        }
+        $.get('/Front/FeProductItem/', json, function(data) {
+            $('#paging').html(data);
+        });
+    }
+
+    function searchClass(id) {
+        var searchMid = @ViewBag.Mid;
+        var searchStatus = $("#status").val();
+        var searchName = $("#searchKey").val().trim();
+        var searchNo = $("#searchNo").val();
+        var SelectedDealerSysNo = $("#dealerSysNo").val();
+
+        id=id||1;
+        var json = {};
+        json.id = id;
+        json.groupSysNo = searchMid;
+
+        if ($.trim(searchStatus) != "") {
+            json.status = searchStatus;
+        }
+        if ($.trim(searchName) != "" && searchName != searchNameTxt) {
+            json.productName = searchName;
+        }
+        if ($.trim(searchNo) != "" && searchNo != searchNoTxt) {
+            json.erpCode = searchNo;
+        }
+        json.SelectedDealerSysNo = SelectedDealerSysNo;
+        $.get('/Front/FeProductItem/', json, function(data) {
+            $('#paging').html(data);
+        });
+    }
+
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        refresh();
+    }
+
+    function Delete(myid) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+                $.post('/Front/Delete', { id: myid }, function (r) {
+                    if (r.Status) {
+                        SuccessTip();
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+
+                });
+            },
+            cancel: true
+        });
+    }
+    
+    $(".displayorderinput").live('blur',function(){
+        var obj = $(this);
+        var sysno = obj.attr("sysno");
+        var defaultval = obj.attr("defaultval");
+        var val = obj.val();
+
+        var type = "^\\d+$"; 
+        var re   =   new   RegExp(type);  
+        if(val.match(re)==null)  
+        {  
+            alert( "排序号必须为整数!");  
+            obj.focus();
+            return;  
+        } 
+
+        if(defaultval != val){
+            $.ajax({
+                url: '/Front/FeProductItemEdit',
+                type: 'post',
+                data: {
+                    hidSysNo: sysno,
+                    DispalySymbol: 10,
+                    DisplayOrder: val
+                },
+                success: function (data) {
+                    if (data.result) {
+                        obj.attr("defaultval",val);
+                    }
+                }
+            });
+        }
+    });
+
+    //同步商品项
+    function ProCreateFeProductItem(){
+        UI.Confirm({
+            content: "您确定同步吗？",
+            ok: function () {
+                if ($("#dealerSysNo").val() == -1) {
+                    UI.Alert({ content: '请选择要同步的分销商' });
+                    return;
+                }
+                $.ajax({
+                    type: "POST",
+                    url: "/Front/ProCreateFeProductItem",
+                    data: {GroupSysNo:mid,DealerSysNo:$("#dealerSysNo").val()},
+                    success: function (data) {
+                        if (data.Status) {
+                            searchClass();
+                        }
+                        UI.Alert({ content: data.Message });
+                    }
+                });
+            }
+        })
+    }
+    </script>
+}
+    <body>
+        <form id="form" method="Get" action="@Url.Action("FeProductItem")">
+            <div class="case">
+                <div class="boxs">
+                    <div class="boxs_tit head_m">
+                        <span class="ra10 c6">
+                            <button type="button" class="btn btn_ht26" onclick=" document.location.href = '/Front/FeProductGroup' "><span class="icon_share_alt"></span><span class="m5_l">返回商品组管理</span></button>
+                        </span>
+                        <h3>商品项管理—@ViewBag.productGroupName</h3>
+                    </div>
+                    <div class="boxs_con_c1">
+                        <!--搜索-->
+                        <div class="boxs_tool">
+                            <div class="right_tool">
+                                <span class="veralign_t fl">代理商</span>
+                                <div class="fl m10_l" style="margin-right: 10px">
+                                    <select id="agentSysNo"></select>
+                                </div>
+
+                                <span class="veralign_t fl">分销商</span>
+                                <div class="fl m10_l" style="margin-right: 10px">
+                                    <select id="dealerSysNo"></select>
+                                </div>
+                                <span class="fl veralign_t">商品项状态</span>
+                                <div class="m10_l fl">
+                                    <select id="status" name="status" class="select_ht28" onchange=" searchClass() ">
+                                        <option value="-1">全部</option>
+                                        @{
+                                            string sel;
+                                            foreach (var dict in (IDictionary<int, string>)ViewBag.StatusList)
+                                            {
+                                                //sel = dict.Key == (int) Hyt.Model.WorkflowStatus.ForeStatus.商品项状态.待审 ? "selected='selected'" : string.Empty;
+                                                @*<option value="@dict.Key" @sel>@dict.Value</option>*@
+                                                <option value="@dict.Key">@dict.Value</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <span class="fl m10_l veralign_t">商品项名称</span>
+                                <div class="m10_l fl"><input name="searchKey" type="text" maxlength="20" id="searchKey" class="input_ht28" value="请输入商品项名称..." onmouseover=" this.focus() " onblur=" if (this.value == '') this.value = '请输入商品项名称...' " onclick=" if (this.value == '请输入商品项名称...') this.value = '' " /></div>
+                                <span class="fl m10_l veralign_t">商品项编号</span>
+                                <div class="m10_l fl">
+                                    <input name="searchNo" type="text" maxlength="20" id="searchNo" class="input_ht28" value="请输入商品项编号..." onmouseover=" this.focus() " onblur=" if (this.value == '') this.value = '请输入商品项编号...' " onclick=" if (this.value == '请输入商品项编号...') this.value = '' " />
+                                </div>
+                                <button type="button" title="搜索" class="btn btn_ht28 m10_l fl" onclick=" searchClass() "><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                            </div>
+          
+                            <div>
+                                <button type="button" class="btn btn_ht26 btn_blue FE1009202"  onclick=" SelectProduct() "><span class="icon icon_plus icon_white"></span><span class="m5_l">添加商品项</span></button><button type="button" class="btn btn_ht26 btn_blue m10_l FE1009602"  onclick=" UpdateFeProductItemStatus() "><span class="icon icon_unlock icon_white"></span><span class="m5_l">批量审核</span></button>
+                                <button type="button" class="btn btn_ht26 btn_blue m10_l FE1009701" id="InStepFeProductItem" onclick="ProCreateFeProductItem()" title="同步商品项"><span class="icon icon_white icon_pencil"></span><span class="m5_l">同步商品项</span></button>
+                            </div>
+                        </div>
+
+                        <div class="boxs_list">
+                            <!--/表格列表区-->
+                            <div class="boxs_listtabel">
+                                @{Html.RenderPartial("_AjaxFeProductItem", Model); }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </body>

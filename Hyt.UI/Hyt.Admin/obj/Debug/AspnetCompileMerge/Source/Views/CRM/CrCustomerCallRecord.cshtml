@@ -1,0 +1,151 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.CrCustomer
+@{
+    ViewBag.Title = "通话记录";
+}
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            doSearch();
+            //设置默认参数
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        search();
+                        break;
+                }
+            });
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    Content: "required",
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function addOrEdit() {
+            openWin("添加通讯记录", "CreateCallRecord",function() {
+                var from = $("#form");
+                if ($(from).valid()) {
+                    var ajax = {
+                        url: '/Crm/CrCustomerCallRecordSave', data: from.serialize(), type: 'POST', dataType: 'json', cache: false,
+                        success: function (json, statusText) {
+                            if (json.result) {
+                                doSearch();
+                                UI.tips.tip_alert("tips_success", "提交成功");
+                                $("#Content").val("");
+                                diologBox.close();
+                            } else {
+                                dialog(json.info);
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                        }
+                    };
+                    $.ajax(ajax);
+                }
+
+            });
+        }
+
+        var diologBox;
+        //打开支付提货等提交页面
+        function openWin(title, id, fn) {
+            diologBox = UI.DialogBox({
+                title: title, content: document.getElementById(id), padding: '0px', drag: false, parent: false,
+                button: [{
+                    name: '保存',
+                    width: '730px',
+                    callback: function () {
+                        if ($.isFunction(fn)) fn();
+                        return false;
+                    },
+                    focus: true
+                }, {
+                    name: '取消'
+                }]
+            });
+        }
+
+        //查询列表
+        function doSearch() {
+            Utils.MaskStart($('#paging'));
+            Ajax.get("/CRM/CrCustomerCallRecordQuery?r=" + Math.random(), "Search", function (p) {
+                p.setParams("sysNo", $("#SysNo").val());
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+            });
+        }
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+    </script>
+}
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m"><h3>通话记录</h3></div>
+
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="left_tool">
+                        <button class="btn btn_blue" id="createBtn" onclick="addOrEdit(); return false;"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增</span></button>
+                    </div>
+                </div>
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="outbox6" id="CreateCallRecord" style="display: none; width: 650px;">
+        <div class="boxs p10">
+            <div class="boxs_detail_dispay boxs_con_c1">
+                <div class="tit_con">
+                    <form id="form" name="form" action="">
+                        <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+                        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="bd_none">
+                            <tbody>
+                                <tr>
+                                    <td width="20%" class="nameright border_rnone">客户帐号：</td>
+                                    <td width="30%" class="border_right" colspan="3">@Model.Account</td>
+                                </tr>
+                                <tr>
+                                    <td width="20%" class="nameright border_rnone">姓名：</td>
+                                    <td width="30%" class="border_right" colspan="3">@Model.Name</td>
+                                </tr>
+                                <tr>
+                                    <td width="20%" class="nameright border_rnone">电话：</td>
+                                    <td width="30%" class="border_right">@Model.Account</td>
+
+                                    <td width="20%" class="nameright border_rnone">咨询时间：</td>
+                                    <td width="30%">@DateTime.Now.ToString("yyyy-MM-dd HH:mm")</td>
+                                </tr>
+                                <tr>
+                                    <td width="20%" class="nameright border_rnone">咨询内容</td>
+                                    <td width="30%" class="border_right" colspan="3">
+                                        <textarea id="Content" name="Content" class="input_xlarge" rows="2" cols="20" style="width: 350px; height: 87px;"></textarea><span id="for_Content" class="prompt m10_l">咨询内容,1-200字符</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+

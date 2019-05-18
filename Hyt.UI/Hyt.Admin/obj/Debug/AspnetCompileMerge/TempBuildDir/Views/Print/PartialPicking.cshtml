@@ -1,0 +1,419 @@
+﻿@model Hyt.Model.Transfer.CBPrtPicking      
+@{
+   
+    string DeliveryTypeName = ViewBag.DeliveryType;
+    if (string.IsNullOrWhiteSpace(DeliveryTypeName))//是否选择了配送方式
+    {
+        DeliveryTypeName = Model.DeliveryTypeName;//没选择用默认的配送方式
+    }
+    Hyt.Model.BsArea cityEntity;
+    Hyt.Model.BsArea areaEntity;
+    Hyt.Model.BsArea provinceEntity = Hyt.BLL.Basic.BasicAreaBo.Instance.GetProvinceEntity(Model.AreaSysNo, out cityEntity, out areaEntity);
+    string areaInfo = string.Empty;
+    if (provinceEntity!=null )
+    {
+        areaInfo += provinceEntity.AreaName;
+    }
+    areaInfo += "省";
+    if (cityEntity != null)
+    {
+        areaInfo += cityEntity.AreaName;
+    }
+    areaInfo += "市";
+    if (areaEntity != null)
+    {
+        areaInfo += areaEntity.AreaName;
+    }
+
+    var page = new Hyt.Util.ListPageUtil<Hyt.Model.Transfer.PrtSubPicking>(Model.List, 7);
+    var count = 0;
+    for (int i = 0; i < page.PageCount; i++)
+{
+    count++;
+    }
+    
+}
+@section HeadCss
+{
+<link href="/Theme/css/base.chirp.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/frame.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/common.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/icon.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/form.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/btn.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/boxandtable.css" rel="stylesheet" type="text/css" />
+<link href="/Theme/css/search.css" rel="stylesheet" type="text/css" media="all" />
+
+<style type="text/css" id="style2">
+    /*.bw { width: 1210px; margin: 0 auto; }*/
+    body, div, p, span, h1, h2, h3, h4, h5, h6, ol, ul, li, b, dl, dt, dd, em, i, form, input {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    li {
+        line-height: 15px;
+    }
+    /*h1,h2,h3,h4,h5,h6{font-family:"微软雅黑","黑体","华文细黑";}*/
+    .slide {
+        font-size: 12px;
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    .bg_f5 {
+        background: #f5f5f5;
+    }
+
+    td {
+        word-break: break-all;
+    }
+
+    * {
+        margin: 0;
+    }
+
+    img {
+        border: none;
+    }
+
+    .imgbox img {
+        border: #ddd solid 1px;
+        padding: 2px;
+    }
+
+    h1, h2 {
+        font-size: 16px;
+    }
+
+    h2 {
+        font-weight: normal;
+    }
+
+    h3, h4 {
+        font-size: 14px;
+    }
+
+    h4 {
+        font-weight: normal;
+    }
+
+    h5, h6 {
+        font-size: 12px;
+    }
+
+    h6 {
+        font-weight: normal;
+    }
+
+    .fl {
+        float: left;
+    }
+
+    .fr {
+        float: right;
+    }
+
+    .auto_left {
+        text-align: left;
+        padding-left: 0px;
+    }
+
+    body {
+        font-family: "微软雅黑";
+        font-size: 12px;
+        line-height: 180%;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    .clear {
+        clear: both;
+        height: 0;
+        line-height: 0;
+    }
+
+    .print_title2 {
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 25px;
+        top: -70px;
+        position: absolute;
+    }
+
+    .dcon_b1 {
+        width: 100%;
+    }
+
+        .dcon_b1 .w1 {
+            width: 200px;
+        }
+
+        .dcon_b1 .w2 {
+            width: 200px;
+        }
+
+        .dcon_b1 .w3 {
+            width: 200px;
+        }
+
+    .dcon_b2 {
+        margin-top: 10px;
+    }
+
+        .dcon_b2 table {
+            text-align: center;
+        }
+
+            .dcon_b2 table thead th {
+                border-bottom: #000 solid 2px;
+            }
+
+        .dcon_b2 table {
+            border-bottom: #000 solid 2px;
+        }
+
+            .dcon_b2 table tbody {
+                line-height: 120%;
+            }
+
+        .dcon_b2 .total {
+        }
+
+    .dcon_b3 {
+        width: 100%;
+        margin-top: 0px;
+        font-weight: bold;
+    }
+
+        .dcon_b3 .remark {
+            margin-bottom: 25px;
+        }
+
+    .pickItem {
+        font-size: 12px;
+    }
+</style>
+}
+
+@for (int i = 0; i < page.PageCount; i++)
+{
+  var list = page.GetDate(i + 1);
+<div class="item">
+   
+  <div class="pickItem">
+      <div class="title absItem">
+          @if (Model.WarehouseSysNo == 59 || Model.WarehouseSysNo==61)
+          {
+              @("销售出库单")  
+          }
+          else
+          {
+              @(" 深圳信营国际电子商务有限公司")
+              <br />
+              @("销售出库单")  
+          }
+      </div>
+      <div class="" style="position:absolute ; top:-20px;left:60%"><span style="font-size: 12px; padding-left: 30px; font-weight:400">第 @(i + 1) 页/ 共 @page.PageCount 页</span></div>
+      <table class="table1">
+          <tbody>
+              <tr>
+                  <td width="200" style="text-align: left; font-size: 12px;">订购单号：@Model.OrderSysNO</td>
+                  <td width="200" style="text-align: left; font-size: 12px;">出库单号：@Model.SysNo</td>
+                  <td width="200" style="text-align: left; font-size: 12px;">收货人姓名：<span style="font-size:20px;font-weight:600;">@Model.ReceiveName</span></td>
+
+              </tr>
+              <tr>
+                  <td width="200" style="text-align: left; font-size: 12px;">订购日期：@Model.SoCreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                  <td width="200" style="text-align: left; font-size: 12px;">发货仓库：@Model.WarehouseName</td>
+                  <td width="200" style="text-align: left; font-size: 12px;">收货人电话：@Model.MobilePhoneNumber</td>
+
+              </tr>
+@if (Model.WarehouseSysNo == 59)
+{
+}else {
+              <tr>
+                  <td width="200" style="text-align: left; font-size: 12px;">
+                      支付方式：@if (Model.PaymentType == (int)Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型.到付)
+                      {
+                          @Hyt.Model.WorkflowStatus.BasicStatus.支付方式类型.到付
+                      }
+                      else
+                      {
+                          @Model.PaymentName
+                      }
+                  </td>
+                  <td width="200" style="text-align: left; font-size: 12px;">快递方式：@DeliveryTypeName</td>
+                  <td width="200" style="text-align: left; font-size: 12px;">地区：@areaInfo</td>
+
+              </tr>
+              <tr>
+                  <td colspan="3" style="text-align: left; font-size: 12px;">收货地址：@Model.StreetAddress</td>
+
+
+              </tr>
+              }            
+          </tbody>
+
+      </table>
+      
+   
+    <div class="table">
+        <table class="table2">
+            <thead>
+                <tr>
+                    <th width="120">编号</th>
+                    <th width="120">条形码</th>
+                    <th width="160">名称</th>
+                    <th width="50">单价</th>
+                    <th width="50">数量</th>
+                    <th width="60">金额</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int j = 0; j < list.Count; j++)
+                {
+                    var item = list[j];
+                    var name = string.Empty;
+                    //查询订单明细，找到销售类型等于赠品，再判断订单明细里面的销售金额大于0【加购】，等于0【赠品】
+                    var orderItem = Hyt.BLL.Order.SoOrderBo.Instance.GetOrderItem(item.OrderItemSysNo);
+                    if (orderItem != null && orderItem.ProductSalesType == 90)
+                    {
+                        name = orderItem.SalesAmount > 0
+                            ? "【加购】" + Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(item.ProductSysNo)
+                            : "【赠品】" + Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(item.ProductSysNo);
+                    }
+                    else
+                    {
+                        name = Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(item.ProductSysNo);
+                    }
+                    name = name.Replace("\"", "\"\"");
+                    <tr>
+                        <td>@item.ErpCode</td>
+                        @{
+                    var pd = Hyt.DataAccess.Product.IPdProductDao.Instance.GetEntityByErpCode(item.ErpCode);
+                        }
+                        <td>@(pd!=null?pd.Barcode:item.Barcode)</td>
+                        <td>@name</td>
+                        <td>@item.OriginalPrice.ToString("C")</td>
+                        <td>@item.ProductQuantity</td>
+                        <td>@item.RealSalesAmount.ToString("C")</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="2">&nbsp;</td>
+                    <td colspan="3">&nbsp;</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+      <table class="table3">
+          <tbody>
+              <tr>
+                  <td colspan="3" style="text-align: left; font-size: 12px;">备注：@Html.Raw(Model.DeliveryRemarks)</td>
+
+                  <td colspan="2" style="text-align: left; font-size: 12px;">出库金额：<span style="font-size: 20px; font-weight: 600; color: #eb3a28; ">@(Model.StockOutAmount.ToString("C"))</span>   应收：@Model.Receivable.ToString("C") @(Model.FreightAmount == 0 ? "" : "(含运费" + Model.FreightAmount.ToString("C") + ")")</td>
+
+              </tr>
+              <tr>
+                  <td colspan="5" style="text-align: left; font-size: 12px; line-height: 50px; ">对内备注：@Model.SoOrder.InternalRemarks</td>
+
+              </tr>
+              <tr>
+                  <td width="120" style="text-align: left; font-size: 12px;">
+                      拣货员：
+                  </td>
+                  <td width="120" style="text-align: left; font-size: 12px;">扫描包装员：</td>
+                  <td width="120" style="text-align: left; font-size: 12px;">发货员：</td>
+                  <td width="150" style="text-align: left; font-size: 12px;">日期：</td>
+                  <td width="150" style="text-align: left; font-size: 12px;">业务员：@ViewBag.DaiLiName </td>
+
+              </tr>
+
+          </tbody>
+
+      </table>
+      @*<div class="f1 absItem">拣货员：</div>
+      <div class="f2 absItem">扫描包装员：</div>
+      <div class="f3 absItem">发货员：</div>
+      <div class="f4 absItem">日期：</div>
+      <div class="f5 absItem">业务员：@ViewBag.DealerName</div>
+
+      <div class="remarks absItem">备注：@Html.Raw(Model.DeliveryRemarks)</div>
+      <br />
+
+      <div class="amountdesc absItem">出库金额：@(Model.StockOutAmount.ToString("C"))     应收：@Model.Receivable.ToString("C") @(Model.FreightAmount == 0 ? "" : "(含运费" + Model.FreightAmount.ToString("C") + ")")</div>
+      <div class="f6 absItem" style="margin-right: 200px; margin-top: 20px">对内备注：@Model.SoOrder.InternalRemarks</div>*@
+
+  </div>
+  <p style="page-break-after:always"></p>
+</div> 
+    
+
+   
+}
+
+
+
+
+
+  @*<div class="item">
+  <div class="pickItem">
+    <div class="orderid absItem">订购单号：884833</div>
+    <div class="stockoutid absItem">出库单号：935621</div>
+    <div class="createdate absItem">订购日期：</div>
+    <div class="warehousename absItem">发货仓库：成都总库</div>
+    <div class="paymentname absItem">支付方式：</div>
+    <div class="deliveryname absItem">快递方式：畅通快递</div>
+    <div class="name absItem">收货人姓名：梁玉春</div>
+    <div class="phone absItem">收货人电话：13002882316</div>
+    <div class="area absItem">地区：四川省成都市高新西区</div>
+    <div class="address absItem">收货地址：南清路环岛29号锦乡半鸟东区7座2203室</div>
+
+    <div class="f1 absItem">拣货员：</div>
+    <div class="f2 absItem">扫描包装员：</div>
+    <div class="f3 absItem">发货员：</div>
+    <div class="f4 absItem">日期：</div>
+    <div class="f5 absItem">签收人：</div>
+    
+    <div class="remarks absItem">备注：</div>
+    <div class="amountdesc absItem">出库金额：这里是金额描述</div>    
+
+    <div class="table">
+    <table>
+      <thead>
+        <tr>
+          <th>编号</th>
+          <th>名称</th>
+          <th>单价</th>
+          <th>数量</th>
+          <th>金额</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="pbh">031150702009</td>
+          <td class="pmc"><input type="text" value="USB3.0 数码充电线2222电线222222222电线222222222电线222222电线22222222电线22222222电线2电线2222222电线22222电线2电线222222222222二代（800mm)" /></td>
+          <td class="pdj">￥32.00</td>
+          <td class="psl">1</td>
+          <td class="pje">￥32.00</td>
+        </tr>       
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">&nbsp;</td>
+          <td colspan="3">&nbsp;</td>
+        </tr>
+      </tfoot>
+    </table>
+    </div>
+  </div>
+  <p style="page-break-after:always"></p>
+  </div>*@

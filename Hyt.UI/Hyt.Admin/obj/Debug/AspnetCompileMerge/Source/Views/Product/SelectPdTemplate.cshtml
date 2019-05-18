@@ -1,0 +1,80 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBPdTemplate>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var str = ViewBag.Type ==  (int)ProductStatus.商品描述模板类型.模块 ? "模块" : "模板";
+    ViewBag.Title = "商品描述"+str+"管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入模板/模块名称...";
+        var searchType = @ViewBag.Type;
+        $(function () {
+            $("#searchName").focus(function () {
+                if ($("#searchName").val() == searchNameTxt) {
+                    $("#searchName").val("");
+                }
+            });
+            $("#searchName").blur(function () {
+                if ($("#searchName").val() == "") {
+                    $("#searchName").val(searchNameTxt);
+                }
+            });
+        });
+
+        function searchPdTemplate() {
+            AjaxStart();
+            var searchName = $("#searchName").val();
+            var search = { id: 1, type: searchType, searchName: null };
+            if ($.trim(searchName) != "" && searchName != searchNameTxt) {
+                search = { id: 1, type: searchType, searchName: searchName };
+            }
+            $.get('/Product/SelectPdTemplate/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+        function selectPdTemplate(sysNo,name,content) {
+            var data = {sysNo:sysNo,name:name,content:content};
+            UI.DialogOpener()._ActiveSelectPdTemplateCallBack(data);
+            UI.CloseDialog();
+        }
+    </script>
+}
+<style type="text/css">
+    .search_btn {
+        position: relative;
+        width: 188px;
+    }
+</style>
+@using (Html.BeginForm("", "Front", FormMethod.Post, new { id = "form", aa = "" }))
+{
+    <div class="caseout">
+        <div class="boxs_con_c1">
+            <!--搜索-->
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl m3_t veralign_t"></span>
+                    <div class="search_btn m10_l fl">
+                        <input class="input_ht28" name="searchName" id="searchName" maxlength="50" style="width: 144px;" type="text" value="请输入模板/模块名称..." />
+                        <button onclick="searchPdTemplate()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="boxs_list">
+                <!--/表格列表区-->
+                <!--/表格列表区-->
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+                    @{Html.RenderPartial("_AjaxSelectPdTemplate", Model); }
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,251 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "借货单管理";
+    @Html.PrivilegeControl(PrivilegeCode.WH1004201, ".WH1004201");
+    @Html.PrivilegeControl(PrivilegeCode.WH1004202, ".WH1004202");
+    @Html.PrivilegeControl(PrivilegeCode.WH1004102, ".WH1004102");  
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#Status").addClass("wd100");
+            //创建借货单
+            //$("#createBtn").click(function () {
+            //    //UI.OpenCreatTab("创建借货单", "/Warehouse/CreateProductLend/");
+            //    window.location.href = '/Warehouse/CreateProductLend/';
+            //});
+
+            UI.searchbox($("#advanced_search"), "#JS_search", $("#JS_search_nav"), $("#clear_btn"));
+            //查询录入框点击事件
+            setDefaultValue();
+            //快捷状态查询
+            $("#Status,#DeliveryUserSysNo,#WhWarehouse").change(function () {
+                doSearch();
+                setDefaultValue();
+            });
+            //高级查询
+            $("#advanced_search_btn").click(function () {
+                advancedSearch();
+            });
+            //注册页面回车事件为查询操作
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+            });
+
+            $("#Status").addClass("select_ht28");
+
+            //#region 初始化--仓库下拉框--事件
+            $("select[name='WhWarehouse']").change(function (e) {
+                var self = $(e.target);
+                var val = self.val();
+                var pairing = $("#" + $(this).attr("data-pairing"));
+                if (val == "0") {
+                    pairing.empty().append("<option value=''>全部</option>");
+                    return;
+                }
+
+                $.ajax({
+                    url: "@Url.Action("GetDeliverymanByWarehouseSysNo", "Logistics")",
+                    data: { "warehouseSysNo": val },
+                    dataType: "json",
+                    type: "post",
+                    success: function (result) {
+                        if (result) {
+                            if (result.Status) {
+                                var options = [];
+                                options.push("<option value=''>全部</option>");
+                                for (var i = 0; i < result.Data.length; i++) {
+                                    options.push("<option value='" + result.Data[i].SysNo + "'>" + result.Data[i].UserName + "</option>");
+                                }
+                                pairing.empty().append(options.join(""));
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', result.Message);
+                            }
+                        }
+                    }
+                });
+            });
+            //#endregion
+
+            doSearch();
+        });
+
+        //设置页面默认值
+        function setDefaultValue() {
+            $("#SysNo").defaultValue("搜索借货单号...");
+        }
+
+        function doSearch() {
+            var data = {};
+            var sysno = $("#SysNo").val();
+            if (sysno && checkRate(sysno)) {
+                data.SysNo = $("#SysNo").val();
+            }
+            var whsysno = $("#WhWarehouse").val();
+            if (whsysno != '0') {
+                data.WarehouseSysNo = whsysno;
+            }
+            data.Status = $("#Status").val();
+            data.DeliveryUserSysNo = $("#DeliveryUserSysNo").val();
+            startSearch(data);
+        }
+        function advancedSearch() {
+            var data = {};
+            data.CreatedDate = $("#CreatedDate").val();
+            data.StockOutBy = $("#StockOutBy").val();
+            data.StockOutDate = $("#StockOutDate").val();
+            data.LastUpdateBy = $("#LastUpdateBy").val();
+            data.LastUpdateDate = $("#LastUpdateDate").val();
+            startSearch(data);
+        }
+        function startSearch(data) {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            $.get('@Url.Action("ProductLend", "Warehouse")', data,
+                function (ret) {
+                    $('#paging').html(ret);
+                    mask.Remove();
+                });
+        }
+        function exportExcel() {
+            var form = $("#advanced_search_form");
+            form.attr('action', '@Url.Action("ExportExcel", "Warehouse")');
+            form.submit();
+            return false;
+        }
+    </script>
+}
+@using ((Html.BeginForm("ProductLend", "Warehouse", FormMethod.Post, new { id = "advanced_search_form" })))
+{ 
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>@ViewBag.Title</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <span class="veralign_t fl">仓库</span>
+                        <div class="fl m10_l">
+                            <select id="WhWarehouse" name="WhWarehouse" data-pairing="DeliveryUserSysNo" class="wd100 m10_r select_ht28">
+                                <option value="0">全部</option>
+                                @foreach (var whWarehouse in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                                {
+                                    <option value="@whWarehouse.SysNo">@whWarehouse.WarehouseName</option>
+                                }
+                            </select>
+                        </div>
+                        <span class="veralign_t fl">借货人</span>
+                        <div class="fl m10_l">
+                            <select id="DeliveryUserSysNo" name="DeliveryUserSysNo" class="wd100 select_ht28">
+                                <option value="" selected="selected">全部</option>
+                            </select>
+                        </div>
+                        <span class="veralign_t fl m10_l">状态</span>
+                        <div class="fl m10_l">
+                            @Html.DropDownList("Status")
+                        </div>
+                        <span class="fl m10_l">借货单号</span>
+                        <div class="search_btn fl m10_l">
+                            <input name="SysNo" type="text" id="SysNo" class="input_ht28" value="搜索借货单号..." />
+                            <button class="btn btn_ht28 btn_blue" id="search_btn" title="搜索" type="button"><span class="icon_search icon_white"></span></button>
+                        </div>
+                        <button class="btn btn_ht28 fl m10_l btn_blue" id="advanced_search" title="高级搜索" type="button"><span class="icon_search icon_white"></span><span class="m5_l">高级搜索</span></button>
+                    </div>
+                    <div>
+                        <button class="btn btn_ht26 m10_r btn_blue WH1004201" type="button" id="createBtn" onclick="window.location.href='/Warehouse/CreateProductLend/'"><span class="icon icon_plus icon_white"></span><span class="m5_l">创建借货单</span></button>
+                        <button class="btn btn_ht26 m10_r btn_blue WH1004202" type="button" onclick="window.location.href='/Warehouse/ProductReturn/'"><span class="icon icon_tostore icon_white"></span><span class="m5_l">商品还货</span></button>
+                        <button class="btn btn_ht26 btn_blue WH1004102" type="button" onclick="exportExcel()"><span class="icon_share icon_white"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                </div>
+
+                <!--/表格列表区-->
+                <div class="boxs_listtabel">
+                    <div id="paging">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="search_box" id="JS_search">
+        <div class="search_title clearfix">
+            <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+        </div>
+        <div class="search_body">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td align="right">创建时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" name="CreatedDate" id="CreatedDate" class="input_ht26">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'CreatedDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">出库人</td>
+                        <td>
+                            <select name="WhWarehouse" data-pairing="StockOutBy" class="wd100 m10_r">
+                                <option value="0">全部</option>
+                                @foreach (var whWarehouse in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                                {
+                                    <option value="@whWarehouse.SysNo">@whWarehouse.WarehouseName</option>
+                                }
+                            </select><select id="StockOutBy" name="StockOutBy" class="wd60">
+                                <option value="" selected="selected">全部</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">出库时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" name="StockOutDate" id="StockOutDate" class="input_ht26">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'StockOutDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">完结人</td>
+                        <td>
+                            <select name="WhWarehouse" data-pairing="LastUpdateBy" class="wd100 m10_r">
+                                <option value="0">全部</option>
+                                @foreach (var whWarehouse in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                                {
+                                    <option value="@whWarehouse.SysNo">@whWarehouse.WarehouseName</option>
+                                }
+                            </select><select id="LastUpdateBy" name="LastUpdateBy" class="wd60">
+                                <option value="" selected="selected">全部</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">完结时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" name="LastUpdateDate" id="LastUpdateDate" class="input_ht26">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'LastUpdateDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="search_foot">
+            <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="advanced_search_btn" type="button">开始查询</button>
+            <button title="清除条件" class="btn btn_ht30 bold m10_l" id="clear_btn" type="reset">清除条件</button>
+        </div>
+    </div>    
+}

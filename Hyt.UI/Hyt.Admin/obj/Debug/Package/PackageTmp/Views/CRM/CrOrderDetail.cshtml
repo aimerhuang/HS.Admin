@@ -1,0 +1,485 @@
+﻿@model Hyt.Model.SoOrder
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户订单详情";
+}
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all"/>
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all"/>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+}
+<div id="tabboxs" class="case">
+    <div class="head_tab">
+        <ul class="tabNav">
+            <li id="liBase" class="long"><a href="javascript:void(0);">销售单基本信息</a></li>
+            <li id="liOrder" class=""><a href="javascript:void(0);">订购商品</a></li>
+            <li id="liRelatedCertificate" class=""><a href="javascript:void(0);">相关凭证</a></li>
+            <li id="liLog" class=""><a href="javascript:void(0);">操作日志</a></li>
+        </ul>
+    </div>
+    <div id="tabcon" class="boxs_con_c1">
+        <!--销售单基本信息-->
+        <div class="list" style="display: none;">
+            <!--销售单详情-->
+            <div class="boxs_detail_dispay">
+                <!--销售单开始-->
+                <div class="tit_dispay">
+                    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                    <h5>销售单</h5>
+                </div>
+                <div class="tit_con" style="display: block;">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">销售单号:</td>
+                                <td width="40%" class="borde_right">
+                                    @Html.DisplayFor(m => m.SysNo)
+                                    @Html.HiddenFor(m => m.SysNo)
+                                    @Html.HiddenFor(m => m.CustomerSysNo)
+                                    @Html.Hidden("Ticks", Model.Stamp.Ticks)
+                                    @Html.HiddenFor(m => m.Status)
+                                    @Html.HiddenFor(m => m.Customer.LevelSysNo)
+                                    @Html.HiddenFor(m => m.TransactionSysNo)
+                                    <input type="hidden" id="hidFlg" value="@ViewBag.Flg" />
+                                </td>
+                                <td width="10%" class="nameright">会员用户名:</td>
+                                <td width="40%">@Html.DisplayFor(m => m.Customer.Account)</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">销售单状态:</td>
+                                <td class="borde_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单状态), Model.Status)</td>
+                                <td class="nameright">会员姓名:</td>
+                                <td>@Html.DisplayFor(m => m.Customer.Name)</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">付款状态:</td>
+                                <td class="borde_right">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态), Model.PayStatus)</td>
+                                <td class="nameright">会员等级:</td>
+                                <td>
+                                    @{
+                                        if (Model.Customer != null)
+                                        {
+                                            var crLevel = Hyt.BLL.CRM.CrCustomerLevelBo.Instance.GetCustomerLevel(Model.Customer.LevelSysNo);
+                                            if (crLevel != null)
+                                            { @Html.Raw(crLevel.LevelDescription);
+                                            }
+                                        }
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">订购时间:</td>
+                                <td class="borde_right">
+                                    @Model.CreateDate.ToString("yyyy-MM-dd")</td>
+                                <td class="nameright">销售单来源:</td>
+                                <td>
+                                    @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单来源), Model.OrderSource)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--销售单结-->
+                <div class="tit_dispay">
+                    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                    <h5>收货信息</h5>
+                </div>
+                <div class="tit_con">
+                    <!--查看视图_-->
+                    <table id="tAddressView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+
+                                <td width="8%" class="nameright">收货人:</td>
+                                <td colspan="3">@Html.DisplayFor(m => m.ReceiveAddress.Name)
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="nameright">收货手机:</td>
+                                <td width="42%" class="borde_right">@Html.DisplayFor(m => m.ReceiveAddress.MobilePhoneNumber)
+                                </td>
+                                <td width="8%" class="nameright">收货电话:</td>
+                                <td width="42%">@Html.DisplayFor(m => m.ReceiveAddress.PhoneNumber)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="nameright">地区:</td>
+                                <td width="42%" class="borde_right">@ViewBag.AddressDetatil
+                                </td>
+                                <td width="8%" class="nameright">邮编:</td>
+                                <td width="42%">@Html.DisplayFor(m => m.ReceiveAddress.ZipCode)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="nameright">地址:</td>
+                                <td colspan="3">@Html.DisplayFor(m => m.ReceiveAddress.StreetAddress)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!--编辑视图-->
+                    <table id="tAddressEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+                        <tbody>
+                            <tr>
+                                <td width="8%" class="nameright">可选地址</td>
+                                <td width="42%" class="borde_right">
+                                    <select id="customerReceiveAddress" name="ReceiveAddressSysNo" class=" wid">
+                                        <option value="0">默认地址</option>
+                                    </select></td>
+                                <td width="8%" class="nameright">收货人</td>
+                                <td width="42%">
+                                    @Html.HiddenFor(m => m.ReceiveAddress.SysNo)
+                                    @Html.TextBoxFor(m => m.ReceiveAddress.Name, new { @class = "input_xlarge m10_r", maxlength = 50 })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="nameright">收货手机</td>
+                                <td width="42%" class="borde_right">
+                                    @Html.TextBoxFor(m => m.ReceiveAddress.MobilePhoneNumber, new { @class = "input_xlarge m10_r", maxlength = 50 })
+                                </td>
+                                <td width="8%" class="nameright">收货电话</td>
+                                <td width="42%">
+                                    @Html.TextBoxFor(m => m.ReceiveAddress.PhoneNumber, new { @class = "input_xlarge m10_r", maxlength = 15 })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="nameright">地区</td>
+                                <td width="42%" class="borde_right">
+
+                                    <select id="dpdProvince" style="width: 113px; margin-right: 10px;" name="dpdProvince" onchange="javascript:AreaChange(false)">
+                                    </select>
+                                    <span class="c6">省</span>
+                                    <select id="dpdCity" class="c3" style="width: 120px; margin-left: 10px; margin-right: 10px;" name="dpdCity" onchange="javascript:AreaChange(false)">
+                                    </select><span class="c6">市/州</span>
+                                    <select id="dpdArea" name="dpdArea" class="c3 " style="width: 120px; margin-left: 10px; margin-right: 10px;" name="dpdArea" onchange="javascript:AreaChange(true)">
+                                    </select>
+                                    @Html.HiddenFor(m => m.ReceiveAddress.AreaSysNo)
+                                </td>
+                                <td width="8%" class="nameright">邮编</td>
+                                <td width="42%">
+                                    @Html.TextBoxFor(m => m.ReceiveAddress.ZipCode, new { @class = "input_xlarge m10_r", maxlength = 10 })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="8%" class="nameright">地址</td>
+                                <td colspan="3">
+                                    @Html.TextBoxFor(m => m.ReceiveAddress.StreetAddress, new { @class = "input_xxlarge m10_r", maxlength = 100 })
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--收货信息-->
+                <div class="tit_dispay">
+                    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                    <h5>配送信息</h5>
+                </div>
+                <div class="tit_con" style="display: block;">
+                    <!--查看视图-->
+                    <table id="tDeliveryView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">配送方式:</td>
+                                <td class="borde_right" colspan="3">
+                                    <span id="spanDeliveryType"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">仓库:</td>
+                                <td width="90%" colspan="3">
+                                    <span id="spanCurrectWarehouseName">@ViewBag.DefaultWarehouseName</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">配送时间段:</td>
+                                <td width="40%" class="borde_right">
+                                    <span id="spanDeliveryTime"></span>
+                                </td>
+                                <td width="10%" class="nameright">送货前联系:</td>
+                                <td width="40%">
+                                    @if (Model.ContactBeforeDelivery == 1)
+                                    {
+                                        <text>是</text>
+                                    }
+                                    else
+                                    {
+                                        <text>否</text>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">配送备注:</td>
+                                <td width="90%" colspan="3">
+                                    @Html.DisplayFor(m => m.DeliveryRemarks)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">会员留言:</td>
+                                <td width="90%" colspan="3">@Html.DisplayFor(m => m.CustomerMessage)</td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">对内备注:</td>
+                                <td width="90%" colspan="3">@Html.DisplayFor(m => m.InternalRemarks)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!--编辑视图-->
+                    <table id="tDeliveryEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">配送方式</td>
+                                <td class="borde_right" colspan="3">
+                                    @Html.Hidden("DefaultDeliveryTypeSysNo", Model.DeliveryTypeSysNo)
+                                    <select id="DeliveryTypeSysNo" name="DeliveryTypeSysNo" class="wid m10_r" onchange="LoadPayTypeList(this.value,null)">
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">仓库</td>
+                                <td width="90%" colspan="3">
+                                    @Html.HiddenFor(m => m.DefaultWarehouseSysNo)
+                                    <input id="DefaultWarehouseName" name="DefaultWarehouseName" type="text" class="input_xlarge" contenteditable="false" value="@ViewBag.DefaultWarehouseName" onfocus="this.blur()">
+                                    <button id="btnSelectWarehouse" class="btn btn_ht26" type="button"><span class="icon_search"></span></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">配送时间段</td>
+                                <td width="40%" class="borde_right">
+                                    @Html.Hidden("DefaultDeliveryTime", Model.DeliveryTime)
+                                    <select id="DeliveryTime" name="DeliveryTime" class="wid">
+                                        <option value="一周之内全天可送达" selected="selected">一周之内全天可送达</option>
+                                        <option value="周一至周五送货">周一至周五送货</option>
+                                        <option value="双休日及公众假期送货">双休日及公众假期送货</option>
+                                    </select>
+                                </td>
+                                <td width="10%" class="nameright">送货前联系</td>
+                                <td width="40%">
+                                    @Html.Hidden("DefaultContactBeforeDelivery", Model.ContactBeforeDelivery)
+                                    <input type="radio" value="1" name="ContactBeforeDelivery" id="contact_yes" /><label for="contact_yes" class="m10_r"> 是</label>
+                                    <input type="radio" value="0" name="ContactBeforeDelivery" id="contact_no" /><label for="contact_no"> 否</label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">配送备注</td>
+                                <td width="90%" colspan="3">
+                                    @Html.TextBoxFor(m => m.DeliveryRemarks, new { @class = "input_xxlarge", maxlength = 200 })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">会员留言</td>
+                                <td width="90%" colspan="3">
+                                    @Html.TextBoxFor(m => m.CustomerMessage, new { @class = "input_xxlarge", maxlength = 200 })
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">对内备注</td>
+                                <td width="90%" colspan="3">
+                                    @Html.TextBoxFor(m => m.InternalRemarks, new { @class = "input_xxlarge", maxlength = 200 })
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--配送信息-->
+                <div class="tit_dispay">
+                    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                    <h5>支付方式</h5>
+                </div>
+                <div class="tit_con" style="display: block;">
+                    <table id="tPayView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">支付方式:</td>
+                                <td colspan="3">
+                                    <span id="spanPayType"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">优惠券</td>
+                                <td width="40%" class="borde_right"></td>
+                                <td width="10%" class="nameright">优惠券密码：</td>
+                                <td width="40%"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <table id="tPayEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+                        <tbody>
+                            <td width="10%" class="nameright">支付方式</td>
+                            <td width="40%" colspan="3">
+                                @Html.Hidden("DefaultPayTypeSysNo", Model.PayTypeSysNo)
+                                <select id="PayTypeSysNo" name="PayTypeSysNo" class="wid m10_r">
+                                </select></td>
+                            <tr>
+                                <td width="10%" class="nameright">优惠券</td>
+                                <td width="40%" class="borde_right">
+                                    <select class="wid" name="CouponSysNo" id="CouponSysNo">
+                                        <option value="">选择已有优惠券</option>
+                                    </select></td>
+                                <td width="10%" class="nameright">优惠券密码</td>
+                                <td width="40%">
+                                    <input type="password" class="input_xlarge" name=""></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--支付方式-->
+                <div class="tit_dispay">
+                    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                    <h5>发票信息</h5>
+                </div>
+                <div class="tit_con" style="display: block;">
+                    <!--查看视图-->
+                    <table id="tInvoiceView" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">发票:</td>
+                                <td width="40%" class="borde_right">
+                                    @if (Model.InvoiceSysNo == 0)
+                                    {
+                                        <text>无</text>
+                                    }
+                                    else
+                                    {
+                                        var invoiceType = Hyt.BLL.Finance.FnInvoiceBo.Instance.GetFnInvoiceType(Model.OrderInvoice.InvoiceTypeSysNo);
+                                        if (invoiceType != null)
+                                        {
+                                           <text>@invoiceType.Name</text>
+                                        }
+                                    }
+                                </td>
+                                <td width="10%" class="nameright">发票台头:</td>
+                                <td width="40%">
+                                    @Html.DisplayFor(m => m.OrderInvoice.InvoiceTitle)
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">发票备注:</td>
+                                <td width="90%" colspan="3">
+                                    @Html.DisplayFor(m => m.OrderInvoice.InvoiceRemarks)
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <!--编辑视图-->
+                    <table id="tInvoiceEdit" width="100%" cellspacing="0" cellpadding="0" border="0" style="display: none">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">发票</td>
+                                <td width="40%" class="borde_right">
+                                    @{ 
+                                        List<SelectListItem> InvoiceTypeList = new List<SelectListItem>();
+                                        if(ViewBag.InvoiceTypeList!=null)
+                                        {
+                                            InvoiceTypeList = ViewBag.InvoiceTypeList;
+                                        }
+                                    }
+                                    @Html.DropDownListFor(m => m.OrderInvoice.InvoiceTypeSysNo,InvoiceTypeList, new { @class = "wid", })
+                                </td>
+                                <td width="10%" class="nameright">发票抬头</td>
+                                <td width="40%">
+                                    @Html.TextBoxFor(m => m.OrderInvoice.InvoiceTitle, new { @class = "input_xlarge m10_r", maxlength = 100 })
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="10%" class="nameright">发票备注</td>
+                                <td width="90%" colspan="3">
+
+                                    @Html.TextBoxFor(m => m.OrderInvoice.InvoiceRemarks, new { @class = "input_xxlarge m10_r", maxlength = 100 })
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--发票信息-->
+                <div class="tit_dispay">
+                    <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                    <h5>金额汇总</h5>
+                </div>
+                <div class="tit_con" style="display: block;">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody>
+                            <tr>
+                                <td width="10%" class="nameright">商品总额:</td>
+                                <td width="90%" colspan="3">
+                                    @Html.HiddenFor(m => m.OrderAmount)
+                                    <span id="spanOrderAmount">&yen;@Model.OrderAmount.ToString("N")
+                                    </span></td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">优惠券金额:</td>
+                                <td colspan="3">
+                                    @Html.HiddenFor(m => m.CouponAmount)
+                                    <span id="spanCouponAmount">&yen;@Model.CouponAmount.ToString("N")
+                                    </span></td>
+                            </tr>
+                            <tr>
+                                <td  class="nameright">折扣金额:</td>
+                                <td  colspan="3">
+                                    @Html.HiddenFor(m => m.ProductDiscountAmount)
+                                    <span id="spanDiscountAmount">&yen;@Model.ProductDiscountAmount.ToString("N")
+                                    </span></td>
+                            </tr>
+                            <tr>
+                                <td  class="nameright">运费:</td>
+                                <td  colspan="3">
+                                    @Html.HiddenFor(m => m.FreightAmount)
+                                    <span id="spanFreight">&yen;@Model.FreightAmount.ToString("N")
+                                    </span></td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">合计:</td>
+                                <td  colspan="3">
+                                    @Html.HiddenFor(m => m.CashPay)
+                                    <span id="spanCashPay">&yen;@Model.CashPay.ToString("N")
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!--发票信息-->
+            </div>
+        </div>
+        <!--商品订购信息-->
+        <div class="list" style="display: none;">
+        @{Html.RenderPartial("_AjaxCrOrderItem", ViewData["CrOrderItem"]);}
+        </div>
+        <!--相关凭证-->
+        <div class="list" style="display: none;">
+        @{Html.RenderPartial("_AjaxCrOrderRecord", ViewData["CrOrderRecord"]);}
+        </div>
+        <div class="list" style="display: none;">
+        @{Html.RenderPartial("_AjaxCrOrderLog", ViewData["LogList"]);}
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript"> 
+        $(document).ready(function (e) {
+            $("#tabboxs").tab({ tabContentObj: "#tabcon" });
+            $("#tabboxs").tab({ tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_p10", tabContent: ".list2" });
+            //表格数据隐藏显示
+            var clickbox = $(".tit_dispay");
+            var btnup = clickbox.children(".more10r").children("span");
+            btnup.toggle(
+                function () {
+                    $(this).parents(".tit_dispay").next(".tit_con").hide();
+                    $(this).removeClass("btn_tableup").addClass("btn_tabledown");
+                },
+                function () {
+                    $(this).parents(".tit_dispay").next(".tit_con").show();
+                    $(this).removeClass("btn_tabledown").addClass("btn_tableup");
+                }
+            );
+        });
+    </script>
+}

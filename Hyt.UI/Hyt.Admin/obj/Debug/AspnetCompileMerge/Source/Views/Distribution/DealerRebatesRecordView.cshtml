@@ -1,0 +1,71 @@
+﻿@{
+    ViewBag.Title = "返利记录管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        @*<div class="boxs_tit head_m">
+            <h3>返利记录管理</h3>
+        </div>*@
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div id="paging_product_item" class="boxs_list">
+                </div>
+                <br/>
+                <div id="paging" class="boxs_list">
+                </div>
+                <br />
+                <div id="paging_dealer" class="boxs_listtabel">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="OrderSysNo" value="@ViewData["OrderSysNo"]"/>
+<input type="hidden" id="Source" value="@Hyt.Model.WorkflowStatus.DistributionStatus.预存款明细来源.返利.GetHashCode()" />
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch2();
+        doSearch();
+        doSearchDealer();
+    });
+
+    //列表数据显示
+    function doSearch2() {
+        Utils.MaskStart($('#paging_product_item'));
+        Ajax.get("/Order/DoOrderItemQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("OrderSysNo", $("#OrderSysNo").val())
+        }, function (data) {
+            $('#paging_product_item').empty();
+            $('#paging_product_item').html(data);
+            Utils.MaskStop();
+        });
+    }
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Distribution/DoDealerRebatesRecordViewQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("OrderSysNo", $("#OrderSysNo").val())
+            p.setParams("SelectedDealerSysNo", -1);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    function doSearchDealer() {
+        Utils.MaskStart($('#paging_dealer'));
+        var data = {};
+        data.Source = $("#Source").val();
+        data.SourceSysNo = $("#OrderSysNo").val();
+        $.get('@Url.Action("DoHistoricalDetailViewQuery", "Distribution")', data,
+           function (ret) {
+               $('#paging_dealer').empty();
+               $('#paging_dealer').html(ret);
+               Utils.MaskStop();
+           });
+    }
+</script>
+

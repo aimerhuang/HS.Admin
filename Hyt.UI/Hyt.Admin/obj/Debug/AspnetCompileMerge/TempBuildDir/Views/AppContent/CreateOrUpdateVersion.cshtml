@@ -1,0 +1,292 @@
+﻿@model Hyt.Model.Transfer.CBApVersion
+
+@{
+    ViewBag.Title = "CreateOrUpdateVersion";
+   
+}
+
+@section HeadJs
+{
+    @* <script src="~/Theme/scripts/jquery.validate.yui.js"></script>*@
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            //required field
+            $('tr td:even').each(function () {
+                if ($(this).parent().attr('name') !== 'Description')
+                    $(this).html('<span class="v_star">*</span>' + $(this).text());
+            });
+            //end req
+
+            //AppCode huangwei
+            $('#AppCode').change(function () {
+                if ($(this).val() != '-1') {
+                    //success m10_l
+                    $('#forAppCode').removeClass().addClass('success m10_l');
+                } else {
+                    $('#forAppCode').removeClass().addClass('error m10_l');
+                }
+            });
+
+            //#region add custom validation methods
+            /* cannot work well
+            $.validator.addMethod('AppCodeVal', function () {
+                //return checkInput
+                var appVersion = $.trim($('#VersionNumber').val());
+                if (!$.isNumeric(appVersion)
+                    || appVersion.indexOf(',') !== -1
+                    || appVersion.indexOf('.') === -1
+                    || appVersion.split('.').length !== 2
+                    || appVersion.split('.')[1].length > 1) {
+
+                    return false;
+                }
+
+                return true;
+            });
+            */
+            $.validator.addMethod('AppVersionVal', function () {
+                //return checkInput
+                var appVersion = $.trim($('#VersionNumber').val());
+                if (!$.isNumeric(appVersion)
+                    || appVersion.indexOf(',') !== -1
+                    || appVersion.indexOf('.') === -1
+                    || appVersion.split('.').length !== 2
+                    || appVersion.split('.')[1].length > 1) {
+                    //$('#forVersionNumber').removeClass().addClass('error m10_l');
+                    return false;
+                }
+
+                return true;
+            });
+
+            //#endregion
+
+            //#region form validate setup
+            $("#form1").validate({
+                rules: {
+                    AppCode: { required: true, min: 0 },
+                    //版本号
+                    VersionNumber: {
+                        required: true,
+                        AppVersionVal: true
+                    },
+                    //版本地址
+                    VersionLink: {
+                        required: true,
+                        url: true
+                    },
+                    //更新信息
+                    UpgradeInfo: {
+                        required: true
+                    },
+                },
+                messages: {
+                    //版本号
+                    VersionNumber: {
+                        required: '请输入版本号',
+                        AppVersionVal: '格式不正确(xx.x)'
+                    },
+                    //版本地址
+                    VersionLink: {
+                        required: '请输入版本地址',
+                        url: '无效的Url'
+                    },
+                    //更新信息
+                    UpgradeInfo: {
+                        required: '请输入更新信息'
+                    },
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+            //#endregion
+
+        });
+
+    </script>
+}
+
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 20%" class="nameright border_rnone">App代码</td>
+                            <td style="width: 80%" class="border_right">
+                                <select id="AppCode" name="AppCode">
+                                    <option value="-1">请选择</option>
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.AppStatus.App代码)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forAppCode" class="prompt m10_l">App代码</span>
+                                <input type="hidden" id="SysNo" name="SysNo" value="@Model.SysNo" />
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">版本号</td>
+                            <td class="border_right">
+                                <input type="text" id="VersionNumber" name="VersionNumber" value="@Model.VersionNumber" maxlength="20" >
+                                <span id="forVersionNumber" class="prompt m10_l">请输入版本号(格式:xx.x)</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">版本地址</td>
+                            <td class="border_right">
+                                <input type="text" id="VersionLink" name="VersionLink" value="@Model.VersionLink"  >
+                                <span id="forVersionLink" class="prompt m10_l">请输入版本地址Url</span>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">更新信息</td>
+                            <td class="border_right">
+                                <textarea id="UpgradeInfo" name="UpgradeInfo" maxlength="200">@Model.UpgradeInfo</textarea>
+                                <span id="forUpgradeInfo" class="prompt m10_l">请输入更新信息</span>
+                            </td>
+                        </tr>
+                        <tr name="Description">
+                            <td class="nameright border_rnone">版本说明</td>
+                            <td class="border_right">
+                                <textarea id="Description" name="Description" maxlength="200">@Model.Description</textarea>
+
+                            </td>
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+
+<script>
+    $("#AppCode").find("option[value=@Model.AppCode]").attr("selected", "true");
+</script>
+<script type="text/javascript">
+    (function () {
+        var opener = art.dialog.opener, // 父页面window对象
+            api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+        if (!api) return;
+        var sysno = $("#SysNo").val();
+        if (sysno == "0") {
+
+            api.title('新增版本')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function (win) {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定要增加吗？",
+                                    ok: function () {
+                                        var model = getModel();
+                                        $.ajax({
+                                            url: "@Url.Action("CreateVersion")",
+                                            data: JSON.stringify(model),
+                                            contentType: 'application/json',
+                                            type: "post",
+                                            success: function (ret) {
+                                                if (ret.Status) {
+                                                    UI.DialogOpener().ExecSuccess("新增版本成功");
+                                                    UI.Dialog.close();
+                                                } else {
+                                                    UI.Alert({ content: "新增版本失败" });
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.Alert({ content: "操作出错！" });
+                                            }
+                                        });
+                                    }
+                                });
+
+
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '关闭'
+                    }
+                );
+                } else {
+
+                    api.title('修改版本')
+                        // 自定义按钮
+                        .button(
+                            {
+                                name: '保存',
+                                callback: function () {
+                                    if ($("#form1").valid()) {
+                                        UI.Confirm({
+                                            content: "您确定要修改吗？",
+                                            ok: function () {
+                                                var model = getModel();
+                                                $.ajax({
+                                                    url: "@Url.Action("UpdateVersion")",
+                                                    data: JSON.stringify(model),
+                                                    contentType: 'application/json',
+                                                    type: "post",
+                                                    success: function (ret) {
+                                                        if (ret.Status) {
+                                                            UI.DialogOpener().ExecSuccess("修改版本成功");
+                                                            UI.Dialog.close();
+                                                        } else {
+                                                            UI.Alert({ content: "修改版本失败" });
+                                                        }
+                                                    },
+                                                    error: function () {
+                                                        UI.Alert({ content: "操作出错！" });
+                                                    }
+                                                });
+                                            }
+                                        });
+                                    }
+                                    return false;
+                                },
+                                focus: true
+                            },
+                    {
+                        name: '关闭'
+                    }
+                );
+                        }
+
+
+
+        function getModel() {
+            var model = {};
+            model.SysNo = $("#SysNo").val();
+            model.AppCode = $("#AppCode").val();
+            model.VersionNumber = $("#VersionNumber").val();
+            model.VersionLink = $("#VersionLink").val();
+            model.UpgradeInfo = $("#UpgradeInfo").val();
+            model.Description = $("#Description").val();
+            return model;
+        }
+    })();
+
+</script>
+
+
+

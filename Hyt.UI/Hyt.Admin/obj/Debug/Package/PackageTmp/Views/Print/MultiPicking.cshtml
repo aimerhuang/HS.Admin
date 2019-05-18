@@ -1,0 +1,189 @@
+﻿@{
+    ViewBag.Title = "批量打印拣货单";
+    Layout = "~/Views/Shared/_Print.cshtml";
+    List<int> ids = ViewBag.ids;
+    List<Hyt.Model.Transfer.PrtDsPicking> lstds = ViewBag.DsPickingList;//升舱列表
+    bool isdsorder=false;
+}
+@model List<Hyt.Model.Transfer.CBPrtPicking>
+@section HeadCss{
+<style type="text/css" id="style1">
+    body, div, p, span, h1, h2, h3, h4, h5, h6, ol, ul, li, b, dl, dt, dd, em, i, form, input {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+    table { border-collapse: collapse;}
+    /*公共的样式 开始*/
+    .pickItem,.dspickItem{font-family:"微软雅黑";font-size:12px;}
+    .absItem { width:200px;overflow:hidden;text-overflow:ellipsis; }
+    .f1 {width:140px;}
+    .f2 {width:160px;}
+    .f3 {width:140px;top:290px;left:300px;}
+    .f4 {width:140px;top:290px;left:440px;}
+    .f5 {width:140px;top:290px;left:550px;}
+    .f6 {
+        width: 100%;
+       
+
+        text-overflow:inherit;
+    }    
+    .orderid { }
+    .stockoutid { }
+    .name { }
+    
+    .createdate { }
+    .warehousename { }
+    .phone { }
+
+    .paymentname { }
+    .deliveryname { }
+    .area { width:250px;}
+    .jddaju {
+       
+        width: 100%;
+    }
+     .address {
+       
+        width: 100%;
+    }
+
+    .table {
+       
+        width: 750px;
+       
+    }
+    .dspickItem .table {
+       
+    }
+    .title {
+        position:absolute;
+        top:-60px;
+        font-size: 16px;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 25px;
+        width: 700px;
+        
+    } .table thead tr th {
+        border-bottom: #000 solid 2px;
+        font-family: "微软雅黑";
+        font-size: 12px;
+    }
+    .table tfoot tr td {border-top: #000 solid 2px;}
+    td { text-align: center;font-family:"微软雅黑";font-size:14px;}
+    .pbh { width:130px;}
+    .pmc { width:130px;}
+    .pmc input { width:410px;border:0px;font-size:12px;font-family:"微软雅黑";height:16px;line-height:16px;}
+    /*.pmc2 { width:570px;}
+    .pmc2 input { width:570px;border:0px;font-size:14px;font-family:"微软雅黑"}*/
+    .pdj { width:75px;}
+    .psl { width:40px;}
+    .pje { width:85px;}
+    .table1 td{
+        font-size: 12px;
+    } .remarks {
+        
+        width: 700px;
+    }
+
+    .amountdesc {
+      
+        width: 320px;
+    }
+    /*公共的样式 结束*/
+
+    /*非升舱订单拣货单打印 开始*/
+   
+    /*非升舱订单拣货单打印 结束*/
+
+    /*升舱订单拣货单打印 开始*/
+    .shopname { }
+    .shopaccount { }
+    .mallorderid {width:250px }
+    .dspickItem .address {width:100%}
+    .addressD {
+       
+        width: 100%;
+    }
+    .jd {
+        
+        width: 100%;
+    }
+    /*升舱订单拣货单打印 结束*/
+  </style>
+
+}
+<div class="boxs_tool " style="display:none">
+    <button class="btn btn_ht26 m5_r" onclick="myPrint()" type="button"><span class="m5_l">开始打印</span></button>  
+</div>
+
+
+<div id="print" style="display:none">
+    @foreach (var id in ids)
+    {
+        isdsorder = false;
+        if (lstds.Count>0)
+        {
+            var order = Hyt.BLL.Order.SoOrderBo.Instance.GetByOutStockSysNo(id);
+            var dealerInfo = Hyt.BLL.Stores.StoresBo.Instance.GetStoreById(order.DealerSysNo);
+            var dailiInfo = Hyt.DataAccess.Stores.IStoresDao.Instance.GetDiLiByCreatId(order.DealerSysNo);
+            Hyt.Model.Transfer.PrtDsPicking dsitem = lstds.FirstOrDefault(m => m.SysNo == id);
+            if(dsitem!=null)
+            {
+                isdsorder = true;
+                ViewBag.DealerName = dealerInfo.DealerName;
+                if (dailiInfo != null)
+                { ViewBag.DaiLiName = dailiInfo.UserName; }
+                
+                Html.RenderPartial("PartialDsPicking", dsitem);
+            }
+        }
+        if(!isdsorder)
+        {
+            var order = Hyt.BLL.Order.SoOrderBo.Instance.GetByOutStockSysNo(id);
+            var dealerInfo = Hyt.BLL.Stores.StoresBo.Instance.GetStoreById(order.DealerSysNo);
+            var dailiInfo = Hyt.DataAccess.Stores.IStoresDao.Instance.GetDiLiByCreatId(order.DealerSysNo);
+            ViewBag.DealerName = dealerInfo.DealerName;
+            if (dailiInfo != null)
+            { ViewBag.DaiLiName = dailiInfo.UserName; }
+            
+            Hyt.Model.Transfer.CBPrtPicking item = Model.FirstOrDefault(m => m.SysNo == id);
+            Html.RenderPartial("PartialPicking", item);
+        }
+    }
+</div>
+@section FooterJs{
+<script type="text/javascript">
+  var LODOP; //声明为全局变量
+  //直接加载打印预览
+  window.onload = function myPreviewLoad() {
+    LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+    var strStyle = "<style>" + document.getElementById("style1").innerHTML + "</style>";
+    SetLoop();
+
+    $(".item").each(function () {
+      LODOP.ADD_PRINT_HTM("85px", "50px", "720px", "350px", strStyle + $(this).html());
+
+      LODOP.NewPage();
+    });
+
+    LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+    LODOP.SET_SHOW_MODE("HIDE_QBUTTIN_PREVIEW", 1);
+    LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+    LODOP.PREVIEW();
+    if (navigator.userAgent.indexOf('Firefox') >= 0 && location.href.indexOf('#reloaded') == -1) {
+      location.href = location.href + "#reloaded";
+      location.reload();
+    }
+  };
+  function myPrint() {
+    LODOP.SET_PRINT_MODE("task", "打印拣货单");//创建打印任务
+    LODOP.PRINTA();
+  }
+  function SetLoop() {
+    LODOP.PRINT_INIT("拣货单批量打印");
+    LODOP.SET_PRINT_PAGESIZE(3, 0, 0, '');
+  }
+</script>
+}

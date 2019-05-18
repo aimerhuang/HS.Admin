@@ -1,0 +1,59 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<Hyt.Model.CBPdTemplate>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th>名称</th>
+            @*<th style="width: 98px">模板图标</th>*@
+            <th>备注</th>
+            <th style="width: 46px">类型</th>
+            <th style="width: 85px">创建人</th>
+            <th style="width: 85px">最后更新人</th>
+            <th style="width: 147px" class="borde_r_none">操作</th>
+        </tr>
+    </thead>
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            if (Model.TotalItemCount > 0)
+            {
+                int row = 1;
+                string cs = string.Empty;
+                foreach (var item in Model.TData)
+                {
+                    if (row % 2 == 0)
+                    {
+                        cs = "stag_color";
+                    }
+                    else
+                    {
+                        cs = string.Empty;
+                    }
+            <tr class="@cs">
+                <td class="align_l p10_l">@item.Name</td>
+               @* <td>@item.Icon</td>*@
+                <td class="align_l p10_l">@item.Remark</td>
+                <td>@EnumUtil.GetDescription(typeof(ProductStatus.商品描述模板类型),item.Type)</td>
+                <td>@item.CreatedByName</td>
+                <td>@item.LastUpdateByName</td>
+                <td>
+                    <button type="button" class="btn btn_ht26 btn_blue m10_r PD1006201" title="编辑" onclick="addOrEdit(@item.SysNo)"><span class="icon_white icon_pencil"></span><span class="m5_l">编辑</span></button><button type="button" class="btn btn_ht26 btn_red PD1006401" title="删除" onclick="deleteOne(@item.SysNo)"><span class="icon_white icon_trash"></span><span class="m5_l">删除</span></button>
+                </td>
+            </tr>
+                    row++;
+                }
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+            </tr>
+            }
+
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }

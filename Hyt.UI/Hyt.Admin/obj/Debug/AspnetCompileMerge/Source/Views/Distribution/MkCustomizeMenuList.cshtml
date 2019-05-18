@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "微信父级菜单管理";
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Plugins/Dialog/Dialog.yui.js")"></script>
+
+    <script type="text/javascript">
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                $("#dealerSysNo").html("");
+                //$("#dealerSysNo").append("<option value='-1'>全部</option>");
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                doSearch();
+            });
+        }
+        $(function () {
+            //弹出地区
+            var options = {
+                onlyLeaftSelect: true,
+                isAll: true,
+                margin: {
+                    vertical: 0,
+                    horizontal: 0
+                },
+                zIndex: 5
+            };
+            DAO.SelectArea($("#JS_outbox"), $("#txt_aprentArea"), options);
+
+            $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#agentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#agentSysNo").change(function () {
+                GetDealersListByCreatedBy($("#agentSysNo").val());
+            });
+            $("#dealerSysNo").change(function () {
+                doSearch();
+            });
+            $("#btn_search").click(function () {
+                doSearch();
+            });
+            $("#Type").change(function () {
+                doSearch();
+            });
+            //注册页面回车事件为查询操作
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+
+            //新增弹出
+            $("#Add").bind("click", function () {
+                UI.DialogOpen('/Distribution/MkCustomizeMenuCreate/', {
+                    width: 800,
+                    height: 275,
+                    title: '新建父级',
+                    button: [{
+                        name: '保存',
+                        callback: function () {
+
+                        },
+                        focus: true
+                    },
+                        { name: '取消' }
+                    ]
+                }, false);
+            });
+        });
+
+        function Edit(id) {
+            UI.DialogOpen('/Distribution/MkCustomizeMenuCreate?id=' + id, {
+                width: 800,
+                height: 275,
+                title: '编辑父级',
+                button: [{
+                    name: '保存',
+                    callback: function () {
+
+                    },
+                    focus: true
+                },
+                    { name: '取消' }
+                ]
+            }, false);
+        }
+
+        function Delete(myid) {
+            UI.Confirm({
+                content: "确认删除?",
+                ok: function () {
+                    $.post('/Distribution/DeleteMkCustomizeMenu', { id: myid }, function (r) {
+                        if (r.Status) {
+                            showTip("删除成功");
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        function showTip(tip) {
+            UI.tips.tip_alert('tips_success', tip);
+            doSearch();
+        }
+        function doSearch() {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            var data = {};
+            var Name = $("#Name").val();
+            if (Name && Name != "请输入名称...") data.Name = Name;
+            data.Type = $("#Type").val();
+            data.SelectedDealerSysNo = $("#dealerSysNo").val();
+            $.get('@Url.Action("MkCustomizeMenuList", "Distribution")', data,
+               function (ret) {
+                   $('#paging').html(ret);
+                   mask.Remove();
+               });
+        }
+
+        //同步总部
+        $("#btnStore").live('click', function () {
+            UI.Confirm({
+                content: "您确定同步吗？",
+                ok: function () {
+                    if ($("#dealerSysNo").val() == -1) {
+                        UI.Alert({ content: '请选择要同步的分销商' });
+                        return;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "/Distribution/ProCreateMkCustomizeMenu",
+                        data: "DealerSysNo=" + $("#dealerSysNo").val(),
+                        success: function (data) {
+                            if (data.Status) {
+                                doSearch(1);
+                            }
+                            UI.Alert({ content: data.Message });
+                        }
+                    });
+                }
+            })
+        });
+
+    </script>
+}
+<div class="case">
+    <div class="boxs_tit head_m">
+        <h3>@ViewBag.Title</h3>
+    </div>
+    <div class="boxs_con_c1">
+        <div class="boxs_tool">
+            <div class="right_tool clearfix">
+                <span class="veralign_t fl">代理商</span>
+                <div class="fl m10_l" style="margin-right: 10px">
+                    <select id="agentSysNo"></select>
+                </div>
+
+                <span class="veralign_t fl">分销商</span>
+                <div class="fl m10_l" style="margin-right: 10px">
+                    <select id="dealerSysNo"></select>
+                </div>
+                <span class="veralign_t fl">类型</span>
+                <div class="fl m10_l" style="margin-right: 10px">
+                    <select id="Type">
+                        <option value="">全选</option>
+                        <option value="view">视图</option>
+                        <option value="click">点击</option>
+                    </select>
+                </div>
+
+                <div class="m10_r fl search_btn ">
+                    <input type="text" id="Name" name="Name" placeholder="请输入名称..." maxlength="20" class="input_ht28 fl m10_r">
+                    <button title="搜索" class="btn btn_ht28 fl btn_blue" id="btn_search"><span class="icon_search icon_white"></span><span class="m5_l"></span></button>
+                </div>
+            </div>
+            <div>
+                <button class="btn btn_ht26 m10_r btn_blue DS1017102" id="Add" title="新建"><span class="icon_plus icon_white"></span><span class="m5_l">新建父级</span></button>
+                <button class="btn btn_ht26 btn_blue m10_r DS1017102" id="btnStore" title="同步总部"><span class="icon icon_white icon_pencil"></span><span class="m5_l">同步总部</span></button>
+            </div>
+        </div>
+        <div class="boxs_list">
+            <div id="paging" class="boxs_listtabel">
+            </div>
+        </div>
+    </div>
+</div>

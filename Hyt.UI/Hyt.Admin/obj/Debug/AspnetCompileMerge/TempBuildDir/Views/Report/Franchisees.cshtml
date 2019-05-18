@@ -1,0 +1,31 @@
+﻿@using Hyt.Model.WorkflowStatus;
+@using Hyt.Model.SystemPredefined
+@using Hyt.Util;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    @Html.PrivilegeControl(PrivilegeCode.RT101207, ".RT101207");
+    @Html.PrivilegeControl(PrivilegeCode.RT101209, ".RT101209");
+}
+<div class="case">
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>加盟商报表</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r RT101207" onclick="UI.OpenCreatTab('加盟商对账报表', '/Report/FranchiseesSaleDetail'); return false;"><span class="icon icon_share"></span><span class="m5_l">加盟商对账报表</span></button>
+                    <button class="btn btn_ht26 m10_r RT101209" onclick="UI.OpenCreatTab('加盟商退换货对账报表', '/Report/FranchiseesRmaDetail'); return false;"><span class="icon icon_share"></span><span class="m5_l">加盟商退换货对账报表</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+        </div>
+    </div>
+</div>

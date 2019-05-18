@@ -1,0 +1,57 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.FnThirdpartyReconciliation>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th width="120">账务流水号</th>
+                <th width="80">来源</th>
+                <th width="200">业务流水号</th>
+                <th width="150">订单号</th>
+                <th width="100">发生时间</th>
+                <th width="180">对方账号</th>
+                <th width="100">金额</th>
+                <th width="100">状态</th>
+                <th width="100">确认时间</th> 
+                <th >备注</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                foreach (var item in Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td >@item.FnNo</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.第三方财务对账来源), item.Source) </td>
+                <td >@item.OperationNo</td>
+                <td >@item.TraderNo</td>
+                <td>@(item.TradeDate == DateTime.MinValue ? "" : item.TradeDate.ToString("yyyy-MM-dd HH:mm")) </td>
+                <td ><a href="#" title="@item.ProductName">@item.BuyerAccount</a></td>
+                <td class="red p10_r" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.Amount, 2))</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.第三方财务对账状态), item.Status) </td>
+                <td>@(item.CheckDate == DateTime.MinValue ? "" : item.CheckDate.ToString("yyyy-MM-dd HH:mm")) </td>
+                <td >@item.Remarks</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+                if(i<1)
+                {
+                   <tr>
+                    <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+                   </tr>
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+ @{Html.RenderPartial("_UrlPaging", Model); }

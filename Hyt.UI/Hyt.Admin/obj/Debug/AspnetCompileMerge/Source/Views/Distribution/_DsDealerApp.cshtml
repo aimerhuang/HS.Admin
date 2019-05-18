@@ -1,0 +1,64 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.Transfer
+@model PagedList
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="120">名称</th>
+                <th width="140">AppKey类型</th>
+                <th style="text-align: left; text-indent: 10px;">APPKEY信息</th>
+                <th style="text-align: left; text-indent: 10px;">扩展配置信息</th>
+                <th width="140">已使用/可使用次数</th>
+                <th width="72">状态</th>
+                <th width="160">操作</th>
+
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TotalItemCount > 0)
+                {
+                    var row = 1;
+                    string cs = string.Empty;
+                    foreach (var item in (List<CBDsDealerApp>)Model.Data)
+                    {
+                        cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                        <tr class="@cs">
+                            <td width="59">@item.AppName</td>
+                            <td width="97">@item.MallName</td>
+                            <td align="left" class="p10_l p10_r">@("APPKEY：" + item.AppKey)<br/>@("APPSECRET：" + item.AppSecret)</td>
+                            <td align="left" class="p10_l p10_r">@item.Extend</td>
+                            <td width="97">@(item.HasRelevance + "/" + item.MaxRelevance)</td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.DistributionStatus.分销商App状态), item.Status)</td>
+                            <td>
+                                @if (item.Status == 0)
+{
+    <button class="btn_blue btn btn_ht26" onclick="changeStatus(@item.SysNo,@item.Status);return false;"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button>
+}
+                                else
+                                {
+                                    <button class="btn_red btn btn_ht26" onclick="changeStatus(@item.SysNo,@item.Status);return false;"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button>
+                                }<button class="btn btn_ht26 btn_blue m10_l"
+                                         onclick="openEdit({MallTypeSysNo:@item.MallTypeSysNo,SysNo:@item.SysNo,AppName:'@item.AppName',MallName:'@item.MallName',AppKey:'@item.AppKey',AppSecret:'@item.AppSecret',HasRelevance:@item.HasRelevance,MaxRelevance:@item.MaxRelevance,Status:@item.Status,Extend:'@Html.Raw(item.Extend)'})">
+    <span class="icon_pencil icon_white"></span><span class="m5_l">修改</span>
+</button>
+                        </td>
+                        @Html.Raw("</tr>")
+                        </tr>
+                        row++;
+                    }
+                }
+                else
+                {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }
+

@@ -1,0 +1,165 @@
+﻿@{
+    ViewBag.Title = "销售排行统计表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+}
+@section headjs{
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+   
+    <script type="text/javascript">
+        $(function () {
+            var offset = $("#warehouseChoose").offset();
+            //绑定选择仓库文本框
+            $("#warehouseChoose").click(function () {
+                $("#warehouseList").css({
+                    "top": (offset.top + $(this).height() + 5) + "px",
+                    "left": offset.left + "px"
+                }).show();
+            });
+            //绑定选择仓库按钮
+            $("#warehouseChooseBtn").click(function () {
+                $("#warehouseList").css({
+                    "top": (offset.top + $(this).height() + 5) + "px",
+                    "left": offset.left + "px"
+                }).show();
+            });
+            $("#btnOk").click(function () {
+                setControlShowWarehouse();
+                $("#warehouseList").hide();
+            });
+            $("#btnCancel").click(function () {
+                $("#warehouseList").hide();
+            });
+            $("#btnSearch").click(function () {
+           
+                GetPageData();
+            });
+            //导出excel按钮
+            $("#export_excel_btn").click(function () {
+                var categoryId = $("#listProductCategories").attr("pdcategory");
+                if (categoryId != undefined && categoryId != "") {
+                    $("#ProductCategories").val(categoryId);
+                }
+                else
+                {
+                    $("#ProductCategories").removeAttr("value");
+
+                }
+                $("#form1").submit();
+            });
+            var options = {
+                onlyLeaftSelect: false,
+                margin: {
+                    vertical: 0,
+                    horizontal: 0
+                },
+                zIndex: 5
+            };
+            DAO.SelectProductCategory($("#JS_outbox"), $("#listProductCategories"), options);
+        });
+        //设置控件显示仓库
+        function setControlShowWarehouse() {
+            var ids = getCheckedWarehouses().join();
+            var names = getCheckedWarehouseNames();
+            if (names.length > 2) {
+                $("#warehouseChoose").val("已选择" + names.length + "个仓库");
+            } else {
+                if (!names.length) {
+                    $("#warehouseChoose").val("请选择仓库");
+                } else {
+                    $("#warehouseChoose").val(names.join());
+                }
+            }
+            $("#warehouseHide").val(ids);
+        }
+        function GetPageData() {
+            Utils.MaskStart($('#paging'));
+            $.post('@Url.Action("_WarehouseProductSales")', { BeginDate: $("#BeginDate").val(), EndDate: $("#EndDate").val(), WhWarehouseIDS: $("#warehouseHide").val(),ProductCategories:$("#listProductCategories").attr("pdcategory"),TakingCount:$("#TakingCount").val() }, function (data) {
+                $("#paging").html(data);
+                Utils.MaskStop();
+            });
+        }
+    </script>
+}
+<div class="case" id="createDeliverMainDiv">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>销售排行统计表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool clearfix">
+                <form id="form1" action='@Url.Action("ExportWarehouseProductSales")' method="post">
+                        <span class="veralign_t fl">仓库</span>
+                        <div class="fl m10_l" style="margin-right: 10px;">
+                            <div class="date_btn">
+                                <input type="text" class="input_ht26" id="warehouseChoose" name="sysno" value="请选择仓库" readonly="readonly" />
+                                <button type="button" title="仓库" class="btn btn_ht26" id="warehouseChooseBtn">
+                                    <span class="icon_th_list"></span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="warehouseHide" name="WhWarehouseIDS" />
+                        </div>
+                        <span class="fl m10_l m10_r">商品分类</span>
+                        <div class="search_btn fl " id="JS_outbox">
+
+                            <input id="listProductCategories"  type="text" value="" class="input_ht28 " readonly="readonly" />
+                            <input id="ProductCategories" name="ProductCategories" type="hidden" />
+                            <button title="选择分类" class="btn btn_ht28" id="btn_selectCategory" type="button">
+                                <span class="icon_th_list"></span>
+                            </button>
+                        </div>
+                        <span class="veralign_t fl">统计时间段</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn120 fl m10_l">
+                                <input type="text" value="@DateTime.Now.ToString("yyyy-MM-01")" class="input_ht26" id="BeginDate" name="BeginDate" onfocus="this.blur()" onclick="UI.Date({ el: 'BeginDate' })">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                            <span class="fl m10_l">-</span>
+                            <div class="date_btn120 fl m10_l">
+                                <input type="text" value="@DateTime.Now.ToString("yyyy-MM-dd")" class="input_ht26" id="EndDate" name="EndDate" onfocus="this.blur()" onclick="UI.Date({ el: 'EndDate' })">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                        </div>
+                        <span class="veralign_t fl">显示条数</span>
+                        <div class="fl m10_l">
+                            <select id="TakingCount" name="TakingCount">
+                                <option value="10">10</option>
+                                <option value="50">50</option>
+                                <option value="100" selected>100</option>
+                                <option value="150">150</option>
+                                <option value="200">200</option>
+                            </select>
+                            </div>
+                            <button class="btn btn_ht28 m10_l fl" title="搜索" id="btnSearch" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+            </form>
+                </div>
+                <!--/工具条按钮-->
+                <div class="left_tool" id="feature_area">
+                    <button class="btn btn_ht26 m10_r" id="export_excel_btn" title="导出Excel" type="button"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+            </div>
+            <!--仓库商品销售排行报表-->
+            <div class="boxs_listtabel" id="paging">
+                @{
+                    Html.RenderAction("_WarehouseProductSales", "Report", new { BeginDate = DateTime.Now.ToString("yyyy-MM-01"), EndDate = DateTime.Now.ToString("yyyy-MM-dd") });
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<!--选择仓库弹出框-->
+<div id="warehouseList" style="width: 282px; vertical-align:top; position: absolute; display: none">
+    @{
+        Html.RenderAction("WarehouseTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>

@@ -1,0 +1,64 @@
+﻿@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model Hyt.Model.Transfer.CBCrExperiencePointLog
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "客户惠源币变更详情";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+}
+
+<form id="form" name="form" action="">
+<body class="bodynone">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="Model.SysNo"/>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tbody>
+              <tr>
+               <td width="20%"  class="nameright border_rnone">客户帐号:</td>
+               <td width="30%" class="border_right" colspan="3">@Model.CustomerAccount</td>
+              </tr>
+                  <tr>
+                      @{
+                          if (Model.Increased == 0)
+                          {
+                              <td width="20%" class="nameright border_rnone">减少积分:</td>
+                              <td width="30%" class="border_right">@Model.Decreased</td>
+                          }
+                          else
+                          {
+                               <td width="20%" class="nameright border_rnone">增加积分:</td>
+                               <td width="30%" class="border_right">@Model.Increased</td>
+                          }
+                      }
+                      <td width="20%"  class="nameright border_rnone">剩余积分:</td>
+                      <td width="30%">@Model.Surplus</td>
+                  </tr>
+              <tr>
+               <td width="20%"  class="nameright border_rnone">变更类型:</td>
+               <td width="30%" class="border_right" colspan="3">@EnumUtil.GetDescription(typeof(CustomerStatus.经验积分变更类型), Model.PointType)</td>
+              </tr>
+              <tr>
+               <td width="20%"  class="nameright border_rnone">变更人:</td>
+               <td width="30%" class="border_right">@Model.UserName</td>
+               <td width="20%"  class="nameright border_rnone">变更时间:</td>
+               <td width="30%">@(Model.ChangeDate.ToString("yyyy-MM-dd HH:mm"))</td>
+              </tr>
+              <tr>
+               <td width="20%"  class="nameright border_rnone">变更描述:</td>
+               <td width="30%" class="border_right" colspan="3">
+                <textarea id="answer" class="input_xlarge" rows="2" name="answer" cols="20" style="width: 320px; height: 50px;" disabled="disabled">@Model.PointDescription</textarea>
+               </td>
+              </tr>
+             </tbody>
+           </table>  
+   </div>
+  </div>  
+</div>
+</body>
+</form>

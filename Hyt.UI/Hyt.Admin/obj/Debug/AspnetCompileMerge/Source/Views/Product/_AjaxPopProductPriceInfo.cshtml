@@ -1,0 +1,39 @@
+﻿@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+
+
+<div class="explain clearfix" style="width: 200px;">
+    @{      
+        if (ViewBag.Pices != null)
+        {
+
+            var list = (List<dynamic>)ViewBag.Pices;
+            IList<dynamic> prices;
+            foreach (var item in list)
+            {
+        <dl>
+            <dt>
+                <h3>@item.priceType</h3>
+            </dt>
+        </dl>
+        <div class="msg_context_box">
+            <dl>
+
+                @{
+                prices = (List<dynamic>)item.prices;
+                foreach (var price in prices)
+                {
+                    <dd>
+                        <span>@price.priceName：</span>&yen;@price.price
+                    </dd>
+                }  
+                }
+            </dl>
+        </div>
+            }
+
+        }
+    }
+</div>
+

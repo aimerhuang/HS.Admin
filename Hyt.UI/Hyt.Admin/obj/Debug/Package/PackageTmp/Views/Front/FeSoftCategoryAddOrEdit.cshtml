@@ -1,0 +1,115 @@
+﻿@{
+    ViewBag.Title = "FeSoftCategoryAddOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.FeSoftCategory
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#FeSoftCategoryForm").validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        maxlength: 30
+                    },
+                    DisplayOrder: {
+                        number: true
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "分类名称必填",
+                        maxlength: "长度超出30个字"
+                    },
+                    DisplayOrder: {
+                        number: "必须为整数"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+                },
+                success: function (span, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#FeSoftCategoryForm").valid()) {
+                                $.post('/Front/FeSoftCategoryAddOrEdit/', $("#FeSoftCategoryForm").serialize(), function (result) {
+                                    if (result.StatusCode > 0) {
+                                        try {
+                                            UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage, true);
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                            if (result.StatusCode == -2) {
+                                                $("#name").focus();
+                                            }
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="FeSoftCategoryForm" name="FeSoftCategoryForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>软件分类名称:</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Name" id="name" class="wd200" value="@Model.Name" /><span class="prompt m10_l">分类名称必填,30字以内</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone" style="vertical-align: top;">显示序号:</td>
+                            <td width="80%" class="borde_right">
+                               <input type="text" name="DisplayOrder" id="DisplayOrder" class="wd200" value="@Model.DisplayOrder" /><span class="prompt m10_l">必须为整数</span>
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>

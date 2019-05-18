@@ -1,0 +1,135 @@
+﻿@using Hyt.Util
+@model System.Collections.Generic.List<Hyt.Model.CBReportBusinessSummary>
+<div class="case">
+    <div class="boxs" id="tabboxs3">
+        <div class="head_tab">
+            <ul class="tabNav" init="true">
+                <li class="menuon_white" style="width: 50px;">表格</li>
+                <li class="" style="width: 50px;">图表</li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+                 <form id="form1">
+                <!--工具条开始-->
+                <div class="boxs_tool">
+                    <!--功能按钮开始-->
+                    <div class="left_tool" style="float: left">
+                        <button class="btn btn_ht26 m10_l" id="btnExport"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                    <div class="right_tool clearfix">
+                         <span class="fl">起止日期</span>
+                        <div class="date_btn120 fl m10_r m10_l">
+                            <input type="text" value="@DateUtil.GetMonthFirst(DateTime.Now).ToString("yyyy-MM-dd")" class="input_ht26" id="BeginDate" name="BeginDate" Search="BeginDate" onclick="UI.Date({ el: 'BeginDate', readOnly: true });">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate',dateFmt:'yyyy-MM-dd'});return false;"><span class="icon_calendar"></span></button>
+                        </div>
+                        <span class="fl">-</span>
+                        <div class="date_btn120 fl m10_l">
+                            <input type="text" value="@DateUtil.GetMonthLast(DateTime.Now).ToString("yyyy-MM-dd")" class="input_ht26" id="EndDate" name="EndDate" Search="EndDate" onclick="UI.Date({ el: 'EndDate', readOnly: true });">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate',dateFmt:'yyyy-MM-dd'});return false;"><span class="icon_calendar"></span></button>
+                        </div>
+                        <button class="btn btn_ht26 fl m10_l" title="查询" id="JS_gaoji1" type="button" onclick="doSearch();doSearchMap(1);return false;"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+
+                </div>
+                 <!--工具条结束-->
+                 </form>
+                <div class="boxs_listtabel" id="paging">
+                   
+                </div>
+            </div>
+            <div class="list" style="display: none;" >
+                <div class="boxs_tool clearfix" style="padding-top: 15px; height: 30px;">
+                    <!--功能按钮开始-->
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="1" id="Flow" checked="checked"/>
+                        <label for="Flow" class="m10_r">流量</label>
+                    </span>
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="2"  id="Visitors"/>
+                        <label for="Visitors" class="m10_r">访客</label>
+                    </span>
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="3" id="OrderAmount"/>
+                        <label for="OrderAmount" class="m10_r">下单数</label>
+                    </span>
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="4"  id="SaleSum"/>
+                        <label for="SaleSum" class="m10_r">销售额</label>
+                    </span>
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="5"  id="ReturnSum"/>
+                        <label for="ReturnSum" class="m10_r">退款总额</label>
+                    </span>
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="6" id="NetSaleSum"/>
+                        <label for="NetSaleSum" class="m10_r">净销售额</label>
+                    </span>
+                    <span class="m10_l">
+                        <input name="DataType" type="radio" value="7" id="CustomPrice"/>
+                        <label for="CustomPrice" class="m10_r">客单价</label>
+                    </span>
+                     <span class="m10_l">
+                        <input name="DataType" type="radio" value="8" id="ChangeRate"/>
+                        <label for="ChangeRate" class="m10_r">转换率</label>
+                    </span>
+                    <!--功能按钮结束-->
+                </div>
+                <div id="highcharts2" style="width: 1280px"></div>
+                <div class="c9" style="padding: 0 20px 10px 20px;">图表中增加一条线“同期比较” 以“年”为单位</div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        UI.Tab({ tabNavBox: '#tabboxs3', tabContentObj: "#tabcon", currentClass: 'menuon_white', onActiveTab: function (index, obj) { } });
+        $("input[name='DataType']").change(function () {
+            doSearchMap($(this).val());
+        });
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //查询列表
+        doSearch();
+
+        //查询图表
+        doSearchMap(1);
+        
+        //导出excel
+        $('#btnExport').click(function () {
+            var form = $("#form1");
+            form.attr('action', '@Url.Action("ExportBusinessSummary", "Report")');
+            form.attr('method', 'post');
+            form.submit();
+            return false;
+        });
+    });
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Report/DoBusinessSummaryList/?r=" + Math.random(), "Search", function () {
+
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+    function doSearchMap(type) {
+        Ajax.post("/Report/DoBusinessSummaryMap/?r=" + Math.random(), "Search", function (p) {
+            p.setParams("DataType", type);
+        }, function (res) {
+            UI.Highcharts({
+                id: "highcharts2", tooltipName: res.SerieName, xCategories: res.xValues, seriesData: res.yValues
+            });
+        });
+    }
+</script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/scripts/highcharts.js"></script>

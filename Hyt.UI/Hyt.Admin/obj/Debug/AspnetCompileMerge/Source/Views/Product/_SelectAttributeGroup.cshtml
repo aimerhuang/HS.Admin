@@ -1,0 +1,112 @@
+﻿@{
+    ViewBag.Title = "商品基础属性组选择";
+}
+
+<table id="attributeGroupTalbe" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr class="ht32" id="attributeGroupTalbe_head" >
+            <th class="border_lnone border_rnone" width="80">
+                <input name="" class="checkall" type="checkbox" value="">
+            </th>
+            <th width="80">属性组编号</th>
+            <th>属性组名称</th>
+            <th width="160">页面展示名称</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="ht32" id="attributeGroupTalbe_100001" key="100001">
+            <td class="border_lnone align_c">
+                <input name="" type="checkbox" value="">
+            </td>
+            <td class="align_c">100001</td>
+            <td class="align_l">IPhone外壳基础属性基础属性</td>
+            <td class="align_c">基本属性</td>
+
+        </tr>
+        <tr class="ht32" id="attributeGroupTalbe_100002" key="100002">
+            <td class="border_lnone align_c">
+                <input name="" type="checkbox" value="">
+            </td>
+            <td class="align_c">100002</td>
+            <td class="align_l">IPhone外壳技术参数</td>
+            <td class="align_c">技术参数</td>
+        </tr>
+        <tr class="ht32" id="attributeGroupTalbe_100003" key="100003">
+            <td class="border_lnone align_c">
+                <input name="" type="checkbox" value="">
+            </td>
+            <td class="align_c">100003</td>
+            <td class="align_l">IPAD贴膜</td>
+            <td class="align_c">基本属性</td>
+        </tr>
+        <tr class="ht32" id="attributeGroupTalbe_100004" key="100004">
+            <td class="border_lnone align_c">
+                <input name="" type="checkbox" value="">
+            </td>
+            <td class="align_c">100004</td>
+            <td class="align_l">SAMSUNG手机电池</td>
+            <td class="align_c">基本属性</td>
+        </tr>
+        <tr class="ht32" id="attributeGroupTalbe_100005" key="100005">
+            <td class="border_lnone align_c">
+                <input name="" type="checkbox" value="">
+            </td>
+            <td class="align_c">100005</td>
+            <td class="align_l">电霸4代</td>
+            <td class="align_c">基本属性</td>
+        </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+
+    var data = [{
+        SysNo: 100001,
+        Name: '基本属性',
+        BackEndName: 'IPhone外壳基础属性基础属性',
+    }, {
+        SysNo: 100002,
+        Name: '技术参数',
+        BackEndName: 'IPhone外壳技术参数',
+    }, {
+        SysNo: 100003,
+        Name: '基本属性',
+        BackEndName: 'IPAD贴膜',
+    }, {
+        SysNo: 100004,
+        Name: '基本属性',
+        BackEndName: 'SAMSUNG手机电池',
+    }, {
+        SysNo: 100005,
+        Name: '基本属性',
+        BackEndName: '电霸4代',
+    }]
+
+
+    //调用页面进行回调
+    function CallBack(parentWindow) {
+        if ($.isFunction(parentWindow._ActiveSelectAttributeGroupCallBack)) {
+
+            //读取值
+            var selectTrItems = checkboxSelector.GetCheckboxSelectedItem();
+            var result = new Array();
+            for (var i = 0; i < selectTrItems.length; i++) {
+                for (var n = 0; n < data.length; n++) {
+                    if (data[n].SysNo == parseInt(selectTrItems[i].attr("key"))) {
+                        result.push(data[n]);
+                        break;
+                    }
+                }
+            }
+
+            parentWindow._ActiveSelectAttributeGroupCallBack(result);
+        }
+        UI.Dialog.close();
+    }
+
+    var checkboxSelector = null;
+    $(function () {
+        checkboxSelector = UI.CheckAllbox("#attributeGroupTalbe", ".checkall");
+    });
+
+</script>

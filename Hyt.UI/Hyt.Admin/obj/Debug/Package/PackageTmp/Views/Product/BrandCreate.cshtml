@@ -1,0 +1,131 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.PdBrand
+@{
+    ViewBag.Title = "BrandCeate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#pdBrandForm").validate({
+                rules: {
+                    Name: {
+                        required: true,
+                        maxlength: 30                        
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "品牌名称必填",
+                        maxlength: "长度超出30个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+                },
+                success: function (span,element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#pdBrandForm").valid()) {
+                                $.post('/Product/BrandCreate/', $("#pdBrandForm").serialize(), function (result) {
+                                    if (result.StatusCode > 0) {
+                                            try {
+                                                UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage,true);
+                                            } catch (e) { };
+                                                UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                            if (result.StatusCode == -2)
+                                            {
+                                                $("#name").focus();
+                                            }
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+            $("#btnUpload").click(function () {
+                DAO.Upload({
+                    config: '@(Hyt.Model.SystemPredefined.UploadConfigAlias.BrandImageConfigAlias)',
+                    callback: function (data) {
+                        $("#imgContainer").html('<img src="@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer' + data[0].url + '" style="width:150px;height:150px" />');
+                        $("#brandLogo").val(data[0].url);
+                    }
+                })
+            });
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="pdBrandForm" name="pdBrandForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>品牌名称:</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Name" id="name" class="wd200" value="@Model.Name" /><span class="prompt m10_l">品牌名称必填,30字以内</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone" style="vertical-align: top;">品牌图片:</td>
+                            <td width="80%" class="borde_right">
+                                <button id="btnUpload" class="btn btn_blue btn_ht32 wd100 bold f14" type="button">上传图片</button>
+                                <div id="imgContainer" style="margin-top:5px;">
+                                    @if (!string.IsNullOrEmpty(Model.Logo))
+                                    {<img src="@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer@Model.Logo" style="width:150px;height:150px;border:0px;" />}
+                                    else
+                                    {<img src="~/Theme/images/defaultpic.gif" style="width:150px;height:150px" />}
+                                </div>
+                                <input type="hidden" name="Logo" value="@Model.Logo" id="brandLogo" />
+                            </td>
+
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>
+

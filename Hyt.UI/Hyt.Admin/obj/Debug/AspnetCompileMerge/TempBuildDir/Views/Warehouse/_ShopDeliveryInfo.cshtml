@@ -1,0 +1,112 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.SoOrder
+<div id="div1">
+    <div class="tit_con">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0">
+            <tbody>
+              <tr>
+                    <td width="10%" class="nameright">提货门店: </td>
+                    <td width="40%" class="borde_right">@if (ViewBag.WarehouseName != null)
+                                                        {@ViewBag.WarehouseName}</td>
+                    <td width="10%" class="nameright">状态:</td>
+                    <td width="40%">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.WarehouseStatus.出库单自提状态), ViewBag.WhStockOut.Status)</td>
+                </tr>
+                <tr>
+                    <td class="nameright">出库单号:</td>
+                    <td class="borde_right">@ViewBag.WhStockOut.SysNo</td>
+                    <td class="nameright">订单号:</td>
+                    <td>@Html.DisplayFor(m => m.SysNo)</td>
+                </tr>
+                <tr>
+                    <td class="nameright">会员账号:</td>
+                    <td class="borde_right">@Html.DisplayFor(m => m.Customer.Account)</td>
+                    <td class="nameright">收货人:</td>
+                    <td>@Html.DisplayFor(m => m.ReceiveAddress.Name)</td>
+                </tr>
+                <tr>
+                    <td class="nameright">收货电话:</td>
+                    <td class="borde_right">@Html.DisplayFor(m => m.ReceiveAddress.MobilePhoneNumber)</td>
+                    <td class="nameright">出库单金额:</td>
+                    <td class="red">&yen;@ViewBag.WhStockOut.StockOutAmount.ToString("0.00")</td>
+                </tr>
+                <tr>
+                    <td class="nameright">应收金额:</td>
+                    @if (Model.PayStatus == (int)Hyt.Model.WorkflowStatus.OrderStatus.销售单支付状态.已支付)
+                    {
+                        <td class="borde_right red">&yen;@{@ViewBag.WhStockOut.Receivable.ToString("0.00")}<span class="green">(已付款)</span></td>
+                        
+                    }
+                    else
+                    {    
+                        <td class="borde_right red">&yen;@{@ViewBag.WhStockOut.Receivable.ToString("0.00")}(未付款) </td>
+                    }
+                    <td class="nameright">延迟自提:</td>
+                    <td>@if (ViewBag.WhStockOut.PickUpDate != null && ViewBag.WhStockOut.PickUpDate.Year > 1)
+                        {
+                          <sapn>延迟日期:&nbsp;&nbsp;</sapn> @ViewBag.WhStockOut.PickUpDate.ToString("yyyy-MM-dd") <span class="p10_l align_l">延迟原因:&nbsp;&nbsp;</span> @ViewBag.WhStockOut.Remarks
+                        }
+                    </td>
+                </tr>
+                <tr>
+                    <td class="nameright border_bnone">发票:</td>
+                    <td class="borde_right border_bnone">  @if (string.IsNullOrWhiteSpace(Model.OrderInvoice.InvoiceTitle))
+                                    { 
+                                        @:无
+                                    }
+                                    else{
+                                           var invoice = Hyt.BLL.Warehouse.FnInvoiceTypeBo.Instance.GetModel(Model.OrderInvoice.InvoiceTypeSysNo);
+                                        string invoiceStr = (invoice != null ? "发票类型:&nbsp;&nbsp;【" + invoice.Name + "】;" : "") + "<span class='m10_l'>发票抬头:&nbsp;&nbsp;<span>【" + Model.OrderInvoice.InvoiceTitle + "】;" + (!string.IsNullOrWhiteSpace(Model.OrderInvoice.InvoiceCode) ? "<span class='m10_l'>发票代码:&nbsp;&nbsp;<span>【" + Model.OrderInvoice.InvoiceCode + "】;" : "") + (!string.IsNullOrWhiteSpace(Model.OrderInvoice.InvoiceNo) ? "<span class='m10_l'>发票号码:&nbsp;&nbsp;</span>【" + Model.OrderInvoice.InvoiceNo + "】" : "");
+                                        @Html.Raw(invoiceStr)
+                                    }</td>
+                    <td class="nameright">签收日期:</td>
+                    <td>@if (ViewBag.WhStockOut.SignTime != null && ViewBag.WhStockOut.SignTime.Year > 1)
+                        {
+                            @ViewBag.WhStockOut.SignTime.ToString("yyyy-MM-dd")
+                        }
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="div2">
+    <div class="tit_con">
+        <div class="boxs_detail border_lnone">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone border_tnone">
+                <thead>
+                    <tr>
+                        <th width="15%" class="border_lnone border_bnone">商品编号</th>
+                        <th class="border_bnone p10_l align_l">后台显示名称</th>
+                        <th width="15%" class="border_bnone">购买数量</th>
+                        <th width="15%" class="border_bnone">商品原单价</th>
+                        <th width="15%" class="border_bnone">小计</th>
+                    </tr>
+                </thead>
+                <tbody>
+                     @{  
+                         foreach (var item in ViewBag.OutStockItem)
+                            {
+                            <tr>
+                                <td width="15%" class="border_lnone border_bnone" align="center">@Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo)</td>
+                                <td class="border_bnone  p10_l align_l">@{
+                                                                            var easName = Hyt.BLL.Product.PdProductBo.Instance.GetProductEasName(item.ProductSysNo);
+                                                                            if (string.IsNullOrWhiteSpace(easName))
+                                                                            {
+                                                                                easName = "(商品名)" + item.ProductName;
+                                                                            }
+                                                                            @MvcHtmlString.Create(easName);
+                                                                        }</td>
+                                <td width="15%" class="border_bnone" align="center">@item.ProductQuantity</td>
+                                 <td width="15%" class="border_bnone red p10_r"  align="right">&yen;@item.OriginalPrice.ToString("0.00")</td>
+                                 <td width="15%" class="border_bnone red p10_r"  align="right">&yen;@item.RealSalesAmount.ToString("0.00")</td>
+                            </tr>
+                            }
+                        }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!--门店编号-->
+<input type="hidden" id="shopSysNo" name="shopSysNo" value="@ViewBag.WhStockOut.WarehouseSysNo" />

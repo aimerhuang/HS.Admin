@@ -1,0 +1,35 @@
+﻿@{
+    if (!string.IsNullOrWhiteSpace(ViewBag.NewPic))
+    {
+        ViewBag.NewPic = ViewBag.NewPic.Replace("\\", "/");
+    }
+}
+
+<form id="formImport" action="@Url.Action("UploadSignedImg", new { whStockOutSysNo = 0})" method="POST" enctype="multipart/form-data">
+    <!-- upload with excel format -->
+    <input type="file" id="txtUpload" name="txtUpload" class="hide" accept="image/gif, image/jpeg" />
+    <input type="text" id="whStockOutSysNo" name="whStockOutSysNo" class="hide" value="@ViewBag.whStockOutSysNo" />
+</form>
+
+<script>
+    $(document).ready(function () {
+        var parent = artDialog.open;
+        $('#txtUpload').change(function () {
+            //must to do the submit (not ajax) to post the data(uploaded file)
+            //window.parent.Utils.MaskStart();
+            formImport.submit();
+
+        });
+        //not (undefined/''/null)
+        if ('@ViewBag.result') {
+            //window.parent.Utils.MaskStop();
+            window.parent.uploadCallBack(decodeURIComponent('@ViewBag.result'));
+            $("#imgContainer", window.parent.document).html("<img src='@ViewBag.NewPic' alt='签收图片' style='max-width: 300px; cursor:pointer;' onclick='showImage(this.src)' />");
+            window.parent.document.location.reload();
+        }
+    });
+
+    function chooseFile() {
+        $("#txtUpload").click();
+    }
+</script>

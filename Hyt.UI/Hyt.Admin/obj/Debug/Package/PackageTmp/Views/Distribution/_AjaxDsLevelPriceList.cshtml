@@ -1,0 +1,90 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.CBPdProductDetail>
+@using Hyt.Model.SystemPredefined
+@Html.PrivilegeControl(PrivilegeCode.DS1005101, ".DS1005101")
+
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="53">
+                <input name="sysNo" id="checkall" type="checkbox" /></th>
+            <th class="wd75">商品编号</th>
+            <th class="align_l p10_lr">商品编号</th>
+            <th class="align_l p10_lr">商品名称</th>
+            <th width="120">主分类</th>
+            <th width="68">商品类型</th>
+            <th class="wd100">基础价格</th>
+            <th width="46">状态</th>
+            <th width="78">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count == 0)
+            {
+            <tr class="odd_color trhover">
+                <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+                return;
+            }
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td>
+                    <input name="sysNo"  @if (item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.上架)
+                                         {
+                                             @Html.Raw("disabled=\"disabled\"")
+                                         } type="checkbox" value="@item.SysNo" /></td>
+                <td>@item.SysNo</td>
+                <td class="align_l p5_l">@item.ErpCode</td>
+                <td class="align_l p5_l">@item.ProductName</td>
+                <td>@item.ProductCategoryName</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), item.ProductType)</td>
+                <td class="align_r p10_r"><span class="red">@item.BasicPrice.ToString("C")</span></td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态), item.Status)</td>
+                <td>
+                    @if (item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.上架)
+                    {
+                        <button class="btn btn_ht26 disabled DS1005301"><span class="icon  icon_pencil"></span><span class="m5_l">调价</span></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_ht26 DS1005301" name="btnPriceChange" onclick="singleLevelPriceChange(@item.SysNo)"><span class="icon  icon_pencil"></span><span class="m5_l">调价</span></button>
+                    }
+                </td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+    });
+    
+    function singleLevelPriceChange(arrSysno) {
+        UI.DialogOpen("/Distribution/ShowLevelPriceSingleChange?productSysNo=" + arrSysno, {
+            title: "商品调价申请",
+            width: 420,
+            height:382,
+            footerClass: "align_c clearfix",
+            resize: true,
+            init: function () {
+                this.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            var $iframe = this.iframe.contentWindow;
+
+                            $iframe.SaveCallback();
+                            return false;
+                        },
+                        focus: true
+                    },
+                    { name: '取消' }
+                );
+            }
+        }, false);
+    }
+</script>

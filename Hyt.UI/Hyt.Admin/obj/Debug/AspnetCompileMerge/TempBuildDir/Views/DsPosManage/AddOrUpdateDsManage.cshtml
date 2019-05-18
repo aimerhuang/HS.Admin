@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "AddOrUpdateDsManage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+
+                            <td style="width: 25%" class="nameright border_rnone">经销商名称</td>
+                            <td style="width: 75%" class="">
+                                @(ViewBag.DSName)
+                            </td>
+
+                        </tr>
+                        <tr>
+
+                            <td style="width: 25%" class="nameright border_rnone"><span class="v_star">*</span>pos名称</td>
+                            <td style="width: 75%" class="">
+                                <input type="text" id="pos_Name" maxlength="50" name="pos_Name" class="wd156" value="@((ViewBag.mod as Hyt.Model.Pos.DsPosManage).pos_posName)">
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>PosKey码</td>
+                            <td>
+                                <input type="text" id="pos_Key" maxlength="50" name="pos_Name" class="wd156"
+                                       value="@((ViewBag.mod as Hyt.Model.Pos.DsPosManage).pos_KeyData)">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">终端机器编号</td>
+                            <td>
+                                <input type="text" id="Pos_Termid" maxlength="50" name="Pos_Termid" class="wd156"
+                                       value="@((ViewBag.mod as Hyt.Model.Pos.DsPosManage).Pos_TLTermid)">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">PosMac码</td>
+                            <td>
+                                <input type="text" id="pos_Mac" maxlength="50" name="pos_Mac" class="wd156"
+                                       value="@((ViewBag.mod as Hyt.Model.Pos.DsPosManage).pos_MacData)">
+                            </td>
+                        </tr>
+
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div align="center" style=" padding:10px;">
+        <button type="button" onclick="SaveDsManageData()">保存</button>
+    </div>
+    
+</div>
+<script type="text/javascript">
+    function SaveDsManageData()
+    {
+        var name = $("#pos_Name").val();
+        var key = $("#pos_Key").val();
+        var mac = $("#pos_Mac").val();
+        var Termid = $("#Pos_Termid").val();
+        if ($.trim(name) == "" || $.trim(key) == "")
+        {
+            UI.Alert({ content: "Pos机名和PosKey都不能为空" });
+            return false;
+        }
+        $.ajax({
+            url: '/DsPosManage/SaveDsManageData',
+            type: 'POST',
+            cache: false,
+            data: {
+                sysNo: "@((ViewBag.mod as Hyt.Model.Pos.DsPosManage).SysNo)", 
+                DealerName: name, 
+                keyCode: key, 
+                macCode: mac,
+                dsSysNo:"@(ViewBag.dsSysNo)",
+                Termid:Termid
+            },
+            success: function (ret) {
+                if (ret.Status) {
+                   
+                    UI.Prompt.Success("操作成功");
+                }
+                else {
+                    alert(ret.Message);
+                }
+            }
+        });
+    }
+</script>

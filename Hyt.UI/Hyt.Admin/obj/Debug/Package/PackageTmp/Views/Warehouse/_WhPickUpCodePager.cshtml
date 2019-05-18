@@ -1,0 +1,55 @@
+﻿@using Hyt.Infrastructure.Pager;
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.Transfer.CBWhPickUpCode>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="list_tit border_rnone border_bnone">
+        <thead>
+            <tr>
+                <th  width="100" >手机号</th>
+                <th class="align_l"><span class="p10_lr">短信内容</span></th>
+                <th  width="100" >出库单号</th>
+                <th width="115">创建时间</th>
+                <th width="80">是否已发送</th>
+              </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                if (Model.TData == null || Model.TData.Count == 0)
+                {
+                <tr>
+                    <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                foreach (var item in Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>@item.MobilePhoneNumber</td>
+                <td class="align_l p10_r p10_l">@item.Content</td>
+                <td>@item.StockOutSysNo</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+            
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.NotificationStatus.短信发送状态), item.Status)</td>
+                
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+@if (Model.TData != null && Model.TData.Count > 0)
+{
+    Html.RenderPartial("_UrlPaging", Model);
+}
+
+

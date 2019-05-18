@@ -1,0 +1,143 @@
+﻿@{
+    ViewBag.Title = "商品商检管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品商检列表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl">商检类型</span>
+                    <select class="select_ht28 fl wd150 m5_l  m10_r" id="IcpTypes" searchitem="IcpTypes">
+                        <option value="">全部</option>
+                        @ViewBag.IcpTypes
+                    </select>
+
+                    <div class="search_btn m10_l fl wd270">
+                        <input name="" type="text" class="input_ht28 wd240" id="Condition" value="搜索系统编号、报文编号..." title="搜索系统编号、报文编号..." maxlength="25" />
+                        <button class="btn btn_ht28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <div>
+                    <button class="btn btn_blue btn_ht26" type="button" onclick="openTab()"><span class="icon icon_plus icon_white"></span><span class="m5_l">新建商品商检</span></button>
+                    <button title="回执" class="btn btn_ht26 btn_blue" type="button" onclick="GetGoodsRec()"><span class="icon_arrow_down icon_white"></span><span class="m5_l">回执</span></button>
+                </div>
+            </div>
+            <div class="boxs_list" id="paging">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#Condition").defaultValue("搜索系统编号、报文编号...");
+
+        $("[searchItem='Statuses']").change(function () {
+            doSearch(1);
+        });
+
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+        doSearch(1);
+    });
+
+    $("#IcpTypes").live('change', function () {
+        doSearch(1);
+    });
+    function doSearch(id) {
+        Ajax.get("/Icp/DoIcpGoodsPaging/?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("id", id);
+            p.setParams("IcpType", $("#IcpTypes").val());
+            if ($("#Condition").val() != "搜索系统编号、报文编号...") {
+                p.setParams("Condition", $("#Condition").val().trim());
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+    function openTab(sysNo) {
+        var url = "/Icp/IcpGoodsCreate/";
+        var text = "";
+        if (sysNo != undefined) {
+            url += sysNo;
+            text = "查看商品商检：" + sysNo;
+        } else {
+            text = "新建商品商检";
+        }
+        UI.OpenCreatTab(text, url);
+    }
+    //获取商品备案回执
+    function GetGoodsRec() {
+        var IcpType = $("#IcpTypes").val();
+        if (IcpType == "") {
+            Utils.alert("请选择商检类型");
+            return false;
+        }
+        $.ajax({
+            url: '@Url.Action("GetGoodsRec")',
+            type: 'post',
+            data: { IcpType: IcpType },
+            success: function (data) {
+                if (data.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_success', data.Message);
+                    doSearch(1);
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_warning', data.Message);
+                }
+            }
+        });
+    }
+    function viewPlatRec(sysNo) {
+        $.ajax({
+            url: '@Url.Action("GetIcp")',
+            type: 'post',
+            data: {'sysNo':sysNo},
+            success: function (data) {
+                var PlatDocRec;
+                if (data.PlatDocRec == null) {
+                    PlatDocRec = "未获得回执";
+                    Utils.alert(PlatDocRec);
+                } else {
+                    PlatDocRec = data.PlatDocRec;
+                    dialogArt = art.dialog({
+                        content: PlatDocRec,
+                        title: "接收回执"
+                    });
+                }
+            }
+        });
+    }
+    function viewCiqRec(sysNo) {
+        $.ajax({
+            url: '@Url.Action("GetIcp")',
+            type: 'post',
+            data: { 'sysNo': sysNo },
+            success: function (data) {
+                var CiqDocRec;
+                if (data.CiqDocRec == null) {
+                    CiqDocRec = "未获得回执";
+                    Utils.alert(CiqDocRec);
+                } else {
+                    CiqDocRec = data.CiqDocRec;
+                    dialogArt = art.dialog({
+                        content: CiqDocRec,
+                        title: "审核回执"
+                    });
+                }
+            }
+        });
+    }
+</script>

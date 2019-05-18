@@ -1,0 +1,115 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.Transfer
+@model PagedList<CBCrExperiencePointLog>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "经验积分日志";
+}
+    @Html.PrivilegeControl(PrivilegeCode.CR1004204, "button."+PrivilegeCode.CR1004204.ToString())
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        var customerSysNo = @ViewBag.customerSysNo;
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+        function AjaxStop() {
+            cover.Remove();
+        }
+        //调整会员等级积分
+        function CrExperiencePointLogOperate() {
+            UI.DialogOpen('/CRM/CrExperiencePointLogOperate?customerSysNo=' + customerSysNo, {
+                title: '调整会员经验积分',
+                width: '510px',
+                height: '260px',
+                init: function () {
+                    this.button(
+                        {
+                            name: '保存',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+                                iframe.add();
+                                return false;
+                            }, focus: true
+                        },
+                        {
+                            name: '关闭'
+                        }
+                    );
+                }
+            }, false);
+        }
+        //等级日志
+        function CrExperiencePointLogDetail(sysNo) {
+            UI.DialogOpen('/CRM/CrExperiencePointLogDetail?sysNo=' + sysNo, {
+                title: '会员等级变更详情',
+                width: '460px',
+                height: '258px',
+                disabled:@(AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.CR1004204)?"false":"true"),
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+        function doSearch() {
+            var pointType = $("#pointType").val();
+            AjaxStart();
+            var json = {};
+            json.customerSysNo = customerSysNo;
+            if ($.trim(pointType) != "") {
+                json.pointType = pointType;
+            }
+
+            $.get('/CRM/CrExperiencePointLog/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+    <!--工具条开始-->
+    <div class="boxs_tool boxs_toolbgnone p0"> 
+      <!--搜索开始-->
+      <div class="right_tool clearfix">
+          <span class="veralign_t fl">变更类型</span>
+          <div class="fl m10_l">
+          <select id="pointType" name="pointType" class="select_ht28" onchange="doSearch()">
+              <option value="-1">全部</option>
+              @{
+                  foreach (var dict in (IDictionary<int, string>)ViewBag.dictType)
+                  {
+                 <option value="@dict.Key">@dict.Value</option>
+                  }
+              }
+          </select>
+          </div>
+      </div>
+      <!--搜索结束-->
+      <!--功能按钮开始-->
+      <div class="left_tool">
+        <button type="button" class="btn btn_ht26 m10_r @(Hyt.Model.SystemPredefined.PrivilegeCode.CR1004204.ToString())" onclick="CrExperiencePointLogOperate(0)"><span class="icon icon_pencil"></span><span class="m5_l">调整经验积分</span></button>
+      </div>
+      <!--功能按钮结束-->
+    </div>
+    <!--工具条结束-->
+    
+    <!--列表开始-->
+    <div class="boxs_listtabel">
+    @{Html.RenderPartial("_AjaxCrExperiencePointLog", Model); }
+    </div>
+    <!--列表结束-->
+</div>
+</form>

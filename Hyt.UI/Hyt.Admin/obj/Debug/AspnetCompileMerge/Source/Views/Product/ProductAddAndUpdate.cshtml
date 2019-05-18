@@ -1,0 +1,417 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "ProductAddAndUpdate";
+}
+
+@section HeadCss
+{
+    <style type="text/css">
+        .tabNav2 li {
+            color: #bbb !important;
+            background: #ebebeb !important;
+        }
+
+        .list2 {
+        }
+
+        .tabNav2 li.navstart {
+            color: #666 !important;
+            background: url(../Theme/images/boxbg.png) repeat-x !important;
+        }
+
+        .tabNav2 li.menuon {
+            color: #333 !important;
+            background: #f5f5f5 !important;
+        }
+
+        a.sb_add {
+            width: 100%;
+            height: 44px;
+            display: inline-block;
+            background: #ececec url(../Theme/images/btn_add.png) center center no-repeat;
+        }
+
+            a.sb_add:hover {
+                background-color: #ddd;
+            }
+
+        .pic_box ul {
+            overflow: hidden;
+        }
+
+        tr.selected {
+            background-color: #FFE6B0;
+        }
+
+        tr.nodatarow td {
+            padding: 10px;
+        }
+    </style>
+
+}
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001201, "." + Hyt.Model.SystemPredefined.PrivilegeCode.PD1001201.ToString())
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001202, "." + Hyt.Model.SystemPredefined.PrivilegeCode.PD1001202.ToString())
+
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+    <script src="/Theme/Plugins/TableBind/TableBind.yui.js"></script>
+    <script type="text/javascript">
+
+        //当前页卡是否严重通过
+        var currentPageIsValid = true;
+
+        //遮罩层
+        var productInfoMark;
+
+
+        //选项卡
+        var prodctEditTab;
+
+        var editModel = false;
+//当前窗口是否应用编辑模式
+        var oldProductModel;
+
+        var productSysNo;
+
+        var isReadOnly = false;
+
+        var descEditor = null;
+
+        //初始化页面信息
+
+        function _init() {
+
+            //从隐藏文本域中取出商品系统编号
+            productSysNo = ($("#hdf_ProductSysNo").val().length > 0) ? parseInt($("#hdf_ProductSysNo").val()) : 0;
+
+            //通过商品的系统编号是否为0来判断当前是编辑模式下还是新增模式下
+            editModel = productSysNo > 0;
+
+            //如果商品系统编号是-1表示这次页面请假是一个非正常请求
+            if (productSysNo == -1) {
+
+                //隐藏所以可操作按钮
+                $("button").hide();
+
+                //提示用户,用户点击确认按钮后，重定向到列表页面
+                UI.Alert({
+                    content: "请正确选择您要修改的商品！！！",
+                    callback: function() {
+
+                        //重定向页面
+                        window.location.href = "@Url.Action("ProductList", "Product")";
+                    },
+                    width: '200px'
+                });
+            }
+
+            //初始化tab页卡
+            prodctEditTab = UI.Tab({
+                tabNavBox: '#tabboxs',
+                tabNavObj: '.tabNav2',
+                tabContentObj: ".boxs_con_p10",
+                tabContent: ".list2",
+                controlUnit: true,
+                controlClass: 'navstart',
+                onActiveTab: function(index, element) {
+
+
+                    //从隐藏文本域中取出商品系统编号
+                    productSysNo = ($("#hdf_ProductSysNo").val().length > 0) ? parseInt($("#hdf_ProductSysNo").val()) : 0;
+
+                    //商品图片页卡初始化
+                    if (index == 2) {
+                        if (productSysNo > 0) {
+
+                            GetProductImagesInfo(productSysNo);
+                            return true;
+                        }
+                    }
+
+                    //绑定商品描述
+                    if (index == 3) {
+                        if (productSysNo > 0) {
+                            //绑定商品描述
+                            if (typeof (BindProductDesc) == "function" && descEditor == null) {
+                                BindProductDesc(oldProductModel.ProductDesc);
+                                descEditor = DescribeEditor();
+                            }
+                            return true;
+                        }
+                    }
+
+                    //商品属性页卡初始化
+                    if (index == 4 && !editModel) {
+                        if (productSysNo > 0) {
+                            GetAttributeByCategory(productSysNo);
+                            return true;
+                        }
+                    }
+
+                    //关联商品页卡初始化
+                    if (index == 5) {
+                        if (productSysNo > 0) {
+                            GetProductAssociationProductList(productSysNo);
+                            return true;
+                        }
+                    }
+
+                    //搭配销售商品页卡初始化
+                    if (index == 6 && editModel) {
+                        if (productSysNo > 0) {
+                            GetProductCollocation(productSysNo);
+                            initProductCollocation();
+                            return true;
+                        }
+                    }
+                    return currentPageIsValid;
+                }
+            });
+
+
+            //从隐藏文本域中取出商品系统编号
+            productSysNo = ($("#hdf_ProductSysNo").val().length > 0) ? parseInt($("#hdf_ProductSysNo").val()) : 0;
+
+            //如果商品是编辑状态将读取商品信息
+            if (productSysNo > 0) {
+                //通过系统编号来读取商品的信息用于初始化页面
+                $.ajax({
+                    url: "@Url.Action("GetUpdateProductMainInfo", "Product")",
+                    data: JSON.stringify({ id: productSysNo }),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+
+                        oldProductModel = data.Product; //缓存数据
+
+                        //转化并缓存时间戳
+                        //data.Stamp = transJsonDate(data.Stamp, "yyyy-MM-dd HH:mm:ss.SSS");
+                        oldProductModel.Stamp = data.Stamp;
+
+                        //数据绑定到第一个页卡
+                        $("#div_productMainInof").JsonBind(oldProductModel);
+
+                        //绑定商品的分类信息
+                        if (typeof (BindCategory) == "function" && oldProductModel.PdCategory != null) {
+                            BindCategory(oldProductModel.PdCategory.Value);
+                        }
+
+                        //绑定商品描述
+                        if (typeof(BindProductDesc) == "function") {
+                            BindProductDesc(oldProductModel.ProductDesc);
+                        }
+
+
+                    },
+                    error: function(XMLHttpRequest, textStatus, errorThrown) {
+                        //默认错误处理
+                        var error = JSON.parse(XMLHttpRequest.responseText);
+                        alert(error.ErrorMessage);
+                        productInfoMark.Remove();
+                    }
+                });
+            } else {
+                //生产默认数据包
+                oldProductModel = {};
+                oldProductModel.PdCategory = null;
+            }
+
+
+            //初始化保存按钮
+            @if (ViewBag.ReadOnly != null)
+            {
+
+                @:$("button").remove();
+                @:isReadOnly = true;
+            }else if (!AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.PD1001201))
+            {
+                 @:$("button").remove();
+                 @:isReadOnly = true;
+            }
+
+        }
+
+        //设置当前窗口为编辑模式
+        $(document).ready(function() {
+
+            InitAjaxLoading();
+
+            //初始化状态
+            _init();
+
+            //如果是编辑模式就将所有页卡启用,否则必须一步一步保存来使页卡可用
+            if (editModel) {
+                $(".tabNav2 li").addClass('navstart');
+            }
+
+            //设置所有的提示文字（验证提示文字）,为默认的样式：以感叹号icon开头，灰色文字
+            $("span.c9").each(function(index, element) {
+                element = $(element);
+                if (!!element.attr("msg") && element.attr("msg") != "") {
+                    element.addClass("prompt");
+                    element.html(element.attr("msg"));
+                }
+
+                //如果提示信息有ID表示是一个有效的验证提示字段，将对其进行显示格式化
+                if (!!element.attr("id")) {
+                    element = element.attr("id").replace("_error", ""); //通过Id命名规则将输入框Id取出
+                    element = $("#" + element); //查找输入框
+
+                    //如果有输入框将设置焦点事件
+                    if (!!element) {
+                        //当获取焦点是显示提示信息
+                        element.focus(function() {
+                            if ($(this).attr("enablenull") == undefined)
+                                ShowElementValidMessage(this);
+                        });
+                    }
+                }
+            });
+
+            //设置可以为空字段输入空显示，用来显示提示信息
+            $("input[enablenull='true']").change(function() {
+                ShowElementValidMessage(this);
+            });
+
+        });
+
+        //显示验证字段提示信息
+        function ShowElementValidMessage(element) {
+
+            element = $(element); //读取控件
+
+            //如果控件值为空将进行提示信息信息显示，以指导用户填写
+            if ($(element).val() == "") {
+                element = $("#" + element.attr("id") + "_error"); //读取对应的错误验证提示容器
+
+                //如果容器不为空将进行提示操作
+                if (!!element) {
+                    //去除现有提示样式
+                    element.removeClass("error");
+                    element.removeClass("success");
+
+                    //判断是否有提示信息内容，如果没有将当做空白处理，不显示任何数据,否则键显示提示信息
+                    if (!!element.attr("msg") && element.attr("msg").length > 0) {
+
+                        //设置提示样式并显示提示内容
+                        element.addClass("prompt");
+                        element.html(element.attr("msg"));
+                    }
+                }
+            }
+        }
+
+
+        var markObject;
+        var enableAjaxLoader = true;
+
+        function InitAjaxLoading() {
+
+            markObject = $(".case");
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function() {
+                if (enableAjaxLoader) {
+                    ajaxLoadingMask = UI.Mask({
+                        obj: $(markObject),
+                        zindex: 1000
+                    });
+                } else {
+                    ajaxLoadingMask = null;
+                }
+            });
+
+            $(document).ajaxStop(function() {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                    enableAjaxLoader = true;
+                }
+            });
+
+            //用于过滤登录超时
+            $(document).ajaxComplete(function (event, request, settings) {
+                //数据样本 "{"IsLogout":true,"Message":"登录超时，请重新登录","Callback":"UI.Dialog.close();DAO.LoginBox()"}"
+                try {
+                    if (request.responseText.indexOf("登录超时，请重新登录") > 0) {
+                        UI.Dialog.close();
+                        DAO.LoginBox();
+                    }
+                }
+                catch(e)
+                {
+                    ;
+                }
+            });
+
+            //弹出窗口设置
+            $("#copybtn").bind("click", function () {
+                UI.DialogBox({
+                    content: document.getElementById('copycommodity'),
+                    title: '克隆商品',
+                    okVal: '保存',
+                    ok: function () { return false; },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+
+        }
+    </script>
+
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Editor/kindeditor.min.js")"></script>
+}
+
+<input type="hidden" id="hdf_ProductSysNo" value="@ViewBag.ProductSysNo" />
+<div class="case">
+    <div class="boxs m10_t" id="tabboxs">
+        <div class="head_tab">
+            <ul class="tabNav2">
+                <li class="navstart menuon">基本信息</li>
+                <li>商品价格</li>
+                <li>商品图片</li>
+                <li>商品描述</li>
+                <li>扩展属性</li>
+                <li>关联规格商品</li>
+                <li>搭配销售商品</li>
+            </ul>
+        </div>
+        <div class="boxs_con_p10">
+
+            <div class="list2" style="display: block;">
+                @Html.Partial("_UpdateProductMainInfo")
+            </div>
+
+            <div class="list2">
+                @{ Html.RenderAction("UpdateProductPriceInfo"); }
+            </div>
+
+            <div class="list2">
+                @Html.Partial("_UpdateProductImagesInfo")
+            </div>
+
+            <div class="list2">
+                @Html.Partial("_UpdateProductDescriptionNoTemplet")
+            </div>
+
+            <div class="list2">
+                @{Html.RenderAction("UpdateProductAttributeInfo");}
+            </div>
+
+            <div class="list2">
+                @Html.Partial("_UpdateProductAttributeAssociationProduct")
+            </div>
+
+            <div class="list2">
+                @Html.Partial("_UpdateProductCollocation")
+            </div>
+        </div>
+    </div>
+</div>
+

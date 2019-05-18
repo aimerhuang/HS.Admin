@@ -1,0 +1,68 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "门店新建退换货单";
+    @Html.PrivilegeControl(PrivilegeCode.RC1003201, ".RC1003201")
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>门店新建退换货单</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="fl">订单编号</span><input type="text" value="" class="input_small m10_r m10_l fl" id="txtOrderSysNo" search="OrderSysNo"><span class="fl">手机号</span><input type="text" value="" class="input_small m10_r m10_l fl" id="txtMobile" search="CustomerMobile">
+                    <span class="fl">下单时间</span><div class="date_btn120 m10_l m10_r fl">
+                                                    <input type="text" name="txtBDate" id="txtBDate" class="input_ht26" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" search="BeginDate" onfocus="UI.Date({el:'txtBDate'})">
+                        <button onclick="UI.Date({el:'txtBDate'})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span class="fl">-</span><div class="date_btn120 m10_l m10_r fl">
+                                                 <input type="text" name="txtEDate" id="txtEDate" class="input_ht26" value="@DateTime.Now.ToString("yyyy-MM-dd")" search="EndDate" onfocus="UI.Date({el:'txtEDate'})">
+                        <button onclick="UI.Date({el:'txtEDate'})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                    </div>
+                    <button type="button" class="btn btn_ht28 fl" title="查询" id="searchBtn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                </div>
+            </div>
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+    $(document).ready(function () {
+        doSearch();
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/RMA/DoRmaNewQuery/?r=" + Math.random(), "Search", function (p) {
+            p.setParams("HandleDepartment", 20);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            $(".exchangebtn").addClass("disabled");
+            Utils.MaskStop();
+        });
+    }
+
+    function RmaReturn(orderSysNo) {
+        UI.OpenCreatTab("退货:" + orderSysNo, "/Rma/RmaReturn/" + orderSysNo + "?department=20");
+    }
+
+    function RmaExchanges(orderSysNo) {
+        UI.OpenCreatTab("换货:" + orderSysNo, "/Rma/RmaExchanges/" + orderSysNo + "?department=20");
+    }
+</script>

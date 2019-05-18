@@ -1,0 +1,334 @@
+﻿@{
+
+    ViewBag.Title = "经销商会员树形图谱";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.DS1003004, ".DS1003004")
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript">
+        <!--
+    var ppp = '@ViewBag.HighPower';
+        var highpower = false;
+        if (ppp == "True" || ppp == "true")
+            highpower = true;
+        //字符串转换true false
+        var settingDealer = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomWarehouse,
+                selectedMulti: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: TreeNodeOnClickDealer
+            }
+        };
+
+        var settingDealerCustomer = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomWarehouse,
+                selectedMulti: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: TreeNodeOnClickCustomer
+            }
+        };
+
+        var curSelectId = -1;
+        var isSave = false;
+        //避免多余的保存操作
+        //点击节点事件
+        Date.prototype.format = function (format) //author: meizz
+        {
+            var o = {
+                "M+": this.getMonth() + 1, //month
+                "d+": this.getDate(),    //day
+                "h+": this.getHours(),   //hour
+                "m+": this.getMinutes(), //minute
+                "s+": this.getSeconds(), //second
+                "q+": Math.floor((this.getMonth() + 3) / 3),  //quarter
+                "S": this.getMilliseconds() //millisecond
+            }
+            if (/(y+)/.test(format)) format = format.replace(RegExp.$1,
+            (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            for (var k in o) if (new RegExp("(" + k + ")").test(format))
+                format = format.replace(RegExp.$1,
+              RegExp.$1.length == 1 ? o[k] :
+                ("00" + o[k]).substr(("" + o[k]).length));
+            return format;
+        }
+        function formatTime(val) {
+            var re = /-?\d+/;
+            var m = re.exec(val);
+            var d = new Date(parseInt(m[0]));
+            return d.format("yyyy-MM-dd hh:mm:ss");
+        }
+
+        function TreeNodeOnClickDealer(event, treeId, treeNode) {
+            //判断点击的是不是叶子节点。如果不是叶子节点将不做任何操作
+            if (treeNode.children != null && treeNode.children.length != 0) {
+                //myZTreeDelivery.expandNode(treeNode, true, true, true);
+                return;
+            }
+            InitZTreeDealerCustomer(treeNode.oSysNo);
+            $("#treePanelCustomerDetail").html("");
+            $('#keyword').val('');
+            //分销商明细
+            $.get('@Url.Action("GetModel", "Distribution")',
+                { DealerSysNo: treeNode.oSysNo },
+                function (data) {
+                    var html = "<table style='width:100%;'><tbody>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>分销商名称：" + data.DealerName + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>等级：" + data.LevelName + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>联系人：" + data.Contact + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>手机号码：" + data.MobilePhoneNumber + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>座机号码：" + (data.PhoneNumber == null ? "" : data.PhoneNumber) + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>邮箱：" + (data.EmailAddress == null ? "" : data.EmailAddress) + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>会员数：" + data.CustomerNums.toString() + "</dt></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td><dt>会员级别分销商数：" + data.CustomerDealerNums.toString() + "</dt></td></tr>";
+                    html += "</tbody></table>";
+                    $("#treePanelDealerDetail").html(html);
+                });
+        }
+        function TreeNodeOnClickCustomer(event, treeId, treeNode) {
+            $.get('@Url.Action("GetModel", "CRM")',
+                { CrCustomerSysNo: treeNode.id },
+                function (data) {
+                    var gender = "保密";
+                    switch (data.Gender) {
+                        case 1:
+                            gender = "男"; break;
+                        case 2:
+                            gender = "女"; break;
+                        default: break;
+                    }
+
+                    var html = "<table style='width:100%;'><tbody>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding-bottom:5px;display:block;'>";
+                    html += "<td><img style='border-radius:3px;' src='" + data.HeadImage + "'height='65' width='65'></td>";
+                    html += "<td><dl style='padding-left:10px;'><dt><b style='font-size:14px;'>" + (data.NickName == null ? data.Account : data.NickName) + "</b>&nbsp;(" + (data.IsSellBusiness == 1 ? '分销商' : '普通会员') + ")";
+                    html += "</dt><dd>编号：" + data.SysNo + "</dd><dd>账号：" + data.Account + "</dd></dl></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px;";
+                    html += "display:block;'><td style='width:220px;'><dl><dd>是否关注微信：" + (data.Subscribe == '1' ? '已关注' : '未关注') + "</dd><dd>冻结余额：￥" + data.BrokerageFreeze + "</dd></dl></td><td><dl><dd>累计佣金：￥" ;
+                    html += data.BrokerageTotal + "</dd><dd>可用佣金：￥" + data.Brokerage + "</dd></dl></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td style='width:220px;'><dl><dt>姓名：" + (data.Name == null ? "-" : data.Name) + "</dt><dd>性别：";
+                    html += gender + "</dd><dd>生日：" + formatTime(data.Birthday) + "</dd></dl></td><td><dl><dd>地区：</dd><dd>电话：" + (data.MobilePhoneNumber == null ? "" : data.MobilePhoneNumber);
+                    html += "</dd><dd>QQ：-&nbsp;&nbsp;邮箱：-" + (data.EmailAddress == null ? "" : data.EmailAddress) + "</dd></dl></td></tr>";
+                    html += "<tr style='border-bottom:1px solid #cbe9f3; padding:10px 0 5px; display:block;'><td style='width:220px;'>注册时间：" + formatTime(data.RegisterDate) + "</td><td>登录时间：" + formatTime(data.LastLoginDate) + "</td></tr>";
+                    html += "</tbody></table>";
+                    $("#treePanelCustomerDetail").html(html);
+                });
+        }
+
+
+        var myZTreeDealer, myInitZTreeDealerCustomer;
+
+        //初始化ZTree
+
+        function InitZTreeDealer() {
+            markObject = $("#divall");
+            $.ajax({
+                url: '@Url.Action("GetDealerTreeList", "Distribution")',
+                data: {
+                    all: true
+                },
+                success:
+                    function (response) {
+                        if (response != null) {
+
+                            //更具返回结果初始化zTree
+                            myZTreeDealer = $.fn.zTree.init($("#dealerTree"),
+                                settingDealer,
+                                response);
+
+                            //展开所有节点
+                            //myZTreeDealer.expandAll(true);
+                        }
+
+                    },
+
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+
+            });
+
+            }
+
+        function InitZTreeDealerCustomer(DealerSysNo, keyword) {
+            var k = keyword ? keyword : '';
+            markObject = $("#divall");
+            $.ajax({
+                url: '@Url.Action("GetDealerCustomerTreeList", "Distribution")',
+                data: { DealerSysNo: DealerSysNo, keyword: k },
+                success: function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myInitZTreeDealerCustomer = $.fn.zTree.init($("#customerTree"),
+                            settingDealerCustomer,
+                            response);
+
+                        //展开所有节点
+                        //InitZTreeDealerCustomer.expandAll(true);
+
+                    }
+
+                },
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+            });
+        }
+
+        var markObject;
+        //AjaxLoader的mark对象
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //自举函数
+        $(document).ready(function () {
+            $("#treePanelDealerDetail").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelDealer").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelCustomerDetail").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelCustomer").css("height", $(window.parent.document).height() - 286 - 48 + "px");
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+
+            //初始化树
+            InitZTreeDealer();
+
+            $('#btnSearch').click(function () {
+                var keyword = $('#keyword').val();
+                var nodes = myZTreeDealer.getSelectedNodes();
+                if (nodes.length > 0) {
+                    var node = nodes[0];
+                    if (node.children != null && node.children.length != 0) {
+                        return;
+                    }
+                    var dealerSysNo = node.oSysNo;
+                    InitZTreeDealerCustomer(dealerSysNo, keyword);
+                    $("#treePanelCustomerDetail").html("");
+                }
+            });
+        });
+
+    </script>
+
+}
+
+
+
+<div class="case commodity_sortmanage" id="divall">
+    <!--divleft-->
+    <div class="clearfix" style="position: relative; padding-right: 660px; overflow: hidden;">
+
+        <div class="" id="divleft" style="float: left; width: 250px;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleDealer" class="boxs_tit head_m">
+                    <h3>分销商</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelDealer" class="left p5" style="overflow: auto;">
+                        <ul id="dealerTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--divmid-->
+        <div class="m5_l" id="divmid" style="width: 250px; position: absolute; float: left; left: 250px; ">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleDealerDetail" class="boxs_tit head_m">
+                    <h3>分销商明细</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelDealerDetail" class="left p5" style="overflow: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="m5_l" id="divmid" style="float: left; width: 300px; position: absolute; left: 505px; ">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleCustomer" class="boxs_tit head_m">
+                    <h3>会员</h3>
+                </div>
+                <div class="btntooldiv boxs_tool">
+                    <div class="search_btn wd200 m10_l fl">
+                        <input name="keyword" type="text" id="keyword" class="input_ht28" placeholder="昵称/姓名/手机号">
+                        <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelCustomer" class="left p5" style="overflow: auto;">
+                        <ul id="customerTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--divright-->
+        <div class="m5_l" id="divright" style="float: left; width: 100%; position: absolute; left: 811px;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleCustomerDetail" class="boxs_tit head_m">
+                    <h3>会员明细</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelCustomerDetail" class=" left p5" style="overflow: auto;">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!--提交按钮-->
+    <div class="pagination align_c clearfix " id="btn_Panel" style="margin-top: 5px; border: 1px solid #C1C1C1;">
+
+    </div>
+    <!-- test end -->
+</div>
+

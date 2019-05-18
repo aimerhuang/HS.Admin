@@ -1,0 +1,51 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model.Transfer
+@using Hyt.Util
+@model PagedList<Hyt.Model.Procurement.CBPmWareGoods>
+
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="40">编号</th>
+                <th>商品名称</th>
+                <th>规格描述</th>
+                <th>待入库数量</th>
+                <th>库存数量</th>
+                <th>正配送数量</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData.Count > 0)
+                {
+                    var Index = 0;
+                    string cs = string.Empty;
+                    foreach (var item in Model.TData)
+                    {
+                        cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                        <tr class="@cs">
+                            <td>@item.SysNo</td>
+                            <td>@item.ProName</td>
+                            <td>@item.Spec</td>
+                            <td>@item.StayInWare</td>
+                            <td>@(item.WareNum)</td>
+                            <td>@(item.Freeze)</td>
+                        </tr>
+                        Index++;
+                    }
+                }
+                else
+                {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <!--分页开始-->
+    <div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+    <!--分页结束-->
+</div>

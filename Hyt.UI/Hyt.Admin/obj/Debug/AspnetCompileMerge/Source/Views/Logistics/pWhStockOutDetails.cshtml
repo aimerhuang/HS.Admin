@@ -1,0 +1,39 @@
+﻿@model IEnumerable<Hyt.Model.WhStockOutItem>
+
+
+<table id="@ViewBag.tableId" width="100%" border="0" cellspacing="0" cellpadding="0" >
+    <thead>
+        <tr>
+            <th width="210px" class="border_lnone">产品货号</th>
+            <th>产品名称</th>
+            <th width="150px">单价</th>
+            <th width="150px">合计金额</th>
+            <th width="100px">购买数量</th>
+            <th width="120px">签收数量</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        
+        @foreach (var item in Model) {
+            <tr name="@item.OrderItemSysNo">
+           
+                <td class="align_c border_lnone" name="tdProductSysNo">@item.ProductSysNo</td>
+                <td class="align_c">@item.ProductName</td>
+                <td class="align_r red p10_r" name="tdPrice">@item.OriginalPrice.ToString("C")</td>
+                <td class="align_r red p10_r" name="tdAmount">@item.RealSalesAmount.ToString("C")</td>
+                <td name="tdPdQty" class="align_r p10_r">@item.ProductQuantity</td>
+                <td name="tdQty" class="align_r boxs_listtabel p10_r">
+                    <input name="txtQty" num="@item.ProductQuantity" type="text" class="number_input wd40" value="1">
+                    <span name="spanQty" style="display: none">1</span>
+                </td>
+                <td class="align_c">
+                    <button type="button" name="btnEdit" class="btn btn_ht26 m10_r" style="display: none"><span class="icon_pencil"></span><span class="m5_l">编辑</span></button><button type="button" name="btnSave" class="btn btn_ht26 m10_r"><span class="icon_ok"></span><span class="m5_l">保存</span></button><button type="button" name="btnCancel" class="btn btn_ht26"><span class="icon_remove"></span><span class="m5_l">取消</span></button>
+                </td>
+            </tr>
+        
+        }
+        
+    </tbody>
+</table>
+

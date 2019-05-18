@@ -1,0 +1,118 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "退回优惠卡";
+}
+
+
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+
+
+    <form id="form1" method="post">
+	<div class="case">
+    	<div class="boxs">
+        	<div class="boxs_tit head_m">
+              <h3>退回优惠卡</h3>
+            </div>
+	        <div class="boxs_con_c1">
+	            
+    <div class="box_con3">
+
+      
+      <div class="m10_t c6 editpw_pwbox">
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+          <td width="80" align="right"><span class="v_star">*</span>客户帐号：</td>
+            <td width="600">
+                <input type="text" value="" class="m5_l wd160 m10_r" name="customerAccount" maxlength="11" id="customerAccount">
+                <span class="prompt m10_l">填写客户登录帐号</span>
+            </td>
+          <td width="" align="left"></td>
+          <td><span class="m5_l c6"></span></td>
+        </tr>
+          <tr>
+              <td width="80" align="right"><span class="v_star">*</span>优惠卡号：</td>
+              <td width="600">
+                  <input type="text" value="" class="m5_l wd160 m10_r" name="couponCardNo" maxlength="11" id="couponCardNo">
+                  <span class="prompt m10_l">填写要退回的优惠卡号</span>
+              </td>
+              <td width="" align="left"></td>
+              <td>
+              </td>
+          </tr>
+          <tr>
+          <td width="80" align="right">&nbsp;</td>
+              <td width="200"><button id="saveInfo" class="btn btn_ht30 btn_blue m5_l" type="button">
+                                  <span class="icon_save icon_white"></span>
+                                  <span>确定退回</span>
+                              </button></td>
+              <td>&nbsp;</td>
+        </tr>
+      </table>
+      </div>      
+      
+    </div>
+
+                
+	        </div>
+        </div>
+    </div>
+
+    </form>
+
+<script type="text/javascript">
+
+    $(document).ready(function(e) {
+        $("#saveInfo").click(function() {
+
+            if ($("#form1").valid()) {
+                UI.Confirm({
+                    content: '确定要退回该优惠卡吗?',
+                    ok: function () {
+                        $.ajax({
+                            type: "POST",
+                            url: "/Promotion/DoCouponCardReutrn",
+                            data: { customerAccount: $("#customerAccount").val(), couponCardNo: $("#couponCardNo").val() },
+                            success: function(ret) {
+                                if (ret.Status) {
+                                    form1.reset();
+                                    UI.Alert({
+                                        icon: "succeed",
+                                        content: ret.Message
+                                    });
+                                } else {
+                                    Utils.alert(ret.Message);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        });
+        
+        $("#form1").validate({
+            rules: {
+                customerAccount: {
+                    required: true,
+                    maxlength: 20
+                },
+                couponCardNo: {
+                    required: true,
+                    maxlength: 50
+                }
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+    });
+    
+</script>

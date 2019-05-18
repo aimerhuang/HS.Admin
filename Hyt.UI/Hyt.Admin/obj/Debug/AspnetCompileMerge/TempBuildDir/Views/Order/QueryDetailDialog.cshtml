@@ -1,0 +1,61 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+
+@{
+    ViewBag.Title = "快递单查询";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $.ajax({
+                type: "POST",
+                url: "/Order/SendORQueryDetail",
+                data: {
+                    "OverseaCarrier": $("#OverseaCarrier").val(),
+                    "OverseaTrackingNo": $("#OverseaTrackingNo").val()
+                },
+                success: function (data) {
+                    var strJson = data.Message;
+                    var obj = eval('(' + strJson + ')');
+                    var strTbody = "";
+                    var strStatus = "";
+                    if (obj.data["Status"] == "0")
+                        strStatus = "入库状态：未预报";
+                    if (obj.data["Status"] == "1")
+                        strStatus = "入库状态：未入库";
+                    if (obj.data["Status"] == "2")
+                        strStatus = "入库状态：已入库";
+                    strTbody += '<tr><td width="25%">' + strStatus + '</td></tr>';
+                    for (var i = 0; i < obj.data["CommodityList"].length; i++) {
+
+                        strTbody += '<tr><td>商品编码：' + obj.data["CommodityList"][i]["SKU"] + '</td></tr>';
+                        strTbody += '<tr><td>商品名称：' + obj.data["CommodityList"][i]["CommodityName"] + '</td></tr>';
+                        strTbody += '<tr><td>入库数量：' + obj.data["CommodityList"][i]["InboundQuantity"] + '</td></tr>';
+                    }                   
+                    $("#tbody").html(strTbody);
+                }
+            });
+        });
+
+    </script>
+}
+<div class="caseout">
+    <div style="border:1px solid #C9C9C9;">
+        <table width="100%" cellspacing="0" cellpadding="5">
+            <tbody id="tbody">
+ 
+            </tbody>
+        </table>
+    </div>
+</div>
+<input type="hidden" id="OverseaCarrier" value="@ViewBag.OverseaCarrier" />
+<input type="hidden" id="OverseaTrackingNo" value="@ViewBag.OverseaTrackingNo" />
+

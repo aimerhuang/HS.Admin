@@ -1,0 +1,184 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "配送员信用管理";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1007201, ".LG1007201") 
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1007301, ".LG1007301") 
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1007401, ".LG1007401") 
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+
+            doSearch();
+            //快捷状态查询
+            $("#IsAllowBorrow").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+
+            $("#IsAllowDelivery").change(function () {
+                doSearch();
+                //setDefaultValue();
+            });
+
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+
+            $("#WhWarehouse").bind("click", function () {
+                DAO.SelectWhareHouseDialog({
+                    callBack: function (data) {
+                        if (data.length > 0) {
+                            $("#WhWarehouse").val(data[0].name);
+                            $("#WarehouseSysNo").val(data[0].id);
+                            $("#WhWarehouse").focus();
+                        }
+                    }
+                });
+
+            });
+
+        });
+
+        //查询列表
+        function doSearch() {
+            $.get('@Url.Action("DeliveryUserCredit", "Logistics")',
+                {
+                    IsAllowBorrow: $("#IsAllowBorrow").val(),
+                    IsAllowDelivery: $("#IsAllowDelivery").val(),
+                    UserName: $("#UserName").val(),
+                    WarehouseSysNo: $("#WarehouseSysNo").val(),
+                },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl m10_l">是否可配送</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" name="IsAllowDelivery" id="IsAllowDelivery">
+                            <option value="">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许配送)))
+                                {
+                                <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">是否可借货</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" name="IsAllowBorrow" id="IsAllowBorrow">
+                            <option value="">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许借货)))
+                                {
+                                <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">仓库</span>
+                    <div class="fl m10_l   ">
+                        <input type="text" class="input_ht28" id="WhWarehouse"  name="WhWarehouse" value="" readonly="readonly" placeholder="搜索仓库..." />
+                        <input type="hidden" id="WarehouseSysNo" name="WarehouseSysNo">
+                    </div>
+
+                    <div class="search_btn m10_l fl">
+                        <input name="UserName" type="text" id="UserName" class="input_ht28" autocomplete="off" value="" maxlength="20" placeholder="搜索配送员姓名..." />
+                        <button class="btn btn_ht28 wd28" id="search_btn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m10_r LG1007201" onclick="Create()"><span class="icon icon_plus"></span><span class="m5_l">新建</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //新增弹出窗
+        function Create() {
+            var url = '@Url.Action("DeliveryUserCreditAdd", "Logistics")';
+            UI.DialogOpen(url,
+                {
+                    title: '新建配送员信用',
+                    width: 1000,
+                    height: 184,
+                    resize: false
+                },
+                false);
+        }
+
+        //修改弹出窗
+        function Update(whsysno, userSysNo) {
+            var url = '@Url.Action("DeliveryUserCreditUpdate", "Logistics")' + '?DeliveryUserSysNo=' + userSysNo + '&warehouseSysNo=' + whsysno;
+            UI.DialogOpen(url, {
+                title: '修改配送员信用', width: 1000, height: 267,
+                resize: false
+            }, false);
+        }
+
+        //操作成功后执行的函数
+        function ExecSuccess(msg) {
+            UI.tips.tip_alert("tips_shrot tips_success", msg);
+            doSearch();
+        }
+        //删除配送方式
+        function Delete(whsysno, userSysNo) {
+
+            UI.Confirm({
+                content: "您确定删除吗？",
+                ok: function () {
+                    $.post('@Url.Action("LgDeliveryUserCreditDelete")', { deliveryUserSysNo: userSysNo, warehouseSysNo: whsysno }, function (data, status) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data) {
+                            UI.tips.tip_alert('tips_shrot tips_success', '删除成功！');
+                            doSearch();
+                        } else {
+                            UI.Alert({ content: "删除失败" });
+                        }
+
+                    });
+                },
+            }
+            );
+
+        }
+
+    </script>
+}

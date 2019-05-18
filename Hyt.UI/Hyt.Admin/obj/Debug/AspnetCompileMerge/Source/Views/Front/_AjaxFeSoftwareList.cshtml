@@ -1,0 +1,110 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<FeSoftware>
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.FE1012301,".FE1012301")
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.FE1012201,".FE1012201")
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.FE1012601,".FE1012601")
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="0%" style="display: none">
+                <input name="sysNo"  type="checkbox" /></th>
+            <th width="" class="align_l p10_lr">软件标题</th>
+            <th width="" class="align_l p10_lr">显示序号</th>
+            <th width="60">状态</th>
+            <th width="233" class="borde_rnone">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+             if(Model.TData.Count == 0)
+            {
+               <tr class="odd_color trhover">
+                <td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td>
+              </tr>
+                return;
+            }
+             int i = 0;
+             foreach (var item in Model.TData)
+             {
+                 if (i % 2 == 0)
+                 {
+            @Html.Raw("<tr>")
+                 }
+                 else
+                 {
+            @Html.Raw("<tr class='stag_color'>")
+                 }
+                 i++;
+            <td width="0%" style="display: none">
+                <input name="sysNo" type="checkbox" value="@item.SysNo" /></td>
+            <td class="align_l p10_lr">@item.Title</td>
+            <td class="align_l p10_lr">@item.DisplayOrder</td>
+            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ForeStatus.软件下载状态), item.Status)</td>
+            <td>
+                @if (item.Status == (int)Hyt.Model.WorkflowStatus.ForeStatus.软件下载状态.已审)
+                {<button class="btn btn_ht26 FE1012601 forbid btn_red m10_r"><span class="icon icon_audit icon_white"></span><span class="m5_l">取消审核</span></button><button class="btn btn_ht26 FE1012301 disabled m10_r"><span class="icon icon_forbidden"></span><span class="m5_l">作废</span></button><button class="btn btn_ht26 disabled FE1012201"><span class="icon icon_pencil"></span><span class="m5_l">修改</span></button>}
+                else if(item.Status == (int)Hyt.Model.WorkflowStatus.ForeStatus.软件下载状态.作废)
+                {<button class="btn btn_ht26 FE1012601 disabled m10_r"><span class="icon icon_audit"></span><span class="m5_l">审核通过</span></button><button class="btn btn_ht26 FE1012301 disabled m10_r"><span class="icon icon_forbidden"></span><span class="m5_l">作废</span></button><button class="btn btn_ht26 disabled FE1012201"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>}
+                else
+                {<button class="btn btn_ht26 FE1012601 agree btn_blue m10_r"><span class="icon icon_audit icon_white"></span><span class="m5_l">审核通过</span></button><button class="btn btn_ht26 btn_red FE1012301 invalid m10_r"><span class="icon icon_white icon_forbidden"></span><span class="m5_l">作废</span></button><button class="btn btn_ht26 btn_blue showDetail FE1012201"><span class="icon_white icon_pencil"></span><span class="m5_l">修改</span></button>}
+            </td>
+            @Html.Raw("</tr>")
+             }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    function changeStatus(obj, status) {
+        var no = $(obj).closest("tr").find("input:checkbox").val();
+        var jsonData = { status: status, sysno: no };
+        $.ajax({
+            url: "/Front/UpdateFeSoftwareStatus",
+            type: "post",
+            dataType: 'json',
+            data: jsonData,
+            success: function (result) {
+                if (result.result > 0) {
+                    UI.Prompt.Success('操作成功');
+                    doSearch(@Model.CurrentPageIndex);
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.message) {
+                        message = result.message;
+                    }
+                    UI.Prompt.Error(message);
+                }
+            }
+        });
+    }
+
+    $(".forbid, .agree, .invalid").click(function () {
+        var status = 0,content ="";
+        if ($(this).hasClass("forbid")) {
+            status = @Hyt.Model.WorkflowStatus.ForeStatus.软件下载状态.待审.GetHashCode();
+            content = "确定要取消审核吗?";
+        }else if($(this).hasClass("agree")){
+            status = @Hyt.Model.WorkflowStatus.ForeStatus.软件下载状态.已审.GetHashCode();
+            content = "确定要审核通过吗?";
+        }else if($(this).hasClass("invalid")){
+            status = @Hyt.Model.WorkflowStatus.ForeStatus.软件下载状态.作废.GetHashCode();
+            content = "确定要作废该记录吗?";
+        }else{
+            UI.Prompt.Error("按钮状态错误，请刷新重试");
+            return;
+        }
+        var obj = this;
+        UI.Confirm({
+            content: content,
+            ok: function () {
+                changeStatus(obj, status);
+            },
+            cancelVal: '取消',
+            cancel: true
+        });
+
+    });
+</script>

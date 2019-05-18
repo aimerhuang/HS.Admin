@@ -1,0 +1,609 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "组织机构管理";
+    @Html.PrivilegeControl(PrivilegeCode.BS1004101, ".BS1004101");
+    @Html.PrivilegeControl(PrivilegeCode.BS1004201, ".BS1004201");
+    @Html.PrivilegeControl(PrivilegeCode.BS1004301, ".BS1004301");
+    @Html.PrivilegeControl(PrivilegeCode.BS1004401, ".BS1004401");
+}
+@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.unobtrusive-ajax.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/TableBind/TableBind.yui.js")"></script>
+    <script type="text/javascript">
+        var IDMark_Switch = "_switch",
+            IDMark_Icon = "_ico",
+            IDMark_Span = "_span",
+            IDMark_Input = "_input",
+            IDMark_Check = "_check",
+            IDMark_Edit = "_edit",
+            IDMark_Remove = "_remove",
+            IDMark_Ul = "_ul",
+            IDMark_A = "_a";
+
+        var setting = {
+            view: {
+                addHoverDom: addHoverDom,
+                removeHoverDom: removeHoverDom,
+                addDiyDom: addDiyDom,
+                selectedMulti: false
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: TreeNodeOnClick
+            }
+        };
+
+        function addHoverDom(treeId, treeNode) {
+            var id = treeNode.id;
+            var aObj = $("#" + treeNode.tId + IDMark_A);
+            if ($("#treetool_" + id).length > 0) return;
+            var editStr = "<div class='treetool' id='treetool_" + id + "'>";
+            editStr += "<span class='icon icon_pencil icon_gray BS1004301' onfocus='this.blur();' title='修改' data-id='" + id + "' id='btn_edit_" + id + "'></span>";
+            switch (treeNode.status) {
+                case 0:
+                    editStr += "<span class='icon icon_gray icon_ok BS1004301' onfocus='this.blur();' title='启用' data-id='" + id + "' id='btn_status_" + id + "'></span>";
+                    break;
+                case 1:
+                    editStr += "<span class='icon icon_ban_circle icon_gray BS1004301' onfocus='this.blur();' title='禁用' data-id='" + id + "' id='btn_status_" + id + "'></span>";
+                    break;
+                default:
+            }
+            editStr += "<span class='icon icon_remove icon_gray BS1004401' onfocus='this.blur();' title='删除' data-id='" + id + "' id='btn_remove_" + id + "'></span></div>";
+            aObj.append(editStr);
+            //为按钮设置事件
+            var btnEdit = $("#btn_edit_" + id);
+            if (btnEdit) btnEdit.bind("click", editTreeNode);
+            //添加删除事件
+            var btnRemove = $("#btn_remove_" + id);
+            if (btnRemove) btnRemove.bind("click", organizationRemove);
+            //禁用图标按钮事件
+            var btnStatus = $("#btn_status_" + id);
+            if (btnStatus) btnStatus.bind("click", treeNodeStatusChange);
+        };
+
+        function removeHoverDom(treeId, treeNode) {
+            $("#treetool_" + treeNode.id).unbind().remove();
+        };
+
+        function addDiyDom(treeId, treeNode) {
+
+            var parentNode = treeNode.getParentNode(); //父节点
+            //如果文字有ft_lt样式表示父节点是禁用状态
+            if (parentNode && parentNode.status == 0) {
+                treeNode.status = 0;
+            }
+            var aObj = $("#" + treeNode.tId + IDMark_A);
+            //判断是否有fl样式（左浮动），因为右边需要排按钮，所以要左样式兼容。
+            if (!aObj.children(1).hasClass("fl")) {
+                aObj.children(1).addClass("fl");    //添加浮动效果
+            }
+            //如果当行状态是禁用状态就切换可用样式
+            if (treeNode.status == 0) {
+                aObj.addClass("disabled");
+                var objTitle = $("#" + treeNode.tId + IDMark_Span);
+                objTitle.addClass("ft_lt red status fl");
+                aObj.append('<span class="icon_ban_circle fl"></span>');
+            }
+        };
+
+        function treeNodeStatusChange() {
+            //通过向上追溯的到当前节点的Id用着个ID来取得当前节点的Json数据
+            var node = myZTree.getNodeByTId("#" + $(this).parent().parent().parent().attr("id"));
+            //判断父级状态，如果是禁用将不执行操作
+            if (node.getParentNode() != null) {
+                if (node.getParentNode().status == 0) {
+                    UI.Alert({ content: '父级禁用状态，无效操作！', width: '200px' });
+                    return false;
+                }
+            }
+            //获取节点名称拼接提示字符串
+            var title = node.name;
+            title = ($(this).hasClass("icon_ban_circle") ? "[<span class='red'>禁用</span>]" : "[<span class='green'>启用</span>]") + "“" + title + "”";
+            UI.Confirm({
+                content: '您是否要' + title + '?',
+                ok: function () {
+                    $.ajax({
+                        url: "@Url.Action("OrganizationStatusChange", "Basic")",
+                        data: { id: node.id, status: node.status },
+                        success: function (data) {
+                            if (data != null && data.Status == true) {
+                                InitZTree(node.id);
+                                UI.Prompt.Success('操作成功！');
+                            } else {
+                                UI.Prompt.Error('操作失败！');
+                            }
+                        }
+                    });
+                }, width: '200px'
+            });
+        }
+        //删除
+        function organizationRemove() {
+            //追溯上级标签（a标签）Id来找到当前节点数据
+            var node = myZTree.getNodeByTId("#" + $(this).parent().parent().parent().attr("id"));
+            //设置Title
+            var title = node.name;
+            if (node.isParent)
+                title = "<span class='red'>确定要删除“" + title + "”及其子组织机构?</span>";
+            else
+                title = "<span class='red'>确定要删除“" + title + "”?</span>";
+            var parentNode = node.getParentNode();
+            var id = null;
+            if (parentNode) id = parentNode.id;
+            //提示用户是否执行操作
+            UI.Confirm({
+                content: title,
+                ok: function () {
+                    $.ajax({
+                        url: '@Url.Action("OrganizationRemove", "Basic")',
+                        data: { id: node.id },
+                        success: function (data) {
+                            if (data && data.StatusCode == 0) {
+                                UI.Prompt.Success('删除成功！');
+                                InitZTree(id);
+                            } else {
+                                UI.Prompt.Error('操作失败！');
+                            }
+                        }
+                    });
+                }, width: '200px'
+            });
+        }
+        //删除节点
+        function removeTreeNode(e) {
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Prompt.Error('请先选择一个组织机构！');
+                return;
+            }
+
+            var parentNode = treeNode.getParentNode();
+            myZTree.removeNode(treeNode, false);
+            if (parentNode && parentNode.children.length == 0)
+                $("#" + parentNode.tId + "_ul").remove();
+        }
+
+        //扩展删除事件
+        function removeTreeNodeByNode(treeNode) {
+            if (treeNode.length == 0) {
+                UI.Prompt.Error('请先选择一个组织机构！');
+                return;
+            }
+            var parentNode = treeNode.getParentNode();
+            myZTree.removeNode(treeNode, false);
+            if (parentNode && parentNode.children.length == 0)
+                $("#" + parentNode.tId + "_ul").remove();
+        }
+
+        //编辑节点
+        function editTreeNode() {
+            if (checkCurrentTreeNodeIsDisabled()) {
+                UI.Prompt.Error('父级机构或该机构处于禁用状态，无效操作！');
+                return false;
+            }
+            var id = $(this).attr("data-id");
+            if (id == null) {
+                UI.Prompt.Error('请先选择一个组织机构！');
+            } else {
+                var url = '@Url.Action("OrganizationEdit", "Basic")' + '/' + id;
+                UI.DialogOpen(url,
+                    {
+                        width: 650,
+                        height: 325,
+                        title: '修组织机构',
+                        button: [{
+                            name: '保存',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                if (!iframe.document.body) {
+                                    UI.Prompt.Error('页面还没加载完毕呢！');
+                                    return false;
+                                };
+                                iframe.submitOrganization();
+                                return false;
+                            }, focus: true
+                        }, { name: '取消' }]
+                    }, false);
+            }
+            return false;
+        };
+
+        //点击节点事件
+        function TreeNodeOnClick(event, treeId, treeNode) {
+            if (treeNode != null) {
+                var parentNode = treeNode.getParentNode();
+                var status = treeNode.status;
+                if (parentNode) status = parentNode.status;
+                showDetail(treeNode.id, status);
+            }
+        }
+        //显示组织详细信息 id:组织ID，组织状态或父级组织状态可为空
+        function showDetail(id, status) {
+            if (id) {
+                var data = { id: id, status: status };
+                $.get('@Url.Action("OrganizationDetail", "Basic")',
+                        data,
+                        function (ret) {
+                            $('#organization_detail').html(ret);
+                        });
+            }
+        }
+        //选中目标组织
+        function selectNode(id) {
+            var node = myZTree.getNodeByParam("id", id);
+            if (node != null) {
+                //展开节点
+                myZTree.expandNode(node, false, false, true, false);
+                //选中展开的节点
+                myZTree.selectNode(node);
+                //显示组织详细信息
+                showDetail(id, node.status);
+                while (true) {
+                    var parentNode = node.getParentNode();
+                    if (parentNode && parentNode.open == false) {
+                        myZTree.expandNode(parentNode, true, false, false, false);
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        //添加父级节点
+        function AddParentTreeNode() {
+            //节点的位置是由当前节点的父级节点来决定的，默认添加的节点和当前节点同级
+            var id = 0;
+            //获取当前选择节点
+            var nodes = myZTree.getSelectedNodes();
+            if (nodes.length > 0) {
+                //获取当前节点部分信息
+                var treeNode = nodes[0];
+                if (treeNode.pId) {
+                    id = treeNode.pId;
+                }
+            }
+            addTreeNode(id);
+        }
+        //添加叶子节点
+        function AddLeafTreeNode(e) {
+
+            //当前选择节点
+            var nodes = myZTree.getSelectedNodes();
+
+            //获取当前节点部分信息
+            var parentNode = nodes[0];
+
+            //如果当前节点没有就默认添加的是根节点
+            if (parentNode) {
+                var id = parentNode.id;
+                addTreeNode(id);
+            } else {
+                UI.Prompt.Error('请选择您要添加的组织机构下面！');
+            }
+        }
+
+        function addTreeNode(id) {
+            var url = '@Url.Action("OrganizationCreate", "Basic")' + '/' + id;
+            UI.DialogOpen(url,
+                {
+                    width: 650,
+                    height: 325,
+                    title: '添加组织机构',
+                    button: [{
+                        name: '保存',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            if (!iframe.document.body) {
+                                UI.Prompt.Error('页面还没加载完毕呢！');
+                                return false;
+                            };
+                            iframe.submitOrganization();
+                            return false;
+                        }, focus: true
+                    }, { name: '取消' }]
+                }, false);
+        }
+        //节点上移
+        function TreeNodeMoveUp() {
+            TreeControlButtonEnabled(false);
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Prompt.Error('请选择一个组织机构！');
+                return false;
+            }
+            //获取与 treeNode 节点相邻的前一个节点
+            var prevNode = treeNode.getPreNode();
+            if (prevNode == null) { return false; } else {
+
+                if (prevNode.pId == treeNode.pId) {
+
+                    var nodeData = { sourceNodeId: prevNode.id, targetNodeId: treeNode.id, direction: "up" };
+
+                    $.ajax({
+                        url: '@Url.Action("MoveTreeNode")',
+                        data: JSON.stringify(nodeData),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data != null && data.Status) {
+                                myZTree.moveNode(treeNode, prevNode, "next");
+                            } else {
+                                UI.Prompt.Error('操作失败');
+                            }
+                            TreeControlButtonEnabled(true);
+                        },
+                        error: function () {
+                            TreeControlButtonEnabled(true);
+                        }
+                    });
+                }
+                return false;
+            }
+        }
+
+        //节点下移
+        function TreeNodeMoveDown() {
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Prompt.Error('请选择一个组织机构！');
+                return false;
+            }
+            //获取与 treeNode 节点相邻的后一个节点
+            var nextNode = treeNode.getNextNode();
+            if (nextNode == null) { return false; } else {
+                if (nextNode.pId == treeNode.pId) {
+
+                    var nodeData = { sourceNodeId: nextNode.id, targetNodeId: treeNode.id, direction: "down" };
+
+                    $.ajax({
+                        url: '@Url.Action("MoveTreeNode")',
+                        data: JSON.stringify(nodeData),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data != null && data.Status) {
+                                myZTree.moveNode(treeNode, nextNode, "prev");
+                            } else {
+                                UI.Prompt.Error('操作失败');
+                            }
+                            TreeControlButtonEnabled(true);
+                        },
+                        error: function () {
+                            TreeControlButtonEnabled(true);
+                        }
+                    });
+                }
+                return false;
+            }
+        }
+
+        //重置左右容器高度
+        function resizeCalBack() {
+            var h = $(document).height() - 64 - $("#treeTitle").height() - $("#treeControlPanel").height();
+            $("#treePanel").css("height", h);
+        }
+
+        //删除选择的行
+        function TableRowDeleteSelected(tr) {
+            $(tr).each(function (index, element) {
+                $(element).remove();
+            });
+        }
+
+        //检查当前节点是否是禁用状态
+        function checkCurrentTreeNodeIsDisabled() {
+            var nodes = myZTree.getSelectedNodes();
+            if (nodes.length == 0)
+                return false;
+            var node = nodes[0];
+            if (node && !node.isParent && node.status == 0) {
+                return true;
+            }
+            var parentNode = node.getParentNode();
+            if (parentNode && parentNode.status == 0) {
+                return true;
+            }
+            return false;
+        }
+
+        var myZTree;
+        //初始化ZTree
+        function InitZTree(id) {
+
+            $.ajax({
+                url: '@Url.Action("OrganizationMenu", "Basic")',
+                success: function (response) {
+                    if (response.Status) {
+                        //更具返回结果初始化zTree
+                        myZTree = $.fn.zTree.init($("#OrganizationTree"), setting, response.Data);
+                        //默认为收起所以节点
+                        myZTree.ExpandAllStatus = false;
+                        if (id) {
+                            selectNode(id);
+                        }
+                    } else {
+                        UI.Prompt.Error(response.Message);
+                    }
+                }
+            });
+        }
+
+        //AjaxLoader 设置遮罩层
+        var ajaxLoadingMask;
+        //设置AjaxLoader
+        function InitAjaxLoading() {
+            $("#divOrganization").ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $("#divOrganization"),
+                    zindex: 1000
+                });
+            });
+
+            $("#divOrganization").ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //分类树操作按按钮控制
+        //enabled: true-启用按钮  false-停用按钮
+        function TreeControlButtonEnabled(enabled) {
+
+            //判断是启用还是停用
+            if (enabled)
+                $("button", "#treeControlPanel").attr("disabled", null);
+            else
+                $("button", "#treeControlPanel").attr("disabled", enabled);
+        }
+        function expandNode(e) {
+            type = e.data.type;
+            if (type == "expandAll") {
+                myZTree.expandAll(true);
+                $("#collapseAllBtn").show();
+                $("#expandAllBtn").hide();
+            } else if (type == "collapseAll") {
+                myZTree.expandAll(false);
+                $("#collapseAllBtn").hide();
+                $("#expandAllBtn").show();
+            }
+        }
+        function showTip(tip,id) {
+            UI.tips.tip_alert('tips_success', tip);
+            InitZTree(id);
+        }
+        $(function () {
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+            @{
+                if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.BS1004101))
+                {
+                    @Html.Raw("InitZTree(null);");
+                }
+            }
+            //页面大小改变是要从新计算布局，应为要在第一屏时左右两边都是自适应高度到最大化
+            $(window).resize(resizeCalBack);
+            resizeCalBack();
+
+            //设置添加同级节点按钮点击事件
+            $("#addParent").click(function () {
+                if (checkCurrentTreeNodeIsDisabled()) {
+                    UI.Prompt.Error('父级机构或该机构处于禁用状态，无效操作！');
+                } else {
+                    AddParentTreeNode();
+                }
+                return false;
+            });
+
+            //设置添加子级节点按钮点击事件
+            $("#addLeaf").bind("click", { isParent: false }, function () {
+                if (checkCurrentTreeNodeIsDisabled()) {
+                    UI.Prompt.Error('父级机构或该机构处于禁用状态，无效操作！');
+                } else {
+                    AddLeafTreeNode($("#addLeaf"));
+                }
+                return false;
+            });
+            $("#expandAllBtn").bind("click", { type: "expandAll" }, expandNode);
+            $("#collapseAllBtn").bind("click", { type: "collapseAll" }, expandNode).hide();
+        });
+    </script>
+
+}
+@section HeadCss
+{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+
+    <style type="text/css">
+        .ztree li a.curSelectedNode {
+            width: 95%;
+            border: solid 1px #ffb951;
+            padding-top: 1px;
+            padding-bottom: 0;
+        }
+
+        #OrganizationTree a {
+            width: 95%;
+            *width: 85%;
+            border: solid 1px #fff;
+        }
+
+            #OrganizationTree a.curSelectedNode {
+                border: solid 1px #ffb951;
+            }
+
+        .ztree li a:hover {
+            background-color: #FFE6B0;
+            border: solid 1px #FFE6B0;
+        }
+
+        tr.selected {
+            background-color: #FFE6B0;
+        }
+
+        .ztree li span.button {
+            float: left;
+        }
+    </style>
+}
+<div class="case commodity_sortmanage">
+    <!--sortmanage_fl-->
+    <div class="sortmanage_fl">
+        <div id="divOrganization BS1004101" class="boxs">
+            <!--有导航条时-->
+            <div id="treeTitle" class="boxs_tit head_m" style="width: 345px;">
+                <h3>组织机构管理</h3>
+            </div>
+            <div class="comp5" style="padding: 0; width: 365px;">
+                <div id="treeControlPanel" class="btntooldiv boxs_tool">
+                    <button class="btn btn_ht26 btn_blue BS1004201" onclick="return false;" id="addParent">
+                        <span class="icon icon_plus icon_white"></span><span>增加同级</span>
+                    </button>
+                    <button class="btn btn_ht26 btn_blue BS1004201" onclick="return false;" id="addLeaf">
+                        <span class="icon icon_plus_sign icon_white"></span><span>增加子级</span>
+                    </button>
+                    <button class="btn btn_ht26 btn_green BS1004301" onclick="TreeNodeMoveUp()" id="upmove">
+                        <span class="icon icon_circle_arrow_up icon_white"></span><span>上移</span>
+                    </button>
+                    <button class="btn btn_ht26 btn_green BS1004301" onclick="TreeNodeMoveDown()" id="downmove">
+                        <span class="icon icon_circle_arrow_down icon_white"></span><span>下移</span>
+                    </button>
+                    <button class="btn btn_ht26 btn_orange BS1004101" id="expandAllBtn">
+                        <span class="icon icon_briefcase icon_white"></span><span>展开</span>
+                    </button>
+                    <button class="btn btn_ht26 btn_orange BS1004101" id="collapseAllBtn"><span class="icon icon_briefcase icon_white"></span><span>折叠</span></button>
+                </div>
+
+                <div id="treePanel" class="zTreeDemoBackground p5 left" style="overflow-y: auto;">
+                    <ul id="OrganizationTree" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sortmanage_fr">
+        <div class="boxs_tit head_m">
+            <h3>组织机构信息</h3>
+        </div>
+        <div id="organization_detail" class="boxs_con_c1">
+            <div class="boxs_tool">
+                请左边选择要查看的组织机构
+            </div>
+        </div>
+    </div>
+
+</div>
+

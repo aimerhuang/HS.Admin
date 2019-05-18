@@ -1,0 +1,394 @@
+﻿@{
+    ViewBag.Title = "FeSoftwareAddOrEdit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.FeSoftware
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript">
+        function SaveFeSoftwareList(data) {
+            if (!!data) {
+                //添加数据
+                var row = $("#trTmp").clone().html().replace('$SysNo', data.SysNo).replace('$DownloadUrl', data.DownloadUrl).replace("$SoftIcon", data.SoftIcon).replace("$SoftIcon", printSoftIcon(data.SoftIcon));
+                row = row.replace('$Name', data.Name).replace('$VersionNumber', data.VersionNumber).replace('$DisplayOrder', data.DisplayOrder);
+                if (data.SysNo > 0) {
+                    //修改数据
+                    $("#listSoftware tr").each(function () {
+                        if ($(this).find(".SysNo").val() == data.SysNo) {
+                            $(this).replaceWith(row);
+                        }
+                    });
+                } else if (data.Index > 0) {
+                    $("#listSoftware tr:eq(" + data.Index + ")").replaceWith(row);
+                }else {                   
+                    $("#listSoftware").find("tbody").append(row);
+                    $(".nodatarow").remove();
+                }
+                resetRowClass();
+            }
+            return false;
+        }
+
+        function printSoftIcon(value)
+        {
+            var arr = [];
+            arr[10] = "pg3.png";
+            arr[20] = "pg1.png";
+            arr[30] = "pg2.png";
+           return '<img src="/Theme/images/' + arr[value] + '" />';
+        }
+
+        //重置软件列表样式
+        function resetRowClass() {
+            $("#listSoftware tr").removeClass("stag_color");
+            $("#listSoftware tr:odd").addClass("stag_color");
+        }
+
+        $(function () {
+            //初始化编辑控件
+            var er = UI.Editor("#Description", {});
+
+            Array.prototype.isUnique = function () {
+                var hash = {};
+                for (var i in this) {
+                    if (hash[this[i]])
+                        return false;
+                    hash[this[i]] = true;
+                }
+                return true;
+            }
+
+            //表单验证
+            $("#FeSoftwareForm").validate({
+                rules: {
+                    Title: {
+                        required: true,
+                        maxlength: 50
+                    },
+                    SoftCategorySysNo: {
+                        min:1
+                    },
+                    HeadLine: {
+                        required: true,
+                        maxlength:250
+                    },
+                    Description: {
+                        required:true,
+                    },
+                    DisplayOrder: {
+                        digits: true
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "分类名称必填",
+                        maxlength: "长度超出50个字"
+                    },
+                    SoftCategorySysNo: {
+                        min:"软件分类必选"
+                    },
+                    HeadLine: {
+                        required: "软件摘要必填",
+                        maxlength: "摘要250字以内"
+                    },
+                    Description: {
+                        required: "软件介绍必填",
+                    },
+                    DisplayOrder: {
+                        digits: "必须为整数"
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+                ignore: ""
+            });
+
+            //选择软件分类功能
+            $("#btn_selectSoftCategory").click(function () {
+                DAO.SelectFeSoftCategory({
+                    callBack: function (data) {
+                        if (data != null && data.sysno != null) {
+                            $("#txtSoftCategory").val(data.name);
+                            $("#SoftCategorySysNo").val(data.sysno);
+                        }
+                    }
+                });
+                return false;
+            });
+
+            //添加软件列表
+            $("#addSoftwareList").click(function () {
+                var url = '/Front/FeSoftwareListAddOrEdit';
+                UI.DialogOpen(url, {
+                    title: '软件分类创建',
+                    width: '650px',
+                    height: '255px'
+                }, false);
+            });
+
+            //组装form数据
+            function generalFormData() {
+                er.sync();
+                $("#Description").val(encodeURIComponent($("#Description").val()));
+                var data = $("#FeSoftwareForm").serializeArray();
+                var items = [], textItems = [];
+                var reg = /^\s*$/g;
+                var isHasEmpty = false;
+                $("#listSoftware tr").each(function () {
+                    if ($(this).find("input:hidden").length > 0) {
+                        var item = {};
+                        item.SysNo = $(this).find("input.SysNo").val();
+                        item.DownloadUrl = $(this).find("input.DownloadUrl").val();
+                        item.SoftIcon = $(this).find("input.SoftIcon").val();                            
+                        item.Name = $.trim($(this).find("td:eq(2)").text());
+                        item.VersionNumber = $.trim($(this).find("td:eq(3)").text());
+                        item.DisplayOrder = $.trim($(this).find("td:eq(4)").text());                            
+                        textItems.push(item.Name);
+                        if (reg.test(item.Name)) {
+                            UI.Prompt.Error("软件名称不能为空");
+                            isHasEmpty = true;
+                        }
+                        items.push(item);
+                    }
+                });
+                //有空的选项
+                if (isHasEmpty) {
+                    return false;
+                }
+                if (!textItems.isUnique()) {
+                    UI.Prompt.Error("软件名称重复");
+                    return false;
+                }
+                data.push({ name: 'items', value: JSON.stringify(items) });          
+                return data;
+            }
+
+            //软件列表修改
+            $("#listSoftware .showDetail").live("click", function () {
+                var sysno = parseInt($(this).closest("tr").find(".SysNo").val());
+                var str = "";
+                if (sysno > 0) {
+                    /*
+                    var url = '/Front/FeSoftwareListAddOrEdit?sysno=' + sysno;
+                    UI.DialogOpen(url, {
+                        title: '软件列表详细信息',
+                        width: '650px',
+                        height: '255px'
+                    }, false);*/
+                    str = '/Front/FeSoftwareListAddOrEdit?sysno=' + sysno;
+                } else {                  
+                    var str = "/Front/FeSoftwareListAddOrEdit?";
+                    str += "SysNo="+ $(this).closest("tr").find("input.SysNo").val();
+                    str += "&DownloadUrl="+ $(this).closest("tr").find("input.DownloadUrl").val();
+                    str += "&SoftIcon=" + $(this).closest("tr").find("input.SoftIcon").val();
+                    str += "&Name=" + $.trim($(this).closest("tr").find("td:eq(2)").text());
+                    str += "&VersionNumber=" +  $.trim($(this).closest("tr").find("td:eq(3)").text());
+                    str += "&DisplayOrder=" + $.trim($(this).closest("tr").find("td:eq(4)").text());
+                    str += "&Index=" + $(this).closest("tr").closest("table").find("tr").index($(this).closest("tr"));
+                }
+                UI.DialogOpen(str, {
+                    title: '软件列表详细信息',
+                    width: '650px',
+                    height: '255px'
+                }, false);
+                return false;
+            });
+            //删除软件
+            $("#listSoftware .btnDel").live("click", function () {
+                var obj = $(this);
+                UI.Confirm({
+                    content: "你确定要删除软件么？",
+                    ok: function () {
+                        obj.closest("tr").remove();
+                        if ($("#listSoftware tr").length < 2) {
+                            $("#listSoftware").find("tbody").html('<tr class="odd_color trhover nodatarow"><td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td></tr>');
+                        }
+                        resetRowClass();
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+                
+            });
+
+            //初始化弹出页面
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            var data = generalFormData();
+                            if ($("#FeSoftwareForm").valid()) {                                
+                                if (data == false) {
+                                    return false;
+                                }
+                                $.post("/Front/FeSoftwareAddOrEdit", data, function (result) {
+                                        if (result.StatusCode > 0) {
+                                            try {
+                                                UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage, true);
+                                            } catch (e) { };
+                                            UI.Dialog.close();
+                                        } else {
+                                            var message = "操作失败";
+                                            if (!!result && !!result.Message) {
+                                                message = result.Message;
+                                                if (result.StatusCode == -2) {
+                                                    $("#name").focus();
+                                                }
+                                            }
+                                            UI.tips.tip_alert("tips_wrong", message);
+                                        }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+            initDialog();
+            resetRowClass();
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="FeSoftwareForm" name="FeSoftwareForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="70" class="nameright border_rnone"><span class="v_star">*</span>软件标题:</td>
+                            <td class="borde_right">
+                                @Html.TextBoxFor(m => m.Title, new { @class = "wd200" })<span id="forTitle" class="prompt m10_l">软件标题,1-50字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>软件分类:</td>
+                            <td class="borde_right">
+                                <input type="text" id="txtSoftCategory" class="wd200" readonly="true" value="@ViewBag.SoftwareCategoryName" />
+                                <button tabindex="5" id="btn_selectSoftCategory" class="btn btn_ht26 m10_r" title="选择软件分类"><span class="icon_th_list"></span><span class="m5_l">选择软件分类</span></button>
+                                <span class="prompt m10_l" id="forSoftCategorySysNo">必须选择分类</span>
+                                <input type="hidden" name="SoftCategorySysNo" id="SoftCategorySysNo" value="@Model.SoftCategorySysNo" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="title30 f12 p20_l ht35  border_left border_right">
+                    &nbsp;
+                    <button class="btn btn_ht26 btn_blue m10_l" type="button" id="addSoftwareList"><span class="icon icon_white icon_plus"></span><span class="m5_l">添加软件列表</span></button>
+                </div>
+            </div>
+
+            <div class="boxs_listtabel m0_l">
+                <table width="100%" class="border_bnone" cellspacing="0" cellpadding="0" border="0" id="listSoftware">
+                    <thead>
+                        <tr>
+                            <th width="0%" class="border_bnone" style="display: none"></th>
+                            <th width="86px" class="border_bnone">软件图标</th>
+                            <th width="" class="border_bnone">软件名称</th>
+                            <th width="80px" class="border_bnone">版本号</th>
+                            <th width="86px" class="border_bnone">显示序号</th>
+                            <th width="148px" class="border_rnone border_bnone">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            if (((List<FeSoftwareList>)ViewBag.SoftwareList).Count == 0)
+                            {
+                            <tr class="odd_color trhover nodatarow">
+                                <td colspan="5" class="align_l p10_l bgr_eb">暂无数据</td>
+                            </tr>
+                            }
+                            foreach (var item in (List<FeSoftwareList>)ViewBag.SoftwareList)
+                            {
+                            <tr>
+                                <td width="0%" style="display: none">
+                                    <input type="hidden" value="@item.SysNo" class="SysNo"  />
+                                    <input type="hidden" value="@item.DownloadUrl" class="DownloadUrl" />
+                                    <input type="hidden" value="@item.SoftIcon" class="SoftIcon" />
+                                </td>
+                                <td><script type="text/ecmascript">document.write(printSoftIcon(@item.SoftIcon))</script></td>
+                                <td>@item.Name</td>
+                                <td>@item.VersionNumber</td>
+                                <td>@item.DisplayOrder</td>
+                                <td class="border_rnone">
+                                    <button class="btn btn_ht26 btn_blue m10_r showDetail"><span class="icon icon_white icon_pencil"></span><span class="m5_l">修改</span></button><button class="btn btn_ht26 btn_red btnDel" type="button"><span class="icon icon_white icon_trash"></span><span class="m5_l">删除</span></button></td>
+                            </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                <table style="display: none;">
+                    <tbody id="trTmp">
+                            <tr>
+                                <td width="0%" style="display: none">
+                                    <input type="hidden" value="$SysNo" class="SysNo"  />
+                                    <input type="hidden" value="$DownloadUrl" class="DownloadUrl" />
+                                    <input type="hidden" value="$SoftIcon" class="SoftIcon" />
+                                </td>
+                                <td>$SoftIcon</td>
+                                <td>$Name</td>
+                                <td>$VersionNumber</td>
+                                <td>$DisplayOrder</td>
+                                <td class="border_rnone">
+                                    <button class="btn btn_ht26  btn_blue m10_r showDetail"><span class="icon icon_white icon_pencil"></span><span class="m5_l">修改</span></button><button class="btn btn_ht26 btn_red btnDel" type="button"><span class="icon icon_white icon_trash"></span><span class="m5_l">删除</span></button></td>
+                            </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="tit_con">
+
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>软件摘要:</td>
+                            <td class="borde_right">
+                                @Html.TextAreaFor(m => m.HeadLine, new { @style = "width:550px;height:55px;", @maxlength="250" })<span id="forHeadLine" class="prompt m10_l">软件摘要,250字以内</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>软件介绍:</td>
+                            <td class="borde_right">
+                                @Html.TextAreaFor(m => m.Description, new { @style = "width:700px;height:200px;visibility: hidden;" })<span id="forDescription" class="prompt m10_l">软件描述必填</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone" style="vertical-align: top;">显示序号:</td>
+                            <td class="borde_right">
+                                @Html.TextBoxFor(m => m.DisplayOrder, new { @class = "wd200" })<span id="forDisplayOrder" class="prompt m10_l">必须为整数</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+
+    </form>
+</div>

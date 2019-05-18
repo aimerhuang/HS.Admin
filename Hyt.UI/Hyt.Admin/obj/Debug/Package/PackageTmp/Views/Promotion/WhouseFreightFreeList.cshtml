@@ -1,0 +1,238 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "仓库免邮";
+}
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>仓库免邮</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="right_tool clearfix">
+                    <span class="fl">后台显示名称</span>
+                    <input id="BackWarehouseName" type="text" class="wd100 fl m10_l m10_r" value="">
+
+                    <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+            </div>
+            <div id="paging" class="boxs_list">
+
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<script type="text/javascript">
+    //选中的记录SysNo列项
+    var checkedsysnolist = [];
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+
+    $(function () {
+        doSearch();
+        @*$('#btnExport').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });*@
+
+        $('#btnImport').click(function () {
+            if (window.frames["pifrmImport"].chooseFile) {
+                window.frames["pifrmImport"].chooseFile();
+            }
+        });
+    });
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Promotion/DoWhouseFreightFreeQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("BackWarehouseName", $("#BackWarehouseName").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.indexOf('成功') !== -1) {
+            UI.tips.tip_alert("tips_success", res);
+            setTimeout(function () {
+                doSearch();
+            }, 1000);
+        } else
+            UI.tips.tip_alert("tips_wrong", res);
+
+    }
+
+    Array.prototype.indexOf = function (val) {
+        for (var i = 0; i < this.length; i++) {
+            if ($.trim(this[i]) == $.trim(val)) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function (val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") != "checked") {
+                    $(this).attr("checked", "checked");
+                    checkedsysnolist.push($(this).val());
+                }
+            });
+        } else {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") == "checked") {
+                    $(this).removeAttr("checked");
+                    checkedsysnolist.remove($(this).val());
+                }
+            });
+        }
+    });
+
+
+
+    $("#paging table tbody input:checkbox").live('click', function () {
+        if ($(this).attr("checked")) {
+            checkedsysnolist.push($(this).val());
+        } else {
+            checkedsysnolist.remove($(this).val());
+        }
+    });
+
+    //导出商品 王耀发 2015-12-38 创建
+    $('#btnExport').click(function () {
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要导出的商品' });
+            return false;
+        }
+        var productStockSysNos = checkedsysnolist;
+        window.location = '@Url.Action("ExportProductStocks")' + "?productStockSysNos=" + JSON.stringify(productStockSysNos);
+        Utils.MaskStop();
+    });
+
+    //取消
+    function cancel(stockId, obj) {
+        var btn = $(obj).prev();
+        var isEdit = false;
+        if (btn.attr("isEdit")) {
+            isEdit = btn.attr("isEdit") == "true";
+        }
+        if (isEdit) {
+            btn.attr("isEdit", false);
+            btn.parents('tr').find('td > span').removeClass('hide');
+            btn.parents('tr').find('td > input[name != sysNo]').addClass('hide');
+            btn.children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+            btn.children('span').eq(1).text('修改');
+            $(obj).hide();
+            $(obj).next().show();
+            $(obj).next().show();
+        }
+    }  
+
+    function btnSave(sysNo,warehouseSysNo, btn) {
+        
+        var isEdit = false;
+        if ($(btn).attr("isEdit")) {
+            isEdit = $(btn).attr("isEdit") == "true";
+        }
+        
+        if (!isEdit) {
+            $(btn).parents('tr').find('td > span').addClass('hide');
+            $(btn).parents('tr').find('td > input[name != sysNo]').removeClass('hide');
+            $(btn).children('span').eq(0).attr('class', 'icon_save').addClass("icon_white");
+            $(btn).children('span').eq(1).text('保存');
+            $(btn).attr("isEdit", true);
+            $(btn).next().show();
+        }
+        else {
+            var inputName = "";
+            if (sysNo > 0) {
+                inputName = "txtFreightFreeAmount_" + sysNo;
+            } else {
+                inputName = "txtFreightFreeAmount_" + warehouseSysNo;
+            }
+            var FreightFreeAmount = $.trim($("input[name='" + inputName + "']").val());
+
+            if (sysNo > 0) {
+                inputName = "isUse_" + sysNo;
+            } else {
+                inputName = "isUse_" + warehouseSysNo;
+            }
+            var IsUse = 0;
+            if($("input[name='" + inputName + "']").attr("checked"))
+            {
+                IsUse = 1
+            }
+
+            if (FreightFreeAmount == "") {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '免邮金额不能为空值');
+                $("input[name='" + inputName + "']").focus();
+                return false;
+            }
+
+            var testRule = /^(([0-9]+\.[0-9]*[0-9][0-9]*)|([0-9]*[0-9][0-9]*\.[0-9]+)|([0-9]*[0-9][0-9]*))$/;
+            if (FreightFreeAmount != "" && !testRule.test(FreightFreeAmount)) {
+                UI.tips.tip_alert('tips_shrot tips_wrong', '免邮金额必须是数值');
+                $("input[name='" + inputName + "']").focus();
+                return false;
+            }
+
+            Ajax.post("/Promotion/SaveWhouseFreightFree/?r=" + Math.random(), "none", function (p) {
+                p.setParams("SysNo", sysNo);
+                p.setParams("WarehouseSysNo", warehouseSysNo);
+                p.setParams("FreightFreeAmount", FreightFreeAmount);
+                p.setParams("IsUse", IsUse)
+            }, function (data) {
+                if (data.Status == true) {
+                    doSearch();
+                    UI.tips.tip_alert('tips_shrot tips_success', '保存成功。');
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败。');
+                }
+            });
+        }
+    }
+    //取消
+    function cancelStock(obj) {
+        var btn = $(obj).prev();
+        var isEdit = false;
+        if (btn.attr("isEdit")) {
+            isEdit = btn.attr("isEdit") == "true";
+        }
+        if (isEdit) {
+            btn.attr("isEdit", false);
+            btn.parents('tr').find('td > span').removeClass('hide');
+            btn.parents('tr').find('td > input[name != sysNo]').addClass('hide');
+            btn.children('span').eq(0).attr('class', 'icon_pencil').addClass("icon_white");
+            btn.children('span').eq(1).text('设置');
+            $(obj).hide();
+            $(obj).next().show();
+        }
+    }
+</script>
+
+

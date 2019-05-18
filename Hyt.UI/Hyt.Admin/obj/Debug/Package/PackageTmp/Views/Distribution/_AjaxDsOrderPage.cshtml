@@ -1,0 +1,167 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util.Extension
+@using Hyt.Util
+@model PagedList<Hyt.Model.DsOrder>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            @*<th width="53">
+                <input name="sysNo" id="checkall" type="checkbox" />
+                <input name="SpecialPriceSysNoList" id="SpecialPriceSysNoList" type="hidden" value="@Model.IdData" />
+            </th>*@
+            <th width="50px" class="align_l p10_lr">系统编号</th>
+            <th width="70px" class="align_l p10_lr">经销商商城编号</th>
+            <th width="80" class="align_l p10_lr">商城订单号</th>
+            <th width="90">商城订单事物编号</th>
+            <th width="60">商城名称</th>
+            <th width="90">分销商名称</th>
+            @*<th width="140">商城退换货事物编号</th>*@
+            @*<th width="90">卖家昵称</th>*@
+            <th width="100">买家昵称</th>
+            <th width="300">详细地址</th>
+            <th width="60">订单金额</th>
+            <th width="100">付款时间</th>
+            <th width="100">升舱时间</th>
+            @*<th width="90">发货时间</th>
+                <th width="90">签收时间</th>
+                <th width="90">最后回调时间</th>*@
+            <th width="50">状态</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count == 0)
+            {
+                <tr class="odd_color trhover">
+                    <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+                return;
+            }
+            int i = 0;
+            string status = "";
+            foreach (var item in Model.TData)
+            {
+                if (i % 2 == 0)
+                {
+                    @Html.Raw("<tr>")
+                }
+                else
+                {
+                    @Html.Raw("<tr class='stag_color'>")
+                }
+            @*<td>
+                <input name="sysNo" type="checkbox" value="@item.SysNo" spsysno="@item.OrderTransactionSysNo" />
+            </td>*@
+                var mallName = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetmallName(item.DealerMallSysNo);
+                var dealerSysNo = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetdealerSysNo(item.DealerMallSysNo);
+                var dealerName = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetdealerName(item.DealerMallSysNo);
+                var orderSysNo = Hyt.BLL.Distribution.DsSpecialPriceBo.Instance.GetorderSysNo(item.DealerMallSysNo);
+            <td class="align_l blue p10_lr"><a href="javascript:OrderBrowse(@item.SysNo);">@item.SysNo</a></td>
+            <td class="align_l blue p10_lr"><a>@item.DealerMallSysNo</a></td>
+            <td class="align_l p10_lr">@item.MallOrderId</td>
+            <td class="align_l p10_lr">@item.OrderTransactionSysNo</td>
+            <td class="align_l blue p10_lr"><a onclick="browseDealerInfo(@dealerSysNo)" href="javascript:;">@mallName</a></td> 
+            <td class="align_l blue p10_lr"><a onclick="browseDealerInfo(@dealerSysNo)" href="javascript:;">@dealerName</a></td>
+            @*<td class="align_l blue p10_lr"><a>@item.ReturnTransactionSysNo</a></td>*@
+            @*<td class="align_l blue p10_lr"><a>@item.SellerNick</a></td>*@
+            <td class="align_l p10_lr">@item.BuyerNick</td>
+            <td class="align_l p10_lr">@item.StreetAddress</td>
+            <td class="align_l p10_lr">@item.Payment</td>
+            <td class="align_l p10_lr">@item.PayTime</td>
+            <td class="align_l p10_lr">@item.UpgradeTime</td>
+            @*<td class="align_l blue p10_lr"><a>@item.DeliveryTime</a></td>
+                <td class="align_l blue p10_lr"><a>@item.SignTime</a></td>
+                <td class="align_l blue p10_lr"><a>@item.LastCallbackTime</a></td>*@
+                if (item.Status == 10)
+                {
+                    status = "升舱中";
+                }
+                if (item.Status == 20)
+                {
+                    status = "已发货";
+                }
+                if (item.Status == 30)
+                {
+                    status = "已完成";
+                }
+                if (item.Status == -10)
+                {
+                    status = "失败";
+                }
+                <td class="align_l blue p10_lr"><a onclick="browseUpOrderInfo(@item.SysNo)" href="javascript:;">@status</a></td>
+                @Html.Raw("</tr>")
+            }
+        }
+        </tbody>
+    </table>
+    @{Html.RenderPartial("_UrlPaging", Model); }
+
+    <script type="text/javascript">
+        $(function () {
+            //查找已被选中项，checkedsysnolist,checkedsysnopricelist(SpecialPriceProductList.cshtml中全局变量) 王耀发 2015-11-03
+            if (checkedsysnolist.length > 0) {
+                $("#paging input:checkbox").each(function () {
+                    var SysNo = $(this).attr("spsysno");
+                    if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                        $(this).attr("checked", true);
+                    }
+                });
+            }
+
+            if (checkedspsysnopricelist.length > 0) {
+                $("#paging input:checkbox").each(function () {
+                    var SysNo = $(this).attr("spsysno");
+                    var Price = $(this).closest("tr").find(".clsPrice").val();
+                    if (Price != undefined) {
+                        SnoPrice = SysNo + ':' + Price;
+                        if (checkedspsysnopricelist.indexOf(SnoPrice) != '-1') {
+                            $(this).attr("checked", true);
+                        }
+                    }
+                });
+            }
+
+            if (checkedsysnopricelist.length > 0) {
+                $("#paging input:checkbox").each(function () {
+                    var SysNo = $(this).val();
+                    var Price = $(this).closest("tr").find(".clsPrice").val();
+                    if (Price != undefined) {
+                        SnoPrice = SysNo + ':' + Price;
+                        if (checkedsysnopricelist.indexOf(SnoPrice) != '-1') {
+                            $(this).attr("checked", true);
+                        }
+                    }
+                });
+            }
+        });
+        function browseDealerInfo(sysNo) {
+            UI.DialogOpen('/Distribution/DealerInfo?sysNo=' + sysNo, {
+                title: '分销商信息',
+                width: '698px',
+                height: '389px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        };
+        //function  browseUpOrderInfo(sysNo) {
+        //    UI.DialogOpen('/Distribution/UpOrderInfo?sysNo=' + sysNo, {
+        //        title: '升舱订单明细',
+        //        width: '698px',
+        //        height: '389px',
+        //        init: function () {
+        //            this.button({
+        //                name: '关闭'
+        //            });
+        //        }
+        //    }, false);
+        //};
+        //订单详情
+        function OrderBrowse(dealerSysNo) {
+            UI.DialogOpen('/Distribution/OrderBrowse?sysNo=' + dealerSysNo + '&Dialog=true', { title: '升舱订单详情', width: 1250, height: 850 }, false);
+        }
+    </script>

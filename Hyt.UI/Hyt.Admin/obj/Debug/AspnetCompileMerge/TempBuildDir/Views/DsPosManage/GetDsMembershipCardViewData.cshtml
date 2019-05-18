@@ -1,0 +1,84 @@
+﻿@{
+    ViewBag.Title = "GetDsMembershipCardViewData";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p10">
+    <div class="boxs_detail_dispay boxs_con_c1">
+        <div class="tit_con">
+            <form method="POST" id="form1" name="form1">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone border_bnone">
+                    <tbody>
+                       
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">会员名称:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsMembershipCard).UserName)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">会员卡号:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsMembershipCard).CardNumber)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">联系电话:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsMembershipCard).LinkTele)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">生日:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsMembershipCard).Birthday.ToString("yyyy-MM-dd"))
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">会员等级:</td>
+                            <td width="42%" class="border_right">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsMembershipCard).LevelName)
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">拥有积分:</td>
+                            <td width="40%">
+                                @((ViewBag.Order as Hyt.Model.Pos.CBDsMembershipCard).PointIntegral)
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="boxs_con_c1 m5_t border_tnone">
+        <div class="boxs_listtabel">
+            <!--/表格列表区-->
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                <thead>
+                    <tr>
+                        <th width="20%">订单编号</th>
+                        <th width="30%">获得积分</th>
+                        <th width="10%">描述备注</th>
+                        <th width="8%">类型</th>
+                        
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var indx = 0;
+                        foreach (var item in ViewBag.ItemList as List<Hyt.Model.Pos.MemberPointHistory>)
+                        {
+                            <tr @(indx % 2 == 0 ? "" : "class = stag_color")>
+                                <td>
+                                    @item.mph_OrderNumber
+                                </td>
+                                <td>@item.mph_Point</td>
+                                <td>@item.mph_Text</td>
+                                <td>@item.mph_TypeName</td>
+
+                            </tr>
+                            indx++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+
+</div>

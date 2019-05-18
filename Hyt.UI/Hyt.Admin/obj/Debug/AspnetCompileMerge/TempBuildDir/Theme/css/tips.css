@@ -1,0 +1,43 @@
+﻿@charset "utf-8";
+/* CSS Document */
+.tips{ width:96%; height:40px; z-index:3000; border-width:1px; border-style:solid; line-height:36px; padding:0px 1%; border-radius:3px; font-size:14px; font-weight:bold; position:fixed; top:0; left:1%;}
+.tips_shrot{ width:auto; padding:0px 10px; left:43%; height:30px; line-height:27px; font-size:12px; font-weight:lighter;}
+.tips_warning{ background:#f9f1e9; border-color:#e5bd93; color:#cb7c25;}
+.tips_success{ background:#e5f4e5; border-color:#80cc80; color:#090;}
+.tips_wrong{ background:#f8e8e9; border-color:#df8f92; color:#c30;}
+.tips .icons{ width:24px; height:24px; display:inline-block; background-image:url(../images/tips_icon.png); margin-right:10px; vertical-align:top; *vertical-align:middle; margin-top:7px;*margin-top:0px;}
+.tips_warning .icons{ background-position:0px 0px;}
+.tips_success .icons{ background-position:-24px 0px;}
+.tips_wrong .icons{ background-position:-48px 0px;}
+.tips a{ float:right; width:12px; height:12px;*height:14px; display:inline-block; overflow:hidden; text-decoration:none!important; font-size:16px;font-weight:bold; text-shadow:0 1px 0 #FFF; vertical-align:text-top; line-height:8px;*line-height:13px; margin-top:16px; text-align:center;}
+.tips_warning a{ color:#e5bd92;}
+.tips_success a{ color:#80cc80;}
+.tips_wrong a{ color:#df8f92;}
+.tips_shrot a{ margin-top:11px; margin-left:10px;}
+.tips_shrot.tips_warning .icons{ width:20px; height:20px; background:url(../images/icon_add.gif) 0px 0px no-repeat; margin-top:5px;}
+.tips_shrot.tips_success .icons{ width:14px; height:14px; background:url(../images/tips_icon.png) 0px -24px no-repeat; margin-top:9px;}
+.tips_shrot.tips_wrong .icons{ width:14px; height:14px; background:url(../images/tips_icon.png) -56px -24px no-repeat; margin-top:9px;}
+
+.msg_title{ width:100%; height:38px; border:1px solid #c1c1c1; background:url(../images/title_bg.png) repeat-x; border-radius:3px 3px 0px 0px; padding:0px 10px; line-height:38px; font-size:14px; font-weight:bold; text-shadow:0 1px 0 #f6f6f6;}
+
+
+.msg li{width:100%; padding:0px 10px; height:34px; line-height:34px; border-left:1px solid #c1c1c1; border-right:1px solid #c1c1c1;}
+.msg_gray{ background:#f5f5f5}
+.msg_grayer{ background:#e1e1e1}
+
+.msg_icon{ width:14px; height:14px; vertical-align:text-top; display:inline-block; margin-top:1px; background-image:url(../images/tips_icon.png); background-repeat:no-repeat;}
+.normal_icon{ background-position:-14px -24px;}
+.right_icon{ background-position:0px -24px;}
+.warning_icon{ background-position:-28px -24px;}
+.always_icon{ background-position:-42px -24px;}
+.wrong_icon{ background-position:-56px -24px;}
+
+.cgreen{ color:#138913;}
+.corange{ color:#ba6407;}
+.cblue{ color:#2592db;}
+.creds{ color:#c53927;}
+
+/*radio开关*/
+.radio_switch{ background:url(../images/tips_icon.png) no-repeat -117px 0; width:60px; height:24px; cursor:pointer}
+.radio_switch.close{ background-position:-182px 0;}
+

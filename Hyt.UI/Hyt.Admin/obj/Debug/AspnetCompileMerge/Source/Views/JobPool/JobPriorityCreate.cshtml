@@ -1,0 +1,128 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.SyJobPoolPriority
+@{
+    ViewBag.Title = "任务池优先级编辑";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#PriorityForm").validate({
+                rules: {
+                    Priority: {
+                        required: true,
+                        number: true,
+                        min: 1
+                    },
+                    PriorityDescription:{
+                        required: true
+                         , maxlength: 50
+                    }
+                },
+                messages: {
+                    Priority: {
+                        required: "优先级必填",
+                        number: "必须为数字",
+                        min:"最小值为1"
+                    },
+                    PriorityDescription: {
+                        required: "优先级名称必填"
+                       ,maxlength: "长度超出50个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#PriorityForm").valid()) {
+                                $.post('/JobPool/SaveJobPriority/', $("#PriorityForm").serialize(), function (result) {
+                                    if (result.Status) {
+                                            try {
+                                                UI.Dialog.opener.doSearch();
+                                            } catch (e) { };
+                                                UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="PriorityForm" name="PriorityForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>优先级</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Priority" id="Priority" class="wd200" value="@if (Model != null && Model.Priority>0)
+                                                                                                      {
+                                                                                                          @Model.Priority
+                                                                                                      }" maxlength="3"/><span class="prompt m10_l" id="c_Priority">优先级必填，且只能为数字</span>
+                            </td>
+                        </tr>
+                         <tr>
+                            <td width="20%" class="nameright border_rnone">优先级编码</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="PriorityCode" id="PriorityCode" class="wd200" maxlength="20" value="@Model.PriorityCode" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright" valign="top"><span class="v_star">*</span>优先级名称</td>
+                            <td colspan="3">
+                                <textarea class="wd200" name="PriorityDescription" id="PriorityDescription">@Model.PriorityDescription</textarea><span class="prompt m10_l" id="c_PriorityDescription">优先级名称必填</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>
+

@@ -1,0 +1,102 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "系统消息";
+
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+            //$("#DeliveryTypeName").defaultValue("搜索配送方式名称...");
+            //查询录入框点击事件
+            setDefaultValue();
+            doSearch();
+            //快捷状态查询
+            $("#Status").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+            $("#ParentSysNo").change(function () {
+                doSearch();
+                // setDefaultValue();
+            });
+            $("#IsOnlineVisible").change(function () {
+                doSearch();
+                //  setDefaultValue();
+            });
+
+
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+                //  setDefaultValue();
+            });
+
+            $("#DeliveryTypeName").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+            //设置页面默认值
+            function setDefaultValue() {
+                $("#DeliveryTypeName").defaultValue("搜索配送方式名称...");
+            }
+        });
+
+        //查询列表
+        function doSearch() {
+
+            $.get('@Url.Action("SyMessagesList", "Main")',
+                { Status: $("#Status").val() },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28 wd100" id="Status" name="Status">
+                            @{
+                                var slist = (SelectList)ViewBag.Status;
+                                foreach (var sitem in slist)
+                                {
+                                <option value="@sitem.Value">@sitem.Text</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+
+
+
+    </div>
+</div>
+
+@section FooterJs{
+    <script type="text/javascript">
+       
+      
+    </script>
+}

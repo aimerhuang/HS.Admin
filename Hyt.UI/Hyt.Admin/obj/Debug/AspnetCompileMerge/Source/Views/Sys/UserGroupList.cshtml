@@ -1,0 +1,126 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "用户组管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    @Html.PrivilegeControl(PrivilegeCode.SY1007101, ".SY1007101")
+    @Html.PrivilegeControl(PrivilegeCode.SY1007201, ".SY1007201")
+    @Html.PrivilegeControl(PrivilegeCode.SY1007701, ".SY1007701")
+    @Html.PrivilegeControl(PrivilegeCode.SY1007401, ".SY1007401")
+}
+@section HeadCss{
+
+}
+@section HeadJs{
+
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"></span>
+            <h3>用户组管理</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r btn_blue SY1007201" id="addUser" title="新增用户组"><span class="icon_plus icon_white"></span><span class="m5_l">新增用户组</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+
+            <div class="boxs_listtabel">
+                <div id="data">
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //页面刷新
+        function Refresh(msg) {
+            if (msg != null) {
+                UI.Prompt.Success(msg);
+            }
+            $.get("/Sys/UserGroupListData", function (result) {
+                $("#data").html(result);
+            });
+        }
+        function Edit(id) {
+            UI.DialogOpen('/Sys/UserGroupEdit?id=' + id, {
+                width: 600,
+                height: 298,
+                title: '修改用户组信息'
+
+            }, false)
+        }
+        //禁用启用
+        function Disabled(myID, flg) {
+            var str = "确认禁用";
+            if (!flg) {
+                str = "确认启用";
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('/Sys/UserGroupDisabled', { id: myID, disabled: flg }, function (r) {
+                        if (r.Status) {
+                            Refresh("操作成功");
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+        function Delete(myid, btn) {
+            UI.Confirm({
+                content: "确认删除?",
+                ok: function () {
+                    $.post('/Sys/UserGroupDelete', { id: myid }, function (r) {
+                        if (r.Status) {
+                            Refresh("操作成功");
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+
+                    });
+                },
+                cancel: true
+            });
+        }
+        $(document).ready(function () {
+            Refresh();
+            //新增弹出
+            $("#addUser").bind("click", function () {
+
+                UI.DialogOpen('/Sys/UserGroupCreate', {
+                    width: 600,
+                    height: 298,
+                    title: '新增用户组'
+
+                }, false)
+
+            })
+
+        })
+
+    </script>
+}

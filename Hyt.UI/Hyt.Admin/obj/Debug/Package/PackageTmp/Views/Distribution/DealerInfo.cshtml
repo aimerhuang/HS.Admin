@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "DealerInfo";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.Transfer.CBDsDealer
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>分销商信息</title>
+</head>
+<body>
+    <div class="p10">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_left border_right">
+                    <tbody>
+                        <tr>
+                            <td width="80" class="nameright">分销商编号</td>
+                            <td width="134" class="border_right">@Model.SysNo</td>
+
+                            <td width="80" class="nameright">等级名称:</td>
+                            <td class="border_right">@Model.LevelName</td>
+                            <td width="120" rowspan="5">
+                                <div style="width:118px; height:147px; border:1px solid #d6d6d6;">
+                                    <img src="" onerror="javascript:this.src='/Theme/images/defaultpic.gif'" width="118" height="147" alt="" />
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">店铺名称:</td>
+                            <td class="border_right" colspan="3">@(Model.ErpName == null ? "无":Model.ErpName)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">创建日期:</td>
+                            <td class="border_right">@Model.CreatedDate</td>
+                            <td class="nameright">最后修改日期:</td>
+                            <td class="border_right">@Model.LastUpdateDate</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">AppID:</td>
+                            <td class="border_right">@(Model.AppID==null?"无":Model.AppID)</td>
+                            <td class="nameright">AppSecret:</td>
+                            <td class="border_right">@(Model.AppSecret == null ? "无" : Model.AppSecret)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">联系人:</td>
+                            <td class="border_right">@(Model.Contact==null?"无":Model.Contact)</td>
+                            <td class="nameright">联系电话:</td>
+                            <td class="border_right">@(Model.MobilePhoneNumber==null?"无":Model.MobilePhoneNumber)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright">三级分销状态:</td>
+                            @if (Model.ThreeLevels==1)
+                            {
+                                <td colspan="4">启用</td>
+                            }
+                            else
+                            {
+                                <td colspan="4">禁用</td>
+                            }
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

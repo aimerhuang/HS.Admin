@@ -1,0 +1,197 @@
+﻿@{
+    ViewBag.Title = "RMADealerInfo";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.DsReturnItem
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js?v=20140530")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4a129ccbf39c60f2eb556dba394e969d"></script>
+}
+
+<div id="tabboxs" class="@if (Request.QueryString["Dialog"] != null)
+                          {
+                              @:p10
+                                              } else { @: case
+                                              }
+     ">
+<div class=" head_tab">
+    <!--/大选项卡-->
+    <ul class="tabNav">
+        <li id="liBase" class="long"><a href="javascript:void(0);">经销商退换货订单信息</a></li>
+        @*<li id="liOrder" class="" onclick="loadProductBtn()"><a href="javascript:void(0);">退换货商品</a></li>*@
+    </ul>
+</div>
+<div id="tabcon" class="boxs_con_c1 bg_f5">
+    <!--升舱订单基本信息-->
+    <div class="list" style="display: none;">
+        <!--按钮信息-->
+        <!--销售单详情-->
+        <div class="boxs_detail_dispay  @if (ViewBag.ReadOnly != null)
+                                                {
+                                                    @:p10_t
+                                                                                                            } ">
+                    <div class=" tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>退换货订单</h5>
+        </div>
+        <div class="tit_con" style="display: block;">
+
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="9%" class="nameright">系统编号:</td>
+                        <td width="41%" class="borde_right">
+                            @Model.SysNo
+                        </td>
+                        <td width="9%" class="nameright">经销商退换货单编号:</td>
+                        <td width="41%">@Model.DsReturnSysNo</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">商城商品编码:</td>
+                        <td class="borde_right">@Model.MallProductId</td>
+                        <td class="nameright">商城商品属性:</td>
+                        <td>@Model.MallProductAttribute</td>
+                    </tr>
+                    <tr>
+                        <td class="nameright">商城商品名称:</td>
+                        <td class="borde_right">@Model.MallProductName</td>
+                        <td class="nameright">商城订单明细编号:</td>
+                        <td>
+                            @Model.MallItemNo
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tit_dispay">
+            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+            <h5>金额汇总</h5>
+        </div>
+        <div class="tit_con" style="display: block;">
+
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="9%" class="nameright">商品数量:</td>
+                        <td width="92%" colspan="3">
+                            <span id="spanProdcutAmount">
+                                @Model.Quantity
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_bnone">合计:</td>
+                        <td colspan="3" class=" border_bnone">
+                            <span id="spanCashPay">
+                                &yen;@Model.Amount.ToString("N")
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    </form>
+</div>
+<!--退换货商品信息-->
+@*<div class="list" style="display: none;" id="divEditOrder">
+    @Html.Partial("DsRMAorderPdInfo", pdmodel)
+</div>*@
+<script type="text/javascript">
+    $(document).ready(function (e) {
+        //tab选项卡
+        $("#tabboxs").tab({ tabContentObj: "#tabcon" });
+        $("#tabboxs").tab({ tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_p10", tabContent: ".list2" });
+        $("#pName").defaultValue("后台显示名称(商品编号)");
+
+        //表格数据隐藏显示
+        var clickbox = $(".tit_dispay");
+        var btnup = clickbox.children(".more10r").children("span");
+        btnup.toggle(
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").hide();
+                $(this).removeClass("btn_tableup").addClass("btn_tabledown");
+            },
+            function () {
+                $(this).parents(".tit_dispay").next(".tit_con").show();
+                $(this).removeClass("btn_tabledown").addClass("btn_tableup");
+            }
+        );
+
+    });
+    //加载编辑，查看视图
+    function LoadView(isEdit) {
+        if (isEdit) {
+            $("#tAddressEdit").show();
+            $("#tAddressView").hide();
+            $("#tDeliveryEdit").show();
+            $("#tDeliveryView").hide();
+            $("#tInvoiceEdit").show();
+            $("#tInvoiceView").hide();
+            $("#btnStart").hide();
+            $("#btnSave").show();
+            $("#btnBack").show();
+            $("#tPayView").hide();
+            $("#tPayEdit").show();
+            $("#btnChecked").hide();//隐藏审核
+            $("#btnCancel").hide();//隐藏作废
+            $('.tj').css("display", "");
+
+
+        }
+        else {
+            $("#tAddressEdit").hide();
+            $("#tAddressView").show();
+            $("#tDeliveryEdit").hide();
+            $("#tDeliveryView").show();
+            $("#tInvoiceEdit").hide();
+            $("#tInvoiceView").show();
+            $("#btnStart").show();
+            $("#btnSave").hide();
+            $("#btnBack").hide();
+            $("#tPayView").show();
+            $("#tPayEdit").hide();
+            $("#btnChecked").show();//隐藏审核
+            $("#btnCancel").show();//隐藏作废
+            $('.tj').css("display", "none");
+
+        }
+        loadProductBtn();
+    }
+    function loadProductBtn() {
+        var disabled = $("#btnStart").css("display") == "none";
+        if (disabled) {
+            $("#divEditOrder button").each(function () {
+                $(this).attr("disabled", null);
+                $(this).removeClass("disabled");
+            });
+        } else {
+            $("#divEditOrder button").each(function () {
+                if ($(this).attr("notdisable") != "1") {
+                    $(this).attr("disabled", "disabled");
+                    $(this).addClass("disabled");
+                }
+            });
+        }
+    }
+
+</script>

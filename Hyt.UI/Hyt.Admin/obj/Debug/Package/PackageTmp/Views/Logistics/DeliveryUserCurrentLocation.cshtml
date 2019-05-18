@@ -1,0 +1,336 @@
+﻿@using Hyt.Model;
+@model LgDeliveryUserLocation
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "业务员定位查询";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.LG1009101, ".LG1009101") 
+
+}
+<script type="text/javascript" src="@(Hyt.Model.Map.MapRef.MapRefAddress)"></script>
+<script>
+    //// 百度地图API功能
+    //var map = new BMap.Map("allmap");
+    //var point = new BMap.Point(116.331398, 39.897445);
+    //map.centerAndZoom(point, 12);
+    //// 创建地址解析器实例
+    //var myGeo = new BMap.Geocoder();
+    //// 将地址解析结果显示在地图上,并调整地图视野
+    //myGeo.getPoint("北京市海淀区上地10街", function (point) {
+    //    if (point) {
+    //        map.centerAndZoom(point, 16);
+    //        map.addOverlay(new BMap.Marker(point));
+    //    }
+    //}, "北京市");
+    $().ready(function () {
+        $("#WhWarehouse").bind("click", function () {
+            var obj, obj2;
+            obj = $("#WhWarehouse");
+
+            obj2 = DAO.SelectWhareHouse(obj, {
+                chkStyle: "radio",
+                callback: function (data) {
+                    obj.val(data[0].name);
+                    //移除弹出层
+                    obj2.Remove();
+
+                    WhChange(data[0].id);
+                }
+            });
+        });
+    });
+    function WhChange(whSysNo) {
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetDeliveryUser", "Logistics")',
+            data: "whSysNo=" + whSysNo,
+            chche: false,
+            success: function (ret) {
+                $("#deliveryUser").MultDropList({ data: ret });
+            }
+        });
+    }
+
+</script>
+<style>
+    .wraper { float: left; position: relative; }
+    .list { position: absolute; top: 27px; width: 161px; height: 196px; overflow: auto; position: absolute; border: 1px solid #ccc; display: none; background: none repeat scroll 0 0 #f1f1f1; float: left; z-index: 1000000; }
+        .list ul li { padding-left: 10px; padding-top: 2px; padding-bottom: 2px; border-bottom: 1px solid #dddddd; }
+            .list ul li span { margin-left: 10px; }
+    ul { list-style: none outside none; }
+</style>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool border_bottom clearfix" style="overflow:inherit">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">仓库</span>
+                    <div class="fl m10_l">
+                        <input type="text" id="WhWarehouse" name="WhWarehouse" value="" readonly="readonly" />
+                    </div>
+
+
+                    <span class="veralign_t fl m10_l">业务员</span>
+                    <div class="fl m10_l">
+                        <input type="text" id="deliveryUser" name="deliveryUser" value="" readonly="readonly" />
+                        <input type="hidden" id="deliveryUserHide" />
+                    </div>
+
+                    <div class="m10_l fl">
+                        <button class="btn btn_ht26 LG1009101" title="搜索" onclick="ShowPosition()"><span class="icon icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+
+                </div>
+            </div>
+            <!--/百度地图区-->
+            <div class="boxs" style="width: 100%; overflow: hidden;" id="allmap"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#allmap").css("height", $(window.parent.document).height() - 277 + "px");
+
+    var mp = new BMap.Map("allmap");
+    //mp.centerAndZoom("北京市");
+    //mp.enableScrollWheelZoom();
+
+    //ip定位当前城市
+    var myCity = new BMap.LocalCity();
+    myCity.get(myFun);
+    function myFun(result) {
+        mp.centerAndZoom(result.name);
+        mp.enableScrollWheelZoom();
+    }
+
+    //setInterval("ShowPosition()", 10000);//自动更新位置
+
+    //ajax获取数据
+    function ShowPosition() {
+        var deliveryUserSysNo = $("#deliveryUserHide").val();
+        if (!deliveryUserSysNo) {
+            UI.Alert({ content: "请输入查询条件！" });
+            return;
+        }
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("GetDeliveryUserCurrentLocation", "Logistics")',
+            data: { deliveryUserSysNo: deliveryUserSysNo },
+            chche: false,
+            success: function (data) {
+                if (data.IsLogout) {
+                    eval(data.Callback);
+                    return;
+                }
+                DrawPoint(data);
+            },
+            error: function () {
+                UI.Alert({ content: "查询出错,请稍候再试" });
+
+            }
+        });
+    }
+    //地图上标记
+    function DrawPoint(data) {
+
+        if (data.Data != null && data.Data.list != null && data.Data.list.length > 0) {
+            mp.clearOverlays(); //有数据先清除
+        }
+        else {
+            UI.Alert({ content: "没有配送员位置信息" });
+
+            return false;
+        }
+        var point = new BMap.Point(data.Data.list[0].Longitude, data.Data.list[0].Latitude);
+        mp.centerAndZoom(point, 14);
+
+        $.each(data.Data.list, function (idx, item) {
+
+            var txt = item.UserName, mouseoverTxt = txt + " " + JsonTimeConvert(item.GpsDate);
+
+            var myCompOverlay = new ComplexCustomOverlay(new BMap.Point(item.Longitude, item.Latitude), txt, mouseoverTxt);
+
+            mp.addOverlay(myCompOverlay);
+
+        });
+    }
+
+
+
+    // 复杂的自定义覆盖物
+    function ComplexCustomOverlay(point, text, mouseoverText) {
+        this._point = point;
+        this._text = text;
+        this._overText = mouseoverText;
+    }
+    ComplexCustomOverlay.prototype = new BMap.Overlay();
+    ComplexCustomOverlay.prototype.initialize = function (map) {
+        this._map = map;
+        var div = this._div = document.createElement("div");
+        div.style.position = "absolute";
+        div.style.zIndex = BMap.Overlay.getZIndex(this._point.lat);
+        div.style.backgroundColor = "#EE5D5B";
+        div.style.border = "1px solid #BC3B3A";
+        div.style.color = "white";
+        div.style.height = "18px";
+        div.style.padding = "2px";
+        div.style.lineHeight = "18px";
+        div.style.whiteSpace = "nowrap";
+        div.style.MozUserSelect = "none";
+        div.style.fontSize = "12px";
+        var span = this._span = document.createElement("span");
+        div.appendChild(span);
+        span.appendChild(document.createTextNode(this._text));
+        var that = this;
+
+        var arrow = this._arrow = document.createElement("div");
+        arrow.style.background = "url(http://map.baidu.com/fwmap/upload/r/map/fwmap/static/house/images/label.png) no-repeat";
+        arrow.style.position = "absolute";
+        arrow.style.width = "11px";
+        arrow.style.height = "10px";
+        arrow.style.top = "16px";
+        arrow.style.left = "10px";
+        arrow.style.overflow = "hidden";
+        div.appendChild(arrow);
+
+        div.onmouseover = function () {
+            this.style.backgroundColor = "#6BADCA";
+            this.style.borderColor = "#0000ff";
+            this.getElementsByTagName("span")[0].innerHTML = that._overText;
+            arrow.style.backgroundPosition = "0px -20px";
+        };
+
+        div.onmouseout = function () {
+            this.style.backgroundColor = "#EE5D5B";
+            this.style.borderColor = "#BC3B3A";
+            this.getElementsByTagName("span")[0].innerHTML = that._text;
+            arrow.style.backgroundPosition = "0px 0px";
+        };
+
+        mp.getPanes().labelPane.appendChild(div);
+
+        return div;
+    };
+    ComplexCustomOverlay.prototype.draw = function () {
+        var map = this._map;
+        var pixel = map.pointToOverlayPixel(this._point);
+        this._div.style.left = pixel.x - parseInt(this._arrow.style.left) + "px";
+        this._div.style.top = pixel.y - 30 + "px";
+    };
+    //JsonTime Example: /Date(1333468581000)/  \\/Date\((\d+)\)\\/
+    function JsonTimeConvert(unixTime) {
+        var unixTimestamp = new Date(parseInt(unixTime.replace("/Date(", "").replace(")/", "")));
+        return formatDate(unixTimestamp, 'yyyy-MM-dd hh:mm:ss');
+    }
+    function formatDate(date, fmt) {
+        var o = {
+            "M+": date.getMonth() + 1,                 //月份 
+            "d+": date.getDate(),                    //日 
+            "h+": date.getHours(),                   //小时 
+            "m+": date.getMinutes(),                 //分 
+            "s+": date.getSeconds(),                 //秒 
+            "q+": Math.floor((date.getMonth() + 3) / 3), //季度 
+            "S": date.getMilliseconds()             //毫秒 
+        };
+        if (/(y+)/.test(fmt))
+            fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+        for (var k in o)
+            if (new RegExp("(" + k + ")").test(fmt))
+                fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+        return fmt;
+    }
+</script>
+<script>
+    (function ($) {
+        $.fn.extend({
+            MultDropList: function (options) {
+                var op = $.extend({ wraperClass: "wraper", width: "", height: "", data: "", selected: "" }, options);
+                return this.each(function () {
+                    var $this = $(this); //指向TextBox
+                    var $hf = $(this).next(); //指向隐藏控件存
+                    var conSelector = "#" + $this.attr("id") + ",#" + $hf.attr("id");
+                    var $wraper = $(conSelector).wrapAll("<div><div></div></div>").parent().parent().addClass(op.wraperClass);
+
+                    var $list = $('<div class="list" style="z-index: 10;"></div>').appendTo($wraper);
+                    $list.css({ "width": op.width, "height": op.height });
+                    //控制弹出页面的显示与隐藏
+                    $this.click(function (e) {
+                        $(".list").hide();
+                        $list.toggle();
+                        e.stopPropagation();
+                    });
+
+                    $(document).click(function () {
+                        $list.hide();
+                    });
+
+                    $list.filter("*").click(function (e) {
+                        e.stopPropagation();
+                    });
+                    //加载默认数据
+                    $list.append('<ul><li><input type="checkbox" class="selectAll"  value="" /><span>全部</span></li></ul>');
+                    var $ul = $list.find("ul");
+
+                    //加载json数据，初始全选
+
+                    var jsondata = op.data;
+                    for (i = 0; i < jsondata.length; i++) {
+                        $ul.append('<li><input type="checkbox" checked=\"checked\" value="' + jsondata[i].Key + '" /><span>' + jsondata[i].Value + '</span></li>');
+                    }
+
+                    //加载勾选项
+                    var seledArr;
+                    if (op.selected.length > 0) {
+                        seledArr = selected.split(",");
+                    }
+                    else {
+                        seledArr = $hf.val().split(",");
+                    }
+
+                    $.each(seledArr, function (index) {
+                        $("li input[value='" + seledArr[index] + "']", $ul).attr("checked", "checked");
+
+                        var kArr = new Array();
+                        var vArr = new Array();
+                        $("input[class!='selectAll']:checked", $ul).each(function (index2) {
+                            kArr[index2] = $(this).val();
+                            vArr[index2] = $(this).next().text();
+                        });
+                        $this.val(vArr.join(","));
+                        $hf.val(kArr.join(","));
+                    });
+                    //全部选择或全不选
+                    $("li:first input", $ul).click(function () {
+                        if ($(this).attr("checked")) {
+                            $("li input", $ul).attr("checked", "checked");
+                        }
+                        else {
+                            $("li input", $ul).removeAttr("checked");
+                        }
+                    });
+                    //点击其它复选框时，更新隐藏控件值,文本框的值
+                    $("input", $ul).click(function () {
+                        var kArr = new Array();
+                        var vArr = new Array();
+                        $("input[class!='selectAll']:checked", $ul).each(function (index) {
+                            kArr[index] = $(this).val();
+                            vArr[index] = $(this).next().text();
+                        });
+                        $hf.val(kArr.join(","));
+                        $this.val(vArr.join(","));
+                    });
+                });
+            }
+        });
+    })(jQuery);
+
+
+
+</script>
+
+
+

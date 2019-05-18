@@ -1,0 +1,152 @@
+/*=author:陈建 date:2013.5.30=*/
+#header{ width:100%; height:43px; background:url(../images/headtop.png) repeat-x 0 -35px; padding-top:8px; position:relative;}
+#header .add_sc{ position:absolute; top:8px; left:480px; font:normal 30px/30px "微软雅黑"; color:red;}
+#header .logo{ width:447px; height:32px; background:url(../images/headtop.png) repeat-x; margin-left:20px;}
+#header .headtool{ margin-right:20px;}
+#header .headtool a{ float:left; width:28px; height:29px; margin-left:10px;}
+#header .headtool .icon_h{background:url(../images/headtop.png) no-repeat transparent;}
+#header .headtool .home{ background-position:0 -88px;}
+#header .headtool .home:hover{ background-position:-279px -88px;}
+#header .headtool .edit{ background-position:-38px -88px;}
+#header .headtool .edit:hover{ background-position:-313px -88px;}
+#header .headtool .tool{ background-position:-76px -88px;}
+#header .headtool .tool:hover{ background-position:-347px -88px;}
+#header .headtool .return{ background-position:-114px -88px;}
+#header .headtool .return:hover{ background-position:-381px -88px;}
+
+#paymain{ width:100%;}
+.py_lf{ width:100px; float:left; position:relative;}
+.py_lf #btnshow{ background:url(../images/headtop.png) no-repeat 0 -123px; width:16px; height:45px; position:absolute; top:50%; right:-14px; cursor:pointer; z-index:1;}
+.py_lf #btnshow:hover{ background-position:-19px -123px;}
+.py_lf #btnhide{ background:url(../images/headtop.png) no-repeat -39px -123px; width:16px; height:45px; position:absolute; top:50%; right:-14px;cursor:pointer;z-index:1;display:none;}
+.py_lf #btnhide:hover{ background-position:-59px -123px;}
+
+.py_lf .navmain{ width:99px; border-right:#096CAD solid 1px; background-color:#0A85D7; color:#D8F0FE; text-shadow:0 2px 2px #086FB3; position:relative;}
+.py_lf .navmain a{color:#D8F0FE}
+.py_lf .navmain .linelfm{background:url(../images/linelfm.png) repeat-x 0 bottom;}
+.py_lf .navmain .userbox{height:90px; width:100%; padding-top:18px; border-top:#3B9DDF solid 1px;}
+.py_lf .navmain .userbox .userpic{ position:relative; height:58px; width:58px; border:#096CAD solid 1px; border-radius:4px; -moz-border-radius:4px;-webkit-border-radius:4px; margin-left:20px;}
+.py_lf .navmain .userbox .userpic .message{ width:23px; height:20px; background:red; text-align:center; position:absolute; top:0; right:0;border:#D3EEFF solid 1px; border-radius:2px; -moz-border-radius:2px;-webkit-border-radius:2px; border-width:0 0 1px 1px;}
+.py_lf .navmain .userbox .usertxt{ height:26px; line-height:26px; text-align:center}
+.py_lf .navmain .topscroll{  background-color:#0A85D7; width:99px; height:20px; padding-bottom:2px; text-align:center; cursor:pointer; position:absolute; top:108px; left:0px; z-index:1;}
+.py_lf .navmain .topscroll span{ background:url(../images/headtop.png) no-repeat -418px -90px; width:11px; height:8px; display:inline-block; margin-top:6px; }
+.py_lf .navmain .downscroll{ background-color:#0A85D7; width:99px; height:20px; padding-bottom:2px; text-align:center; cursor:pointer; position:absolute; left:0; bottom:0; z-index:1; border-top:#3b9ddf solid 1px;}
+.py_lf .navmain .downscroll span{ background:url(../images/headtop.png) no-repeat -434px -90px; width:11px; height:8px; display:inline-block; margin-top:6px;}
+.py_lf .navmain .topscroll:hover,.py_lf .navmain .downscroll:hover{ background-color:#0A75BC;}
+
+#navmain_inner{ position:relative; overflow:hidden;}
+.py_lf .navmain div ul{ position:relative; padding-top:20px;}
+
+.py_lf .navmain div ul li{ background:url(../images/linelfm.png) repeat-x  center bottom; height:68px; text-align:center; font-size:14px; padding-top:12px; cursor:pointer;}
+.py_lf .navmain div ul li:hover{ background-color:#0A7CC9;}
+.py_lf .navmain div ul li.menuon{ background-color:#096CAD;}
+.py_lf .navmain div ul li .iconnav{ width:36px; height:36px; background:url(../images/navmpic.png) no-repeat; margin-left:31px; }
+*+html .py_lf .navmain div ul li .iconnav{margin-left:0; }
+.py_lf .navmain div ul li .mymenu{ background-position:0 0;}
+.py_lf .navmain div ul li .sysmg{ background-position:-36px 0;}
+.py_lf .navmain div ul li .basemg{ background-position:-72px 0;}
+.py_lf .navmain div ul li .webmg{ background-position:-108px 0;}
+.py_lf .navmain div ul li .commodmg{ background-position:-144px 0;}
+.py_lf .navmain div ul li .ordermg{ background-position:-180px 0;}
+.py_lf .navmain div ul li .warehmg{ background-position:-216px 0;}
+.py_lf .navmain div ul li .returnmg{ background-position:-252px 0;}
+.py_lf .navmain div ul li .financemg{ background-position:-288px 0;}
+.py_lf .navmain div ul li .storemg{ background-position:-324px 0;}
+.py_lf .navmain div ul li .netsalemg{ background-position:-360px 0;}
+.py_lf .navmain div ul li .abnormg{ background-position:-396px 0;}
+.py_lf .navmain div ul li .clientmg{ background-position:0 -39px;}
+.py_lf .navmain div ul li .promotmg{ background-position:-36px -39px;}
+.py_lf .navmain div ul li .s_report{ background-position:-72px -39px;}
+.py_lf .navmain div ul li .logisticmg{ background-position:-108px -39px;}
+.py_lf .navmain div ul li .commonmg{ background-position:-144px -39px;}
+.py_lf .navmain div ul li .marketmg{ background-position:-180px -39px;}
+
+
+
+.py_lf .navson{ width:159px; position:relative; overflow:hidden; background:#D6D6D6 url(../images/linelfsonY.png) repeat-y right; padding-right:2px; text-shadow:0 1px 0 #f5f5f5; display:none;}
+.py_lf .navson .title{ background:url(../images/headtxt.png) repeat-x 0 -53px; height:52px; line-height:52px; padding-left:15px; position:relative; z-index:1}
+.py_lf .navson .title span{ width:26px; height:26px; background:url(../images/navmpicsmall.png) no-repeat; margin:0 10px; float:left; margin-top:13px;}
+
+
+.py_lf .navson .son_topscroll{  background-color:#dcdcdc; height:20px; padding-bottom:2px;  width:159px; text-align:center; cursor:pointer; position:relative;  z-index:2; border-bottom:#c1c1c1 solid 1px;}
+.py_lf .navson .son_topscroll a{ background:url(../images/headtop.png) no-repeat -418px -105px; width:11px; height:8px; display:inline-block; margin-top:6px; }
+.py_lf .navson .son_downscroll{ background-color:#dcdcdc; height:20px;  padding-bottom:2px; width:159px; text-align:center; cursor:pointer; position:absolute; left:0; bottom:0; z-index:1; border-top:#c1c1c1 solid 1px;}
+.py_lf .navson .son_downscroll a{ background:url(../images/headtop.png) no-repeat -434px -105px; width:11px; height:8px; display:inline-block; margin-top:6px;}
+.py_lf .navson .son_topscroll:hover,.py_lf .navmain .son_downscroll:hover{ background-color:#cdcdcd;}
+
+
+
+
+.py_lf .navson ul{ display:block; position:relative; top:0;}
+.py_lf .navson ul li{ display:block; height:42px; line-height:42px; background:url(../images/linelfson.png) repeat-x  center bottom; padding-left:22px;}
+.py_lf .navson ul li.menu_on{ background-color:#EBEBEB;}
+
+.py_lf .navson ul li:hover{ background-color:#E0E0E0; cursor:pointer;}
+.py_lf .navson ul li span{ margin-top:13px; margin-right:10px; display:none;}
+.py_lf .navson ul li:hover span{ display:block;}
+.py_lf .navson ul li span.icon_minus_sign{}
+.py_lf .navson ul li span.icon_minus_sign:hover{background-image:url(../images/signback.png); }
+.py_lf .navson ul li span.icon_plus_sign:hover{background-image:url(../images/signback.png); }
+.py_lf .navson .mymenu .title span{ background-position:0 0;}
+.py_lf .navson .sysmg .title span{ background-position:-33px 0;}
+.py_lf .navson .basemg .title span{ background-position:-66px 0;}
+.py_lf .navson .webmg .title span{ background-position:-99px 0;}
+.py_lf .navson .commodmg .title span{ background-position:-131px 0;}
+.py_lf .navson .ordermg .title span{ background-position:-162px 0;}
+.py_lf .navson .warehmg .title span{ background-position:-193px 0;}
+.py_lf .navson .returnmg .title span{ background-position:-226px 0;}
+.py_lf .navson .financemg .title span{ background-position:-258px 0;}
+.py_lf .navson .storemg .title span{ background-position:-289px 0;}
+.py_lf .navson .netsalemg .title span{ background-position:-322px 0;}
+.py_lf .navson .abnormg .title span{ background-position:-355px 0;}
+.py_lf .navson .clientmg .title span{ background-position:-388px 0;}
+.py_lf .navson .promotmg .title span{ background-position:-421px 0;}
+.py_lf .navson .s_report .title span{ background-position:-455px 0;}
+.py_lf .navson .logisticmg .title span{ background-position:-489px 0;}
+.py_lf .navson .commonmg .title span{ background-position:-522px 0;}
+.py_lf .navson .marketmg .title span{ background-position:-555px 0;}
+.py_lf .navson .show{ display:block;}
+.py_lf .navson .hidden{ display:none;}
+
+
+
+/*paymain_right*/
+.py_rf{ margin-left:100px}
+.py_rf .tabstate{ background:url(../images/headtxt.png) repeat-x 0 -53px; height:52px;  }
+.py_rf .tabstate .tabtop{  height:37px; padding-top:15px; position:relative; overflow:hidden;}
+.py_rf .tabstate .tabtop .arrow{ background:url(../images/headtxt.png) no-repeat; width:21px; height:52px; position:absolute; top:0px;}
+.py_rf .tabstate .tabtop .a_l{ background-position:0 0; left:0px; cursor:pointer; z-index:1;}
+.py_rf .tabstate .tabtop .a_r{ background-position:-24px 0; right:0px; cursor:pointer;z-index:1;}
+.py_rf .tabstate .tabtop .a_l:hover{ background-position:-47px 0;}
+.py_rf .tabstate .tabtop .a_r:hover{ background-position:-70px 0;}
+
+
+#carousel_inner{ position:relative;}
+.py_rf .tabstate .tabtop ul{position:relative; width:4000px;}
+.py_rf .tabstate .tabtop ul li{ float:left; width:100px; background:url(../images/headtxt.png) repeat-x 0 -190px; height:35px; margin-bottom:1px; line-height:32px; border:#c1c1c1 solid 1px; border-bottom:none; margin-left:10px; padding:0 8px; border-top-left-radius:4px; border-top-right-radius:4px; -moz-border-top-left-radius:4px;-moz-border-top-right-radius:4px; -webkit-border-top-left-radius:4px; -webkit-border-top-right-radius:4px; text-shadow:0 1px 0 #f5f5f5; cursor:pointer; }
+.py_rf .tabstate .tabtop ul li a{ display:block; color:#666;}
+.py_rf .tabstate .tabtop ul li.menuon{ background:#ececec; font-weight:bold;}
+.py_rf .tabstate .tabtop ul li.menuon a{ color:#333;}
+.py_rf .tabstate .tabtop ul li span{ width:10px; height:10px; float:right; margin-top:12px; background:url(../images/headtop.png) no-repeat -263px -88px; cursor:pointer;}
+.py_rf .tabstate .tabtop ul li span:hover{ background-position:-263px -103px;}
+.py_rf .tabstate .state_s{ width:330px; float:right; height:47px; line-height:20px; padding-top:5px; padding-left:10px;}
+.py_rf .tabstate .state_s dl{ float:left; width:110px;}
+.py_rf .tabstate .state_s dl dd{ float:right; width:75px;}
+.py_rf .tabstate .state_s .icons{ background:url(../images/headtop.png) no-repeat; width:33px; height:33px; margin-top:4px;}
+.py_rf .tabstate .state_s .v_today{ background-position:-148px -88px;}
+.py_rf .tabstate .state_s .p_number{ background-position:-186px -88px;}
+.py_rf .tabstate .state_s .o_money{ background-position:-224px -88px;}
+
+.py_rf .tabstate.state_s dl{ float:left;}
+.py_rf .location{ background:url(../images/headtxt.png) repeat-x 0 -107px; height:42px; line-height:42px;}
+.py_rf .location .current{ padding-left:15px;}
+.py_rf .location .search{ float:right; padding-top:5px; padding-right:20px; width:80px;}
+.py_rf .location .search table tr td{ padding:0 5px;}
+
+.iframepage iframe{display:none;}
+#py_rf .py_rf_tab{}
+#py_rf .py_rf_Loca{}
+
+/**全屏*/
+.away{ position:absolute; top:42px; left:0px; z-index:5; width:100%; background:#ebebeb;}
+.breadFull{ position:absolute; width:100%; left:0px; top:0px; z-index:5;}

@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "内存键值对详情";
+}
+@helper LoadProperties()
+{
+    if (ViewBag.Propertys != null)
+    {
+        var properties = ViewBag.Propertys as List<string>;
+        if (properties != null && properties.Count > 0)
+        {
+            foreach (var p in properties)
+            {
+                <option value='@p'>@p</option>
+            }
+        }
+    }
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>Key:@ViewBag.Key（@ViewBag.Prompt）</h3>
+        </div>
+        @if(ViewBag.Propertys != null)
+        {
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <div class="right_tool clearfix">
+                        <div class="fl m10_l">
+                            <select class="select_ht28 wd200" Search="propertyName">
+                                @LoadProperties()
+                            </select>
+                        </div>
+                        <div class="search_btn m10_l fl">
+                            <input type="text" id="propertyValue" class="input_ht28" value="" >
+                            <button id="searchBtn" class="btn btn_ht28 wd28" onclick="doSearch();" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                </div>
+                <!--表格列开始-->
+                <div id="paging"></div>
+
+            </div>
+            
+            <script type="text/javascript">
+                $(document).ready(function () {
+
+                    $("#propertyValue").defaultValue("请输入属性值...");
+                    doSearch();
+                });
+
+                //查询列表
+                function doSearch() {
+                    var key = '@ViewBag.Key';
+                    var type = '@ViewBag.Type';
+                    Ajax.get("/Sys/DoCacheDetailQuery", "Search", function (p) {
+                        if ($("#propertyValue").val() != '请输入属性值...') {
+                            p.setParams("propertyValue", $("#propertyValue").val());
+                        }
+                        p.setParams("key", key);
+                        p.setParams("type", type);
+                    }, function (data) {
+                        $('#paging').empty();
+                        $('#paging').html(data);
+                    });
+                }
+            </script>
+        }
+    </div>
+
+</div>

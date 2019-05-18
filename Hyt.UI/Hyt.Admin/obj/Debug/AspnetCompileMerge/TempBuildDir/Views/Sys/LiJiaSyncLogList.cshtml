@@ -1,0 +1,362 @@
+﻿@using Hyt.Admin.Controllers
+@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "利嘉同步日志管理";
+    @Html.PrivilegeControl(PrivilegeCode.EAS1001101, ".EAS1001101")
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+}
+
+<div id="JS_search" class="search_box" style="right:-267px;">
+    <div class="search_title clearfix">
+        <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+    </div>
+    <div class="search_body">
+        <form id="form1">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td width="28%" align="right">状态</td>
+                        <td width="72%">
+                            <select class="wd170" search="Status" id="StatusType" name="Status">
+                                <option selected="selected">全部</option>
+                                @MvcHtmlString.Create(MvcCreateHtml.EnumToString<Extra.Erp.Model.同步状态>(null, null).ToString())
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">接口类型</td>
+                        <td width="72%">
+                            <select name="Name" search="Name" class="wd170">
+                                <option value="" selected="selected">全部</option>
+                                <option value="导入收款单">导入收款单</option>
+                                <option value="导入付款单">导入付款单</option>
+                                <option value="销售出库">销售出库</option>
+                                <option value="销售退货">销售退货</option>
+                                <option value="配送员借货">配送员借货</option>
+                                <option value="配送员还货">配送员还货</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">单据号</td>
+                        <td>
+                            <input type="text" search="VoucherNo" name="VoucherNo" value="" class="wd156">
+                        </td>
+                    </tr>
+                    @*<tr>
+                            <td align="right">创建日期</td>
+                            <td>
+                                <div class="date_btn">
+                                    <input type="text" value="" class="input_ht26" id="BeginDate" search="BeginDate" name="BeginDate" onclick="UI.Date({ el: 'BeginDate', readOnly: true });">
+                                    <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'BeginDate' })"><span class="icon_calendar"></span></button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td align="right">&nbsp;</td>
+                            <td>
+                                <div class="date_btn">
+                                    <input type="text" value="" class="input_ht26" id="EndDate" search="EndDate" name="EndDate" onclick="UI.Date({ el: 'EndDate', readOnly: true });">
+                                    <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'EndDate' })"><span class="icon_calendar"></span></button>
+                                </div>
+                            </td>
+                        </tr>*@
+                    <tr>
+                        <td align="right">同步日期</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" class="input_ht26" id="LastsyncBeginTime" search="LastsyncBeginTime" name="LastsyncBeginTime" onclick="UI.Date({ el: 'LastsyncBeginTime', dateFmt: 'yyyy-MM-dd 00:00:00', readOnly: true });">
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'LastsyncBeginTime', dateFmt: 'yyyy-MM-dd 00:00:00' })"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td align="right">&nbsp;</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" class="input_ht26" id="LastsyncEndDate" search="LastsyncEndDate" name="LastsyncEndDate" onclick="UI.Date({ el: 'LastsyncEndDate',dateFmt: 'yyyy-MM-dd 23:59:59', readOnly: true });">
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'LastsyncEndDate', dateFmt: 'yyyy-MM-dd 23:59:59' })"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">流程编号</td>
+                        <td>
+                            <input type="text" search="FlowIdentify" name="FlowIdentify" class="wd156">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">备注</td>
+                        <td>
+                            <input type="text" search="Remarks" name="Remarks" class="wd156">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">状态代码</td>
+                        <td>
+                            <input type="text" search="StatusCode" name="StatusCode" class="wd156">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">仓库</td>
+                        <td>
+                            <input type="text" id="warehouse_sysno" class=" wd156" onclick="selectWharehouse() ">
+                            <input type="hidden" id="WarehouseSysNo" value="" search="WarehouseSysNo" name="WarehouseSysNo">
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" id="searchBtn" class="btn btn_blue btn_ht30 bold">开始查询</button><button type="reset" title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>利嘉同步日志管理</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="outbtn2"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <div class="left_tool">
+                    <button class="btn btn_red btn_ht26" id="invalidBtn" status="0"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                    <button class="btn btn_ht26 m10_l" id="btnExport"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    <button class="btn btn_blue btn_ht26 m10_l" onclick="SynchronizeToErp(this)"><span class="icon_repeat icon_white"></span><span class="m5_l">批量同步</span></button>
+             
+
+                    @*<button class="btn btn_blue btn_ht26 m10_l" onclick="SynchronizeOrderHaiDaiToMall(this)"><span class="icon_repeat icon_white"></span><span class="m5_l">同步海带订单</span></button>*@
+                </div>
+            </div>
+
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+    <div style="z-index: 9; background-color: #000; opacity: 0.85; filter: alpha(opacity=85); color: white; position: absolute; width: 300px; padding: 5px; display: none;border-radius:4px; -moz-border-radius:4px;-webkit-border-radius:4px;" id="divMsg">
+    </div>
+</div>
+@*选择仓库弹出框*@
+<div id="warehouseList" style="width: 282px; vertical-align:top; position: absolute; display: none">
+    @{
+        Html.RenderAction("WarehouseTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>
+<script src="~/Theme/scripts/jquery.min.js"></script>
+<script type="text/javascript">
+
+    function SynchronizeToErp(obj) {
+
+        var ids = new Array();
+        $('input.checktd').each(function () {
+            if ($(this).attr("checked")) {
+                var mSysNo = $(this).val();
+                ids.push(mSysNo);
+            }
+        });
+
+        if (ids.length == 0) {
+            Utils.alert("请先选择Kis单据！");
+            return false;
+        }
+
+        $(obj).attr("disabled", "disabled").addClass("disabled").find("span").next().html("等待");
+
+        Ajax.postJosn("/ajax/SynchronizeToLiJiaErp", "", function (p) {
+            p.setParams("r", Math.random());
+            p.setParams("sysNos", ids);
+        }, function (data) {
+            UI.Alert({ content: data.Message });
+            $(obj).removeAttr("disabled").removeClass("disabled").find("span").next().html("批量同步");
+            doSearch($("#pageIndex").val());
+        });
+    }
+    function SynchronizeOrder100ToMall(obj) {
+        $(obj).attr("disabled", "disabled").addClass("disabled").find("span").next().html("等待");
+        Ajax.get("/ajax/SynchronizeOrder100ToMall", "", function (p) {
+            p.setParams("r", Math.random());
+        }, function (data) {
+            UI.Alert({ content: data.Message });
+            $(obj).removeAttr("disabled").removeClass("disabled").find("span").next().html("同步订单100");
+        });
+    }
+    //海带订单同步
+    function SynchronizeOrderHaiDaiToMall(obj) {
+
+        $(obj).attr("disabled", "disabled").addClass("disabled").find("span").next().html("等待");
+        Ajax.get("/ajax/SynchronizeOrderHaiDaiToMall", "", function (p) {
+            p.setParams("r", Math.random());
+        }, function (data) {
+            UI.Alert({ content: data.Message });
+            $(obj).removeAttr("disabled").removeClass("disabled").find("span").next().html("同步海带订单");
+        });
+    }
+    $(document).ready(function (e) {
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        //作废
+        $("#invalidBtn").click(function () {
+            var ids = new Array();
+            $('input.checktd').each(function () {
+                if ($(this).attr("checked")) {
+                    var mSysNo = $(this).val();
+                    ids.push(mSysNo);
+                }
+            });
+            if (ids.length == 0) {
+                Utils.alert("请先选择Kis单据！");
+                return false;
+            }
+            UI.DialogBox({
+                width: 300,
+                height: 120,
+                title: "作废原因",
+                content: '<textarea id="txtInvalidRLiJiaons" style="width: 280px; height: 100px; word-break: break-all; word-wrap: break-word;"></textarea>',
+                padding: '10px',
+                button: [{
+                    name: '保存',
+                    callback: function () {
+                        var remarks = parent.$("#txtInvalidRLiJiaons").val();
+                        Ajax.postJosn("/Sys/BatchInvalidLiJia", "", function (p) {
+                            p.setParams("sysNos", ids);
+                            p.setParams("remarks", remarks);
+                            p.setParams("r", Math.random());
+                        }, function (data) {
+                            //UI.Alert({ content: data.Message });
+                            UI.tips.tip_alert('tips_shrot tips_success', data.Message);
+                            //if (data.Status)
+                            doSearch($("#pageIndex").val());
+                        });
+                    }
+                }, { name: '取消' }
+                ]
+            });
+            return false;
+        });
+    });
+
+    function Open(id) {
+        UI.OpenCreatTab('Kis日志编号:' + id, '/Sys/LiJiaDetailList/?sysNo=' + id);
+    }
+    $(document).ready(function () {
+        doSearch(1);
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch(1);
+            return false;
+        });
+    });
+
+    //查询列表
+    function doSearch(pageIndex) {
+        Ajax.get("/Sys/DoLiJiaSyncLogQuery", "search", function (p) {
+            //p.setParams("HandleDepartment",20);
+            p.setParams("id", pageIndex);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+    //查询条件变化时执行
+    $("#StatusType").change(function () {
+        //doSearch();
+    });
+    //LiJia重新同步
+    function LiJiaSyn(sysNo,obj) {
+        $(obj).attr("disabled", "disabled").addClass("disabled").find("span").next().html("等待");
+        Ajax.get("/Sys/LiJiaSyn", "", function (p) {
+            p.setParams("sysNo", sysNo);
+            p.setParams("r", Math.random());
+        }, function (data) {
+            UI.Alert({ content: data.Message });
+
+            //if (data.Status)
+            doSearch($("#pageIndex").val());
+        });
+    }
+
+    function InvalidLiJia(sysNo) {
+
+        UI.DialogBox({
+            width: 300,
+            height: 120,
+            title: sysNo+"作废原因",
+            content: '<textarea id="txInvalidRLiJiaon" style="width: 280px; height: 100px; word-break: break-all; word-wrap: break-word;"></textarea>',
+            padding: '10px',
+            button: [{
+                name: '保存',
+                callback: function () {
+                    var remarks = parent.$("#txInvalidRLiJiaon").val();
+                    Ajax.get("/Sys/InvalidLiJia", "", function (p) {
+                        p.setParams("sysNo", sysNo);
+                        p.setParams("remarks", remarks);
+                        p.setParams("r", Math.random());
+                    }, function (data) {
+                        UI.Alert({ content: data.Message });
+                        //if (data.Status)
+                        doSearch($("#pageIndex").val());
+                    });
+                }
+            }, { name: '取消' }
+            ]
+                });
+    }
+    function hideMsg() {
+        $("#divMsg").css("display", "none");
+    }
+    //显示
+    function showMsg(obj, content) {
+        if (content != null && content != "") {
+            $("#divMsg").html(content);
+            $("#divMsg").css("display", "block");
+            var offset = $(obj).position();
+            $("#divMsg").css("top", offset.top - 10);
+            $("#divMsg").css("left", offset.left + 40);
+        }
+    }
+    $('#btnExport').click(function () {
+        var form = $("#form1");
+        form.attr('action', '@Url.Action("ExportLiJiaSyncLog", "Sys")');
+        form.attr('method', 'post');
+        form.submit();
+        return false;
+    });
+    function selectWharehouse() {
+        DAO.SelectWhareHouseDialog({
+            chkStyle: 'checkbox',
+            isAllWh: true,
+            callBack: function (list) {
+                if (list) {
+                    var ids = [];
+                    var names = [];
+                    for (var i = 0; i < list.length; i++) {
+                        var data = list[i];
+                        if (data) {
+                            ids.push(data.id);
+                            names.push(data.name);
+                        }
+                    }
+                    if (ids.length > 0) {
+                        $('#warehouse_sysno').val(names.join());
+                        $('#WarehouseSysNo').val(ids.join());
+                    }
+                }
+            }
+        });
+    }
+</script>

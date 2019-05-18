@@ -1,0 +1,117 @@
+﻿@model Hyt.Model.Transfer.CBDsDealer
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改分销商";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+}
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+
+                            <td style="width: 10.5%" class="nameright border_rnone">LOGO：</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                <img width="90" height="90" src="@Model.ImageUrl" />
+                            </td>
+                            <td style="width: 10.5%" class="nameright border_rnone">ICON：</td>
+                            <td style="width: 39.5%">
+                                <img width="90" height="90" src="@Model.IcoUrl" />
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td style="width: 10.5%" class="nameright border_rnone">名称：</td>
+                            <td style="width: 39.5%" class="border_right1">
+                                @Model.DealerName
+                            </td>
+                            <td style="width: 10.5%" class="nameright border_rnone">系统账号：</td>
+                            <td style="width: 39.5%">
+                                @Model.Account
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">等级：</td>
+                            <td class="border_right1">
+                                @Model.LevelName
+
+                            </td>
+                            <td class="nameright border_rnone">状态：</td>
+                            <td>
+                                @((Hyt.Model.WorkflowStatus.DistributionStatus.分销商状态)Model.Status)
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td class="nameright border_rnone">联系人</td>
+                            <td class="border_right1">@Model.Contact
+
+                            </td>
+                            <td class="nameright border_rnone">电子邮箱：</td>
+                            <td>@Model.EmailAddress
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">座机号码：</td>
+                            <td class="border_right1">
+                                @Model.PhoneNumber
+
+                            </td>
+                            <td class="nameright border_rnone">手机号码：</td>
+                            <td>
+                                @Model.MobilePhoneNumber
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">ERP编号：</td>
+                            <td class="border_right1">
+                                @Model.ErpCode
+
+                            </td>
+                            <td class="nameright border_rnone">ERP名称：</td>
+                            <td>
+                                @Model.ErpName
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">地区：</td>
+                            <td colspan="3">@Model.AreaAllName
+
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">街道地址：</td>
+                            <td colspan="3">@Model.StreetAddress
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+<script type="text/javascript">
+    (function () {
+        var opener = art.dialog.opener, // 父页面window对象
+            api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+        if (!api) return;
+
+        // 操作对话框
+        api.title('查看分销商')
+            // 自定义按钮
+            .button(
+                {
+                    name: '关闭'
+                }
+            );
+    })();
+</script>

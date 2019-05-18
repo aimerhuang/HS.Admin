@@ -1,0 +1,75 @@
+﻿@{
+    ViewBag.Title = "EditPosMoneyBox";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td class="nameright border_rnone">经销商名：</td>
+                            <td class="">
+                                @((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).DealerName)
+                            </td>
+                            <td class="nameright border_rnone">收银机名：</td>
+                            <td class="">
+                                @((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).PosSYName)
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">当前时间：</td>
+                            <td class="">
+                                @((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).ActionTime.ToString("yyyy-MM-dd"))
+                            </td>
+                            <td class="nameright border_rnone">钱柜金额：</td>
+                            <td class="">
+                                @{
+                                    if (((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).ActionTime.ToString("yyyy-MM-dd")) == DateTime.Now.ToString("yyyy-MM-dd"))
+                                    {
+                                        <input type="text" id="ipt_MoneyBox" value="@((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).SaveMoney.ToString("#,##0.00"))" />
+                                    }
+                                    else
+                                    {
+                                        @((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).SaveMoney.ToString("#,##0.00"))
+                                    }
+                                }
+                                
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+    <div align="center" style="padding:10px; display:@((((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).ActionTime.ToString("yyyy-MM-dd")) == DateTime.Now.ToString("yyyy-MM-dd")) ? "" : "none")">
+        <button type="button" onclick="SaveDsPosMoneyBox()">保存</button>
+  
+        <button type="button" onclick="window.location.href = '/DsPosManage/GetPosMoneyBoxPager'">返回</button>
+    </div>
+</div>
+<script type="text/javascript">
+    function SaveDsPosMoneyBox()
+    {
+        $.ajax({
+            url: '/DsPosManage/SaveDsPosMoneyBox',
+            type: 'POST',
+            cache: false,
+            data: {
+                SysNo: "@((ViewBag.Mod as Hyt.Model.Pos.CBDsPosMoneyBox).SysNo)",
+                SaveMoney: $("#ipt_MoneyBox").val()
+            },
+            success: function (ret) {
+                if (ret.Status) {
+
+                    UI.Prompt.Success("操作成功");
+                }
+                else {
+                    alert(ret.Message);
+                }
+            }
+        });
+    }
+</script>

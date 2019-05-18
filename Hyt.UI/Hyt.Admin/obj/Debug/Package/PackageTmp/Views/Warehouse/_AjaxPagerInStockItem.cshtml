@@ -1,0 +1,77 @@
+﻿@using Hyt.BLL.Product
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.WhStockInItem>
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th width="border_lnone wd75">序号</th>
+            <th class="align_l p10_lr">商品编号</th>
+            <th class="align_l p10_lr">商品编码</th>
+            <th class="align_l p10_lr">后台显示名称</th>
+            <th width="72">入库数量</th>
+            <th width="85">已入库数量</th>
+            <th width="130">本次入库数量</th>
+            <th width="130">商品备注</th>
+            <th width="122">最后更新时间</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TData != null && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {                   
+            <tr>
+                <td class="border_lnone wd75">@(Model.TData.IndexOf(item)+1)</td>
+                <td class="align_l p10_lr">@item.ProductSysNo</td>
+                <td class="align_l p10_lr">@item.ProductErpCode</td>
+                <td class="align_l p10_lr">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                <td>@item.StockInQuantity</td>
+                <td>@item.RealStockInQuantity </td>
+                <td>
+                    @if ((item.StockInQuantity - item.RealStockInQuantity) > 0)
+                    {
+                        <input type="text" name="quantity" id="quantity_@item.ProductSysNo" 
+                           data-totalquantity="@item.StockInQuantity" 
+                           data-qealquantity="@item.RealStockInQuantity" 
+                           data-sysno="@item.SysNo" 
+                           data-pid="@item.ProductSysNo" class="wd90" 
+                           value="@(item.StockInQuantity - item.RealStockInQuantity)" />
+                    }
+                </td>
+                <td>@item.Remarks</td>
+                <td>
+                    @if (item.LastUpdateDate > DateTime.MinValue)
+                    {
+                        @item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    $(function () {
+        $("#item_list").delegate("input[name='quantity']", "blur", function () {
+            var totalquantity = $(this).attr("data-totalquantity");
+            var qealquantity = $(this).attr("data-qealquantity");
+            var val = $(this).val();
+            if (val == '' || isNaN(val)) {
+                $(this).val(totalquantity - qealquantity);
+            }
+            if (checkRate(val) && val > 0) {
+                var count = qealquantity * 1 + val * 1;
+                if (count > totalquantity) {
+                    $(this).val(totalquantity - qealquantity);
+                }
+            }
+        });
+    });
+</script>

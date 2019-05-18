@@ -1,0 +1,25 @@
+﻿@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model IList<Hyt.Model.Transfer.CBProductListItem>
+
+        @{
+            var Index = 0;
+            string cs = string.Empty;
+            foreach (var item in Model)
+            {
+                cs = Index%2 == 0 ? string.Empty : "stag_color";
+                <tr class="@cs">
+                    <td class="border_lnone align_c"><input name="sysNo"  type="checkbox" value="@item.SysNo" /></td>
+                    <td align="center">@item.ErpCode</td>
+                    <td>@item.ProductName</td>
+                    <td align="right"><span class="p10_r red">&yen;@item.Price</span></td>
+                    <td align="left">@item.CategoryName</td>
+                </tr>
+                Index++;
+            }
+        }
+   
+<script type="text/javascript">
+    var tableCheckboxSelector = UI.CheckAllbox("#ProductCollocation", ".checkall");
+</script>

@@ -1,0 +1,142 @@
+﻿@model Hyt.Model.FnInvoice
+<script src="~/Theme/scripts/jquery.validate.yui.js"></script>
+
+<form id="form">
+    <div class="boxs">
+        <div class="caseout">
+            <div class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td style="width: 10%;" class="nameright border_rnone">订单编号：</td>
+                                <td style="width: 40%" class="border_right">@ViewBag.OrderSysNo</td>
+                                <td style="width: 10%" class="nameright border_rnone">订单金额：</td>
+                                <td style="width: 40%" class="red">@Model.InvoiceAmount.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票代码：</td>
+                                <td class="border_right">
+                                    <input id="txtInvoiceCode" name="InvoiceCode" type="text" class="m10_r" value="@Model.InvoiceCode" maxlength="165"/>
+                                    <span id="for_txtInvoiceCode" class="hide"></span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票号码：</td>
+                                <td>
+                                    <input id="txtInvoiceNo" name="InvoiceNo" type="text" class="m10_r" value="@Model.InvoiceNo" maxlength="165"/>
+                                    <span id="for_txtInvoiceNo" class="hide"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票抬头：</td>
+                                <td class="border_right">
+                                    <input id="txtInvoiceTitle" name="InvoiceTitle" type="text" class="m10_r" value="@Model.InvoiceTitle"/>
+                                    <span id="for_txtInvoiceTitle" class="hide"></span>
+                                </td>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>发票类型：</td>
+                                <td>
+                                    @Html.DropDownList("InvoiceType")
+                                    <span id="for_InvoiceType" class="hide m10_l"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票备注：</td>
+                                <td class="border_right" colspan="3">
+                                    @*<input id="txtInvoiceRemarks" type="text" class="input_xxlarge"name="InvoiceRemarks" value="@Model.InvoiceRemarks"/>*@
+                                    <textarea id="txtInvoiceRemarks" name="InvoiceRemarks" maxlength="200" style="width: 96%;">@Model.InvoiceRemarks</textarea>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</form>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#form").validate({
+            rules: {
+                InvoiceCode: { required: true, maxlength: 165 },
+                InvoiceNo: { required: true, maxlength: 165 },
+                InvoiceTitle: { required: true, maxlength: 100 },
+                InvoiceType: { required: true }
+            },
+            messages: {
+                InvoiceCode: {
+                    required: "填写发票代码",
+                    maxlength: "最多165个字符"
+                },
+                InvoiceNo: {
+                    required: "填写发票号码",
+                    maxlength: "最多165个字符"
+                },
+                InvoiceTitle: {
+                    required: "填写发票抬头",
+                    maxlength: "最多100个字符"
+                },
+                InvoiceType: {
+                    required: "填选择发票类型"
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#for_' + el.attr('id')).attr('class', 'prompt error');
+                $('#for_' + el.attr('id')).text(error.html());
+            },
+            success: function (label, el) {
+                $('#for_' + el.attr('id')).attr('class', 'prompt success');
+            }
+        });
+
+    });
+
+    function updateInvoice(invoiceSysNo) {
+        if (invoiceSysNo <= 0) {
+            return;
+        }
+
+        function getModel() {
+            var data = {};
+            data.SysNo = '@Model.SysNo';
+            data.InvoiceCode = $("#txtInvoiceCode").val();
+            data.InvoiceNo = $("#txtInvoiceNo").val();
+            data.InvoiceTitle = $("#txtInvoiceTitle").val();
+            data.InvoiceTypeSysNo = $("#InvoiceType").val();
+            data.InvoiceRemarks = $("#txtInvoiceRemarks").val();
+            data.TransactionSysNo = '@Model.TransactionSysNo';
+            return data;
+        }
+        var from = $("#form");
+
+        if ($(from).valid()) {
+            var model = getModel();
+            UI.Confirm({
+                content: '确认进行开票操作？',
+                padding: '10px 20px',
+                ok: function () {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("InvoiceUpdateEdit")',
+                        data: model,
+                        chche: false,
+                        success: function (ret) {
+                            if (ret.StatusCode == 0) {
+                                UI.DialogOpener().showTip('发票开具成功');
+                                UI.Dialog.close();
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function () {
+                            UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                        }
+                    });
+                },
+                cancelVal: '关闭',
+                cancel: true
+            });
+        }
+    }
+</script>

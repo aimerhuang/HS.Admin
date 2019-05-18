@@ -1,0 +1,292 @@
+﻿<!-- 商品描述 -->
+<div class="boxs_tool">
+<div class="left_tool">
+    <button id="btn_SelectDescriptTemplate" class="btn btn_ht26 m10_r" onclick="ShowPdTemplateSelector()"><span class="icon icon_inbox"></span><span class="m5_l">选择模板</span></button>
+</div>
+</div>
+
+<div class="editwrap" id="editwrap">
+            
+</div>
+<div class="align_c m10_t">
+    <button id="btn_Save_ProductDesc" class="btn btn_blue btn_ht30"><span class="icon_save icon_white"></span><span class="m5_l">保存</span></button>&nbsp;&nbsp;
+    <button id="btn_Save_ProductDesc_Next" class="btn btn_green btn_ht30" ><span class="icon_save icon_white"></span><span class="m5_l">保存 进入下一步</span></button>
+    <span class="v_star m20_l">*</span><span class="f12 c9 m20_t m10_b">必须创建商品描述否则商品将无法上架销售</span>
+</div>
+
+<!-- 商品描述 END -->
+<script type="text/javascript">    
+
+    $(document).ready(function () {
+
+       
+        //根据现在状态设置按钮显示状态
+        productDescriptionBtnControl(editModel);
+        
+        //设置两个保存按钮事件
+        $("#btn_Save_ProductDesc").click(saveProductDesc);
+        $("#btn_Save_ProductDesc_Next").click(saveProductDesc);
+    });
+    
+    //绑定商品描述
+    function BindProductDesc(html) {
+        //如果商品描述为空或没有值将设置默认提示文字
+        if (html == null)
+            $("#editwrap").html(DescriptEmptyTemplateHTML.getMultiLine());
+        else
+            $("#editwrap").html(html.decode());
+        
+       
+    }
+    
+    function ShowPdTemplateSelector() {
+        
+        //初始化模板编辑器
+        var deditor = DEditor();
+            DAO.SelectPdTemplate(function (data) {
+                $("#editwrap").html(data.content.decode());
+                deditor = DEditor();
+            });
+            return false;
+    }
+    
+    function DescriptEmptyTemplateHTML() {
+        /*
+        <p class="c9 p10"><span class="prompt">您还没有设置商品描述！！！</span></p>
+        */
+    }
+
+    //保存商品描述
+    function saveProductDesc() {
+
+        var data = {
+            productSysNo: $("#hdf_ProductSysNo").val(),
+            html:""
+        };
+        
+        var html = $("#editwrap").html();
+        if (html.length > 0 && html != DescriptEmptyTemplateHTML.getMultiLine()) {
+
+            $(".J_TAdd", html).each(function(index, element) {
+                $(element).remove();
+            });
+
+            var reg = /<p class="J_TAdd">添加新的模块<\/p>/g;
+            html = html.replace(reg, "");
+            data.html = html.encode();
+        } else {
+            UI.tips.tip_alert('tips_shrot tips_warning', '无数据可供保存');
+            return;
+        }
+
+        //提交表单
+        $.ajax({
+            url: "@Url.Action("UpdateProductDescription","Product")",
+                        data: JSON.stringify(data),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (response) {
+                            if (!response.Status) {
+                                UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + response.result.Message);
+                            } else {
+
+                                UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+                                if (!editModel) {
+                                    productDescriptionBtnControl(false);
+                                    prodctEditTab.Active('4');
+                                }
+                            }
+                        },
+                        error: function (XMLHttpRequest, textStatus, errorThrown) {
+                            //默认错误处理
+                            var error = JSON.parse(XMLHttpRequest.responseText);
+                            alert(error.ErrorMessage);
+                        }
+                    });
+    }
+    
+    var DescribeEditor = DEditor = function() {
+
+        var $wrap = $("#editwrap");
+
+        //初始化编辑器
+        (function() {
+            $wrap
+                //添加模块工具栏
+                .find(".J_TRegion").each(function() {
+                    var that = $(this);
+
+                    that.append(
+                        $("<p class='J_TAdd'>添加新的模块</p>")
+                            .click(function() {
+                                DAO.SelectPdModule(function(data) {
+                                    var html = $(data.content.decode());
+                                    if (html.hasClass('J_TBox'))
+                                        html.mouseenter(function(e) {
+                                            methodMask($(e.target));
+                                        });
+                                    that.find('.J_TAdd').before(html);
+                                });
+                            })
+                    );
+                })
+                //创建操作遮罩
+                .find(".J_TBox").each(function() {
+                    $(this).mouseenter(function(e) {
+                        $(".J_TMask").remove();
+                        methodMask($(this));
+                    });
+                });
+        })();
+
+
+        var methodMask = function(parent) {
+            var config = $.extend({
+                insert: true,
+                edit: true,
+                up: true,
+                down: true,
+                remove: true
+            }, eval(parent.attr("data-config")));
+            $mask = $(
+                '<div class="J_TMask" title="双击编辑">'
+                    + '<ul class="J_Tools">'
+                    + ' <li class="tools-edit" title="编辑">编辑</li>'
+                    + ' <li class="tools-up" title="向上移动">上移</li>'
+                    + ' <li class="tools-down" title="向下移动">下移</li>'
+                    + ' <li class="tools-remove" title="移除该模块">移除</li>'
+                    + '</ul>'
+                    + '<div class="masklayer"></div>'
+                    + '</div>'
+            )
+                .css({
+                    top: parent.offset().top,
+                    left: parent.offset().left,
+                    width: parent.width() - 2,
+                    height: parent.height() - 2
+                })
+                .dblclick(function(e) {
+                    //double click edit
+                    //parent.attr("data-type")  //取得内容类型 image或text
+                    switch (parent.attr("data-type").toLocaleLowerCase()) {
+                    case "image":
+                        //console.log("image");
+                        EditImage(parent);
+                        break;
+                    default:
+                        //console.log("text");
+                        EditText(parent);
+                        break;
+                    }
+                    //取消浏览器默认事件，防止双击选中整个页面，好说不好看啊！
+                    //if (e && e.preventDefault)
+                    //    e.preventDefault();  
+                    //else
+                    //    window.event.returnValue = false;
+                })
+                .mouseleave(function() {
+                    $(this).remove();
+                });
+            $mask.find(".tools-edit").bind('click', function () {
+                switch (parent.attr("data-type").toLocaleLowerCase()) {
+                case "image":
+                    //console.log("image");
+                    EditImage(parent);
+                    break;
+                default:
+                    //console.log("text");
+                    EditText(parent);
+                    break;
+                }
+            });
+            $mask.find(".tools-up").bind('click', function() {
+                if (parent.prev().hasClass("J_TBox")) {
+                    parent.prev().before(parent);
+                }
+                $mask.remove();
+            });
+            $mask.find(".tools-down").bind('click', function() {
+                next = parent.next();
+
+                //查找下一直到找到下一个区域是J_TBox 或 J_TRegion;
+                while (next.length > 0 && !next.hasClass("J_TBox")) {
+                    //如果下一个是区域，将不进行移动
+                    if (next.next().hasClass("J_TRegion"))
+                        return;
+                    next = next.next();
+                }
+
+                //如果找到的控件是J_Box（模块）就将选中的模块和它位置对调
+                if (next.hasClass("J_TBox")) {
+                    next.after(parent);
+                    $mask.remove(); //移除当前遮罩效果
+                }
+
+            });
+            $mask.find(".tools-remove").bind('click', function() {
+                $mask.remove();
+                parent.remove();
+            });
+
+            parent.after($mask);
+        };
+
+        this.AddModule = function() {
+            //添加模块
+        };
+
+        this.EditImage = function(parent) {
+            DAO.Upload({
+                callback: function(data) {
+                    parent.html("");
+                    $(data).each(function(index, image) {
+                        parent.append('<img src="@Hyt.BLL.Web.ProductImageBo.Instance.GetProductDescriptionImagePath("")' + image.url + '" />');
+                    });
+                }, config: "@(Hyt.Model.SystemPredefined.UploadConfigAlias.ProductDescriptionImageConfigAlias)"
+            });
+        };
+
+        this.EditText = function(parent) {
+            art.dialog.data('description', parent.html());
+
+            UI.DialogOpen("@Url.Action("ProductDescriptionEditor","Product")", {
+                width: '825px',
+                height: '565px',
+                title: '编辑描述内容',
+                init: function() {
+                    this.button(
+                        {
+                            name: '确认',
+                            callback: function() {
+                                var $iframe = this.iframe.contentWindow;
+                                data = $iframe.CallBack();
+                                parent.html(data);
+                                return true;
+                            },
+                            focus: true
+                        }, {
+                            name: '取消',
+                            callback: function() {
+
+                            }
+                        }
+                    );
+                }
+            }, false);
+        };
+
+        return this;
+    };
+    
+    function productDescriptionBtnControl(isEdit) {
+        if (isEdit) {
+            $("#btn_Save_ProductDesc").show();
+            $("#btn_Save_ProductDesc_Next").hide();
+        } else {
+            $("#btn_Save_ProductDesc").hide();
+            $("#btn_Save_ProductDesc_Next").show();
+        }
+    }
+</script>

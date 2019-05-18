@@ -1,0 +1,402 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBWhStockOut>
+@Html.PrivilegeControl(PrivilegeCode.WH1003101, ".WH1003101")
+@Html.PrivilegeControl(PrivilegeCode.WH1003301, ".WH1003301")
+@Html.PrivilegeControl(PrivilegeCode.WH1003401, ".WH1003401")
+@Html.PrivilegeControl(PrivilegeCode.WH1003601, ".WH1003601")
+
+<div id="paging">
+    <div class="boxs_listtabel">
+        <!--/表格列表区-->
+        <table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th class="wd75"><input type="checkbox" id="clbQx" /></th>
+                    <th class="wd75">出库单号</th>
+                    <th class="wd75">订单编号</th>
+                    <th class="align_l p10_lr">收货人</th>
+                    <th width="100px">仓库</th>
+                    <th width="120px">配送方式</th>
+                    <th width="90">应收金额</th>
+                    <th width="116">创建时间</th>
+                    <th width="116">出库时间</th>
+                    <th width="60">是否开票</th>
+                    <th width="90">来源</th>
+                    <th width="70">状态</th>
+                    <th width="330">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (!Model.TData.Any())
+                    {
+                        <tr>
+                            <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                        </tr>
+                    }
+                    foreach (var master in (List<Hyt.Model.CBWhStockOut>)Model.TData)
+                    {
+                        var outstackBtnName = "outstack" + master.SysNo;
+
+                        var disabled10_f10 = "btn_blue"; //出库状态为10或-10 按钮是否禁用
+                        var iconColor10_f10 = "icon_white";//出库状态为10或-10 按钮图片是否为白色
+
+                        var disabledn10_f10 = "btn_blue"; //出库状态不等于10或等于-10 按钮是否禁用
+                        var iconColorn10_f10 = "icon_white";//出库状态不等于10或等于-10 按钮图片是否为白色
+
+                        var disabled40_10 = "btn_red"; //出库状态大于40或小于10 按钮是否禁用
+                        var iconColor40_10 = "icon_white";//出库状态大于40或小于10 按钮图片是否为白色
+
+                        if (master.Status == 10 || master.Status == -10)
+                        {
+                            disabled10_f10 = "disabled";
+                            iconColor10_f10 = "";
+                        }
+                        if (master.Status != 10 || master.Status == -10)
+                        {
+                            disabledn10_f10 = "disabled";
+                            iconColorn10_f10 = "";
+                        }
+                        if (master.Status > 40 || master.Status < 10)
+                        {
+                            disabled40_10 = "disabled";
+                            iconColor40_10 = "";
+                        }
+
+                        <tr>
+                            <td class="blue"><input type="checkbox" name="checkinfo" class="xz" value="@(master.SysNo)" /> </td>
+
+                            <td class="blue" title="查看出库单:@master.SysNo"><a onclick="ShowInfo(@master.SysNo)">@master.SysNo</a></td>
+                            <td class="blue"><a href="javascript:OrderBrowse(@master.OrderSysNO);">@master.OrderSysNO</a></td>
+                            <td class="align_l p10_lr">@master.ReceiverName</td>
+                            <td>@Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetWarehouseName(master.WarehouseSysNo)</td>
+                            <td>
+                                @Hyt.BLL.Logistics.DeliveryTypeBo.Instance.GetDeliveryTypeName(master.DeliveryTypeSysNo)
+                                @{
+                                    @*if (master.Status == (int)WarehouseStatus.出库单状态.已签收)
+                                          {
+                                             <br />
+                                             @(Hyt.BLL.Logistics.DeliveryTypeBo.Instance.GetExpressNo(master.SysNo))
+                                        }*@
+
+                                    <br />
+                        if ((Hyt.BLL.ExpressList.ExpressListBLL.Instance.GetKuaiDiNo(master.SysNo)) != 0)
+                        {
+                            @(Hyt.BLL.ExpressList.ExpressListBLL.Instance.GetKuaiDiNo(master.SysNo))
+                        }
+                        else
+                        {
+                            <span id="@master.SysNo"></span>
+
+                        }
+                                }
+                            </td>
+                            <td class="red p10_r align_r">@master.Receivable.ToString("C")</td>
+                            <td>@master.SoCreateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@master.StockOutDate.ToString("yyyy-MM-dd HH:mm")</td>
+                            <td>@(master.InvoiceSysNo > 0 ? "是" : "否")</td>
+                            <td>@(master.OrderSource)</td>
+
+                            <td>@((WarehouseStatus.出库单状态)master.Status)<span class='icon icon_picture m5_l' style="cursor:pointer;display:@(string.IsNullOrWhiteSpace(master.SignImage) ? "none" : "inline-block")" onclick="showImage('@master.SignImage.Replace("\\","/")')"></span></td>
+                            <td>
+                               @if (master.WarehouseSysNo != 30 && master.WarehouseSysNo != 41 )
+                                {
+                                      <button class="btn btn_ht26 m10_r WH1003301 @disabledn10_f10" sysno="@master.SysNo" deliverytypesysno="@master.DeliveryTypeSysNo" type="button" onclick="OutStock(@master.SysNo, @master.Status,this)" name="@outstackBtnName"><span class="icon_exitstore m5_r @iconColorn10_f10"></span><span>出库</span></button>
+                                }
+                                @* <button class="btn btn_ht26 m10_r WH1003301 @disabledn10_f10"  sysno="@master.SysNo" deliverytypesysno="@master.DeliveryTypeSysNo" type="button" onclick="OutStock(@master.SysNo, @master.Status,this)" name="@outstackBtnName"><span class="icon_exitstore m5_r @iconColorn10_f10"></span><span>出库</span></button>
+                                     <td>
+                                    @if (master.WarehouseSysNo != 59 &&  master.WarehouseSysNo != 61)
+                                     {
+                                           <button class="btn btn_ht26 m10_r WH1003301 @disabledn10_f10" sysno="@master.SysNo" deliverytypesysno="@master.DeliveryTypeSysNo" type="button" onclick="OutStock(@master.SysNo, @master.Status,this)" name="@outstackBtnName"><span class="icon_exitstore m5_r @iconColorn10_f10"></span><span>出库</span></button>
+                                     }*@
+                               @*<button class="btn btn_ht26 m10_r WH1003301 @disabledn10_f10" sysno="@master.SysNo" deliverytypesysno="@master.DeliveryTypeSysNo" type="button" onclick="OutStock(@master.SysNo, @master.Status,this)" name="@outstackBtnName"><span class="icon_exitstore m5_r @iconColorn10_f10"></span><span>出库</span></button>*@
+                                <button class="btn btn_ht26 m10_r WH1003601 @disabled10_f10" onclick="PickUpOrderPrint(@master.SysNo, @master.Status,this)" type="button"><span class="icon_print m5_r @iconColor10_f10"></span><span>拣货单</span></button>
+                                <button class="btn btn_ht26 m10_r WH1003601 @disabled10_f10" deliverytypesysno="@master.DeliveryTypeSysNo" onclick="PackagePrint(@master.SysNo, @master.Status, @master.DeliveryTypeSysNo,this)" type="button"><span class="icon_print m5_r @iconColor10_f10"></span><span>包裹单</span></button>
+                                <button class="btn btn_ht26 WH1003401 @disabled40_10" type="button" onclick="Cancel(@master.SysNo, @master.Status)"><span class="icon_forbidden m5_r @iconColor40_10"></span><span>作废</span></button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+    </div>
+    <input type="hidden" value="0" id="hiCbl" />
+    <script type="text/javascript">
+        //订单详情
+        function OrderBrowse(orderSysNo) {
+            UI.DialogOpen('/Order/OrderView?id=' + orderSysNo + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+        }
+
+        //保存出库单按钮实例
+        var outstackBtn = null;
+
+        $(function () {
+            //表格加入隔行样式
+            DAO.InterlineStyle();
+        });
+
+        function ShowInfo(sysno) {
+            var url = '/Warehouse/StockOutInfo?whStockOutSysNo=' + sysno;
+            UI.DialogOpen(url, {
+                title: '出库单信息',
+                width: 830,
+                height: 600,
+                init: function () {
+                    this.button({ name: '关闭' });
+                }
+            }, false);
+        }
+
+        function OutStock(sysno, status, self) {
+            if (status != 10 || status == -10) {
+                return;
+            }
+            //保存当前出库按钮实例，便于后面的操作
+            outstackBtn = self;
+            var url = '/Warehouse/StockOut?sysno=' + sysno;
+            UI.DialogOpen(url, {
+                title: '商品出库',
+                width: 820,
+                height: 490,
+                resize: false,
+                init: function () {
+                    this.button({
+                        name: "出库",
+                        focus: true,
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+
+                            if (!iframe.document.body) {
+                                UI.Alert({
+                                    content: '数据加载中,请稍等.'
+                                });
+                                return false;
+                            }
+
+                            iframe.DoOutStock();
+                            return false;
+                        }
+                    },
+                    { name: "关闭" });
+                }
+            }, false);
+        }
+
+        //打印拣货单
+        function PickUpOrderPrint(sysno, status) {
+            if (status == -10 || status == 10) {
+                return;
+            }
+
+            //打印
+            var url = '/Print/Picking/' + sysno;
+            UI.DialogOpen(url, {
+                title: '打印拣货单',
+                width: 1000,
+                height: 720,
+                close: function () {
+                    //window.submitForm();
+                },
+                resize: false,
+                init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        //this.iframe.contentWindow.location.reload();
+                        this.iframe.contentWindow.location.href = url + "?isRefresh=" + Math.random();
+                    }
+                }
+            });
+        }
+
+        //打印包裹单
+        function PackagePrint(sysno, status, deliveryTypeSysNo) {
+            @*$.ajax({
+                url: "@Url.Action("GetEl", "Warehouse")",
+                data: { sysno: sysno },
+                success: function (data) {
+                    if (data == '1') {
+                        UI.tips.tip_alert('tips_warning', '已包裹！！！', true);
+                    } else {*@
+            if (status == -10 || status == 10) {
+                return;
+            }
+            //打印
+            var url = '/Print/Pack?id=' + sysno + '&deliveryTypeSysNo=' + deliveryTypeSysNo;
+            UI.DialogOpen(url, {
+                title: '打印包裹单',
+                width: 1000,
+                height: 720,
+                close: function () {
+                    //window.submitForm();
+                },
+                resize: false,
+                init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        //this.iframe.contentWindow.location.reload();
+                        this.iframe.contentWindow.location.href = url + "&isRefresh=" + Math.random();
+                    }
+                }
+            });
+            //}
+            //}, error: function () {
+            //}
+            //});
+        }
+
+        function showDialogBox(msg) {
+            UI.Alert({
+                content: msg,
+                callback: function () {
+                    //UI.DialogOpener().location.reload();
+                    submitForm();
+                },
+                width: '200px'
+            });
+        }
+
+        function Cancel(sysno, status) {
+            if (status > 40 || status < 10) {
+                return;
+            }
+
+            var html = '<div>'
+                + '<div style="float: left; padding: 22px 7px 0 0; "><span class="v_star">*</span>作废原因</div>'
+                + '<div style="float: left">'
+                + '<textarea style="height: 60px; width: 205px"></textarea>'
+                + '</div>'
+                + '<div style="clear: both;"/>'
+                + '</div>'
+                + '<div style="height:20px;padding-left:52px">'
+                + '<span class="prompt m10_l" name="tips">作废原因必须输入</span>'
+                + '</div>'
+                + '<div style="text-align:right;margin-top:3px; padding-right: 3px">'
+                + '<select style="width:136px"></select>&nbsp;&nbsp;'
+                + '最多输入<span style="color:red;font-weight:bold">50</span>字'
+                + '</div>';
+
+            //获取作废文本信息
+            var words = $("#cancelStockoutText").val().split("|");
+            var options = "<option value='0'>选择作废原因</option>";
+            for (var i = 0; i < words.length; i++) {
+                options += "<option value='1|" + words[i] + "'>" + words[i] + "</option>";
+            }
+
+            var div = document.createElement("div");
+            div.innerHTML = html;
+
+            $(div).find("textarea").keyup(function (e) { //绑定输入文本域keyup事件，用于检测输入的文字是否超出
+                var txt = $(this).val();
+                var wordLimit = 50;
+
+                if (txt.length <= wordLimit) {
+                    var num = wordLimit - txt.length;
+                    $(div).children("div").last().children("span").text(num);
+                } else {
+                    $(this).val(txt.substr(0, wordLimit));
+                }
+                if (!txt) {
+                    $(div).find("span[name='tips']").removeClass().addClass("error").addClass("m10_l");
+                    $(this).addClass("inputerror");
+                } else {
+                    $(div).find("span[name='tips']").removeClass().addClass("success").addClass("m10_l");
+                    $(this).removeClass();
+                }
+            }).end().find("select").append(options)
+                .change(function () { //绑定下拉选择作废原因事件
+                    var status_txt = this.value.split("|");
+                    var textarea = $(div).find("textarea");
+                    if (status_txt[0] == "0") {
+                        textarea.val("");
+                    } else {
+                        textarea.val(status_txt[1]);
+                    }
+                    textarea.triggerHandler("keyup");
+                });
+
+            UI.DialogBox({
+                title: "出库单作废",
+                width: 320,
+                height: 130,
+                content: div,
+                cancel: true,
+                ok: function () {
+                    var value = $(div).find("textarea").val();
+                    if (!value) {
+                        $(div).find("span[name='tips']").removeClass().addClass("error").addClass("m10_l");
+                        $(div).find("textarea").addClass("inputerror");
+                        return false;
+                    }
+                    $.ajax({
+                        type: "POST",
+                        url: "@Url.Action("CancelOutStock", "Warehouse")",
+                        data: { sysno: sysno, text: value },
+                        chche: false,
+                        success: function (ret) {
+                            if (ret.IsLogout) {
+                                DAO.LoginBox();
+                                return;
+                            }
+                            if (ret.Status) {
+                                UI.tips.tip_alert('tips_success', '成功作废出库单。');
+                                submitForm();
+                            } else {
+                                showDialogBox(ret.Message);
+                            }
+                        },
+                        error: function () {
+                            showDialogBox('操作出错,请稍候再试!');
+                        }
+                    });
+                }
+            });
+        }
+
+        function showImage(src) {
+            UI.DialogOpen('/warehouse/PicBrowser?path=' + src, {
+                title: '签收图片',
+                height: 650
+            }, false);
+        }
+
+
+        //全选反选
+        $('#clbQx').click(function () {
+
+            if ($("#clbQx").attr("checked")) {
+                $(":checkbox").attr("checked", true);
+            } else {
+                $(":checkbox").attr("checked", false);
+            }
+            AddCbl();
+        })
+
+        //子复选框的事件
+        $(".xz").click(function () {
+            //当没有选中某个子复选框时，SelectAll取消选中
+            var xz = 0;
+            $(".xz").each(function () {
+                if ($(this).attr("checked")) {
+                    xz++;
+                }
+            });
+            if (xz == 0) {
+                $("#clbQx").attr("checked", false);
+            } else {
+                $("#clbQx").attr("checked", true);
+            }
+            AddCbl();
+        });
+
+        //保存选中的Id
+        function AddCbl() {
+            var idstr = "";
+            $(".xz").each(function () {
+                if ($(this).attr("checked")) {
+                    idstr += $(this).val() + ",";
+                }
+            });
+            $("#hiCbl").val(idstr);
+        }
+    </script>
+</div>

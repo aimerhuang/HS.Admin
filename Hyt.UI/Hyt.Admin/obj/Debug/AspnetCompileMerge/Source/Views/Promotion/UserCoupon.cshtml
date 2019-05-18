@@ -1,0 +1,195 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "绑定优惠券";
+}
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.Transfer.CBCrCustomer
+@{
+    @Html.PrivilegeControl(PrivilegeCode.SP1005101, ".SP1005101")
+    @Html.PrivilegeControl(PrivilegeCode.SP1006401, ".SP1006401")
+}
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+<script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+
+
+
+    <form id="form1" method="post">
+	<div class="case">
+    	<div class="boxs">
+        	<div class="boxs_tit head_m">
+              <h3>绑定优惠券</h3>
+            </div>
+	        <div class="boxs_con_c1">
+	            
+	            <div class="boxs_tool">
+	                <div class="right_tool clearfix">
+	                    <span class="fl m10_r">用户搜索</span><input type="text" class="input_ht28 fl m10_r" maxlength="20" placeholder="输入账号" id="customerAccount" name="customerAccount"  onclick="this.select();" value="@Model.Account"><button class="btn btn_ht28 fl" title="搜索" type="submit"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+	                </div>
+	            </div>
+                
+	            <div class="boxs_detail_dispay">
+                
+	                <div class="head_detail" style="border-width:1px 0 0 0;">
+	                    <h5>用户基本信息</h5>
+	                </div>
+                
+	                <div class="tit_con">
+	                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+	                        <tbody>
+	                            <tr>
+	                                <td width="8%" class="nameright">姓名：</td>
+	                                <td width="42%" class="border_right">@Model.Name
+                                        <input id="CustomerSysNo" type="hidden" value="@Model.SysNo" />
+	                                </td>
+	                                <td width="8%" class="nameright">帐号：</td>
+	                                <td width="42%">@Model.Account</td>
+	                            </tr>
+	                            <tr>
+	                                <td width="8%" class="nameright">手机：</td>
+	                                <td width="42%" class="border_right">@Model.MobilePhoneNumber</td>
+	                                <td width="8%" class="nameright">邮件：</td>
+	                                <td width="42%">@Model.EmailAddress</td>
+	                            </tr>
+	                        </tbody></table>
+	                </div>
+	                <div class="head_detail" style="border-width:0 0 1px 0;">
+	                    
+	                    <span class="more10r c6"><button class="btn btn_ht26 btn_orange m5_t m10_r SP1006401" type="button" id="btnGetCouponCard"><span class="icon icon_plus icon_white"></span><span class="m5_l">给用户绑定优惠卡</span></button><button class="btn btn_ht26 m5_t SP1005101" type="button" id="btnGetAllCoupons"><span class="icon icon_plus"></span><span class="m5_l">给用户绑定优惠券</span></button></span>
+	                    <h5>用户当前优惠券</h5>
+	                </div>
+        
+	                <div class="boxs_detail border_lnone" id="outerPaging">
+	                    
+	                </div>
+        
+        
+        
+        
+	            </div>
+                
+	        </div>
+        </div>
+    </div>
+
+    </form>
+
+<script type="text/javascript">
+    function openSelector() {
+        var customerSysNo = $("#CustomerSysNo").val();
+        if (customerSysNo <= 0) {
+            tips('tips_warning', '请先搜索到用户后再做绑定。');
+        } else {
+                UI.DialogOpen('/promotion/SelectUserCoupons', {
+                    width: 1000,
+                    height: 530,
+                    title: '给用户绑定优惠券'
+                }, false);
+        }
+    }
+    
+    function doUserDataRead() {
+        var customerSysNo = $("#CustomerSysNo").val();
+        if (customerSysNo > 0) {
+            Ajax.get("/Promotion/DoUserBoundCouponsQuery/?r=", "searchItem", function (p) {
+                p.setParams("customerSysNo", customerSysNo);
+            }, function (data) {
+                $('#outerPaging').empty();
+                $('#outerPaging').html(data);
+            });
+        }
+    }
+
+    $(document).ready(function(e) {
+        $("#form1").ajaxLoadingMask(true);
+        doUserDataRead();
+        $("#btnGetAllCoupons").click(function() {
+            openSelector();
+        });
+        $("#btnGetCouponCard").click(function () {
+            var customerSysNo = $("#CustomerSysNo").val();
+            if (customerSysNo <= 0) {
+                tips('tips_warning', '请先搜索到用户后再做绑定。');
+            } else {
+                UI.DialogOpen('/promotion/CouponCardSelector', {
+                    width: 800,
+                    height: 430,
+                    title: '给用户绑定优惠卡'
+                }, false);
+            }
+        });
+    });
+    
+    //作废优惠券
+    function doCancel(couponSysNo) {
+        UI.Confirm({
+            content: '确定要作废优惠券吗？',
+            ok: function() {
+                $.ajax({
+                    type: "POST",
+                    url: "/Promotion/CancelUserCoupon",
+                    data: "sysNo=" + couponSysNo,
+                    success: function(ret) {
+                        if (ret.Status) {
+                            $("#btnAudit_" + couponSysNo).addClass("disabled");
+                            $("#btnCancel_" + couponSysNo).addClass("disabled");
+                            $("#btnAudit_" + couponSysNo).attr("onclick", "");
+                            $("#btnCancel_" + couponSysNo).attr("onclick", "");
+                            $("#tdStatus_" + couponSysNo).text("已作废");
+                            //UI.Alert({
+                            //    icon: "succeed",
+                            //    content: '作废优惠券成功'
+                            //});
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    //审核优惠券
+    function doAudit(couponSysNo) {
+        UI.Confirm({
+            content: '确定要审核优惠券吗？',
+            ok: function() {
+                $.ajax({
+                    type: "POST",
+                    url: "/Promotion/AuditUserCoupon",
+                    data: "sysNo=" + couponSysNo,
+                    success: function(ret) {
+                        if (ret.Status) {
+                            $("#btnAudit_" + couponSysNo).addClass("disabled");
+                            $("#btnAudit_" + couponSysNo).attr("onclick", "");
+                            $("#btnAudit_" + couponSysNo + " span[class='m5_l']").text("已审");
+                            $("#tdStatus_" + couponSysNo).text("已审核");
+                            //UI.Alert({
+                            //    icon: "succeed",
+                            //    content: '审核优惠券成功'
+                            //});
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+    
+    function BindNewCoupon(sysNo) {
+        $.ajax({
+            type: "POST",
+            url: "/Promotion/GetCoupon",
+            data: "id=" + sysNo,
+            success: function (ret) {
+                if (ret.SysNo > 0) {
+                    var newrow = "<tr><td class='border_lnone'>" + ret.CouponCode + "</td><td>" + ret.CouponAmount + "</td><td>" + ret.RequirementAmount + "</td><td>" + ret.StartTime + "</td><td>" + ret.EndTime + "</td><td class='align_l'>" + ret.Description + "</td><td>" + ret.UsedQuantity + "/" + ret.UseQuantity + "</td><td>" + ret.Status + "</td><td><span class='p10_r'><button class='btn btn_ht26'  type='button' onclick='doAudit(" + ret.SysNo + ")' id='btnAudit_" + ret.SysNo + "'><span class='icon_ok'></span><span class='m5_l'>审核</span></button></span><span class='p10_r'><button class='btn btn_ht26'  type='button' onclick='doCancel(" + ret.SysNo + ")' id='btnCancel_" + ret.SysNo + "'><span class='icon icon_trash'></span><span class='m5_l'>作废</span></button></span></td></tr>";
+                    $("#tb_userCoupons").append(newrow);
+                }
+            }
+        });
+    }
+</script>

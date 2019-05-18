@@ -1,0 +1,287 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "退换货单管理";
+
+    const int returnType = (int)Hyt.Model.WorkflowStatus.RmaStatus.RMA类型.售后退货;
+    const int exchangeType = (int)Hyt.Model.WorkflowStatus.RmaStatus.RMA类型.售后换货;
+    const int refundsType = (int)Hyt.Model.WorkflowStatus.RmaStatus.RMA类型.仅退款;
+    const int reviewStatus = (int)Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.待审核;
+    
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div id="JS_search" class="search_box" style="right:-267px;">
+	<div class="search_title clearfix"> 
+    	<span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a> 
+    </div>
+    <div class="search_body">
+    	<table width="100%">
+        <tbody>
+            <tr>
+                <td align="right">会员帐号</td>
+                <td width="72%"><input type="text" value="" class="wd156" SearchComplex="CustomerAccount"></td>
+            </tr>
+            <tr>
+                <td align="right">申请日期</td>
+                <td>
+                  <div class="date_btn">
+                  <input type="text" value="" onclick="UI.Date({ el: 'd11',maxDate:'#F{$dp.$D(\'d12\',{d:0});}' })" id="d11"  SearchComplex="BeginDate">
+                  <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d11',maxDate:'#F{$dp.$D(\'d12\',{d:0});}'})"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">&nbsp;</td>
+                <td>
+                  <div class="date_btn">
+                  <input type="text" value="" class="input_ht26"  onclick="UI.Date({ el: 'd12',minDate:'#F{$dp.$D(\'d11\',{d:0});}' })" id="d12" SearchComplex="EndDate">
+                  <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d12',minDate:'#F{$dp.$D(\'d11\',{d:0});}'})"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">RMA单号</td>
+                <td>
+               		<input type="text" value="" class="wd156" SearchComplex="RmaId">
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">订单号</td>
+                <td>
+               		<input type="text" value="" class="wd156" SearchComplex="OrderSysNo">
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">销售单来源</td>
+                <td>
+               		<select class="wd170" id="OrderSources" name="OrderSources">
+                    </select>
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">退换货状态</td>
+                <td>
+                    <select class="wd170" id="RmaStatuses" name="RmaStatuses">
+	                       <option>全部</option>
+                           @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.RmaStatus.退换货状态>(null, null).ToString())
+                    </select>
+                </td>
+            </tr>
+            <tr>
+            	<td align="right">RMA类型</td>
+                <td>
+                    <select class="wd170" SearchComplex="RmaType" id="RmaType" name="RmaType">
+	                    <option selected="selected">全部</option>
+                           @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.RmaStatus.RMA类型>(null, null).ToString())
+                    </select>
+                </td>
+            </tr>
+
+        </tbody>
+        </table>
+    </div>
+    <div class="search_foot">
+    	<button title="开始查询" class="btn btn_blue btn_ht30 bold" id="btnComplexSearch">开始查询</button><button type="reset" title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+          <h3>退换货单管理</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+           	<div class="boxs_tool">
+	               <!--/工具条-->
+	               <div class="right_tool clearfix">
+	                   <span class="fl">RMA类型</span> 	
+	                   <select class="select_ht28 fl m10_r m10_l" Search="RmaType" id="RmaType1">
+	                    <option selected="selected">全部</option>
+                           @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.RmaStatus.RMA类型>(null, null).ToString())
+	                   </select>
+                       <span class="fl">状态</span> 	
+	                   <select class="select_ht28 fl m10_l" id="RmaStatus">
+	                       <option>全部</option>
+                           @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.RmaStatus.退换货状态>(i => i.Text == Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.待审核.ToString(), null).ToString())
+                    })
+	                   </select>
+	                   <div class="search_btn m10_l fl">
+	                       <input type="text" value="RMA单号..." class="input_ht28" id="txtRmaId">
+	                       <button title="搜索" class="btn btn_ht28 wd28" id="searchBtn"><span class="icon_search"></span></button>
+	                   </div><button class="btn btn_ht28 m10_l fl" title="高级搜索" id="outbtn2"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+	               </div>
+                   
+
+	           </div> 
+
+            <div id="paging">
+            </div>
+            
+        </div>
+        
+    </div>
+</div>
+ <input type="hidden" id="CustomerSysNo" value="@ViewBag.CustomerSysNo" Search="CustomerSysNo" SearchComplex="CustomerSysNo"/>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        doSearch();
+
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+        
+        //绑定高级查询按钮事件
+        $("#btnComplexSearch").click(function () {
+            doComplexSearch();
+        });
+        
+        loadOrderSource();
+        //loadRmaStatus();
+        //loadRmaType();
+        
+        
+        
+        //查询条件变化时执行
+        $("#RmaType1").change(function () {
+            doSearch();
+        });
+        $("#RmaStatus").change(function () {
+            doSearch();
+        });
+        
+        $("#txtRmaId").defaultValue("RMA单号...");
+        
+    });
+
+    //加载订单来源
+    function loadOrderSource() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadOrderSourceList",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.Value + "'>" + item.Text + "</option>";
+                });
+                $('#OrderSources').html(content);
+            }
+        });
+    }
+   
+    //查询列表
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/RMA/DoRmaEditQuery/?r=" + Math.random(), "Search", function (p) {
+            if ($("#txtRmaId").val() != "RMA单号...") {
+                p.setParams("RmaId", $("#txtRmaId").val());
+            }
+            var rmaStatus = $("#RmaStatus").val();
+            if (rmaStatus == null) rmaStatus = '@((int)Hyt.Model.WorkflowStatus.RmaStatus.退换货状态.待审核)';
+            if (rmaStatus != '') {
+                p.setParams("RmaStatuses", rmaStatus);
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function doComplexSearch() {
+        Utils.MaskStart($('.case'));
+        Ajax.get("/RMA/DoRmaEditQuery/?r=" + Math.random(), "SearchComplex", function (p) {
+            if ($("#OrderSources").val() != "") {
+                p.setParams("OrderSources", $("#OrderSources").val());
+            }
+            if ($("#RmaStatuses").val() != "") {
+                p.setParams("RmaStatuses", $("#RmaStatuses").val());
+            }
+        }, function (data) {
+            $("#JS_search_nav").click();
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    //打印
+    function Print(sysNo) {
+        var url = '/Print/BrowseReturnedBill/?reqSource=callcenter&rmaSysNo=' + sysNo;
+        UI.DialogOpen(url, { title: '退换货单打印:' + sysNo, width: 1024, height: 680, init: function() {
+            if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                this.iframe.contentWindow.location.reload();
+            }
+        } }, false);
+    }
+    
+    //标签跳转
+    function navigateTo(rmaSysNo, rmaType, rmaStatus) {
+        var returnType = @returnType;
+        var exchangeType = @exchangeType;
+        var refundsType = @refundsType;
+        var reviewStatus = @reviewStatus;
+
+        var tabUrl  = "";
+        var tabText = "";
+        if (rmaType == returnType) {
+            tabText = "退货:";
+            switch(rmaStatus) {
+            case reviewStatus:
+                tabUrl = "/rma/ReturnToAudit/";
+                break;
+            default:
+                tabUrl = "/rma/RmaReturnView/";
+                break;
+            }
+        }
+        else if (rmaType == exchangeType) {
+            tabText = "换货:";
+            switch (rmaStatus) {
+            case reviewStatus:
+                tabUrl = "/rma/ExchangesToAudit/";
+                break;
+            default:
+                tabUrl = "/rma/RmaExchangesView/";
+                break;
+            }
+        }
+        //else if (rmaType == refundsType) {
+        //    tabText = "退款:";
+        //    switch (rmaStatus) {
+        //        case reviewStatus:
+        //            tabUrl = "/rma/ExchangesToAudit/";
+        //            break;
+        //        default:
+        //            tabUrl = "/rma/RmaExchangesView/";
+        //            break;
+        //    }
+        //}
+
+        UI.OpenCreatTab(tabText + rmaSysNo, '/rma/RMADetail/?sysNo=' + rmaSysNo);
+    }
+
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+    
+    function browseUserInfo(sysNo) {
+        UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+            title: '会员信息',
+            width: '698px',
+            height: '489px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    }
+</script>
+

@@ -1,0 +1,119 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.Origin
+@{
+    ViewBag.Title = "国家编辑";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/selectcontrol.js"> </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#OriginForm").validate({
+                rules: {
+                    Origin_Name: {
+                        required: true
+                         , maxlength: 100
+                    }
+                },
+                messages: {
+                    Origin_Name: {
+                        required: "国家名称必填"
+                       , maxlength: "长度超出100个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#OriginForm").valid()) {
+                                $.post('/Basic/SaveOrigin/', $("#OriginForm").serialize(), function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doSearch();
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+
+    </script>
+}
+<div class="caseout">
+    <form id="OriginForm" name="OriginForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>国家名称</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" name="Origin_Name" id="Origin_Name" class="wd200" value="@if (Model.Origin_Name != null){@Model.Origin_Name}" maxlength="100" /><span class="prompt m10_l" id="c_Origin_Name">填写国家名称</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">国旗</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" id="Origin_Img" class="wd200" name="Origin_Img" value="@if (Model.Origin_Img != null){@Model.Origin_Img}" maxlength="200">
+                                <button class="btn btn_ht26 m5_l" type="button" onclick="DAO.Upload({config:'@(Hyt.Model.SystemPredefined.UploadConfigAlias.OriginImageConfigAlias)',callback:function(data){ $('#Origin_Img').val(data[0].url); }})"><span class="icon_upload"></span><span class="m5_l">上传文件</span></button><span id="forImageUrl" class="prompt m10_l">国旗,1-200字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright" valign="top">国家描述</td>
+                            <td colspan="3">
+                                <textarea class="wd200" name="Origin_Describe" id="Origin_Describe">@if (Model.Origin_Describe != null){@Model.Origin_Describe}</textarea><span class="prompt m10_l" id="c_Origin_Describe">国家描述</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        </div>
+
+    </form>
+</div>
+
+

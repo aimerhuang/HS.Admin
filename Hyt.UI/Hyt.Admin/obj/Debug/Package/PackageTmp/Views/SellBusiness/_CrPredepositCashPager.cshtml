@@ -1,0 +1,72 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CrPredepositCash>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="110">交易号</th>
+                <th width="110">外部交易号</th>
+                <th width="110">名称</th>
+                <th width="110">提现类型</th>
+                <th width="110">金额</th>
+                <th width="110">支付方式名称</th>
+                <th width="110">收款账号</th>
+                <th width="110">收款人姓名</th>
+                <th width="110">收款银行</th>
+                <th width="50">支付状态</th>
+                <th width="60">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="9" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CrPredepositCash>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+
+                <td>@item.PdcTradeNo</td>
+                <td>@item.PdcOutTradeNo</td>
+                <td>@item.PdcUserName</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SellBusinessStatus.提现类型), item.PdType)</td>
+                <td>@item.PdcAmount</td>
+                <td>@item.PdcPaymentName</td>
+                <td>@item.PdcCashAccount</td> 
+                <td>@item.PdcToName</td>
+                <td>@item.PdcToBank</td>
+                <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.提现支付状态), item.PdcPayState)</td>                                                 
+                <td>
+                    @if (Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.提现支付状态), item.PdcPayState) == "未支付")
+                    { 
+                       <button type="button" class="btn btn_ht26 btn_blue PD1003601" title="审核" onclick="Aduit(@item.SysNo,1)"><span class=" icon_white icon_audit"></span><span class="m5_l">审核</span></button>
+                    }
+                    else
+                    {
+                        <button class="btn btn_ht26 disabled PD1003601" title="审核" type="button" disabled="disabled"><span class="icon_audit"></span><span class="m5_l">审核</span></button>
+                    }
+                </td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }

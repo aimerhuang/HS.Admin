@@ -1,0 +1,98 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Manual
+@using Hyt.Model.SystemPredefined
+@model PagedList<SyKeyInfo>
+@Html.PrivilegeControl(PrivilegeCode.SY1002101, ".SY1002101")
+@Html.PrivilegeControl(PrivilegeCode.SY1002401, ".SY1002401")
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th class="p10_lr align_l">key</th>
+                <th class="p10_lr align_l">描述</th>
+                <th width="60">类型</th>
+                <th width="80">值</th>
+                <th width="100">存储对象总量</th>
+                <th width="80">内存占用</th>
+                <th width="80">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var mode = Model.TData as List<SyKeyInfo>;
+                if (mode != null && mode.Count >0)
+                {
+                    foreach (var item in mode)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }else{
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                        <td class="p10_l align_l blue"><a href="javascript:void(0)" onclick="show('@item.Key')">@item.Key</a></td>
+                        <td class="p10_l align_l">@item.Desc</td>
+                        <td>@item.KeyType</td>
+                        <td>
+                            @if (item.Count != null)
+                            {
+                                if (item.CanShow)
+                                {<button class="btn btn_ht26 SY1002101" onclick=" openTab('@item.Key');return false; "><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+                                }
+                            }
+                            else
+                            {
+                                @item.KeyValue
+                            }
+                        </td>
+                        <td>@item.Count</td>
+                        <td>@item.MemoryUsed</td>
+                        <td>
+                            @if (item.Count != null)
+                            {
+                                <button class="btn btn_ht26 SY1002401 btn_red" onclick="deleteMemcached('@item.Key');return false;"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                            }
+                        </td>
+                        @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <td class="p10_l" align="left" colspan="7">暂无数据</td>
+                }
+                
+            }
+        </tbody>
+    </table>
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<div id="divJson" style="display:none">
+    <textarea id="jsonMsg" style="min-width:500px;min-height: 300px;word-break: break-all; word-wrap:break-word;" />
+</div>
+<script type="text/javascript">
+    function show(key) {
+        var content = '';
+        $.ajax({
+            global:false,
+            cache: false,
+            async: false,
+            timeout:10000,
+            type: "POST",
+            url: "/Sys/GetMemcacheKeyInfo",
+            data: "key=" + key,
+            success: function (ret) {
+                content = ret.Message;
+            },
+            error: function (httpRequest, txtStatus, error) {
+                content = txtStatus;
+            }
+        });
+        $('#jsonMsg').text(content);
+        UI.DialogBox({ width: 500, title: key, content: $('#divJson').html(), padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' })
+    }
+</script>

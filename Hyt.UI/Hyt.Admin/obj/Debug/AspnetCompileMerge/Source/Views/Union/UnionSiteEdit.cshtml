@@ -1,0 +1,168 @@
+﻿@model Hyt.Model.UnUnionSite
+@{
+    ViewBag.Title = "修改联盟网站";
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/TableBind/TableBind.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#UnionSite_form").validate({
+                rules: {
+                    SiteName: {
+                        required: true,
+                        maxlength: 50,
+                        minlength: 2,
+                        rangelength: [2, 50],
+                        remote: {
+                            url: '@Url.Action("UnionSiteVerify")',
+                            type: 'POST',
+                            data: {
+                                siteName: $("#SiteName").val(),
+                                id: $("#SysNo").val()
+                            },
+                            dataType: 'json',
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $("#SiteNameVerifyResult").text('网站名称，2-50个字符');
+                                } else {
+                                    $("#SiteNameVerifyResult").text('联盟网站已经存在');
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    SiteUrl: { required: true, url: true },
+                    Contact: { required: true },
+                    BeginTime: { required: true, dateISO: true },
+                    EndTime: { required: true, dateISO: true },
+                    Status: { required: true }
+                },
+                messages: {
+                    SiteName: {
+                        required: "网站必填",
+                        maxlength: "长度超出50个字"
+                    },
+                    SiteUrl: {
+                        required: "网站URL必填"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l');
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+            $("#Status").attr("dn", "Status");
+        });
+
+        function submitUnionSite() {
+            if ($("#UnionSite_form").valid()) {
+                UI.Confirm({
+                    content: '您确定要修改联盟网站吗？',
+                    ok: function () {
+                        var model = $("#UnionSite_form").JsonBind();
+                        if (model) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("UnionSiteEdit", "Union")",
+                                data: JSON.stringify(model),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function (ret) {
+                                    mask.Remove();
+                                    if (ret.IsLogout) { eval(ret.Callback); return; }
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('联盟网站修改成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function () {
+                                    mask.Remove();
+                                }
+                            });
+                        } else {
+                            UI.Alert({ content: '数据错据,请检查重试!' });
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+<form id="UnionSite_form" action="@Url.Action("UnionSiteEdit")" method="post">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td class="nameright border_rnone" style="width: 15%"><span class="v_star">*</span>网站名称</td>
+                        <td colspan="3">
+                            <input type="text" id="SiteName" name="SiteName" dn="SiteName" value="@Model.SiteName" maxlength="50" class="wd300 ">
+                            <span id="SiteNameVerifyResult" class="prompt m10_l">网站名称，2-50个字符</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>网站URL</td>
+                        <td  colspan="3">
+                            <input type="text" id="SiteUrl" name="SiteUrl" dn="SiteUrl" maxlength="50" value="@Model.SiteUrl" class="wd300 ">
+                            <span class="prompt m10_l">网站URL</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>联系人</td>
+                        <td  colspan="3">
+                            <input type="text" id="Contact" name="Contact" dn="Contact" value="@Model.Contact" class="wd60 ">
+                            <span class="prompt m10_l">联系人</span>
+                        </td>
+                       
+                    </tr>
+                    <tr>
+                         <td class="nameright border_rnone" >电话</td>
+                        <td colspan="3">
+                            <input type="text" id="Telephone" name="Telephone" dn="Telephone" value="@Model.Telephone" class="wd60 ">
+                            <span class="prompt m10_l">联系电话</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">手机</td>
+                        <td  colspan="3">
+                            <input type="text" id="MobilePhoneNumber" name="MobilePhoneNumber" dn="MobilePhoneNumber" value="@Model.MobilePhoneNumber" class="wd60 ">
+                            <span class="prompt m10_l">联系电话</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>有效日期起</td>
+                        <td  colspan="3">
+                            <input type="text" class="Wdate" id="BeginTime" name="BeginTime" dn="BeginTime" onfocus="WdatePicker({maxDate:'#F{$dp.$D(\'EndTime\',{d:0});}'})" value="@Model.BeginTime.ToString("yyyy-MM-dd")" />
+                            <button type="button" title="有效日期起" class="btn btn_ht26" onclick="var max=$('#EndTime').val();UI.Date({ el: 'BeginTime',maxDate:max });"><span class="icon_calendar"></span></button>
+                            <span class="prompt m10_l">有效日期起</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone"><span class="v_star">*</span>有效日期止</td>
+                        <td  colspan="3">
+                            <input type="text" class="Wdate" id="EndTime" name="EndTime" dn="EndTime" onfocus="WdatePicker({minDate:'#F{$dp.$D(\'StartTime\',{d:0});}'})" value="@Model.EndTime.ToString("yyyy-MM-dd")" />
+                            <button type="button" title="有效日期止" class="btn btn_ht26" onclick="var min=$('#BeginTime').val();UI.Date({ el: 'EndTime',minDate:min });"><span class="icon_calendar"></span></button>
+                            <span class="prompt m10_l">有效日期止</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone" ><span class="v_star">*</span>状态</td>
+                        <td  colspan="3">
+                            @Html.DropDownList("Status")
+                            <span class="prompt m10_l">请选择状态</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <input id="SysNo" name="SysNo" dn="SysNo" type="hidden" value="@Model.SysNo" />
+</form>

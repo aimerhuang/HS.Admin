@@ -1,0 +1,154 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBApVersion>
+@{
+    ViewBag.Title = "APP版本管理";
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+          $(document).ready(function () {
+
+            $("#txtVersionInput").keydown(function(e) {
+                if (e.keyCode == 13) {
+                    ajaxAction();
+                }
+            });
+      
+            $('#btnAdd').click(function() {
+                Create();
+            });
+
+           
+            $('#btnDelMulti').click(function() {
+
+                if (!$('input[type=checkbox]').is(':checked')) {
+                    UI.Alert({ content: '请至少选择一条记录!' });
+                    return;
+                }
+
+                UI.Confirm({
+                        content: '确定要删除吗?',
+                        ok: function() {
+
+                            var sysNos = [];
+                            $('input[type=checkbox]:checked').each(function() {
+                                if ($(this).attr('name') != undefined)
+                                    sysNos.push($(this).attr('name'));
+                            });
+
+                           
+                            del(sysNos.join(','));
+                        }
+                    }
+                );
+
+            });
+
+            // 版本号输入查找           
+            $('#btnVersionSearch').click(function() {
+                ajaxAction();
+            });
+ 
+        });
+
+        function Create() {
+            var url = '@Url.Action("CreateOrUpdateVersion")';
+            UI.DialogOpen(url,
+                {
+                    title: '新增版本',
+                    width: 700,
+                    height: 342,
+                    close: function () { },
+                    resize: false
+                },
+                false);
+         
+        }
+        function Update(sysno) {
+            var url = '@Url.Action("CreateOrUpdateVersion")' + '?sysno=' + sysno;
+            UI.DialogOpen(url, {
+                title: '修改版本',
+                width: 700,
+                height: 342,
+                close: function () {
+                },
+                resize: false
+            }, false);
+        }
+        //操作成功后执行的函数
+        function ExecSuccess(msg) {
+            UI.tips.tip_alert("tips_shrot tips_success", msg);
+            ajaxAction();
+        }
+ 
+        function del(vals) {
+           
+            $.ajax({
+                url: '@Url.Action("DeleteVersion")',
+                type: 'post',
+                data: { arrDelSysnos: vals },
+              
+                success: function(data) {
+                    if (data.Status) {
+
+                        UI.tips.tip_alert('tips_success', data.Message);
+             
+                        ajaxAction();
+                    } else {
+
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    }
+                }
+            });
+        }
+
+        function ajaxAction() {
+            $.ajax({
+                url: '@Url.Action("VersionManagement")',
+                type: 'get',     
+                data: { VersionNumber: $("#txtVersionInput").val() },
+                success: function (data) {                
+                    $('#divSearchResult').html(data);
+                }
+            });
+        }
+    </script>
+    }
+
+    <body>
+        <div class="case">
+            <div class="boxs">
+                <div class="boxs_tit head_m">
+                    <h3>App版本管理</h3>
+                </div>
+                <div class="boxs_con_c1">
+                    <div class="boxs_tool">
+                        <div class="left_tool" style="float: left">
+                            <button class="btn btn_ht26 m5_r btn_blue" type="button" title="添加版本" id="btnAdd"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增</span></button>
+                            <button type="button" id="btnDelMulti" class="btn btn_ht26 btn_red"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                        </div>
+                        <div class="right_tool clearfix">
+
+
+                            <div class="search_btn m10_l fl">
+                                <input id="txtVersionInput" type="text" class="input_ht28" placeholder="请输入版本号...">
+                                <button id="btnVersionSearch" type="button" class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- 查询结果 -->
+                    <div id="divSearchResult" class="boxs_listtabel">
+
+                        @{Html.RenderPartial("pAjaxPager_AppVersion", Model);}
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </body>

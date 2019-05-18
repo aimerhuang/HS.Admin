@@ -1,0 +1,41 @@
+﻿@model Hyt.Model.MkBlogroll
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "友情链接管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+  <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+  <table width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tbody>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>网站名称</td>
+              <td>@Model.WebSiteName</td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>网站地址</td>
+              <td>@Model.WebSiteUrl</td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>电子邮箱</td>
+              <td>@Model.EmailAddress</td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>排序号</td>
+              <td>@Model.DisplayOrder</td>
+          </tr>
+          <tr>
+              <td width="70" class="nameright border_rnone"><span class="v_star">*</span>网站描述</td>
+              <td><textarea id="SiteDescription" class="input_xlarge" disabled="disabled" rows="10" name="SiteDescription" cols="20">@Model.SiteDescription</textarea></td>
+          </tr>
+      </tbody>
+   </table>
+   </div>
+  </div>  
+</div>
+</form>

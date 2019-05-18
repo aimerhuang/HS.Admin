@@ -1,0 +1,183 @@
+﻿@using Hyt.Admin.Controllers
+@using Hyt.Model.SystemPredefined
+@using Hyt.Service.Task.Core
+@model IList<Hyt.Model.SyTaskConfig>
+@{
+    ViewBag.Title = "任务计划管理";
+     @Html.PrivilegeControl(PrivilegeCode.SY1011701, ".SY1011701")
+    @Html.PrivilegeControl(PrivilegeCode.SY1011201, ".SY1011201")
+    
+}
+
+
+<div class="case">
+  <div class="boxs">
+  
+    <div class="boxs_tit head_m"><h3>任务计划管理</h3></div>
+    
+    <div class="boxs_con_c1">    
+    
+      <!--工具条开始-->
+      <div class="boxs_tool"> 
+      
+        <!--搜索开始-->
+          @*<div class="right_tool clearfix">
+            <span class="veralign_t fl">任务类型</span>
+          	<div class="fl m10_l">
+            <select class="select_ht28">
+            <option>默认下拉</option>
+            </select>
+            </div>
+            <span class="veralign_t fl m10_l">状态</span>
+          	<div class="fl m10_l">
+            <select class="select_ht28">
+                <option>启用</option>
+                <option>禁用</option>
+            </select>
+            </div>
+            <div class="search_btn wd200 m10_l fl">
+              <input type="text" value="输入任务名..." class="input_ht28" name="">
+              <button class="btn btn_ht28 wd28" title="搜索"><span class="icon_search"></span></button>
+            </div>
+           
+        </div>*@        
+        <!--搜索结束-->
+  
+        
+        <!--功能按钮开始-->
+        <div class="left_tool">
+          <button class="btn btn_ht26 m10_r SY1011201 btn_blue" id="AddTask" title="新增任务"><span class="icon_plus icon_white"></span><span class="m5_l">新增任务</span></button>
+        </div>
+        <!--功能按钮结束-->
+        
+      </div>
+      <!--工具条结束-->
+      
+      <!--表格列开始-->
+      <div class="boxs_listtabel">
+          <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th>任务名称</th>
+                    <th>触发器</th>
+                    <th width="120">上次执行结果</th>
+                    <th width="125">上次执行时间</th>
+                    <th width="80">创建时间</th>
+                    <th width="60">状态</th>
+                    <th width="240">操作</th>
+                </tr>
+            </thead>
+              <tbody>
+                  @{
+                      int i = 0;
+                      foreach (var item in Model)
+                      {
+                          <tr @Html.Raw(i % 2 != 0?"class='stag_color'":"")>
+                              <td align="left">　@item.TaskName</td>
+                              <td align="left">　@TaskController.GetTips(item)</td>
+                              <td>@item.LastMessage</td>
+                              <td>@item.LastExecuteTime.ToString("yyyy-MM-dd HH:mm")</td>
+                              <td>@item.CreateTime.ToString("yyyy-MM-dd")</td>
+                              <td>@Html.Raw(item.Status==1 ? "启用" : "禁用")</td>
+                              <td>
+                                  @if (item.Status == 0)
+                                    {
+                                        <button class="btn btn_ht26 btn_blue m10_r SY1011701" onclick="setStatus(@item.SysNo,1,'启用')"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button>
+                                    }
+                                  else
+                                  {
+                                    <button class="btn btn_ht26 btn_red m10_r SY1011701" onclick="setStatus(@item.SysNo,0,'禁用')"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button>
+                                  }
+                                  <button data="@item.SysNo" class="EditTask btn btn_ht26 btn_blue m10_r SY1011201" @Html.Raw(item.Status == 1 ? "disabled=\"disabled\"" : "")><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                                  <button data="@item.SysNo" class="ViewTaskLog btn btn_ht26 SY1011201"><span class="icon_tosee"></span><span class="m5_l">查看日志</span></button>
+                              </td>
+                          </tr>
+                          i++;
+                      }
+                  }
+              </tbody>
+          </table>
+        </div>
+        <!--表格列结束-->
+        
+        <div class="pagination clearfix"> <b class="fl"><span class="f12 c6 bold4">共</span><span class=" m5_r m5_l f12 c3">1</span><span class="f12 c6 bold4">页</span><span class="f12 c6 m5_r m5_l bold4">|</span><span class="f12 c6 bold4">每页显示</span><span class=" m5_r m5_l f12 c3">30</span><span class="f12 c6 m5_l bold4">条</span></b>
+        <div class="page_con fr">  </div>
+      </div>
+      
+    </div>
+  </div>
+    
+</div>
+
+<script type="text/javascript">
+    function setStatus(sysNo, statusEdit, statusText) {
+        UI.Confirm({
+            content: '确定要' + statusText + '吗?',
+            ok: function () {
+                $.post('@Url.Action("UpdateStatus")', { sysNo: sysNo, status: statusEdit }, function (data) {
+                    if (data.Status) {
+                        UI.Prompt.Success('状态更新成功！');
+                        window.location.reload();
+                    }
+                    else{
+                        UI.Prompt.Error('状态删除失败,远端主机无响应！');
+                    }
+                });
+            },
+            width: '200px'
+        });
+
+    }
+    //页面刷新
+    function Refresh(msg) {
+        if (msg != null) {
+            UI.Prompt.Success(msg);
+        }
+        UI.CloseDialog();
+        location.reload();
+    }
+    //新增/更新页面弹出
+    $("#AddTask").bind("click", function () {
+
+        UI.DialogOpen('@Url.Action("TaskInfo")', {
+            width: 800,
+            height: 630,
+            title: '新增任务计划',
+            button: [{
+                    name: '保存',
+                    callback: function() {
+                    },
+                    focus: true
+                },
+                { name: '取消' }
+            ]
+        }, false);
+    });
+    //修改状态弹出
+    $(".EditTask").bind("click", function () {
+        var sysNo = $(this).attr("data");
+        UI.DialogOpen('@Url.Action("TaskInfo")' + '?sysNo=' + sysNo, {
+            width: 800,
+            height: 600,
+            title: '修改任务计划',
+            button: [{
+                    name: '保存',
+                    callback: function () {
+                    },
+                    focus: true
+                },
+                { name: '取消' }
+            ]
+        }, false);
+    });
+    //查看任务日志
+    $(".ViewTaskLog").bind("click", function () {
+        var sysNo = $(this).attr("data");
+        UI.DialogOpen('@Url.Action("TaskLog")' + '?sysNo=' + sysNo, {
+            width: 850,
+            height: 455,
+            title: '查看任务日志',
+            button: [{ name: '关闭' }]
+        }, false);
+    });
+</script>

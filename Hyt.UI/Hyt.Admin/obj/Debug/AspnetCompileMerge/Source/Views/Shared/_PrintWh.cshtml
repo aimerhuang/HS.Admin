@@ -1,0 +1,142 @@
+﻿@{
+  
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    <link href="/Theme/css/base.chirp.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/frame.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/common.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/icon.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/form.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/btn.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/boxandtable.css" rel="stylesheet" type="text/css" />
+    <link href="/Theme/css/search.css" rel="stylesheet" type="text/css" media="all" />
+    <script type="text/javascript" src="/Theme/scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Dialog/Dialog.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Print/LodopFuncs.js?v=5"></script>
+    <style type="text/css" id="style1">
+        #print { display: none; }
+        .divdisplay { margin-top: 15px; }
+        .auto_left { text-align: left; padding-left: 2px; }
+        table { width: 100%; font-size: 14px; font-family: 宋体; text-align: center; margin-bottom: 5px; }
+        .print_title { font-size: 20px; text-align: center; font-weight: bold; margin-bottom: 5px; }
+        .main_tb { text-align: left; }
+        /*主表label标题*/
+        .main_title { padding-right: 5px; font-weight: bold; text-align: right; }
+        /*明细表*/
+        .item_tb { border-collapse: collapse; border: 1px solid black; }
+            .item_tb thead tr th { border: 1px solid black; }
+            .item_tb tbody tr td { border: 1px solid black; }
+            /*数字金额列*/
+            .item_tb tbody tr th { text-align: right; border: 1px solid black; padding-right: 5px; }
+        /*合计行*/
+        .item_allcount { text-align: right; }
+            .item_allcount th { border-top: 1px solid black; padding-right: 5px; }
+
+        /*明细表 入库单*/
+        .item_tb_instock { border-collapse: collapse; border: 1px solid black; }
+            .item_tb_instock thead tr th { border: 1px solid black; }
+            .item_tb_instock tbody tr td { border-left: 1px solid black; border-right: 1px solid black; }
+            /*入库单数字金额列*/
+            .item_tb_instock tbody tr th { text-align: right; padding-right: 5px; border-left: 1px solid black; border-right: 1px solid black; }
+        /*页尾签名 入库单*/
+        .foot_tb_instock { text-align: right; padding-right: 5px; }
+        /*页尾签名 配送单*/
+        .foot_tb_delivery { text-align: left; }
+        /*页尾签名 借货单*/
+        .foot_tb_lend { text-align: left; }
+            .foot_tb_lend tr td { width: 33.3%; }
+        /*页尾签名 结算单*/
+        .foot_tb_settlement { text-align: left; }
+            .foot_tb_settlement tr td { width: 25%; }
+        .foot_subtb { border-collapse: collapse; text-align: center; border: 0; }
+            .foot_subtb td { border: 1px solid black; }
+
+        /*页尾签名 拣货单*/
+        .foot_tb { text-align: left; }
+            .foot_tb tr td { width: 100%; }
+        .slide { font-size: 12px; padding-top: 5px; padding-bottom: 5px; }
+        #divslide { display: none; }
+        .mtop_title { font-size: 16px; font-weight: bold; text-align: right; height: 50px; padding-right: 25%; }
+    </style>
+
+    @RenderSection("HeadCss", required: false)
+    @RenderSection("HeadJs", required: false)
+
+</head>
+<body>
+    <div class="caseout" style="margin: auto;">
+        @RenderBody()
+        <!--工具条开始-->
+        <div class="boxs_tool ">
+            <button class="btn btn_ht26 m5_r" onclick="myPreview()" type="button"><span class="m5_l">打印预览</span></button>
+            <button class="btn btn_ht26 m5_r" onclick="mySetup()" type="button"><span class="m5_l">打印维护</span></button>
+            @*   <button class="btn btn_ht26 m5_r" onclick="myDesign()" type="button"><span class="m5_l">打印设计</span></button>*@
+            <button class="btn btn_ht26 m5_r" onclick="myPrint()" type="button"><span class="m5_l">直接打印</span></button>
+            <button class="btn btn_ht26 m5_r" onclick="myPrintA()" type="button"><span class="m5_l">选择打印机</span></button>
+            @*    <button class="btn btn_ht26 m5_r" onclick="window.location.reload();" type="button" id="btnrefresh"><span class="m5_l">刷新</span></button>*@
+        </div>
+        <object source="~/Print/install_lodop32.exe" id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width="100%" height="600">
+            <embed id="LODOP_EM" type="application/x-print-lodop" width="100%" height="650" pluginspage="~/Print/install_lodop32.exe" source="~/Print/install_lodop32.exe"></embed>
+
+        </object>
+        <script>
+            //声明为全局变量
+            var LODOP;
+            $(function () {
+                myPreviewLoad();
+
+            });
+
+            //直接打印
+            function myPrint() {
+                CreatePrintPage();
+                LODOP.PRINT();
+            }
+
+            //选择打印机打印
+            function myPrintA() {
+                CreatePrintPage();
+                LODOP.PRINTA();
+            }
+
+            //直接加载打印预览
+            function myPreviewLoad() {
+                //console.log('do init')
+                CreatePrintPage();
+                LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+                LODOP.SET_SHOW_MODE("HIDE_QBUTTIN_PREVIEW", 1);
+                LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+                LODOP.PREVIEW();
+                // LODOP.PRINT();
+            }
+
+            //打印预览
+            function myPreview() {
+                CreatePrintPage();
+                LODOP.PREVIEW();
+            }
+
+
+            //打印维护
+            function mySetup() {
+                CreatePrintPage();
+                LODOP.PRINT_SETUP();
+            }
+
+            //打印设计
+            function myDesign() {
+                CreatePrintPage();
+                LODOP.PRINT_DESIGN();
+            }
+        </script>
+        @RenderSection("FooterJs", required: false)
+    </div>
+</body>
+</html>

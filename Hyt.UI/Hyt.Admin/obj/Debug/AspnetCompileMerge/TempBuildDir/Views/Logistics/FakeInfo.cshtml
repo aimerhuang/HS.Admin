@@ -1,0 +1,145 @@
+﻿@{
+    ViewBag.Title = "物流号刷单";
+}
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+}
+@section headjs{
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script>
+        $(function() {
+            update();
+
+            //初始化生成物流日志按钮事件
+            $("#generateBtn").click(function() {
+                var expressNo = $.trim($("#txtExpressNo").val());
+                if (!expressNo || expressNo == "请输入物流号") {
+                    UI.Alert({
+                        content: "请输入物流号"
+                    });
+                    return;
+                }
+                if (expressNo.length > 14) {
+                    UI.Alert({
+                        content: "物流号为长度在1至14位的数字，请确认物流号长度！"
+                    });
+                    return;
+                }
+                if (!(/^[1-9][0-9]*$/.test(expressNo)))
+                {
+                    //输入物流号不是大于零的整数
+                    UI.Alert({
+                        content: "物流号只能为大于零的整数！"
+                    });
+                    return;
+                }
+                $.ajax({
+                    url: "@Url.Action("GenerateLogisticsLog")",
+                    type: "post",
+                    dataType: "json",
+                    data: { "expressNo": expressNo },
+                    success: function(result) {
+                        if (result && result.Status) {
+                            update();
+                        } else {
+                            UI.tips.tip_alert('tips_warning', result.Message);
+                        }
+                    }
+                });
+            });
+
+            $("#easy_order_search_btn").click(function() {
+                var expressNo = $("#logisticsNo").val();
+                expressNo = expressNo == "请输入物流号" ? "" : expressNo;
+                update({ "expressNo": expressNo });
+            });
+
+            $("#logisticsNo").keydown(function(e) {
+                e.stopPropagation();
+                //当点击回车按钮时需处理的逻辑
+                if (e.which == "13") {
+                    $("#easy_order_search_btn").triggerHandler("click");
+                }
+            });
+        });
+
+        //初始化表格按钮事件
+
+        function initTableBtnEvent() {
+            $("#delivery_note_main_table").find("button,a").click(function() {
+                var expressNo = $(this).attr("expressNo");
+                $.ajax({
+                    url: "@Url.Action("GetMKLogList")",
+                    type: "post",
+                    dataType: "html",
+                    data: { "expressNo": expressNo },
+                    success: function(result) {
+                        UI.DialogBox({
+                            title: "物流日志查看",
+                            width: 700,
+                            height: 400,
+                            content: result,
+                            cancel: true,
+                            cancelVal: '关闭',
+                            ok: false
+                        });
+                    }
+                });
+            });
+        }
+
+        function update(searchData) {
+            var ajaxLoadingMask = UI.Mask({
+                obj: $("#createDeliverMainDiv"),
+                zindex: 1000
+            });
+            $.get('@Url.Action("FakeInfo", "Logistics")' + '?o=' + Math.random(),
+                searchData,
+                function(data) {
+                    $('#paging').empty().append(data);
+                    initTableBtnEvent();
+                    ajaxLoadingMask.Remove();
+                });
+        }
+
+        //表格加载完成后执行
+
+        function tableOnload() {
+            AjaxStop();
+            initTableBtnEvent();
+        }
+    </script>
+  
+}
+<div class="case" id="createDeliverMainDiv">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>物流号刷单</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool clearfix"  >
+                    <div class="search_btn m10_l fl">
+                        <input type="text" class="input_ht28"    id="logisticsNo" name="order_sysno"   value="请输入物流号" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入物流号'" onfocus="this.select()" onclick="if (this.value == '请输入物流号') this.value = ''"/>
+                        <button class="btn btn_ht28 wd28"   title="搜索" id="easy_order_search_btn"><span class="icon_search"></span></button>
+                    </div>
+                        
+                </div>
+                <!--/工具条按钮-->
+                <div class="left_tool" id="feature_area">
+                    <input type="text" class="input_medium m10_r" id="txtExpressNo" name="txtExpressNo" value="请输入物流号" maxlength="14" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入物流号'" onfocus="this.select()" onclick="if (this.value == '请输入物流号') this.value = ''" />
+                    <button class="btn btn_ht26 m5_r" type="button"  title="生成日志" id="generateBtn">生成日志</button>
+                </div>
+            </div>
+
+            <!--物流单信息列表-->
+         <div class="boxs_list" id="paging">
+                
+         </div>
+
+        </div>
+
+        
+    </div>
+</div>

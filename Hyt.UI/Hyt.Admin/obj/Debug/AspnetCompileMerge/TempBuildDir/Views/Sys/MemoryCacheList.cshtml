@@ -1,0 +1,146 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "内存数据库管理";
+        @Html.PrivilegeControl(PrivilegeCode.SY1002401, ".SY1002401")
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+	<div class="case">
+    	<div class="boxs">
+        	<div class="boxs_tit head_m">
+              <h3>内存数据库管理</h3>
+            </div>
+	        <div class="boxs_con_c1">
+	            <div class="boxs_detail_dispay">
+	                <div class="tit_dispay border_tnone">
+	                    <h5>概要信息</h5>
+	                </div>
+	                <div class="tit_con">
+	                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+	                        <tbody>
+	                            <tr>
+	                                <td width="100" class="nameright">当前key总数:</td>
+	                                <td width="100">@{@ViewBag.KeyAmount} 条</td>
+	                                <td width="100" class="nameright">当前内存占用:</td>
+	                                <td>@ViewBag.MemcacheCount</td>
+	                            </tr>
+	                        </tbody>
+	                    </table>
+	                </div>
+	            </div>
+	            <div class="boxs_detail_dispay">
+	                <div class="tit_dispay border_tnone">
+	                    <h5>内存数据库列表</h5>
+	                </div>
+	            </div>
+                <div class="boxs_tool">
+                    <div class="left_tool">
+                        <button id="AllDelete" title="全部删除" class="btn btn_ht28 fl  btn_red SY1002401" onclick="delAllMemory();return false;"><span class="icon_trash icon_white"></span><span class="m5_l">全部删除</span></button>
+                    </div> 
+                    <div class="right_tool clearfix">
+                        <div class="fl m10_l">
+                            
+                        </div>
+                        <span class="veralign_t fl m10_l">前缀</span>
+                        <div class="fl m10_l">
+                            <input type="text" Search="extension"  class="input_small fl wd240" value="" id="extension">
+                        </div>
+                        <div class="m10_l fl">
+                            <button id="batchDelete" title="批量删除" class="btn btn_ht28 btn_red m10_l fl SY1002401" onclick="deleteMemcachedPrefix();return false;"><span class="icon_trash icon_white"></span><span class="m5_l">批量删除</span></button>
+                        </div>
+                        
+                    </div>             
+                </div>
+	            <!--表格列开始-->
+	            <div id="paging">
+	            </div>
+	        </div>
+           
+        </div>
+    
+    </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch();
+    });
+
+    //查询列表
+    function doSearch() {
+        Ajax.get("/Sys/DoMemoryCacheQuery", "Search", function (p) {
+             p.setParams("r", Math.random());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+    function delMemoryKey(key) {
+        //删除
+        UI.Confirm({
+            content: '您确定要删除该缓存？', ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Sys/DeleteMemory",
+                    data: "key=" + key,
+                    success: function (ret) {
+                        if (ret.Status) {
+                            Utils.alert("删除成功", function () {
+                                doSearch();
+                            }, "succeed");
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+    function delAllMemory() {
+        //删除
+        UI.Confirm({
+            content: '您确定要删除所有缓存？', ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Sys/DeleteAllMemory",
+                    success: function (ret) {
+                        if (ret.Status) {
+                            Utils.alert("删除成功", function () {
+                                doSearch();
+                            }, "succeed");
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+    function deleteMemcachedPrefix() {
+        //批量删除
+        var keyPrefix = $('#extension').val();
+        UI.Confirm({
+            width: 300,
+            content: '您确定要删除所有前缀为<br><b class="red">Hyt.' + keyPrefix + '</b><br>的缓存？',
+            ok: function () {
+                $.ajax({
+                    cache:false,
+                    type: "POST",
+                    url: "/Sys/DeleteNetByPrefix",
+                    data: "keyPrefix=Hyt." + keyPrefix,
+                    success: function (ret) {
+                        if (ret.Status) {
+                            Utils.alert("删除成功", function () {
+                                doSearch();
+                            }, "succeed");
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+    function openTab(key) {
+        var url = '@Url.Action("CacheDetailList","Sys")?key=' + key + "&type=";
+        UI.OpenCreatTab('内存数据库Key:' + key, url);
+    }
+</script>

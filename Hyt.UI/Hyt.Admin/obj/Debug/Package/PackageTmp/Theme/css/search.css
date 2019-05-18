@@ -1,0 +1,11 @@
+@charset "utf-8";
+/* CSS Document */
+.search_box{ width:264px; height:1500px; background:#EBEBEB; box-shadow:-4px 3px 3px #ABABAB; position:fixed; top:0; right:0; border-left:1px solid #ABABAB; z-index:5; right:-267px;}
+.search_box .search_title{ width:244px; padding:0px 10px; height:40px; line-height:40px; background:url(../images/search_bg.png) repeat-x;}
+.search_box .search_title a{ display:inline-block; width:21px; height:21px; text-align:center; overflow:hidden; line-height:21px; color:#fff; font-size:20px; text-shadow:0 1px 0 rgba(255, 255, 255, 0.9); font-family:Helvetica,STHeiti; font-weight:bold; margin-top:8px;}
+.search_box .search_title a:hover{ background:#0A82D1;}
+.search_box .search_body{ width:264px;  overflow-y:auto; padding:8px 0; background:#ebebeb;}
+.search_box .search_body table{ border:none;}
+.search_box .search_body table td{ line-height:30px; padding:0 2px;}
+.search_box .search_body table td.h_else{ height:30px;}
+.search_box .search_foot{ width:264px; height:45px; padding-top:13px; background:url(../images/search_bg.png) 0px -40px repeat-x; text-align:center; border-bottom:1px solid #c1c1c1; border-top:1px solid #c1c1c1;}

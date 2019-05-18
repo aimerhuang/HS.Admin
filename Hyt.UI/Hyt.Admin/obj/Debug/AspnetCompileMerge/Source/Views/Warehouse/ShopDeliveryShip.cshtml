@@ -1,0 +1,322 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "提交快递送达";
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/scripts/selectcontrol.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+}
+<form method="POST" id="form" name="form">
+    <div class="caseout" id="bd">
+        <div class="boxs_detail_dispay">
+            <div class="tit_dispay">
+                <h5>提交快速送达信息</h5>
+            </div>
+
+            <div class="tit_con">
+
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr>
+                            <td width="100" class="nameright border_rnone"><span class="v_star">*</span>收货地址</td>
+                            <td colspan="3">
+                                <select id="customerReceiveAddress" name="customerReceiveAddress"></select></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>地区</td>
+                            <td colspan="3">
+                                <select class="m10_r" id="dpdCountry"></select><span class="c6">国家</span><select class="m10_r" id="dpdProvince"></select><span class="c6">省</span><select class="m10_r" id="dpdCity"></select><span class="c6">市/地区</span><select id="areaSysNo" name="areaSysNo" save="areaSysNo"></select><span class="c6">区/县</span><br />
+                                <span id="c_areaSysNo" class="prompt">选择收货地址</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>地址</td>
+                            <td colspan="3">
+                                <input class="input_xlarge" id="streetAddress" name="streetAddress" maxlength="100" type="text" save="streetAddress" /><span id="c_streetAddress" class="prompt m10_l">填写详细地址</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>转快递原因</td>
+                            <td colspan="3">
+                                <input class="input_xlarge" name="shipReson" id="shipReson" type="text" maxlength="100" save="shipReson" />
+                                <button class="btn btn_ht28 m10_l" title="选择常用原因" id="SelectBsText" onclick='DAO.SelectBsText({callBack: function(data) {$("#shipReson").val(data.title);}});return false;'>选择常用原因</button><span id="c_shipReson" class="prompt m10_l">填写转快递原因</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">会员留言</td>
+                            <td colspan="3">
+                                <input class="input_xlarge" name="customerMessage" id="customerMessage" maxlength="100" type="text" save="customerMessage" /></td>
+                        </tr>
+                        <tr style="display: none">
+                            <td class="nameright border_rnone">发票</td>
+                            <td colspan="3">
+                                <select class="wd150" id="invoiceType" name="invoiceType" save="invoiceType">
+                                    <option value="0">无</option>
+                                    @foreach (var item in ViewBag.InvoiceTypeList)
+                                    {
+                                        if (ViewBag.Invoice != null && ViewBag.Invoice.InvoiceTypeSysNo == item.SysNo)
+                                        {
+                                        <option value="@item.SysNo"  selected="selected">@item.Name</option>
+                                        }
+                                        else
+                                        {
+                                        <option value="@item.SysNo" >@item.Name</option>
+                                        }
+                                    }
+                                </select></td>
+                        </tr>
+                    </tbody>
+                    <tbody id="InvoicectTr" class="hide">
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>发票抬头</td>
+                            <td colspan="3">
+                                <input class="input_xlarge" name="invoiceTitle" id="invoiceTitle" type="text" maxlength="50" save="invoiceTitle" value=" @if (ViewBag.Invoice != null)
+                                                                                                                                                         {
+                                                                                                                                                              @ViewBag.Invoice.InvoiceTitle}"/><span id="c_invoiceTitle" class="prompt m10_l">填写发票抬头</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">发票备注</td>
+                            <td colspan="3">
+                                <input class="input_xlarge" id="invoiceRemarks" name="invoiceRemarks" type="text" maxlength="200" save="invoiceRemarks" value=" @if (ViewBag.Invoice != null)
+                                                                                                                                                                {
+                                                                                                                                                              @ViewBag.Invoice.InvoiceRemarks}"/></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            @if (!ViewBag.IsPayed) //未付款
+            {
+                <div class="tit_dispay border_tnone">
+                    <h5>所有钱款请当面点清</h5>
+                </div>
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tbody>
+                            <tr>
+                                <td width="100" class="nameright border_rnone">应收金额:</td>
+                                <td colspan="3"><span class="red" id="requiredPayAmount">&yen;@{@ViewBag.WhStockOut.Receivable.ToString("0.00")}</span></td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>付款方式</td>
+                                <td colspan="3">
+                                    <select class="wd150" id="payType" save="payType">
+                                       <option value="@Hyt.Model.SystemPredefined.PaymentType.现金预付">现金</option>
+                                        <option value="@Hyt.Model.SystemPredefined.PaymentType.刷卡预付">刷卡</option>
+                                    </select></td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_left">EAS收款科目</td>
+                                <td class="border_right">
+                                    <select name="EasReceiptCode" id="EasReceiptCode" class="wd150" save="EasReceiptCode"></select>
+                                </td>
+                            </tr>
+                            <tr style="display:none" id="trVoucherNo">
+                                <td class="nameright bd_none p10_r"><span class="v_star">*</span>刷卡流水号</td>
+                                <td class="bd_none">
+                                    <input id="voucherNo" name="voucherNo" save="voucherNo" type="text"  class="input_xlarge" maxlength="20" />
+                                </td>
+                            </tr>
+                        </tbody>
+                        <tbody id="bdpay">
+                            <tr>
+                                <td class="nameright border_rnone"><span class="v_star">*</span>支付金额</td>
+                                <td colspan="3">
+                                    <input class="input_xlarge payMoney" type="text" id="payMoney" name="payMoney" onkeyup="changeMoney(this, $('#money'))" maxlength="10" /><span id="c_payMoney" class="prompt m10_l">支付金额应大于付款金额</span></td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">找零:</td>
+                                <td colspan="3" id="money">&yen;0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <script type="text/javascript">
+                    //加载EAS收款科目
+                    function LoadEasReceiptCode() {
+                        if ($("#payType").val()) {
+                            var m_WarehouseSysNo = $("#shopSysNo").val();
+                            var m_PaymentTypeSysNo = $("#payType").val();
+
+                            $.get('/Ajax/GetReceiptTitleAssociation', { warehouseSysNo: m_WarehouseSysNo, paymentTypeSysNo: m_PaymentTypeSysNo }, function (result) {
+                                if (typeof (result) != "object") {
+                                    return;
+                                }
+                                $("#EasReceiptCode").empty();
+                                $.each(result, function (i, item) {
+                                    if (item.Selected == 1) {
+                                        $("<option></option>")
+                                            .val(item.Value)
+                                            .html(item.Text).attr("selected", "selected")
+                                            .appendTo($("#EasReceiptCode"));
+                                    } else {
+                                        $("<option></option>")
+                                            .val(item.Value)
+                                            .html(item.Text)
+                                            .appendTo($("#EasReceiptCode"));
+                                    }
+                                });
+                            });
+                        }
+                    }
+                    $(document).ready(function (e) {
+                        $("#payType").change(function () {
+                            $("#bdpay").show();
+                            if ($(this).val() == "@Convert.ToInt32(Hyt.Model.SystemPredefined.PaymentType.刷卡预付)") {
+                                $("#bdpay").hide();
+                            }
+                            showTrVoucherNo();
+                            LoadEasReceiptCode();//加载EAS收款科目
+                        });
+                        showTrVoucherNo();
+                        LoadEasReceiptCode();//加载EAS收款科目
+                    });
+                    function changeMoney(obj, money) {
+
+                        if (!isNaN($(obj).val())) {
+                            $(money).html(($(obj).val() - $("#requiredPayAmount").text().toDecimal()).toPrice('&yen;'));
+                        }
+                    }
+        @{
+                var paymenttype = (int)Hyt.Model.SystemPredefined.PaymentType.刷卡预付;
+        }
+
+                function showTrVoucherNo() {
+                    var paymenttype = $("#payType").val();
+                    if (paymenttype == '@paymenttype') {
+                        $("#trVoucherNo").show();
+                    } else {
+                        $("#trVoucherNo").hide();
+                    }
+                }
+                </script>
+            }
+        </div>
+    </div>
+    <input type="hidden" id="shopSysNo" name="shopSysNo" value="@ViewBag.WhStockOut.WarehouseSysNo" />
+</form>
+<script type="text/javascript">
+
+    $(document).ready(function (e) {
+        loadCustomerReceiveAddress(@ViewBag.ReceiveAddressSysNo);
+        initDialog();
+        //if ($("#invoiceType").val() != 0) {
+        //    $("#InvoicectTr").removeClass("hide");
+        //}
+        $("#invoiceType").bind("change", function () {
+            if ($(this).val() == 0) {
+                $("#InvoicectTr").addClass("hide");
+            } else {
+                $("#InvoicectTr").removeClass("hide");
+            }
+        });
+        LoadRule();
+
+        $("#bd").ajaxLoadingMask(true);
+        $(".payMoney").numberInput();
+    });
+    function initDialog() {
+        // 父页面window对象
+        api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+
+                    if ($("#invoiceType").val() != "0") {
+                        $('#invoiceTitle').rules('add', {
+                            required: true
+                        });
+                    }
+                    $('#areaSysNo').rules('add', {
+                        min: 1
+                    });
+                    $('#streetAddress').rules('add', {
+                        required: true
+                    });
+                    $('#shipReson').rules('add', {
+                        required: true
+                    });
+                    if ($("#payType").val() == "@Convert.ToInt32(Hyt.Model.SystemPredefined.PaymentType.现金预付)") {
+                        var requiredPayAmount = $("#requiredPayAmount").html().toDecimal();
+                        $('#payMoney').rules('add', {
+                            min: requiredPayAmount,
+                            required: true
+                        });
+                    }
+                    if (!setting.form()) {
+                        return false;
+                    }
+
+                    Ajax.post("/Warehouse/SetOrderToCourier", "Save", function (p) {
+                        p.setParams("stockOutSysNo", "@ViewBag.SysNo");
+                        }, function (ret) {
+                            if (ret.StatusCode == 0) {
+                                UI.Alert({
+                                    title: '提示',
+                                    icon: 'succeed',
+                                    content: "提交成功",
+                                    callback: function () {
+                                        try {
+                                            UI.CloseDialog();
+                                            var origin = UI.DialogOpener();
+                                            origin.UI.CloseTab(null, "/Warehouse/ShopDeliveryList");
+                                        } catch (ex) {
+                                            alert(ex);
+                                        }
+                                    },
+                                    cancel: false,
+                                    padding: '10px 20px'
+                                });
+
+                            } else {
+                                Utils.alert(ret.Message);
+                            }
+                        });
+                        return false;
+                    },
+                    focus: true
+                },
+                {
+                    name: '取消'
+                }
+            );
+                }
+                //加载会员收货地址
+                function loadCustomerReceiveAddress(sysno) {
+                    var content = '';
+                    $.ajax({
+                        async: false,
+                        type: "get",
+                        url: "/Ajax/LoadOrderReceive?receiveAddressSysNo=" + sysno,
+                        success: function (rows) {
+
+                            var selected = "";
+
+                            selected = 'selected="selected"';
+
+                            content = "<option value='" + rows.value + "' " + selected + ">" + rows.text + "</option>";
+
+                            $('#customerReceiveAddress').html(content);
+                            setDefaultArea(rows.areasysno);
+                            $("#streetAddress").val(rows.street);
+                        }
+                    });
+                }
+
+                function setDefaultArea(a) {
+                    Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#areaSysNo"), { a: a, callback: function (type) { } });
+                }
+                var setting;
+                //加载验证规则
+                function LoadRule() {
+                    setting = $("#form").validate({
+                        errorPlacement: function (error, el) {
+                            $('#c_' + el.attr('id')).attr('class', 'error m10_l');
+                        },
+                        success: function (label, el) {
+                            $('#c_' + el.attr('id')).attr('class', 'success m10_l');
+                        }
+                    });
+                }
+
+</script>

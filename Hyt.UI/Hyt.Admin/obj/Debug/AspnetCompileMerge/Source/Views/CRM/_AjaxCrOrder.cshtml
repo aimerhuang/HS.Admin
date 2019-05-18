@@ -1,0 +1,58 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<Hyt.Model.CBSoOrder>
+
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="30">订单号</th>
+                <th width="30">状态</th>
+                <th width="60">会员名</th>
+                <th width="30">收货人</th>
+                <th width="60">收货电话</th>
+                <th width="60">配送方式</th>
+                <th width="60">支付方式</th>
+                <th width="50">支付金额</th>
+                <th width="30">积分</th>
+                <th width="60">来源</th>
+                <th width="30">审核人</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData.Count > 0)
+                {
+                    var Index = 0;
+                    string cs = string.Empty;
+                    foreach (var item in (List<Hyt.Model.CBSoOrder>) Model.TData)
+                    {
+                        cs = Index%2 == 0 ? string.Empty : "stag_color";
+                        <tr class="@cs">
+                            <td class="blue"><a href="javascript:CrOrderDetail(@item.SysNo);">@item.SysNo</a></td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof (Hyt.Model.WorkflowStatus.OrderStatus.销售单状态), item.Status)</td>
+                            <td>@item.CustomerName</td>
+                            <td>@item.ReceiveName</td>
+                            <td>@item.ReceiveTel</td>
+                            <td>@item.DeliveryTypeName</td>
+                            <td>@item.PaymentName</td>
+                            <td class="red p10_r">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.CashPay, 2))</td>
+                            <td>@item.Point</td>
+                            <td >@Hyt.Util.EnumUtil.GetDescription(typeof (Hyt.Model.WorkflowStatus.OrderStatus.销售单来源), item.OrderSource)</td>
+                            <td>@item.AuditorName</td>
+                        </tr>
+                        Index++;
+                    }
+                }
+                else
+                {
+                      <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="11">暂无数据</td>
+                      </tr>
+                }
+            }
+        </tbody>
+    </table>
+    @{Html.RenderPartial("_UrlPaging", Model); }
+</div>

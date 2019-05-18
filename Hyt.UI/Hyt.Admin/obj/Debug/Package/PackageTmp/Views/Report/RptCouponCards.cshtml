@@ -1,0 +1,198 @@
+﻿@{
+    ViewBag.Title = "会员卡月统计报表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.BLL.Promotion
+
+<link href="~/Theme/css/tips.css" rel="stylesheet" />
+<script src="~/Theme/scripts/tips.js"></script>
+<script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+<script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+
+<script type="text/javascript">
+    $(function() {
+
+        doQuery();
+        $("#JS_gaoji1").click(function() {
+            doQuery();
+        });
+
+        var offset = $("#warehouseChoose").offset();
+
+        //绑定选择仓库文本框
+        $("#warehouseChoose").click(function() {
+            $("#warehouseList").css({
+                "top": (offset.top + $(this).height() + 5) + "px",
+                "left": offset.left + "px"
+            }).show();
+        });
+        //绑定选择仓库按钮
+        $("#warehouseChooseBtn").click(function() {
+            $("#warehouseChoose").triggerHandler("click");
+        });
+
+        $("#btnOk").click(function() {
+            setControlShowWarehouse();
+            $("#warehouseList").hide();
+        });
+
+        $("#btnCancel").click(function() {
+            $("#warehouseList").hide();
+        });
+
+        $('#btnExport').click(function() {
+            var form = $("#form1");
+            form.attr('action', '@Url.Action("ExportCouponCards", "Report")');
+            form.attr('method', 'post');
+            form.submit();
+        });
+
+    });
+
+    function doQuery() {
+        Utils.MaskStart($('#paging'));
+
+        $.ajax({
+            url: "@Url.Action("SetWhSelected")",
+            type: "post",
+            dataType: "text",
+            data: { "whSelected": $("#Warehouses").val() },
+            success: function() {
+                Ajax.get("/Report/RptCouponCards/?r=" + Math.random(), "queryPara", function(p) {
+                    p.setParams("PageSize", 10);
+                }, function(data) {
+                    $('#paging').empty();
+                    $('#paging').html(data);
+                });
+                Utils.MaskStop();
+            }
+        });
+
+    }
+
+
+    function setControlShowWarehouse() {
+        var ids = getCheckedWarehouses().join();
+        var names = getCheckedWarehouseNames();
+        if (names.length > 2) {
+            $("#warehouseChoose").val("已选择" + names.length + "个仓库");
+        } else {
+            if (!names.length) {
+                $("#warehouseChoose").val("请选择仓库");
+            } else {
+                $("#warehouseChoose").val(names.join());
+            }
+        }
+        $("#Warehouses").val(ids);
+    }
+
+    //分页开始时执行的方法
+    function tableBegin() {
+        $.ajax({
+            url: "@Url.Action("SetWhSelected")",
+            type: "post",
+        dataType: "text",
+        data: { "whSelected": $("#Warehouses").val() },
+        success: function() {
+            AjaxStart();
+        }
+    });
+    }
+
+</script>
+
+
+<div class="case">
+
+
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>会员卡月统计报表</h3>
+        </div>
+
+
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <form id="form1">
+                    <!--搜索开始-->
+                    <div class="right_tool clearfix">
+                        
+                        <span class="fl">会员卡类型</span>
+                        <select class="select_ht28 fl wd80 m10_r m10_l" querypara="CouponCardTypeSysNo" id="CouponCardTypeSysNo" name="CouponCardTypeSysNo">
+                            <option selected="selected" value="">全部</option>
+                            @{
+                                var cardTypeList = SpCouponCardBo.Instance.GetAllTypeName();
+                                foreach (var spCouponCardType in cardTypeList)
+                                {
+                                    <option value="@spCouponCardType.SysNo">@spCouponCardType.TypeName</option>
+                                }
+                            }
+                        </select>
+
+                        <span class="veralign_t fl">仓库</span>
+                        <div class="fl m10_l" style="margin-right: 10px;">
+                            <div class="date_btn">
+                                <input type="text" class="input_ht26" id="warehouseChoose" name="sysno" value="请选择仓库" readonly="readonly" />
+                                <button type="button" title="仓库" class="btn btn_ht26" id="warehouseChooseBtn">
+                                    <span class="icon_th_list"></span>
+                                </button>
+                            </div>
+                            <input type="hidden" id="Warehouses" name="warehouses" />
+                        </div>
+
+                        <span class="veralign_t fl">统计月份</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn">
+                                <input type="text" id="Month" name="Month" class="input_ht26" value="@DateTime.Now.ToString("yyyy-MM")" querypara="Month" onclick="UI.Date({el:'Month',dateFmt:'yyyy-MM'})" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'Month',dateFmt:'yyyy-MM'})">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+
+
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="JS_gaoji1" type="button"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+
+                    </div>
+                    <!--搜索结束-->
+                </form>
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r" id="btnExport" type="button"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+            </div>
+            <!--表格列结束-->
+
+
+        </div>
+
+    </div>
+
+
+
+</div>
+
+@*选择仓库弹出框*@
+<div id="warehouseList" style="width: 282px; vertical-align:top; position: absolute; display: none">
+    @{
+        Html.RenderAction("WarehouseTree", "Basic");
+    }
+    <div class="align_c pagination align_c clearfix" id="btnContainer">
+        <button class="btn btn_blue btn_ht28 m5_r" type="button" id="btnOk">确定</button>
+        <button class="btn btn_ht28" type="button" id="btnCancel">取消</button>
+    </div>
+</div>

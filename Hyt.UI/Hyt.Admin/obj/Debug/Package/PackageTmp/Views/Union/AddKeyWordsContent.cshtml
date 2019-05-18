@@ -1,0 +1,120 @@
+﻿@model Hyt.Model.MkWeixinKeywordsReply
+@{
+    ViewBag.Title = "AddKeyWordsContent";//添加关键词回复内容,model为关键词系统编号
+}
+@*新增/修改 文本图文 *@
+@section FooterJs
+{
+    <script type="text/javascript">
+        $(document).ready(function() {
+            //required field
+            $('tr td:even').each(function() {
+
+                $(this).html('<span class="v_star">*</span>' + $(this).text());
+            });
+            //end req
+            $('button[name=btnImgUpload]').click(function() {
+                var btn = $(this);
+                DAO.Upload(
+                    {
+                        config: 'WeChatImages',//image config
+                        callback: function(data) {
+                            var url = '@Hyt.BLL.Config.Config.Instance.GetAttachmentConfig().FileServer' + data[0].url;
+                            btn.prev().val(url); //txt for path
+                            btn.siblings('img').attr('src', url);
+
+                        }
+                    }
+                );
+
+            });
+        });
+
+
+    </script>
+}
+
+<div class="caseout">
+    <div class="boxs">
+@{
+    if (ViewBag.option == "text")
+    {
+        //图文
+        <form id="formPost">
+            <div class="boxs_detail_dispay">
+    
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_righte1">
+
+                        <tr>
+                            <td width="15%" class="nameright border_rnone">文本内容:</td>
+                            <td>
+                                @Html.TextAreaFor(m=>m.Content)
+                                <span id="forContent" class="prompt m10_l">请输入回复内容(最大长度为1000个字符)</span>
+                            </td>
+                        </tr>
+                            
+
+                    </table>
+                </div>
+    
+            </div>
+        </form>
+    }
+    else
+    {
+        //文本
+        <form id="formPost">
+            <div class="boxs_detail_dispay">
+    
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_righte1">
+                            
+                        <tr>
+                            <td width="10%" class="nameright border_rnone">封面图片:</td>
+                            <td>
+                                @*@Html.TextBoxFor(m=>m.Image,new {@class = "input_mlarge",disabled="disabled"}) *@
+                                @Html.TextBoxFor(m=>m.Image,new {@class = "input_mlarge disabled"})    
+                                <button class="btn btn_ht26" name="btnImgUpload" type="button"><span class="icon_upload"></span><span class="m5_l">选择图片</span></button>
+                                <span id="forImage" class="prompt m10_l">请选择图片</span>
+                                <img class="block m10_t"/>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td width="10%" class="nameright border_rnone">标题:</td>
+                            <td>
+                                @Html.TextBoxFor(m=>m.Title)
+                                <span id="forTitle" class="prompt m10_l">请输入标题(最大长度为200个字符)</span>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td width="10%" class="nameright border_rnone">描述:</td>
+                            <td>
+                                @Html.TextAreaFor(m=>m.Content)
+                                <span id="forContent" class="prompt m10_l">请输入描述(最大长度为1000个字符)</span>
+                            </td>
+                        </tr>
+                        
+                                                <tr>
+                            <td width="10%" class="nameright border_rnone">原文链接:</td>
+                            <td>
+                                @Html.TextBoxFor(m=>m.Hyperlink)
+                                <span id="forHyperlink" class="prompt m10_l">请输入链接(最大长度为150个字符)</span>
+                            </td>
+                        </tr>
+
+
+                           
+                           
+                    </table>
+                </div>
+    
+            </div>
+        </form>
+
+    }
+}
+        </div>
+</div>

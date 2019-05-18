@@ -1,0 +1,39 @@
+﻿@model IList<Hyt.Model.CBLgDeliveryItem>
+
+@{
+    List<Hyt.Model.CBLgDeliveryItem> items = null;
+    if (Model != null)
+    {
+        items = (List<Hyt.Model.CBLgDeliveryItem>)Model;
+    }
+    else
+    {
+        items = new List<Hyt.Model.CBLgDeliveryItem>();
+    }
+}
+        @{
+          bool alter = false;
+        }
+        @for (int i = 0; i < items.Count; i++)
+        {
+            int lineNum = i + 1;
+            Hyt.Model.CBLgDeliveryItem item = items[i];
+            <tr @(alter ? "" : "class = stag_color")>
+                <td>@lineNum</td>
+                <td>@item.NoteSysNo</td>
+                <td>
+                   @(((Hyt.Model.WorkflowStatus.LogisticsStatus.配送单据类型)item.NoteType).ToString())
+                </td>
+                <td>@item.Name</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.MobilePhoneNumber</td>
+                <td>@item.Receivable.ToString("C")</td>
+                <td>
+                    @if (item.Status == (int)Hyt.Model.WorkflowStatus.LogisticsStatus.配送单明细状态.待签收)
+                    {
+                        <button class="btn btn_ht26" delivery_item_sysno ="@item.SysNo"><span class="icon_trash"></span></button>
+                    }
+                </td>
+            </tr>
+            alter = !alter;  
+        }

@@ -1,0 +1,230 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.MkCustomizeMenu
+@{
+    ViewBag.Title = "微信菜单编辑";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/selectcontrol.js"> </script>
+
+    <script type="text/javascript">
+        $(function () {
+            $.post("/Distribution/GetDealersListByCurUser", {}, function (data) {
+                $.each(data, function (idx, item) {
+                    if (item.SysNo != undefined) {
+                        $("#DealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                    }
+                });
+                $("#DealerSysNo").val($("#hDealerSysNo").val());
+            });
+            $.validator.addMethod("WXMenuNameCheck", function (value, element, param) {
+                var realLength = 0, len = value.length, charCode = -1;
+                for (var i = 0; i < len; i++) {
+                    charCode = value.charCodeAt(i);
+                    if (charCode >= 0 && charCode <= 128) realLength += 1;
+                    else realLength += 2;
+                }
+                return this.optional(element) || realLength <= parseInt(param);
+            });
+            $("#MkCustomizeMenuForm").validate({
+                rules: {
+                    Name: {
+                        required: true
+                         , WXMenuNameCheck: 8
+                    },
+                    Url: {
+                        required: true
+                         , maxlength: 300
+                    },
+                    Order: {
+                        required: true,
+                        number: true
+                    }
+                },
+                messages: {
+                    Name: {
+                        required: "菜单名称必填"
+                       , WXMenuNameCheck: "长度超出"
+                    },
+                    Url: {
+                        required: "菜单链接必填"
+                       , maxlength: "长度超出300个字"
+                    },
+                    Order: {
+                        required: "显示顺序必填",
+                        number: "请输入合法的数字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt error m10_l').text($(error).text());
+
+                },
+                success: function (span, element) {
+                    element.parent().find('.prompt').attr('class', 'prompt success m10_l');
+                }
+            });
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮
+                api.button(
+                    {
+                        name: '保存',
+                        callback: function () {
+                            var nflag = true;
+                            $("#Key").css({ "border": "1px solid #CCCCCC" });
+                            if ($("#Type").val() == "click") {
+                                if ($.trim($("#Key").val()) == "") {
+                                    $("#Key").css({ "border": "1px solid #C53A28" });
+                                    $("#forKey").attr('class', 'prompt error m10_l').text("菜单KEY值必填");
+                                    nflag = false;
+                                }
+                            }
+                            if ($("#MkCustomizeMenuForm").valid() && nflag) {
+                                //var str = "abc/e/gf";
+                                //alert(str.replace(/\//g, ""));
+
+                                $.post('/Distribution/SaveMkCustomizeMenu/', $("#MkCustomizeMenuForm").serialize(), function (result) {
+                                    if (result.Status) {
+                                        try {
+                                            UI.Dialog.opener.doSearch();
+                                        } catch (e) { };
+                                        UI.Dialog.close();
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '取消'
+                    }
+                );
+            }
+
+            initDialog();
+
+        });
+        //判断分销商添加的菜单是否超过3个，超过则不能添加
+        //2016-1-12 王耀发 创建
+        $("#DealerSysNo").live("change", function () {
+            $.post("/Distribution/IsCanAddMkCustomizeMenu", { dealerSysNo: $("#DealerSysNo").val() }, function (data) {
+                if (data.Status == false) {
+                    UI.tips.tip_alert("tips_wrong", data.Message);
+                    $("#DealerSysNo").val($("#hDealerSysNo").val());
+                } else {
+                    $("#hDealerSysNo").val($("#DealerSysNo").val());
+                }
+            });
+        });
+
+        $("#Type").live('change', function () {
+            if ($(this).val() == "view") {
+                $("#vKey").hide();
+            } else {
+                $("#vKey").show();
+            }
+        });
+    </script>
+}
+<div class="caseout">
+    <form id="MkCustomizeMenuForm" name="MkCustomizeMenuForm" action="">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>菜单名称</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" id="Name" class="wd300" name="Name" value="@if (Model.Name != null)
+                                                                                                          {@Model.Name}" maxlength="8">
+                                <span id="forName" class="prompt m10_l">菜单名称,1-4字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>类型</td>
+                            <td width="80%" class="borde_right">
+                                <select id="Type" class="wd300" name="Type">
+                                    @if (Model.Type != null)
+                                    {
+                                        if (Model.Type == "view")
+                                        {
+                                            <option value="view" selected="selected">视图</option>
+                                            <option value="click">点击</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="view">视图</option>
+                                            <option value="click" selected="selected">点击</option>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <option value="view">视图</option>
+                                        <option value="click">点击</option>
+                                    }
+
+                                </select>
+                                <span class="prompt m10_l" id="c_Type">请选择类型</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>经销商</td>
+                            <td width="80%" class="borde_right">
+                                <select id="DealerSysNo" class="wd300" name="DealerSysNo"></select>
+                                <span class="prompt m10_l" id="c_DealerSysNo">请选择经销商</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>菜单链接</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" id="Url" class="wd300" name="Url" value="@if (Model.Url != null)
+                                                                                                          {@Model.Url}" maxlength="300">
+                                <span id="forUrl" class="prompt m10_l">菜单链接,1-300字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star" id="vKey" style="display:none;">*</span>菜单KEY值</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" id="Key" class="wd300" name="Key" value="@if (Model.Key != null)
+                                                                                                          {@Model.Key}" maxlength="50">
+                                <span id="forKey" class="prompt m10_l">菜单KEY值,1-50字符</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>显示顺序</td>
+                            <td width="80%" class="borde_right">
+                                <input type="text" id="Order" class="wd300" name="Order" value="@if (Model.Order != null)
+                                                                                                          {@Model.Order}" maxlength="50">
+                                <span id="forOrder" class="prompt m10_l">数值越大，排序越靠后</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <input type="hidden" name="SysNo" value="@Model.SysNo" />
+            <input type="hidden" id="hDealerSysNo" value="@Model.DealerSysNo" />
+        </div>
+
+    </form>
+</div>
+

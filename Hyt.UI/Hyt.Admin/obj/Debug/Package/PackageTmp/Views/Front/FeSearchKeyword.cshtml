@@ -1,0 +1,186 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.FeSearchKeyword>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "搜索关键字";
+    const int records = (int)ForeStatus.搜索关键字状态.后台记录;
+    @Html.PrivilegeControl(PrivilegeCode.FE1003601, "button.FE1003601")
+    @Html.PrivilegeControl(PrivilegeCode.FE1003201, "button.FE1003201")
+    @Html.PrivilegeControl(PrivilegeCode.FE1003401, "button.FE1003401")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"> </script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"> </script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入关键字...";
+        var searchHitsCountTxt = "请输入点击次数...";
+        var records = @records;
+        $(function () {
+            $("#searchName").focus(function () {
+                if ($("#searchName").val() == searchNameTxt) {
+                    $("#searchName").val("");
+                }
+            });
+            $("#searchName").blur(function () {
+                if ($("#searchName").val() == "") {
+                    $("#searchName").val(searchNameTxt);
+                }
+            });
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        searchKeyword();
+                        break;
+                }
+            });
+            //$("#searchHitsCount").focus(function () {
+            //    if ($("#searchHitsCount").val() == searchHitsCountTxt) {
+            //        $("#searchHitsCount").val("");
+            //    }
+            //});
+            //$("#searchHitsCount").blur(function () {
+            //    if ($("#searchHitsCount").val() == "") {
+            //        $("#searchHitsCount").val(searchHitsCountTxt);
+            //    }
+            //});
+        });
+
+        function addOrEdit(sysNo) {
+            var str = sysNo == 0 ? "新增关键字信息" : "修改关键字信息";
+            var url = sysNo == 0 ? "/Front/FeSearchKeywordAddOrEdit/" : "/Front/FeSearchKeywordAddOrEdit/?sysNo=" + sysNo;
+            UI.DialogOpen(url, {
+                title: str,
+                width: '460px',
+                height: '104px',
+                init: function () {
+                    this.button({
+                        name: '保存',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+
+                            iframe.addOrEdit();
+
+                            return false;
+                        }, focus: true
+                    },
+                        {
+                            name: "取消"
+                        });
+                }
+
+            });
+        }
+
+        function dialog() {
+            UI.tips.tip_alert('tips_success', '保存成功');
+        }
+        
+        function dataLoad(id) {
+            $.get('/Front/FeSearchKeyword/', { id: id }, function (data) {
+                $('#paging').html(data);
+            });
+        }
+
+        function setStatus(sysNo, status) {
+            var str = status == records ? "确定要取消前台显示吗?" : "确定要设置为前台显示吗?";
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeSearchKeywordSetStatus", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchKeyword();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function deleteOne(sysNo) {
+            UI.Confirm({
+                content: '确定要删除吗?',
+                ok: function () {
+                    $.post('@Url.Action("FeSearchKeywordDelete", "Front")', { sysNo: sysNo }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchKeyword();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function searchKeyword() {
+            AjaxStart();
+            var searchName = $("#searchName").val().trim();
+            //var searchHitsCount = $("#searchHitsCount").val();
+            //var searchCreatedDateStart = $("#searchCreatedDateStart").val();
+            //var searchCreatedDateEnd = $("#searchCreatedDateEnd").val();
+            var searchStaus = $("#searchStaus").val();
+            var search = { id: 1, searchName: ($.trim(searchName) != "" && searchName != searchNameTxt) ? searchName : null, status: searchStaus };
+
+            $.get('/Front/FeSearchKeyword/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+
+    </script>
+}
+@using (Html.BeginForm("FeSearchKeyword", "Front", FormMethod.Get, new { id = "form", aa = "" }))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>搜索关键字</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="fl m3_t veralign_t">状态</span>
+                        <select class="fl m10_l" id="searchStaus" name="searchStaus" onchange="searchKeyword()">
+                            <option value="-1">全部</option>
+                            @{
+    foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+    {
+                                <option value="@dict.Key">@dict.Value</option>
+    }
+                            }
+                        </select>
+                        <span class="fl m3_t veralign_t m10_l">关键字</span>
+                        <div class="search_btn m10_l fl">
+                            <input class="input_ht28" name="searchName" id="searchName" maxlength="100" type="text" value="请输入关键字..." />
+                            <button onclick="searchKeyword()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                        </div>
+                        @* <button type="button" class="btn btn_ht28 fl" title="搜索" onclick="searchKeyword()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>*@
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn_ht26 btn_blue FE1003201" onclick="addOrEdit(0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增关键字</span></button>
+                    </div>
+                </div>
+                <div class="boxs_list">
+                    <!--/表格列表区-->
+                    <div class="boxs_listtabel" id="paging">
+                        <!--/表格列表区-->
+                        @{ Html.RenderPartial("_AjaxFeSearchKeywordList", Model); }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

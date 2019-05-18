@@ -1,0 +1,258 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@model PagedList<MkBlogroll>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "友情链接";
+    @Html.PrivilegeControl(PrivilegeCode.FE1010001, "button.FE1010001")
+    @Html.PrivilegeControl(PrivilegeCode.FE1010002, "button.FE1010002")
+    @Html.PrivilegeControl(PrivilegeCode.FE1010003, "button.FE1010003")
+}
+@section headjs{
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入友情链接名称...";
+
+        $(function() {
+            //设置默认参数
+            $("body").keydown(function(event) {
+                switch (event.keyCode) {
+                case 13:
+                    doSearch();
+                    break;
+                }
+            });
+            UI.CheckAllbox(".boxs_listtabel", ".checkall");
+        });
+
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+
+        function tip_alert(mode, context) {
+            UI.tips.tip_alert(mode, context);
+        }
+
+        //查看
+        function view(sysNo) {
+            var url, title, w, h;
+            url = "/Front/FeLinksView/" + sysNo;
+            title = "查看友情链接";
+            name = "查看";
+            w = 450;
+            h = 285;
+            UI.DialogOpen(url, {
+                title: title,
+                width: w,
+                height: h,
+                init: function() {}
+            });
+        }
+
+        function addOrEdit(sysNo) {
+            var url, title, w, h;
+            if (sysNo != 0) {
+                url = "/Front/FeLinksAdd/" + sysNo;
+                title = "修改友情链接";
+                name = "修改";
+                w = 560;
+                h = 290;
+            } else {
+                url = "/Front/FeLinksAdd/";
+                title = "添加友情链接";
+                w = 560;
+                h = 290; //加入平台类型
+            }
+            UI.DialogOpen(url, {
+                title: title,
+                width: w,
+                height: h,
+                init: function() {
+                    this.button(
+                        {
+                            name: '保存',
+                            callback: function() {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+                                if (!iframe.document.body) {
+                                    alert('iframe还没加载完毕呢');
+                                    return false;
+                                }
+                                ;
+                                iframe.addOrEdit();
+                                return false;
+                            },
+                            focus: true
+                        },
+                        {
+                            name: '取消',
+                        }
+                    );
+                }
+            });
+        }
+
+        /// <summary>
+        /// 单条更新状态
+        /// </summary>
+        /// <param name="content">提示内容</param>
+        /// <param name="status">状态</param>
+        /// <param name="sysNo">系统编号</param>
+
+        function UpdateStatus(content, status, sysNo) {
+            var result = [];
+
+            var json = {};
+            json.sysNo = sysNo;
+            json.status = status;
+
+            result.push(json);
+
+            UI.Confirm({
+                content: content,
+                ok: function() {
+                    $.ajax({
+                        url: "/Front/FeLinksStatus/",
+                        data: JSON.stringify({ collocation: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function(data) {
+                            if (data.IsLogout) {
+                                eval(data.Callback);
+                                return;
+                            }
+                            if (data.result) {
+                                UI.tips.tip_alert('tips_success', data.info);
+                                doSearch();
+                                UI.Dialog.close();
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', data.info);
+                                UI.Dialog.close();
+                            }
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        /// <summary>
+        /// 批量更新状态
+        /// </summary>
+
+        function UpdateFeAdvStatus() {
+            var result = [];
+            $("#collocationASTable tbody input:checkbox:checked").each(function() {
+                var json = {};
+                json.sysNo = $(this).val();
+                json.status = @((int) Hyt.Model.WorkflowStatus.MarketingStatus.友情链接管理状态.已审);
+                result.push(json);
+            });
+            if (result.length == 0) {
+                UI.Alert({ content: '请选择要批量审核友情链接数据' });
+                return;
+            }
+
+            UI.Confirm({
+                content: "确定要批量启用友情链接吗？",
+                ok: function() {
+                    $.ajax({
+                        url: "/Front/FeLinksStatusAll/",
+                        data: JSON.stringify({ collocation: result }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function(data) {
+                            if (data.IsLogout) {
+                                eval(data.Callback);
+                                return;
+                            }
+                            if (data.result) {
+                                UI.tips.tip_alert('tips_success', data.info);
+                                doSearch();
+                                UI.Dialog.close();
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', data.info);
+                                UI.Dialog.close();
+                            }
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+
+        function doSearch() {
+            AjaxStart();
+
+            var searchStaus = $("#status").val();
+            var searchKey = $("#searchKey").val().trim();
+
+            var json = {};
+            json.id = 1;
+
+            if ($.trim(searchStaus) != "") {
+                json.status = searchStaus;
+            }
+
+            if ($.trim(searchKey) != "" && searchKey != searchNameTxt) {
+                json.webSiteName = searchKey;
+            }
+
+            $.get('/Front/FeLinks?r=' + Math.random(), json, function(data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m"><h3>友情链接</h3></div>
+        <div class="boxs_con_c1">
+            <!--搜索-->
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl m10_l veralign_t">友情链接状态</span>
+                    <div class="m10_l fl">
+                        <select id="status" name="status" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                            @{
+                                string sel;
+                                foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                                {
+                                    //sel = dict.Key == (int)Hyt.Model.WorkflowStatus.ForeStatus.广告组状态.启用 ? "selected='selected'" : string.Empty;
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <span class="fl m10_l veralign_t">友情链接名称</span>
+                    <div class="search_btn m10_l fl">
+                        <input name="searchKey" type="text" id="searchKey" class="input_ht28" maxlength="20" value="请输入友情链接名称..." onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入友情链接名称...'" onclick="if (this.value == '请输入友情链接名称...') this.value = ''" />
+                        <button type="button" title="搜索" class="btn btn_ht28 m10_l fl" onclick="doSearch()"><span class="icon_search"></span><span class="m5_l"></span></button>
+                    </div>
+                  
+                </div>
+          
+                <div>
+                    <button type="button" class="btn btn_ht26 btn_blue FE1010002"  onclick="addOrEdit(0)"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加友情链接</span></button><button type="button" class="btn btn_ht26 btn_blue m10_l FE1010003"  onclick="UpdateFeAdvStatus()"><span class="icon icon_unlock icon_white"></span><span class="m5_l">批量启用</span></button>
+                </div>
+            </div>
+            <div class="boxs_list">
+                <!--/表格列表区-->
+                <div class="boxs_listtabel">
+                    @{Html.RenderPartial("_AjaxFeLinks", Model); }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

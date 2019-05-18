@@ -1,0 +1,80 @@
+﻿@using Hyt.BLL.Front
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<CBFeArticle>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th style="text-align: left; text-indent: 10px;">标题</th>
+            <th style="width: 85px">分销商</th>
+            <th style="width: 85px">创建人</th>
+            <th style="width: 85px">最后更新人</th>
+            <th style="width: 124px">最后更新时间</th>
+            <th style="width: 46px">状态</th>
+            <th style="width: 243px" class="borde_r_none">操作</th>
+        </tr>
+    </thead>
+
+    <tbody class="list_con" width="100%" border="0" cellspacing="0" cellpadding="0">
+        @{
+            const int audit = (int)Hyt.Model.WorkflowStatus.ForeStatus.文章状态.已审;
+            const int invalid = (int)Hyt.Model.WorkflowStatus.ForeStatus.文章状态.作废;
+            const int pending = (int)Hyt.Model.WorkflowStatus.ForeStatus.文章分类状态.待审;
+            if (Model.TotalItemCount > 0)
+            {
+                int row = 1;
+                string cs = string.Empty;
+                foreach (var item in Model.TData)
+                {
+                    cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                    string url;
+                    var feArticleCategory = FeArticleCategoryBo.Instance.GetModel(item.CategorySysNo);
+                    if (feArticleCategory.Type == (int) ForeStatus.文章分类类型.帮助)
+                    {
+                        url = "http://" + HttpContext.Current.Request.Url.Host.Remove(0, HttpContext.Current.Request.Url.Host.IndexOf('.') + 1) + "/Help/Index?id=" + item.SysNo;
+                    }
+                    else
+                    {
+                        url = "http://" + HttpContext.Current.Request.Url.Host.Remove(0, HttpContext.Current.Request.Url.Host.IndexOf('.') + 1) + "/News/" + item.SysNo;
+                    }
+            <tr class="@cs">
+                <td style="text-align: left; text-indent: 10px;"><a href="@url" target="_blank">@(item.Title.Length>35?item.Title.Substring(35)+"...":item.Title)</a></td>
+                <td>@item.DealerName</td>
+                <td>@item.CreatedByName</td>
+                <td>@item.LastupdateByName</td>
+                <td>@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ForeStatus.文章状态), item.Status)</td>
+                <td class="borde_r_none">
+                    @{
+                    if (item.Status == (int)Hyt.Model.WorkflowStatus.ForeStatus.文章状态.已审)
+                    {
+                        <button type="button"  class="btn btn_ht26 btn_red m10_r FE1005601" title="取消审核" onclick="audit(@item.SysNo,@pending,2)"><span class="icon_cancelAudit icon_white"></span><span class="m5_l">取消审核</span></button><button type="button" class="btn btn_ht26 disabled m10_r FE1005201" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button><button type="button" class="btn btn_ht26 disabled FE1005501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    else if (item.Status == (int)Hyt.Model.WorkflowStatus.ForeStatus.文章状态.作废)
+                    {
+                        <button type="button" class="btn btn_ht26 disabled m10_r FE1005601" title="审核"><span class="icon_audit"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 disabled m10_r FE1005201" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button><button type="button" class="btn btn_ht26 disabled FE1005501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                    }
+                    else
+                    {
+                        <button type="button"  class="btn btn_ht26 btn_blue m10_r FE1005601"  title="审核" onclick=" audit(@item.SysNo, @audit,0) "><span class="icon_audit icon_white"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 btn_blue m10_r FE1005201" title="修改" onclick=" addOrEdit(@item.SysNo) "><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button type="button" class="btn btn_ht26 btn_red FE1005501" title="作废" onclick=" audit(@item.SysNo, @invalid,1) "><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                    }
+                    }
+                </td>
+            </tr>
+                    row++;
+                }
+            }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+

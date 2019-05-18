@@ -1,0 +1,83 @@
+﻿@{
+    ViewBag.Title = "推送订单返回信息管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>推送订单返回信息管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="fl">返回订单</span>
+                        <input id="OrderNo" type="text" class="wd100 fl m10_l m10_r" value="">
+                        <span class="fl">返回信息</span>
+                        <input id="Msg" type="text" class="wd100 fl m10_l m10_r" value="">
+                        <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+                </div>
+
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<input type="button" id="clikd" />*@
+<script type="text/javascript">
+    //$("#clikd").live('click', function () {
+    //    alert("eeeee");
+    //    $.ajax({
+    //        type: "POST",
+    //        url: "/Api/InboundQueryAndSendMsg",
+    //        //data: "soSysNo=" + soSysno,
+    //        success: function (content) {
+
+    //        }
+    //    });
+    //});
+
+    $(document).ready(function () {
+        doSearch();
+    });
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Order/DoSendOrderReturnQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("OrderNo", $("#OrderNo").val());
+            p.setParams("Msg", $("#Msg").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        doSearch();
+
+    }
+
+    function Query(OverseaCarrier, OverseaTrackingNo) {
+        UI.DialogOpen('/Order/QueryDetailDialog?OverseaCarrier=' + OverseaCarrier + '&OverseaTrackingNo=' + OverseaTrackingNo, {
+            width: 600,
+            height: 300,
+            title: '预报单追踪'
+        }, false);
+    }
+
+</script>
+

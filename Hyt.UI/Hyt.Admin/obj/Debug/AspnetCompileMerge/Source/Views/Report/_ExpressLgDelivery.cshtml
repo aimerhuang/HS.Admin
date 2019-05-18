@@ -1,0 +1,64 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBRptExpressLgDelivery>
+
+@{
+    Model.OnBegin = "setWhData";
+    <style type="text/css">
+        td { word-break: break-all; }
+    </style>
+
+    <div id="paging"><!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <thead>
+                <tr>
+                    <th class="wd100">日期</th>
+                    <th>办事处</th>
+                    <th class="wd200">快递公司</th>
+                    <th class="wd100">快递单数</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                @{
+    if (Model.TData == null || !Model.TData.Any())
+    {
+        <tr id='trNodata'>
+            <td colspan="99" class="align_l">&nbsp;暂无数据.</td>
+        </tr>
+    }
+    else
+    {
+        var count = 1;
+        foreach (var m in Model.TData)
+        {
+            if (count % 2 == 0)
+            {
+                                @: <tr class="stag_color">
+                            }
+                            else
+                            {
+                                @: <tr>
+                            }
+                            <td >@m.统计日期</td>
+                            <td >@m.办事处</td>
+                            <td >@m.快递公司</td>
+                            <td >@m.总单量</td>
+                            @:</tr>
+
+                            count++;
+                        }
+                    }
+                }
+            
+            </tbody>
+        </table>
+        <!-- end content -->
+        
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+            -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+}

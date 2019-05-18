@@ -1,0 +1,70 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model.Transfer
+@using Hyt.Util
+@model PagedList<Hyt.Model.Pos.CBDsPosReturnOrder>
+
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th width="40">编号</th>
+                <th>经销商名称</th>
+                <th>销售流水号</th>
+                <th>退货流水号</th>
+                <th>营业员</th>
+                <th width="100">退货时间</th>
+                <th width="60">退货数量</th>
+                <th width="60">需退金额</th>
+                <th width="60">实退金额</th>
+                <th width="60">抵消积分</th>
+                <th width="100">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData.Count > 0)
+                {
+                    var Index = 0;
+                    string cs = string.Empty;
+                    foreach (var item in Model.TData)
+                    {
+                        cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                        <tr class="@cs">
+                            <td>@item.SysNo</td>
+                            <td>@item.StoreName</td>
+                            <td>@item.SellOrderNumber</td>
+                            <td>@item.SerialNumber</td>
+                            <td>@item.Clerker</td>
+                            <td>@(item.ReturnTime.ToString("yyyy-MM-dd HH:mm"))</td>
+                            <td>@item.TotalNum</td>
+                            <td>@item.TotalReturnValue</td>
+                            <td>@item.TotalMayReturnValue</td>
+                            <td>@item.ReturnPoint</td>
+                            <td>
+                                <button onclick="ShowPosReturnSellData(@item.SysNo)" type="button" class="btn btn_ht26" title="查看">
+                                    <span class="icon_tosee"></span><span class="m5_l">查看</span>
+                                </button>
+                            </td>
+                        </tr>
+                        Index++;
+                    }
+                }
+                else
+                {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <!--分页开始-->
+    <div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+    <!--分页结束-->
+</div>
+<script>
+    function ShowPosReturnSellData(sysNo) {
+        window.location.href = "/DsPosManage/GetPosReturnSellManageViewData?SysNo=" + sysNo;
+    }
+</script>

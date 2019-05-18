@@ -1,0 +1,274 @@
+﻿@using Hyt.Admin.Controllers;
+@using Hyt.Model.SystemPredefined
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "用户管理";
+    
+    @Html.PrivilegeControl(PrivilegeCode.SY1008101, ".SY1008101")
+    @Html.PrivilegeControl(PrivilegeCode.SY1008201, ".SY1008201")
+    @Html.PrivilegeControl(PrivilegeCode.SY1008701, ".SY1008701")
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+@helper LoadSyUserStatus()
+{
+    @MvcHtmlString.Create(MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.SystemStatus.系统用户状态>(null, null).ToString())
+}
+@helper LoadSyUserGroup()
+{
+    var list = ViewBag.SyUserGroup as List<SelectListItem>;
+    if (list != null && list.Count > 0)
+    {
+    @list.SelectItemListToString(null, null)
+    }
+}
+
+<!--高级搜索开始-->
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix">
+        <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a>
+    </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">用户组</td>
+                <td width="75%">
+                    <select class="wd170" searchex="GroupSysNo" id="GroupSysNo" name="GroupSysNo">
+                        <option>全部</option>
+                        @LoadSyUserGroup()
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">状态</td>
+                <td>
+                    <select class="wd170" searchex="Status" id="Status" name="Status">
+                        <option>全部</option>
+                        @LoadSyUserStatus()
+                    </select></td>
+            </tr>
+            <tr>
+                <td align="right">用户帐号</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchex="Account" id="Account" name="Account" /></td>
+            </tr>
+
+            <tr>
+                <td align="right">手机号</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchex="MobilePhoneNumber" id="MobilePhoneNumber" name="MobilePhoneNumber" /></td>
+            </tr>
+
+            <tr>
+                <td align="right">真实姓名</td>
+                <td>
+                    <input type="text" value="" class="wd156" searchex="UserName" id="UserName" name="UserName" /></td>
+            </tr>
+            <tr>
+                <td align="right">仓库</td>
+                <td>
+                    <input type="text" id="warehouse_sysno" class=" wd156" onclick="selectWharehouse() ">
+                    <input type="hidden" id="WarehouseSysNo" value="">
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" class="btn btn_blue btn_ht30 bold SY1008101" id="btnComplexSearch">开始查询</button>
+        <button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l SY1008101" id="JS_delete">清除条件</button>
+    </div>
+</div>
+<!--高级搜索结束-->
+
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6">
+                <button class="btn btn_ht26 m10_r"><span class="icon_share_alt"></span><span class="m5_l" onclick="history.go(-1)">返回</span></button></span>
+            <h3>用户管理</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="StatusList" search="Status">
+                            <option>全部</option>
+                            @LoadSyUserStatus()
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">用户组</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="GroupSysNoList" search="GroupSysNo">
+                            <option>全部</option>
+                            @LoadSyUserGroup()
+                        </select>
+                    </div>
+                    <div class="search_btn wd200 m10_l fl">
+                        <input type="text" value="" class="input_ht28" id="Keyword">
+                        <button class="btn btn_ht28 wd28 SY1008101" title="搜索" id="searchBtn"><span class="icon_search"></span></button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl SY1008101" title="高级搜索" id="JS_gaoji1"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <!--搜索结束-->
+
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 btn_blue m10_r SY1008201" id="addUser" title="新增用户"><span class="icon_plus icon_white"></span><span class="m5_l">新增用户</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <div id="paging">
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    //页面刷新
+    function Refresh(msg, id) {
+        if (msg != null) {
+            UI.Prompt.Success(msg);
+        }
+        doSearch(id);
+    }
+
+    //新增弹出
+    $("#addUser").bind("click", function () {
+        popUserInfo('', 1);
+    });
+    //弹出用户信息窗口
+    function popUserInfo(id, page) {
+        UI.DialogOpen('/Sys/UserInfo/' + id + '?page=' + page, {
+            width: 600,
+            height: 300,
+            title: '用户信息',
+            button: [{
+                name: '保存',
+                callback: function () {
+                },
+                focus: true
+            },
+                { name: '取消' }
+            ]
+        }, false);
+    }
+    function setStatus(sysNo, statusEdit, statusText, Id) {
+        /// <summary>
+        /// 设置用户状态
+        /// </summary>
+        /// <param name="sysNo">系统用户编号</param>
+        /// <param name="statusEdit">要修改的状态值</param>
+        /// <param name="statusText">要修改的状态文本</param>
+        /// <param name="Id">页码</param>
+        //var content = "SysNo:" + sysNo + ",statusEdit:" + statusEdit + ",statusText:" + statusText;
+        UI.Confirm({
+            content: '确定要' + statusText + '吗?',
+            ok: function () {
+                $.post("/Sys/SetUserStatus", { sysNo: sysNo, status: statusEdit }, function (data) {
+                    if (data.Status) {
+                        doSearch(Id);
+                    } else {
+                        UI.Alert({ content: data.Message != '' ? data.Message : '未知错误，请联系管理员' });
+                    }
+                });
+            },
+            width: '200px'
+        });
+
+    }
+    //高级搜索
+    UI.searchbox($("#JS_gaoji1"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+    $(document).ready(function () {
+        $("#Keyword").defaultValue("请输入手机号、真实姓名...");
+        doSearch();
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+        //绑定高级查询按钮事件
+        $("#btnComplexSearch").click(function () {
+            doComplexSearch(1);
+        });
+        
+        $("#Keyword").keydown(function (event) {
+            switch (event.keyCode) {
+                case 13:
+                    doSearch();
+                    break;
+            }
+        });
+    });
+    //查询条件变化时执行
+    $("#GroupSysNoList").change(function () {
+        doSearch();
+    });
+    $("#StatusList").change(function () {
+        doSearch();
+    });
+    //查询列表
+    function doSearch(id) {
+        Ajax.get("/Sys/DoSyUserQuery?r=" + Math.random(), "Search", function (p) {
+            if ($("#Keyword").val() != '请输入手机号、真实姓名...') {
+                p.setParams("Keyword", $("#Keyword").val());
+            };
+            if (id) {
+                p.setParams("Id", id);
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+    //高级查询
+    function doComplexSearch(currentPage) {
+        Ajax.get("/Sys/DoSyUserQuery", "searchEx", function (p) {
+            p.setParams("WarehouseSysNo", $("#WarehouseSysNo").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            $("#JS_search_nav").click();
+        });
+    }
+    
+    function resetPwd(sysNo,userName) {
+        UI.Confirm({
+            content: "确定要重置【"+userName+"】的密码?",
+            ok: function () {
+                $.post("/Sys/ResetPwd", { sysNo: sysNo }, function (data) {
+                    if (data.Message != '') {
+                        UI.Alert({ content: data.Message, icon: "succeed" });
+                    } else {
+                        UI.Alert({ content: '未知错误，请联系管理员' });
+                    }
+                });
+            },
+            width: '200px'
+        });
+    }
+    
+    function selectWharehouse() {
+        DAO.SelectWhareHouseDialog({
+            chkStyle: 'radio',
+            callBack: function (data) {
+                if (data) {
+                    $('#warehouse_sysno').val(data[0].name);
+                    $('#WarehouseSysNo').val(data[0].id);
+                }
+            }
+        });
+    }
+</script>

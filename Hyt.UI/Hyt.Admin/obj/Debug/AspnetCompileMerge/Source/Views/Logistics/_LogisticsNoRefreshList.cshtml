@@ -1,0 +1,69 @@
+﻿@using Hyt.Infrastructure.Pager;
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.MkExpressLog>
+
+@{
+    IList<Hyt.Model.MkExpressLog> cbLgDelivery = Model.TData;
+    if (cbLgDelivery == null)
+    {
+        cbLgDelivery = new List<Hyt.Model.MkExpressLog>();
+    }
+    Model.OnComplete = "tableOnload";
+}
+
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table class="border_bnone border_rnone" width="100%" border="0" cellspacing="0" cellpadding="0" >
+        <thead>
+            <tr>
+                @*<th width="53">
+                    <input type="checkbox" id="select_all_checkbox" /></th>*@
+                <th class="wd75">系统编号</th>
+                <th class="align_l p10_lr">物流单号</th>
+                <th width="68px">操作人</th>
+                <th width="116px">操作时间</th>
+                <th width="80px">操作</th>
+            </tr>
+        </thead>
+    
+        <tbody id="delivery_note_main_table">
+            @if (cbLgDelivery.Count == 0)
+            {
+                <tr id="data_tips_tr">
+                    <td colspan="10" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+            }
+
+            @{
+                bool alter = false;
+            }
+            @foreach (Hyt.Model.MkExpressLog item in cbLgDelivery)
+            {
+                <tr @(alter ? "" : "class = stag_color")>
+                   
+                    <td>
+                        @item.SysNo
+                    </td>
+                    
+                    <td class="align_l p10_lr">
+                        <a href="javascript:void(0)" style="color:#2592DB;text-decoration: underline;" expressNo="@item.ExpressNo">@item.ExpressNo</a>
+                    </td>
+                    <td>@item.OperatorName</td>
+                    <td>
+                        @item.OperateDate.ToString("yyyy-MM-dd HH:mm")
+                    </td>
+                    <td>
+                        <button class="btn btn_ht26"  title="查看" expressNo="@item.ExpressNo"><span class="icon icon_eye_open"></span><span class="m5_l">查看</span></button>
+                    </td>
+                </tr>
+                
+                alter = !alter;
+            }
+
+        </tbody>
+    </table>
+
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+

@@ -1,0 +1,79 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.CrBulkPurchase
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "大宗采购管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+
+    <script type="text/javascript">
+        var er;
+
+        $(function () {
+
+        });
+
+        function edit(status) {
+            $.post('/CRM/CrBulkPurchaseEdit/', { sysNo: $("#hidSysNo").val(), status: status }, function (data) {
+                if (data.IsPass) {
+                    UI.Dialog.opener.dialog();
+                    UI.Dialog.opener.searchBulk();
+                    UI.Dialog.close();
+                }
+            });
+        }
+
+    </script>
+}
+<form id="crBulkPurchaseForm" name="crBulkPurchaseForm" action="">
+        <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="59" class="nameright border_rnone">
+                            <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>联系人:</td>
+                        <td>
+                            @Model.ContactName
+                        </td>
+                    </tr>
+                    <tr><td width="59" class="nameright border_rnone">联系方式:</td>
+                       <td>
+                            @Model.ContactWay
+                        </td>
+                    </tr>
+                    <tr><td width="59" class="nameright border_rnone">公司名称:</td>
+                        <td>
+                            @Model.CompanyName
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="59" class="nameright border_rnone">购买需求:</td>
+                        <td>
+                            <textarea disabled="disabled">
+                            @Model.Demand
+                            </textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="59" class="nameright border_rnone">提交时间:</td>
+                        <td>
+                            @Model.CommitDate.ToString("yyyy-MM-dd HH:mm")
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="59" class="nameright border_rnone">处理时间:</td>
+                        <td>
+                            @Model.HandleDate.ToString("yyyy-MM-dd HH:mm")
+                        </td>
+                    </tr>
+                </table>
+            </div>
+             </div>
+    </div>
+</form>

@@ -1,0 +1,1346 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "订单创建";
+    @Html.PrivilegeControl(PrivilegeCode.SO1002201, ".SO1002201")
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model PagedList
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/css/special.css")" rel="stylesheet" media="all" />
+    <link href="@Url.Content("~/Theme/css/tips.css")" rel="stylesheet" media="all" />
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tab.js")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/selectcontrol.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js?1")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=4a129ccbf39c60f2eb556dba394e969d"></script>
+}
+<style>
+    select, .input_xlarge, button {
+        font-size: 12px;
+        vertical-align: middle;
+    }
+
+    .hzy_else label {
+        position: absolute;
+        top: 292px;
+        left: 630px;
+        top: 295px\9;
+        left: 620px\9;
+    }
+</style>
+<div class="case">
+    <div id="tabboxs" class="boxs">
+        <div class="head_tab">
+            <!--/大选项卡-->
+            <ul class="tabNav">
+                <li class="long"><a href="javascript:void(0);">销售单基本信息</a></li>
+                <li class=""><a href="javascript:void(0);">订购商品</a></li>
+            </ul>
+        </div>
+        <div id="tabcon" class="boxs_con_c1">
+            <div class="list" style="display: none;">
+                <form id="form1">
+                    <div class="boxs_detail_dispay">
+
+                        <div class="tit_dispay">
+                            <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                            <h5>分销商信息</h5>
+                        </div>
+                        <div class="tit_con" style="display: block;">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                <tbody>
+                                    <tr>
+                                        <td width="8%" class="nameright"><span class="v_star">*</span>代理商</td>
+                                        <td width="92%" colspan="3" class="borde_right">
+                                            @Html.Partial("_AgentDealer", -1)
+                                        </td>
+                                        </tr>
+                               
+                                </tbody>
+                            </table>
+                         </div>
+                            <div class="tit_dispay">
+                                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                                <h5>会员信息</h5>
+                            </div>
+                            <div class="tit_con" style="display: block;">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>会员搜索</td>
+                                            <td width="42%" class="borde_right">
+                                                <div id="JS_outbox" class="search_btn fl m5_r" style="width: 218px;">
+                                                    <input type="text" id="customer_key" name="customer_key" autocomplete="off" class="input_ht26" style="width: 174px; font-size: 12px;" value="" maxlength="20" title="搜索会员姓名、手机...">
+                                                    <button id="search_customer" class="btn btn_ht26" title="搜索" type="button">
+                                                        <span class="icon_search"></span>
+                                                    </button>
+                                                </div>
+                                                <button title="添加" class="btn btn_ht26 m10_r" id="add_customer" type="button"><span class="icon_plus"></span></button>
+                                                <input type="button" id="btnRefreshCustomer" style="display: none" />
+                                                <input type="hidden" id="customerID" name="customerID" value="0" />
+                                                <span class="prompt" id="c_customer_key">搜索并选择会员</span>
+                                            </td>
+                                            <td width="8%" class="nameright">会员姓名:</td>
+                                            <td width="42%"><span id="customerName" /></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">可用积分:</td>
+                                            <td width="42%" class="borde_right"><span id="customerScore" /></td>
+                                            <td width="8%" class="nameright">会员等级:</td>
+                                            <td width="42%"><span id="customerRank" /></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tit_dispay">
+                                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                                <h5>收货信息</h5>
+                            </div>
+                            <div class="tit_con">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>可选地址</td>
+                                            <td width="42%" class="borde_right">
+                                                <select class="wid" id="customerReceiveAddress">
+                                                    <option value="0">请选择</option>
+                                                </select>
+                                            </td>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>收货人</td>
+                                            <td width="42%">
+                                                <input type="text" id="receiveName" name="receiveName" class="input_xlarge m10_r" maxlength="20"><span class="prompt" id="c_receiveName">填写收货人姓名</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>收货手机</td>
+                                            <td width="42%" class="borde_right">
+                                                <input type="text" id="receiveMobile" name="receiveMobile" class="input_xlarge m10_r" maxlength="15"><span class="prompt" id="c_receiveMobile">填写收货人手机</span>
+                                            </td>
+                                            <td width="8%" class="nameright">收货电话</td>
+                                            <td width="42%">
+                                                <input type="text" id="receivePhone" name="" class="input_xlarge m10_r" maxlength="22">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>地区</td>
+                                            <td width="92%" colspan="3" class="hzy_else">
+                                                <select style="width: 120px; margin-right: 10px;" class="c3" id="dpdCountry"></select><span class="c6">国家</span>
+                                                <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="dpdProvince"></select><span class="c6">省</span>
+                                                <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="dpdCity"></select><span class="c6">市/地区</span>
+                                                <select style="width: 120px; margin-left: 10px; margin-right: 10px;" class="c3" id="dpdArea" name="dpdArea"></select><span class="c6">区/县</span>
+                                                <span class="prompt m10_l" id="c_dpdArea">选择收货地区</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>地址</td>
+                                            <td width="42%">
+                                                <input type="text" id="streetAddress" name="streetAddress" class="input_xlarge m10_r" maxlength="100"><span class="prompt" id="c_streetAddress">填写地址</span>
+                                            </td>
+                                            <td width="8%" class="nameright">邮编</td>
+                                            <td width="42%" class="borde_right">
+                                                <input type="text" id="zipCode" name="zipCode" class="input_xlarge m10_r" maxlength="10">
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">身份证号码</td>
+                                            <td width="92%" colspan="3">
+                                                <input type="text" id="IDCardNo" name="IDCardNo" class="input_xlarge m10_r" maxlength="100">
+                                            </td>
+                                         
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tit_dispay">
+                                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                                <h5>配送信息</h5>
+                            </div>
+                            <div class="tit_con" style="display: block;">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>配送方式</td>
+                                            <td width="92%" colspan="3" class="borde_right">
+                                                <select id="shipType" class="wid m10_r" name="shipType">
+                                                    <option value="0">请选择</option>
+                                                </select>
+                                                <span class="prompt" id="c_shipType">选择配送方式</span>
+                                                @*<span id="spanWarn" class="v_star" style="display: none">（当前地址不支持百城当日达）</span>*@
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>仓库</td>
+                                            <td width="92%" colspan="3">
+                                                <input id="DefaultWarehouseName" name="DefaultWarehouseName" type="text" class="input_xlarge m10_r" contenteditable="false" value="" />
+                                                @*<span class="prompt" id="c_DefaultWarehouseName">选择仓库</span>*@
+                                                <input type="hidden" id="DefaultWarehouseSysNo" name="DefaultWarehouseSysNo" value="0" />
+                                                <span class="prompt" id="c_DefaultWarehouseSysNo">选择仓库</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">配送备注</td>
+                                            <td width="92%" colspan="3">
+                                                <input type="text" class="input_xlarge input_w m10_r" name="DeliveryRemark" id="DeliveryRemark" style="width: 97%" maxlength="200" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">配送时间段</td>
+                                            <td width="42%" class="borde_right">
+                                                <select class="wid" id="DeliveryTime" name="DeliveryTime">
+                                                    <option value="一周之内全天可送达" selected="selected">一周之内全天可送达</option>
+                                                    <option value="周一至周五送货">周一至周五送货</option>
+                                                    <option value="双休日及公众假期送货">双休日及公众假期送货</option>
+                                                </select>
+                                            </td>
+                                            <td width="8%" class="nameright">送货前联系</td>
+                                            <td width="42%">
+                                                <input type="radio" value="1" name="contact" id="contact_yes" /><label for="contact_yes" class="m10_r"> 是</label>
+                                                <input type="radio" value="0" name="contact" checked="checked" id="contact_no" /><label for="contact_no"> 否</label>
+                                            </td>
+                                        </tr>
+
+                                        <tr>
+                                            <td width="8%" class="nameright">会员留言</td>
+                                            <td width="92%" colspan="3">
+                                                <input type="text" class="input_xlarge input_w m10_r" name="CustomerMessage" id="CustomerMessage" maxlength="200" style="width: 97%" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">对内备注</td>
+                                            <td width="92%" colspan="3">
+                                                <input type="text" class="input_xlarge input_w m10_r" name="InternalRemark" id="InternalRemark" maxlength="200" style="width: 97%" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tit_dispay">
+                                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                                <h5>支付方式</h5>
+                            </div>
+                            <div class="tit_con" style="display: block;">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td width="8%" class="nameright"><span class="v_star">*</span>支付方式</td>
+                                            <td width="92%" colspan="3">
+                                                <select id="payType" class="wid m10_r" name="payType">
+                                                    <option value="0">请选择</option>
+                                                </select>
+                                                <span class="prompt" id="c_payType">选择支付方式</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">优惠券</td>
+                                            <td width="42%" class="borde_right">
+                                                <select class="wid" id="ddlCoupon">
+                                                    <option value="">请选择</option>
+                                                </select>
+                                                <span id="spanDesc" class="tagfull-inner" style="display: none"></span>
+                                            </td>
+
+                                            <td width="8%" class="nameright" style="display:none;">会员币支付</td>
+                                            <td width="42%" class="borde_right" style="display:none;">
+                                                <input type="text" name="CoinPay" id="CoinPay" class="input_xlarge" min="0" digits="true" max="0" value="0" />
+                                                <span class="prompt" id="c_CoinPay">可使用会员币数量：0 个</span>
+                                            </td>
+                                        </tr>
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="tit_dispay">
+                                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                                <h5>发票信息</h5>
+                            </div>
+                            <div class="tit_con" style="display: block;">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td width="8%" class="nameright">发票</td>
+                                            <td width="42%" class="borde_right">
+                                                <select class="wid" id="InvoiceType" name="InvoiceType">
+                                                    <option value="0">无</option>
+                                                    @foreach (var type in ViewBag.FnInvoiceType)
+                                                    {
+                                                        <option value="@type.SysNo">@type.Name</option>
+                                                    }
+                                                </select>
+                                            </td>
+                                            <td width="8%" class="nameright">发票抬头</td>
+
+                                            <td width="42%">
+                                                <input type="text" class="input_xlarge" id="InvoiceTitle" name="InvoiceTitle" maxlength="100" />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">发票备注</td>
+                                            <td width="92%" colspan="3">
+                                                <input type="text" class="input_xlarge input_w m10_r" style="width: 97%" name="InvoiceRemarks" id="InvoiceRemarks" maxlength="200" />
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="tit_dispay">
+                                <div class="more10r m5_t"><span class="btn_arrow btn_tableup"></span></div>
+                                <h5>金额汇总</h5>
+                            </div>
+                            <div class="tit_con" style="display: block;">
+                                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                    <tbody>
+                                        <tr>
+                                            <td width="8%" class="nameright">商品总额:</td>
+                                            <td width="92%" colspan="3"><span name="OrderAmount" id="OrderAmount">&yen;0.00</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">获得积分:</td>
+                                            <td width="92%" colspan="3"><span name="score" id="score">0</span></td>
+
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">优惠金额:</td>
+                                            <td width="92%" colspan="3"><span name="CouponAmount" id="CouponAmount">&yen;0.00</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">税费:</td>
+                                            <td width="92%" colspan="3"><span name="TaxFee" id="TaxFee">&yen;0.00</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">运费:</td>
+                                            <td width="92%" colspan="3"><span name="Freight" id="Freight">&yen;0.00</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td width="8%" class="nameright">合计:</td>
+                                            <td width="42%"><span name="total" id="total">&yen;0.00</span></td>
+                                            <td width="8%" class="nameright"></td>
+                                            <td width="42%"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="pagination align_center clearfix align_c">
+                                <button class="btn btn_blue btn_ht30 SO1002201" id="saveOrder" type="button">
+                                    <span class="icon_save icon_white"></span>
+                                    <span>保存</span>
+                                </button>&nbsp;
+                            </div>
+                        </div>
+                </form>
+            </div>
+            <div class="list" style="display: none;">
+                <div class="">
+                    <div class="boxs_tool p5_t ht32">
+                        <!--/工具条-->
+                        <div class="right_tool">
+                            <button title="挑选商品" class="btn btn_ht28 wd90 m10_l fl" onclick="
+                                if ($('#customerID').val() == '0') { UI.Alert({ content: '请选择会员' }); return false; };
+                                if ($('#shipType').val() == '0') { UI.Alert({ content: '请选择配送方式' }); return false; };
+                                if ($('#DefaultWarehouseSysNo').val() == '0' || $('#DefaultWarehouseSysNo').val() == '') { UI.Alert({ content: '请选择仓库' }); return false; };
+                                DAO.SelectPromotionProduct({ associationAttr: { customerSysNo: $('#customerID').val(), warehouseSysNo: $('#DefaultWarehouseSysNo').val(), dealerSysNo: '0' }, onselect: function (a) { AddProductToCart(a) } });"
+                                    type="button">
+                                <span class="icon_search"></span><span class="m5_l">挑选商品</span>
+                            </button>
+                        </div>
+                        <div class="bold f14">
+                            订购商品清单
+                        </div>
+                    </div>
+
+
+                    <div class="boxs_listtabel " id="productResult">
+                        <!--/表格列表区-->
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="item_list">
+                            <thead>
+                                <tr>
+                                    <th width="100">商品编号</th>
+                                    <th>后台显示名称</th>
+                                    <th width="120">数量</th>
+                                    <th width="80">价格</th>
+                                    <th width="60">积分</th>
+                                    <th width="50">操作</th>
+                                    <th style="display: none">商品号</th>
+                                </tr>
+                            </thead>
+                            <tbody id="product_list"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!--弹出选择赠品-->
+        <div id="tbPromotionGift" class="boxs_con_c1" style="display: none; vertical-align: top; height: 400px; overflow: auto">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <div class="search_btn m10_l fl">
+                        <input name="pName" type="text" id="pName" class="input_ht28" value="后台显示名称(商品编号)">
+                        <button class="btn btn_ht28 wd28" id="searchProductBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+                <!--搜索结束-->
+            </div>
+            <!--工具条结束-->
+            <div class="boxs_listtabel">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            <th width="120px" class="p10_lr">商品编号</th>
+                            <th width="200px" class="p10_lr">后台显示名称</th>
+                            <th width="68px" class="p10_lr">加购价</th>
+                            <th width="90">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbData"></tbody>
+                    <tbody id="tbNoData" style="display: none">
+                        <tr>
+                            <td class='align_l p10_l bgr_eb' colspan='4'>暂无数据。</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <script type="text/javascript">
+                //搜索赠品
+                $("#searchProductBtn").click(function () {
+                    var productName = $(this).prev().val();
+                    var tb = $(this).parents().find("#tbData");
+                    var notb = $(this).parents().find("#tbNoData");
+                    tb.show();
+                    notb.hide();
+                    if (productName) {
+                        if (productName == '' || productName == '后台显示名称(商品编号)') {
+                            tb.find("tr").show();
+                        } else {
+                            var obj = [];
+                            tb.find(".search").each(function (i) {
+                                if ($(this).text().toLowerCase().indexOf(productName.toLowerCase()) >= 0 || $(this).text().toLowerCase().indexOf(productName.toLowerCase()) >= 0) {
+                                    obj.push($(this).parent());
+                                }
+                            });
+                            if (obj.length > 0) {
+                                tb.find("tr").hide();
+                                $.each(obj, function (idx, item) {
+                                    item.show();
+                                });
+                            } else {
+                                tb.hide();
+                                notb.show();
+                            }
+                        }
+                    }
+                    return false;
+                });
+            </script>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="customerLevel" value="" />
+@section FooterJs{
+    <script type="text/javascript">
+        var map_x = 0;
+        var map_y = 0;
+        //  地区，配送方式，优惠券，商品明细变化：
+        //   重新计算购物车对象
+        //   刷新：购物车明细及合计金额，优惠券，金额汇总
+
+        //添加商品到购物车
+
+        function AddProductToCart(products) {
+            $.ajax({
+                url: '/Order/AddProductToCartAndReturnHtml',
+                type: 'post',
+                cache: false,
+                data: { customerSysNo: $("#customerID").val(), products: JSON.stringify(products) },
+                dataType: 'json',
+                success: function (json) {
+                    if (json.Status == true) {
+                        reLoadShoppingCart();
+                    }
+                    // Utils.MaskStop();
+                }
+            });
+
+        }
+
+        //订购商品列表数量改变事件
+        //2013-9-21 修改 by ywb
+
+        function quantityChange(input) {
+            var WarehouseSysNo = $("#DefaultWarehouseSysNo").val();
+            if (WarehouseSysNo == "") {
+                UI.Alert({ content: "请选择仓库" })
+            } else {
+                var groupcode = $(input).attr("groupcode");
+                var promotionsysno = $(input).attr("promotionsysno");
+                var sysno = $(input).attr("sysno");
+                if (groupcode != undefined && promotionsysno != undefined) {
+                    //Utils.MaskStart($('#tabcon'));
+                    //更新购物车组商品数量
+                    $.ajax({
+                        url: '/Order/UpdateGroupQuantity',
+                        type: 'post',
+                        cache: false,
+                        data: { customerSysNo: $("#customerID").val(), groupCode: groupcode, promotionSysNo: promotionsysno, quantity: $(input).val() },
+                        dataType: 'json',
+                        success: function (json) {
+                            if (json.Status == true) {
+                                reLoadShoppingCart();
+                            }
+                            // Utils.MaskStop();
+                        }
+                    });
+                } else if (sysno != undefined) {
+                    // Utils.MaskStart($('#tabcon'));
+                    //更新购物车明细商品数量
+                    $.ajax({
+                        url: '/Order/UpdateItemQuantity',
+                        type: 'post',
+                        cache: false,
+                        data: { customerSysNo: $("#customerID").val(), sysNo: sysno, quantity: $(input).val() },
+                        dataType: 'json',
+                        success: function (json) {
+                            if (json.Status == true) {
+                                reLoadShoppingCart();
+                            }
+                            // Utils.MaskStop();
+                        }
+                    });
+                } else {
+                    //----------------下面是修改之前的代码-------------------
+                    //var value = Number($(input).val());
+                    //if (!value) $(input).val(1);
+                    //if (value < 1) {
+                    //    delRow(input);
+                    //}
+                }
+            }
+        }
+
+        //删除购物车中组或者明细 2013-9-21 创建 by ywb
+
+        function delCart(btn) {
+            var groupcode = $(btn).attr("groupcode");
+            var promotionsysno = $(btn).attr("promotionsysno");
+            var sysno = $(btn).attr("sysno");
+            UI.Confirm({
+                content: "确定要删除此商品吗?",
+                ok: function() {
+                    if (groupcode != undefined && promotionsysno != undefined) {
+                        //删除购物车组商品
+                        $.ajax({
+                            url: '/Order/RemoveGroup',
+                            type: 'post',
+                            cache: false,
+                            data: { customerSysNo: $("#customerID").val(), groupCode: groupcode, promotionSysNo: promotionsysno },
+                            dataType: 'json',
+                            success: function(json) {
+                                if (json.Status == true) {
+                                    reLoadShoppingCart();
+                                }
+                            }
+                        });
+                    } else if (sysno != undefined) {
+                        //删除购物车明细商品数量
+                        $.ajax({
+                            url: '/Order/RemoveItem',
+                            type: 'post',
+                            cache: false,
+                            data: { customerSysNo: $("#customerID").val(), sysNo: sysno },
+                            dataType: 'json',
+                            success: function(json) {
+                                if (json.Status == true) {
+                                    reLoadShoppingCart();
+                                }
+                            }
+                        });
+                    }
+
+                },
+                cancel: function() {
+                }
+            });
+
+
+        }
+
+        //选择赠品 2013-9-23 创建 by ywb
+        var giftDialog;
+
+        function choiceGift(btn) {
+            var choicedPromotionSysNo, choicedProductSysNo;
+            var span = $(btn).prev();
+            if (span.length > 0) {
+                choicedPromotionSysNo = span.attr("promotionsysno");
+                choicedProductSysNo = span.attr("productsysno");
+            }
+            var gifts = JSON.parse($(btn).attr("json").replaceAll("{YH}", "\""));
+            choiceGiftDialog(gifts, function(gift) {
+                if (choicedPromotionSysNo != undefined && choicedProductSysNo != undefined) {
+                    $.ajax({
+                        url: '/Order/RemoveGift',
+                        type: 'post',
+                        cache: false,
+                        async: false,
+                        data: { customerSysNo: $("#customerID").val(), productSysNo: choicedProductSysNo, promotionSysNo: choicedPromotionSysNo },
+                        dataType: 'json',
+                        success: function(json) {
+                            $.ajax({
+                                url: '/Order/AddGift',
+                                type: 'post',
+                                cache: false,
+                                data: { customerSysNo: $("#customerID").val(), productSysNo: gift.ProductSysNo, promotionSysNo: gift.PromotionSysNo },
+                                dataType: 'json',
+                                success: function(json) {
+                                    if (json.Status == true) {
+                                        reLoadShoppingCart();
+                                        giftDialog.close();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                } else {
+                    $.ajax({
+                        url: '/Order/AddGift',
+                        type: 'post',
+                        cache: false,
+                        data: { customerSysNo: $("#customerID").val(), productSysNo: gift.ProductSysNo, promotionSysNo: gift.PromotionSysNo },
+                        dataType: 'json',
+                        success: function(json) {
+                            if (json.Status == true) {
+                                reLoadShoppingCart();
+                                giftDialog.close();
+                            }
+                        }
+                    });
+                }
+            });
+
+        }
+
+
+        //显示选择赠品对话框
+
+        function choiceGiftDialog(gifts, callback) {
+            var template = "<tr {0}>"
+                + "<td class='search p10_lr '>{1}</td>"
+                + "<td class='search align_l p10_lr '>{2}</td>"
+                + "<td class='align_r p10_lr red'>{3}</td>"
+                + "<td class='align_c p10_lr'>"
+                + "<button class='btn btn_ht26' json=\"{4}\"><span class='icon_search'></span><span class='m5_l'>选择</span></button>"
+                + "</td>"
+                + "</tr>";
+            var content = "";
+            var nodaContent = "<tr>"
+                + "<td class='align_l p10_l' colspan='4'>暂无商品</td>"
+                + "</tr>";
+            if (gifts.length > 0) {
+                $(gifts).each(function (i) {
+                    var rowClass = i % 2 == 0 ? "" : "class='stag_color'";
+                    content += template.format(rowClass,this.ProductErpCode, this.ProductName, this.PurchasePrice, JSON.stringify(this).replaceAll("\"", "{YH}"));
+                });
+
+            } else {
+                content = nodaContent;
+            }
+            $("#tbData").html(content);
+            $("#tbData button").click(function () { callback(JSON.parse($(this).attr("json").replaceAll("{YH}", "\""))); });
+            giftDialog = UI.DialogBox({ title: "选择赠品", width: '491px', content: document.getElementById('tbPromotionGift'), padding: '10px', footerClass: 'aui_none'});
+        }
+
+        //重新加载购物车数据 2013-9-21 add by ywb
+        var defaultcouponCode = "";
+
+        function reLoadShoppingCart() {
+            var sysNo = $("#customerID").val();
+            if (sysNo == null || sysNo == undefined || sysNo == "" || sysNo == "0") return;
+            //#ddlCoupon,#shipType
+            var areaSysNo = Number($('#dpdArea').val()) || 0;
+            var deliveryTypeSysNo = Number($("#shipType").val()) || 0;
+            var couponCode = $("#ddlCoupon").val();
+            var warehouseSysNo = Number($('#DefaultWarehouseSysNo').val()) || 0;
+            var postData = { customerSysNo: sysNo, couponCode: couponCode };
+            if (areaSysNo > 0) {
+                postData.areaSysNo = areaSysNo;
+            }
+            if (deliveryTypeSysNo > 0) {
+                postData.deliveryTypeSysNo = deliveryTypeSysNo;
+            }
+            if (warehouseSysNo > 0) {
+                postData.warehouseSysNo = warehouseSysNo;
+            }
+            //加载用户的购物车
+            $.ajax({
+                url: '/Order/ShoppingCartHtml',
+                type: 'get',
+                cache: false,
+                data: postData,
+                dataType: 'html',
+                success: function (html) {
+                    $("#CoinPay").val(0);
+                    $("#productResult").html(html).show();
+                    $("#OrderAmount").html($("#divPrice").attr("OrderAmount"));
+                    $("#score").html($("#divPrice").attr("score"));
+                    $("#Freight").html($("#divPrice").attr("FreightAmount"));
+                    $("#TaxFee").html($("#divPrice").attr("TaxFee"));
+                    $("#CouponAmount").html($("#divPrice").attr("CouponAmount"));
+                    $("#total").html($("#divPrice").attr("total"));
+                    UI.Numbercontrol({
+                        numberinputselect: "input[class='number_input']",
+                        minNumber: 0,
+                        step: 1,
+                        eventType: "click",
+                        cutActiveNum: function(obj) {
+                            quantityChange(obj);
+                        },
+                        addActiveNum: function(obj) {
+                            quantityChange(obj);
+                        }
+                    });
+                    $("#ddlCoupon").html($("#ddlValidCoupon").html());
+                    var flg = false;
+                     $('#ddlCoupon option').each(function(i) {
+                         if ($(this).val() == defaultcouponCode) {
+                             $(this).attr("selected", "selected");
+                             flg = true;
+                         }
+                     });
+                     if (!flg) {
+                         //当前默认值不在列表中，清除默认值
+                         defaultcouponCode = "";
+                     }
+                    var selectitem = $("#ddlCoupon").find("option:selected"); //显示优惠券描述
+                    $("#spanDesc").hide();
+                    if (selectitem.val() != "" && selectitem.attr("title") != "" && selectitem.attr("title") != undefined) {
+                        $("#spanDesc").show();
+                        $("#spanDesc").html(selectitem.attr("title"));
+                    }
+                }
+            });
+        }
+
+        //验证发票
+
+        function VerificationData() {
+            //构造发票信息
+            var invoiceInfo = $("#InvoiceType").val();
+            if (invoiceInfo != "0") {
+                $('#InvoiceTitle').rules('add', {
+                    required: true,
+                    messages: {
+                        required: '请输入发票抬头'
+                    }
+                });
+                $('#InvoiceRemarks').rules('add', {
+                    required: true,
+                    messages: {
+                        required: '请输入发票备注'
+                    }
+                });
+            } else {
+                $('#InvoiceTitle').rules('remove');
+                $('#InvoiceRemarks').rules('remove');
+            }
+        }
+
+        var setting;
+        //表单验证配置对象
+        //加载验证规则
+
+        function LoadRule() {
+            setting = $("#form1").validate({
+                onclick: false,
+                onkeyup: false,
+                rules: {
+                    customerID: { required: true, min: 1 },
+                    receiveName: { required: true, maxlength: 200 },
+                    receiveMobile: { required: true, maxlength: 11, isMobile: true },
+                    streetAddress: { required: true, maxlength: 100 },
+                    dpdArea: { required: true, min: 1 },
+                    DeliveryTypeSysNo: { required: true, min: 1 },
+                    PayTypeSysNo: { required: true, min: 1 },
+                    shipType: { required: true, min: 1 },
+                    payType: { required: true, min: 1 },
+                    DefaultWarehouseSysNo: { required: true, min: 1 },
+                    DefaultWarehouseName: { required: true },
+                    customer_key: { required: true }
+                },
+                errorPlacement: function(error, el) {
+                    $('#c_' + el.attr('id')).removeClass('success').addClass('error');
+                },
+                success: function(label, el) {
+                    $('#c_' + el.attr('id')).removeClass('error').addClass('success');
+                },
+                ignore: ""
+            });
+        }
+
+        //表单检查
+
+        function checkform() {
+            //if ($('#customerID').val() == '0') {
+            //    $('#c_customer_key').removeClass('success').addClass('error');
+            //    tips('tips_warning', '搜索并选择会员');
+            //    return false;
+            //} else {
+            //    $('#c_customerID').removeClass('error').addClass('success');
+            //}
+            //if ($('#shipType').val() == '0' || $('#shipType').val() < 1) {
+            //    $('#c_shipType').removeClass('success').addClass('error');
+            //    tips('tips_warning', '选择配送方式');
+            //    return false;
+            //} else {
+            //    $('#c_shipType').removeClass('error').addClass('success');
+            //}
+            //if ($('#DefaultWarehouseSysNo').val() == '0' || $('#DefaultWarehouseSysNo').val() < 1) {
+            //    $('#c_DefaultWarehouseSysNo').removeClass('success').addClass('error');
+            //    tips('tips_warning', '选择仓库');
+            //    return false;
+            //} else {
+            //    $('#c_DefaultWarehouseSysNo').removeClass('error').addClass('success');
+            //}
+            //var amount = $("#divPrice").attr("OrderAmount");
+            //if (Number(!amount || amount.substr(1)) <= 0) {
+            //    tips('tips_warning', '订购商品不能为空');
+            //    return false;
+            //}
+            VerificationData();
+            if (!setting.form()) {
+                return false;
+            }
+            var amount = $("#divPrice").attr("OrderAmount");
+            if (Number(!amount || amount.substr(1)) <= 0) {
+                tips('tips_warning', '订购商品不能为空');
+                return false;
+            }
+            return true;
+        }
+
+        //获取订单数据
+
+        function getSoOrder() {
+            var soOrder = {
+                CustomerSysNo: $("#customerID").val(),
+                DefaultWarehouseSysNo: $("#DefaultWarehouseSysNo").val(),
+                DeliveryTypeSysNo: $("#shipType").val(),
+                PayTypeSysNo: $("#payType").val(),
+                CouponAmount: $("#CouponAmount").text(),
+                CustomerMessage: $("#CustomerMessage").val(),
+                DeliveryRemarks: $("#DeliveryRemark").val(),
+                DeliveryTime: $("#DeliveryTime").val(),
+                ContactBeforeDelivery: $("input[name='contact']:checked").val(),
+                Remarks: "",
+                Status: 10,
+                InternalRemarks: $("#InternalRemark").val(),
+                CoinPay: Number($("#CoinPay").val()) || 0,
+                DealerSysNo: $("#DealerSysNo").val()
+            };
+            return soOrder;
+        }
+
+        //获取发票
+
+        function getFnInvoice() {
+            var Invoice = {
+                InvoiceTypeSysNo: $("#InvoiceType").val(),
+                InvoiceTitle: $("#InvoiceTitle").val(),
+                InvoiceRemarks: $("#InvoiceRemarks").val()
+            };
+            return Invoice;
+        }
+
+        //获取订单收货地址
+
+        function getSoReceiveAddress() {
+            var soReceiveAddress = {
+                Name: $("#receiveName").val(),
+                PhoneNumber: $("#receivePhone").val(),
+                MobilePhoneNumber: $("#receiveMobile").val(),
+                AreaSysNo: $("#dpdArea").val(),
+                StreetAddress: $("#streetAddress").val(),
+                ZipCode: $("#zipCode").val(),
+                IDCardNo: $("#IDCardNo").val(),
+                IDCardImgs: ""
+            };
+            return soReceiveAddress;
+        }
+
+        //获取销售单明细
+
+        function getSoOrderItem() {
+            var soOrderItem = [];
+            $("#product_list").find("tr").each(function(i) {
+                var productsysno = $(this).find("td").eq(6).html();
+                var productname = $(this).find("td").eq(1).html();
+                var quantity = $(this).find("input").eq(0).val();
+                var originalprice = $(this).find("td").eq(3).html();
+                var item = {
+                    ProductSysNo: productsysno,
+                    ProductName: productname,
+                    Quantity: quantity,
+                    OriginalPrice: originalprice
+                };
+                soOrderItem.push(item);
+            });
+            return soOrderItem;
+        }
+
+        $(document).ready(function (e) {
+            $("#tabboxs").ajaxLoadingMask();
+            //$("#tabboxs").ajaxLoadingMask();
+            $("#customer_key").defaultValue("搜索会员姓名、手机...");
+            $("#pName").defaultValue("后台显示名称(商品编号)");
+            //选择会员自动完成
+            UI.AutoComplete("customer_key", {
+                postUrl: "/ajax/SearchCustomer?word={0}",
+                height: 200,
+                width: 380,
+                showHeader: true,
+                btn: $("#search_customer"),
+                columns: [
+                    { header: "帐号", width: 100, render: function (data) { return data.Account } },
+                    { header: "姓名", width: 100, render: function (data) { return data.Name } },
+                    { header: "手机号", width: 100, render: function (data) { return data.MobilePhoneNumber } },
+                    { header: "会员ID", width: 80, render: function (data) { return data.SysNo } }],
+                callback: function(data) {
+                    if ($("#customerID").val() != data.SysNo) {                       
+                        autoComplateCallBack(data.SysNo, data.Account);
+                    } else {
+                        $("#customer_key").val(data.Account);
+                    }
+                }
+            });
+            //如果会员编号不为空则加载该会员数据
+            if ('@ViewBag.CustomerSysNo' != '') {
+                autoComplateCallBack('@ViewBag.CustomerSysNo', '@ViewBag.Account');
+            }
+
+            LoadRule();
+            //刷新会员信息 (确认是否有用？没用删除)
+            $("#btnRefreshCustomer").click(function() {
+                var cID = $("#customerID").val();
+                searchCustomer(cID);
+                loadCustomerReceiveAddress(cID);
+            });
+            //加载仓库
+            $("#DefaultWarehouseName").focus(function() {
+                UI.DialogOpen('/Order/SelectWarehouse/?DeliveryTypeSysNo=' + $("#shipType").val(), {
+                    width: '820px',
+                    height: '503px',
+                    title: '选择仓库',
+                    ok: function() {
+                        var iframe = this.iframe.contentWindow;
+                        if (!iframe.document.body) {
+                            UI.tips.tip_alert('tips_warning', 'iframe还没加载完毕呢');
+                            return false;
+                        }
+                        var DefaultWarehouseName = iframe.document.getElementById('WarehouseName').value;
+                        var DefaultWarehouseSysNo = iframe.document.getElementById('SysNo').value;
+
+                        $("#DefaultWarehouseName").val(DefaultWarehouseName);
+                        $("#DefaultWarehouseSysNo").val(DefaultWarehouseSysNo);
+                        reLoadShoppingCart();
+
+
+                        //选择仓库之后，判断仓库库存 王耀发 2015-12-28 创建
+                        //if ($.trim($("#product_list").html()) == "") {
+                        //    $("#DefaultWarehouseName").val(DefaultWarehouseName);
+                        //    $("#DefaultWarehouseSysNo").val(DefaultWarehouseSysNo);
+                        //} else {
+                        //    var productlist = "";
+                        //    $("#product_list tr").each(function () {
+                        //        var productsysno;
+                        //        $(this).find("td button.btn_ht26").each(function () {
+                        //            if ($(this).attr("productsysno") != undefined) {
+                        //                productsysno = $(this).attr("productsysno");
+                        //            }
+                        //        });
+                        //        var quantity = $(this).find("td input.number_input").val();
+                        //        if (productlist == "") {
+                        //            productlist = productsysno + ',' + DefaultWarehouseSysNo + ',' + quantity;
+                        //        } else {
+                        //            productlist += ';' + productsysno + ',' + DefaultWarehouseSysNo + ',' + quantity;
+                        //        }
+                        //    });
+
+                        //    var json = JSON.stringify({ ProductList: productlist});
+                        //    $.ajax({
+                        //        url: '/Order/JudgeShopCartProductStock',
+                        //        type: 'POST',
+                        //        cache: false,
+                        //        data: json,
+                        //        contentType: 'application/json; charset=utf-8',
+                        //        success: function (data) {
+                        //            if (data.Status) {
+                        //                $("#DefaultWarehouseName").val(DefaultWarehouseName);
+                        //                $("#DefaultWarehouseSysNo").val(DefaultWarehouseSysNo);
+                        //                reLoadShoppingCart();
+                        //            } else {  
+                        //                UI.Alert({ content: data.Message })
+                        //            }
+                        //        }
+                        //    });
+                        //}
+                        return true;
+                    },
+                    cancel: true
+                });
+            });
+            //加载收货地区
+            Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), {
+                callback: function(type) {
+                }
+            });
+
+            //保存订单
+            $("#saveOrder").click(function () {
+                if (!checkform()) return;
+                var num_CoinPay = $("#CoinPay").val(); //会员币
+                if (num_CoinPay != "") {
+                    var paycash = Number($("#divPrice").attr("total").replace("¥", ""));
+                    if (paycash < 0) {
+                        tips('tips_warning', "订单金额不能小于零!");
+                        return;
+                    }
+                    else if (paycash < Number(num_CoinPay)) {
+                        tips('tips_warning', "支付会员币已经大于订单金额!");
+                        $("#CoinPay").focus();
+                        return;
+                    }
+                }
+
+                var dealerSysNo = $("#DealerSysNo").val();
+                if (dealerSysNo == null || !dealerSysNo)
+                {
+                    tips('tips_warning', "请选择分销商!");
+                    return;
+                }
+
+                $("#saveOrder").attr("disabled", "disabled");
+                var couponCode = $("#ddlCoupon").val();
+                var order = { SoOrder: getSoOrder(), SoReceiveAddress: getSoReceiveAddress(), Product: getSoOrderItem(), Invoice: getFnInvoice(), CouponCode: couponCode };
+
+                var json = JSON.stringify(order); //$.toJSON(order);
+
+              
+                $.ajax({
+                    url: '/Order/SaveSoOrder',
+                    type: 'POST',
+                    cache: false,
+                    data: json,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function(data) {
+                        if (data.Status) {
+                            UI.tips.tip_alert('tips_success', '成功生成订单！');
+                            UI.Confirm({
+                                content: '成功生成订单！点击[确定]进入该订单详情',
+                                ok: function() {
+                                    UI.CloseTab(null, "/Order/OrderDetail/" + data.StatusCode, "订单：" + data.StatusCode);
+                                },
+                                cancel: function() {
+                                    window.location.href = window.location.href;
+                                }
+                            });
+                        } else {
+                            tips('tips_wrong', data.Message);
+                            $("#saveOrder").removeAttr('disabled');
+                        }
+                    }
+                });
+            });
+
+            //tab选项卡
+            $("#tabboxs").tab({ tabContentObj: "#tabcon" });
+            $("#tabboxs").tab({ tabNavObj: '.tabNav2', tabContentObj: ".boxs_con_p10", tabContent: ".list2" });
+
+
+            //表格数据隐藏显示
+            var clickbox = $(".tit_dispay");
+            var btnup = clickbox.children(".more10r").children("span");
+            btnup.toggle(
+                function() {
+                    $(this).parents(".tit_dispay").next(".tit_con").hide();
+                    $(this).removeClass("btn_tableup").addClass("btn_tabledown");
+                },
+                function() {
+                    $(this).parents(".tit_dispay").next(".tit_con").show();
+                    $(this).removeClass("btn_tabledown").addClass("btn_tableup");
+                }
+            );
+
+            //会员搜索 点击模拟select选框
+            var showdiv = $("#JS_outbox>ul");
+            $("#search_customer").bind("click", function() {
+                if (!showdiv.is(":visible")) {
+                    $(document).one("click", function() {
+                        showdiv.hide();
+                    });
+                    return false;
+                }
+            });
+            $("#JS_outbox>input").bind("click", function() {
+                $(document).one("click", function() {
+                    showdiv.hide();
+                });
+                return false;
+            });
+            $("#JS_outbox>ul>li").bind("click", function() {
+                $("input", "#JS_outbox").val($(this).html());
+                showdiv.hide();
+            });
+
+            //自动完成后事件
+
+            function autoComplateCallBack(sysNo, account) {
+                $("#customerID").val(sysNo);
+                $("#product_list").empty();
+                $("#customer_key").val(account);
+                $("#receiveName").val('');
+                $("#receiveMobile").val('');
+                searchCustomer(sysNo);
+                loadCustomerReceiveAddress(sysNo);
+                $('c_customer_key').removeClass('error').addClass('success');
+                reLoadShoppingCart();
+            }
+
+
+            //查询会员
+
+            function searchCustomer(sysno) {
+                $.ajax({
+                    async: false,
+                    type: "get",
+                    url: "/Ajax/SearchCustomerBySysNo?sysNo=" + sysno,
+                    success: function(result) {
+                        if (result) {
+                            var CoinPay_Num = result.customer.ExperienceCoin; //当前用户拥会员币
+                            $("#CoinPay").attr("max", CoinPay_Num);
+                            $("#CoinPay").val(0);
+                            $("#c_CoinPay").html("可使用会员币：" + CoinPay_Num + "个");
+                            $("#customerName").text(result.customer.Name);
+                            $("#customerRank").text(result.levelName);
+                            $("#customerScore").text(result.customer.AvailablePoint);
+                            $("#customerLevel").val(result.customer.LevelSysNo);
+                           
+                        }
+                    }
+                });
+            }
+
+            //会员搜索 点击模拟select选框结束
+            //加载会员收货地址
+
+            function loadCustomerReceiveAddress(customerSysNo) {
+                var content = '<option value="0">请选择</option>';
+                $.ajax({
+                    async: false,
+                    type: "get",
+                    url: "/Ajax/LoadCustomerAddress?sysNo=" + customerSysNo,
+                    success: function(rows) {
+                        $.each(rows, function(idx, item) {
+                            content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                        });
+                        $('#customerReceiveAddress').html(content);
+                        if (document.getElementById('customerReceiveAddress').options.length > 1)
+                            $("#customerReceiveAddress").bind("change", function() {
+                                if (this.value != '0') {
+                                    searchCustomerReceiveAddress(this.value);
+                                    //刷新地图的点
+                                    ReloadMapPoint();
+                                }
+                            });
+                    }
+                });
+            }
+
+            //查询收货地址
+
+            function searchCustomerReceiveAddress(sysno) {
+                $.ajax({
+                    async: false,
+                    type: "get",
+                    url: "/Ajax/SearchCustomerReceiveAddress?sysNO=" + sysno,
+                    success: function(row) {
+                        if (row) {
+                            $("#receiveName").val(row.Name);
+                            $("#receiveMobile").val(row.MobilePhoneNumber);
+                            $("#receivePhone").val(row.PhoneNumber);
+                            $("#zipCode").val(row.ZipCode);
+                            $("#streetAddress").val(row.StreetAddress);
+                            $("#IDCardNo").val(row.IDCardNo);
+                            setDefaultArea(row.AreaSysNo);
+                        }
+                    }
+                });
+            }
+
+            //优惠券改变,刷新购物车
+            $("#ddlCoupon").change(function() {
+                defaultcouponCode = $("#ddlCoupon").val();
+                reLoadShoppingCart();
+            });
+            //配送方式改变,加载支付方式，刷新购物车
+            $("#shipType").bind("change", function () {
+                loadPayType();
+                reLoadShoppingCart();
+                $("#DefaultWarehouseName").val("");
+                $("#DefaultWarehouseSysNo").val("");
+                var WarehouseNo = $("#shipType").find("option:selected").attr("warehouseno");//加
+                var WarehouseName = $("#shipType").find("option:selected").attr("warehousename");//
+                if (WarehouseNo!=null&&WarehouseNo != "0")
+                {
+                    $("#DefaultWarehouseSysNo").val(WarehouseNo);
+                    $("#DefaultWarehouseName").val(WarehouseName);
+                    return;
+                }
+                //没有加盟商仓库查询匹配的仓库
+                var m_deliveryTypeSysNo = $("#shipType").val();
+                if (m_deliveryTypeSysNo != "0") {
+                    $.getJSON('@Url.Content("/Ajax/GetDefaultWarehouse")' + '?i=' + new Date(), { areaSysNo: $('#dpdArea').val(), deliveryTypeSysNo: m_deliveryTypeSysNo }, function(result) {
+                        if (result.Status) {
+
+                            $("#DefaultWarehouseName").val(result.Message);
+                            $("#DefaultWarehouseSysNo").val(result.StatusCode);
+                        }
+                    });
+                }
+            });
+            //刷新配送方式及购物车
+            $("#dpdArea").bind("change", function() {
+                //刷新地图的点
+                ReloadMapPoint();
+            });
+            $("#streetAddress").bind("change", function() {
+                //刷新地图的点
+                ReloadMapPoint();
+            });
+            //加载配送方式,刷新购物车
+
+            function loadShipType() {
+                $("#DefaultWarehouseName").val("");
+                $("#DefaultWarehouseSysNo").val("");
+                var content = '<option value="0">请选择</option>';
+                $.getJSON('@Url.Content("/Ajax/LoadDeliveryTypeByAreaAndMap")' + '?i=' + new Date(), { areaNo: $('#dpdArea').val(), cityNo: $('#dpdCity').val(), x: map_x, y: map_y }, function(rows) {
+                    $.each(rows, function(idx, item) {
+                        if (item.optgroup) {
+                            content += "<optgroup label='" + item.label + "' warehouseno='" + item.WarehouseNo + "' warehousename='"+item.WarehouseName+"'></optgroup>";
+                        } else {
+                            content += "<option value='" + item.Value + "' warehouseno='" + item.WarehouseNo + "' warehousename='" + item.WarehouseName + "'>" + item.Text + "</option>";
+                        }
+                        //if (idx < 1) {
+                            //if (item.IsInMap) {
+                            //    $("#spanWarn").hide();
+                            //} else {
+                            //    $("#spanWarn").show();
+                            //}
+                        //}
+                    });
+                    $('#shipType').html(content);
+                    reLoadShoppingCart(); //收货地址改变时会加载配送方式，加载时更新购物车数据
+                });
+            }
+
+            //刷新地图点
+
+            function ReloadMapPoint() {
+                var dpdArea = $("#dpdArea");
+                var dpdCity = $("#dpdCity");
+                var dpdProvince = $("#dpdProvince");
+                var address = $("#streetAddress").val();
+                var a_No = dpdArea.val();
+                var a_Name = dpdArea.find("option:selected").text();
+                var local = "";
+                if (a_No != "-1") {
+                    var c_Name = dpdCity.find("option:selected").text();
+                    var c_No = dpdCity.val();
+                    if (c_Name == "北京" || c_Name == "重庆" || c_Name == "上海" || c_Name == "天津") {
+                        local = c_Name + "市";
+                    } else {
+                        local = dpdProvince.find("option:selected").text() + "省" + c_Name + "市";
+                    }
+                    var myGeo = new BMap.Geocoder();
+                    if (myGeo != null && myGeo != undefined) {
+                        myGeo.getPoint( address, function(point) {
+                            if (point) {
+                                map_x = point.lng;
+                                map_y = point.lat;
+                            } else {
+                                map_x = 0;
+                                map_y = 0;
+                            }
+                            //加载配送方式
+                            loadShipType();
+
+                        }, local);
+                    } else {
+                        //加载配送方式
+                        loadShipType();
+                    }
+                }
+            }
+
+            //加载支付方式，不刷新购物车
+
+            function loadPayType() {
+                var content = '<option value="0">请选择</option>';
+                $.ajax({
+                    async: false,
+                    type: "get",
+                    url: "/Ajax/LoadPayTypeListByDeliverySysNo?deliverySysNo=" + $('#shipType').val(),
+                    success: function(rows) {
+                        $.each(rows, function(idx, item) {
+                            content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                        });
+                        $('#payType').html(content);
+                    }
+                });
+            }
+
+            //初始化地区联动
+
+            function setDefaultArea(a) {
+                Area($("#dpdCountry"), $("#dpdProvince"), $("#dpdCity"), $("#dpdArea"), {
+                    a: a,
+                    callback: function(type) {
+                    }
+                });
+            }
+
+            //调用创建会员组件，并传入一个回调方法
+            $("#add_customer").click(function() {
+                DAO.CreateCustomer({
+                    from: '60',  //(int)CustomerStatus.注册来源.海品聚客服注册
+                    fromNo: '@ViewBag.CreatorSysNo',  //当前用户编号
+                    onselect: function(result) {
+                        var c = result.customer;
+                        var row = result.address;
+                        $('#customer_key').val(c.Account);
+                        $('#customerID').val(c.SysNo);
+                        $('#customerName').text(c.Name);
+                        $('#customerScore').text(c.AvailablePoint);
+                        $('#customerRank').text("初级");
+                        loadCustomerReceiveAddress(c.SysNo);
+                        $("#receiveName").val(row.Name);
+                        $("#receiveMobile").val(row.MobilePhoneNumber);
+                        $("#receivePhone").val(row.PhoneNumber);
+                        $("#zipCode").val(row.ZipCode);
+                        $("#streetAddress").val(row.StreetAddress);
+                        setDefaultArea(row.AreaSysNo);
+                        loadShipType();
+                    }
+                });
+            });
+        });
+
+    </script>
+}
+
+

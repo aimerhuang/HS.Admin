@@ -1,0 +1,172 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "促销选择";
+    var mutiple = ViewBag.multiple;
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+
+
+<div class="caseout">
+    
+    <div class="boxs" id="tabboxs">
+        
+        <div class="head_tab">
+            <ul id="tabNav">
+                <li class="menuon_white">数据列表</li>
+                <li class="">已选择</li>
+            </ul>
+        </div>
+
+        <div class="boxs_con_c1">
+            
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <span class="fl">促销类型</span><select name="PromotionType" id="PromotionType" searchItem="PromotionType" class="fl m10_l m10_r" >
+                                                        <option>全部</option>
+                                                        @ViewBag.PromotionTypes
+                                                    </select><span class="fl">促销名称</span><input type="text" value="" class="input_small m10_r m10_l fl" id="Name" searchItem="Name">
+                                                                                         <span class="fl">起止时间</span><div class="date_btn120 m10_l m10_r fl">
+                                                                                                                         <input type="text" name="txtBDate" id="txtBDate" class="input_ht26" value="" searchItem="StartTime" onfocus="UI.Date({el:'txtBDate'});this.blur();">
+                                                                                                                         <button onclick="UI.Date({el:'txtBDate'})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                                                                                                     </div>
+                                                                                         <span class="fl">-</span><div class="date_btn120 m10_l m10_r fl">
+                                                                                                                      <input type="text" name="txtEDate" id="txtEDate" class="input_ht26" value="" searchItem="EndTime" onfocus="UI.Date({el:'txtEDate'});this.blur();">
+                                                                                                                      <button onclick="UI.Date({el:'txtEDate'})" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                                                                                                  </div>
+                                                                                         <button type="button" class="btn btn_ht28 fl" title="查询" id="searchBtn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+                    </div>
+                </div>
+                <div id="paging">
+                </div>
+            </div>
+            
+
+            
+            <div class="list">
+
+                <!--工具条开始-->
+                <div class="boxs_tool">
+
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 m10_r" id="batch_cancel"><span class="icon_trash"></span><span class="m5_l">批量取消</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+
+                </div>
+                <!--工具条结束-->
+
+                <div class="boxs_listtabel">
+                    <table id="selected_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                        <thead>
+                            <tr>
+                                <th width="53">
+                                    <input name="" type="checkbox" value="" id="selected_select_all" class="checkall" /></th>
+                            	<th>促销名称</th>
+                                <th width="90">促销代码</th>
+                                <th width="100">促销类型</th>
+                                <th width="270">起止时间</th>
+                                <th width="110">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                                <tr class="odd_color" id="noitem">
+                                    <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                                </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+
+
+        </div>
+
+    </div>
+</div>
+
+<input type="hidden" value="@ViewBag.isOverlay" searchItem="IsOverlay"/>
+
+<script>
+
+    //tab选项卡  
+    UI.Tab({ tabNavBox: '#tabboxs', tabNavObj: '#tabNav', currentClass: 'menuon_white', tabContentObj: ".boxs_con_c1", tabContent: ".list" });
+
+    //已选择checkbox
+    UI.CheckAllbox("#selected_list", "#selected_select_all");
+
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    $("#PromotionType").change(function () {
+        doSearch();
+    });
+    
+
+    doSearch();
+
+    //列表数据显示
+    function doSearch() {
+        Ajax.get("/Promotion/DoPromotionSelectorQuery/?r=" + Math.random(), "searchItem", function () {
+
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            CheckboxSelect();
+        });
+    }
+
+
+
+    //调用页面进行回调
+    function CallBack() {
+        if ($.isFunction(parent._ActiveSelectPromotionCallBack)) {
+            var result = new Array();
+            $("#selected_list input[name='sysno']").each(function () {
+
+                var sysNo = $(this).val();
+                var name = $(this).parent().parent().find("td").eq(1).html();
+                var model = [{ sysNo: sysNo, name: name }];
+                result.push(model);
+            });
+ 
+            parent._ActiveSelectPromotionCallBack(result);
+            UI.Dialog.close();
+        }
+    }
+    
+    //分页完成事件 :
+    function AjaxOnComplete() {
+        AjaxStop();
+        CheckboxSelect();
+    }
+    
+    //加载完成复选框打勾事件
+    function CheckboxSelect() {
+        var items = $("#selected_list input[name='sysno']");
+        items.each(function () {
+            var sysno = $(this).val();
+            $("#checkbox_" + sysno).attr("checked", "checked");
+        });
+    }
+    
+    function singleMode() {
+        $("input[name='sysno']").click(function () {
+            CallBack();
+        });
+    }
+
+    var mutiple = @mutiple;
+
+    
+</script>

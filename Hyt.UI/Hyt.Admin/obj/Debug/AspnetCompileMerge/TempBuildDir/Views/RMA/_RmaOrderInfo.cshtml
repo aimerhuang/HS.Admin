@@ -1,0 +1,50 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Admin.Models.ReturnOrder 
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_right border_top border_bottom">
+            <tbody>
+                <tr>
+                  <td class="nameright border_left" width="10%">订单编号:</td>
+                    <td class="border_right" width="23%">@Model.SysNo</td>
+                    <td class="nameright" width="10%">订单来源:</td>
+                    <td class="" width="23%">@Model.OrderSource</td>
+                    <td class="nameright border_left border_rnone" width="10%">订单状态:</td>
+                  <td class="border_rnone">@Model.Status</td>
+                </tr>
+                <tr>
+                  <td  class="nameright border_left">会员姓名:</td>
+                  <td  class="border_right">@Model.CustomerName</td>
+                  <td class="nameright">会员账号:</td>
+               @if (Model.RmaOrderSysNo>0)
+               { 
+                  <td class="border_rnone" >@Model.MobilePhoneNumber</td>
+                   <td class="nameright border_left border_rnone">新订单编号:</td>
+                  <td class="border_rnone"><span class="blue"> <a href="#" onclick='javascript: UI.OpenCreatTab("订单:@Model.RmaOrderSysNo", "/Order/OrderView?id=@Model.RmaOrderSysNo")'>@Model.RmaOrderSysNo</a></span></td>
+               }
+               else
+               {
+                <td class="border_rnone" colspan="3">@Model.MobilePhoneNumber</td>
+               }
+                </tr>
+                 
+                <tr>
+                  <td class="nameright border_left ">发票信息:</td>
+                  <td colspan="5" class="border_rnone"> @if (string.IsNullOrWhiteSpace(Model.InvoiceTitle))
+                                    { 
+                                        @:无
+                                    }
+                                    else
+                                    {
+                                          var invoice = Hyt.BLL.Warehouse.FnInvoiceTypeBo.Instance.GetModel(Model.InvoiceTypeSysNo);
+                                          string invoiceStr = (invoice != null ? "<span>发票类型:&nbsp;&nbsp;</span>【" + invoice.Name + "】;" : "") + "<span class='m10_l'>发票抬头:&nbsp;&nbsp;<span>【" + Model.InvoiceTitle + "】;" + (!string.IsNullOrWhiteSpace(Model.InvoiceCode) ? "<span class='m10_l'>发票代码:&nbsp;&nbsp;</span>【" + Model.InvoiceCode + "】;" : "") + (!string.IsNullOrWhiteSpace(Model.InvoiceNo) ? "<span class='m10_l'>发票号码:&nbsp;&nbsp;</span>【" + Model.InvoiceNo + "】" : "");
+                                         @Html.Raw(invoiceStr)
+                                    }</td>
+                </tr>
+                <tr>
+                  <td class="nameright border_left border_bnone">订单金额:</td>
+                  <td colspan="5" class="border_bnone red ">
+                      <input id="hidCashPay" type="hidden" value="@Model.CashPay" />
+                     &yen;@Model.CashPay.ToString("N")
+                  </td>
+                </tr>
+          	</tbody>
+          </table><input type="hidden" id="hdCustomerSysNo" value="@Model.CustomerSysNo">

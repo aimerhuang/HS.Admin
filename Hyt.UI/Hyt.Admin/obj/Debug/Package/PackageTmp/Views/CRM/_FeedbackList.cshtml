@@ -1,0 +1,64 @@
+﻿@using Hyt.Infrastructure.Pager;
+@model Hyt.Infrastructure.Pager.PagedList
+
+@{
+    List<Hyt.Model.CBCrFeedback> cbCrFeedbacks = (List<Hyt.Model.CBCrFeedback>)Model.Data;
+    if (cbCrFeedbacks == null)
+    {
+        cbCrFeedbacks = new List<Hyt.Model.CBCrFeedback>();
+    }
+    Model.OnComplete = "tableOnload";
+}
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table class="border_bnone border_rnone" width="100%" border="0" cellspacing="0" cellpadding="0" >
+        <thead>
+            <tr>
+                <th width="68px">客户姓名</th>
+                <th>客户帐号</th>
+                <th width="90px">客户电话</th>
+                <th width="160px">客户邮箱</th>
+                <th width="68px">意见类型</th>
+                <th width="80px">反馈来源</th>
+                <th width="92px">创建人</th>
+                <th width="116px">创建日期</th>
+                <th width="78px">操作</th>
+            </tr>
+        </thead>
+    
+        <tbody id="feedback_main_table">
+            @if (cbCrFeedbacks.Count == 0)
+            {
+                <tr id="data_tips_tr">
+                    <td colspan="10" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+            }
+            @{
+                bool alter = false;
+            }
+            @foreach (var item in cbCrFeedbacks)
+            {
+                <tr @(alter ? "" : "class = stag_color")>
+                    <td>@item.Name</td>
+                    <td>@item.Account</td>
+                    <td>@item.Phone</td>
+                    <td>@item.Email</td>
+                    <td>@item.SuggestType</td>
+                    <td>@((Hyt.Model.WorkflowStatus.CustomerStatus.意见反馈类型来源)item.Source)</td>
+                    <td>@item.CreateName</td>
+                    <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>
+                        <button class="btn btn_ht26"  title="查看" name="view_btn"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+                        <input type="hidden" value="@item.Content" />
+                    </td>
+                </tr>
+                alter = !alter;
+            }
+
+        </tbody>
+    </table>
+
+</div>
+
+@{Html.RenderPartial("_UrlPaging", Model); }

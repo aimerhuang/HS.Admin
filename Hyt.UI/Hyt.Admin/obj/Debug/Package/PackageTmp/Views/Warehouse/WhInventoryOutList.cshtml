@@ -1,0 +1,222 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "出库单管理";
+    @Html.PrivilegeControl(PrivilegeCode.WH1006103, ".WH1006103");
+}
+
+<script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+
+@using ((Html.BeginForm("InStockManage", "Warehouse", FormMethod.Get, new { id = "advanced_search_form" })))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>@ViewBag.Title</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        @*<span class="veralign_t fl m10_l">来源单据类型</span>
+                        <div class="fl m10_l">
+                            @Html.DropDownList("SourceType")
+                        </div>*@
+                        <span class="veralign_t fl m10_l">状态</span>
+                        <div class="fl m10_l">
+                            @Html.DropDownList("Status")
+                        </div>
+                        @*<span class="veralign_t fl m10_l">票据</span>
+                        <div class="fl m10_l">
+                            @Html.DropDownList("IsPrinted")
+                        </div>*@
+                        <span class="fl m10_l">出库单号</span>
+                        <div class="search_btn fl m10_l">
+                            <input name="SysNo" type="text" id="SysNo" class="input_ht28" value="搜索出库单号..." />
+                            <button class="btn btn_ht28 btn_blue" id="search_btn" title="搜索" type="button"><span class="icon_search icon_white"></span></button>
+                        </div>
+                        <button class="btn btn_ht28 fl m10_l btn_blue" id="advanced_search" title="高级搜索" type="button"><span class="icon_search icon_white"></span><span class="m5_l">高级搜索</span></button>
+                    </div>
+                    <div>
+                        @*<button class="btn btn_ht26" title="刷新" id="refresh_btn" type="button"><span class="icon icon_refresh"></span><span class="m5_l">刷新</span></button>*@
+                        @*<button class="btn btn_ht26 btn_blue WH1006103" title="批量打印" id="batchprint_btn" type="button"><span class="icon icon_print icon_white"></span><span class="m5_l">批量打印</span></button>*@
+                    </div>
+                </div>
+
+                <!--/表格列表区-->
+                <div class="boxs_listtabel">
+                    <div id="paging">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="search_box" id="JS_search">
+        <div class="search_title clearfix">
+            <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+        </div>
+        <div class="search_body">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td width="28%" align="right">仓库</td>
+                        <td width="72%">
+                            @*<input id="warehouse_sys_no" type="text" class=" wd156 m5_r" onclick="selectWharehouse()" />
+                                <input id="WarehouseSysNo" type="hidden" />*@
+                            <select name="WarehouseSysNo" class="m10_r wd170" id="WarehouseSysNo">
+                                <option value="">全部</option>
+                                @foreach (var whWarehouse in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                                {
+                                    <option value="@whWarehouse.SysNo">@whWarehouse.BackWarehouseName</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">来源单编号</td>
+                        <td>
+                            <input type="text" class="wd156 m5_r" name="SourceSysNo" id="SourceSysNo">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">创建时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" name="CreatedDate" id="CreatedDate" class="input_ht26">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'CreatedDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="search_foot">
+            <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="advanced_search_btn" type="button">开始查询</button>
+            <button title="清除条件" class="btn btn_ht30 bold m10_l" id="clear_btn" type="reset">清除条件</button>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    $(function () {
+            $("#Status").addClass("select_ht28");
+            //$("#SourceType,#Status,#IsPrinted").addClass("select_ht28");
+            doSearch();
+            //快捷状态查询
+            $("#Status").change(function () {
+                doSearch();
+                setDefaultValue();
+            }).addClass("wd100");
+            //$("#Status,#SourceType,#IsPrinted").change(function () {
+            //    doSearch();
+            //    setDefaultValue();
+            //}).addClass("wd100");
+            //查询录入框点击事件
+            setDefaultValue();
+
+            UI.searchbox($("#advanced_search"), "#JS_search", $("#JS_search_nav"), $("#clear_btn"));
+            //刷新
+            $("#refresh_btn").click(function () {
+                $("#clear_btn").click();
+                doSearch();
+                setDefaultValue();
+            });
+            //注册页面回车事件为查询操作
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    checkId();
+                }
+            });
+            //开始查询
+            $("#search_btn").click(function () {
+                checkId();
+            });
+
+            //高级查询
+            $("#advanced_search_btn").click(function () {
+                advancedSearch();
+            });
+
+            //批量打印
+            //$("#batchprint_btn").click(function () {
+            //    var items = $("[name='sysno']:checked");
+            //    if (items.length > 0) {
+            //        var selectIds = items.map(function (i, n) {
+            //            return $(n).val();
+            //        }).get();
+            //        if (selectIds.length > 0) {
+            //            var url = '/Print/InStockBatch?sysNo=' + selectIds;
+            //            window.location.href = url;
+            //        }
+            //    } else {
+            //        UI.Alert({
+            //            content: "请选择要批量打印的入库单"
+            //        });
+            //        return;
+            //    }
+            //});
+        });
+
+        function checkId() {
+            var sysno = $("#SysNo").val();
+            if (checkRate(sysno) || sysno == '搜索出库单号...') {
+                doSearch();
+            } else {
+                UI.tips.tip_alert('tips_warning', '出库单号只能为数字！', true);
+                setDefaultValue();
+            }
+        }
+        function setDefaultValue() {
+            $("#SysNo").defaultValue("搜索出库单号...");
+        }
+        //仓库组件
+        function selectWharehouse() {
+            var input = $("#warehouse_sys_no");
+            var obj = DAO.SelectWhareHouse(input, {
+                chkStyle: 'radio',
+                callback: function (data) {
+                    if (data) {
+                        $('#warehouse_sys_no').val(data[0].name);
+                        $('#WarehouseSysNo').val(data[0].id);
+                    }
+                    //移除弹出层
+                    obj.Remove();
+                }
+            });
+        }
+        function showTip(tip) {
+            UI.tips.tip_alert('tips_success', tip);
+            doSearch();
+        }
+        //查询列表
+
+        function doSearch() {
+            var data = {};
+            var sysno = $("#SysNo").val();
+            if (sysno && checkRate(sysno)) {
+                data.SysNo = $("#SysNo").val();
+            }
+            data.Status = $("#Status").val();
+            //data.IsPrinted = $("#IsPrinted").val();
+            //data.SourceType = $("#SourceType").val();
+            startSearch(data);
+        }
+
+        function advancedSearch() {
+            var data = {};
+            data.WarehouseSysNo = $("#WarehouseSysNo").val();
+            data.SourceSysNo = $("#SourceSysNo").val();
+            data.CreatedDate = $("#CreatedDate").val();
+            startSearch(data);
+        }
+
+        function startSearch(data) {
+            var mask = UI.Mask({ obj: $('.case'), opacity: 0.2 });
+            $.get('@Url.Action("WhInventoryOutList", "Warehouse")', data,
+                function (ret) {
+                    $('#paging').html(ret);
+                    mask.Remove();
+                });
+        }
+</script>

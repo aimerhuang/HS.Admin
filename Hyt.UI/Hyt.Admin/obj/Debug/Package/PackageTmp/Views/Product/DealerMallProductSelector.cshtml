@@ -1,0 +1,150 @@
+﻿@{
+    ViewBag.Title = "Product";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <style type="text/css">
+        #paging td {
+            text-align: center;
+        }
+    </style>
+
+}
+
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="caseout">
+    <div class="boxs_con_c1">
+        <div class="list">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool">
+
+                    <span class="veralign_t fl">查询条件</span>
+                    <div class="m10_l fl">
+                        <input name="Group" type="text" class="input_ht28" id="group" value="选择商品组..." readonly="readonly" />
+                    </div>
+
+
+                    <div class="search_btn m10_l fl">
+                        <input name="Name" type="text" class="input_ht28" id="name" value="搜索商品代码、名称..." />
+                        <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="boxs_listtabel" id="paging">
+                <!--/表格列表区-->
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    #overlay {
+        position: absolute;
+        top: 50px;
+        left: 815px;
+        width: 300px;
+        height: 500px;
+        background: #fff;
+        border: 1px solid #C1C1C1;
+        display: none;
+    }
+</style>
+<div id="overlay">
+    <div style="height: 461px;padding:5px; border-bottom: 1px solid #C1C1C1; overflow: auto; ">
+        <ul id="ulProductGroup">
+            @{
+                var Model = Hyt.BLL.Front.FeProductGroupBo.Instance.SeachProductGroup(1, -1, 1, null);
+                foreach (var item in (List<FeProductGroup>)Model.Data)
+                {
+                    <li><label><input type="radio" name="radioProduct" value="@item.SysNo" />&nbsp;<span>@item.Name</span></label></li>
+                }
+            }
+        </ul>
+    </div>
+    <div style="height: 28px; background: #DEDEDE; text-align: center"><button type="button" id="Cancel">取消</button>&nbsp;&nbsp;<button type="button" id="Close">关闭</button></div>
+</div>
+
+<script type="text/JavaScript">
+    $("#group").live('click', function () {
+        $("#overlay").slideDown();
+    });
+    $("#Close").live('click', function () {
+        $("#overlay").slideUp();
+    });
+    $("#Cancel").live('click', function () {
+        $("#ulProductGroup li label input[type='radio']").each(function () {
+            if ($(this).attr("checked")) {
+                $(this).removeAttr("checked");
+            }
+        });
+    });
+        //查询列表
+        function doSearch(id) {
+            var name;
+            if ($("#name").val() != "搜索商品代码、名称...") {
+                name = $("#name").val();
+            }
+            //获取选择的项目组
+            var GroupSysNoList = "";
+            $("#ulProductGroup li label input[type='radio']").each(function () {
+                if ($(this).attr("checked")) {
+                    if (GroupSysNoList == "") {
+                        GroupSysNoList = $(this).val();
+                    } else {
+                        GroupSysNoList += ',' + $(this).val();
+                    }
+                }
+            });
+
+            $.get('@Url.Action("GetDealerMallProductList", "Product")',
+                { id: id, name: name, GroupSysNoList: GroupSysNoList, selector: "selector" },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+
+        function CallBack() {
+            var data;
+            var json = '[';
+            var i = 0,j=0;
+            $("#paging input:checkbox:checked").each(function () {
+                i++;
+            });
+            $("#paging input:checkbox:checked").each(function () {
+                j = j + 1;
+                json += '{';
+                var obj = $(this);
+                var sysno = obj.val();
+                json += '"SysNo":' + sysno;
+                var ErpCode = $.trim(obj.parent().next().html());
+                json += ',"ErpCode":"' + ErpCode + '"';
+                var EasName = $.trim(obj.parent().next().next().html());
+                json += ',"EasName":"' + EasName + '"}';
+                if (j < i) {
+                    json += ',';
+                }
+            });
+            json += ']';
+            eval("data=" + json);
+            parent && parent._ActivePdProductSelectorCallBack(data);
+        }
+
+        $(function () {
+            $("#name").defaultValue("搜索商品代码、名称...");
+            doSearch(1);
+            //查询订单
+            $("#searchBtn").click(function () {
+                doSearch(1);
+            });
+        });
+</script>

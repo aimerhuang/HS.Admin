@@ -1,0 +1,19 @@
+﻿@{
+    Layout = null;
+}
+<div id="header">
+    <div class="headtool fr">
+        @{
+            var action = ViewContext.RouteData.Values["action"].ToString().ToLower();
+            if (action != "login" && action !="logout")
+            {
+            <a class="icon_h home" href="/Main"></a>
+            @*<a class="icon_h edit"></a>
+            <a class="icon_h tool"></a>*@
+            <a title="退出" class="icon_h return" href="@Url.Action("Logout", "Account")"></a>
+            }
+        }
+    </div>
+    <div class="logo" title="跨境电子商务管理系统"></div>
+    @*<span class="add_sc">测试版</span>*@
+</div>

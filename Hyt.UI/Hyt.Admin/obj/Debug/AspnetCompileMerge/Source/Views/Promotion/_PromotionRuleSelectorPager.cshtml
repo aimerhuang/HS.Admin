@@ -1,0 +1,58 @@
+﻿@using System.Web.Script.Serialization
+@using Hyt.BLL.Promotion
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.SpPromotionRule>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            
+                        	<tr>
+                            	<th width="200">规则名称</th>
+                                <th width="110">促销应用类型</th>
+                                <th>前台展示文本</th>
+	                            <th>规则描述</th>
+                                <th width="80">操作</th>
+                            </tr>
+
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+                
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.SpPromotionRule>)Model.TData)
+                {
+                    var str = new JavaScriptSerializer().Serialize(PromotionBo.Instance.GetListByAdminHtml(item.AdminHtml));
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }else{
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                    
+                    <td>@item.Name</td>
+                    <td>
+                        @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.促销应用类型),item.PromotionType)
+                    </td>
+                    <td>@item.FrontText</td>
+                    <td>@item.Description</td>   
+                <td>
+                    <button class="btn btn_ht26" onclick="doSelect({ruleType:@item.RuleType,sysNo:@item.SysNo,name:'@item.Name',description:'@item.Description.Replace("\r","").Replace("\n","")',adminHtml:@str});"><span class="icon_changeGoods"></span><span class="m5_l">选择</span></button>
+                        </td>
+
+                    @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,184 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "促销选择";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div class="search_box" id="JS_search">
+  <div class="search_title clearfix"> <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+  <div class="search_body">
+    <table width="100%">
+      <tr>
+        <td width="25%" align="right">促销名称</td>
+        <td width="75%"><input type="text"  value="" class="wd156" id="Name"/></td>
+      </tr>
+      <tr>
+        <td align="right"><input type="checkbox" name="checkbox" id="IsUsePromotionCode" value="@Hyt.Model.WorkflowStatus.PromotionStatus.是否使用促销码.是.GetHashCode()"></td>
+        <td>是否使用促销代码</td>
+      </tr>
+    </table>
+  </div>
+    <div class="search_foot">
+        <button title="开始查询" id="btnComplexSearch" class="btn btn_blue btn_ht30 bold">开始查询</button><button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+    
+</div>
+
+<div class="case">
+	<div class="boxs">
+    	<div class="boxs_tit head_m">
+            <h3>促销管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+        	<div class="boxs_tool">
+                <div class="right_tool">
+                	<span class="fl">促销类型</span>
+                    <select class="select_ht28 fl wd120 m10_r m10_l" searchItem="PromotionType">
+                        <option>全部</option>
+                        @ViewBag.PromotionTypes
+                    </select>
+                    <span class="fl">使用平台</span>
+                    <select class="select_ht28 fl wd90 m10_r m10_l" searchItem="UsePlatform" id="UsePlatform">
+                        <option>全部</option>
+                        @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.PromotionStatus.促销使用平台>(null, null).ToString())
+                    </select>
+                    <span class="fl">起止时间</span>
+                    <div class="date_btn120 fl m10_l m10_r">
+                     <input type="text" value="" class="input_ht26" id="d11" searchItem="StartTime" onfocus="UI.Date({el:'d11'});this.blur();">
+                     <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d11'})"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span class="fl">-</span>
+                    <div class="date_btn120 fl m10_l m10_r">
+                     <input type="text" value="" class="input_ht26" id="d12" searchItem="EndTime" onfocus="UI.Date({el:'d12'});this.blur();">
+                     <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d12'})"><span class="icon_calendar"></span></button>
+                    </div>
+                    <span class="fl m10_l">状态</span>
+                    <select class="select_ht28 fl wd70 m10_r m10_l" searchItem="Status">
+                                                        <option>全部</option>
+                                                        @ViewBag.Statuses
+                    </select>
+                    <button title="搜索" class="btn btn_ht28 fl" id="searchBtn"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    <button id="JS_gaoji" title="高级搜索" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>  
+                <div>
+                    <button class="btn btn_blue btn_ht26" type="button" onclick="openTab()"><span class="icon icon_plus icon_white"></span><span class="m5_l">新建促销</span></button>
+                </div>
+
+	        </div>
+
+                <div id="paging">
+                </div>
+
+        </div>
+        
+        
+    </div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function(e) {
+	UI.searchbox($("#JS_gaoji"),"#JS_search",$("#JS_search_nav"),$("#JS_delete"));
+	});
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    
+    $("[searchItem='PromotionType'],[searchItem='Status'],#UsePlatform").change(function () {
+        doSearch();
+    });
+    
+    $("#btnComplexSearch").click(function () {
+        doComplexSearch();
+    });
+    //状态默认为全部
+    $("[searchItem='Status']").val("");
+
+    doSearch();
+
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Promotion/DoPromotionQuery/?r=" + Math.random(), "searchItem", function () {
+
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function doComplexSearch() {
+        Ajax.get("/Promotion/DoPromotionQuery/?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("Name", $("#Name").val());
+            if ($("#IsUsePromotionCode").attr("checked")) {
+                p.setParams("IsUsePromotionCode", $("#IsUsePromotionCode").val());
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            $("#JS_search_nav").click();
+
+        });
+    }
+    
+    function openTab(sysNo) {
+        var url = "/Promotion/PromotionCreate/";
+        var text = "";
+        if (sysNo != undefined) {
+            url += sysNo;
+            text = "修改促销：" + sysNo;
+        } else {
+            text = "新建促销";
+        }
+        UI.OpenCreatTab(text, url);
+    }
+
+    //审核
+    function audit(SysNo) {
+        UI.Confirm({
+            content: "确定要通过审核该促销吗?",
+            ok: function () {
+                Ajax.postJosn("/Promotion/AuditPromotionInPage", "", function (p) {
+                    p.setParams("SysNo", SysNo);
+                }, function (ret) {
+                    if (ret.Status) {
+                        doSearch();
+                        Utils.alert("提交成功");
+                    } else {
+                        Utils.alert(ret.Message);
+                    }
+                });
+            }
+        });
+    }
+
+    //取消促销审核
+    function calcelaudit(SysNo) {
+        UI.Confirm({
+            content: '确定要取消促销审核吗？',
+            ok: function () {
+                Ajax.postJosn("/Promotion/CalcelAuditPromotion", "", function (p) {
+                    p.setParams("SysNo", SysNo);
+                }, function (ret) {
+                    if (ret.Status) {
+                        doSearch();
+                        Utils.alert("提交成功");
+                    } else {
+                        Utils.alert(ret.Message);
+                    }
+                });
+            }
+        });
+        return false;
+    }
+
+</script>

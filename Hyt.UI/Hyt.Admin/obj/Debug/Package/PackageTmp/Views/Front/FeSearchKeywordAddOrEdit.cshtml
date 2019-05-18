@@ -1,0 +1,102 @@
+﻿@using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.FeSearchKeyword
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "关键字管理";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/Plugins/Editor/kindeditor.min.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+
+    <script type="text/javascript">
+
+        $(function () {
+
+            $("#feSearchKeywordForm").validate({
+                debug: true,
+                rules: {
+                    txtKeyword: {
+                        required: true,
+                        maxlength: 100,
+                        remote: {
+                            url: "/Front/FeSearchKeywordVerify",
+                            type: "post",
+                            data: {
+                                txtKeyword: function () {
+                                    return $("#txtKeyword").val();
+                                },
+                                hidSysNo: function () {
+                                    return $("#hidSysNo").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#fortxtKeyword').text('字数限制,1-100个字符');
+                                } else {
+                                    $('#fortxtKeyword').text('搜索关键字已存在');
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    txtHitsCount: {
+                        required: true,
+
+                        number: true
+                    }
+
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function addOrEdit() {
+
+            $("#feSearchKeywordForm").submit();
+
+            if ($("#feSearchKeywordForm").valid()) {
+                $.post('/Front/FeSearchKeywordAddOrEdit/', $("#feSearchKeywordForm").serialize(), function (data) {
+                    if (data.IsPass) {
+                        UI.Dialog.opener.dialog();
+                        UI.Dialog.opener.dataLoad(1);
+                        UI.Dialog.close();
+                    }
+                });
+            }
+        }
+
+    </script>
+}
+
+<form id="feSearchKeywordForm" name="feSearchKeywordForm" action="">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tr>
+                        <td width="68" class="nameright border_rnone">
+                            <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/><span class="v_star">*</span>关键字</td>
+                        <td>
+                            <input type="text" id="txtKeyword" name="txtKeyword" value="@HttpUtility.HtmlDecode(Model.keyword)" class="c3"/><span id="fortxtKeyword" class="prompt m10_l">字数限制,1-100个字符</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="68" class="nameright border_rnone"><span class="v_star">*</span>点击次数</td>
+                        <td>
+                            <input type="text" id="txtHitsCount" name="txtHitsCount" value="@Model.HitsCount" class="c3"/><span id="fortxtHitsCount" class="prompt m10_l">前台显示点击次数的数字</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>

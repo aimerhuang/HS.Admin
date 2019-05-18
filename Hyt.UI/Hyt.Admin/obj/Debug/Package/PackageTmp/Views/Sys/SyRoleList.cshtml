@@ -1,0 +1,85 @@
+﻿@using Hyt.Admin.Controllers
+@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "SyRoleList";
+    @*@Html.PrivilegeControl(PrivilegeCode.SY1004101, ".SY1004101")
+    @Html.PrivilegeControl(PrivilegeCode.SY1004201, ".SY1004201")
+    @Html.PrivilegeControl(PrivilegeCode.SY1004701, ".SY1004701")
+    @Html.PrivilegeControl(PrivilegeCode.SY1004401, ".SY1004401")*@
+}
+@helper LoadSyRoleStatus()
+{
+    @MvcHtmlString.Create(MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.SystemStatus.角色状态>(null, null).ToString())
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <span class="ra10 c6"></span>
+            <h3>角色管理</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" id="StatusList" search="Status">
+                            <option value="" selected="selected">全部</option>
+                            @LoadSyRoleStatus()
+                        </select>
+                    </div>
+                </div>
+                <!--搜索结束-->
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r btn_blue SY1004201" id="addRole" title="新增角色"><span class="icon_plus icon_white"></span><span class="m5_l">新增角色</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div id="paging">
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch();
+        //新增弹出
+        $("#addRole").bind("click", function () {
+            UI.DialogOpen('/Sys/SyRoleCreate/', {
+                width: 600,
+                height: 558,
+                title: '新增角色'
+            }, false);
+        });
+        $("#StatusList").change(function () {
+            doSearch();
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        Ajax.get("/Sys/DoRoleQuery?r=" + Math.random(), "Search", function (p) {
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+</script>

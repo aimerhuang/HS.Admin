@@ -1,0 +1,62 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBLgDeliveryUserCredit>
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">仓库</th>
+            <th width="85">配送员</th>
+            <th class="wd100">配送信用额度</th>
+            <th class="wd100">可用配送额度</th>
+            <th class="wd100">借货信用额度</th>
+            <th class="wd100">可用借货额度</th>
+            <th width="85">是否可配送</th>
+            <th width="85">是否可借货</th>
+            <th width="85">配送员状态</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (null != Model.TData && Model.TData.Count > 0)
+        {
+            foreach (Hyt.Model.Transfer.CBLgDeliveryUserCredit item in Model.TData)
+            {
+            <tr>
+                <td class="align_l p10_lr">@item.WareHouseName</td>
+                <td>@item.UserName</td>
+                <td class="red p10_r align_r">@item.DeliveryCredit.ToString("C")</td>
+                <td class="red p10_r align_r">@item.RemainingDeliveryCredit.ToString("C")</td>
+                <td class="red p10_r align_r">@item.BorrowingCredit.ToString("C")</td>
+                <td class="red p10_r align_r">@item.RemainingBorrowingCredit.ToString("C")</td>
+                <td>
+                    @((Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许配送)item.IsAllowDelivery)
+                </td>
+                <td>
+                    @((Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许借货)item.IsAllowBorrow)
+                </td>
+
+                <td>@((Hyt.Model.WorkflowStatus.SystemStatus.系统用户状态)item.Status)</td>
+                <td>
+                    <button class="btn btn_ht26 LG1007301" id="btnUpd" onclick="Update(@item.WarehouseSysNo,@item.DeliveryUserSysNo)" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button><button class="btn btn_ht26 m10_l LG1007401" id="btnDel" onclick="Delete(@item.WarehouseSysNo,@item.DeliveryUserSysNo)" title="删除"><span class="icon_trash"></span><span class="m5_l">删除</span></button>
+                </td>
+            </tr>                             
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="9">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+</script>
+
+

@@ -1,0 +1,91 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@model PagedList<Hyt.Model.Transfer.CBSpCoupon>
+<style type="text/css">
+.border_all .pagination{ margin-left: 0px;}
+</style>
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="">
+    <thead>
+        <tr>
+            <th width="90">优惠券代码</th>
+            <th class="align_l"><span class="p10_lr">优惠劵描述</span></th>
+            <th width="80">优惠劵金额</th>
+            <th width="90">所需消费金额</th>
+            <th width="120">开始时间</th>
+            <th width="120">到期时间</th>
+            <th width="60">使用次数</th>
+            <th width="80">使用平台</th>
+            <th width="70">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+	            @{
+	                if (!Model.TData.Any())
+	                {
+	                    <tr>
+	                        <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+	                    </tr>
+	                }
+	                else
+	                {
+                        var i = 0;
+	                    foreach (var item in (List<Hyt.Model.Transfer.CBSpCoupon>) Model.TData)
+	                    {
+	                        if (i%2 == 0)
+	                        {
+	                            @Html.Raw("<tr>")
+	                        }
+	                        else
+	                        {
+	                            @Html.Raw("<tr class='stag_color'>")
+	                        }
+	                        <td>@item.CouponCode</td>
+                            <td class="align_l"><span class="p10_lr">@item.Description</span></td>
+	                        <td>@MvcHtmlString.Create(FormatUtil.FormatCurrency(item.CouponAmount,2))</td>
+	                        <td>@MvcHtmlString.Create(FormatUtil.FormatCurrency(item.RequirementAmount,2))</td>
+	                        <td>@item.StartTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+	                        <td>@item.EndTime.ToString("yyyy-MM-dd HH:mm:ss")</td>
+	                        <td>@item.UsedQuantity/@item.UseQuantity</td>
+	                        <td>@Hyt.Admin.Controllers.PromotionController.GetUserPlatText(new Dictionary<int,int>{{(int)PromotionStatus.促销使用平台.PC商城,item.WebPlatform},{(int)PromotionStatus.促销使用平台.门店,item.ShopPlatform},{(int)PromotionStatus.促销使用平台.手机商城,item.MallAppPlatform},{(int)PromotionStatus.促销使用平台.物流App,item.LogisticsAppPlatform}})</td>
+	                        <td><button class="btn btn_ht26" type="button" onclick="doBind(@item.SysNo)"><span class="icon_ok"></span><span class="m5_l">选择</span></button></td>
+	                        @Html.Raw("</tr>")
+	                        i++;
+	                    }
+	                }
+	            }
+    </tbody>
+</table>
+
+<div class="border_all" style=" border-top:none; margin-left:0px;">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+
+    
+    
+<script type="text/javascript">
+    function doBind(couponSysNo) {
+        var parent = artDialog.open.origin;
+        var customerSysNo = parent.document.getElementById("CustomerSysNo").value;
+        UI.Confirm({
+            content: '确定要将该优惠卷绑定此客户吗?',
+            ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Promotion/AssignUserCoupon",
+                    data: { sysNo: couponSysNo, customerSysNo: customerSysNo },
+                    success: function (ret) {
+                        if (ret.Status) {
+                            parent.doUserDataRead();
+                            doSearch();
+                            UI.Alert({
+                                icon: "succeed",
+                                content: '绑定成功。'
+                            });
+                        } else {
+                            Utils.alert(ret.Message);
+                        }
+                    }
+                });
+            }
+        });
+    }
+</script>

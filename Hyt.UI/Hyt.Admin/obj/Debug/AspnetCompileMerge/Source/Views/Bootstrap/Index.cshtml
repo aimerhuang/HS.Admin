@@ -1,0 +1,234 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bootstrap 模板</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 引入 Bootstrap -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 Shim 和 Respond.js 用于让 IE8 支持 HTML5元素和媒体查询 -->
+    <!-- 注意： 如果通过 file://  引入 Respond.js 文件，则该文件无法起效果 -->
+    <!--[if lt IE 9]>
+       <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+       <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="column">
+                <h1>Hello, world!</h1>
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <img src="~/Theme/images/apppic02.jpg" class="img-responsive" alt="响应式图像">
+            </div>
+            
+        </div>
+        <div class="row">
+            <div class="col-xs-5 col-sm-3 col-md-2 col-lg-6" style="background-color: #dedef8; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                    enim ad minim veniam, quis nostrud exercitation ullamco laboris
+                    nisi ut aliquip ex ea commodo consequat.
+                </p>
+
+                <p>
+                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+                    accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
+                    quae ab illo inventore veritatis et quasi architecto beatae vitae
+                    dicta sunt explicabo.
+                </p>
+            </div>
+
+            <div class="col-xs-7 col-sm-9 col-md-6 col-lg-4" style="background-color: #dedef8;box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                <p>
+                    Sed ut perspiciatis unde omnis iste natus error sit voluptatem
+                    accusantium doloremque laudantium.
+                </p>
+
+                <p>
+                    Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet,
+                    consectetur, adipisci velit, sed quia non numquam eius modi
+                    tempora incidunt ut labore et dolore magnam aliquam quaerat
+                    voluptatem.
+                </p>
+            </div>
+            <div class="clearfix visible-xs"></div>
+
+            <div class="col-xs-6 col-sm-3"
+                 style="background-color: #dedef8;
+        box-shadow:inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                <p>
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco
+                    laboris nisi ut aliquip ex ea commodo consequat.
+                </p>
+            </div>
+            <div class="col-xs-6 col-sm-3"
+                 style="background-color: #dedef8;box-shadow:
+        inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
+                    eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
+                    enim ad minim
+                </p>
+            </div>
+        </div>
+        @*<img src="~/Theme/images/apppic02.jpg" />*@
+        <div class="row">
+            <div class="col-xs-6 col-md-offset-3"
+                 style="background-color: #dedef8;box-shadow:
+        inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                <p>
+                    Lorem ipsum dolor sit amet, consectetur adipisicing
+                    elit.
+                </p>
+            </div>
+            <div class="col-md-6">
+                <h4>第二列 - 分为四个盒子</h4>
+                <div class="row">
+                    <div class="col-md-6" style="background-color: #B18904; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                        <p>
+                            Consectetur art party Tonx culpa semiotics. Pinterest
+                            assumenda minim organic quis.
+                        </p>
+                    </div>
+                    <div class="col-md-6" style="background-color: #B18904; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                        <p>
+                            sed do eiusmod tempor incididunt ut labore et dolore magna
+                            aliqua. Ut enim ad minim veniam, quis nostrud exercitation
+                            ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                        </p>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6" style="background-color: #B18904; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                        <p>
+                            quis nostrud exercitation ullamco laboris nisi ut
+                            aliquip ex ea commodo consequat.
+                        </p>
+                    </div>
+                    <div class="col-md-6" style="background-color: #B18904; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                        <p>
+                            Lorem ipsum dolor sit amet, consectetur adipisicing elit,
+                            sed do eiusmod tempor incididunt ut labore et dolore magna
+                            aliqua. Ut enim ad minim.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Hello, world!</h1>
+        <div class="row">
+            <p>
+                排序前
+            </p>
+            <div class="col-md-4" style="background-color: #dedef8; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                我在左边
+            </div>
+            <div class="col-md-8" style="background-color: #dedef8; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                我在右边
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <p>
+                排序后
+            </p>
+            <div class="col-md-4 col-md-push-8" style="background-color: #dedef8; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                我在左边
+            </div>
+            <div class="col-md-8 col-md-pull-4" style="background-color: #dedef8; box-shadow: inset 1px -1px 1px #444, inset -1px 1px 1px #444;">
+                我在右边
+            </div>
+        </div>
+        <h1>我是标题1 h1. <small>我是副标题1 h1</small></h1>
+        <h2>我是标题2 h2. <small>我是副标题2 h2</small></h2>
+        <h3>我是标题3 h3. <small>我是副标题3 h3</small></h3>
+        <h4>我是标题4 h4. <small>我是副标题4 h4</small></h4>
+        <h5>我是标题5 h5. <small>我是副标题5 h5</small></h5>
+        <h6>我是标题6 h6. <small>我是副标题6 h6</small></h6>
+        <small>本行内容是在标签内</small><br>
+        <strong>本行内容是在标签内</strong><br>
+        <em>本行内容是在标签内，并呈现为斜体</em><br>
+        <p class="text-left">向左对齐文本</p>
+        <p class="text-center">居中对齐文本</p>
+        <p class="text-right">向右对齐文本</p>
+        <p class="text-muted">本行内容是减弱的</p>
+        <p class="text-primary">本行内容带有一个 primary class</p>
+        <p class="text-success">本行内容带有一个 success class</p>
+        <p class="text-info">本行内容带有一个 info class</p>
+        <p class="text-warning">本行内容带有一个 warning class</p>
+        <p class="text-danger">本行内容带有一个 danger class</p>
+        <abbr title="World Wide Web">WWW</abbr><br>
+        <abbr title="Real Simple Syndication" class="initialism">RSS</abbr>
+        <address>
+            <strong>Some Company, Inc.</strong><br>
+            007 street<br>
+            Some City, State XXXXX<br>
+            <abbr title="Phone">P:</abbr> (123) 456-7890
+        </address>
+        <address>
+            <strong>Full Name</strong><br>
+            <a href="mailto:#">mailto@somedomain.com</a>
+        </address>
+        <h4>有序列表</h4>
+        <ol>
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+            <li>Item 4</li>
+        </ol>
+        <h4>无序列表</h4>
+        <ul>
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+            <li>Item 4</li>
+        </ul>
+        <h4>未定义样式列表</h4>
+        <ul class="list-unstyled">
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+            <li>Item 4</li>
+        </ul>
+        <h4>内联列表</h4>
+        <ul class="list-inline">
+            <li>Item 1</li>
+            <li>Item 2</li>
+            <li>Item 3</li>
+            <li>Item 4</li>
+        </ul>
+        <h4>定义列表</h4>
+        <dl>
+            <dt>Description 1</dt>
+            <dd>Item 1</dd>
+            <dt>Description 2</dt>
+            <dd>Item 2</dd>
+        </dl>
+        <h4>水平的定义列表</h4>
+        <dl class="dl-horizontal">
+            <dt>Description 1</dt>
+            <dd>Item 1</dd>
+            <dt>Description 2</dt>
+            <dd>Item 2</dd>
+        </dl>
+    </div>
+
+    <!-- jQuery (Bootstrap 的 JavaScript 插件需要引入 jQuery) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- 包括所有已编译的插件 -->
+    <script src="~/Theme/bootstrap-3.3.7-dist/js/bootstrap.min.js"></script>
+
+</body>
+</html>

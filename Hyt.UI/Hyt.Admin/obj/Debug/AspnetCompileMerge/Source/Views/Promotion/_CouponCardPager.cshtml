@@ -1,0 +1,69 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Util;
+@using Hyt.Model.WorkflowStatus;
+@model PagedList<Hyt.Model.Transfer.CBSpCouponCard>
+<style type="text/css">
+    .hzypd table td{ padding: 0 10px;}
+</style>
+<div class="boxs_list">
+    <div class="boxs_listtabel hzypd">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+            <thead>
+                <tr>
+                   <th width="160">优惠券卡类型名称</th>
+                    <th class="align_l p10_lr">优惠卡号码</th>
+                    <th width="140">激活时间</th>
+                    <th width="140">终止时间</th>
+                    <th width="90">状态</th>
+                    <th width="90">操作</th>
+                </tr>
+            </thead>
+	        <tbody>
+	            @{
+                    if (!Model.TData.Any())
+                    {
+	                    <tr>
+	                        <td colspan="10" class="align_l p10_l bgr_eb">暂无数据。</td>
+	                    </tr>
+                    }
+                    else
+                    {
+                        int i = 0;
+                        foreach (var item in (List<Hyt.Model.Transfer.CBSpCouponCard>)Model.TData)
+                        {
+                            if (i % 2 == 0)
+                            {
+	                            @Html.Raw("<tr>")
+                            }
+                            else
+                            {
+	                            @Html.Raw("<tr class='stag_color'>")
+                            }
+	                        <td>@item.TypeName</td>
+	                        <td class="align_l p10_lr">@item.CouponCardNo</td>
+	                        <td>@if (item.ActivationTime != (DateTime.Parse("0001-01-01")))
+                             {@item.ActivationTime.ToString("yyyy-MM-dd")}</td>
+	                        <td>@if (item.TerminationTime != (DateTime.Parse("0001-01-01")))
+                             {@item.TerminationTime.ToString("yyyy-MM-dd")}</td>
+	                        <td>@EnumUtil.GetDescription(typeof(PromotionStatus.优惠券卡状态), item.Status)</td>
+                            <td>
+                            @{
+                            var statusEnable = (int)PromotionStatus.优惠券卡状态.启用;
+                            var statusDisable = (int)PromotionStatus.优惠券卡状态.禁用;
+                            var statusEdit = item.Status == statusEnable ? statusDisable : statusEnable;
+                            var statusText = statusEdit == statusEnable ? "启用" : "禁用";
+                            var btncss = statusEdit == statusEnable ? "btn_blue" : "btn_red";
+                            var statusCss = statusEdit == statusEnable ? "icon_check" : "icon_ban_circle";
+                            }
+                            <button class="btn btn_ht26  @btncss" value="@item.SysNo" onclick="setStatus(@item.SysNo,@statusEdit,'@statusText',@Model.CurrentPageIndex)"><span class="icon_white @statusCss"></span><span class="m5_l">@statusText</span></button>
+                        </td>
+	                        @Html.Raw("</tr>")
+                            i++;
+                        }
+                    }
+	            }
+	        </tbody>
+        </table>
+     </div>
+</div>
+@{Html.RenderPartial("_UrlPaging", Model); }

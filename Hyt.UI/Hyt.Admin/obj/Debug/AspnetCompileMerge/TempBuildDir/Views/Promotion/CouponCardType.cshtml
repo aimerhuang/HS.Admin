@@ -1,0 +1,129 @@
+﻿@{
+    ViewBag.Title = "优惠卡类型";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@model PagedList
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/UI.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/scripts/Utils.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("/Theme/Scripts/jquery.unobtrusive-ajax.js")"></script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>优惠卡类型</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <span class="veralign_t fl m10_l">状态</span>
+                        <div class="m10_l fl">
+                            <select name="status" id="status" class="select_ht28">
+                                <option value="" selected="selected">全部</option>
+                                @{
+                                    foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.PromotionStatus.优惠券卡类型状态)))
+                                    {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="search_btn m10_l fl" style="width: 233px;">
+                            <input name="typename" type="text" id="typename" style="width: 189px;" class="input_ht28" value="搜索类型名称..">
+                            <button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 btn_blue" id="createBtn"><span class="icon icon_white icon_plus"></span><span class="m5_l">添加</span></button>
+                    </div>
+                </div>
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#status").change(function () {
+            doSearch(1);
+        });
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+        doSearch(1);
+        $("#typename").defaultValue("搜索类型名称..");
+        //创建属性
+        $("#createBtn").click(function () {
+            var url = '/Promotion/CouponCardTypeCreate';
+            UI.DialogOpen(url, {
+                title: '优惠卡类型',
+                width: '550px',
+                height: '400px'
+            }, false);
+        });
+    });
+
+    //查询列表
+    function doSearch(id) {
+        var name;
+        if ($("#typename").val() != "搜索类型名称..") {
+            name = $.trim($("#typename").val());
+        }
+        $.get("/Promotion/_CouponCardType?r=" + Math.random(),
+            { id: id, TypeName: name, Status: $("#status").val() },
+            function (data) {
+
+                $('#paging').html(data);
+            });
+    }
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        doSearch(1);
+
+    }
+    function Edit(id) {
+        UI.DialogOpen('/Promotion/CouponCardTypeCreate?id=' + id, {
+            width: 550,
+            height: 400,
+            title: '优惠卡类型'
+
+        }, false)
+    }
+    //禁用启用
+    function Disabled(myID, flg) {
+        var str = "确认禁用";
+        if (!flg) {
+            str = "确认启用";
+        }
+        UI.Confirm({
+            content: str,
+            ok: function () {
+
+            },
+            cancel: true
+        });
+    }
+    function Delete(myid, btn) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+                $.post('/Promotion/DeleteCouponCardType', { id: myid }, function (r) {
+                    if (r.Status) {
+                        SuccessTip();
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+
+                });
+            },
+            cancel: true
+        });
+    }
+</script>

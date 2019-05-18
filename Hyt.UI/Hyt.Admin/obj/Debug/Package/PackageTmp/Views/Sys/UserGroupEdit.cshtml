@@ -1,0 +1,364 @@
+﻿@model Hyt.Model.SyUserGroup
+
+@{
+    ViewBag.Title = "修改用户组信息";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+}
+
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/Plugins/ZTree/skin.css")' rel="stylesheet" type="text/css" media="all"/>
+    <style type="text/css">
+        .basebox1
+        {
+            padding: 10px 0;
+        }
+
+            .basebox1 table tr td
+            {
+                border-right: none !important;
+                border-bottom: none !important;
+            }
+
+        .usergroup
+        {
+            background-color: #f5f5f5;
+            padding: 10px 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 200px;
+        }
+
+            .usergroup dl
+            {
+                float: left;
+            }
+
+                .usergroup dl dt
+                {
+                    margin-bottom: 5px;
+                }
+
+                .usergroup dl.operate
+                {
+                    padding: 10px 36px 0 36px;
+                }
+
+                    .usergroup dl.operate dd
+                    {
+                        margin-top: 40px;
+                    }
+
+        .usermenu
+        {
+            background-color: #f5f5f5;
+            padding: 10px 20px;
+            overflow-x: hidden;
+            overflow-y: auto;
+            height: 200px;
+        }
+    </style>
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")" ></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")" ></script>
+}
+<div class="caseout" id="bd">
+
+    <div class="boxs" id="tabboxs3">
+        <div class="head_tab">
+            <ul class="tabNav">
+                <li><a>基本信息</a></li>
+                <li><a>菜单权限</a></li>
+                <li><a>角色</a></li>
+            </ul>
+        </div>
+        <div class="boxs_con_c1" id="tabcon">
+            <div class="list">
+                <div class="boxs_detail_dispay">
+                    <div class="tit_con basebox1">
+                        <form id="formCreate">
+                            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_lnone border_tnone">
+                                <tbody>
+                                    <tr>
+                                        <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>用户组名称</td>
+                                        <td width="80%">
+                                            @Html.HiddenFor(m => m.SysNo)
+                                            <input type="hidden" id="hidGroupName" value="@Model.GroupName" /> 
+                                            @Html.TextBoxFor(m => m.GroupName, new { @class = "wd270", maxlength = "15", contenteditable = "false", onfocus = "this.blur()" })
+                                            <span id="c_GroupName" class="prompt">填写用户组名称</span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">用户组描述</td>
+                                        <td>
+                                            @Html.TextAreaFor(m => m.Description, new { @class = "wd270", maxlength = "200" })
+                                        </td>
+                                    </tr>
+
+                                    <tr>
+                                        <td class="nameright border_rnone" valign="top">状&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;态</td>
+                                        <td>
+                                            <label><input name="Status" type="radio" value="1" @{if (Model.Status==1){<text>checked</text>}} />
+                                            启用&nbsp;&nbsp;</label><label><input name="Status" type="radio" value="0"  @{if (Model.Status==0){<text>checked</text>}} />禁用</label></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone" valign="top">系统分组</td>
+                                        <td>
+                                           <label> <input name="IsSystem" type="radio" value="1" @{if (Model.IsSystem==1){<text>checked</text>}}/>
+                                            是&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</label><label></label><input name="IsSystem" type="radio" value="0" @{if (Model.IsSystem==0){<text>checked</text>}} />否</label>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="list">
+                <div class="usermenu">
+                    <div class="zTreeDemoBackground left">
+                        <ul id="treeMenu" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="list">
+                <div class="usergroup clearfix">
+                    <dl>
+                        <dt>角色</dt>
+                        <dd>
+                             @{
+                                var roleList = Hyt.BLL.Sys.SyRoleBo.Instance.GetList().Where(m => m.Status == 1).ToList();
+                                var haveList = Hyt.BLL.Sys.SyUserGroupBo.Instance.GetUserGroupRole(Model.SysNo);
+                            }
+                            <select id="NotInList" style="width: 150px; height: 168px;" size="2" tabindex="1"  multiple="multiple">
+                                @if (roleList != null)
+                                {
+                                    foreach (Hyt.Model.SyRole item in roleList)
+                                    {
+                                        if (haveList == null || !haveList.Any(m => m.RoleID == item.SysNo))
+                                        {
+                                            <option value="@item.SysNo">@item.RoleName</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </dd>
+                    </dl>
+                    <dl class="operate">
+                        <dd>
+                             <button id="btnAdd" class="btn btn_ht26 wd50  btn_blue" type="button">>></button>
+                           
+                        </dd>
+                        <dd>
+                          <button id="btnRemove" class="btn btn_ht26 wd50 btn_red" type="button"><<</button>
+                        </dd>
+                    </dl>
+                    <dl>
+                         <dt>用户组拥有的角色</dt>
+                        <dd>
+                           
+                            <select id="InList" style="width: 150px; height: 168px;" size="2" tabindex="0"  multiple="multiple">
+                                @if (roleList != null)
+                                {
+                                    foreach (Hyt.Model.SyRole item in roleList)
+                                    {
+                                        if (haveList != null && haveList.Any(m => m.RoleID == item.SysNo))
+                                        {
+                                            <option value="@item.SysNo" >@item.RoleName</option>
+                                        }
+                                    }
+                                }
+                            </select>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //tab选项卡
+        $(function () {
+            UI.Tab({ tabNavBox: '#tabboxs3', tabContentObj: "#tabcon", onActiveTab: function (index, obj) { } });
+            //验证
+            LoadRule();
+            LoadMeun();
+            //加载按钮
+            LoadBtn();
+            $("#btnAdd").click(function () {
+                AddRoles();
+            });
+            $("#btnRemove").click(function () {
+                RemoveRoles();
+            });
+            $("#NotInList option").dblclick(function () { AddRoles(); });
+            $("#InList option").dblclick(function () { RemoveRoles(); });
+            $("#bd").ajaxLoadingMask(true);
+        });
+        function AddRoles() {
+            var items = $("#NotInList").find("option:selected");
+            if (items.length < 1) return;
+            items.remove().appendTo($("#InList"));
+            $("#InList option").dblclick(function () { RemoveRoles(); });
+        }
+        function RemoveRoles() {
+            var items = $("#InList").find("option:selected");
+            if (items.length < 1) return;
+            items.remove().appendTo($("#NotInList"));
+            $("#NotInList option").dblclick(function () { AddRoles(); });
+        }
+        var setting;
+        //加载验证规则
+        function LoadRule() {
+            setting = $("#formCreate").validate({
+                onclick: false,
+                onkeyup: false,
+                rules: {
+
+                    GroupName: {
+                        required: true,
+                        maxlength: 20,
+                        remote: {
+                            type: "post",
+                            url: "/sys/NotExistUserGroup",
+                            data: {
+                                groupName: function () {
+                                    return $("#GroupName").val();
+                                }
+                            },
+                            dataType: "json",
+                            dataFilter: function (data, type) {
+                                //数据未做改变
+                                if ($("#GroupName").val() == $("#hidGroupName").val()) {
+                                    data = 'true';
+                                }
+                                if (data == 'true') {
+                                    $('#c_GroupName').text('填写用户组名称');
+                                } else {
+                                    $('#c_GroupName').text('用户组名称已经存在').delay(1500).show(function () {
+                                        $(this).text('填写用户组名称').css('display', 'inline');
+                                    });
+                                }
+                                return data;
+                            }
+                        }
+                    }
+                },
+                errorPlacement: function (error, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'error');
+                },
+                success: function (label, el) {
+                    $('#c_' + el.attr('id')).attr('class', 'success');
+                },
+                ignore: ""
+            });
+        }
+        //加载菜单
+        var zTreeObj;
+        function LoadMeun() {
+            var ztreeSetting = {
+                data: {
+                    simpleData: {
+                        enable: true
+                    }
+                },
+                check: {
+                    enable: true,
+                    chkboxType: { "Y": "p", "N": "ps" }
+                }
+            };
+            $.ajax({
+                url: '/Sys/GetTreeListByUserGroup?id=' + $("#SysNo").val(),
+                success: function (response) {
+                    if (response != null) {
+                        zTreeObj = UI.ZTree.init($("#treeMenu"), ztreeSetting, response);
+                    }
+                }
+            });
+        }
+        //加载按钮
+        function LoadBtn() {
+            var parent = artDialog.open.origin,					// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+            if (!api) return;
+            // 自定义按钮
+            api.button(
+                {
+                    name: '保存',
+                    callback: function () {
+
+                        var $iframe = this.iframe.contentWindow;
+                        $iframe.Save(parent);
+                        return false;
+                    },
+                    focus: true
+                },
+                {
+                    name: '取消'
+                }
+            );
+        }
+        //
+        function Save(win) {
+            if (!setting.form()) {
+                $(".tabNav li:first").click();
+                return false;
+            }
+            var selectedMenu = zTreeObj.getCheckedNodes(true);
+            var GroupMeuns0 = new Array();
+            for (var i = 0; i < selectedMenu.length; i++) {
+                var xx = {
+                    UserGroupID: 0,
+                    MenuID: selectedMenu[i].id.replace("m_", "").replace("p_", ""),
+                    MenuType: selectedMenu[i].nodetype,
+                }
+                GroupMeuns0.push(xx);
+            }
+            var GroupRoles0 = new Array();
+            $('#InList option').each(function () {
+                var mm = {
+                    UserGroupID: 0,
+                    RoleID: $(this).val()
+                }
+                GroupRoles0.push(mm);
+            });
+            if (GroupMeuns0.length < 1 || GroupRoles0.length < 1) {
+                //确认
+
+            }
+            var entity = {
+                SysNo:$("#SysNo").val(),
+                GroupName: $("#GroupName").val(),
+                Description: $("#Description").val(),
+                IsSystem: $("input[name='IsSystem']:checked").val(),
+                Status: $("input[name='Status']:checked").val()
+            }
+            var sendata = { model: entity, groupMeuns: GroupMeuns0, groupRoles: GroupRoles0 };
+            var sendjson = JSON.stringify(sendata);
+            $.ajax({
+                url: '/Sys/UserGroupSave',
+                type: 'POST',
+                cache: false,
+                data: sendjson,
+                contentType: 'application/json; charset=utf-8',
+                success: function (result) {
+                    if (result.Status) {
+                        if (win.Refresh != null) {
+                            win.Refresh("操作成功");
+                        }
+                        UI.CloseDialog();
+                    }
+                    else {
+                        UI.Alert({
+                            content: result.Message
+
+                        });
+                    }
+                }
+            });
+        }
+    </script>
+}

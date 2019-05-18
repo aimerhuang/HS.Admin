@@ -1,0 +1,364 @@
+﻿@{
+    ViewBag.Title = "AddOrUpdatePosSellManageData";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p10">
+    <div class="boxs_detail_dispay boxs_con_c1">
+        <div class="tit_con">
+            <form method="POST" id="form1" name="form1">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone border_bnone">
+                    <tbody>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">经销商:</td>
+                            <td class="border_right">
+                                <select id="sele_DealerSysNo" onchange="GetPosManageDate()">
+                                    @{
+                                        foreach (Hyt.Model.DsDealer mod in ViewBag.DealerList)
+                                        {
+                                            <option value="@mod.SysNo">@mod.DealerName</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">收银机:</td>
+                            <td class="border_right">
+                                <select id="sele_PosSysNo">
+                                    
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">流水号:</td>
+                            <td class="border_right">
+                                <input id="SerialNumber" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).SerialNumber)" />
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">付款方式:</td>
+                            <td class="border_right">
+                                <select id="PayType">
+                                    <option value="Cash">现金</option>
+                                    <option value="支付宝">支付宝</option>
+                                    <option value="WXPay">微信</option>
+                                    <option value="POS机">POS机</option>
+                                </select>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">营业员:</td>
+                            <td width="42%" class="border_right">
+                                <input id="Clerker" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).Clerker)" /> 
+                                
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">销售时间:</td>
+                            <td width="40%">
+                                <input id="SaleTime" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).SaleTime)" /> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">销售总数:</td>
+                            <td width="42%" class="border_right">
+                                <input id="TotalNum" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalNum)" /> 
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">销售金额:</td>
+                            <td width="40%">
+                                <input id="TotalSellValue" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalSellValue)" /> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">原价金额:</td>
+                            <td width="42%" class="border_right">
+                                <input id="TotalOrigValue" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalOrigValue)" /> 
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">优惠金额:</td>
+                            <td width="40%">
+                                <input id="TotalDisValue" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalDisValue)" /> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">付款金额:</td>
+                            <td width="42%" class="border_right">
+                                <input id="TotalPayValue" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalPayValue)" /> 
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">找零金额:</td>
+                            <td width="40%">
+                                <input id="TotalGetValue" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).TotalGetValue)" /> 
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">会员卡号:</td>
+                            <td width="42%" class="border_right">
+                                <input id="CardNumber" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).CardNumber)" />
+                                
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">会员名称:</td>
+                            <td width="40%">
+                                <input id="CardName" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).CardName)" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">订单折扣:</td>
+                            <td width="42%" class="border_right">
+                                <input id="HavePrivilege" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).HavePrivilege)" />
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">订单返利积分:</td>
+                            <td width="40%">
+                                <input id="OrderPoint" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).OrderPoint)" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">消费积分:</td>
+                            <td width="42%" class="border_right">
+                                <input id="UsePoint" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).UsePoint)" />
+                            </td>
+                            <td width="10%" class="nameright borde_rnone">积分消费金额:</td>
+                            <td width="40%">
+                                <input id="PointMoney" type="text" value="@((ViewBag.Order as Hyt.Model.Pos.DsPosOrder).PointMoney)" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </form>
+        </div>
+    </div>
+    <div class="boxs_con_c1 m5_t border_tnone">
+        <div  style="padding:5px;">
+          商品条码：<input type="text" id="ipt_Barcode" />
+        </div>
+        <div class="boxs_listtabel">
+            <!--/表格列表区-->
+            <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+                <thead>
+                    <tr>
+                        <th width="10%">商品编号</th>
+                        <th width="24%">商品名称</th>
+                        <th width="10%">商品条码</th>
+                        <th width="8%">商品价格</th>
+                        <th width="8%">实售价格</th>
+                        <th width="8%">折扣</th>
+                        <th width="8%">商品数量</th>
+                        <th width="8%">总金额</th>
+                        <th width="6%"></th>
+                    </tr>
+                </thead>
+                <tbody id="tb_Body">
+                    @{
+                        var indx = 0;
+                        foreach (var item in ViewBag.ItemList as List<Hyt.Model.Pos.DsPosOrderItem>)
+                        {
+                            <tr>
+                                <td>
+                                    @item.SysNo
+                                </td>
+                                <td>@item.ProName</td>
+                                <td>@item.ProBarCode</td>
+                                <td>@(item.ProPrice.ToString("0.00"))</td>
+                                <td><input onchange="SetTotalPrice(this,'@item.ProBarCode')" readonly="true" type="text" value="@((item.ProPrice == 0 ? item.ProPrice : item.ProPrice * item.ProDiscount).ToString("0.00"))" /></td>
+                                <td><input onchange="SetTotalPrice(this,'@item.ProBarCode')" type="text" value="@(item.ProDiscount)" /></td>
+                                <td><input onchange="SetTotalPrice(this,'@item.ProBarCode')" type="text" value="@(item.ProNum)" /></td>
+                                <td><input type="text" readonly="true" value="@(((item.ProPrice == 0 ? item.ProPrice : item.ProPrice * item.ProDiscount) * item.ProNum).ToString("0.00"))" /></td>
+                                <td>
+                                    <button type="button" id="btn_Delete" title="删除" class="btn btn_ht26 m10_r btn_blue" onclick="DeleteJsonList('@item.ProBarCode')">
+                                        <span>删除</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            indx++;
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div style="padding:20px;" align="center">
+        <button type="button" id="btnBack" title="确定" class="btn btn_ht26 m10_r btn_blue" onclick="SavePosOrderData();">
+            <span>确定</span>
+        </button>
+
+        <button type="button" id="btnBack" title="返回" class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href = '/DsPosManage/GetPosSellManagePage'">
+            <span>返回</span>
+        </button>
+    </div>
+</div>
+<script>
+    var list = new Array();
+    $(function () {
+
+        $("#ipt_Barcode").bind('keydown', CheckForEnter);
+        GetPosManageDate();
+    });
+    function CheckForEnter(event)
+    {
+        if (event && event.keyCode == 13) { // enter 键
+            $.ajax({
+                url: '/DsPosManage/GetProductListInfo',
+                type: 'POST',
+                cache: false,
+                data: {
+                    barcode: $("#ipt_Barcode").val()
+                },
+                success: function (json) {
+                    
+                    for (var i = 0; i < list.length; i++) {
+                        if (list[i].ProBarCode == json.Barcode) {
+                            return;
+                        }
+                    }
+
+                    var data = {
+                        ProSysNo: json.SysNo,
+                        ProName: json.ProductName,
+                        ProBarCode: json.Barcode,
+                        ProPrice: json.CostPrice,
+                        ProNum: 1,
+                        ProDiscount: 10,
+                        ProDisPrice: json.CostPrice,
+                        ProTotalValue: json.CostPrice
+                    };
+                    list.push(data);
+                  
+                    BindHTML();
+                }
+            });
+
+            $("#ipt_Barcode").val("");
+        }
+    }
+    function SetTotalPrice(ele,barcode)
+    {
+        var tr = $(ele).parent().parent();
+        var sellPrice = $(tr).find("input[name='ipt_SellPrice']").val();
+        var discount = $(tr).find("input[name='ipt_Discount']").val();
+        var count = $(tr).find("input[name='ipt_Count']").val();
+        var TotalPrice = $(tr).find("input[name='ipt_TotalPrice']").val();
+
+        var json = null;
+        for(var i=0;i<list.length;i++)
+        {
+            var tempJson = list[i];
+            if(tempJson.ProBarCode==barcode)
+            {
+                json = tempJson;
+                break;
+            }
+        }
+        if(json!=null)
+        {
+            json.ProDiscount = discount;
+            json.ProNum = count;
+            json.ProDisPrice =json.ProPrice * json.ProDiscount/10;
+            json.ProTotalValue = json.ProNum * json.ProDisPrice;
+        }
+        BindHTML();
+    }
+
+    function BindHTML()
+    {
+        var table = "";
+        var sellNum = 0;
+        var sellValue = 0;
+        var sellOrgin = 0;
+        var disValue = 0;
+        for (var i = 0; i < list.length; i++)
+        {
+            var json = list[i];
+            sellNum += parseInt(json.ProNum);
+            sellValue += json.ProTotalValue;
+            sellOrgin += json.ProNum * json.ProPrice
+            disValue += json.ProNum * json.ProPrice - json.ProTotalValue;
+            table += "<tr>";
+            table += "<td>" + json.ProSysNo + "</td>";
+            table += "<td>" + json.ProName + "</td>";
+            table += "<td>" + json.ProBarCode + "</td>";
+            table += "<td>" + json.ProPrice.toFixed(2) + "</td>";
+            table += "<td><input onchange=\"SetTotalPrice(this,'" + json.ProBarCode + "')\" readonly=\"true\"  name=\"ipt_SellPrice\" type=\"text\" style=\"width:50px;\" value=\"" + json.ProDisPrice + "\" /></td>";
+            table += "<td><input onchange=\"SetTotalPrice(this,'" + json.ProBarCode + "')\" name=\"ipt_Discount\"  type=\"text\" style=\"width:50px;\" value=\"" + json.ProDiscount + "\" /></td>";
+            table += "<td><input onchange=\"SetTotalPrice(this,'" + json.ProBarCode + "')\" name=\"ipt_Count\" type=\"text\" style=\"width:50px;\" value=\"" + json.ProNum + "\" /></td>";
+            table += "<td><input name=\"ipt_TotalPrice\" readonly=\"true\" type=\"text\" style=\"width:50px;\" value=\"" + (json.ProNum * json.ProDisPrice).toFixed(2) + "\" /></td>";
+            table += "<td><button type=\"button\" id=\"btn_Delete\" title=\"删除\" class=\"btn btn_ht26 m10_r btn_blue\" onclick=\"DeleteJsonList('" + json.ProBarCode + "')\"><span>删除</span></button></td>";
+            table += "</tr>";
+        }
+        $("#TotalNum").val(sellNum);
+        $("#TotalSellValue").val(sellValue.toFixed(2));
+
+        $("#TotalOrigValue").val(sellOrgin.toFixed(2));
+        $("#TotalDisValue").val(disValue.toFixed(2));
+
+        $("#tb_Body").html(table);
+       
+    }
+    function DeleteJsonList(barcode)
+    {
+        for(var i=0;i<list.length;i++)
+        {
+            if (list[i].ProBarCode == barcode)
+            {
+                list.splice(i, 1);
+                break;
+            }
+        }
+        BindHTML();
+    }
+    function SavePosOrderData()
+    {
+        $.ajax({
+            url: '/DsPosManage/SavePosOrderData',
+            type: 'POST',
+            cache: false,
+            data: {
+                DsSysNo: $("#sele_DealerSysNo").val(),
+                DsPosSysNo: $("#sele_PosSysNo").val(),
+                SerialNumber: $("#SerialNumber").val(),
+                PayType: $("#PayType").val(),
+                Clerker: $("#Clerker").val(),
+                SaleTime: $("#SaleTime").val(),
+                TotalNum: $("#TotalNum").val(),
+                TotalSellValue: $("#TotalSellValue").val(),
+                TotalOrigValue: $("#TotalOrigValue").val(),
+                TotalDisValue: $("#TotalDisValue").val(),
+                TotalPayValue: $("#TotalPayValue").val(),
+                TotalGetValue: $("#TotalGetValue").val(),
+                CardNumber: $("#CardNumber").val(),
+                CardName: $("#CardName").val(),
+                HavePrivilege: $("#HavePrivilege").val(),
+                OrderPoint: $("#OrderPoint").val(),
+                UsePoint: $("#UsePoint").val(),
+                PointMoney: $("#PointMoney").val(),
+                Items: JSON.stringify(list)
+            },
+            success: function (json) {
+                if (json.Status) {
+                    UI.Alert({
+                        content: json.Message,
+                        callback: function () {
+                            window.location.href = "/DsPosManage/GetPosSellManagePage";
+                        }
+                    });
+                }
+                else {
+                    UI.Alert({ content: json.Message });
+                }
+            }
+        });
+    }
+    function GetPosManageDate()
+    {
+        $.ajax({
+            url: '/DsPosManage/GetDsPosManage',
+            type: 'POST',
+            cache: false,
+            data: {
+                DsSysNo: $("#sele_DealerSysNo").val()
+            },
+            success: function (json) {
+                var ele = $("#sele_PosSysNo");
+                var sele = "";
+                for(var i=0;i<json.length;i++)
+                {
+                    sele += "<option value=\"" + json[i].SysNo + "\">" + json[i].pos_posName + "</option>";
+                }
+                ele.html(sele);
+            }
+        });
+    }
+</script>

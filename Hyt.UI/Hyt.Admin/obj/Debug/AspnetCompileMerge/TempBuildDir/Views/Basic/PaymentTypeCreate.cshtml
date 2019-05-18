@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "新增支付方式";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#payment_type_form").validate({
+                rules: {
+                    PaymentName: {
+                        required: true,
+                        maxlength: 50,
+                        rangelength: [1, 50],
+                        remote: {
+                            url: '@Url.Action("PaymentTypeVerify")',
+                            type: 'POST',
+                            data: {
+                                paymentName: $("#PaymentName").val()
+                            },
+                            dataType: 'json',
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $("#PaymentNameVerifyResult").text('请填写支付名称，1-50个字符');
+                                } else {
+                                    $("#PaymentNameVerifyResult").text('支付方式已经存在');
+                                }
+                                return data;
+                            }
+                        }
+                    },
+                    IsOnlinePay: { required: true },
+                    IsOnlineVisible: { required: true },
+                    PaymentType: { required: true },
+                    RequiredCardNumber: { required: true },
+                    Status: { required: true },
+                    DisplayOrder: { required: true, digits: true }
+                },
+                messages: {
+                    PaymentName: {
+                        required: "支付方式名称必填",
+                        maxlength: "长度超出50个字"
+                    }
+                },
+                errorPlacement: function (error, element) {
+                    element.parent().find('span').attr('class', 'error m10_l');
+
+                },
+                success: function (span, element) {
+                    element.parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+        });
+
+        function getModel() {
+            var model = {};
+            model.PaymentName = $("#PaymentName").val();
+            model.IsOnlinePay = $("#IsOnlinePay").val();
+            model.IsOnlineVisible = $("#IsOnlineVisible").val();
+            model.PaymentType = $("#PaymentType").val();
+            model.RequiredCardNumber = $("#RequiredCardNumber").val();
+            model.Status = $("#Status").val();
+            model.DisplayOrder = $("#DisplayOrder").val();
+            model.PaymentDescription = $("#PaymentDescription").val();
+            return model;
+        }
+
+        function submitPaymentType() {
+            if ($("#payment_type_form").valid()) {
+                UI.Confirm({
+                    content: '您确定要添加支付方式吗？',
+                    ok: function () {
+                        var model = getModel();
+                        if (model) {
+                            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                            $.ajax({
+                                url: "@Url.Action("PaymentTypeCreate", "Basic")",
+                                data: JSON.stringify(model),
+                                contentType: 'application/json',
+                                type: "post",
+                                success: function (ret) {
+                                    mask.Remove();
+                                    if (ret.StatusCode < 0) {
+                                        UI.Alert({ content: ret.Message });
+                                    } else {
+                                        UI.DialogOpener().showTip('支付方式添加成功');
+                                        UI.Dialog.close();
+                                    }
+                                },
+                                error: function () {
+                                    mask.Remove();
+                                }
+                            });
+                        } else {
+                            UI.Alert({
+                                content: '数据错据,请检查重试!'
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    </script>
+
+}
+<div class="caseout">
+    <div class="boxs_detail_dispay">
+        <form id="payment_type_form" action="" method="post">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tr>
+                        <td class="nameright border_lnone" width="60"><span class="v_star">*</span>支付名称</td>
+                        <td colspan="3">
+                            <input type="text" id="PaymentName" name="PaymentName" value="" maxlength="50" class="wd300 m10_r">
+                            <span id="PaymentNameVerifyResult" class="prompt">请填写支付名称，1-50个字符</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone"><span class="v_star">*</span>网上支付</td>
+                        <td class="border_right" width="220">
+                            @Html.DropDownList("IsOnlinePay", ViewBag.IsOnlinePay as SelectList, htmlAttributes: new { @class = "m10_r" })
+                            <span class="prompt">请选择网上支付类型</span>
+                        </td>
+                        <td class="nameright" width="60"><span class="v_star">*</span>前台可见</td>
+                        <td>
+                            @Html.DropDownList("IsOnlineVisible", ViewBag.IsOnlineVisible as SelectList, htmlAttributes: new { @class = "m10_r" })
+                            <span class="prompt">请选择前台是否可见</span></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone"><span class="v_star">*</span>支付类型</td>
+                        <td class="border_right">
+                            @Html.DropDownList("PaymentType", ViewBag.PaymentType as SelectList, htmlAttributes: new { @class = "m10_r" })
+                            <span class="prompt">请选择支付类型</span>
+                        </td>
+                        <td class="nameright" width="60"><span class="v_star">*</span>需要卡号</td>
+                        <td>
+                            @Html.DropDownList("RequiredCardNumber", ViewBag.RequiredCardNumber as SelectList, htmlAttributes: new { @class = "m10_r" })
+                            <span class="prompt">请选择是否需要卡号</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone"><span class="v_star">*</span>状态</td>
+                        <td class="border_right">
+                            @Html.DropDownList("Status", ViewBag.Status as SelectList, htmlAttributes: new { @class = "m10_r" })
+                            <span class="prompt">请选择状态</span></td>
+                        <td class="nameright" width="60"><span class="v_star">*</span>显示顺序</td>
+                        <td>
+                            <input type="text" id="DisplayOrder" name="DisplayOrder" class=" wd60 m10_r" value="0"><span class="prompt">请填写显示数字序号</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone" valign="top">支付描述</td>
+                        <td colspan="3">
+                            <textarea id="PaymentDescription" name="PaymentDescription" class="wd300 m10_r"></textarea><span class="prompt">请填写支付描述</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>

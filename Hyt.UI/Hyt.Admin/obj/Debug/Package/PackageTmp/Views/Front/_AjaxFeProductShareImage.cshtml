@@ -1,0 +1,65 @@
+﻿@using Hyt.Model
+@using Hyt.Util
+@using Hyt.BLL.Config
+@using Hyt.Model.WorkflowStatus
+
+
+<table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone">
+    <thead>
+        <tr>
+            <th width="81">图片</th>
+            <th>晒单标题</th>
+            <th width="46">状态</th>
+            <th width="174">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            const int audit = (int)ForeStatus.商品评论状态.已审;
+            const int invalid = (int)ForeStatus.商品评论状态.作废;
+            const int pending = (int)ForeStatus.商品评论状态.待审;
+            var commentModel = (CBFeProductComment)ViewBag.CommentModel;
+                
+            var list = (IList<FeProductCommentImage>)ViewBag.CommentImage;
+            if (list != null && list.Any())
+            {
+                foreach (var item in list)
+                {
+                    var strSpan = "span" + item.SysNo;
+                    <tr class="stag_color">
+                        <td style="text-align: center">
+                            <img style="border: 0; width: 80px; height: 80px" alt="鼠标移到图片可弹出层显示大图片(黄波实现)" src="@(Config.Instance.GetAttachmentConfig().FileServer+item.ImagePath)" />
+                        </td>
+                        <td class="align_l p5_l">@commentModel.ShareTitle</td>
+                        <td style="text-align: center">@EnumUtil.GetDescription(typeof(ForeStatus.晒单图片状态), item.Status)</td>
+                        <td style="text-align: center">
+                            <span id="@strSpan">
+                                @{
+                                    if (item.Status == audit)
+                                    {
+                                        <button type="button" class="btn btn_ht26 m10_r CommentAudit FE1002603" title="取消审核" onclick="setImageAudit(@item.SysNo,@pending)"><span class="icon_audit"></span><span class="m5_l">取消审核</span></button><button type="button" class="btn btn_ht26 disabled CommentAudit FE1002501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                                    }
+                                    else if (item.Status == invalid)
+                                    {
+                                        <button type="button" class="btn btn_ht26 disabled m10_r CommentAudit FE1002603" title="审核"><span class="icon_audit"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 disabled CommentAudit FE1002501" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn_ht26 m10_r CommentAudit FE1002603" title="审核" onclick="setImageAudit(@item.SysNo, @audit)"><span class="icon_audit"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 CommentAudit FE1002501" title="作废" onclick="setImageAudit(@item.SysNo, @invalid)"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                                    }
+                                }
+                            </span>
+
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr class="odd_color">
+                    <td class="align_l p10_l bgr_eb" colspan="4">暂无数据</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

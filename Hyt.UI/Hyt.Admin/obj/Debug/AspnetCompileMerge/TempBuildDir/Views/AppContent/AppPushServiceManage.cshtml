@@ -1,0 +1,329 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@{
+    ViewBag.Title = "App推送服务管理";
+}
+  
+@Html.PrivilegeControl(PrivilegeCode.AP1002102  ,".AP1002102")
+
+@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+    <script language="javascript" type="text/javascript">
+        function doSearch() {
+
+            var stringPara = $("#txt_stringParameter").val();
+            stringPara = stringPara.indexOf("标题/内容/客户账号") == 0 ? null : stringPara;
+
+            var data = {};
+            data.id = 0;
+            data = {};
+            data.AppType = $("#AppType").val();
+            data.ServiceType = $("#ServiceType").val();
+            data.Title = stringPara;
+            data.Content = stringPara;
+            data.CustomerAccount = stringPara;
+            data.Status = $("#Status").val();
+
+            Utils.MaskStart($('#paging'));
+            $.post('@Url.Action("AppPushServiceManage", "AppContent")',
+                data,
+                function(response) {
+                    Utils.MaskStop();
+                    $('#paging').html(response);
+                }
+            );
+        }
+
+        //审核通过
+
+        function audit(sysNo, obj) {
+
+            $(obj).attr("disabled", "disabled"); //当前按钮失效
+            $(obj).removeClass("btn_blue");
+            $(obj).addClass("disabled");
+
+            $.post('@Url.Action("AuditAppPushService", "Ajax")', { sysNo: sysNo }, function(response) {
+
+                if (response != null) {
+                    var tdList = $("#row_" + sysNo + " td");
+                    if (response.Status == true) {
+                        tdList.eq(5).html("@AppStatus.App推送服务状态.已审核");
+                        $(obj).attr("disabled", "disabled"); //当前按钮失效
+                        $(obj).removeClass("btn_blue");
+                        $(obj).addClass("disabled");
+
+                        $(obj).next().attr("disabled", "disabled"); //编辑按钮失效
+                        $(obj).next().removeClass("btn_blue");
+                        $(obj).next().addClass("disabled");
+
+                        $(obj).next().next().attr("disabled", "disabled"); //作废按钮失效
+                        $(obj).next().next().removeClass("btn_red");
+                        $(obj).next().next().addClass("disabled");
+
+                        UI.tips.tip_alert('tips_shrot tips_warning', '消息推送中...');
+
+                        //推送消息
+                        $.post('@Url.Action("PushAppPushService", "Ajax")', { sysNo: sysNo }, function(response) {
+                            if (response.Status == true) {
+                                //取消消息框
+                                if ($("#JS_tip").length > 0) {
+                                    $("#JS_tip").hide();
+                                    $("#JS_tip").remove();
+                                }
+                                UI.tips.tip_alert('tips_shrot tips_success', '推送成功');
+                                tdList.eq(5).html("@AppStatus.App推送服务状态.已发送");
+
+                            } else {
+                                tdList.eq(5).html("@AppStatus.App推送服务状态.失败");
+                                UI.Alert({
+                                    content: response.Message,
+                                    width: 200
+                                });
+                            }
+                        });
+
+                    } else {
+
+                        $(obj).attr("disabled", null); //当前按钮失效
+                        $(obj).addClass("btn_blue");
+                        $(obj).removeClass("disabled");
+
+                        UI.Alert({
+                            content: "审核失败",
+                            width: 200
+                        });
+                    }
+                }
+            });
+        }
+
+        //作废
+
+        function invalid(sysNo, obj) {
+
+            $(obj).attr("disabled", "disabled"); //当前按钮失效
+            $(obj).removeClass("btn_red");
+            $(obj).addClass("disabled");
+
+            $.post('@Url.Action("InvalidAppPushService", "Ajax")', { sysNo: sysNo }, function(response) {
+                if (response != null && response.Status == true) {
+                    var tdList = $("#row_" + sysNo + " td");
+                    UI.tips.tip_alert('tips_shrot tips_success', '作废成功');
+                    tdList.eq(5).html("@AppStatus.App推送服务状态.作废");
+
+                    $(obj).attr("disabled", "disabled"); //当前按钮失效
+                    $(obj).removeClass("btn_red");
+                    $(obj).addClass("disabled");
+
+                    $(obj).prev().attr("disabled", "disabled"); //编辑按钮失效
+                    $(obj).prev().removeClass("btn_blue");
+                    $(obj).prev().addClass("disabled");
+
+                    $(obj).prev().prev().removeClass("btn_blue"); //审核按钮失效
+                    $(obj).prev().prev().addClass("disabled");
+                    $(obj).prev().prev().attr("disabled", "disabled");
+
+                } else {
+                    $(obj).attr("disabled", null); //当前按钮失效
+                    $(obj).addClass("btn_blue");
+                    $(obj).removeClass("disabled");
+
+                    UI.tips.tip_alert('tips_shrot tips_warning', '作废失败');
+                }
+            });
+        }
+
+        //打开推送信息详情对话框
+
+        function openDetial(id, isView) {
+
+            para = {
+                id: "AddAppPushServiceManage",
+                width: 500,
+                height: 309,
+                title: '创建推送',
+                button: null
+            };
+
+            if (id == null) {
+                
+                para.button = [{ name: '保存', callback: createNewPushInfo, focus: true }, { name: '取消' }];
+                UI.DialogOpen('@Url.Action("AddAppPushServiceManage", "AppContent")', para, false);
+                
+            } else if (isView) {
+
+                para.title = "查看推送消息";
+                para.button = [{ name: '取消', focus: true }];
+                UI.DialogOpen('@Url.Action("EditAppPushServiceManage", "AppContent", new {isView = true})' + '&sysNo=' + id, para, false);
+            } else {
+                
+                para.title = "编辑推送消息";
+                para.button = [{
+                    name: '保存',
+                    callback: editSave,
+                    focus: true
+                }, { name: '取消' }];
+                UI.DialogOpen('@Url.Action("EditAppPushServiceManage", "AppContent", new {isView = false})' + '&sysNo=' + id, para, false);
+            }
+
+
+        }
+
+        //编辑推送信息
+
+        function edit(sysNo, obj) {
+            openDetial(sysNo);
+        }
+
+        //查看推送信息
+
+        function view(sysNo) {
+            openDetial(sysNo, true);
+        }
+
+        //编辑保存方法
+
+        function editSave(obj) {
+            var $iframe = this.iframe.contentWindow;
+            $iframe.switchControlBottonsEnabled();
+            var data = $iframe.createNewPushData();
+
+            if (data != null) {
+                $.ajax({
+                    url: "@Url.Action("EditAppPushService", "Ajax")",
+                    data: data,
+                    dataType: 'JSON',
+                    type: "POST",
+                    success: function(response) {
+                        if (response.Status == true) {
+                            $iframe.closeWindow();
+                            UI.tips.tip_alert('tips_shrot tips_success', '添加成功');
+                            doSearch();
+                        } else {
+                            var msg = (response.Message.length == 0) ? "添加失败" : response.Message;
+
+                            $iframe.switchControlBottonsEnabled(true);
+
+                            UI.Alert({
+                                content: msg
+                            });
+                        }
+                    }
+                });
+            }
+
+            return false;
+        }
+
+        //创建信息推送信息
+
+        function createNewPushInfo() {
+            var $iframe = this.iframe.contentWindow;
+            $iframe.switchControlBottonsEnabled();
+            var data = $iframe.createNewPushData();
+
+            if (data != null) {
+                $.ajax({
+                    url: "@Url.Action("AddAppPushService", "Ajax")",
+                    data: data,
+                    dataType: 'JSON',
+                    type: "POST",
+                    success: function(response) {
+                        if (response.Status == true) {
+                            $iframe.closeWindow();
+                            UI.tips.tip_alert('tips_shrot tips_success', '添加成功');
+                            doSearch();
+                        } else {
+                            var msg = (response.Message.length == 0) ? "添加失败" : response.Message;
+
+                            $iframe.switchControlBottonsEnabled(true);
+
+                            UI.Alert({
+                                content: msg
+                            });
+                        }
+                    }
+                });
+            } else {
+                $iframe.switchControlBottonsEnabled(true);
+            }
+            return false;
+        }
+
+        $(function () {
+            
+            $("#txt_stringParameter").keydown(function (e) {
+                if (e.keyCode == 13) {
+                    doSearch();
+                }
+            });
+
+            doSearch();
+        })
+    </script>
+}
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>推送信息管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl">状态</span>
+                    <select class="select_ht28 fl wd80 m10_r m10_l" id="Status">
+                        <option selected="selected" value="0">全部</option> 
+                        @{
+                             var statusList = EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.AppStatus.App推送服务状态));
+                             foreach (var key in statusList.Keys)
+                             {
+                                 var selectListItem = statusList[key];
+                                   <option value="@key">@selectListItem</option>
+                             } 
+                         }
+                    </select>
+                    <span class="fl">服务类型</span>
+                    <select class="select_ht28 fl wd80 m10_r m10_l" id="ServiceType">
+                        <option selected="selected" value="0">全部</option> 
+                        @{
+                            var appTypeList = EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.AppStatus.App推送服务类型));
+                            foreach (var key in appTypeList.Keys)
+                            {
+                                var selectListItem = appTypeList[key];
+                                <option value="@key">@selectListItem</option>
+                            } 
+                        }
+                    </select>
+                    <span class="fl">App类型</span>
+                    <select class="select_ht28 fl wd80 m10_r m10_l" id="AppType">
+                        <option value="@((int)AppStatus.App推送App类型.全部)">全部</option>
+                        @{
+                            var osTypeList = EnumUtil.ToDictionary(typeof(AppStatus.App推送App类型));
+                            foreach (var key in osTypeList.Keys)
+                            {
+                                if (key == (int) AppStatus.App推送App类型.全部)
+                                {
+                                    continue;
+                                }
+                                var selectListItem = osTypeList[key];
+                                <option value="@key">@selectListItem</option>
+                            } 
+                        }
+                    </select>
+                    <input type="text" placeholder="标题/内容/客户账号" class="wd120 fl m10_l m10_r" value="" id="txt_stringParameter">
+                    <button title="搜索" class="btn btn_ht28 fl" onclick="doSearch()"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                </div>
+                <div class="left_tool">
+                    <button class="btn btn_ht26 m10_r @PrivilegeCode.AP1002102.ToString()" onclick="openDetial(null)"><span class="icon icon_plus"></span><span class="m5_l">创建推送</span></button>
+                </div>
+            </div>
+            <div class="boxs_list">
+                <div class="boxs_listtabel" id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

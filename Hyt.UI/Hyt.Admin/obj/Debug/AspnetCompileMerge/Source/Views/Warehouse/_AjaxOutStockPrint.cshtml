@@ -1,0 +1,86 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBWhStockOut>
+
+  <div class="boxs_listtabel">
+        <!--/表格列表区-->
+        <table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th width="53px"><input class="checkall" type="checkbox" value=""></th>
+                    <th class="wd75">出库单号</th>
+                    <th class="wd75">订单编号</th>
+                    <th width="50"  class="align_l p10_lr">收货人</th>
+                    <th width="80px">仓库</th>
+                    <th width="170">创建时间
+                        <button  class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="Asc()"><span style="background-position: -287px -96px;" class="icon_ok_sign m5_r "></span><span></span></button>
+                        <button   class="btn btn_ht26 m10_r WH1003601 " type="button" onclick="desc()"><span style="background-position: -309px -96px;" class="icon_ok_sign m5_r "></span><span></span></button>
+                    </th>
+                    <th width="150">配送方式</th>
+                    <th width="80">来源</th>
+                    <th width="50">状态</th>
+                    <th width="200">客户留言</th>
+                    <th width="250">销售单对内备注</th>
+                    <th>出库单备注</th>
+                    <th width="116">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    int row=0;
+                    if (!Model.TData.Any())
+                    {
+                        <tr>
+                            <td colspan="11" class="align_l p10_l bgr_eb">暂无数据。</td>
+                        </tr>
+                    }
+                    foreach (var master in Model.TData)
+                    {
+                        row++;
+                        <tr @{if (row % 2 == 0) { <text> class='stag_color' </text> }}>
+                            <td><input type="checkbox" name="checkinfo" value="@master.SysNo"></td>
+                            <td class="blue" data="@master.SysNo" title="查看出库单:@master.SysNo"><a onclick="showinfo(@master.SysNo)">@master.SysNo</a></td>
+                            <td class="blue" data="@master.OrderSysNO"><a href="javascript:OrderBrowse(@master.OrderSysNO);">@master.OrderSysNO</a></td>
+                            <td class="align_l p10_lr">@master.ReceiverName</td>
+                            <td data="@master.WarehouseSysNo">@master.WarehouseName</td>
+                            <td>@master.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                             <td data="@master.DeliveryTypeSysNo">
+                                 @Hyt.BLL.Logistics.DeliveryTypeBo.Instance.GetDeliveryTypeName(master.DeliveryTypeSysNo)
+                                 @{
+                                        var v = Hyt.BLL.Logistics.DeliveryTypeBo.Instance.GetExpressNo(master.SysNo);
+                                        if (!string.IsNullOrEmpty(v))
+                                        { 
+                                            <input type="text" name="express" class="wd156 express" value="@(v)" style="display:none;" />
+                                             <br />
+                                             @(v)
+                                        }else
+                                        {
+                                            if (master.Status != (int)WarehouseStatus.出库单状态.已签收)
+                                            {
+                                                <input type="text" name="express" class="wd156 express" value=""  />
+                                            }else
+                                            { 
+                                                <input type="text" name="express" class="wd156 express" value="" style="display:none;" />
+                                            }
+                                        }
+                                 }
+                                 
+                             </td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.OrderStatus.销售单来源), Convert.ToInt32(master.OrderSource))</td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.WarehouseStatus.出库单状态), master.Status)</td>
+                            <td>@master.SoCustomerMessage</td>
+                            <td>@master.SoInternalRemarks</td>
+                            <td><input name="txtRemarks_@master.SysNo" value="@master.Remarks" class="hide wd100 number_input" type="text" style="width: 250px;"><span>@master.Remarks</span></td>
+                            <td >
+                                <button class="btn btn_blue btn_ht26" onclick="btnSave(@master.SysNo,this)" type="button"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                                <button class="btn btn_ht26 m10_l" style="display:none" id="btnCancel" onclick="cancel(@master.SysNo,this)" type="button"><span class="icon_cancelAudit"></span><span class="m5_l">取消</span></button>                          
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+       
+    </div>
+
+@{ Html.RenderPartial("_UrlPaging", Model); }

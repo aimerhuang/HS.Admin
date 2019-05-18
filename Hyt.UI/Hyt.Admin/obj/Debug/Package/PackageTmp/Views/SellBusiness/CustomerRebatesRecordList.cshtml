@@ -1,0 +1,75 @@
+﻿@{
+    ViewBag.Title = "返利记录管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>返利记录管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="fl">订单系统编号</span>
+                        <input id="OrderSysNo" type="text" class="wd100 fl m10_l m10_r" value="">
+                        <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+                </div>
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        doSearch();
+    });
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/SellBusiness/DoCrCustomerRebatesRecordQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("OrderSysNo", $("#OrderSysNo").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        doSearch();
+
+    }
+
+    function Delete(myid, btn) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+                $.post('/SellBusiness/DeleteRebatesRecord', { id: myid }, function (r) {
+                    if (r.Status) {
+                        SuccessTip();
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+
+                });
+            },
+            cancel: true
+        });
+    }
+</script>
+

@@ -1,0 +1,99 @@
+﻿@model System.Collections.Generic.List<Hyt.Model.Transfer.CBRptCouponCard>
+
+<script type="text/javascript" src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+
+<div class="case">
+    
+
+        <div class="boxs">
+  
+            <div class="boxs_tit head_m">
+                <h3>优惠卡统计报表</h3>
+            </div>
+    
+
+
+            <div class="boxs_con_c1">    
+    
+                <!--工具条开始-->
+                <div class="boxs_tool"> 
+      
+                    <form id="form1">
+                        <!--搜索开始-->
+                        <div class="right_tool clearfix">
+                            <span class="veralign_t fl">优惠卡使用日期</span>
+                            <div class="fl m10_l">
+                                <div class="date_btn120 fl m10_l">
+                                    <input type="text" value="" class="input_ht26" id="BeginDate" name="BeginDate"  queryPara="BeginDate" onfocus="this.blur()" onclick="UI.Date({ el: 'BeginDate' })">
+                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate'})" type="button" ><span class="icon_calendar"></span></button>
+                                </div>
+                                <span class="fl m10_l">-</span>
+                                <div class="date_btn120 fl m10_l">
+                                    <input type="text" value="" class="input_ht26" id="EndDate" name="EndDate"  queryPara="EndDate" onfocus="this.blur()" onclick="UI.Date({ el: 'EndDate' })">
+                                    <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate'})"  type="button" ><span class="icon_calendar"></span></button>
+                                </div>
+                               
+                                <button class="btn btn_ht28 m10_l fl" title="查询" id="JS_gaoji1" type="button"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+              
+                            </div>
+            
+                        </div>
+                        <!--搜索结束-->
+                    </form>
+        
+                    <!--功能按钮开始-->
+                    <div class="left_tool"><button class="btn btn_ht26 m10_r" id="btnExport" style="display:none"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+        
+                </div>
+                <!--工具条结束-->
+      
+                <!--表格列开始-->
+                <div class="boxs_listtabel" id="paging">
+                    @{Html.RenderPartial("_CouponCards", Model);}
+                </div>
+                <!--表格列结束-->
+        
+        
+            </div>
+
+        </div>  
+    
+
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#JS_gaoji1").click(function() {
+            doSearch();
+        });
+        
+    });
+
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Report/CouponCards/?r=" + Math.random(), "queryPara", function () {
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    $('#btnExport').click(function () {
+        var categoryId = $("#listProductCategories").attr("pdcategory");
+        if (categoryId != undefined && categoryId != "") {
+            $("#ProductCategories").val(categoryId);
+        }
+        var form = $("#form1");
+        form.attr('action', '@Url.Action("ExportSalesRanking", "Report")');
+        form.attr('method', 'post');
+        form.submit();
+    });
+
+</script>
+        

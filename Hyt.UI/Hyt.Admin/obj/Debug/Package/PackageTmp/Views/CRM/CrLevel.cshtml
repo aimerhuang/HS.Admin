@@ -1,0 +1,138 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@model IList<CrCustomerLevel>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "等级管理";
+    @Html.PrivilegeControl(PrivilegeCode.CR1005201, "button.CR1005201")
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>会员等级管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <!--搜索开始-->
+                <div class="right_tool clearfix" style="display:none;">
+                    <span class="veralign_t fl">是否可用于支付货款</span>
+                    <div class="fl m10_l">
+                        <select id="canPayForProduct" name="canPayForProduct" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                         @{
+                            foreach (var dict in (IDictionary<int, string>)ViewBag.dictPayForProduct)
+                            {
+                            <option value="@dict.Key">@dict.Value</option>
+                            }
+                         }
+                        </select>
+                    </div>
+                    <span class="veralign_t fl m10_l">是否可用于支付</span>
+                    <div class="fl m10_l">
+                        <select id="canPayForService" name="canPayForService" class="select_ht28" onchange="doSearch()">
+                            <option value="-1">全部</option>
+                         @{
+                             foreach (var dict in (IDictionary<int, string>)ViewBag.dictPayForService)
+                             {
+                                 <option value="@dict.Key">@dict.Value</option>
+                             }
+                         }
+                        </select>
+                    </div>
+                </div>
+                <!--搜索结束-->
+
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button class="btn btn_ht26 btn_blue m10_r" id="btn_addleave"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加会员等级</span></button>
+                </div>
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+
+            <!--表格列开始-->
+            <div class="boxs_listtabel">
+                @{Html.RenderPartial("_AjaxCrLevel", Model); }
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+        function AjaxStop() {
+            cover.Remove();
+        }
+        function doSearch() {
+            var canPayForProduct = $("#canPayForProduct").val();
+            var canPayForService = $("#canPayForService").val();
+
+            AjaxStart();
+            var json = {};
+            if ($.trim(canPayForProduct) != "") {
+                json.canPayForProduct = canPayForProduct;
+            }
+            if ($.trim(canPayForService) != "") {
+                json.canPayForService = canPayForService;
+            }
+            $.get('/CRM/CrLevel/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+        function LevelEdit(sysNo) {
+            UI.DialogOpen('/CRM/CrLevelEdit?sysNo=' + sysNo, {
+                title: '修改会员等级',
+                width: '625px',
+                height: '465px',
+                init: function() {
+                    this.button({
+                        name: '保存',
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            var form = iframe.document.getElementById('form');
+                            iframe.addOrEdit();
+                            return false;
+                        }, focus: true
+                    }, {
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+        $(function () {
+            $('#btn_addleave').click(function () {
+                UI.DialogOpen('/CRM/CrLevelEdit?sysno=0', {
+                    title: '添加会员等级',
+                    width: '625px',
+                    height: '465px',
+                    init: function () {
+                        this.button({
+                            name: '保存',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                var form = iframe.document.getElementById('form');
+                                iframe.addOrEdit();
+                                return false;
+                            }, focus: true
+                        }, {
+                            name: '关闭'
+                        });
+                    }
+                }, false);
+            });
+        })
+    </script>
+}

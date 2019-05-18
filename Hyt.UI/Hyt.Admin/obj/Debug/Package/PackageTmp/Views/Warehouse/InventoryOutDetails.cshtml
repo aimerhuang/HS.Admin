@@ -1,0 +1,97 @@
+﻿@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.WhInventoryOut
+
+@section headjs{
+
+    <script type="text/javascript">
+
+
+        var warehouseSysNo="@(Model!=null?Model.WarehouseSysNo:0)";
+        $(function () {
+            doSearch();
+            
+        });
+        //查询列表
+        function doSearch() {
+            $.get('@Url.Action("InventoryOutDetails", "Warehouse")',
+                { SysNo: $("#hid_sysno").val() },
+                function (data) {
+                    $('#paging').html(data);
+                });
+        }
+    </script>
+}
+@section HeadCss
+{
+    <style type="text/css">
+        Label {
+            word-break: break-all;
+        }
+    </style>
+}
+@if (null != Model)
+{
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="head_detail border_bnone">
+                <h5>出库单详情</h5>
+            </div>
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td width="15%" class="nameright border_rnone">出库单编号:</td>
+                            <td width="35%">@Model.SysNo</td>
+                            <td width="15%" class="nameright border_rnone">仓库:</td>
+                            <td width="35%" class="border_rnone">@WhWarehouseBo.Instance.GetWarehouseName(Model.WarehouseSysNo)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">来源单据类型:</td>
+                            <td>@((WarehouseStatus.出库单来源)Model.SourceType)</td>
+                            <td class="nameright border_rnone">来源单编号:</td>
+                            <td class="border_rnone">@Model.SourceSysNO</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">创建人:</td>
+                            <td>@SyUserBo.Instance.GetUserName(Model.CreatedBy)</td>
+                            <td class="nameright border_rnone">创建时间:</td>
+                            <td class="border_rnone">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">最后更新人:</td>
+                            <td>@SyUserBo.Instance.GetUserName(Model.LastUpdateBy)</td>
+                            <td class="nameright border_rnone">最后更新时间:</td>
+                            <td class="border_rnone">@Model.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">状态:</td>
+                            <td>@ViewBag.Status</td>
+                            <td class="nameright border_rnone">备注:</td>
+                            <td class="border_rnone" style="word-break: break-all; word-wrap: break-word;">
+                                @if (!string.IsNullOrWhiteSpace(Model.Remarks))
+                                {
+                                    @Model.Remarks
+                                }
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="head_detail m10_t">
+                <h5>出库单明细</h5>
+            </div>
+            <div class="boxs_detail m10_t">
+                <div id="paging">
+                </div>
+            </div>
+        </div>
+        <input id="hid_sysno" type="hidden" value="@Model.SysNo" />
+    </div>
+
+}
+else
+{
+    <div class="align_l p10_l bgr_eb">未找到出库单,请重试！</div>
+}

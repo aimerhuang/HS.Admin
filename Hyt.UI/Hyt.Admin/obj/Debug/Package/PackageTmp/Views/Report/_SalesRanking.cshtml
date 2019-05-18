@@ -1,0 +1,45 @@
+﻿@model System.Collections.Generic.List<Hyt.Model.RptSalesRanking>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone" id="tableResult">
+      <thead>
+          <tr>
+              <th width="53">序号</th>
+              <th width="120">商品分类</th>
+              <th width="110">商品编号</th>
+              <th class="align_l p10_l">商品名称</th>
+              <th width="76">销售数量</th>
+              <th width="116">销售金额</th>
+          </tr>
+      </thead>
+      <tbody>
+          @{
+              if (!Model.Any())
+              {
+                  <tr>
+                      <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                  </tr>
+              }
+              var i = 0;
+              foreach (var item in Model)
+              {
+
+                  if (i%2 == 0)
+                  {
+                      @Html.Raw("<tr>")
+                  }
+                  else
+                  {
+                      @Html.Raw("<tr class='stag_color'>")
+                  }
+                  <td class="blue">@item.RowNumber</td>
+                  <td class="align_l"><span class="p10_lr">@item.ProductCategoryName</span></td>
+                  <td>@item.ProductSysNo</td>
+                  <td class="align_l"><span class="p10_lr">@item.ProductName</span></td>
+                  <td>@item.SalesQuantity</td>
+                  <td class="red p10_r nowrap" align="right">@MvcHtmlString.Create(Hyt.Util.FormatUtil.FormatCurrency(item.SalesAmount,2))</td>
+                  @Html.Raw("</tr>")
+                  i++;
+              }
+          }
+      </tbody>
+  </table>

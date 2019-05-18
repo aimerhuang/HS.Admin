@@ -1,0 +1,31 @@
+﻿@using Hyt.Model
+@using Hyt.Util
+@model IList<CBPdProductAtttributeReadRelation>
+
+@foreach (var item in Model){
+<div class="tit_con attributebox" title="@item.AttributeGroupName">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        <input type="hidden" class="AttributeGroupSysNo" value="@item.AttributeGroupSysNo" />
+                        <button class="btn btn_blue btn_ht28 m10_r btnDeleteGroup" title="删除分组"><span class="icon_trash icon_white"></span><span class="m5_l">删除分组</span></button><button class="btn btn_ht28 m10_r btnGroupUp" title="上移"><span class="icon_arrow_up"></span><span class="m5_l">上移</span></button><button class="btn btn_ht28 m10_r btnGroupDown" title="下移"><span class="icon_arrow_down"></span><span class="m5_l">下移</span></button></td>
+                </tr>
+                 @{Html.RenderPartial("_GenerateProductAttribute", item.ProductAtttributeList); }
+                <tr>
+                    <td colspan="4" class="p0">
+                        <a href="javascript:void(0);" class="sb_add" title="添加属性"></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+</div>
+}
+@if(Model.Count > 0){
+<script type="text/javascript">
+    $(function () {
+        $(".attributebox").Accordion();
+        AttributeFormValid();
+    });
+</script>
+}

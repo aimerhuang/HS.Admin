@@ -1,0 +1,278 @@
+﻿@model Hyt.Model.Transfer.CBLgDeliveryUserCredit
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改配送员信用额度";
+    if (Model == null) { return; }
+}
+@section HeadJs{
+    <script src="~/Theme/scripts/jquery.validate.min.js"></script>
+}
+<div class="caseout">
+    <form id="form1" action="" method="post">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 10%" class="nameright border_rnone">仓库：</td>
+                            <td style="width: 40%" class="border_right1">
+                                <input type="hidden" id="WarehouseSysNo" name="WarehouseSysNo" value="@Model.WarehouseSysNo" />
+                                @Model.WareHouseName
+                            </td>
+                            <td style="width: 10%" class="nameright border_rnone">配送员：</td>
+                            <td style="width: 40%" class="">
+                                <input type="hidden" id="DeliveryUserSysNo" name="DeliveryUserSysNo" value="@Model.DeliveryUserSysNo" />
+                                @Model.UserName</td>
+
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>是否允许配送</td>
+                            <td class="border_right1">
+                                <select id="IsAllowDelivery" name="IsAllowDelivery">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许配送)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forIsAllowDelivery" class="prompt m10_l">是否允许配送</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>是否允许借货</td>
+                            <td>
+                                <select id="IsAllowBorrow" name="IsAllowBorrow">
+                                    @{
+                                        foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送员是否允许借货)))
+                                        {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                        }
+                                    }
+                                </select>
+                                <span id="forIsAllowBorrow" class="prompt m10_l">是否允许借货</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">配送信用额度</td>
+                            <td class="border_right1">
+                                <input type="text" id="DeliveryCredit" name="DeliveryCredit" class="disabled" readonly="readonly" value="@Model.DeliveryCredit">
+                            </td>
+                            <td class="nameright border_rnone">借货信用额度</td>
+                            <td>
+                                <input type="text" id="BorrowingCredit" name="BorrowingCredit" class="disabled" readonly="readonly" value="@Model.BorrowingCredit">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">配送可用额度</td>
+                            <td class="border_right1">
+                                <input type="text" id="RemainingDeliveryCredit" name="RemainingDeliveryCredit" class="disabled" readonly="readonly" value="@Model.RemainingDeliveryCredit">
+                            </td>
+
+                            <td class="nameright border_rnone">借货可用额度</td>
+                            <td>
+                                <input type="text" id="RemainingBorrowingCredit" name="RemainingBorrowingCredit" class="disabled"  readonly="readonly" value="@Model.RemainingBorrowingCredit">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>增减配送额度</td>
+                            <td class="border_right1">
+                                <input type="text" id="addDeliveryCredit" name="addDeliveryCredit" onchange="DeliveryCreditChange(this.value)" value="0" maxlength="10">
+                                <span id="foraddDeliveryCredit" class="prompt m10_l">数字-999999到999999</span>
+                            </td>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>增减借货额度</td>
+                            <td>
+                                <input type="text" id="addBorrowingCredit" name="addBorrowingCredit" onchange="BorrowingCreditCreditChange(this.value)" value="0" maxlength="10">
+                                <span id="foraddBorrowingCredit" class="prompt m10_l">数字-999999到999999</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="border_right1 " style="padding-left: 18px; color: green" colspan="2">说明：输入正数表示增加配送信用额度；
+              输入负数表示 减少配送信用额度；</td>
+                            <td colspan="2" style="padding-left: 18px; color: green" class="p10_l">说明：输入正数表示增加借货信用额度；
+              输入负数表示 减少借货信用额度；</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </form>
+
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //设置选择项
+        window.onload = function () {
+            $("#IsAllowDelivery").find("option[value=@Model.IsAllowDelivery]").attr("selected", "true");
+            $("#IsAllowBorrow").find("option[value=@Model.IsAllowBorrow]").attr("selected", "true");
+        };
+        //信用额度改变
+        function DeliveryCreditChange(addvalue) {
+            if (isNaN(parseFloat(addvalue)))
+                return false;
+            var rvalue = parseFloat("@Model.RemainingDeliveryCredit") + parseFloat(addvalue);
+            if (rvalue < 0) {
+                //UI.Alert({ content: "不能透支，信用可用额度不能为负数" });
+                //$('#foraddDeliveryCredit').attr('class', 'error m10_l');
+                //$('#foraddDeliveryCredit').val("透支过多,超过配送可用额度");
+                $("#addDeliveryCredit").val("0");
+                $("#DeliveryCredit").val(@Model.DeliveryCredit);
+                $("#RemainingDeliveryCredit").val(@Model.RemainingDeliveryCredit);
+                return false;
+            }
+            $("#RemainingDeliveryCredit").val(rvalue);
+
+            var dvalue = parseFloat("@Model.DeliveryCredit") + parseFloat(addvalue);
+            $("#DeliveryCredit").val(dvalue);
+        }
+
+        //借货额度改变
+
+        function BorrowingCreditCreditChange(addvalue) {
+            if (isNaN(parseFloat(addvalue)))
+                return false;
+            var rvalue = parseFloat("@Model.RemainingBorrowingCredit") + parseFloat(addvalue);
+            if (rvalue < 0) {
+                //UI.Alert({ content: "不能透支，借货可用额度不能为负数" });
+                //$('#foraddBorrowingCredit').attr('class', 'error m10_l');
+                //$('#foraddBorrowingCredit').val("透支过多,超过借货可用额度");
+                $("#addBorrowingCredit").val("0");
+                $("#BorrowingCredit").val(@Model.BorrowingCredit);
+                $("#RemainingBorrowingCredit").val(@Model.RemainingBorrowingCredit);
+                return false;
+            }
+            $("#RemainingBorrowingCredit").val(rvalue);
+
+            var dvalue = parseFloat("@Model.BorrowingCredit") + parseFloat(addvalue);
+            $("#BorrowingCredit").val(dvalue);
+        }
+
+        //验证 
+        jQuery.validator.addMethod("sumtwo2", function (value, element, params) {
+            var result;
+            if (params == "#RemainingDeliveryCredit") { //配送
+                result = parseFloat("@Model.RemainingDeliveryCredit") + parseFloat(value) >= 0;
+                if (!result) {
+                    $("#foraddDeliveryCredit").html("透支过多,超过配送可用额度");
+                } else {
+                    $("#foraddDeliveryCredit").html("数字-999999到999999");
+                }
+            } else {//借货
+                result = parseFloat("@Model.RemainingBorrowingCredit") + parseFloat(value) >= 0;
+                if (!result) {
+                    $("#foraddBorrowingCredit").html("透支过多,超过借货可用额度");
+                } else {
+                    $("#foraddBorrowingCredit").html("数字-999999到999999");
+                }
+            }
+            return result;
+        });
+        $().ready(function () {
+
+            $("#form1").validate({
+                rules: {
+                    // 选择框
+                    IsAllowDelivery: {
+                        required: true,
+                    },
+                    IsAllowBorrow: {
+                        required: true,
+                    },
+                    addDeliveryCredit: {
+                        required: true,
+                        number: true,
+                        range: [-999999, 999999],
+                        sumtwo2: "#RemainingDeliveryCredit"
+                    },
+                    addBorrowingCredit: {
+                        required: true,
+                        number: true,
+                        range: [-999999, 999999],
+                        sumtwo2: "#RemainingBorrowingCredit",
+                    },
+                },
+                //messages: {
+                //    addDeliveryCredit: {
+                //        sumtwo: "透支过多,超过配送可用额度"
+                //    },
+                //    addBorrowingCredit: {
+                //        sumtwo: "透支过多,超过借货可用额度"
+                //    },
+                //},
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        (function () {
+            var opener = art.dialog.opener, // 父页面window对象
+                api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('修改配送员信用')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function (win) {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定要修改吗？",
+                                    ok: function () {
+                                        var model = getModel();
+                                        $.ajax({
+                                            url: "@Url.Action("LgDeliveryUserCreditUpdate")",
+                                            data: JSON.stringify(model),
+                                            contentType: 'application/json',
+                                            type: "post",
+                                            success: function (ret) {
+                                                if (ret) {
+                                                    UI.DialogOpener().ExecSuccess("修改配送员信用成功");
+                                                    UI.Dialog.close();
+                                                } else {
+                                                    UI.Alert({ content: "修改配送员信用失败" });
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.Alert({ content: "操作出错！" });
+                                            }
+                                        });
+                                    }
+                                });
+
+
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '关闭'
+                    }
+                );
+            function getModel() {
+                var model = {};
+                model.SysNo = $("#SysNo").val();
+                model.WarehouseSysNo = $("#WarehouseSysNo").val();
+                model.DeliveryUserSysNo = $("#DeliveryUserSysNo").val();
+                model.DeliveryCredit = $("#DeliveryCredit").val();
+                model.RemainingDeliveryCredit = $("#RemainingDeliveryCredit").val();
+                model.BorrowingCredit = $("#BorrowingCredit").val();
+                model.RemainingBorrowingCredit = $("#RemainingBorrowingCredit").val();
+                model.IsAllowDelivery = $("#IsAllowDelivery").val();
+                model.IsAllowBorrow = $("#IsAllowBorrow").val();
+                model.addDeliveryCredit = $("#addDeliveryCredit").val();
+                model.addBorrowingCredit = $("#addBorrowingCredit").val();
+
+                return model;
+            }
+        })();
+
+    </script>
+}

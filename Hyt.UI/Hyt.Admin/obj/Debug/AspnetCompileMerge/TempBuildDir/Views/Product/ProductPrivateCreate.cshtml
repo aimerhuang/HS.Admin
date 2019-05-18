@@ -1,0 +1,152 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.PdProductPrivateList
+
+@{
+    ViewBag.Title = "定制产品";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    bool CanEdit = true;
+}
+@section HeadCss{
+
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type='text/javascript' src='/Theme/scripts/jquery.min.js'></script>
+    <script type='text/javascrip' src='/Theme/scripts/common.yui.js'>
+    </script>
+    <script type='text/javascript' src='/Theme/Plugins/Dialog/Dialog.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/UI.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/Utils.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/DAO.yui.js'></script>
+
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>定制产品</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <div id="divEdit" class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <input type="hidden" id="mSysNo" value="@Model.SysNo" />
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                        <tbody>
+                            <tr>
+                                <td width="180" class="nameright">品牌：</td>
+                                <td>
+                                    @Model.BrandName
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright">产品描述：</td>
+                                <td>
+                                    @Model.ProductDesc
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright">图片：</td>
+                                <td>
+                                    <img id="ProductImage"  width="140" height="140" src="@Model.ProductImage"></img>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright">备注：</td>
+                                <td>
+                                    @Model.ProductRemark
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright">联系方式：</td>
+                                <td>
+                                    @Model.ContactWay
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright">处理意见：</td>
+                                <td>
+                                    <textarea  id="AuditOpinion" cols="1" rows="3" style="width: 450px" maxlength="200">@Model.AuditOpinion</textarea>                                 
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="pagination align_c clearfix">
+                @if (CanEdit && (Model.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.定制商品状态.未处理 || Model.Status == 0))
+                { 
+                    <button id="btnAudit" class="btn btn_blue btn_ht30 m10_r" type="submit">
+                        <span class="icon_save icon_white"></span>
+                        <span>处理</span>
+                    </button>
+                    <button id="btnCancel" class="btn btn_red btn_ht30 m10_r" type="button">
+                        <span class="icon_white icon_trash"></span>
+                        <span>作废</span>
+                    </button>                    
+                }
+                @if (CanEdit && Model.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.定制商品状态.已处理 && AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.PD1006503))
+                {
+                    <button id="btnCancel" class="btn btn_red btn_ht30 m10_r" type="button">
+                        <span class="icon_white icon_trash"></span>
+                        <span>作废</span>
+                    </button>    
+                }
+                &nbsp;
+            </div>
+        </div>
+    </div>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        $(function () {
+            //审核
+            $("#btnAudit").click(function () {
+                UI.Confirm({
+                    content: "确认审核通过?",
+                    ok: function () {
+                        $.post('/Product/AuditProductPrivate', { id: $("#mSysNo").val(), AuditOpinion: $("#AuditOpinion").val() }, function (r) {
+                            if (r.Status) {
+                                UI.CloseTab(null, "/Product/ProductPrivateList/", null, true);
+                                Utils.alert("提交成功！", null, "succeed");
+
+                            }
+                            else {
+                                UI.Alert({
+                                    content: r.Message
+
+                                });
+                            }
+                        });
+                    },
+                    cancel: true
+                });
+            });
+            //作废
+            $("#btnCancel").click(function () {
+                UI.Confirm({
+                    content: "确认作废?",
+                    ok: function () {
+                        $.post('/Product/CancelProductPrivate', { id: $("#mSysNo").val(), AuditOpinion: $("#AuditOpinion").val() }, function (r) {
+                            if (r.Status) {
+                                $("#btnCancel").hide();
+                                UI.CloseTab(null, "/Product/ProductPrivateList/", null, true);
+                                Utils.alert("提交成功！", null, "succeed");
+                            }
+                            else {
+                                UI.Alert({
+                                    content: r.Message
+
+                                });
+                            }
+                        });
+                    },
+                    cancel: true
+                });
+            });
+
+        });
+    </script>
+ }

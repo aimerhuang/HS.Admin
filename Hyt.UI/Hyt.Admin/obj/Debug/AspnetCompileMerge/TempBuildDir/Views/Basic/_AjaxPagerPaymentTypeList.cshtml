@@ -1,0 +1,145 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model IEnumerable<Hyt.Model.Transfer.CBBsPaymentType>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.BS1003301, ".BS1003301") 
+    @Html.PrivilegeControl(PrivilegeCode.BS1003701, ".BS1003701") 
+}
+<table id="item_list" width="100%" cellspacing="0" cellpadding="0" border="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th class="align_l p10_lr">支付名称</th>
+            <th width="72">网上支付</th>
+            <th width="72">前台可见</th>
+            <th width="72">支付类型</th>
+            <th width="72">需要卡号</th>
+            <th width="72">显示顺序</th>
+            <th width="52">状态</th>
+            <th width="120">创建时间</th>
+            <th width="148">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            foreach (var item in Model)
+            {
+  
+            <tr>
+                <td class="blue align_l p10_lr"><a href="javascript:;" name="detail" data-id="@item.SysNo">@item.PaymentName</a></td>
+                <td>@((BasicStatus.支付方式是否网上支付)item.IsOnlinePay)</td>
+                <td>@((BasicStatus.支付方式前台是否可见)item.IsOnlineVisible)</td>
+                <td>@((BasicStatus.支付方式类型)item.PaymentType)</td>
+                <td>@((BasicStatus.是否需要卡号)item.RequiredCardNumber)</td>
+                <td>@item.DisplayOrder</td>
+                <td>@((BasicStatus.支付方式状态)item.Status)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>
+                    @if (item.Status == (int)BasicStatus.支付方式状态.启用)
+                    {
+                        <button title="禁用" name="disabled" data-id="@item.SysNo" class="btn btn_ht26 m10_r btn_blue BS1003701" type="button"><span class="icon_ban_circle icon_white"></span><span class="m5_l">禁用</span></button><button title="修改" class="btn btn_ht26  btn_blue BS1003301" type="button" data-id="@item.SysNo" name="edit"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    }
+                    else
+                    {
+                        <button title="启用" name="enable" data-id="@item.SysNo" class="btn btn_ht26 m10_r btn_blue BS1003701" type="button"><span class="icon_check icon_white"></span><span class="m5_l">启用</span></button><button title="修改" class="btn btn_ht26 btn_blue BS1003301" type="button" data-id="@item.SysNo" name="edit"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="10" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+        $("#item_list").delegate("button[name='edit']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                var url = "/Basic/PaymentTypeEdit/"+id;
+                UI.DialogOpen(url, {
+                    title: '修改支付方式',
+                    width: 650,
+                    height: 284,
+                    close: function() {
+                    },
+                    init: function () {
+                        this.button({
+                            name: '确认',
+                            callback: function () {
+                                var iframe = this.iframe.contentWindow;
+                                if (!iframe.document.body) {
+                                    UI.Alert('页面还没加载完毕呢');
+                                    return false;
+                                };
+                                iframe.submitPaymentType();
+                                return false;
+                            }, focus: true
+                        }, {
+                            name: "取消"
+                        });
+                    }
+                }, false);
+            }
+        });
+        $("#item_list").delegate("a[name='detail']", "click", function () {
+            var id = $(this).attr("data-id");
+            var url = '/Basic/PaymentTypeDetail/' + id;
+            UI.DialogOpen(url, {
+                title: '支付方式查看',
+                width: 585,
+                height: 226,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+        $("#item_list").delegate("button[name='disabled']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                PaymentTypeStatusChange(id, @((int)BasicStatus.支付方式状态.禁用), '确定要禁用该支付方式吗？');
+        }
+        });
+        $("#item_list").delegate("button[name='enable']", 'click', function () {
+            var id = $(this).attr("data-id");
+            if (id && id > 0) {
+                PaymentTypeStatusChange(id, @((int)BasicStatus.支付方式状态.启用), '确定要启用该支付方式吗？');
+            }
+        });
+    });
+
+    function PaymentTypeStatusChange(id, status, content) {
+        var data = {};
+        data.id = id;
+        data.status = status;
+        UI.Confirm({
+            content: content,
+            ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "@Url.Action("PaymentTypeStatusChange", "Basic")",
+                    data:data,
+                    chche: false,
+                    success: function (ret) {
+                        if (ret.IsLogout) { eval(data.Callback);return; }
+                        if (ret.StatusCode == 0) {
+                            //UI.Prompt.Success('操作成功！');
+                            UI.tips.tip_alert('tips_success', '操作成功');
+                            doSearch();
+                        } else {
+                            UI.Alert({ content: ret.Message });
+                        }
+                    },
+                    error: function () {
+                        UI.Alert({ content: '操作出错,请稍候重试!' });
+                    }
+                });
+            }
+        });
+    }
+</script>

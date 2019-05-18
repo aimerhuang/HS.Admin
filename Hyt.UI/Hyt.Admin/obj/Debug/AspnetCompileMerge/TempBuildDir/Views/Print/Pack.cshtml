@@ -1,0 +1,175 @@
+﻿@{
+    Layout = "~/Views/Shared/_Print.cshtml";
+    ViewBag.Title = "快递包裹单打印";
+    var modelTemplate = (IList<Hyt.Model.Transfer.CBLgDeliveryPrintTemplate>)ViewBag.modelTemplate;
+}
+@model Hyt.Model.Transfer.PrtPack
+
+@functions {
+    private string GetTrimName(string field)
+    {
+        if (!string.IsNullOrEmpty(field))
+        {
+            return field.Trim().Replace("\r", "").Replace("\n", "");
+        }
+        return "";
+    }
+}
+
+@if (ViewBag.package == "已包裹")
+{
+    <h1>已包裹</h1>
+
+}
+else
+{
+    <!--工具条开始-->
+    <div class="boxs_tool">
+
+        <!--搜索开始-->
+        <div class="right_tool clearfix">
+
+            <span class="veralign_t fl m10_l">@(ViewBag.DeliveryTypeName)</span>
+            <div class="fl m10_l">
+                <select class="select_ht28" id="DeliveryPrintTemplateKV" name="DeliveryPrintTemplateKV">
+                    @if (modelTemplate != null && modelTemplate.Count > 0)
+                    {
+                        foreach (var item in modelTemplate)
+                        {
+                            <option value='@item.SysNo'>@item.Name</option>
+                        }
+                    }
+                    else
+                    {
+                        <option value='0'>无模板</option>
+                    }
+                </select>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn_ht26 m5_r" onclick="myPreview()" type="button"><span class="m5_l">打印预览</span></button>
+            <button class="btn btn_ht26 m5_r" onclick="mySetup()" type="button"><span class="m5_l">打印维护</span></button>
+            @*  <button class="btn btn_ht26 m5_r" onclick="myDesign()" type="button"><span class="m5_l">打印设计</span></button>*@
+            <button class="btn btn_ht26 m5_r" onclick="myPrint()" type="button"><span class="m5_l">直接打印</span></button>
+            <button class="btn btn_ht26 m5_r" onclick="myPrintA()" type="button"><span class="m5_l">选择打印机</span></button>
+        </div>
+    </div>
+
+
+
+    @section FooterJs
+{
+        <script type="text/javascript">
+            var LODOP; //声明为全局变量
+            var initload = true;
+            var template;
+            $(function () {
+                myPreviewLoad();
+                $("#DeliveryPrintTemplateKV").change(function () {
+                    initload = false;
+                    LoadTemplate();
+                });
+            });
+            //直接加载打印预览
+            function myPreviewLoad() {
+                CreatePrintPage();
+                LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+                LODOP.SET_SHOW_MODE("HIDE_QBUTTIN_PREVIEW", 1);
+                LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+                LODOP.PREVIEW();
+            }
+            function LoadTemplate() {
+                var sysno = $("#DeliveryPrintTemplateKV").val();
+                $.get('@Url.Action("GetDeliveryPrintTemplate")', { templateSysNo: sysno, replace: false }, function (data) {
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    template = data.Template;
+                    CreatePrintPage();
+                    LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+                    LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+                    LODOP.PREVIEW();
+                });
+            }
+            //直接打印
+            function myPrint() {
+                CreatePrintPage();
+                var isprint = LODOP.PRINT();
+                if (isprint) { UI.Alert({ content: "", icon: "succeed" }); }
+                UI.tips.tip_alert("tips_shrot tips_success", "打印成功！");
+                ajax();
+            }
+            //选择打印机打印
+            function myPrintA() {
+                CreatePrintPage();
+                LODOP.PRINTA();
+            }
+            //打印预览
+            function myPreview() {
+
+                CreatePrintPage();
+                LODOP.PREVIEW();
+            }
+            //打印维护
+            function mySetup() {
+                CreatePrintPage();
+                LODOP.PRINT_SETUP();
+               
+            }
+            //打印设计
+            function myDesign() {
+                CreatePrintPage();
+                LODOP.PRINT_DESIGN();
+            }
+            function EL() {
+                CreatePrintPage();
+                var isprint = LODOP.PRINT();
+                if (isprint) {
+                    UI.Alert({ content: " ", icon: "succeed" }
+                    );
+                }
+                UI.tips.tip_alert("tips_shrot tips_success", "打印成功！");
+                ajax();
+            }
+            function ajax() {
+
+                @*$.ajax({
+                    url: "@Url.Action("AddExpressList", "Print")",
+                    data: { DsOrderSysNo: '@Model.OrderSysNo', SysNo: '@Model.SysNo' },
+                    success: function (data) {
+                        //if (data == '1') {
+                        //    UI.tips.tip_alert("tips_shrot tips_success", "成功！！！");
+                        //} else {
+                        //    UI.tips.tip_alert('tips_warning', '网络异常！！！', true);
+                        //}
+                    }, ERROR: function () {
+                        UI.tips.tip_alert('tips_warning', '网络异常！！！', true);
+                    }
+                });*@
+            }
+            function CreatePrintPage() {
+                var fromName = '@GetTrimName(Model.FromName)';
+                var fromTel = '@GetTrimName(Model.FromTel)';
+                var fromAddress = '@GetTrimName(Model.FromAddress)';
+                var fromCity = '@GetTrimName(Model.FromCity)';
+                var toName = '@GetTrimName(Model.ToName)';
+                var toTel = '@GetTrimName(Model.ToTel)';
+                var toAddress = '@GetTrimName(Model.ToAddress)';
+                var toCity = '@GetTrimName(Model.ToCity)';
+                var toMobile = '@GetTrimName(Model.ToMobile)';
+                var stockOutSysNo = '@Model.SysNo';
+                var printTime = '@DateTime.Now.ToString("yyyy-MM-dd")';
+                var electronicName = '123';
+                var orderSysNo = '@Model.OrderSysNo';
+                var dsOrderSysNo = '@GetTrimName(Model.DsOrderSysNo)';
+                LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+                if (initload) {
+                    @Html.Raw(ViewBag.Template);
+                } else {
+                    eval(template);
+                }
+            }
+        </script>
+    }
+}

@@ -1,0 +1,96 @@
+﻿@{
+    ViewBag.Title = "GetPosManageReconciliation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>门店对账单信息</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--功能按钮开始-->
+                <div class="right_tool">
+                    @*<input type="date" id="ipt_SearchData" value="@((ViewBag.DateTime))" /> <button onclick="SearchData()">搜索</button>*@
+                    <div class="date_btn120 fl m10_l">
+                        <input type="text" value="@((ViewBag.DateTime))" class="input_ht26" id="ipt_SearchData" name="ipt_SearchData" querypara="ipt_SearchData" onfocus="this.blur()" onclick="UI.Date({ el: 'ipt_SearchData' })">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'ipt_SearchData' })" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl" title="查询" id="JS_gaoji1" type="button" onclick="SearchData()"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+                </div>
+            </div>
+            <div id="paging" class="boxs_listtabel">
+                <table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            <th class="align_l p10_lr">经销商</th>
+                            @*<th>收银机</th>*@
+                            <th>销售数量</th>
+                            <th>原始金额</th>
+                            <th>积分抵扣金额</th>
+                            <th>优惠金额</th>
+                            <th>代金券金额</th>
+                            <th>实收金额</th>
+                            <th>退货数量</th>
+                            <th>退货金额</th>
+                            <th>银行卡金额</th>
+                            <th>支付宝金额</th>
+                            <th>微信金额</th>
+                            <th>现金金额</th>
+                            <th>总盈亏额</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            string dealerName = "";
+                            foreach(Hyt.Model.Pos.PosCheckValueMod mod in ViewBag.ModList as List<Hyt.Model.Pos.PosCheckValueMod>)
+                            {
+                                @*if(dealerName!=mod.DealerName)
+                                {
+                                    dealerName = mod.DealerName;
+                                    <tr>
+                                        <td colspan="12" align="left" style="padding:5px;font-weight:bold ">
+                                            @dealerName
+                                        </td>
+                                    </tr>
+                                }*@
+                                <tr>
+                                    <td>@mod.DealerName</td>
+                                    @*<td>@mod.PosName</td>*@
+                                    <td>@mod.PosOrderNum</td>
+                                    <td>@mod.posOrginTotalValue</td>
+                                    <td>@mod.PointMoney</td>
+                                    <td>@mod.PosDisValue</td>
+                                    <td>@mod.KimsVolume</td>
+                                    <td>@mod.PosTotalValue</td>
+                                    <td>@mod.PosRetOrderNum</td>
+                                    <td>@mod.PosRetTotalValue</td>
+                                    @*<td>@mod.NoCash</td>*@
+                                    <td>@mod.BankValue</td>
+                                    <td>@mod.AliValue</td>
+                                    <td>@mod.WXValue</td>
+                                    <td>@mod.Cash</td>
+                                    <td style="@(Convert.ToDecimal(mod.PosSellValue) > 0 ? "color:red" : Convert.ToDecimal(mod.PosSellValue) < 0 ? "color:green" : "")">
+                                        @(Convert.ToDecimal(mod.PosSellValue) > 0 ? "+" : Convert.ToDecimal(mod.PosSellValue) < 0 ? "-" : "")@mod.PosSellValue
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+<script type="text/javascript">
+    function SearchData()
+    {
+        var date = $("#ipt_SearchData").val();
+        window.location.href = "/DsPosManage/GetPosManageReconciliation?dateTime=" + date;
+    }
+</script>

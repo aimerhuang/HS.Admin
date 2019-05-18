@@ -1,0 +1,39 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.BsPaymentType
+@{
+    ViewBag.Title = "支付方式查看";
+}
+<div class="caseout">
+    <div class="boxs_detail_dispay" id="toLook">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tr>
+                    <td class="nameright border_lnone border_rnone" width="60">支付名称：</td>
+                    <td colspan="3">@Model.PaymentName</td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone border_rnone">网上支付：</td>
+                    <td class="border_right" width="195">@((BasicStatus.支付方式是否网上支付)Model.IsOnlinePay)</td>
+                    <td class="nameright border_rnone" width="60">前台可见：</td>
+                    <td>@((BasicStatus.支付方式前台是否可见)Model.IsOnlineVisible)</td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone border_rnone">支付类型：</td>
+                    <td class="border_right">@((BasicStatus.支付方式类型)Model.PaymentType)</td>
+                    <td class="nameright border_rnone" width="60">需要卡号：</td>
+                    <td>@((BasicStatus.是否需要卡号)Model.RequiredCardNumber)</td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone border_rnone">状态：</td>
+                    <td class="border_right">@((BasicStatus.支付方式状态)Model.Status)</td>
+                    <td class="nameright border_rnone" width="60">显示顺序：</td>
+                    <td>@Model.DisplayOrder</td>
+                </tr>
+                <tr>
+                    <td class="nameright border_lnone border_rnone" valign="top">支付描述：</td>
+                    <td colspan="3">@Model.PaymentDescription</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>

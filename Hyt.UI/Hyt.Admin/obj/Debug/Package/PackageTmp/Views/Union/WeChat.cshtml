@@ -1,0 +1,141 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList
+@{
+    ViewBag.Title = "微信咨询客服回复";
+    @Html.PrivilegeControl(PrivilegeCode.UN1007201, ".UN1007201")
+    @Html.PrivilegeControl(PrivilegeCode.UN1007101, ".UN1007101")
+}
+@section HeadJs{
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //$("#DsDealerName").defaultValue("请输入微信号");
+            //查询录入框点击事件
+            //setDefaultValue();
+            doSearch();
+
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+            });
+
+            $("#WeixinId").keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+            //设置页面默认值
+            //function setDefaultValue() {
+            //    //$("#WeixinId").defaultValue("请输入微信号");
+            //}
+        });
+
+        //查询列表
+        function doSearch() {
+            var condition = null;
+            var searchValue = $("#WeixinId").val();
+            if (searchValue && searchValue != "请输入微信号") {
+                condition = $("#WeixinId").val();
+            }
+            $.get('@Url.Action("WeChat", "Union")',
+                {
+                    weixinId: condition,
+                    startDate: $("#StartTime").val(),
+                    endDate: $("#EndTime").val()
+                },
+                function (data) {
+                
+                    $('#paging').html(data);
+                });
+        }
+        //批量查看
+        function BatchLook() {
+            var items = $("input[name='subCheck']");
+
+            var weixinIds = "";
+            items.each(function () {
+                if ($(this).attr("checked") == "checked") {
+                    weixinIds += $(this).val() + ",";
+                }
+            });
+            weixinIds = weixinIds.substr(0, weixinIds.length - 1);
+           
+            if (weixinIds.length == 0) {
+                UI.Alert({ content: "请先选择！" });
+                return;
+            }
+            $.ajax({
+                url: "@Url.Action("AjaxWeixinQuestionUpdateStatus", "Union")",
+                data: JSON.stringify({ weixinId: weixinIds }),
+                contentType: 'application/json',
+                type: "post",
+                success: function (ret) {
+               
+                    if (ret) {
+                        UI.tips.tip_alert('tips_shrot tips_success', '批量查看成功');
+                        doSearch();
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_wrong', '批量查看失败');
+                    }
+                },
+                error: function () {
+                    UI.Alert({ content: "操作出错！" });
+                }
+            });
+            }
+
+        //查看咨询信息
+        function Look(weixinId) {
+            window.location.href = '@Url.Action("WeChatReply")' + '?weixinId=' + weixinId;
+    @*        var url = '@Url.Action("WeChatReply")' + '?weixinId=' + weixinId;
+            UI.OpenCreatTab('查看咨询信息', url);*@
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>@ViewBag.Title</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl">微信号</span>
+                    <div class="fl m10_l">
+                        <span class="fl">
+                            <input name="" id="WeixinId" class="wd80" placeholder="请输入微信号" type="text" /></span>
+                        <span class="veralign_t fl m10_l">咨询时间</span>
+                        <div class="date_btn120 fl m10_l">
+                            <input type="text" value="" placeholder="起始时间" class="input_ht26" id="StartTime" name="">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'StartTime'})"><span class="icon_calendar"></span></button>
+                        </div>
+                        <span class="veralign_t fl m10_l">到</span>
+                        <div class="date_btn120 fl m10_l">
+                            <input type="text" value="" placeholder="截止时间" class="input_ht26" id="EndTime" name="">
+                            <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndTime',minDate:'#F{$dp.$D(\'StartTime\',{d:0});}'})"><span class="icon_calendar"></span></button>
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="search_btn"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+             
+                    </div>
+
+                </div>
+
+
+                <div>
+                    <button title="批量查看" onclick="BatchLook()" class="btn btn_ht26"><span class="icon icon_tosee"></span><span class="m5_l">批量查看</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

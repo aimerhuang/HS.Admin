@@ -1,0 +1,1213 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "地区信息管理";
+    @Html.PrivilegeControl(PrivilegeCode.BS1001101, ".BS1001101") 
+    @Html.PrivilegeControl(PrivilegeCode.BS1001201, ".BS1001201") 
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all"/>
+    <style type="text/css">
+        .ztree li a.curSelectedNode {
+            width: 95%;
+            *width: 85%;
+            border: solid 1px #ffb951;
+            padding-top: 1px;
+            padding-bottom: 0;
+        }
+
+        #areaCatetoryTree a {
+            width: 95%;
+            border: solid 1px #fff;
+            height: 17px;
+            line-height: 17px;
+        }
+
+            #areaCatetoryTree a.curSelectedNode {
+                border: solid 1px #ffb951;
+            }
+
+        .ztree li a:hover {
+            background-color: #FFE6B0;
+            border: solid 1px #FFE6B0;
+        }
+
+        tr.selected {
+            background-color: #FFE6B0;
+        }
+
+        .ztree li span.button {
+            float: left;
+        }
+
+        #JS_outbox .prompt {
+            background-position: 0 -95px;
+            float: left;
+        }
+
+        #JS_outbox .success {
+            background-position: 0 -16px;
+            float: left;
+        }
+
+        #JS_outbox .error {
+            background-position: 0 -76px;
+            float: left;
+        }
+    </style>
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>  
+
+    <script type="text/javascript">
+		<!--
+    var setting = {
+        view: {
+            addDiyDom: OnAddDiyTreeNodeDom,
+            selectedMulti: false,
+            showTitle: false
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        },
+        callback: {
+            onClick: TreeNodeOnClick
+        }
+    };
+
+    //自定义节点样式
+
+    function OnAddDiyTreeNodeDom(treeId, treeNode) {
+        //的到节点文字部分的容器（a标签）
+        var aObj = $("#" + treeNode.tId + "_a");
+
+        //判断是否有fl样式（左浮动），因为右边需要排按钮，所以要左样式兼容。
+        if (!aObj.children(1).hasClass("fl")) {
+            aObj.children(1).addClass("fl"); //添加浮动效果
+        }
+
+        //格式化数据成新的node的HTML
+        aObj.html(aObj.html() + "<div class='treetool BS1001201' style='visibility:hidden'><span title='编辑' class='icon icon_pencil icon_gray' style='visibility:hidden'></span><span  title='设为无效' class='icon icon_ban_circle icon_gray'></span></div>");
+        if (treeNode.name.length > 15) {
+            aObj.attr("title", treeNode.name);
+            treeNode.name = treeNode.name.substr(0, 15) + "...";
+            var zTree = $.fn.zTree.getZTreeObj("areaCatetoryTree");
+            zTree.updateNode(treeNode);
+        }
+        //为按钮设置事件
+        $(".treetool .icon_pencil", aObj).bind("click", editTreeNode); //点击编辑节点按钮（笔icon）
+
+        //状态图标按钮事件
+        $(".treetool .icon_ban_circle", aObj).bind("click", function () {
+
+            var that = this;
+
+            //通过向上追溯的到当前节点的Id用着个ID来取得当前节点的Json数据
+            var node = myZTree.getNodeByTId("#" + $(that).parent().parent().parent().attr("id"));
+
+            //判断父级状态，如果是无效将不执行操作
+            if (node.getParentNode() != null) {
+                if (treeNode.getParentNode().status == 0) {
+
+                    UI.Alert({
+                        content: '不能执行该操作，上级节点为无效状态！！！',
+                        callback: function () {
+                        },
+                        width: '200px'
+                    });
+
+                    return false;
+                }
+            }
+
+            //获取节点名称拼接提示字符串
+            // var title = node.name;
+            var title = ($(that).hasClass("icon_ban_circle") ? "[<span class='red'>设为无效</span>]" : "[<span class='green'>设为有效</span>]");
+
+            //提示用户
+            UI.Confirm({
+                content: '您是否确认将' + node.name + title + '？',
+                ok: function () {
+                    disabledNode(that);
+                },
+                cancel: function () {
+                    return true;
+                },
+                width: '200px'
+            });
+            return false;
+        });
+
+        //当前上滑过样式
+        //鼠标进入是显示操作按钮
+        aObj.mouseenter(function () {
+            if ($(this).hasClass("curSelectedNode"))
+                return true;
+            $(this).children("div").css("visibility", "visible");
+            //省市不允许修改           
+            if ($(this).hasClass("level2"))
+                $(this).children("div").children(".icon_pencil").css("visibility", "visible");
+            return true;
+        });
+
+        //鼠标移除时隐藏操作按钮
+        aObj.mouseleave(function () {
+            if ($(this).hasClass("curSelectedNode"))
+                return true;
+            $(this).children("div").css("visibility", "hidden");
+            //省市不允许修改
+            if ($(this).hasClass("level2"))
+                $(this).children("div").children(".icon_pencil").css("visibility", "hidden");
+            return true;
+        });
+
+
+        var parentNode = treeNode.getParentNode(); //父节点
+        //如果文字有ft_lt样式表示父节点是禁用状态
+        if (parentNode) {
+            if ($("#" + parentNode.tId).children("a").children("span").hasClass("ft_lt"))
+                treeNode.status = 0;
+            if ($("#" + parentNode.tId).children("a").children("span").hasClass("icon_eye_open")) {
+                treeNode.isOnlien = 0;
+            }
+        }
+
+        //如果当行状态是禁用状态就切换可用样式
+        if (treeNode.status == 0) {
+            ChanageTreeNodeStatus($(".treetool .icon_ban_circle", aObj), false); //切换状态
+        }
+    }
+
+
+    function disabledNode(obj) {
+
+        //去顶所以的下级节点的span标签
+        var enabled = true;
+        var treeNode = myZTree.getNodeByTId($(obj).parent().parent().parent().attr("id"));
+        var sysNo = treeNode.id;
+
+        //如果样式是“icon_ban_circle”表示是要禁用，否则就是启用
+        if ($(obj).hasClass("icon_ban_circle")) {
+            enabled = false;
+            treeNode.status = 0;
+        } else {
+            enabled = true;
+            treeNode.status = 1;
+        }
+
+        $.ajax({
+            url: '@Url.Action("ChangeAreaStatus", "Basic")',
+            data: { sysNo: sysNo, enabled: enabled },
+            success: function (data) {
+                if (data.IsLogout) {
+                    eval(data.Callback);
+                    return;
+                }
+                if (data == true) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                    ChanageTreeNodeStatus(obj, enabled);
+                    var selectNodes = myZTree.getSelectedNodes();
+                    if (selectNodes.length > 0) {
+                        if (selectNodes[0].id == treeNode.id)
+                            EnableEdit(enabled);
+                    }
+                } else {
+                    UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败！');
+                }
+            }
+        });
+
+
+    }
+
+
+    function ChanageTreeNodeStatus(obj, enabled) {
+
+        //找到按钮
+        var wordSpanOdd = $("a", "#" + $(obj).parent().parent().parent().attr("id")).children("span:odd");
+        var wordSpan;
+        //如果样式是“icon_ban_circle”表示是要禁用，否则就是启用
+        if (!enabled) {
+
+            //禁用时隐藏铅笔样式
+            $(".icon_pencil", wordSpanOdd).hide();
+
+            //设置状态icon
+            wordSpan = $("#" + $(obj).parent().parent().parent().attr("id") + " .icon_ban_circle");
+            wordSpan.removeClass("icon_ban_circle");
+            wordSpan.addClass("icon_ok");
+            wordSpan.attr("title", "设为有效");
+            //显示标题后的状态icon
+            wordSpanOdd.addClass("ft_lt red status");
+            wordSpanOdd.append('<span class="icon_ban_circle"></span>');
+
+        } else {
+
+            //设置状态icon
+            wordSpan = $("#" + $(obj).parent().parent().parent().attr("id") + " .icon_ok");
+            wordSpan.removeClass("icon_ok");
+            wordSpan.addClass("icon_ban_circle");
+            wordSpan.attr("title", "设为无效");
+            //显示编辑按钮
+            $(".icon_pencil", wordSpanOdd).show();
+
+            //隐藏标题后的状态
+            wordSpanOdd.removeClass("ft_lt red status");
+            wordSpanOdd.children(".icon_ban_circle").remove();
+        }
+    }
+
+    //删除节点
+
+    function removeTreeNode(e) {
+        var nodes = myZTree.getSelectedNodes();
+        var treeNode = nodes[0];
+        if (nodes.length == 0) {
+            UI.Alert({
+                content: '请先选择一个节点！！！',
+                callback: function () {
+                },
+                width: '200px'
+            });
+            return;
+        }
+
+        var parentNode = treeNode.getParentNode();
+        myZTree.removeNode(treeNode, false);
+        if (parentNode && parentNode.children.length == 0)
+            $("#" + parentNode.tId + "_ul").remove();
+    }
+
+    //编辑节点
+
+    function editTreeNode() {
+
+        //更具点击按钮找到节点容器（Li标签），然后再获取id来查找Node数据
+        var treeNode = myZTree.getNodeByTId($(this).parent().parent().parent().attr("id"));
+        //检查当前节点是否是禁用，如果是禁用就不能保存
+        if (checkCurrentTreeNodeIsDisabled(treeNode)) {
+            UI.tips.tip_alert('tips_shrot tips_warning', '地区当前状态为[无效],所以不能修改！');
+            return false;
+        }
+        $("#basetitle").html("编辑地区");
+
+
+        if (treeNode == null) {
+            UI.Alert({
+                content: '请先选择一个节点！！！',
+                callback: function () {
+                },
+                width: '200px'
+            });
+            return false;
+        }
+        if (treeNode.id == curSelectId) {
+            EnableEdit(true);
+            return true;
+        }
+
+        isEdit = true;
+        return true;
+
+    }
+
+
+    //点击节点事件
+
+    function TreeNodeOnClick(event, treeId, treeNode) {
+
+        //如果节点编号为-1表示是新增的节点。否则执行选择选择节点事件
+        if (myZTree.getNodeByParam("id", "-1")) {
+
+            //如果当前点击的节点就是这个新增的节点将不做任何操作，否则提示用户接下来的操作
+            if (treeNode.id == -1) {
+                return;
+            } else {
+
+                //询问用户是否要放弃前面选择的节点
+                UI.Confirm({
+                    content: '是否要放弃新添加的区？',
+                    ok: function () {
+
+                        //放弃之前新添加的节点
+                        myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                        removeTreeNode();
+
+                        //清除选择
+                        myZTree.selectNode(treeNode, false);
+                        UI.tips.tip_alert('tips_shrot tips_success', '数据已清除！');
+
+                        //选择新节点
+                        SelectedTreeNode(event, treeId, treeNode);
+                    },
+                    cancel: function () {
+                        myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                    },
+                    width: '200px'
+                });
+            }
+
+        } else {
+            //被2个事件触发，选择在后
+            //点的编辑按钮就不用执行下面的事件,
+            //根据选择的id和保存的sysno是否相等判断是否点击了新的节点
+
+            if ($("#" + treeNode.tId + "_a").attr("title") != $("#txt_AreaName").val()) {
+                SelectedTreeNode(event, treeId, treeNode); //执行选择节点
+            } else {
+                return;
+            }
+        }
+
+    }
+
+    var curSelectId = -1;
+    //是否直接点击的编辑按钮
+    var isEdit = false;
+
+    //执行选择节点事件
+
+    function SelectedTreeNode(event, treeId, treeNode) {
+
+        if (treeNode.id == curSelectId)//两次选择的是同一节点
+        {
+            return;
+        }
+        curSelectId = treeNode.id; //设置当前节点
+
+
+        //获取当前节点
+        var selectNodes = myZTree.getSelectedNodes();
+
+        //如果当前节点不为空则显示后面的编辑按钮
+        if (selectNodes != null && selectNodes.length == 1) {
+            //判断当前选择的LI标签不为空
+            if (myZTree.selectNodeTId != null) {
+                //
+                $("#" + myZTree.selectNodeTId).children("a").children(".treetool").children("span").addClass("icon_gray");
+            }
+
+            $(".treetool").css("visibility", "hidden");
+            $(".treetool .icon_pencil").css("visibility", "hidden");
+            $("#" + selectNodes[0].tId).children("a").children(".treetool").children(".icon_gray").removeClass("icon_gray");
+
+            $(".treetool:first", $("#" + treeNode.tId)).css("visibility", "visible");
+            //if ($("#" + treeNode.tId).hasClass("level2")) 王耀发 2016-2-22 创建
+            $(".treetool:first", $("#" + treeNode.tId)).children(".icon_pencil").css("visibility", "visible");
+
+            myZTree.selectNodeTId = selectNodes[0].tId;
+
+            //如果当前节点为省级，新增区按钮则不可用，否则可用
+            //if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level0") || $("#" + myZTree.selectNodeTId).children("a").hasClass("level1")) {
+            //    $("#addArea").addClass("disabled");
+            //    $("#addArea").attr("disabled", "disabled");
+            //} else {
+            //    $("#addArea").removeClass("disabled");
+            //    $("#addArea").removeAttr("disabled");
+            //}
+
+            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level0"))
+            {
+                $("#addArea").html("新增省");
+            }
+            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level1")) {
+                $("#addArea").html("新增市");
+            }
+            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level2") || $("#" + myZTree.selectNodeTId).children("a").hasClass("level3")) {
+                $("#addArea").html("新增区");
+            }
+        }
+
+        //更具选择的分类节点读取数据库并绑定到右侧数据区域
+        if (selectNodes[0].id > 0) {
+            markObject = $(".sortmanage_fr");
+            $.ajax({
+                url: '@Url.Action("GetArea", "Basic")',
+                data: { sysNo: selectNodes[0].id },
+                success: function (data) {
+
+                    //绑定到表单
+                    $(".sortmanage_fr").JsonBind(data);
+
+                    if (data != null) {
+                        //$("#txt_aprentArea").val(data.CBBsArea2.AreaName);
+                        $("#txt_aprentArea").attr("selAreaSysNo", data.ParentSysNo);
+                    } else {
+                        // $("#txt_aprentArea").val("无");
+                        $("#txt_aprentArea").attr("selAreaSysNo", 0);
+                    }
+
+                }
+            }
+                );
+
+        } else {
+            //清除数据
+            $(".sortmanage_fr").JsonBind(null);
+            $("#txt_aprentArea").val("选择上级区");
+            $("#txt_aprentArea").attr("selAreaSysNo", 0);
+        }
+
+        if (!isEdit) {
+            EnableEdit(false);
+        } else { EnableEdit(true); }
+        isEdit = false;
+    }
+
+    var log, className = "dark";
+
+    //添加根节点
+    var newCount = 1;
+
+    //添加同级节点
+
+    function AddParentTreeNode(e) {
+        //节点的位置是由当前节点的父级节点来决定的，默认添加的节点和当前节点同级
+
+        //获取当前选择节点
+        var nodes = myZTree.getSelectedNodes();
+
+        //获取当前节点部分信息
+        isParent = e.data.isParent;
+        var treeNode = nodes[0];
+
+        //如果当前节点没有就默认添加的是根节点
+        if (treeNode) {
+            //添加一个新节点到分类树,位置就在当前节点同级
+            treeNode = myZTree.addNodes(myZTree.getNodeByParam("id", treeNode.pId, null), { id: -1, pId: treeNode.pId, isParent: isParent, name: "添加的新同级" });
+        } else {
+            //添加一个新节点到分类树的根节点
+            treeNode = myZTree.addNodes(null, { id: -1, pId: 0, isParent: isParent, name: "添加的新同级" });
+        }
+
+        //设置新添加的节点为当前选择节点
+        myZTree.selectNode(treeNode[0], false);
+        //TreeNodeOnClick(null, "", treeNode[0]);
+
+        EnableEdit(true);
+
+        $("#txt_AreaName").val("");
+        $("#txt_AreaCode").val("");
+        $("#hddSysNo").val("-1"); //表示为新增
+    }
+
+    ;
+
+    //添加叶子节点
+
+    function AddLeafTreeNode(e) {
+
+        //当前选择节点
+        var nodes = myZTree.getSelectedNodes();
+        isParent = e.data.isParent;
+
+        //获取当前节点部分信息
+        var treeNode = nodes[0];
+
+        //如果当前节点没有就默认添加的是根节点
+        if (treeNode) {
+            //设置新添加节点的父节点为当前节点
+            var parentNode = treeNode;
+
+            //添加一个新节点到分类树,位置在当前节点下
+            treeNode = myZTree.addNodes(treeNode, { id: -1, pId: treeNode.id, isParent: isParent, name: "添加的新子级" });
+
+            //设置新添加的节点为当前选择节点
+            myZTree.selectNode(treeNode[0], false);
+            // SelectedTreeNode(null, "", treeNode[0]);
+
+            EnableEdit(true);
+
+            $(".sortmanage_fr").JsonBind(null);
+            //初始化编辑区分类初始化数据,默认选择的为当前节点
+            $("#txt_aprentArea").val(parentNode.name);
+
+            $("#txt_aprentArea").attr("selAreaSysNo", parentNode.id);
+            
+
+            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level0")) {
+                $("#arealevel").html("省");
+            }
+            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level1")) {
+                $("#arealevel").html("市");
+            }
+            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level2") || $("#" + myZTree.selectNodeTId).children("a").hasClass("level3")) {
+                $("#arealevel").html("区");
+            }
+
+
+
+        } else {
+            UI.Alert({
+                content: '请选择您要条件到那一个市下面！！！',
+                callback: function () {
+                },
+                width: '200px'
+            });
+        }
+
+    }
+
+
+    //节点上移
+
+    function TreeNodeMoveUp() {
+
+        TreeControlButtonEnabled(false);
+        var nodes = myZTree.getSelectedNodes();
+        var treeNode = nodes[0];
+        if (nodes.length == 0) {
+            UI.Alert({ content: '请先选择一个节点' });
+            return;
+        }
+
+        var prevNode = myZTree.getNodesByParam("tId", $("#" + treeNode.tId).prev().attr("id"));
+        if (prevNode.length == 0)
+            return;
+
+
+        //如果当前节点和他要对换位置的节点还在同一个父节点则进行位置调换操作
+        //否则将视为改变父节操作
+        if (prevNode[0].pId == treeNode.pId) {
+
+            var data = { originalSysNo: prevNode[0].id, objectiveSysNo: treeNode.id };
+
+            $.ajax({
+                url: '@Url.Action("AreaSwapDisplayOrder", "Basic")',
+                data: JSON.stringify(data),
+                dataType: "json",
+                type: "POST",
+                cache: false,
+                contentType: 'application/json; charset=utf-8',
+                success: function (data) {
+                    if (data != null && data.success) {
+                        TableRowMove($("#" + treeNode.tId), true);
+                    } else {
+                        UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + data.msg);
+                    }
+                    TreeControlButtonEnabled(true);
+                },
+                error: function () {
+                    TreeControlButtonEnabled(true);
+                }
+            });
+            }
+            return;
+        }
+
+
+        //节点下移
+
+        function TreeNodeMoveDown(e) {
+            var nodes = myZTree.getSelectedNodes();
+            var treeNode = nodes[0];
+            if (nodes.length == 0) {
+                UI.Alert({ content: "请先选择一个节点" });
+                return;
+            }
+
+            //如果当前节点和他要对换位置的节点还在同一个父节点则进行位置调换操作
+            //否则将视为改变父节操作
+            var nextNode = myZTree.getNodesByParam("tId", $("#" + treeNode.tId).next().attr("id"));
+
+            if (nextNode.length == 0)
+                return;
+
+            if (nextNode[0].pId == treeNode.pId) {
+
+                var data = { originalSysNo: nextNode[0].id, objectiveSysNo: treeNode.id };
+
+                $.ajax({
+                    url: '@Url.Action("AreaSwapDisplayOrder", "Basic")',
+                    data: JSON.stringify(data),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data != null && data.success) {
+                            TableRowMove($("#" + treeNode.tId), false);
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_warning', '操作失败' + data.msg);
+                        }
+                        TreeControlButtonEnabled(true);
+                    },
+                    error: function () {
+                        TreeControlButtonEnabled(true);
+                    }
+                });
+            }
+            return;
+
+        }
+
+        //全部展开
+
+        function TreeExpandAll(obj) {
+            if (myZTree.ExpandAllStatus == false) {
+                $(obj).children("span:last").text("折叠");
+                myZTree.ExpandAllStatus = !myZTree.ExpandAllStatus;
+                myZTree.expandAll(myZTree.ExpandAllStatus);
+            } else {
+                $(obj).children("span:last").text("展开");
+                myZTree.ExpandAllStatus = !myZTree.ExpandAllStatus;
+                myZTree.expandAll(myZTree.ExpandAllStatus);
+            }
+            return false;
+        }
+
+        ;
+
+        //重置左右容器高度
+
+        function resizeCalBack() {
+            var height = $(document).height() - 64 - $("#treeTitle").height() - $("#treeControlPanel").height();
+            $("#treePanel").css("height", height);
+
+        }
+
+
+        //移动tr
+
+        function TableRowMove(tr, isUp) {
+            if ($(tr).length == 0)
+                return false;
+
+            //是否是上移
+            if (isUp) {
+
+                //上移操作
+                //如果tr以上没有节点将不做任何操作
+                if ($(tr).prev().length == 0)
+                    return false;
+
+                //上移节点
+                $(tr).prev().before($(tr));
+
+            } else {
+
+                //下移操作
+                //如果tr以下没有节点将不做任何操作
+                if ($(tr).next().length == 0)
+                    return false;
+
+                //下移节点
+                $(tr).next().after($(tr));
+
+            }
+
+            return true;
+        }
+
+
+        var myZTree;
+
+        //检查当前节点是否是禁用状态
+
+        function checkCurrentTreeNodeIsDisabled(node) {
+
+            //根据当前选择节点是否有 ft_lt样式来标准是否是禁用
+            if ($("#" + node.tId + " span").hasClass("ft_lt"))
+                return true;
+            return false;
+        }
+
+        //启用编辑，将所要button和input设我启用或停用
+
+        function EnableEdit(status) {
+
+            if (status) {
+                $("#btn_Panel button").show();
+                $("#btn_attr_panel button").show();
+                $(".sortmanage_fr input").attr("disabled", null);
+                $(".sortmanage_fr input").removeClass("disabled");
+
+                $("[status='edit']").each(function () {
+                    $(this).show();
+                });
+                $("[status='unedit']").each(function () {
+                    $(this).hide();
+                });
+
+            } else {
+                $("#basetitle").html("地区基本信息");
+                $("#btn_Panel button").hide();
+                $("#btn_attr_panel button").hide();
+                $(".sortmanage_fr input").attr("disabled", "disabled");
+                $(".sortmanage_fr input").addClass("disabled");
+
+                $("[status='edit']").each(function () {
+                    $(this).hide();
+                });
+                $("[status='unedit']").each(function () {
+                    $(this).show();
+                });
+            }
+
+
+        }
+
+
+        //初始化ZTree
+
+        function InitZTree() {
+            markObject = $(".sortmanage_fl");
+            $.ajax({
+                url: '@Url.Action("GetBsAreaZTreeList", "Basic")',
+                data: { all: true },
+                success: function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTree = $.fn.zTree.init($("#areaCatetoryTree"),
+                            setting,
+                            response);
+
+                        //默认为收起所以节点
+                        myZTree.ExpandAllStatus = false;
+                        //默认会国家添加 王耀发 2016-2-22 创建
+                        myZTree.selectNodeTId = undefined;
+                        $("#addArea").html("新增国家");
+                    }
+
+                },
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+            });
+
+
+        }
+
+        var markObject;
+        //AjaxLoader的mark对象
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //自举函数
+        $(document).ready(function () {
+
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+
+            //设置验证        
+            $("#formarea").validate({
+                onsubmit: false,
+                rules: {
+                    //文本
+                    txt_AreaCode: {
+                        maxlength: 10, //只能英文字母和数字？——_
+                    },
+                    txt_aprentArea: {
+                        required: true,
+                    },
+                    txt_AreaName: {
+                        required: true,
+                                                                                                  @*  remote: { //添加和修改2中情况检查不一致,form验证不了
+                                url: '@Url.Action("IsCanAddArea")',     //后台处理程序，
+                            type: "post",               //数据发送方式
+                            dataType: "json",           //接受数据格式   
+                            data: {
+                                //要传递的数据
+                                areaName: function () {
+                                    return $("#txt_AreaName").val();
+                                },
+                            },
+                            dataFilter: function (data, type) {
+                                if (data == 'true') {
+                                    $('#fortxt_AreaName').text('字数限制,1-50个字');
+                                } else {
+                                    $('#fortxt_AreaName').text('配送方式名称已存在');
+                                }
+                                return data;
+                            }
+                        }*@
+                        }
+                    },
+                    errorPlacement: function (error, el) {
+                        $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                    },
+                    success: function (label, el) {
+                        $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                    },
+                });
+                //初始化树
+                InitZTree();
+
+                //弹出地区 
+                var options = {
+                    onlyLeaftSelect: true,
+                    isAll: false,
+                    margin: {
+                        vertical: 0,
+                        horizontal: 0
+                    },
+                    zIndex: 5
+                };
+                DAO.SelectArea($("#JS_outbox"), $("#txt_aprentArea"), options);
+
+                //页面大小改变是要从新计算布局，因为要在第一屏时左右两边都是自适应高度到最大化
+                $(window).resize(resizeCalBack);
+                resizeCalBack();
+
+                //设置添加子级节点按钮点击事件
+                $("#addArea").bind("click", { isParent: false }, function () {
+
+                    $("#basetitle").html("新增地区");
+
+                    //判断当前选择的LI标签不为空 王耀发 2016-2-22 创建
+                    if (myZTree.selectNodeTId == undefined) {
+                        //国家添加同级节点
+                        isParent = true;
+                    }
+                    else{
+                        if (myZTree.selectNodeTId != null) {
+                            //判断当前节点是市级还是区一级，为市则添加子节点，为区添加同级节点
+                            if ($("#" + myZTree.selectNodeTId).children("a").hasClass("level0") || $("#" + myZTree.selectNodeTId).children("a").hasClass("level1") || $("#" + myZTree.selectNodeTId).children("a").hasClass("level2")) {
+                                //市级添加子节点
+                                isParent = false;
+                            } else {
+                                //区级添加同级节点
+                                isParent = true;
+                            }
+                        }
+                    }
+
+                    if (myZTree.getNodeByParam("id", "-1") != null) {
+                        UI.Confirm({
+                            content: '是否要放弃新添加区？',
+                            ok: function () {
+                                removeTreeNode(null);
+                                UI.tips.tip_alert('tips_shrot tips_success', '数据已清除！');
+                                if (isParent)
+                                    AddParentTreeNode($("#addArea"));
+                                else
+                                    AddLeafTreeNode($("#addArea"));
+                            },
+                            cancel: function () {
+                                myZTree.selectNode(myZTree.getNodeByParam("id", "-1"), false);
+                            },
+                            width: '200px'
+                        });
+                    } else {
+                        if (isParent)
+                            AddParentTreeNode($("#addArea"));
+                        else
+                            AddLeafTreeNode($("#addArea"));
+                    }
+
+                });
+
+                //生产折叠卡
+                //$(".according").Accordion();
+            });
+
+            //保存区
+
+            function Save() {
+
+                //判断验证表单，如果不通过就返回
+                if (!$("form").valid()) return;
+
+                //用于所以按钮，以防止重复提交
+                // EnableEdit(false);
+
+                //初始化分类对象
+                var model = $(".sortmanage_fr").JsonBind(); //获取分类JSON模型
+
+
+                model.ParentSysNo = $("#txt_aprentArea").attr("selAreaSysNo"); //获取父级节点分类系统编号
+
+                //根据商品分类系统编号判断是否是新增商品分类，如果没有系统编号或系统编号为0表示是新增的分类
+                if ($("#hddSysNo").val() != null && $("#hddSysNo").val() > 0) {
+                    EditCategory(model); //编辑分类
+                } else {
+                    AddCategory(model); //添加分类
+                }
+            }
+
+            //保存修改地区基本信息
+
+            function EditCategory(model) {
+
+                //Ajax提交修改内容
+                $.ajax({
+                    url: '@Url.Action("UpdateBsArea", "Basic")',
+                    data: JSON.stringify({ model: model }),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        //如果成功就Tips提示成功，并更新商品分类树
+                        if (data.success == true) {
+
+                            curSelectId = -1;
+
+                            //成功提示
+                            UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+
+                            //更新zTree节点值,如果变更了父级节点将从新生产商品分类树
+                            var selectNodes = myZTree.getSelectedNodes(); //从分类树中获取当前现在的分类
+
+                            //如果有选择节点将进行逻辑处理
+                            if (selectNodes.length > 0) {
+                                //判断是否修改了父级节点，修改了将更新整棵商品分类树，否则只功能性当节点
+                                if (selectNodes[0].pId != model.ParentSysNo) {
+                                    InitZTree(); //更新分类树 
+                                } else {
+                                    //只更新当前选择的分类节点
+                                    //设置节点新值
+                                    var namelength = 15; //同setting.view.namelength        
+                                    var name = model.AreaName.length < namelength ? model.AreaName : model.AreaName.substr(0, namelength) + "...";
+                                    selectNodes[0].pId = model.ParentSysNo;
+                                    selectNodes[0].name = name;
+                                    selectNodes[0].title = model.AreaName;
+                                    //调用ZTree更新方法更新节点
+                                    myZTree.updateNode(selectNodes[0], false);
+                                }
+                            }
+                            //恢复按钮状态为不可用，不可用的绑定回来
+                            if ($("#txt_aprentArea").val().indexOf("->") > 0)
+                                $("#parentName").html($("#txt_aprentArea").val().split("->")[1]);
+                            $("#areaName").html($("#txt_AreaName").val());
+                            $("#areaCode").html($("#txt_AreaCode").val());
+                            EnableEdit(false);
+
+                        } else {
+                            //失败提示
+                            UI.tips.tip_alert('tips_shrot tips_wrong',
+                                '操作失败！' + data.msg);
+                        }
+
+                    },
+
+                    error: function () {
+                        //恢复按钮状态为可用
+                        // EnableEdit(false);
+                    }
+                });
+            }
+
+
+            //添加区
+            //model:区JSON对象       
+
+            function AddCategory(model) {
+                //设置新增商品分类系统编号为0(默认值)
+                model.SysNo = 0;
+
+                //Ajax提交数据
+                $.ajax({
+                    url: '@Url.Action("CreateBsArea", "Basic")',
+                    data: JSON.stringify({ model: model }),
+                    dataType: "json",
+                    type: "POST",
+                    cache: false,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        //判断是否成功，成功就更新整棵商品分类树
+                        if (data.success == true) {
+
+                            curSelectId = -1;
+
+                            //成功提示
+                            UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+
+                            //更新zTree节点值
+                            var selectNodes = myZTree.getSelectedNodes(); //获取当前节点，应为默认情况下新增时，想添加的节点为当前节点
+
+                            //节点正确将更新商品分类树
+                            if (selectNodes.length > 0) {
+                                //设置节点新值                         
+                                selectNodes[0].id = data.newid; //sysno
+                                var namelength = 15; //同setting.view.namelength        
+                                var name = model.AreaName.length < namelength ? model.AreaName : model.AreaName.substr(0, namelength) + "...";
+                                selectNodes[0].name = name;
+                                selectNodes[0].title = model.AreaName;
+                                //更新分类树
+                                InitZTree();
+                            }
+                            //恢复按钮状态为不可用，不可用的绑定回来
+                            if ($("#txt_aprentArea").val().indexOf("->") > 0)
+                                $("#parentName").html($("#txt_aprentArea").val().split("->")[1]);
+                            else {
+                                $("#parentName").html($("#txt_aprentArea").val());
+                            }
+                            $("#hddSysNo").val(data.newid);
+                            $("#areaName").html($("#txt_AreaName").val());
+                            $("#areaCode").html($("#txt_AreaCode").val());
+                            EnableEdit(false);
+
+                        } else {
+                            UI.tips.tip_alert('tips_shrot tips_wrong', '操作失败！' + data.msg);
+                        }
+
+                    },
+                    error: function () {
+                        // EnableEdit(false);
+                    }
+                });
+
+            }
+
+            //分类树操作按按钮控制
+            //enabled: true-启用按钮  false-停用按钮
+
+            function TreeControlButtonEnabled(enabled) {
+
+                //判断是启用还是停用
+                if (enabled)
+                    $("button", "#treeControlPanel").attr("disabled", null);
+                else
+                    $("button", "#treeControlPanel").attr("disabled", enabled);
+            }
+
+            //取消编辑内容，将编辑区域回执为空
+
+            function Cancel() {
+                //更新zTree节点值
+                var selectNodes = myZTree.getSelectedNodes();
+
+                //将编辑区域表单置空
+                // $(".sortmanage_fr").JsonBind(null);
+                $("#txt_AreaName").val('');
+                $("#txt_AreaCode").val('');
+                //判断当前节点是否为新增，如果id<=0 表示新增节点
+                if (selectNodes[0].id <= 0) {
+                    //清空属性组列表
+                    //myTableBinder.Clear();
+                    //删除新添加的节点
+                    myZTree.removeNode(selectNodes[0]);
+                }
+
+                //经验编辑功能按钮
+                //EnableEdit(false);
+            }
+
+            //-->
+    </script>
+
+}
+
+
+
+<div class="case commodity_sortmanage">
+    <!--sortmanage_fl-->
+    <div class="sortmanage_fl">
+        <div class="boxs">
+            <!--有导航条时-->
+            <div id="treeTitle" class="boxs_tit head_m">
+                <h3>地区列表</h3>
+            </div>
+            <div class="comp5" style="padding: 0;">
+                <div id="treeControlPanel" class="btntooldiv boxs_tool">
+                    @*<button id="addArea" class="btn btn_ht26 btn_blue disabled BS1001201" disabled="disabled"><span class="icon icon_plus_sign icon_white"></span><span>新增区</span></button>*@
+                    <button id="addArea" class="btn btn_ht26 btn_blue BS1001201"><span class="icon icon_plus_sign icon_white"></span><span>新增国家</span></button>
+                    <button id="upmove" onclick="TreeNodeMoveUp(this)" class="btn btn_ht26 btn_green BS1001201"><span class="icon icon_circle_arrow_up icon_white"></span><span>上移</span></button>
+                    <button id="downmove" class="btn btn_ht26 btn_green BS1001201" onclick="TreeNodeMoveDown(this)"><span class="icon icon_circle_arrow_down icon_white"></span><span>下移</span></button>
+                    <button id="expandAll" onclick="TreeExpandAll(this)" class="btn btn_ht26 btn_orange "><span class="icon icon_briefcase icon_white"></span><span>展开</span></button>
+                </div>
+                <div id="treePanel" class="zTreeDemoBackground left p5 BS1001101" style="overflow: auto;">
+                    <ul id="areaCatetoryTree" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- test -->
+    <!--sortmanage_fr-->
+    <div class="sortmanage_fr">
+        <div class="boxs_tit head_m">
+            <h3 id="basetitle">地区基本信息</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <form id="formarea" name="formAddProductCatetgory" onsubmit="return false;">
+                <div class="boxs boxs_detail_dispay">
+                    <div class=" tit_con" title="">
+                        <input type="hidden" dn="SysNo" id="hddSysNo" />
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone">
+                            <tr>
+                                <td width="100" class="nameright"><span class="v_star">*</span>上级地区<span status="unedit">：</span></td>
+                                <td>
+                                    <div class="search_btn fl" style="width: 300px;" id="JS_outbox">
+                                        <span dn="ParentName" status="unedit" id="parentName"></span>
+                                        <div style="display: none;" status="edit">
+                                            <input id="txt_aprentArea" dn="ParentName" name="txt_aprentArea" type="text" value="选择上级地区" class="input_ht28 wd150 fl" name="" readonly="readonly" />
+                                            <button title="选择市级地区" class="btn btn_ht28 fl" style="left: 123px;" id="btn_selectCategory">
+                                                <span class="icon_th_list"></span>
+                                            </button>
+
+                                        </div>
+                                        <span id="fortxt_aprentArea" class="prompt m10_l " status="edit" style="display: none; margin-top: 2px; margin-left: 42px;">上级地区</span>
+                                    </div>
+
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="100" class="nameright ">地区等级<span status="unedit">：</span></td>
+                                <td>
+                                    <span dn="AreaLevelName" id="arealevel"></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="100" class="nameright"><span class="v_star">*</span>地区名称<span status="unedit">：</span></td>
+                                <td><span dn="AreaName" id="areaName" status="unedit"></span>
+                                    <input id="txt_AreaName" style="display: none;" name="txt_AreaName" maxlength="50" status="edit" dn="AreaName" class="wd300" type="text" />
+                                    <span id="fortxt_AreaName" status="edit" style="display: none;" class="prompt m10_l">字数限制,1-50个字</span></td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">地区编码<span status="unedit">：</span></td>
+                                <td><span dn="AreaCode" id="areaCode" status="unedit"></span>
+                                    <input name="txt_AreaCode" id="txt_AreaCode" style="display: none;" maxlength="10" status="edit" dn="AreaCode" class="wd300" type="text" />
+                                    <span id="fortxt_AreaCode" status="edit" style="display: none;" class="prompt m10_l">字数限制，最长10个字</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!--提交按钮-->
+                <div class="pagination align_c clearfix BS1001201" id="btn_Panel">
+                    <button id="btn_Save" class="btn btn_blue btn_ht28 wd70 bold f14" style="display: none;" onclick="Save()">保存</button>&nbsp;
+                    <button id="btn_cancelcreate" onclick="Cancel()" class="btn btn_ht28 bold f14 wd70" style="display: none;">取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- test end -->
+</div>
+
+

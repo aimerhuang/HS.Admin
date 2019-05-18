@@ -1,0 +1,55 @@
+﻿@using Hyt.BLL.Product
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.WhProductLendItem>
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th class="wd75">商品编号</th>
+            <th class="align_l p10_lr">商品编号</th>
+            <th class="align_l p10_lr">后台显示名称</th>
+            <th width="70">借货数量</th>
+            <th width="70">还货数量</th>
+            <th width="70">销售数量</th>
+            <th width="70">库存数量</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (null != Model.TData && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {
+                var product = PdProductBo.Instance.GetProduct(item.ProductSysNo);
+            <tr>
+                <td>@item.ProductSysNo</td>
+                <td class="align_l p10_lr">
+                    @if (product != null)
+                    {
+                        @product.ErpCode
+                    }
+                </td>
+                <td class="align_l p10_lr">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                <td>@item.LendQuantity</td>
+                <td>@item.ReturnQuantity</td>
+                <td>@item.SaleQuantity</td>
+                <td>
+                    @{
+                    var inventory = item.LendQuantity - item.ReturnQuantity - item.SaleQuantity;
+                        @inventory
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+    });
+</script>

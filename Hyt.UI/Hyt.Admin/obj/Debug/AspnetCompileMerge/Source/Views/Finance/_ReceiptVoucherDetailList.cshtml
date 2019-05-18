@@ -1,0 +1,33 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model List<Hyt.Model.Transfer.CBFnReceiptVoucherItem>
+@if (Model != null && Model.Count > 0)
+{
+    foreach (var item in Model)
+    {
+        <tr>
+            <td class="border_lnone">@item.PaymentTypeName</td>
+            <td align="right" class="p10_r red">&yen;@item.Amount.ToString("N")</td>
+            <td class="align_l p10_lr">@item.VoucherNo</td>
+            <td>@item.CreditCardNumber</td>
+            <td>
+                @Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.FinanceStatus.收款方类型), item.ReceivablesSideType)
+            </td>
+            <td>@item.ReceivablesSideSysNo</td>
+            <td>@Hyt.BLL.Sys.SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+            <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+            <td>
+                @if (ViewBag.IsCanEdit )
+                {
+                    <button class="btn btn_red btn_ht26 forbidden" onclick="Delete(@item.SysNo);return false;"><span class="icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>
+                }
+            </td>
+        </tr>
+    }
+}
+else
+{
+    <tr>
+        <td class="align_l p10_l bgr_eb border_lnone" colspan="9">暂无数据。</td>
+    </tr>
+}

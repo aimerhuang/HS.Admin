@@ -1,0 +1,241 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.AtAllocation
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "新增调拨单";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var GlobalAASysNo = '@Model.SysNo';
+        $(function () {
+            QueryAtAllocationItemList();
+        });
+
+        function QueryAtAllocationItemList(isEdit) {
+            Utils.MaskStart($('#paging'));
+            var atAllocationSysNo = GlobalAASysNo;
+            isEdit = isEdit || '@ViewBag.isEdit';
+            Ajax.get("/Warehouse/QueryAtAllocationItemList?atAllocationSysNo=" + atAllocationSysNo + "&isEdit=" + isEdit + "&r=" + Math.random(), "none", function (p) {
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+            });
+        }
+
+        function SelectProduct() {
+            var selectproduct = [];
+
+            if (!($("#OutWhWarehouse").val() && $("#InWhWarehouse").val())) {
+                UI.tips.tip_alert('tips_wrong', '请选择仓库');
+                return;
+            }
+
+            if ($("#OutWhWarehouse").val() == $("#InWhWarehouse").val()) {
+                UI.tips.tip_alert('tips_wrong', '调出仓库和调入仓库不能相同');
+                return;
+            }
+
+            $.get('/Warehouse/GetAtAllocationProducts/', { atAllocationSysNo: GlobalAASysNo }, function (data) {
+                for (var k = 0; k < data.length; k++) {
+                    selectproduct.push(data[k].ProductSysNo);
+                }
+                DAO.SelectProduct({
+                    selectStockProduct: 1,
+                    warehouseSysNo: $("#OutWhWarehouse").val(),
+                    selectedProducts: selectproduct,
+                    selectedIsReadOnly: true,
+                    syncWebFront: true,
+                    onselect: function (data) {
+                        var result = [];
+
+                        for (var i = 0; i < data.length; i++) {
+                            result[i] = {};
+                            result[i].AllocationSysNo = GlobalAASysNo;
+                            result[i].SysNo = 0;
+                            result[i].ErpCode = '';
+                            result[i].ProductName = '';
+                            result[i].Quantity = 0;
+                            result[i].Remarks = '';
+                            result[i].ProductSysNo = data[i].pid;
+                        }
+                        $.ajax({
+                            url: '/Warehouse/AddProductToAtAllocation',
+                            data: {
+                                detailListStr: JSON.stringify(result),
+                                atAllocationSysNo: GlobalAASysNo,
+                                outWarehouseSysNo: $("#OutWhWarehouse").val(),
+                                inWarehouseSysNo: $("#InWhWarehouse").val()
+                            },
+                            type: "POST",
+                            cache: false,
+                            success: function (result) {
+                                if (result.Status) {
+                                    GlobalAASysNo = result.StatusCode;
+                                } else {
+                                    UI.tips.tip_alert('tips_wrong', result.Message);
+                                }
+                                QueryAtAllocationItemList(false);
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        function DeleteDetail(sysNo, atAllocationSysNo, th) {
+            UI.Confirm({
+                content: "确认删除?",
+                ok: function () {
+                    $.post("/Warehouse/DeleteAtAllocationItem", { sysNo: sysNo, atAllocationSysNo: atAllocationSysNo }, function (result) {
+                        if (result.Status == false) {
+                            UI.Alert({
+                                content: result.Message
+                            });
+                        }
+                        else {
+                            UI.Prompt.Success("操作成功");
+                            $(th).parent("td").parent("tr").remove();
+                            // QueryAtAllocationItemList();
+                        }
+                    });
+                },
+                cancel: true
+            });
+        }
+
+        function GetDetailList() {
+            var detailList = [];
+            var i = 0;
+            $("#collocationASTable tbody input").each(function () {
+                atAllocationSysNo = GlobalAASysNo;
+                detailList[i] = {};
+                detailList[i].SysNo = $(this).attr("name").replace('txtSysNo_', '');
+                detailList[i].AllocationSysNo = atAllocationSysNo;
+                detailList[i].ErpCode = 0;
+                detailList[i].Quantity = $(this).val();
+                detailList[i].ProductName = '';
+                detailList[i].ProductSysNo = 0;
+                detailList[i].Remarks = '';
+                i++;
+            });
+
+            return detailList;
+        }
+
+        function Save() {
+            var detailList = GetDetailList();
+            var atAllocationSysNo = GlobalAASysNo;
+           
+            $.post("/Warehouse/SaveAtAllocationItems", { detailListStr: JSON.stringify(detailList), atAllocationSysNo: atAllocationSysNo }, function (result) {
+                if (result.Status == false) {
+                    UI.Alert({
+                        content: result.Message
+                    });
+                }
+                else {
+                    UI.Prompt.Success("操作成功");
+                    QueryAtAllocationItemList();
+                    var count = 0;
+                    for (var i = 0; i < detailList.length; i++) {
+                        count =  parseFloat(count)+ parseFloat(detailList[i].Quantity);
+                    }
+                    $(".count").html(count);
+                }
+            });
+        }
+    </script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            @if (ViewBag.isEdit == true)
+            {
+                <span class="ra10 c6">
+                    <button type="button" class="btn btn_ht26" onclick="document.location.href = '/Warehouse/AtAllocation'"><span class="icon_share_alt"></span><span class="m5_l">返回库存调拨</span></button>
+                </span>
+            }
+            <h3>@(ViewBag.isEdit == true ? "修改" : "查看")调拨单</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <!--搜索-->
+            <div class="boxs_tool">
+                <div>
+                    <span class="veralign_t fl" style="margin-top:3px;">调出仓库</span>
+                    <div class="fl m10_l">
+                        @if (Model != null && Model.OutWarehouseSysNo > 0)
+                        {
+                            string whName = "";
+                            foreach (var item in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                            {
+                                if (item.SysNo == Model.OutWarehouseSysNo)
+                                {
+                                    whName = item.BackWarehouseName;
+                                }
+                            }
+                            <select id="OutWhWarehouse" name="OutWhWarehouse" class="wd130 m10_r select_ht28">
+                                <option value="@Model.OutWarehouseSysNo">@whName</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <select id="OutWhWarehouse" name="OutWhWarehouse" class="wd130 m10_r select_ht28">
+                                <option value="">-请选择-</option>
+                                @foreach (var whWarehouse in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                                {
+                                    <option value="@whWarehouse.SysNo">@whWarehouse.BackWarehouseName</option>
+                                }
+                            </select>
+                        }
+                    </div>
+                    <span class="veralign_t fl" style="margin-top:3px;">调入仓库</span>
+                    <div class="fl m10_l">
+                        @if (Model != null && Model.EnterWarehouseSysNo > 0)
+                        {
+                            string whName = "";
+                            foreach (var item in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                            {
+                                if (item.SysNo == Model.EnterWarehouseSysNo)
+                                {
+                                    whName = item.BackWarehouseName;
+                                }
+                            }
+                            <select id="InWhWarehouse" name="InWhWarehouse" class="wd130 m10_r select_ht28">
+                                <option value="@Model.EnterWarehouseSysNo">@whName</option>
+                            </select>
+                        }
+                        else
+                        {
+                            <select id="InWhWarehouse" name="InWhWarehouse" class="wd130 m10_r select_ht28">
+                                <option value="">-请选择-</option>
+                                @foreach (var whWarehouse in (IList<Hyt.Model.WhWarehouse>)ViewBag.Warehouse)
+                                {
+                                    <option value="@whWarehouse.SysNo">@whWarehouse.BackWarehouseName</option>
+                                }
+                            </select>
+                        }
+                    </div>
+                    @if (ViewBag.isEdit == true)
+                    {
+                        <button type="button" class="btn btn_ht26 btn_blue m10_r" onclick="SelectProduct()"><span class="icon icon_plus icon_white"></span><span class="m5_l">添加调拨商品</span></button>
+                        <button type="button" class="btn btn_ht26 btn_blue m10_r" onclick="Save()"><span class="icon icon_pencil icon_white"></span><span class="m5_l">保存</span></button>
+                        <span>调拨总数量：</span><span class="m5_l count" ></span>
+                    }
+                </div>
+            </div>
+
+            <div class="boxs_list">
+                <!--/表格列表区-->
+                <div class="boxs_listtabel">
+                    <div id="paging">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

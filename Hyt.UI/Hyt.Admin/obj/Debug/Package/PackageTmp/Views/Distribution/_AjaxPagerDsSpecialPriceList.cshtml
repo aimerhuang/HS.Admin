@@ -1,0 +1,203 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBDsSpecialPrice>
+@using Hyt.Model.SystemPredefined
+@Html.PrivilegeControl(PrivilegeCode.DS1001301, ".DS1001301")
+
+<form id="form">
+    <div class="caseout" id="edit" style="display: none; width: 500px; height: 155px;">
+        <div class="boxs_detail_dispay">
+            <div class="tit_dispay border_left border_right">
+                <h5>商品信息</h5>
+            </div>
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                    <tr>
+                        <td style="width: 20%;" class="nameright border_rnone">商品编号：</td>
+                        <td style="width: 15%;" class="border_right"><span id="txtProductSysNo"></span></td>
+                        <td style="width: 20%;" class="nameright border_rnone">后台显示名称：</td>
+                        <td style="width: 45%;"><span id="txtProductName"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">分销商编号：</td>
+                        <td class="border_right"><span id="txtDealerSysNo"></span></td>
+                        <td class="nameright border_rnone">分销商名称：</td>
+                        <td><span id="txtDealerName"></span></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_lnone">特殊价格：</td>
+                        <td colspan="3">
+                            <input id="txtPrice" type="text" name="SpecialPrice" class="wd200" /><span id="for_txtPrice" class="hide"></span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</form>
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>
+                <th class="wd75">系统编号</th>
+                <th class="wd100">商品编号</th>
+                <th class="align_l p10_lr">后台显示名称</th>
+                <th class="wd75">分销商编号</th>
+                <th class="align_l p10_lr">分销商名称</th>
+                <th width="120">特殊价格</th>
+                <th width="46">状态</th>
+                <th width="148">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                <tr>
+                    <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+                }
+                foreach (var master in (List<Hyt.Model.Transfer.CBDsSpecialPrice>)Model.TData)
+                {
+                <tr>
+                    <td>@master.SysNo</td>
+                    <td>@master.ErpCode</td>
+                    <td class="align_l p10_lr">@master.ProductName</td>
+                    <td>@master.DealerSysNo</td>
+                    <td class="align_l p10_lr">@master.DealerName</td>
+                    <td class="red p10_r align_r">@master.Price.ToString("C")</td>
+                    @if (master.Status == 1)
+                    {
+                        <td>启用</td>
+                        <td>
+                            <button class="btn btn_ht26 m10_r btn_blue DS1001301" name="btnUpdateStatus" type="button" onclick=" setStatus(@master.SysNo, @master.Status) " ><span class="icon_ban_circle m5_r icon_white"></span><span>禁用</span>
+                            </button><button class="btn btn_ht26 btn_blue DS1001301" type="button" name="btnEditPrice" onclick=" editPrice(@master.SysNo,@master.Price,'@master.ProductName',@master.DealerSysNo,'@master.DealerName') " ><span class="icon_pencil m5_r icon_white"></span><span>编辑</span></button>
+                        </td>
+                    }
+                    else
+                    {
+                        <td>禁用</td>
+                        <td>
+                            <button class="btn btn_ht26 m10_r btn_blue DS1001301" name="btnUpdateStatus" type="button" onclick=" setStatus(@master.SysNo, @master.Status) " ><span class="icon_check m5_r icon_white"></span><span>启用</span>
+                            </button><button class="btn btn_ht26 btn_blue DS1001301" type="button" name="btnEditPrice" onclick=" editPrice(@master.SysNo,@master.Price, '@master.ProductName',@master.DealerSysNo,'@master.DealerName') " ><span class="icon_pencil m5_r icon_white"></span><span>编辑</span></button>
+                        </td>
+                    }
+
+                </tr>
+                }
+            }
+        </tbody>
+    </table>
+    @{ Html.RenderPartial("_UrlPaging", Model); }
+</div>
+
+
+<script type="text/javascript">
+    $(function () {
+        //表格加入隔行样式
+        DAO.InterlineStyle();
+
+        $("#form").validate({
+            rules: {
+                SpecialPrice: { required: true, maxlength: 20, min: 0 }
+            },
+            messages: {
+                SpecialPrice: {
+                    required: "请填写商品特殊价格",
+                    maxlength: "最多20个字符",
+                    min: "价格不能小于0"
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#for_' + el.attr('id')).attr('class', 'error');
+                $('#for_' + el.attr('id')).text(error.html());
+            },
+            success: function (label, el) {
+                $('#for_' + el.attr('id')).attr('class', 'success');
+            }
+        });
+    });
+    function setStatus(sysno, status) {
+        var msg = status == true ? '确认要禁用该特殊价格吗?' : '确认要启用该特殊价格吗?';
+        UI.Confirm({
+            content: msg,
+            ok: function () {
+                $.ajax({
+                    type: "POST",
+                    url: "/Distribution/DsSpecialPriceUpdateStatus/",
+                    data: {
+                        SysNo: sysno,
+                        Status: status == 0 ? 1 : 0
+                    },
+                    chche: false,
+                    success: function (ret) {
+                        if (ret.StatusCode == undefined) {
+                            UI.tips.tip_alert('tips_warning', ret);
+                            return;
+                        }
+                        if (ret.StatusCode == 0) {
+                            UI.Alert({
+                                title: '提示',
+                                icon: 'succeed',
+                                content: ret.Message,
+                                callback: function () {
+                                    UI.DialogOpener().quickSearch();
+                                    UI.CloseDialog();
+                                },
+                                cancel: false,
+                                padding: '10px 20px'
+                            });
+                        } else {
+                            UI.tips.tip_alert('tips_warning', ret.Message);
+                        }
+                    },
+                    error: function () {
+                        UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                    }
+                });
+            },
+            cancelVal: '关闭',
+            cancel: true
+        });
+    }
+
+    function editPrice(sysno, price, productName, dealerSysNo, dealerName) {
+        $('#txtPrice').val(price);
+        $('#txtProductSysNo').html(sysno);
+        $('#txtProductName').html(productName);
+        $('#txtDealerSysNo').html(dealerSysNo);
+        $('#txtDealerName').html(dealerName);
+        var dd = document.getElementById('edit');
+        var priceInput = $(dd).find("#txtPrice");
+        UI.DialogBox({
+            title: '修改特殊价格',
+            cancel: true,
+            content: dd,
+            ok: function () {
+                if (!$("#form").valid()) { return false; }
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("DsSpecialPriceUpdatePrice")',
+                    data: {
+                        SysNo: sysno,
+                        Price: priceInput.val()
+                    }, chche: false,
+                    success: function (ret) {
+                        if (ret.StatusCode == undefined) {
+                            UI.tips.tip_alert('tips_warning', ret);
+                            return;
+                        }
+                        if (ret.StatusCode == 0) {
+                            showTip(ret.Message);
+                        } else {
+                            UI.tips.tip_alert('tips_warning', ret.Message);
+                        }
+                    },
+                    error: function () {
+                        UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                    }
+                });
+                return true;
+            }
+        });
+    }
+</script>

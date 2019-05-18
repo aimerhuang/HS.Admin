@@ -1,0 +1,396 @@
+﻿@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList
+
+@{
+    ViewBag.Title = "配送单维护";
+    @Html.PrivilegeControl(PrivilegeCode.LG1006201, "#add_delivery_btn");
+    @Html.PrivilegeControl(PrivilegeCode.LG1006101, "#export_excel_btn");
+    @Html.PrivilegeControl(PrivilegeCode.LG1006104, "button[name=edit_btn]");
+    @Html.PrivilegeControl(PrivilegeCode.LG1006103, "button[name=print_btn]");
+    @Html.PrivilegeControl(PrivilegeCode.LG1006501, "button[title=作废]");
+}
+
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+}
+@section headjs{
+    <script src="~/Theme/scripts/tips.js"></script>
+    <script src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            //高级查询弹出效果事件绑定
+            UI.searchbox($("#advanced_search"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+            //初始化仓库人员下拉联动样式
+            $("#select_list").find("label").remove().end()
+                .find("#txtWareHouse").css("width", "156px").attr("name", "stock_sysno").attr("readonly", true).end()
+                .find("#selDelManBasic").appendTo("#select_user").attr("name", "delivery_man_sysno").css("width", "170px");
+
+            searchAdv();
+        });
+
+        //用于提交加载
+        var loading_img;
+
+        //保存查询数据，用于导出Excel
+        var save_query_data = {};
+
+        $(function () {
+
+            loading_img = $("#loading_img").clone().show();
+
+            $("#sysno").keydown(function (e) {
+                e.stopPropagation();
+
+                //当点击回车按钮时需处理的逻辑
+                if (e.which == "13") {
+                    //触发添加出库/取件单按钮事件
+                    $("#easy_search_btn").triggerHandler("click");
+                }
+            });
+
+            $("#order_sysno").keydown(function (e) {
+                e.stopPropagation();
+
+                //当点击回车按钮时需处理的逻辑
+                if (e.which == "13") {
+                    //触发添加出库/取件单按钮事件
+                    $("#easy_order_search_btn").triggerHandler("click");
+                }
+            });
+
+            //绑定高级查询按钮
+            $("#avd_search_btn").click(function () {
+                searchAdv();
+                return false;
+            });
+
+            //绑定配送单状态查询快捷下拉框
+            $("#select_delivery_status").change(function (e) {
+                var searchData = {
+                    status: $(this).val(),
+                    sysno: $("#sysno").val(),
+                    order_sysno: $("#order_sysno").val()
+                };
+                saveQueryData(searchData);
+                update(searchData);
+            });
+
+            //绑定配送单编号快捷查询按钮事件
+            $("#easy_search_btn").click(function (e) {
+                var searchData = {
+                    sysno: $("#sysno").val()
+                };
+                saveQueryData(searchData);
+                update(searchData);
+            });
+
+            //绑定订单编号快捷查询按钮事件
+            $("#easy_order_search_btn").click(function (e) {
+                var searchData = {
+                    order_sysno: $("#order_sysno").val()
+                };
+                saveQueryData(searchData);
+                update(searchData);
+            });
+
+            //清除高级查询条件按钮事件
+            $("#JS_delete").click(function () {
+                $("#txtWareHouse").attr("sysno", "");
+            });
+
+            //绑定导出Excel按钮事件
+            $("#export_excel_btn").click(function () {
+
+                var totalNum = $("#pagination").children("b.fl").children("span").eq(1).text();
+                if (totalNum > 60000) {
+                    UI.Alert({
+                        content: '导出数据量过大，请通过搜索筛选需要的数据后再导出.'
+                    });
+                    return;
+                }
+
+                $("#hd_sysno").val(save_query_data.sysno);
+                $("#hd_stock_sysno").val(save_query_data.stock_sysno);
+                $("#hd_delivery_man_sysno").val(save_query_data.delivery_man_sysno);
+                $("#hd_status").val(save_query_data.status);
+                $("#hd_stock_out_no").val(save_query_data.stock_out_no);
+                $("#hd_created_name").val(save_query_data.created_name);
+                $("#hd_start_date").val(save_query_data.start_date);
+                $("#hd_end_date").val(save_query_data.end_date);
+
+                export_excel_form.submit();
+            });
+        });
+
+        //高级查询
+        function searchAdv() {
+            var searchData = {
+                sysno: $("#sysno").val(),
+                stock_sysno: $("#txtWareHouse").attr("sysno"),
+                delivery_man_sysno: $("#selDelManBasic").val(),
+                status: $("#status_select").val(),
+                stock_out_no: $("#stock_out_no").val(),
+                created_name: $("#created_name").val(),
+                start_date: $("#start_time_txt").val(),
+                end_date: $("#end_time_txt").val()
+            };
+            saveQueryData(searchData);
+            update(searchData);
+        }
+
+        //保存查询参数
+        function saveQueryData(queryData) {
+            for (var i in save_query_data) {
+                save_query_data[i] = null;
+            }
+            for (var k in queryData) {
+                save_query_data[k] = queryData[k];
+            }
+        }
+
+        //初始化表格按钮事件
+        function initTableBtnEvent() {
+
+            //表格全选checkbox事件
+            //$("#select_all_checkbox").bind('click', function() {
+            //    var checked = $(this).attr("checked") ? true : false;
+            //    $("#delivery_note_main_table").find("input[name='delivery_note_box']").attr("checked", checked);
+            //});
+
+            $("#delivery_note_main_table").find("button[name='cancel_btn']").click(function (e) { //配送单作废按钮事件
+
+                var self = $(this);
+                var deliverySysNo = self.attr("sysno");
+
+                UI.Confirm({
+                    content: "确定作废此配送单？",
+                    cancel: true,
+                    ok: function () {
+                        $.ajax({
+                            url: "@Url.Action("CancelDeliveryNote")",
+                            dataType: "json",
+                            data: { "deliverySysNo": deliverySysNo },
+                            type: "post",
+                            success: function (data) {
+                                if (data) {
+                                    if (data.Status) {
+                                        UI.tips.tip_alert('tips_success', data.Message);
+                                        self.parent().find("img").remove()
+                                            .end()
+                                            .append("<button class=\"btn m10_r btn_ht26 disabled\" title=\"打印\"><span class=\"icon icon_print\"></span><span class=\"m5_l\">打印</span></button>"
+                                                + "<button  class=\"btn btn_ht26 disabled\" title=\"作废\"  ><span class=\"icon_forbidden\"></span><span class=\"m5_l\">作废</span></button>");
+                                    } else {
+                                        UI.tips.tip_alert('tips_wrong', data.Message);
+                                        self.parent().children("img").remove();
+                                        self.parent().children("button").show();
+                                    }
+                                }
+                            },
+                            beforeSend: function () {
+                                self.parent().children("button").hide();
+                                self.parent().append(loading_img);
+                            },
+                            error: function (a, b, c) {
+                                UI.tips.tip_alert('tips_wrong', '出现错误');
+                                self.parent().children("img").remove();
+                                self.parent().children("button").show();
+                            }
+                        });
+                    }
+                });
+
+            }).end().find("button[name='print_btn']").click(function (e) { //打印按钮事件
+                var self = $(e.target);
+                var url = "@Url.Action("Delivery", "Print")" + "/" + self.attr("sysno");
+                UI.DialogOpen(url, {
+                    title: '配送单打印',
+                    width: 900,
+                    height: 700,
+                    init: function () {
+                        if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                            //this.iframe.contentWindow.location.reload();
+                            this.iframe.contentWindow.location.href = url + "?isRefresh=" + Math.random();
+                        }
+                    }
+                }, false);
+            });
+        }
+
+        //表格呈现
+
+        function update(searchData) {
+            var ajaxLoadingMask = UI.Mask({
+                obj: $("#createDeliverMainDiv"),
+                zindex: 1000
+            });
+            $.get('@Url.Action("DeliveryNoteMaintain", "Logistics")' + '?o=' + Math.random(),
+                searchData,
+                function (data) {
+                    $('#paging').empty().append(data);
+                    //初始化表格按钮事件
+                    initTableBtnEvent();
+                    ajaxLoadingMask.Remove();
+                });
+        }
+
+        //表格加载完成后执行
+
+        function tableOnload() {
+            AjaxStop();
+            initTableBtnEvent();
+        }
+
+    </script>
+}
+<img src="~/Theme/images/icons/loading.gif" style="border:0;display:none" id="loading_img" />
+<div class="case" id="createDeliverMainDiv">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>配送单维护</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+
+
+                <div class="right_tool clearfix">
+
+                    <span class="veralign_t fl">状态过滤</span>
+                    <div class="fl m10_l">
+                        <select class="select_ht28" style="width: 80px" id="select_delivery_status" name="status">
+                            <option value="0">全部</option>
+                            @foreach (var deliveryStatus in typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送单状态).GetEnumValues())
+                            {
+                                int tmp = (int)deliveryStatus;
+                                string selected = tmp == (int)Hyt.Model.WorkflowStatus.LogisticsStatus.配送单状态.配送在途 ? "selected=selected" : "";
+                                <option @selected value="@tmp">@deliveryStatus.ToString()</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="search_btn m10_l fl">
+                        <input type="text" class="input_ht28" id="sysno" name="sysno" value="请输入配送单号" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入配送单号'" onfocus="this.select()" onclick="if (this.value == '请输入配送单号') this.value = ''" />
+                        <button class="btn btn_ht28 wd28" title="搜索" id="easy_search_btn">
+                            <span class="icon_search"></span>
+                        </button>
+                    </div>
+                    <div class="search_btn m10_l fl">
+                        <input type="text" class="input_ht28" id="order_sysno" name="order_sysno" value="请输入订单号" onmouseover="this.focus()" onblur="if (this.value =='') this.value='请输入订单号'" onfocus="this.select()" onclick="if (this.value == '请输入订单号') this.value = ''" />
+                        <button class="btn btn_ht28 wd28" title="搜索" id="easy_order_search_btn">
+                            <span class="icon_search"></span>
+                        </button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="advanced_search"><span class="icon_search "></span><span class="m5_l">高级搜索</span></button>
+
+                </div>
+
+                <!--/工具条按钮-->
+                <div class="left_tool" id="feature_area">
+                    <button class="btn btn_ht26 m5_r" type="button" title="添加配送单" id="add_delivery_btn" onclick="window.location.href='@Url.Action("CreateDeliveryNote")'"><span class="icon icon_plus "></span><span class="m5_l">添加配送单</span></button>
+                    <button class="btn btn_ht26 m10_r" id="export_excel_btn" title="导出Excel"><span class="icon_download_alt "></span><span class="m5_l">导出Excel</span></button>
+                    <!-- <button class="btn btn_ht26 m10_r" type="button" title="生成结算单" id="generate_settlement_btn"><span class="icon icon_th_list"></span><span class="m5_l">生成结算单</span></button>-->
+                </div>
+            </div>
+
+            <!--配送单信息列表-->
+            <div class="boxs_list" id="paging">
+
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+@*高级查询弹出层*@
+<form name="adv_form" id="adv_form" action="@Url.Action("DeliveryNoteMaintain", "Logistics")" method="get">
+    <div class="search_box" id="JS_search" style="right: -267px;">
+        <div class="search_title clearfix">
+            <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+        </div>
+        <div class="search_body">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td width="28%" align="right">仓库</td>
+                        <td width="72%" id="select_list">
+                            @{Html.RenderAction("WareHouseAndDeliveryMan");}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">配送人</td>
+                        <td id="select_user"></td>
+                    </tr>
+                    <tr>
+                        <td align="right">配送单状态</td>
+                        <td>
+                            <select class="wd170" id="status_select" name="status">
+                                <option value="0">---全部---</option>
+                                @foreach (var deliveryStatus in typeof(Hyt.Model.WorkflowStatus.LogisticsStatus.配送单状态).GetEnumValues())
+                                {
+                                    int tmp = (int)deliveryStatus;
+                                    <option value="@tmp">@deliveryStatus.ToString()</option>
+                                }
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">创建人</td>
+                        <td>
+                            <input type="text" class="wd156" id="created_name" name="created_name" value="">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">出库单号</td>
+                        <td>
+                            <input type="text" id="stock_out_no" class="wd156" value="" name="stock_out_no">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">开始时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" id="start_time_txt" name="start_date" class="input_ht26" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'start_time_txt',maxDate: '#F{$dp.$D(\'end_time_txt\')}'})">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="right">截至时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" id="end_time_txt" name="end_date" class="input_ht26" value="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'end_time_txt',minDate: '#F{$dp.$D(\'start_time_txt\')}'})">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="search_foot" style="width:300px;">
+            <button title="开始查询" type="button" class="btn btn_blue btn_ht30 bold" id="avd_search_btn">开始查询</button>&nbsp;
+            <button title="清除条件" type="reset" class="btn btn_ht30 bold" id="JS_delete">清除条件</button>
+        </div>
+    </div>
+</form>
+
+@*导出Excel用表单*@
+<form id="export_excel_form" action="@Url.Action("ExportExcel")" method="POST">
+    <input id="hd_sysno" name="sysno" type="hidden" />
+    <input id="hd_stock_sysno" name="stock_sysno" type="hidden" />
+    <input id="hd_delivery_man_sysno" name="delivery_man_sysno" type="hidden" />
+    <input id="hd_status" name="status" type="hidden" />
+    <input id="hd_stock_out_no" name="stock_out_no" type="hidden" />
+    <input id="hd_created_name" name="created_name" type="hidden" />
+    <input id="hd_start_date" name="start_date" type="hidden" />
+    <input id="hd_end_date" name="end_date" type="hidden" />
+</form>
+
+
+
+

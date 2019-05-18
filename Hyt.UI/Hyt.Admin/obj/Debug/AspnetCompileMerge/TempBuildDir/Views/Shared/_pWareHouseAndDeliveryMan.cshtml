@@ -1,0 +1,73 @@
+﻿@*
+分部视图 仓库与配送人员
+调用方式:
+    @{
+        Html.RenderAction("WareHouseAndDeliveryMan", new
+            {
+                wareHouseId = "selWareHouseAdv",
+                deliveryManId = "selDelManAdv",
+                lblWareHouseId = "lblWareHouseAdv",
+                lblDeliveryManId = "lblDelManAdv",
+                inLine = false
+            });
+    }
+2013-06-19 黄伟 创建
+*@
+
+<script type="text/javascript">
+    var whId = '@ViewBag.whId';
+    var userId = '@ViewBag.userId';
+
+    $(document).ready(function () {
+        $('#txtWareHouse').click(function () {
+            DAO.SelectWhareHouseDialog({
+                chkStyle: 'radio',
+                callBack: function (data) {
+
+                    //set the warehouse value
+                    $('#txtWareHouse').val(data[0].name);
+                    $("#txtWareHouse").attr('sysno', data[0].id);
+
+                    //移除弹出层
+                    //obj.Remove();
+
+                    //change the user
+                    if ($('#txtWareHouse').val() != '') {
+                        //refresh the users
+                        $.ajax({
+                            url: '@Url.Action("GetDeliveryUser", "Logistics")',
+                            //data: { whSysNo: $('#' + whId).val() },
+                            data: { whSysNo: data[0].id },
+                            success: function (result) {
+
+                                var strHtml = '<option value="0" selected="selected">请选择</option>';
+                                for (var i = 0; i < result.length; i++) {
+                                    strHtml += '<option value="' + result[i].Key + '">' + result[i].Value + '</option>';
+                                }
+                                $('#' + userId).html(strHtml);
+                            }
+                        });
+                    } else {
+                        $('#' + userId).html('<option value="0" selected="selected">请选择</option>');
+                    }
+                }
+           });
+        });
+    });
+
+    //var obj;
+    //function selectWhareHouse() {
+    //    obj = $("#div_wharehouse");
+
+    //}
+</script>
+<div>
+    @*@Html.DropDownList(ViewBag.whId as string, ViewBag.WareHouses as IEnumerable<SelectListItem>, new { @class = "wd150" })*@
+    <div id="div_wharehouse">
+        <label for="txtWareHouse">仓库</label>
+        <input type="text" id="txtWareHouse" style="width: 128px" />
+    </div>
+    <label id="@ViewBag.lblUserId" for="@ViewBag.userId">人员</label>
+    @Html.DropDownList(ViewBag.userId as string, ViewBag.Users as IEnumerable<SelectListItem>, new { style = "width:143px" })
+
+</div>

@@ -1,0 +1,212 @@
+﻿@model Hyt.Model.CBCrComplaint
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "会员投诉管理";
+    @Html.PrivilegeControl(PrivilegeCode.CR1001301, "button.CR1001301")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $("#form").validate({
+                debug: true,
+                rules: {
+                    replyContent: { required: true, maxlength: 500 }
+                },
+                errorPlacement: function (error, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for_' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+        });
+        //获取回复列表
+        function ReplyContent() {
+            var strHTML="";
+            $.post('/CRM/CrComplaintReply/', { sysNo: $("#hidSysNo").val() }, function (data) {
+                //var dataObj = eval("(" + data + ")");
+                $.each(data, function (idx, item) {
+                    var cs = idx % 2 == 0 ? "odd_color" : "";
+                    strHTML += "<tr class=\"" + cs + "\">";
+                    strHTML +="<td>";
+                    strHTML += "   <div class=\"complaintTitle\">" + item.UserName + " &nbsp :&nbsp " + item.ReplyDate + "</div>";
+                    strHTML += "   <div class=\"complaintContent\">" + item.ReplyContent + "</div>";
+                    strHTML +="</td>";
+                    strHTML +="</tr>";
+                });
+                $('#data').html(strHTML);
+            });
+            AjaxStop();
+        }
+        function addOrEdit() {
+            var from = $("#form");
+            $(from).submit();
+            
+            if ($(from).valid()) {
+                AjaxStart();
+                $.post('/CRM/CrComplaintReplyAddOrEdit/', from.serialize(), function (data) {
+                    $("#replyContent").val("");
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    if (data.result) {
+                        UI.Dialog.opener.dialog(data.info);
+                        UI.Dialog.opener.doSearch();
+                        var strHTML = "";
+                        $.post('/CRM/CrComplaintReply/', { sysNo: $("#hidSysNo").val() }, function (data) {
+                            //var dataObj = eval("(" + data + ")");
+                            $.each(data, function (idx, item) {
+                                var css = idx % 2 == 0 ? "odd_color" : "";
+                                strHTML += "<tr class=\"" + css + "\">";
+                                strHTML += "<td>";
+                                strHTML += "   <div class=\"complaintTitle\">" + item.UserName + " &nbsp :&nbsp " + item.ReplyDate + "</div>";
+                                strHTML += "   <div class=\"complaintContent\">" + item.ReplyContent + "</div>";
+                                strHTML += "</td>";
+                                strHTML += "</tr>";
+                            });
+                            $('#data').html(strHTML);
+                        });
+                        AjaxStop();
+                    } else {
+                        AjaxStop();
+                    }
+                });
+            }
+        }
+        function UpdateStatus(status) {
+            UI.Dialog.opener.UpdateStatus($("#hidSysNo").val(),0);
+        }
+        //关闭投诉/已处理
+        function CloseStatus() {
+            UI.Confirm({
+                content: '您确定要关闭此条记录吗？',
+                ok: function () {
+                    $.post('@Url.Action("CrComplaintClose", "CRM")', { sysNo: $("#hidSysNo").val() }, function (data) {
+                         if (data.IsLogout) {
+                             eval(data.Callback);
+                             return;
+                         }
+                         if (data.result) {
+                             UI.Dialog.opener.dialog(data.info);
+                             UI.Dialog.opener.doSearch()
+                             UI.Dialog.close();
+                         } else {
+                             UI.Dialog.opener.dialog(data.info);
+                             UI.Dialog.close();
+                         }
+                     });
+                 },
+                 cancel: true
+             });
+        }
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('.complaint_box'), opacity: 0.6 });
+        }
+
+        function AjaxStop() {
+            cover.Remove();
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<body class="bodynone">
+<div class="caseout">
+<div class="boxs_detail_dispay">
+  <div class="tit_con">
+          <input type="hidden" id="hidSysNo" name="hidSysNo" value="@Model.SysNo"/>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+              <tbody>
+              <tr>
+               <td width="20%" class="nameright border_rnone">订单编号 :</td>
+               <td width="30%" class="border_right">@Model.OrderSysNo</td>
+               <td width="20%" class="nameright border_rnone">投诉类型:</td>
+               <td width="30%">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.CustomerStatus.会员投诉类型),Model.ComplainType)</td>
+              </tr>
+              <tr>
+               <td width="20%" class="nameright border_rnone">投诉人:</td>
+               <td width="30%" class="border_right">@Model.Name</td>
+               <td width="20%" class="nameright border_rnone">投诉时间:</td>
+               <td width="30%">@Model.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+              </tr>
+              <tr>
+               <td width="20%"  class="nameright border_rnone"><span class="v_star">*</span>投诉内容</td>
+               <td width="30%" class="border_right" colspan="3">
+                   <textarea class="input_xlarge" disabled="disabled" rows="2" cols="20" style="width: 417px; height: 50px;">@Model.ComplainContent</textarea>
+               </td>
+              </tr>
+              <tr>
+               <td width="20%"  class="nameright border_rnone">投诉处理</td>
+               <td width="30%" class="border_right" colspan="3">
+                   <style>
+                       .complaintTitle{ display:block; line-height:20px; }
+                       .complaintContent{ display:block;}
+                       .complaint_box { background:#f5f5f5; height:200px; overflow-y:auto}
+                       .empty { height:190px;}
+                   </style>
+                   <div class="complaint_box">
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tbody id="data">
+                        @{
+                            var row = 1;
+                            string cs = string.Empty;
+                            var list = (List<Hyt.Model.CBCrComplaintReply>)ViewBag.List;
+                            if(list.Count>0)
+                            {
+                                foreach (var item in list)
+                                {
+                                      cs = row % 2 == 0 ? string.Empty : "odd_color";
+                                      <tr class="@cs">
+                                       <td>
+                                           <div class="complaintTitle">@item.UserName: &nbsp @item.ReplyDate.ToString("yyyy-MM-dd HH:mm:ss")</div>
+                                           <div class="complaintContent">@item.ReplyContent</div>
+                                       </td>
+                                      </tr>
+                                    row++;
+                                }
+                            }
+                            else
+                            {
+                                <tr class="odd_color empty">
+                                    <td>
+                                        暂无数据
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        </tbody>
+                    </table>
+                  </div>
+               </td>
+              </tr>
+              @{
+                  if(Model.Status==(int)CustomerStatus.会员投诉状态.待处理)
+                  {
+                      <tr>
+                       <td width="20%"  class="nameright border_rnone">回复内容</td>
+                       <td width="30%" class="border_right" colspan="3">
+                          <textarea id="replyContent" name="replyContent" class="input_xlarge" rows="2" cols="20" style="width: 300px; height: 50px;"></textarea><span id="for_replyContent" class="prompt m10_l">回复内容，1-500字符</span>
+                       </td>
+                      </tr>
+                  }
+                  else if(Model.Status==(int)CustomerStatus.会员投诉状态.处理中)
+                  {
+                      <tr>
+                       <td width="20%"  class="nameright border_rnone"><span class="v_star">*</span>回复内容</td>
+                       <td width="30%" class="border_right" colspan="3">
+                          <textarea id="replyContent" name="replyContent" class="input_xlarge" rows="2" cols="20" style="width: 300px; height: 50px;"></textarea><span id="for_replyContent" class="prompt m10_l">回复内容，1-500字符</span>
+                       </td>
+                      </tr>
+                  }
+              }
+             </tbody>
+           </table>  
+   </div>
+  </div>  
+</div>
+</body>
+</form>

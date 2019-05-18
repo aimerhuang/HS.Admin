@@ -1,0 +1,270 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.PdProductStockIn
+
+@{
+    ViewBag.Title = "商品入库单";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+
+}
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+    <script type='text/javascript' src='/Theme/scripts/jquery.min.js'></script>
+    <script type='text/javascrip' src='/Theme/scripts/common.yui.js'>
+    </script>
+    <script type='text/javascript' src='/Theme/Plugins/Dialog/Dialog.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/UI.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/Utils.yui.js'></script>
+    <script type='text/javascript' src='/Theme/scripts/DAO.yui.js'></script>
+
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+   <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+    <style type="text/css">
+        a:hover {
+            text-decoration: underline;
+        }
+        table#product_table thead tr td {
+            border-left: 1px solid #E1E1E1;
+            text-align:center;
+        }
+
+        table#product_table tbody tr td {
+            border-left: 1px solid #E1E1E1;
+            text-align: center;
+        }
+
+        table#product_table tbody tr td.lstd {
+            border-right: 1px solid #E1E1E1;
+        }
+
+    </style>
+
+}
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品入库单</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <div id="divEdit" class="boxs_detail_dispay">
+                <div class="tit_con">
+                    <input type="hidden" id="mSysNo" value="@Model.SysNo" />
+                    <input type="hidden" id="WarehouseSysNo" value="@ViewData["WarehouseSysNo"]" />
+                    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone">
+                        <tbody>
+                            <tr>
+                                <td width="180" class="nameright"><span class="v_star">*</span>仓库名称</td>
+                                <td>@Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetWarehouseName(int.Parse(ViewData["WarehouseSysNo"].ToString()))</td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright"><span class="v_star">*</span>入库单号</td>
+                                <td>
+                                    <input type="text" name="StockInNo" id="StockInNo" save="StockInNo" maxlength="50" value="@if (Model.StockInNo != null){@Model.StockInNo}" class="wd200" />
+                                    <span class="prompt m10_l" id="c_StockInNo">填写入库单号</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="180" class="nameright"><span class="v_star">*</span>入库时间</td>
+                                <td>
+                                    <div class="date_btn" style="position: relative; float: left;">
+                                        <input name="StorageTime" id="StorageTime" style="width:136px;" class="input_ht26 valid" save="StorageTime" onfocus="UI.Date({el:'StartTime', dateFmt: 'yyyy-MM-dd HH:mm'})" type="text" value="@(Model.StorageTime != null ? DateTime.Now.ToString("yyyy-MM-dd HH:mm") : Model.StorageTime.ToString("yyyy-MM-dd HH:mm"))">
+                                        <button onclick="UI.Date({ el: 'StorageTime', dateFmt: 'yyyy-MM-dd HH:mm' }); return false;" class="btn btn_ht26" title="日历"><span class="icon_calendar"></span></button>
+                                    </div>
+                                    <div style="position: relative; float: left;"><span class="prompt m10_l" id="c_StorageTime">填写入库时间</span></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright">
+
+                                </td>
+                                <td style="text-align:right;">
+                                    <button id="btnAdd" class="btn btn_blue btn_ht30 m10_r" type="button">
+                                        <span class="icon_white icon_thumbs_up"></span>
+                                        <span>添加商品</span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright"><span class="v_star">*</span>已选择商品<br/><span class="prompt m10_l" id="c_Product">选择商品</span></td>
+                                <td>
+                                    <table id="product_table" style="width: 100%;">
+                                        <thead><tr><td>商品编号</td><td>后台显示名称</td><td><span class="v_star">*</span>入库数量</td><td class="lstd">操作</td></tr></thead>
+                                        <tbody id="protbody">
+                                                @{
+                                                    List<Hyt.Model.PdProductStockInDetailList> PdProductStockInDetail = Hyt.BLL.Warehouse.PdProductStockInDetailBo.Instance.GetProductStockInDetailBy(Model.SysNo);
+                                                        if (Model.SysNo > 0 && PdProductStockInDetail.Count > 0)
+                                                        {
+                                                            foreach (Hyt.Model.PdProductStockInDetailList item in PdProductStockInDetail)
+                                                            {
+                                                                <tr id="@item.PdProductSysNo"><td>@item.ErpCode</td><td>@item.EasName</td><td><input type="text" lid="@item.PdProductSysNo" value="@item.StorageQuantity" class="squantity" /></td><td class="lstd"><a href="javascript:void(0);" class="delTr" style="color:#3366CC;">删除</a></td></tr>
+                                                            }
+                                                        }
+                                                 }
+                                        </tbody>
+                                   </table>
+                                </td>
+                           </tr>
+                           <tr>
+                               <td colspan="2" style="text-align:center;">
+                                   <button id="btnSave" class="btn btn_blue btn_ht30 m10_r" type="submit">
+                                       <span class="icon_save icon_white"></span>
+                                       <span>保存</span>
+                                   </button>
+                                   @{ 
+                                       if(Model.SysNo > 0)
+                                       { 
+                                           <button id="btnCancel" class="btn btn_red btn_ht30 m10_r" type="submit">
+                                               <span class="icon_trash icon_white"></span>
+                                               <span>作废</span>
+                                           </button>
+                                       }
+                                   }
+                               </td>
+                           </tr>
+                          </tbody>
+                 </table>
+              </div>
+           </div>
+        </div>
+    </div>
+</div>
+
+@section FooterJs{
+    <script type="text/javascript">
+            $(function () {
+
+            });
+ 
+
+            //选择模板
+            $("#btnAdd").live('click', function () {
+                DAO.SelectPdProduct({
+                    callBack: function (data) {
+                        var html = $.trim($("#protbody").html());
+                        var strHtml = "";
+                        for(var i = 0 ; i < data.length ; i++)
+                        {
+                            flag = true;
+                            $("tbody#protbody tr").each(function () {
+                                if ($.trim($(this).attr('id')) == $.trim(data[i].SysNo)) {
+                                    flag = false;
+                                }                              
+                            });
+                            if (flag)
+                            {
+                                strHtml += '<tr id="' + data[i].SysNo + '"><td>' + data[i].ErpCode + '</td><td>' + data[i].EasName + '</td><td><input type="text" lid="' + data[i].SysNo + '" value="" class="squantity"/></td><td class="lstd"><a href="javascript:void(0);" class="delTr" style="color:#3366CC;">删除</a></td></tr>';
+                            }
+                        }
+                        if (html == "") {
+                            $("#protbody").html(strHtml);
+                        } else {
+                            $("#protbody").html(html + strHtml);
+                        }
+                    }
+                });
+            });
+            $(".delTr").live('click', function () {
+                $(this).parent().parent().remove();
+            });
+
+            $("#btnSave").live('click', function () {
+                var aValid = true;
+                if ($.trim($("#StockInNo").val()) == "") {
+                    $("#StockInNo").css("border", "1px solid #C53A28");
+                    $('#c_' + $("#StockInNo").attr('id')).attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $("#StockInNo").css("border", "1px solid #CCCCCC");
+                    $('#c_' + $("#StockInNo").attr('id')).attr('class', 'success m10_l');
+                }
+                if ($.trim($("#StorageTime").val()) == "") {
+                    $("#StorageTime").css("border", "1px solid #C53A28");
+                    $('#c_' + $("#StorageTime").attr('id')).attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $("#StorageTime").css("border", "1px solid #CCCCCC");
+                    $('#c_' + $("#StorageTime").attr('id')).attr('class', 'success m10_l');
+                }
+                var html = $.trim($("#protbody").html());
+                if (html == "") {
+                    $('#c_Product').attr('class', 'error m10_l');
+                    aValid = false;
+                } else {
+                    $('#c_Product').attr('class', 'success m10_l');
+                }
+                if (html != "") {
+                    $("tbody#protbody tr").each(function () {
+                        if ($.trim($(this).find("input.squantity").val()) == "") {
+                            $(this).find("input.squantity").css("border", "1px solid #C53A28");
+                            aValid = false;
+                        } else {
+                            $(this).find("input.squantity").css("border", "1px solid #CCCCCC");
+                        }
+                    });
+                }
+                if (!aValid) {
+                    return false;
+                }
+ 
+                var productlis = "";
+                $("tbody#protbody tr").each(function () {
+                    if (productlis == "") {
+                        productlis = $(this).find("input.squantity").attr("lid") + "," + $(this).find("input.squantity").val();
+                    } else {
+                        productlis += ";" + $(this).find("input.squantity").attr("lid") + "," + $(this).find("input.squantity").val();
+                    }
+                });
+                $.ajax({
+                    url: '@Url.Action("SavePdProductStockIn")',
+                    type: 'post',
+                    data: {
+                        SysNo: $("#mSysNo").val(),
+                        StockInNo: $.trim($("#StockInNo").val()),
+                        StorageTime: $.trim($("#StorageTime").val()),
+                        WarehouseSysNo:$("#WarehouseSysNo").val(),
+                        PdProductStockInDetail: productlis
+                    },
+                    success: function (data) {
+                        if (data.Status) {
+                            //Utils.alert(data.Message, function () {
+                                //alert($("#WarehouseSysNo").val());
+                                UI.CloseTab(null, "/Warehouse/ProductStockInList?WarehouseSysNo=" + $("#WarehouseSysNo").val(), null, true);
+                           // }, 'succeed');
+                        } else {
+                            UI.Alert({
+                                content: data.Message
+                            });
+                        }
+                    }
+                });
+            });
+
+        //作废
+        $("#btnCancel").click(function () {
+            UI.Confirm({
+                content: "确认作废?",
+                ok: function () {
+                    $.post('/Warehouse/CancelProductStockIn', { id: $("#mSysNo").val() }, function (r) {
+                        if (r.Status) {
+                            //Utils.alert(r.Message, function () {
+                                UI.CloseTab(null, "/Warehouse/ProductStockInList?WarehouseSysNo=" + $("#WarehouseSysNo").val(), null, true);
+                            //}, 'succeed');
+                        }
+                        else {
+                            UI.Alert({
+                                content: r.Message
+                            });
+                        }
+                    });
+                },
+                cancel: true
+            });
+        });
+    </script>
+}

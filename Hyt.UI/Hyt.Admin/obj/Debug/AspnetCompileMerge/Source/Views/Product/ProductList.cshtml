@@ -1,0 +1,921 @@
+﻿@{
+    ViewBag.Title = "ProductList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBPdProductDetail>
+
+@section HeadCss
+{
+    <style type="text/css">
+        #divMsg dl dt, #divMsg dl dd {
+            width: 100%;
+        }
+
+        #divMsg dl dd {
+            color: red;
+        }
+
+            #divMsg dl dd span {
+                width: 100px;
+                text-align: right;
+                display: block;
+                float: left;
+                color: #000;
+            }
+
+        #divMsg .msg_context_box {
+            max-height: 100px;
+            overflow: auto;
+        }
+    </style>
+}
+
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"> </script>
+}
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001201, ".PD1001201")
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001202, ".PD1001202")
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001203, ".PD1001203")
+<!--高级搜索开始-->
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">代理商</td>
+                <td width="75%">
+                    <select id="complexAgentSysNo"></select>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">分销商</td>
+                <td width="75%">
+                    <select id="complexDealerSysNo"></select>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">系统编号</td>
+                <td width="75%">
+                    <input type="text" id="complexSysno" value="" class="wd156" />
+                </td>
+            </tr>
+            <tr>
+                <td align="right">商品类型</td>
+                <td>
+                    <select name="status" id="complexType" class="wd170">
+                        <option value="-1" selected="selected">全部</option>
+                        @{
+                            foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型)))
+                            {
+                                <option value="@dict.Key">@dict.Value</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">前台显示</td>
+                <td>
+                    <select name="IsFrontDisplay" id="complexIsFrontDisplay" class="select_ht28">
+                        @{
+                            foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.前台显示)))
+                            {
+                                if (@dict.Key == 1)
+                                {
+                                    <option value="@dict.Key" >@dict.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        }
+                        <option value="-1" selected="selected">全部</option>
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td align="right">状态</td>
+                <td>
+                    <select name="status" id="complexStatus" class="wd170">
+                        <option value="-1" selected="selected">全部</option>
+                        @{
+                            foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                            {
+                                if (dict.Key != 2)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">后台显示名称</td>
+                <td width="75%">
+                    <input type="text" id="complexProductName" value="" class="wd156" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">商品编号</td>
+                <td width="75%">
+                    <input type="text" id="complexErpCode" value="" class="wd156" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">条形码</td>
+                <td width="75%">
+                    <input type="text" id="complexBarcode" value="" class="wd156" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">商品分类</td>
+                <td width="75%" id="btn_selectCategory">
+                    <input id="complexCategory" name="txt_aprentProductCategory" type="text" value="选择分类" class="wd156" name="" readonly="readonly" />
+                    <input type="hidden" id="complexCategorySysno" value="" class="wd156" />
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">更新时间</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtBDate' })" id="txtBDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtBDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtEDate' })" id="txtEDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtEDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">创建时间</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtCBDate' })" id="txtCBDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtCBDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75" class="h_else">
+                    <div class="date_btn">
+                        <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'txtCEDate' })" id="txtCEDate" name="">
+                        <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'txtCEDate'})" type="button"><span class="icon_calendar"></span></button>
+                    </div>
+                </td>
+            </tr>
+
+            <tr>
+                <td width="25%" align="right">前台下单</td>
+                <td width="75%">
+                    @*<input name="" type="checkbox" value="" class="m5_r" />*@
+                    <select id="CanFrontEndOrder" name="CanFrontEndOrder">
+                        <option value="-1" selected="selected">全部</option>
+                        <option value="1">能下</option>
+                        <option value="0">不能</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align="right">商品产地</td>
+                <td>
+                    <select name="status" id="originType" class="wd170">
+                        <option value="-1" selected="selected">全部</option>
+                        @{
+                            foreach (var oItem in (ViewBag.OriginList as IList<Hyt.Model.Origin>))
+                            {
+                                <option value="@oItem.SysNo">@oItem.Origin_Name</option>
+                            }
+                        }
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" id="btnComplexSearch" class="btn btn_blue btn_ht30 bold">开始查询</button>
+        <button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+<!--高级搜索结束-->
+
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>商品列表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                    <span class="veralign_t fl m10_l">代理商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="agentSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">分销商</span>
+                    <div class="fl m10_l" style="margin-right: 10px">
+                        <select id="dealerSysNo"></select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">前台显示</span>
+                    <div class="m10_l fl">
+                        <select name="IsFrontDisplay" id="IsFrontDisplay" class="select_ht28">
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.前台显示)))
+                                {
+                                    if (@dict.Key == 1)
+                                    {
+                                        <option value="@dict.Key" >@dict.Value</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            }
+                            <option value="-1" selected="selected">全部</option>
+                        </select>
+                    </div>
+
+                    <span class="veralign_t fl m10_l">状态</span>
+                    <div class="m10_l fl">
+                        <select name="status" id="status" class="select_ht28">
+                            <option value="-1" selected="selected">全部</option>
+                            @{
+                                foreach (var dict in Hyt.Util.EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态)))
+                                {
+                                    if (dict.Key != 2)
+                                    {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <div class="search_btn wd200 m10_l fl">
+                        <input name="" type="text" id="name" class="input_ht28" value="后台显示名称/商品编号..." onclick="$(this).select()" />
+                        <button class="btn btn_ht28 wd28" id="btnSearch" title="搜索" type="button"><span class="icon_search"></span></button>
+                    </div>
+                    <button class="btn btn_ht28 m10_l fl" title="高级搜索" id="JS_btnSearch" type="button"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <!--搜索结束-->
+                <!--功能按钮开始-->
+                <div class="left_tool">
+                    <button id="btn_add" class="btn btn_ht26 btn_blue m10_r PD1001201" title="添加商品"><span class="icon_white icon_plus"></span><span class="m5_l">添加商品</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r PD1001202" id="btnIntoStore" title="批量上架"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量上架</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r PD1001202" id="btnOutStore" title="批量下架"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量下架</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r PD1001202" id="btnChangePrice" title="批量调价"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量调价</span></button>
+                    <button type="button" id="btnImport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue PD1001203"><span class="icon_importing icon_white m5_r"></span><span>Excel商品导入</span></button>
+                    <button type="button" id="btnExport" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon icon_share icon_white"></span><span class="m5_l">Excel商品导出</span></button>
+                    <button type="button" id="btnExportLiJia" title="支持类型为.xls" class="btn btn_ht26 m10_r btn_blue"><span class="icon icon_share icon_white"></span><span class="m5_l">Excel利嘉模板商品导出</span></button>
+                    <button id="btn_qrcode" class="btn btn_ht26 btn_blue m10_r" title="生成当前页商品二维码"><span class="m5_l">生成当前页商品二维码</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r PD1001202" id="btnChangeCategories" title="批量修改分类"><span class="icon icon_white icon_pencil"></span><span class="m5_l">批量修改分类</span></button>
+                    <button class="btn btn_ht26 btn_blue m10_r PD1001202" id="btnSynchronizing" title="同步信息到B2B"><span class="icon icon_white icon_pencil"></span><span class="m5_l">同步商品到B2B(图片，描述)</span></button>
+                    @*<button class="btn btn_ht26 m10_l" id="btnExport" title="下载模板"><span class="icon_download_alt"></span><span class="m5_l">下载模板</span></button>*@
+                    <iframe id="pifrmImport" name="pifrmImport" src="@Url.Action("ImportExcel")" class="hide"></iframe>
+                </div>
+
+                <!--功能按钮结束-->
+
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+
+            </div>
+            <!--表格列结束-->
+
+        </div>
+    </div>
+</div>
+
+<div style="display: none;z-index: 9; background-color: White; position: absolute;" id="divMsg">
+</div>
+
+<script type="text/javascript">
+
+
+    //选中的记录SysNo列项
+    var checkedsysnolist = [];
+
+    //高级搜索
+    UI.searchbox($("#JS_btnSearch"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+    $("#name").defaultValue("后台显示名称/商品编号...");
+
+    var currentSearchType = 1;
+    ///当前的搜搜的数据
+    var currentSearchJson = null;
+
+    var curpage = 1;
+    //查询列表
+    function doSearch(id) {
+        checkedsysnolist = [];
+        var name;
+        if ($("#name").val() != "后台显示名称/商品编号...") {
+            name = $.trim($("#name").val());
+        }
+        currentSearchJson = {
+            id: id,
+            ProductName: name,
+            Status: $("#status").val(),
+            CanFrontEndOrder: -1,
+            IsFrontDisplay: $("#IsFrontDisplay").val(),
+            SelectedAgentSysNo: $("#agentSysNo").val(),
+            SelectedDealerSysNo: $("#dealerSysNo").val()
+        };
+        currentSearchType = 1;
+        curpage = id;
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("ProductList", "Product")',
+            { id: id, ProductName: name, Status: $("#status").val(), CanFrontEndOrder: -1, IsFrontDisplay: $("#IsFrontDisplay").val(), SelectedAgentSysNo: $("#agentSysNo").val(), SelectedDealerSysNo: $("#dealerSysNo").val() },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+
+            });
+
+    }
+
+    function doComplexSearch(id) {
+        checkedsysnolist = [];
+        var name, erpCode, barCode, startTime, endTime, createStartTime, createEndTime;
+        currentSearchType = 2;
+        if ($("#complexProductName").val() != "") {
+            name = $.trim($("#complexProductName").val());
+        }
+        if ($("#complexErpCode").val() != "") {
+            erpCode = $.trim($("#complexErpCode").val());
+        }
+        if ($("#complexBarcode").val() != "") {
+            barCode = $.trim($("#complexBarcode").val());
+        }
+        if ($("#txtBDate").val() != "") {
+            startTime = $.trim($("#txtBDate").val());
+        }
+
+        if ($("#txtEDate").val() != "") {
+            endTime = $.trim($("#txtEDate").val());
+        }
+        if ($("#txtCBDate").val() != "") {
+            createStartTime = $.trim($("#txtCBDate").val());
+        }
+        if ($("#txtCEDate").val() != "") {
+            createEndTime = $.trim($("#txtCEDate").val());
+        }
+
+
+        ///当前的高级搜索的数据
+        currentSearchJson = {
+            id: id,
+            ProductName: name,
+            StartTime: startTime,
+            EndTime: endTime,
+            CreateStartTime: createStartTime,
+            CreateEndTime: createEndTime,
+            SysNo: parseInt($("#complexSysno").val()),
+            ProductType: $("#complexType").val(),
+            Status: $("#complexStatus").val(),
+            IsFrontDisplay: $("#complexIsFrontDisplay").val(),
+            ErpCode: erpCode,
+            Barcode: barCode,
+            ProductCategorySysno: parseInt($("#complexCategorySysno").val()),
+            CanFrontEndOrder: $("#CanFrontEndOrder").val(),
+            SelectedAgentSysNo: $("#complexAgentSysNo").val(),
+            SelectedDealerSysNo: $("#complexDealerSysNo").val(),
+            OriginSysNo: $("#originType").val()
+        };
+
+        Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("ProductList", "Product")',
+            {
+                id: id, ProductName: name, StartTime: startTime, EndTime: endTime, CreateStartTime: createStartTime, CreateEndTime: createEndTime, SysNo: parseInt($("#complexSysno").val()), ProductType: $("#complexType").val(), Status: $("#complexStatus").val(),
+                IsFrontDisplay: $("#complexIsFrontDisplay").val(), ErpCode: erpCode, Barcode: barCode, ProductCategorySysno: parseInt($("#complexCategorySysno").val()), CanFrontEndOrder: $("#CanFrontEndOrder").val(),
+                SelectedAgentSysNo: $("#complexAgentSysNo").val(), SelectedDealerSysNo: $("#complexDealerSysNo").val(), OriginSysNo: $("#originType").val()
+            },
+            function (data) {
+                Utils.MaskStop();
+                $('#paging').html(data);
+            });
+    }
+
+    //查询按钮
+    $("#btnSearch").click(function () {
+        doSearch(1);
+    });
+
+    $("#btnComplexSearch").click(function () {
+        doComplexSearch(1);
+    });
+
+    $("#status").change(function () {
+        doSearch(1);
+    });
+
+    //添加按钮
+    $("#btn_add").click(function () {
+        UI.OpenCreatTab('添加商品', '@Url.Action("AddProduct")');
+    });
+
+    // 生成二维码
+    $('#btn_qrcode').click(function () {
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要生成二维码的商品' });
+            return;
+        }
+        window.open("@Url.Action("CreateProductQRCode")" + '?sysNos=' + checkedsysnolist.join(',').toString());
+    });
+
+    DAO.SelectProductCategory($("#complexCategory"), $("#complexCategory"), {
+        margin: {
+            vertical: 8,         //垂直位置
+            horizontal: -30        //水平位置
+        },
+        callBack: function (data) {
+            if (data.length == 0) {
+                $("#complexCategorySysno").val("0");
+                $("#complexCategory").val("选择分类");
+                return;
+            }
+            if (!!data) {
+                $("#complexCategorySysno").val(data[0].id);
+            }
+
+        }
+
+    });
+
+    Array.prototype.indexOf = function (val) {
+        for (var i = 0; i < this.length; i++) {
+            if ($.trim(this[i]) == $.trim(val)) return i;
+        }
+        return -1;
+    };
+    Array.prototype.remove = function (val) {
+        var index = this.indexOf(val);
+        if (index > -1) {
+            this.splice(index, 1);
+        }
+    };
+
+    $("#checkall").live("click", function () {
+        if ($(this).attr("checked") == "checked") {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") != "checked") {
+                    $(this).attr("checked", "checked");
+                    checkedsysnolist.push($(this).val());
+                }
+            });
+        } else {
+            $("#paging table tbody input:checkbox").each(function () {
+                if ($(this).attr("disabled") != "disabled" && $(this).attr("checked") == "checked") {
+                    $(this).removeAttr("checked");
+                    checkedsysnolist.remove($(this).val());
+                }
+            });
+        }
+    });
+
+
+
+    $("#paging table tbody input:checkbox").live('click', function () {
+        if ($(this).attr("checked")) {
+            checkedsysnolist.push($(this).val());
+        } else {
+            checkedsysnolist.remove($(this).val());
+        }
+    });
+
+    $("#btnChangePrice").click(function () {
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要调价的商品' });
+            return;
+        }
+
+        DAO.PriceAdjustmentRequest({
+            productSysNoList: checkedsysnolist,
+            success: function () {
+                UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');
+            }
+        });
+    });
+    //同步商品信息到B2B
+    $("#btnSynchronizing").click(function () {
+        var productSysNos = checkedsysnolist;
+
+        var paramData = "";
+        for (var key in currentSearchJson) {
+            currentSearchJson.ProductName = "undefined";  //修复商品编号搜索导出不了的问题
+            if (paramData != "") {
+                paramData += "&";
+            }
+            paramData += key + "=" + currentSearchJson[key];
+        }
+        if (paramData != "") {
+            paramData = "&" + paramData;
+        }
+
+        $.ajax({
+            url: "/Product/SynProductsToB2B?productSysNos=" + JSON.stringify(productSysNos) + paramData,
+            type: "get",
+            dataType: 'json',
+            data: {},
+            success: function (result) {
+                if (result.Status) {
+                    UI.Alert({
+                        content: '操作成功！'
+
+                    });
+                    //UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                    
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.Message) {
+                        message = result.Message;
+                    }
+                    UI.Alert({ content: message });
+                }
+            }
+        });
+
+        @*window.location = '@Url.Action("SynProductsToB2B")' + "?productSysNos=" + JSON.stringify(productSysNos) + paramData;
+        UI.tips.tip_alert('tips_shrot tips_success', '保存成功！');*@
+    });
+    //批量上架
+    $("#btnIntoStore").click(function () {
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要上架的商品' });
+            return;
+        }
+        var productSysNoList = "";
+        for (var i = 0 ; i < checkedsysnolist.length; i++) {
+            if (productSysNoList == "") {
+                productSysNoList = checkedsysnolist[i];
+            } else {
+                productSysNoList += ',' + checkedsysnolist[i];
+            }
+        }
+        var status = "@Hyt.Model.WorkflowStatus.ProductStatus.商品状态.上架.GetHashCode()";
+        changePLStatus(productSysNoList, status);
+    });
+
+    //批量下架
+    $("#btnOutStore").click(function () {
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要下架的商品' });
+            return;
+        }
+        var productSysNoList = "";
+        for (var i = 0 ; i < checkedsysnolist.length; i++) {
+            if (productSysNoList == "") {
+                productSysNoList = checkedsysnolist[i];
+            } else {
+                productSysNoList += ',' + checkedsysnolist[i];
+            }
+        }
+        var status = "@Hyt.Model.WorkflowStatus.ProductStatus.商品状态.下架.GetHashCode()";
+        changePLStatus(productSysNoList, status);
+    });
+
+    function changePLStatus(productSysNoList, status) {
+        var jsonData = { status: status, productSysNoList: productSysNoList };
+        $.ajax({
+            url: "/Product/UpdatePLProductStatus",
+            type: "post",
+            dataType: 'json',
+            data: jsonData,
+            success: function (result) {
+                if (result.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                    if (currentSearchType == 2) {
+                        doComplexSearch(@Model.CurrentPageIndex);
+                    } else {
+                        doSearch(@Model.CurrentPageIndex);
+                    }
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.Message) {
+                        message = result.Message;
+                    }
+                    UI.Alert({ content: message });
+                }
+            }
+        });
+    }
+
+    //取得订单状态
+    function GetPriceInfo(sysno, obj) {
+        $.ajax({
+            type: "POST",
+            url: "/Product/GetProductPriceInfo",
+            data: "productSysNo=" + sysno,
+            success: function (content) {
+                if (content != null && content != "") {
+
+                    $("#divMsg").html(content);
+                    $("#divMsg").css("display", "inline");
+                    var offset = $(obj).position();
+
+
+                    var parentPosition = $(obj).closest("table").position();
+                    var top;
+
+                    if ($("body").height() - (offset.top) < $("#divMsg").height()) {
+                        top = offset.top - $("#divMsg").height() + $(obj).height();
+                        if (top < 0) {
+                            top = 0;
+                        }
+
+                    } else {
+                        top = offset.top - 10;
+                    }
+
+                    $("#divMsg").css("top", top);
+                    $("#divMsg").css("left", offset.left + 40);
+                    $(document).one("click", function () { HidePriceInfo(); });
+                    $("#divMsg").one("click", function () { return false; });
+
+                }
+            }
+        });
+    }
+
+    function HidePriceInfo() {
+        $("#divMsg").hide();
+    }
+
+
+    window.top.ProductList_ShowMessage = function (result, message, confirm) {
+        var css = "tips_success";
+        if (!result.Status) {
+            css = "tips_wrong";
+        }
+        if (confirm) {
+            UI.Confirm({
+                content: message,
+                ok: function () {
+                    UI.OpenCreatTab('修改商品', "@Url.Action("EditProduct", "Product")" + "?sysNo=" + result.StatusCode);
+                },
+            });
+        } else {
+            UI.tips.tip_alert(css, message);
+        }
+    }
+
+    $(function () {
+        $.post("/Distribution/GetGetDaiLiShangListByCurUser", {}, function (data) {
+            $("#agentSysNo,#complexAgentSysNo").append("<option value='-1'>全部</option>");
+            $.each(data, function (idx, item) {
+                if (item.SysNo != undefined) {
+                    $("#agentSysNo,#complexAgentSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                }
+            });
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+            GetComplexDealersListByCreatedBy($("#complexAgentSysNo").val());
+        });
+        $("#agentSysNo").change(function () {
+            GetDealersListByCreatedBy($("#agentSysNo").val());
+        });
+        $("#complexAgentSysNo").change(function () {
+            GetComplexDealersListByCreatedBy($("#complexAgentSysNo").val());
+        });
+        $("#dealerSysNo").change(function () {
+            doSearch(1);
+        });
+        //$("#complexDealerSysNo").change(function () {
+        //doComplexSearch(1);
+        //});
+        function GetDealersListByCreatedBy(DealerCreatedBy) {
+            $("#dealerSysNo").html("");
+            if (DealerCreatedBy != -1) {
+                $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                    $("#dealerSysNo").append("<option value='-1'>全部</option>");
+                    $.each(data, function (idx, item) {
+                        if (item.SysNo != undefined) {
+                            $("#dealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    });
+                    doSearch();
+                });
+            } else {
+                $("#dealerSysNo").append("<option value='-1'>全部</option>");
+                doSearch();
+            }
+        }
+        function GetComplexDealersListByCreatedBy(DealerCreatedBy) {
+            $("#complexDealerSysNo").html("");
+            if (DealerCreatedBy != -1) {
+                $.post("/Distribution/GetDealersListByCreatedBy", { DealerCreatedBy: DealerCreatedBy }, function (data) {
+                    $("#complexDealerSysNo").append("<option value='-1'>全部</option>");
+                    $.each(data, function (idx, item) {
+                        if (item.SysNo != undefined) {
+                            $("#complexDealerSysNo").append("<option value='" + item.SysNo + "'>" + item.DealerName + "</option>");
+                        }
+                    });
+                });
+            } else {
+                $("#complexDealerSysNo").append("<option value='-1'>全部</option>");
+            }
+        }
+
+        //doSearch();
+        $("#name").keyup(function (e) {
+            if (e.keyCode == 13) {
+                doSearch();
+            }
+        });
+        //导出模板
+        @*$('#btnExport').click(function () {
+            window.location = '@Url.Action("ExportTemplate")';
+        });*@
+
+        $('#btnImport').click(function () {
+            if (window.frames["pifrmImport"].chooseFile) {
+                window.frames["pifrmImport"].chooseFile();
+            }
+        });
+    });
+    function maskStart() {
+        Utils.MaskStart($('.case'));
+    }
+
+    function maskStop() {
+        Utils.MaskStop();
+    }
+    //导入excel回调方法
+    function importCallBack(res) {
+        if (res.indexOf('成功') !== -1) {
+            UI.tips.tip_alert("tips_success", res);
+            setTimeout(function () {
+                doSearch();
+            }, 1000);
+        } else
+            UI.tips.tip_alert("tips_wrong", res);
+
+    }
+    //导出商品 王耀发 2015-12-38 创建 不勾选导出全部商品
+    $('#btnExport').click(function () {
+        //if (checkedsysnolist.length == 0) {
+        //    UI.Alert({ content: '请勾选要导出的商品' });
+        //    return;
+        //}
+        
+        //var productSysNos = checkedsysnolist;
+        //window.location = '@Url.Action("ExportProducts")' + "?productSysNos=" + JSON.stringify(productSysNos);
+        var productSysNos = checkedsysnolist;
+
+        var paramData = "";
+        for (var key in currentSearchJson) {
+            currentSearchJson.ProductName = "undefined";  //修复商品编号搜索导出不了的问题
+            if (paramData != "") {
+                paramData += "&";
+            }
+            paramData += key + "=" + currentSearchJson[key];
+        }
+        if (paramData != "") {
+            paramData = "&" + paramData;
+        }
+        window.location = '@Url.Action("ExportProducts")' + "?productSysNos=" + JSON.stringify(productSysNos) + paramData;
+        Utils.MaskStop();
+    });
+
+    //导出利嘉商品 罗勤尧 2017-5-17 创建 不勾选导出全部商品
+    $('#btnExportLiJia').click(function () {
+        //if (checkedsysnolist.length == 0) {
+        //    UI.Alert({ content: '请勾选要导出的商品' });
+        //    return;
+        //}
+
+        //var productSysNos = checkedsysnolist;
+        //window.location = 'Url.Action("ExportProducts")' + "?productSysNos=" + JSON.stringify(productSysNos);
+        var productSysNos = checkedsysnolist;
+
+        var paramData = "";
+        for (var key in currentSearchJson) {
+            if (paramData != "") {
+                paramData += "&";
+            }
+            paramData += key + "=" + currentSearchJson[key];
+        }
+        if (paramData != "") {
+            paramData = "&" + paramData;
+        }
+        window.location = '@Url.Action("ExportProductsJiaXin")' + "?productSysNos=" + JSON.stringify(productSysNos) + paramData;
+        Utils.MaskStop();
+    });
+    
+    //添加商品备案信息 2016-4-2 王耀发 创建
+    function OpenIcpTab(ProductSysNo) {
+        var url = "/Product/ProductIcpInfo?id=" + ProductSysNo;
+        var text = "商检备案：" + ProductSysNo;
+        UI.OpenCreatTab(text, url);
+    }
+
+    //批量修改商品类别
+    //2016-05-05 陈海裕 创建
+    var selectedCategory = new Array();    //已选择的商品分类对象列表
+    var deleteCategory = new Array();      //删除的商品分类对象列表
+    var options = {
+        margin: {
+            vertical: 14,
+            horizontal: -14
+        },
+        isMulti: true,
+        zIndex: 5,
+        callBack: function (data) {
+            deleteCategory = new Array();
+            //分析被移除的商品分类
+            $(selectedCategory).each(function (index, element) {
+                var isRemoved = true;
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].id == element) {
+                        isRemoved = false;
+                        break;
+                    }
+                }
+                if (isRemoved) {
+                    deleteCategory.push(element);
+                }
+            });
+            selectedCategory = new Array();
+            $(data).each(function (index, element) {
+                if (element.halfCheck == false) {
+                    selectedCategory.push(element.id);
+                } else {
+                    element.halfCheck = false
+                }
+            });
+
+            $.post('/Product/BatchUpdateProductsCategories', {
+                productSysNos: checkedsysnolist.toString(),
+                selectedCategory: selectedCategory.toString(),
+                deleteCategory: deleteCategory.toString()
+            }, function (result) {
+                if (result) {
+                    if (result.Status == true) {
+                        UI.tips.tip_alert("tips_success", result.Message);
+                    }
+                }
+            });
+        }
+    };
+    var beforeBinding = function (callback) {
+        // 检测商品
+        if (checkedsysnolist.length == 0) {
+            UI.Alert({ content: '请勾选要修改的商品' });
+            return;
+        }
+        var productSysNoList = "";
+        for (var i = 0 ; i < checkedsysnolist.length; i++) {
+            if (productSysNoList == "") {
+                productSysNoList = checkedsysnolist[i];
+            } else {
+                productSysNoList += ',' + checkedsysnolist[i];
+            }
+        }
+
+        $.get('/Ajax/GetProductsCategories', { productSysNoList: productSysNoList }, function (data) {
+            selectedCategory = data;
+            if (callback && typeof (callback) == 'function') {
+                callback(data);
+            }
+        });
+    }
+
+    var afterBinding = function () {
+
+    }
+
+    DAO.BatchSelectProductCategory($("#btnChangeCategories"), options, beforeBinding, afterBinding);
+</script>

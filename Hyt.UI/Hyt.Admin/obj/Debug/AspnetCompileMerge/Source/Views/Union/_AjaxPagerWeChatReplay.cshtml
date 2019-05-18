@@ -1,0 +1,45 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBMkWeixinQuestion>
+@{
+    ViewBag.Title = "_AjaxPagerWeChatReplay";
+}
+@if (Model != null && Model.TData.Count > 0)
+{
+    foreach (var item in Model.TData.Reverse())
+    {
+        if (item.Type == (int)Hyt.Model.WorkflowStatus.MarketingStatus.微信咨询类型.咨询)
+        {
+    <dl>
+        <dt><span class="more10r">@item.MessagesTime.ToString("yyyy-MM-dd HH:mm")</span><span class="green">微信号：@item.ShowName</span></dt>
+        <dd>@item.Messages</dd>
+        <div class="arrow_l"></div>
+    </dl>
+        }
+        else
+        {
+    <dl class="answer">
+        <dt><span class="more10r">@item.MessagesTime.ToString("yyyy-MM-dd HH:mm")</span><span class="green">客服账号：@item.ShowName</span></dt>
+        <dd>@item.Messages</dd>
+        <div class="arrow_r"></div>
+    </dl>
+
+        }
+    }
+    <script>   
+        $("#pagecount").val('@Model.TotalPageCount');
+        if ($("#pagecount").val()==1) {          
+            $("#seeMore").hide();
+        }
+    </script>
+}
+else
+{
+    <dl>
+        <dd class="align_l p10_l bgr_eb odd_color">暂无数据</dd>
+    </dl>  
+     <script>
+         $("#seeMore").hide();      
+    </script>                
+               
+}
+

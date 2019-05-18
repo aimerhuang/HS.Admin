@@ -1,0 +1,181 @@
+﻿@{
+    ViewBag.Title = "系统日志管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+
+<!--下面是弹出框-->
+<div id="JS_tanchu" class="f14 bold red" style="display:none; text-align:left; vertical-align:top;"></div>
+<!--弹出框end-->
+
+<div class="search_box" id="JS_search">
+  <div class="search_title clearfix"> <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+  <div class="search_body">
+    <table width="100%">
+        <tr>
+            <td width="30%" align="right">日志级别</td>
+            <td width="70%">
+                <select class="wd170" complexSearchItem="logLevels">
+                    <option selected="selected">全部</option>
+                    @ViewBag.LogLevel
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">来源</td>
+            <td>
+                <select class="wd170" complexSearchItem="Sources">
+                    <option selected="selected">全部</option>
+                    @ViewBag.Source
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">操作对象类型</td>
+            <td>
+                <select class="wd170" complexSearchItem="TargetType">
+                    <option selected="selected">全部</option>
+                    @ViewBag.TargetType
+                </select>
+            </td>
+        </tr>
+        <tr>
+            <td align="right">操作对象</td>
+            <td><input type="text" class="wd156" value="" complexSearchItem="TargetSysNo"></td>
+        </tr>
+        <tr>
+            <td align="right">操作人编号</td>
+            <td><input type="number" class="wd156" value="" complexSearchItem="Operator"></td>
+        </tr>
+        <tr>
+            <td align="right">操作IP</td>
+            <td><input type="text" class="wd156" value="" complexSearchItem="logIp"></td>
+        </tr>
+        <tr>
+            <td align="right">操作内容</td>
+            <td><input type="text" class="wd156" value="" complexSearchItem="Message"></td>
+        </tr>
+        <tr>
+            <td align="right">操作时间</td>
+            <td>
+                <div class="date_btn">
+                <input type="text" onfocus="UI.Date({el:'BeginDate',dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'EndDate\')}'})" value="" complexSearchItem="BeginDate" id="BeginDate" >
+                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'BeginDate',dateFmt:'yyyy-MM-dd HH:mm:ss',maxDate:'#F{$dp.$D(\'EndDate\')}'})"><span class="icon_calendar"></span></button>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td align="right"></td>
+            <td>
+                <div class="date_btn">
+                    <input type="text" onfocus="UI.Date({el:'EndDate',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'BeginDate\')}'})" value="" complexSearchItem="EndDate" id="EndDate" />
+                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'EndDate',dateFmt:'yyyy-MM-dd HH:mm:ss',minDate:'#F{$dp.$D(\'BeginDate\')}'})"><span class="icon_calendar"></span></button>
+                </div>
+            </td>
+        </tr>
+    </table>
+  </div>
+    <div class="search_foot">
+        <button title="开始查询" id="btnComplexSearch" class="btn btn_blue btn_ht30 bold">开始查询</button><button title="清除条件" type="reset" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+    
+</div>
+
+<div class="case">
+  <div class="boxs">
+  
+    <div class="boxs_tit head_m"><span class="ra10 c6"><button class="btn btn_ht26 m10_r" style="display:none"><span class="icon_share_alt"></span><span class="m5_l">返回</span></button></span>
+      <h3>系统日志管理</h3>
+    </div>
+    
+    <div class="boxs_con_c1">    
+    
+      <!--工具条开始-->
+      <div class="boxs_tool"> 
+          <!--功能按钮开始-->
+          <div class="right_tool clearfix" style="float:none;"><span class="fl  m10_r">日志级别</span>
+                    <select class="select_ht28 wd120 fl m10_r" searchItem="logLevels">
+                        <option selected="selected">全部</option>
+                        @ViewBag.LogLevel
+	                   </select><span class="fl  m10_r">来源</span>
+                       <select class="select_ht28 wd120 fl m10_r" searchItem="Sources">
+                           <option selected="selected">全部</option>
+                           @ViewBag.Source
+                       </select><span class="fl">操作人</span><input type="text" class="wd80 m10_r m10_l fl" value="" searchItem="Operator"><span class="fl">操作人IP</span><input type="text"  class="wd80 m10_r m10_l fl" value="" searchItem="logIp">
+                                                                                                                                          <span class="fl">操作内容</span><input type="text"  class="wd80 m10_r m10_l fl" value="" searchItem="Message">                                      
+                                                                                                                                          <button id="searchBtn" title="查询" class="btn btn_ht26 fl" type="button"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+          <button id="JS_gaoji" title="高级搜索" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+          </div>
+        <!--功能按钮结束-->
+      </div>
+      <!--工具条结束-->
+      
+            <div class="paging" id="paging">
+            </div>
+      
+    </div>
+  </div>
+    
+</div>
+
+
+
+  
+
+<script type="text/javascript">
+
+    
+    $(document).ready(function () {
+        UI.searchbox($("#JS_gaoji"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+        
+        $("[searchItem='logLevels'],[searchItem='Sources']").change(function () {
+            doSearch(1);
+        });
+
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+
+        doSearch(1);
+    });
+
+    function doSearch(id) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Sys/DoLogPaging/?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("id", id);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function browseDetail(id) {
+        var text = $("#detail_" + id).val();
+        if (text == "")
+            return false;
+        var obj = document.getElementById('JS_tanchu');
+        $("#JS_tanchu").html("<pre style='word-wrap: break-word; white-space: pre-wrap; white-space: -moz-pre-wrap;'>" + text + "</pre>");
+        UI.DialogBox({  content: obj, width:700, title: '异常消息', padding: '10px', cancelVal: '关闭', cancel: true, footerClass: 'aui_none' });
+    }
+    
+    $("#btnComplexSearch").click(function () {
+        doComplexSearch();
+    });
+    
+    function doComplexSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Sys/DoLogPaging?r=" + Math.random(), "complexSearchItem", function (p) {
+            p.setParams("id", 1);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            $("#JS_search_nav").click();
+            Utils.MaskStop();
+        });
+    }
+    
+</script>

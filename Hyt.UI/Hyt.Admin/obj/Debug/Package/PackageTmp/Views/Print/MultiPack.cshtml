@@ -1,0 +1,167 @@
+﻿@model List<Hyt.Model.Transfer.CBPrtPack>
+@{
+    ViewBag.Title = "批量打印包裹单";
+    Layout = "~/Views/Shared/_Print.cshtml";
+    List<int> ids = ViewBag.ids;
+    string Template =string.Empty;
+    List<Hyt.Model.Transfer.CBLgDeliveryPrintTemplate> TemplateList = ViewBag.TemplateList;
+    int currectTemplateID = 0;
+    if (TemplateList != null && TemplateList.Count>0)
+    { 
+        if(Request.QueryString["TemplateID"]!=null)
+        {
+           int.TryParse(Request.QueryString["TemplateID"].ToString(), out currectTemplateID);
+           var item = TemplateList.FirstOrDefault(m => m.SysNo == currectTemplateID);
+           if(item!=null)
+           {
+                Template = item.Template;
+           }
+        }
+        else
+        {
+            Template = TemplateList.FirstOrDefault().Template;
+            currectTemplateID = TemplateList.FirstOrDefault().SysNo;
+        }
+    }
+    string LODOPContent = String.Empty;
+    if (ids != null && !string.IsNullOrEmpty(Template))
+    {
+        var index = Template.IndexOf(");");
+        if(index>-1)
+        {
+         Template = Template.Substring(index + 2);
+        }
+        ids.ForEach((x) =>
+        {
+            var item = Model.FirstOrDefault(m => m.SysNo == x);
+            if(item!=null)
+            {
+                LODOPContent += " LODOP.NewPage();\n";
+                LODOPContent += ReplacePack(Template,item)+"\n";
+            }
+        });
+    }
+}
+@functions{
+    /// <summary>
+    /// 模版替换
+    /// </summary>
+    /// <param name="template"></param>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    string ReplacePack(string template, Hyt.Model.Transfer.CBPrtPack item)
+    {
+        var dic = new Dictionary<string, string>();
+        if(!string.IsNullOrEmpty(item.DsOrderSysNo))//升舱
+        {
+            dic.Add("fromName", GetScript(item.ShopName));
+            dic.Add("fromTel", GetScript(item.ServicePhone));
+        }
+        else
+        {
+          dic.Add("fromName", GetScript("商城"));
+          dic.Add("fromTel", GetScript("4000889898"));
+        }
+        dic.Add("fromAddress", GetScript("快递员您辛苦了，麻烦及时送达给我们这位尊贵的顾客，谢谢！"));
+        dic.Add("fromCity", GetScript(item.FromCity == null
+                                 ? ""
+                                 : Hyt.BLL.Basic.BasicAreaBo.Instance.GetAreaFullName(int.Parse(item.FromCity))));
+        dic.Add("toName", GetScript(item.ToName));
+        dic.Add("toTel", GetScript(item.ToTel));
+        dic.Add("toAddress", GetScript(item.ToAddress));
+        dic.Add("toCity", GetScript(item.ToCity == null ? "" : Hyt.BLL.Basic.BasicAreaBo.Instance.GetAreaFullName(int.Parse(item.ToCity))));
+        dic.Add("toMobile", GetScript(item.ToMobile));
+        dic.Add("stockOutSysNo", GetScript(item.SysNo.ToString()));
+        dic.Add("printTime", GetScript(DateTime.Now.ToString("yyyy-MM-dd")));
+        dic.Add("electronicName",GetScript("电子产品"));
+        dic.Add("orderSysNo", GetScript(item.OrderSysNo.ToString()));
+        dic.Add("dsOrderSysNo", GetScript(item.DsOrderSysNo));
+        return dic.Aggregate(template, (current, m) => current.Replace(m.Key, m.Value));
+    }
+    string GetScript(string field)
+    {
+        if (!string.IsNullOrEmpty(field))
+        {
+            return  "\""+ field.Trim()+"\"";
+        }
+        return "\"\"";
+    }  
+}
+
+<div class="boxs_tool">
+    <!--搜索开始-->
+    <div class="right_tool clearfix">
+        <div class="fl m10_l">
+            <select class="select_ht28" id="DeliveryPrintTemplateKV" name="DeliveryPrintTemplateKV" onchange="javascript:goto($(this).val());">
+                @if (TemplateList != null && TemplateList.Count > 0)
+                {
+                    foreach (var item in TemplateList)
+                    {
+                        if (currectTemplateID==item.SysNo)
+                        { 
+                          <option value='@item.SysNo' selected>@item.Name</option>
+                        }
+                        else
+                        {
+                            <option value='@item.SysNo'>@item.Name</option>
+                        }
+                    }
+                }
+                else
+                {
+                  <option value='0'>无模板</option>
+                }
+            </select>
+        </div>
+    </div>
+</div>
+    @section FooterJs{
+    <script type="text/javascript">
+    var LODOP; //声明为全局变量
+    //直接加载打印预览
+    window.onload = function myPreviewLoad() {
+        LODOP = getLodop(document.getElementById('LODOP_OB'), document.getElementById('LODOP_EM'));
+        LODOP.PRINT_INITA(0, 0, 881, 484, "包裹单批量打印");
+        @Html.Raw(LODOPContent)
+        LODOP.SET_SHOW_MODE("PREVIEW_IN_BROWSE", 1);
+        LODOP.SET_SHOW_MODE("HIDE_QBUTTIN_PREVIEW", 1);
+        LODOP.SET_SHOW_MODE("HIDE_PAPER_BOARD", 1);
+        LODOP.PREVIEW();
+        if (navigator.userAgent.indexOf('Firefox') >= 0 && location.href.indexOf('#reloaded') == -1) {
+            location.href = location.href + "#reloaded";
+            location.reload();
+        }
+    };
+    function goto(id) {
+        var ids = "";
+        var type = "";
+        var tsysno = "";
+        var deliveryType = "";
+        @if(Request.QueryString["ids"]!=null)
+         {
+            <text>ids = '@Request.QueryString["ids"].ToString()';</text>
+         }
+        @if (Request.QueryString["type"] != null)
+        {
+            <text>type = '@Request.QueryString["type"].ToString()';</text>
+        }
+         @if (Request.QueryString["tsysno"] != null)
+         {
+            <text>tsysno = '@Request.QueryString["tsysno"].ToString()';</text>
+         }
+        @if (Request.QueryString["deliveryType"] != null)
+         {
+            <text>deliveryType = '@Request.QueryString["deliveryType"].ToString()';</text>
+         }
+        var url = "/Print/PrintMultiOutStock?ids=" + ids + "&type=" + type + "&tsysno=" + tsysno + "&deliveryType=" + deliveryType + "&TemplateID=" + id;
+        if (navigator.userAgent.indexOf('Firefox') >= 0)
+        {
+            url = url + "#reloaded";
+        }
+        location.href = url;
+    }
+    </script>
+    }
+
+
+

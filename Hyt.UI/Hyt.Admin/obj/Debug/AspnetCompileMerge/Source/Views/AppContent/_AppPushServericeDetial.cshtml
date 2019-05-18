@@ -1,0 +1,251 @@
+﻿@using Hyt.Model.Transfer
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@using Hyt.Util.Extension
+@model  CBApPushService    
+
+@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+}
+
+<form id="f_pushForm">
+    @Html.HiddenFor(m=>m.SysNo,new{dn="SysNo"})    
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+                <tbody>
+                    <tr>
+                        <td width="20%" class="nameright border_rnone">服务类型</td>
+                        <td width="80%">
+                            <select class="{select:true,messages:{select:'必须选择服务类型'}} select_ht28 fl wd80" id="ServiceType" name="ServiceType" dn="ServiceType">
+                                <option>请选择</option>
+                                @{
+                                    var appTypeList = EnumUtil.ToDictionary(typeof(Hyt.Model.WorkflowStatus.AppStatus.App推送服务类型));
+                                    foreach (var key in appTypeList.Keys)
+                                    {
+                                        var selectListItem = appTypeList[key];
+                                        <option @((Model != null && Model.ServiceType == key) ? "selected='selected'" : "") value="@key">@selectListItem</option>
+                                    } 
+                                }
+                            </select>
+                            <span id="ServiceType_error" class="prompt m10_l" msg="服务类型">服务类型</span></td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">App类型</td>
+                        <td>
+                            <select class="select_ht28 fl wd80" dn="AppType">
+                                <option value="@((int)AppStatus.App推送App类型.全部)">全部</option>
+                                @{
+                                    var osTypeList = EnumUtil.ToDictionary(typeof(AppStatus.App推送App类型));
+                                    foreach (var key in osTypeList.Keys)
+                                    {
+                                        if (key == (int) AppStatus.App推送App类型.全部)
+                                        {
+                                            continue;
+                                        }
+                                        var selectListItem = osTypeList[key];
+                                        <option @((Model != null && Model.AppType  == key) ? "selected='selected'" : "") value="@key">@selectListItem</option>
+                                    } 
+                                }
+              
+                            </select>
+                            <span id="c_absa" class="prompt m10_l">App类型</span></td>
+                    </tr> 
+                    @{ 
+                        var dataModel = Model ?? new CBApPushService();
+                    }    
+                    <tr>
+                        <td class="nameright border_rnone">标题</td>
+                        <td>
+                            <input type="text" class="{required:true,maxlength:100,messages:{required:'必须填写标题',maxlength:'100个字符以内'}} wd240" id="Title" name="Title" dn="Title" value="@dataModel.Title" /><span id="Title_error" class="prompt m10_l" msg="标题">标题</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_rnone">内容</td>
+                        <td><textarea name="" cols=""  rows="6" id="Content" name="Content" dn="Content" class="{required:true,maxlength:200,messages:{required:'必须填写内容',maxlength:'200个字符以内'}} wd240" >@dataModel.Content</textarea>
+                            <span id="Content_error" class="prompt m10_l" msg="消息内容">消息内容</span>
+                        </td>
+                    </tr> 
+                    <tr class="pro @((int)AppStatus.App推送服务类型.产品详情 == dataModel.ServiceType?"":"hide")">
+                        <td class="nameright border_rnone">商品</td>
+                        <td><input type="text" class="wd240" id="Product" name="Product" dn="Parameter" value="@dataModel.Parameter" readonly="readonly"  /><button class="btn btn_ht26 btn_blue m10_l" id="btn_selectProduct" >选择</button></td>
+                    </tr>
+                    <tr class="app @((int)AppStatus.App推送服务类型.App浏览器 == dataModel.ServiceType?"":"hide")">
+                        <td class="nameright border_rnone">URL</td>
+                        <td>
+                            <input type="text" class="wd240" id="Url" name="Url" dn="Url" value="@dataModel.Parameter" />
+                        </td>
+                    </tr>
+                    <tr class="cr @((int)AppStatus.App推送服务类型.个人消息 == dataModel.ServiceType?"":"hide")">
+                        <td class="nameright border_rnone">群发</td>    
+                        <td>
+                            是<input type="radio" name="isGroup" checked="checked" onclick="showCustomerInputBox(false)"/>&nbsp;&nbsp;&nbsp;&nbsp;否<input id="persnolMessage" type="radio" name="isGroup" onclick="showCustomerInputBox(true)" @(!string.IsNullOrWhiteSpace(dataModel.CustomerAccount)?"checked='checked'":"")/>
+                        </td>
+                    </tr>
+                    <tr class="cr_single @(string.IsNullOrWhiteSpace(dataModel.CustomerAccount)?"hide":"")" >
+                         <td class="nameright border_rnone">客户</td>
+                        <td>
+                            <input type="text" class="wd240" id="CustomerAccount" name="CustomerAccount" dn="CustomerAccount" value="@dataModel.CustomerAccount" />   
+                            <span id="CustomerAccount_error" class="prompt m10_l" msg="客户账号">客户账号</span>
+                        </td>
+                    </tr>    
+                </tbody>
+            </table>
+        </div>
+    </div>   
+</form>
+<script type="text/javascript">
+    $(function() {
+        $('#ServiceType').change(function() {
+            var index = $(this)[0].selectedIndex;
+            switch (index) {
+            case @((int)AppStatus.App推送服务类型.产品详情):
+                {
+                    $(this).parents("table").find(".pro").removeClass('hide');
+                    $(this).parents("table").find(".app").addClass('hide');
+                    $(this).parents("table").find(".cr").addClass('hide');
+                    break;
+                }
+            case @((int)AppStatus.App推送服务类型.App浏览器):
+                {
+                    $(this).parents("table").find(".app").removeClass('hide');
+                    $(this).parents("table").find(".pro").addClass('hide');
+                    $(this).parents("table").find(".cr").addClass('hide');
+                    break;
+                }
+            case @((int)AppStatus.App推送服务类型.个人消息):
+                {
+                    $(this).parents("table").find(".cr").removeClass('hide');
+                    $(this).parents("table").find(".app").addClass('hide');
+                    $(this).parents("table").find(".pro").addClass('hide');
+                    break;
+                }
+            default:
+                {
+                    $(this).parents("table").find(".pro").addClass('hide');
+                    $(this).parents("table").find(".app").addClass('hide');
+                    $(this).parents("table").find(".cr").addClass('hide');
+                    break;
+                }
+            }
+        });
+
+        $("#btn_selectProduct").click(function() {
+            var selectedProducts = new Array();
+            if ($("#Product").val() != null && $("#Product").val().length > 0) {
+                selectedProducts = $("#Product").val().split(",");
+            }
+
+            var setting = {
+                title: "选择商品",
+                selectedProducts:selectedProducts,
+                selectSingleNode:true,
+                onselect: function(data) {
+                    var products = "";
+                    $.each(data, function(i, e) {
+                        if (products.length > 0) {
+                            products += ",";
+                        }
+                        products = products + e.pid;
+                    });
+                    $("#Product").val(products);
+                }
+            };
+
+            DAO.SelectProduct(setting);
+            return false;
+        });
+
+
+        $("#f_pushForm").validate({
+            rules: {
+                CustomerAccount: {
+                    remote: {
+                        url: "@Url.Action("ExistCustomer","Ajax")",
+                        data: { account: function () { return $("#CustomerAccount").val(); }},
+                                type: "GET",
+                                dataType:"json",
+                                cache: false,
+                                contentType: 'application/json; charset=utf-8'
+                            }
+              }  
+            },
+            messages: {
+                CustomerAccount: {
+                    remote:"用户不存在"
+                }  
+            },
+            errorPlacement: function (error, element) {
+
+                //设置错误信息
+                if (error.html() != "") {
+                    $("#" + $(element).attr("id") + '_error').html(error);
+                    $("#" + $(element).attr("id") + '_error').removeClass("prompt");
+                    $("#" + $(element).attr("id") + '_error').removeClass("success");
+                    $("#" + $(element).attr("id") + '_error').addClass("error");
+                }
+            },
+            success: function (element) {
+
+                //设置成功信息
+                var obj = $("#" + element.attr("for") + "_error");
+                obj.html(obj.attr("msg"));
+                $("#" + $(element).attr("for") + '_error').removeClass("error");
+                $("#" + $(element).attr("for") + '_error').removeClass("prompt");
+                if ($("#" + $(element).attr("for")).val() != "" && $("#" + $(element).attr("for") + '_error').attr("msg") != "") {
+                    $("#" + $(element).attr("for") + '_error').addClass("success");
+                }
+            }
+        });
+    });
+    
+
+    //创建新推送消息
+    function createNewPushData() {
+        var data = getJsonData();
+        return data;
+    }
+
+    //验证并重组数据位JSON数据格式
+    function getJsonData() {
+
+        var validResult = $("#f_pushForm").valid();
+
+        if($("#persnolMessage").attr("checked") == "cheked" && $("#CustomerAccount").val().length < 0);
+        {
+            $("#CustomerAccount").addClass("inputerror");
+            $("#CustomerAccount_error").addClass("error");
+        }
+
+        if (validResult) {
+            return $("#f_pushForm").JsonBind();
+        }
+
+        return null;
+    }
+    
+    function closeWindow() {
+        UI.Dialog.close();
+    }
+    
+    function switchControlBottonsEnabled(isEnabled) {
+        if (isEnabled) {
+            $(window.parent.document).find(".aui_footer .aui_buttons button").removeClass("disabled");
+            $(window.parent.document).find(".aui_footer .aui_buttons button").attr("disabled", null);
+        } else {
+            $(window.parent.document).find(".aui_footer .aui_buttons button").addClass("disabled");
+            $(window.parent.document).find(".aui_footer .aui_buttons button").attr("disabled", "disabled");
+        }
+    }
+    
+    function showCustomerInputBox(isShow) {
+        if (isShow) {
+            $(".cr_single").removeClass('hide');
+        } else {
+            $(".cr_single").addClass('hide');
+            $(".cr_single").value("");
+        }
+    }
+    
+</script>

@@ -1,0 +1,74 @@
+﻿@{
+    ViewBag.Title = "InserOrUpdateDsMembershipLevel";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="p10">
+    <div class="boxs_detail_dispay boxs_con_c1">
+        <div class="tit_con">
+            
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_tnone border_bnone">
+                    <tbody>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">等级名称:</td>
+                            <td class="border_right" colspan="3">
+                                <input type="text" id="ipt_LevelName" value="@((ViewBag.Mod as Hyt.Model.Pos.DsMembershioLevel).LevelName)" @(ViewBag.IsBindDealer?"":"disabled") />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">折扣:</td>
+                            <td class="border_right" colspan="3">
+                                <input type="text" id="ipt_Privilege" value="@((ViewBag.Mod as Hyt.Model.Pos.DsMembershioLevel).Privilege)" @(ViewBag.IsBindDealer ? "" : "disabled") />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone">金额转积分:</td>
+                            <td class="border_right" colspan="3">
+                                <input type="text" id="ipt_PointToFen" value="@((ViewBag.Mod as Hyt.Model.Pos.DsMembershioLevel).PointToFen)" @(ViewBag.IsBindDealer ? "" : "disabled") />
+                                <em>注:如果设置0.5 则表示每消费5毛钱获得1积分</em>
+                            </td>
+                        </tr>
+                        
+                        <tr>
+                            <td width="10%" class="nameright borde_rnone"></td>
+                            <td class="border_right" colspan="3">
+                                <button type="button" id="btnAdd" title="保存" class="btn btn_ht26 m10_r btn_blue" onclick="AddMembershioLevelControl()"  style="@(ViewBag.IsBindDealer ? "" : "display:none;")">
+                                    <span class="icon_importing icon_white m5_r"></span><span>保存</span>
+                                </button>
+
+                                <button type="button" id="btnBack" title="返回" class="btn btn_ht26 m10_r btn_blue" onclick="window.location.href = '/DsPosManage/GetDsMembershioLevelList'">
+                                    <span>返回</span>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+       
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    
+    function AddMembershioLevelControl()
+    {
+        var LevelName = $("#ipt_LevelName").val();
+        var Privilege = $("#ipt_Privilege").val();
+        var PointToFen = $("#ipt_PointToFen").val();
+       
+        $.ajax({
+            url: '/DsPosManage/SaveMembershioLevelData',
+            type: 'POST',
+            cache: false,
+            data: { sysNo: "@((ViewBag.mod as Hyt.Model.Pos.DsMembershioLevel).SysNo)", LevelName: LevelName, Privilege: Privilege, PointToFen: PointToFen,dsSysNo:@ViewBag.dsSysNo },
+            success: function (ret) {
+                if (ret.Status) {
+                   
+                    UI.Prompt.Success("操作成功");
+                }
+                else {
+                    alert(ret.Message);
+                }
+            }
+        });
+    }
+</script>

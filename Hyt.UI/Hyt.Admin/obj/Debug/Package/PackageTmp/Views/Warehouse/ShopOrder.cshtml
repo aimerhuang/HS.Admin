@@ -1,0 +1,232 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "门店订单管理";
+    @Html.PrivilegeControl(PrivilegeCode.SO1004201, ".SO1004201")
+}
+<script type="text/javascript" src="../Theme/Plugins/Date/WdatePicker.js"></script>
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+
+<div class="search_box" id="JS_search">
+    <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+    <div class="search_body">
+        <table width="100%">
+            <tr>
+                <td width="25%" align="right">下单时间</td>
+                <td width="75">
+                  <div class="date_btn">
+                      <input type="text" class="input_ht26" name="" id="d12" advance="BeginDate" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")">
+                  <button onclick="UI.Date({el:'d12'})" class="btn btn_ht26" title="日历" type="button"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="25%" align="right">&nbsp;</td>
+                <td width="75">
+                  <div class="date_btn">
+                      <input type="text" class="input_ht26" name="" id="d13" advance="EndDate" value="@DateTime.Now.ToString("yyyy-MM-dd")">
+                  <button onclick="UI.Date({el:'d13'})" class="btn btn_ht26" title="日历" type="button"><span class="icon_calendar"></span></button>
+                  </div>
+                </td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">销售单号</td>
+                <td width="72%">
+                    <input type="text" value=""  advance="OrderSysNo" class="wd156"></td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">会员会员号</td>
+                <td width="72%">
+                    <input type="text" value="" advance="CustomerAccount" class="wd156"></td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">会员姓名</td>
+                <td width="72">
+                    <input type="text" value="" advance="CustomerName" class="wd156"></td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">门店</td>
+                <td width="72%">
+                    <select class="wd170" id="StoreSysNoList">
+                        <option value="0">全部</option>
+                        @{ 
+                            foreach (Hyt.Model.WhWarehouse warehouse in ViewBag.Warehouse)
+                            {
+                            <option  value="@warehouse.SysNo">@warehouse.WarehouseName</option>
+                            }
+                        }
+                    </select></td>
+            </tr>
+            <tr>
+                <td width="28%" align="right">配送方式</td>
+                <td width="72%">
+                    <select advance="DeliveryTypeSysNo" class="wd170" id="txtDeliveryTypeSysNo">
+                    </select></td>
+            </tr>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="advancedBtn">开始查询</button><button title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_dbelete" type="reset">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>门店订单管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                     <div class="fl m10_l">
+                           <select name="status" id="status" search="Status" advance="Status">
+                                    <option value="0">全部</option>
+                                    <option value="1">今日订单</option>
+                                    <option value="2">今日转快递</option>
+                                    <option value="3">今日已提货</option>
+                                </select>
+                          </div>
+                     <div class="search_btn m10_l fl wd270">
+                         <input name="" type="text" class="input_ht28" style="width:227px" id="Keyword" value="搜索您要的订单编号..." maxlength="25" /><button class="btn btn_ht28 wd28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                      </div>
+                     <button class="btn btn_ht28 m10_l fl" title="高级搜索"  id="outbtn2"><span class="icon_search" ></span><span class="m5_l">高级搜索</span></button>
+                </div>
+                <div class="left_tool" >
+                     <button class="btn btn_blue btn_ht26 wd100 SO1004201" id="createBtn" status="0"><span class="icon icon_plus icon_white"></span><span class="m5_l">新增销售单</span></button>
+                </div>
+            </div>
+            <div id="paging">
+                
+            </div>
+        </div>
+    </div>
+</div>
+ <div style="z-index: 9; background-color: White; position: absolute;" id="divMsg">
+ </div>
+<script type="text/javascript" src="../Theme/scripts/search.js"></script>
+<script type="text/javascript">
+    var artobj;
+    $(function () {
+        //查询录入框点击事件
+        $("#Keyword").defaultValue("搜索您要的订单编号...");
+
+        doSearch(1);
+
+        //引用弹出框方法
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_dbelete"));
+
+        //查询条件变化时执行
+        $("[Search]").filter("[Search='Status']").change(function () { doSearch(1); });
+
+        //查询订单
+        $("#searchBtn").click(function() {
+            doSearch(1);
+        });
+            doAdvanceSearch(1);
+       // });
+        //创建订单
+        $("#createBtn").click(function () {
+            UI.OpenCreatTab("新建销售单", "/Warehouse/ShopOrderQuickCreate");
+        });
+
+        loadAllShipType();
+        
+    });
+
+    //查询列表
+    function doSearch(currentPage) {
+        
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Warehouse/SearchShopOrder?rrr="+new Date(), "Search", function (p) {
+            if ($("#Keyword").val() != "搜索您要的订单编号...") {
+                p.setParams("Keyword", $("#Keyword").val());
+            } else {
+                //没有查询条件时只查询最近一周数据
+                if ($("#status").val() == 0) {
+                    p.setParams("BeginDate", '@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")');
+                    p.setParams("EndDate", '@DateTime.Now.ToString("yyyy-MM-dd")');
+                }
+            }
+
+            p.setParams("CurrentPage", currentPage);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    //高级查询列表
+    function doAdvanceSearch(currentPage) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/Warehouse/SearchShopOrder", "Advance", function (p) {
+            p.setParams("CurrentPage", currentPage);
+            if ($("#StoreSysNoList").val() != "0") {
+                p.setParams("StoreSysNoList", $("#StoreSysNoList").val());
+            }
+        }, function (data) {
+            Utils.MaskStop();
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+    //取得订单状态
+    function GetOrderStatus(soSysno, obj) {
+        $.ajax({
+            type: "POST",
+            url: "/Order/LoadOrderStatus",
+            data: "soSysNo=" + soSysno,
+            success: function (content) {
+                if (content != null && content != "") {
+                    $("#divMsg").html(content);
+                    $("#divMsg").css("display", "inline");
+                    var offset = $(obj).position();
+                    $("#divMsg").css("top", offset.top - 10);
+                    $("#divMsg").css("left", offset.left + 40);
+                    $(document).one("click", function () {
+                        $("#divMsg").css("display", "none");
+                    });
+                }
+            }
+        });
+    }
+    //隐藏订单日志
+    function HidOrderStatus() {
+        $("#divMsg").hide();
+    }
+    //订单详情
+    function OrderBrowse(orderSysNo) {
+        UI.DialogOpen('/Warehouse/ShopOrderDetail/' + orderSysNo, { title: '订单详情', width: 850, height: 600 }, false);
+    }
+    
+    //加载配送方式
+    function loadAllShipType() {
+        var content = '<option value="">全部</option>';
+        $.ajax({
+            async: false,
+            type: "get",
+            url: "/Ajax/LoadAllShipType",
+            success: function (rows) {
+                $.each(rows, function (idx, item) {
+                    content += "<option value='" + item.value + "'>" + item.text + "</option>";
+                });
+                $('#txtDeliveryTypeSysNo').html(content);
+            }
+        });
+    }
+
+    //打印
+    function Print(sysNo) {
+        var url = '/Print/ShopInvoice/?whStockOutSysNo=' + sysNo;
+        UI.DialogOpen(url, {
+            title: '小票打印:' + sysNo, width: 1024, height: 680, init: function () {
+                //if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                //    this.iframe.contentWindow.location.reload();
+                //}
+            }
+        }, false);
+    }
+</script>

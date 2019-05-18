@@ -1,0 +1,176 @@
+﻿@using Hyt.Model
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.InventorySheet.WhInventory>
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="100">顺序号</th>
+                <th width="100">盘点单编号</th>
+                <th width="145">创建时间</th>
+                <th width="105">备注</th>
+                <th width="105">制单</th>
+                <th width="105">状态</th>
+                <th width="250">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData != null && Model.TData.Count > 0)
+                {
+                    foreach (var item in Model.TData)
+                    {
+                        <tr @(Model.TData.IndexOf(item) % 2 == 0 ? "" : "class='stag_color'") class='stag_color'>
+                            <td>@item.SysNo</td>
+                            <td>@item.Code</td>
+                            <td>@item.AddTime</td>
+                            <td>@item.Remarks</td>
+                            <td>@item.CreatedName</td>
+                            <td class="status">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.InventorySheet.WhlnventoryEnum.WhlnventoryStatus), item.Status)</td>
+                            <td>
+
+                                @{
+                        if (ViewBag.PageStatus == 1)
+                        {
+                            <button class="btn btn_ht26  m10_l" title="盘点作业详情" type="button" onclick="GetDetail('@item.SysNo','@item.Code')">
+                                <span class="icon_search"></span>
+                                <span class="m5_l">详情</span>
+                            </button>
+                            if (item.Status == (int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhlnventoryStatus.未处理)
+                            {
+                                <button onclick="audit('@item.SysNo',this)" title="确认通过" class="btn btn_ht26 btn_blue m10_l" type="button">
+                                    <span class="icon_white icon icon_audit"></span>
+                                    <span class="m5_l">确认通过</span>
+                                </button>
+                            }
+                            else
+                            {
+                                <button title="确认通过" class="btn btn_ht26 disabled m10_l" type="button">
+                                    <span class="icon icon_audit"></span>
+                                    <span class="m5_l">确认通过</span>
+                                </button>
+                            }
+                        }
+
+                                if (ViewBag.PageStatus == 2)
+                                {
+                                        if (item.Status == (int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhlnventoryStatus.数据录入)
+                                        {
+                                            <button class="btn btn_ht26 m10_l btn_blue" title="录入数据" data-id="900" name="in_stock_create" type="button" onclick="GetDetail('@item.SysNo','@item.Code')">
+                                                <span class="icon_tostore icon_white"></span>
+                                                <span class="m5_l">录入数据</span>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button title="录入数据" class="btn btn_ht26 m10_l disabled " type="button">
+                                                <span class="icon_tostore "></span>
+                                                <span class="m5_l">录入数据</span>
+                                            </button>
+                                        }
+
+                                        if (item.Status == (int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhlnventoryStatus.数据录入)
+                                        {
+                                            <button onclick="auditLuRu('@item.SysNo',this)" title="确认完成" class="btn btn_ht26 btn_blue m10_l" type="button">
+                                                <span class="icon_white icon icon_audit"></span>
+                                                <span class="m5_l">确认完成</span>
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <button title="确认完成" class="btn btn_ht26 disabled m10_l" type="button">
+                                                <span class="icon icon_audit"></span>
+                                                <span class="m5_l">确认完成</span>
+                                            </button>
+                                        }
+                                }
+
+
+                                    if (ViewBag.PageStatus == 3)
+                                    { 
+                                        <button class="btn btn_ht26  m10_l" title="盘点作业详情" type="button" onclick="GetDetail('@item.SysNo','@item.Code')">
+                                            <span class="icon_search"></span>
+                                            <span class="m5_l">详情</span>
+                                        </button>
+                                    }
+                                    
+}
+
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+<!--表格列结束-->
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script>
+    //详情弹出
+    function GetDetail(id, code) {
+        UI.DialogOpen('/InventorySheet/InventoryDetail?id=' + id + '&PageStatus=@(ViewBag.PageStatus)', {
+            width: 1800,
+            height: 800,
+            title: code,
+            button: [{ name: '取消' }
+            ]
+        }, false);
+    }
+
+    ///确认通过
+    function audit(id, th) {
+        if ($(th).is('.disabled ')) {
+            return;
+        }
+        UI.Confirm({
+            content: '确认通过吗？',
+            ok: function () {
+                $.post("/InventorySheet/UploadStatus", { "id": id, "status": '@((int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhlnventoryStatus.数据录入)' }, function (data) {
+                    if (data.Message != "已通过!") {
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    } else {
+                        UI.tips.tip_alert('tips_success', data.Message);
+                        $(th).addClass("disabled").removeClass("btn_blue");
+                        $(th).children(".icon_white").removeClass("icon_white");
+                        $(th).parent().prev(".status").html("数据录入");
+                    }
+                });
+            },
+            cancel: true
+        });
+    }
+
+
+    ///数据录入确认通过
+    function auditLuRu(id, th) {
+        if ($(th).is('.disabled ')) {
+            return;
+        }
+        
+        UI.Confirm({
+            content: '确认通过吗？',
+            ok: function () {
+                var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                $.post("/InventorySheet/UploadStatus", { "id": id, "status": '@((int)Hyt.Model.InventorySheet.WhlnventoryEnum.WhlnventoryStatus.编制报告)' }, function (data) {
+                    if (data.Message != "已通过!") {
+                        UI.tips.tip_alert('tips_wrong', data.Message);
+                    } else {
+                        UI.tips.tip_alert('tips_success', data.Message);
+                        doSearch(@(Model.CurrentPageIndex));
+                    }
+                    mask.Remove();
+                });
+            },
+            cancel: true
+        });
+    }
+
+
+
+</script>

@@ -1,0 +1,258 @@
+﻿@model List<Hyt.Model.DsUser>
+
+@{
+    ViewBag.Title = "账号列表";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section HeadJs{
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.yui.js")"></script>
+
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/UI.yui.js")"></script>
+}
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>账号列表(@ViewBag.Dealername)</h3>
+        </div>
+        <div class="boxs_con_c1">
+
+            <!--工具条开始-->
+            <div class="boxs_tool">
+
+                <!--搜索开始-->
+                <div class="right_tool clearfix">
+                </div>
+                <div>
+                    <button class="btn btn_ht26 m10_r DS1003201" onclick="showdiv(0)"><span class="icon icon_plus"></span><span class="m5_l">新建</span></button>
+                </div>
+            </div>
+
+            <!--/表格列表区-->
+            <div class="boxs_listtabel">
+                <div id="paging">
+                
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<input id="dealersysno"  type="hidden" value="@ViewBag.DealerSysno" />
+<div id="divEdit" style="display: none;" class="boxs_detail_dispay">
+    <div class="tit_con wd580">
+        <form method="POST" id="form1" name="form1">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="17%" class="nameright border_left">账号</td>
+                        <td class="border_right">
+                            <input type="hidden" id="hidUid" value="0" />
+                            <input id="txtAccount" name="Account" type="text" class="input_ht26" maxlength="30">
+                            <span id="c_txtAccount" class="prompt">填写账号</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_left">用户姓名</td>
+                        <td class="border_right">
+                            <input id="txtName" name="Name" type="text" class="input_ht26" maxlength="30">
+                            <span id="c_txtName" class="prompt">填写用户姓名</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="nameright border_left">状态</td>
+                        <td class="border_right">
+                            <label><input id="rdiYes" name="Status" type="radio" value="1" checked />启用</label>
+                            <label><input id="rdiNo" name="Status" type="radio" value="0" />禁用</label>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </form>
+    </div>
+</div>
+<script language="javascript" type="text/javascript">
+    
+    jQuery.validator.addMethod("maxStrLength", function (value, element, param) {
+        value = value.replace(/[^\x00-\xff]/g, 'xxx'); //将中文转为字母
+        return this.optional(element) || this.getLength($.trim(value), element) <= param;
+    }, "字母长度超长");
+
+    $(function () {
+        LoadRule();
+        Loaddata();
+
+    });
+
+         
+    function ResetPwd(sysNo)
+    {
+        UI.Confirm({
+            content: '确认重置密码',
+            ok: function () {
+                $.post("/Distribution/ResetPwd", { sysNo: sysNo }, function (result) {
+                    UI.Alert({
+                        content: result.Message
+
+                    });
+                });
+            }
+        });
+    }
+
+    function Disabled(sysNo, status)
+    {
+        var str = "确认禁用";
+        if (status==1) {
+            str = "确认启用";
+        }
+        UI.Confirm({
+            content: str,
+            ok: function () {
+                $.post("/Distribution/Disabled", { sysNo: sysNo, status: status }, function (result) {
+                    if (result.Status) {
+                        UI.Prompt.Success("操作成功")
+                        Loaddata();
+                    }
+                });
+            }
+        });
+    }
+
+    function Loaddata()
+    {
+        $.get("/Distribution/_DsUserList?dealersysno=" + $("#dealersysno").val(), function (result) {
+            $("#paging").html(result);
+        });
+    }
+
+    function showdiv(uid) {
+        if(uid>0)
+        {
+            $.get("/Distribution/GetDsUser?sysNo="+uid, function (result) {
+                $("#txtAccount").val(result.Account);
+                $("#txtAccount").attr("readonly", "readonly");
+                $("#txtName").val(result.Name);
+                $("#hidUid").val(result.SysNo);
+                $("input[name=Status][value=" + result.Status + "]").attr("checked", true);
+                showpost();
+            });
+        }
+        else
+        {
+            $("#txtAccount").removeAttr("readonly");
+            $("input[name=Status][value=1]").attr("checked", true);
+            $("#hidUid").val(0);
+            $("#txtAccount").val("");
+            $("#txtName").val("");
+            showpost();
+        }
+    }
+
+    function showpost()
+    {
+        UI.DialogBox({
+            content: document.getElementById('divEdit'),
+            title: '账号信息',
+            padding: '10px 10px 5px 10px',
+            okVal: '保存',
+            id:'box1',
+            ok: function () {
+                if (!setting.form()) {
+                 
+                    return false;
+                }
+                var entity = {
+                    SysNo: $("#hidUid").val(),
+                    DealerSysNo: $("#dealersysno").val(),
+                    Account: $("#txtAccount").val(),
+                    Name: $("#txtName").val(),
+                    Status: $("input[name='Status']:checked").val()
+                }
+                var sendata = { model: entity};
+                var sendjson = JSON.stringify(sendata);
+                $.ajax({
+                    url: '/Distribution/SaveDsUser',
+                    type: 'POST',
+                    cache: false,
+                    data: sendjson,
+                    contentType: 'application/json; charset=utf-8',
+                    success: function (result) {
+                        if (result.Status) {
+                            UI.Prompt.Success("操作成功");
+                            UI.CloseDialog("box1");
+                            Loaddata();
+                        }
+                        else {
+                            UI.Alert({
+                                content: result.Message
+
+                            });
+                        }
+                    }
+                });
+                return false;
+            },
+            width: 200,
+            cancelVal: '取消',
+            cancel: true,
+            parent: false,
+            footerClass: 'aui_none'
+        });
+    }
+
+    var setting;
+    //加载验证规则
+    function LoadRule() {
+        setting = $("#form1").validate({
+            onclick: false,
+            onkeyup: false,
+            rules: {
+                Account: {
+                    required: true,
+                    maxStrLength: 30,
+                    remote: {
+                        type: "post",
+                        url: "/Distribution/NotExistDsUser",
+                        data: {
+                            dealersysno: function () {
+                                return $("#dealersysno").val();
+                            },
+                            account: function () {
+                                return $("#txtAccount").val();
+                            },
+                            sysNO: function () {
+                                return $("#hidUid").val();
+                            },
+                        },
+                        dataType: "json",
+                        dataFilter: function (data, type) {
+            
+                            if (data == 'true') {
+                                $('#c_txtAccount').text('填写账号');
+                            } else {
+                                $('#c_txtAccount').text('账号已经存在').delay(1500).show(function () {
+                                    $(this).text('填写账号').css('display', 'inline');
+                                });
+                            }
+                            return data;
+                        }
+                    }
+                },
+                Name:
+                {
+                     required: true,
+                     maxStrLength: 30
+                }
+
+            },
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).attr('class', 'error');
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).attr('class', 'success');
+            },
+           
+        });
+    }
+</script>

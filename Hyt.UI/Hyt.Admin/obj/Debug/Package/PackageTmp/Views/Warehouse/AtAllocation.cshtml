@@ -1,0 +1,84 @@
+﻿@using Hyt.Infrastructure.Pager
+
+@{
+    ViewBag.Title = "调拨单";
+}
+@model PagedList<Hyt.Model.CBAtAllocation>
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js?v=1"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+<div class="case" id="divCase">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>调拨单</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="left_tool" style="float: left">
+                    <button class="btn btn_ht26 m10_r" id="btnAdd" title="添加调拨单"><span class="icon icon_plus"></span><span class="m5_l">添加调拨单</span></button>
+                    @*<button class="btn btn_ht26 m10_r" id="btnExport" title="导出Excel"><span class="icon icon_share"></span><span class="m5_l">导出Excel</span></button>*@
+                </div>
+                <div class="right_tool clearfix">
+                    @*<div class="search_btn m10_l fl wd270">
+                            <input name="" type="text" class="input_ht28 wd240" id="Condition" value="搜索订单编号/调拨仓库" title="搜索订单编号/调拨仓库" maxlength="25" />
+                            <button class="btn btn_ht28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                        </div>*@
+                </div>
+            </div>
+            <div id="paging">
+            </div>
+        </div>
+    </div>
+    <div style="z-index: 9; background-color: White; position: absolute;" id="divMsg">
+    </div>
+</div>
+
+<script>
+    $(function () {
+        doSearch();
+
+        $('#btnAdd').click(function () {
+            location.href = '/Warehouse/AtAllocationAddOrEdit?isEdit=true';
+        });
+    });
+
+    //查询列表
+    function doSearch() {
+        checkedsysnolist = '';
+        isSearch = true;
+        searchParameters = {};
+        Utils.MaskStart($('#paging'));
+        Ajax.get('/Warehouse/QueryAtAllocationList/?r=' + Math.random(), 'none', function (p) {
+            if ($("#Condition").val() != '搜索订单编号/调拨仓库') {
+                p.setParams('Condition', $('#Condition').val());
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    //审核调拨单
+    function CheckAtAllocation(sysNo) {
+        UI.Confirm({
+            content: "确认审核?",
+            ok: function () {
+                $.post("/Warehouse/CheckAtAllocation", { sysNo: sysNo }, function (result) {
+                    if (result.Status == false) {
+                        UI.Alert({
+                            content: result.Message
+                        });
+                    }
+                    else {
+                        UI.Prompt.Success("操作成功");
+                        doSearch();
+                    }
+                });
+            },
+            cancel: true
+        });
+    }
+</script>

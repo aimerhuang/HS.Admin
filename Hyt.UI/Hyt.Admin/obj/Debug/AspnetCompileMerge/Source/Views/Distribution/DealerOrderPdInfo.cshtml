@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "DealerOrderPdInfo";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+
+@*@using Hyt.Model.SystemPredefined*@
+@using Hyt.Model.WorkflowStatus
+@model List<DsOrderItem>
+@using Hyt.BLL.Distribution
+@using Hyt.Admin
+@using Hyt.BLL.Authentication
+
+
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+    <thead>
+        <tr>
+            <th width="120">升舱订单编号</th>
+            <th width="120">订单事物编号</th>
+            <th width="120" class="p10_l">商城订单明细编号</th>
+            <th width="270">商品名称</th>
+            <th width="82">商品价格</th>
+            <th width="80">购买数量</th>
+            <th width="82">优惠</th>
+        </tr>
+    </thead>
+        <tbody id="tbItems" style="background-color: #efefef">
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.DsOrderSysNo</td>
+                    <td>@item.OrderTransactionSysNo</td>
+                    <td>@item.MallItemNo</td>
+                    <td>@item.MallProductName</td>
+                    <td>@item.Price</td>
+                    <td>@item.Quantity</td>
+                    <td>@item.DiscountAmount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+

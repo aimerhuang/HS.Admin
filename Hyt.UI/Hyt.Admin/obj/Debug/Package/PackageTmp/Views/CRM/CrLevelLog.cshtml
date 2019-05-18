@@ -1,0 +1,82 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.Transfer
+@model PagedList<CBCrLevelLog>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "等级日志";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        function dialog(content) {
+            UI.Alert({
+                content: content
+            });
+        }
+        function AjaxStart() {
+            window.cover = UI.Mask({ obj: $('#paging'), opacity: 0.6 });
+        }
+        function AjaxStop() {
+            cover.Remove();
+        }
+        //等级日志
+        function CrLevelLogDetail(sysNo) {
+            UI.DialogOpen('/CRM/CrLevelLogDetail?sysNo=' + sysNo, {
+                title: '会员等级变更详情',
+                width: '460px',
+                height: '258px',
+                init: function () {
+                    this.button({
+                        name: '关闭'
+                    });
+                }
+            }, false);
+        }
+        function doSearch() {
+            var changeType = $("#changeType").val();
+            AjaxStart();
+            var json = {};
+            json.sysNo = @ViewBag.sysNo;
+            
+            if ($.trim(changeType) != "") {
+                json.changeType = changeType;
+            }
+
+            $.get('/CRM/CrLevelLog/', json, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+<form id="form" name="form" action="">
+<div class="caseout">
+    <!--工具条开始-->
+    <div class="boxs_tool boxs_toolbgnone p0"> 
+      <!--搜索开始-->
+      <div class="right_tool clearfix">
+          <span class="veralign_t fl">变更类型</span>
+          <div class="fl m10_l">
+          <select id="changeType" name="changeType" class="select_ht28" onchange="doSearch()">
+              <option value="-1">全部</option>
+              @{
+                  foreach (var dict in (IDictionary<int, string>)ViewBag.dictType)
+                 {
+                 <option value="@dict.Key">@dict.Value</option>
+                 }
+              }
+          </select>
+          </div>
+      </div>
+      <!--搜索结束-->
+    </div>
+    <!--工具条结束-->
+    
+    <!--列表开始-->
+    <div class="boxs_listtabel">
+    @{Html.RenderPartial("_AjaxCrLevelLog", Model); }
+    </div>
+    <!--列表结束-->
+</div>
+</form>

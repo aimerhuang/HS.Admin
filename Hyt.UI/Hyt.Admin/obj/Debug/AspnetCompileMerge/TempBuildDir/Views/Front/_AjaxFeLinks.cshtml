@@ -1,0 +1,51 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<MkBlogroll>
+<div id="paging">
+    <table id="collocationASTable" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone">
+        <thead>
+            <tr>
+                <th style="width: 53px;"><input class="checkall" name="sysNo" id="sysNo" type="checkbox" value="0" /></th>
+                <th class="align_l p10_l" width="300px">网站名称</th>
+                <th class="align_l p10_l">网站地址</th>
+                <th width="59">排序号</th>
+                <th width="46">状态</th>
+                <th width="256">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                const int pending = (int)Hyt.Model.WorkflowStatus.MarketingStatus.友情链接管理状态.待审;
+                const int assessed = (int) Hyt.Model.WorkflowStatus.MarketingStatus.友情链接管理状态.已审;
+                const int repeal = (int) Hyt.Model.WorkflowStatus.MarketingStatus.友情链接管理状态.作废;
+                if (Model.TotalItemCount > 0)
+                {
+                    var row = 1;
+                    string cs = string.Empty;
+                    foreach (var item in (List<MkBlogroll>)Model.TData)
+                    {
+                        cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                        <tr class="@cs">
+                            <td><input name="sysNo" type="checkbox" @(item.Status == (int)Hyt.Model.WorkflowStatus.MarketingStatus.友情链接管理状态.作废 ? "disabled=disabled":"") value="@item.SysNo" /></td>
+                            <td  class="align_l blue p10_lr"><a onclick="view(@item.SysNo)" href="javascript:void(0)">@item.WebSiteName</a></td>
+                            <td  class="align_l blue p10_lr"><a target="_bank" href="@item.WebSiteUrl">@item.WebSiteUrl</a></td>
+                            <td>@item.DisplayOrder</td>
+                            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ForeStatus.广告项状态), item.Status)</td>
+                            <td>@if (item.Status == assessed){<button type="button" class="btn btn_ht26 btn_red m10_r FE1010003" onclick="UpdateStatus('确定要取消审该该记录吗？',@pending,@item.SysNo)"><span class="icon icon_audit icon_white"></span><span class="m5_l">取消审核</span></button><button type="button" class="btn btn_ht26 disabled m10_r FE1010003"><span class="icon icon_forbidden"></span><span class="m5_l">作废</span></button>}else if (item.Status == repeal){<button type="button" class="btn btn_ht26 disabled m10_r FE1010003"><span class="icon icon_audit"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 disabled m10_r FE1010003"><span class="icon icon_forbidden"></span><span class="m5_l">作废</span></button>}else{<button type="button" class="btn btn_ht26 btn_blue m10_r FE1010003"  onclick="UpdateStatus('确定要审核该记录吗？',@assessed,@item.SysNo)"><span class="icon icon_audit icon_white"></span><span class="m5_l">审核通过</span></button><button type="button" class="btn btn_ht26 btn_red m10_r FE1010003"  onclick="UpdateStatus('确定要作废该记录吗？',@repeal,@item.SysNo)"><span class="icon icon_forbidden icon_white"></span><span class="m5_l">作废</span></button>}@if (item.Status == (int) Hyt.Model.WorkflowStatus.ForeStatus.广告组类型.代码){if (item.Status == assessed){<button type="button" class="btn btn_ht26 disabled FE1010002" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>}else if (item.Status == pending){<button type="button" class="btn btn_ht26 FE1010002" title="修改" onclick=" addOrEdit(@item.SysNo) "><span class="icon_pencil FE1008202"></span><span class="m5_l">修改</span></button>}else{<button type="button" class="btn btn_ht26 disabled FE1010002" title="修改"><span class="icon_pencil"></span>修改</button>}}else{if (item.Status == assessed){<button type="button" class="btn btn_ht26 disabled FE1010002" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>}else if (item.Status == pending){<button type="button" class="btn btn_ht26 btn_blue FE1010002" title="修改" onclick="addOrEdit(@item.SysNo)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>}else{<button type="button" class="btn btn_ht26 disabled FE1010002" title="修改"><span class="icon_pencil"></span><span class="m5_l">修改</span></button>}}
+                            </td>
+                        </tr>
+                        row++;
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td class="align_l p10_l bgr_eb" colspan="8">暂无数据</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    @{Html.RenderPartial("_UrlPaging", Model); }
+</div>

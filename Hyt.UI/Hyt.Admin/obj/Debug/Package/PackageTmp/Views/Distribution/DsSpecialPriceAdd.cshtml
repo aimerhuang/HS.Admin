@@ -1,0 +1,223 @@
+﻿@using Hyt.Model.SystemPredefined
+@Html.PrivilegeControl(PrivilegeCode.DS1001201, ".DS1001201")
+<script src="~/Theme/scripts/jquery.validate.yui.js"></script>
+<form id="form">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            @*<div class="head_detail border_bnone">
+                <h5>商品信息</h5>
+            </div>*@
+            <div class="tit_con">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                    <tbody>
+                        <tr>
+                            <td colspan="2">
+                                <button id="productSelect" type="button" class="btn btn_blue btn_ht26 m10_r"><span class="icon_search icon_white"></span><span class="m5_l">选择商品</span></button>
+                                特殊价格：<input id="txtPrice" name="SpecialPrice" type="text" class="input_ht28 m10_r m5_l" maxlength="20" />
+                                <span id="for_txtPrice" class="hide"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="wd240" align="center">
+                                <img id="productImage" src="~/Theme/images/defaultpic.gif" width="80" height="80" alt="商品图片" />
+                            </td>
+                            <td>
+                                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                                    <tr>
+                                        <td class="nameright border_rnone wd80">商品编号：</td>
+                                        <td class="border_right"><span id="spanProductSysNo"></span></td>
+                                        <td class="nameright border_rnone wd80">商品类型：</td>
+                                        <td><span id="spanProductType"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone wd80">商品分类：</td>
+                                        <td class="border_right"><span id="spanProductCategory"></span></td>
+                                        <td class="nameright border_rnone wd80">商品名称：</td>
+                                        <td><span id="spanProductName"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="nameright border_rnone">基本价格：</td>
+                                        <td colspan="3"><span id="spanProductPrice" class="red bold"></span></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tit_con p10_t m5_t">
+                <!--工具条开始-->
+                <div class="boxs_tool boxs_toolbgnone">
+                    <!--功能按钮开始-->
+                    <div class="left_tool">
+                        <button onclick="DsDealerSelect()" type="button" class="btn btn_blue btn_ht26 m10_r"><span class="icon_search icon_white"></span><span class="m5_l">选择分销商</span></button>
+                    </div>
+                    <!--功能按钮结束-->
+                </div>
+                <!--工具条结束-->
+                <div class="boxs_detail_table border_lnone">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <thead>
+                            <tr class="head_detail">
+                                <th width="140">分销商编号</th>
+                                <th>分销商名称</th>
+                                <th width="68">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selected_dealer">
+                            <tr></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#productSelect").click(function () {
+            var url = '@Url.Action("DsSpecialPriceProductSearch")';
+            UI.DialogOpen(url, {
+                title: '选择商品',
+                width: 880,
+                height: 500,
+                resize: true,
+                init: function () {
+                    this.button({
+                        name: "选择",
+                        focus: true,
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                            if (!iframe.document.body) {
+                                UI.Alert({ content: '数据加载中,请稍等.' });
+                                return false;
+                            }
+                            var product = iframe.productSelect().split(',');
+                            if (product) {
+                                $('#spanProductSysNo').html(product[0]);
+                                $('#spanProductName').html(product[1]);
+                                $('#spanProductCategory').html(product[2]);
+                                $('#spanProductType').html(product[3]);
+                                $('#spanProductPrice').html(product[4]);
+                                $('#productImage').attr("src", product[5]);
+                            }
+                            return true;
+                        }
+                    }, { name: "关闭" });
+                }
+            }, false);
+
+        });
+
+        $("#form").validate({
+            rules: {
+                SpecialPrice: { required: true, maxlength: 20, min: 0 }
+            },
+            messages: {
+                SpecialPrice: {
+                    required: "请填写商品特殊价格",
+                    maxlength: "最多20个字符",
+                    min: "价格不能小于0"
+                }
+            },
+            errorPlacement: function (error, el) {
+                $('#for_' + el.attr('id')).attr('class', 'error');
+                $('#for_' + el.attr('id')).text(error.html());
+            },
+            success: function (label, el) {
+                $('#for_' + el.attr('id')).attr('class', 'success');
+            }
+        });
+
+    });
+
+    function DsDealerSelect() {
+        var productSysNo = $('#spanProductSysNo').html();
+        if (productSysNo.length == 0) {
+            UI.Alert({ content: "请先选择商品." });
+            return;
+        }
+        $("#selected_dealer tr:gt(0)").remove();
+
+        DAO.SelectDsDealer({
+            pdSysNo: productSysNo, callBack: function (dealerList) {
+                $(dealerList).each(function (i) {
+                    var sysno = dealerList[i].split(':')[0];
+                    var name = dealerList[i].split(':')[1];
+                    var newRow = "<tr id='selected_tr_" + sysno + "'><td class='border_lnone'>" + sysno + "</td><td class='align_l'><span class='p10_l'>" + name + "</span></td><td><button onclick='DsDealerRemove(" + sysno + ")' class='btn btn_ht26' title='删除'><span class='icon_trash'></span></button></td></tr>";
+                    $("#selected_dealer tr:last").after(newRow);
+                });
+            }
+        });
+    }
+    function DsDealerRemove(sysno) {
+        UI.Confirm({
+            content: "确认要将该分销商从列表中移除吗?",
+            padding: '10px 20px',
+            ok: function () {
+                $("#selected_tr_" + sysno).remove();
+            },
+            cancelVal: '关闭',
+            cancel: true
+        });
+    }
+    //将数组转换为以数组索引为key的对象集合
+    convertArrayToObject = function (/*待转换数组*/array) {
+        var convertObj = {};
+        var len = array.length;
+        for (var i = 0; i < len; i++) {
+            convertObj[i] = array[i];
+        }
+        return convertObj;
+    };
+    function insert() {
+        var productSysNo = $('#spanProductSysNo').text();
+        if (productSysNo.length <= 0) {
+            UI.Alert({ content: "请先选择商品." });
+            return false;
+        }
+        if (!$("#form").valid()) {
+            return false;
+        }
+        var price = $("#txtPrice").val();
+        var list = [];
+        $('#selected_dealer tr').each(function (trindex) {
+            if (trindex == 0) {
+                return;
+            }
+            var dealerSysNo = $("#selected_dealer tr:eq(" + trindex + ") td:eq(0)").html();
+            if (dealerSysNo) {
+                list.push(dealerSysNo);
+            }
+        });
+        if (list.length > 0) {
+            var data = {};
+            data.productSysNo = productSysNo;
+            data.price = price;
+            data.dealerList = convertArrayToObject(list);
+            $.ajax({
+                url: '@Url.Action("DsSpecialPriceInsert")',
+                data: data,
+                dataType: "json",
+                type: "POST",
+                success: function (ret) {
+                    if (ret.StatusCode == 0) {
+                        UI.DialogOpener().showTip('分销商特殊价格添加成功');
+                        UI.Dialog.close();
+                    } else {
+                        UI.tips.tip_alert('tips_warning', ret.Message);
+                    }
+                },
+                error: function () {
+                    UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                }
+            });
+        } else {
+            UI.Alert({ content: "请先选择分销商." });
+        }
+        return false;
+    }
+</script>
+

@@ -1,0 +1,272 @@
+﻿@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@{
+    ViewBag.Title = "采购退货单管理";
+    @Html.PrivilegeControl(PrivilegeCode.WH1004201, ".WH1004201");
+    @Html.PrivilegeControl(PrivilegeCode.WH1004202, ".WH1004202");
+    @Html.PrivilegeControl(PrivilegeCode.WH1004102, ".WH1004102");
+}
+@section HeadCss{
+    <link href="~/Theme/Plugins/select2/select2.css" rel="stylesheet" />
+}
+@section headjs{
+    <script src="@Url.Content("~/Theme/Plugins/Date/WdatePicker.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Scripts/jquery.unobtrusive-ajax.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Theme/Scripts/Utils.yui.js")" type="text/javascript"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/select2/select2.js"></script>
+    <script type="text/javascript" src='@Url.Content("~/Theme/Plugins/select2/select2_locale_zh-CN.js")'></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#Status").addClass("wd100");
+            //创建借货单
+            //$("#createBtn").click(function () {
+            //    //UI.OpenCreatTab("创建借货单", "/Warehouse/CreateProductLend/");
+            //    window.location.href = '/Warehouse/CreateProductLend/';
+            //});
+
+            //修改下拉列表框为select2
+            UI.SelectWhareHouse($("#WhWarehouse"), 0, null, "全部");
+            UI.SelectWhareHouse($("#WhWarehouse2"), 0, null, "全部");
+            UI.SelectWhareHouse($("#WhWarehouse3"), 0, null, "全部");
+
+            UI.searchbox($("#advanced_search"), "#JS_search", $("#JS_search_nav"), $("#clear_btn"));
+
+            //清除select2的条件
+            $("#clear_btn").click(function () {
+                //将name="WhWarehouse"下拉列清除条件
+                $("select[name='WhWarehouse']").val("0");
+                //触发改变事件select2达到清除条件
+                $("select[name='WhWarehouse']").trigger("change");
+            });
+
+            //查询录入框点击事件
+            setDefaultValue();
+            //快捷状态查询
+            $("#Status,#WhWarehouse").change(function () {
+                doSearch();
+                setDefaultValue();
+            });
+            //高级查询
+            $("#advanced_search_btn").click(function () {
+                advancedSearch();
+            });
+            //注册页面回车事件为查询操作
+            $(document).keydown(function (e) {
+                if (13 == e.keyCode) {
+                    doSearch();
+                }
+            });
+            //开始查询
+            $("#search_btn").click(function () {
+                doSearch();
+            });
+
+            $("#Status").addClass("select_ht28");
+
+            //#region 初始化--仓库下拉框--事件
+            $("select[name='WhWarehouse']").change(function (e) {
+                var self = $(e.target);
+                var val = self.val();
+                var pairing = $("#" + $(this).attr("data-pairing"));
+
+                if (val == "0") {
+                    pairing.empty().append("<option value=''>全部</option>");
+                    return;
+                }
+
+                $.ajax({
+                    url: "@Url.Action("GetDeliverymanByWarehouseSysNo", "Logistics")",
+                    data: { "warehouseSysNo": val },
+                    dataType: "json",
+                    type: "post",
+                    success: function (result) {
+                        if (result) {
+                            if (result.Status) {
+                                var options = [];
+                                options.push("<option value=''>全部</option>");
+                                for (var i = 0; i < result.Data.length; i++) {
+                                    options.push("<option value='" + result.Data[i].SysNo + "'>" + result.Data[i].UserName + "</option>");
+                                }
+                                pairing.empty().append(options.join(""));
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', result.Message);
+                            }
+                        }
+                    }
+                });
+            });
+            //#endregion
+
+            doSearch();
+        });
+
+        //设置页面默认值
+        function setDefaultValue() {
+            $("#SysNo").defaultValue("搜索采购单号...");
+        }
+
+        function doSearch() {
+            var data = {};
+            if ("搜索采购单号..." != $("#SysNo").val())
+            {
+                data.PurchaseCode = $("#SysNo").val();
+            }
+            var whsysno = $("#WhWarehouse").val();
+            if (whsysno != '0') {
+                data.WarehouseSysNo = whsysno;
+            }
+            data.Status = $("#Status").val();
+            startSearch(data);
+        }
+        function advancedSearch() {
+            var data = {};
+            if ($("#CreatedDate").val()!="")
+                data.CreatedDate = $("#CreatedDate").val();
+            startSearch(data);
+        }
+        function startSearch(data) {
+            var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+            $.get('@Url.Action("PurchaseReturnList", "Purchase")', data,
+                function (ret) {
+                    $('#paging').html(ret);
+                    mask.Remove();
+                });
+        }
+        function exportExcel() {
+            var form = $("#advanced_search_form");
+            form.attr('action', '@Url.Action("ExportExcel", "Warehouse")');
+            form.submit();
+            return false;
+        }
+
+    </script>
+}
+@using ((Html.BeginForm("PurchaseCreate", "Purchase", FormMethod.Post, new { id = "advanced_search_form" })))
+{
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>@ViewBag.Title</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <!--/工具条-->
+                    <div class="right_tool clearfix">
+                        <span class="veralign_t fl">仓库</span>
+                        <div class="fl m10_l">
+                            <input type="text" id="WhWarehouse" name="WhWarehouse" data-pairing="DeliveryUserSysNo" class="wd100 m10_r select_ht28" />
+                        </div>
+                        @*<span class="veralign_t fl">借货人</span>
+                            <div class="fl m10_l">
+                                <select id="DeliveryUserSysNo" name="DeliveryUserSysNo" class="wd100 select_ht28">
+                                    <option value="" selected="selected">全部</option>
+                                </select>
+                            </div>*@
+                        <span class="veralign_t fl m10_l">状态</span>
+                        <div class="fl m10_l">
+                            @Html.DropDownList("Status")
+                        </div>
+                        <span class="fl m10_l">采购单号</span>
+                        <div class="search_btn fl m10_l">
+                            <input name="SysNo" type="text" id="SysNo" class="input_ht28" value="搜索采购单号..." />
+                            <button class="btn btn_ht28 btn_blue" id="search_btn" title="搜索" type="button"><span class="icon_search icon_white"></span></button>
+                        </div>
+                        @*<button class="btn btn_ht28 fl m10_l btn_blue" id="advanced_search" title="高级搜索" type="button"><span class="icon_search icon_white"></span><span class="m5_l">高级搜索</span></button>*@
+                    </div>
+                    <div>
+                        @*<button class="btn btn_ht26 m10_r btn_blue WH1004201" type="button" id="createBtn" onclick="window.location.href = '/Purchase/PurchaseCreate/'"><span class="icon icon_plus icon_white"></span><span class="m5_l">创建采购单</span></button>*@
+                        @*<button class="btn btn_ht26 btn_blue WH1004102" type="button" onclick="exportExcel()"><span class="icon_share icon_white"></span><span class="m5_l">导出Excel</span></button>*@
+                    </div>
+                </div>
+                <!--/表格列表区-->
+                <div class="boxs_listtabel">
+                    <div id="paging" style="overflow:visible;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="search_box" id="JS_search">
+        <div class="search_title clearfix">
+            <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+        </div>
+        <div class="search_body">
+            <table width="100%">
+                <tbody>
+                    <tr>
+                        <td align="right">创建时间</td>
+                        <td>
+                            <div class="date_btn">
+                                <input type="text" value="" name="CreatedDate" id="CreatedDate" class="input_ht26">
+                                <button title="日历" class="btn btn_ht26" onclick="UI.Date({el:'CreatedDate'})" type="button"><span class="icon_calendar"></span></button>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="search_foot">
+            <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="advanced_search_btn" type="button">开始查询</button>
+            <button title="清除条件" class="btn btn_ht30 bold m10_l" id="clear_btn" type="reset">清除条件</button>
+        </div>
+    </div>*@
+}
+<script type="text/javascript">
+    function audit(sysNo) {
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("AuditPurchaseReturn", "Purchase")",
+            data: { sysNo: sysNo },
+            chche: false,
+            success: function (ret)
+            {
+                if (ret.IsLogout) {
+                    DAO.LoginBox();
+                    return;
+                }
+                if (ret.Status) {
+                    UI.tips.tip_alert('tips_success', '成功作审核采购退货单。');
+                    doSearch();
+                } else {
+                    //showDialogBox(ret.Message);
+                    UI.tips.tip_alert('tips_wrong', ret.Message);
+
+                }
+        },
+        error: function () {
+            //showDialogBox('操作出错,请稍候再试!');
+            UI.tips.tip_alert('tips_wrong', '操作出错, 请稍候再试');
+        }
+    });
+    }
+
+    function Cancel(sysno) {
+        var data= {delSysNos:[]};
+        data.delSysNos.push(sysno);
+        $.ajax({
+            type: "POST",
+            url: "@Url.Action("DeletePurchaseReturn", "Purchase")",
+            contentType: 'application/json',
+            data:JSON.stringify(data),
+            chche: false,
+            success: function (ret) {
+                if (ret.IsLogout) {
+                    DAO.LoginBox();
+                    return;
+                }
+                if (ret.Status) {
+                    UI.tips.tip_alert('tips_success', '成功删除采购退货单。');
+                    doSearch();
+                } else {
+                    UI.tips.tip_alert('tips_wrong',ret.Message);
+                    doSearch();
+                }
+        },
+        error: function () {
+            showDialogBox('操作出错,请稍候再试!');
+        }
+    });
+  }
+</script>

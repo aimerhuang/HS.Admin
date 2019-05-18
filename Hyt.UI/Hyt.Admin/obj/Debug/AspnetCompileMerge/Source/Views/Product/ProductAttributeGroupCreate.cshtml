@@ -1,0 +1,297 @@
+﻿ @using System.Diagnostics
+@using Hyt.Model
+@model Hyt.Model.PdAttributeGroup
+@{
+    ViewBag.Title = "BrandCeate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section HeadCss{
+    <link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all"/>
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            $("#pdAttributeGroupForm").validate({               
+                rules: {
+                    Name: {
+                        required: true,
+                        maxlength :30
+                    },
+                    BackEndName: {
+                        required:true
+                    }
+                },
+                messages: {                    
+                    Name: {
+                        required: "属性组名称必填",
+                        maxlength: "长度超出30个字"
+                    }
+                },
+                errorPlacement: function (error, element) {                  
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');                    
+                   
+                },
+                success: function (span, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+
+         
+
+
+            function initDialog() {
+                var parent = art.dialog.parent,				// 父页面window对象
+                api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+                if (!api) return;
+                // 自定义按钮               
+                api.button([                   
+                    {
+                        name: '保存',
+                        callback: function () {
+                            if ($("#pdAttributeGroupForm").valid()) {
+                                generalAttributes();
+                                $.post('/Product/ProductAttributeGroupCreate/', $("#pdAttributeGroupForm").serialize(), function (result) {
+                                    if (result.StatusCode > 0) {
+                                        UI.tips.tip_alert("tips_success", "保存成功");
+                                        setTimeout(function () {
+                                            try {
+                                                UI.Dialog.opener.doSearch(UI.Dialog.opener.curpage);
+                                            } catch (e) {
+                                            };
+                                            UI.Dialog.close();
+                                        }, 1000);
+                                    } else {
+                                        var message = "操作失败";
+                                        if (!!result && !!result.Message) {
+                                            message = result.Message;
+                                            if (result.StatusCode == -2) {
+                                                $("#name").focus();
+                                            }
+                                        }
+                                        UI.tips.tip_alert("tips_wrong", message);
+                                    }
+                                });
+                                return false;
+                            } else {
+                                return false;
+                            }
+                        },
+                        focus: true
+                    },
+                     {
+                         name: '取消'                         
+                     }
+                ]
+                );
+                //设置属性表格设置样式
+                resetRowClass();
+                initAttributes();
+            }
+
+            
+            var attributeSysno = 195;
+            //添加功能
+            $("#addAttribute").click(function () {
+               
+                var arr = [];                
+                $("#listAttribute input.sysno").each(function () {
+                    arr.push($(this).val());
+                });              
+                DAO.SelectAttribute({
+                    arrAttributeIds: arr, callBack: function (data) {                       
+                        //添加row                       
+                        for (var i = 0; i < data.length; i++) {
+                            var result = data[i];
+                            var mark = true;
+                            for (var j = 0; j < arr.length; j++) {
+                                if (result.SysNo == arr[j]) {
+                                    mark = false;
+                                    break;
+                                }
+                            }
+                            if (mark) {
+                                if (result.SysNo > 0) {
+                                    var row = $("#trTmp").clone().html().replace('$name', result.AttributeName).replace('$backname', result.BackEndName).replace("$sysno", result.SysNo);
+                                    $("#listAttribute").find("tbody").append(row);
+                                    
+                                }
+                            }
+                        }
+                        //删除row
+                        $("#listAttribute").find("tbody").find("tr").each(function () {
+                            
+                            var mark = true;
+                            var value = $(this).find("input.sysno").val();
+                            for (var i = 0; i < data.length; i++) {
+                                if (data[i].SysNo == value) {
+                                    mark = false;
+                                    break;
+                                }
+                            }
+                            if (mark) {
+                                $(this).remove();
+                            }
+
+                        });
+                        resetRowClass();
+                    }
+                });
+                
+            });
+
+
+
+            //删除功能
+            $(".btnDel").live("click", function () {
+                var obj = this;
+                UI.Confirm({
+                    content: '确定要删除吗?',
+                    ok: function () {
+                        $(obj).closest("tr").remove();
+                        resetRowClass();
+                    },
+                    cancelVal: '取消',
+                    cancel: true
+                });
+            });
+
+            $(".btnUp").live("click", function () {
+                var objRow = $(this).closest("tr");
+                var index = $("#listAttribute tr").index(objRow);
+                if (index > 1) {
+                    objRow.insertBefore(objRow.prev());
+                }
+                resetRowClass();
+            });
+
+            $(".btnDown").live("click", function () {
+                var objRow = $(this).closest("tr");
+                var index = $("#listAttribute tr").index(objRow);
+                var length = $("#listAttribute tr").length;
+                if (index < length-1) {
+                    objRow.insertAfter(objRow.next());
+                }
+                resetRowClass();
+            });
+
+            function generalAttributes() {
+                var arr = [];
+                $("#listAttribute input.sysno").each(function () {
+                    arr.push($(this).val());
+                });
+                $("#attributes").val(arr.join(','));
+                
+            }
+
+            function initAttributes()
+            {
+                var arr = [];
+                $("#listAttribute input.sysno").each(function () {
+                    arr.push($(this).val());
+                });
+                $("#initattributes").val(arr.join(','));
+                
+            }
+
+
+            //重置样式
+            function resetRowClass()
+            {
+                $("#listAttribute tr").removeClass("stag_color");
+                $("#listAttribute tr:odd").addClass("stag_color");
+
+                $("#listAttribute button").removeClass("disabled");
+                $("#listAttribute tr:last").find(".icon_arrow_down").parent().addClass("disabled");
+                $("#listAttribute tr:eq(1)").find(".icon_arrow_up").parent().addClass("disabled");
+            }
+            initDialog();
+        });
+
+
+        
+
+
+    </script>
+}
+<div class="caseout">
+<form id="pdAttributeGroupForm" name="pdBrandForm" action="">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                <tbody>
+                    <tr>
+                        <td width="30%" class="nameright border_rnone"><span class="v_star">*</span>属性组名称</td>
+                        <td width="70%">
+                            <input type="text" name="Name" id="name" value="@Model.Name"  class="wd200" maxlength="30"><span id="forname" class="prompt m10_l">属性组名称必填</span></td>
+                    </tr>
+                    <tr>
+                        <td width="30%" class="nameright border_rnone"><span class="v_star">*</span>后台显示名称</td>
+                        <td width="70%">
+                            <input type="text" name="BackEndName" id="backEndName" value="@Model.BackEndName" class="wd200" maxlength="30"><span class="prompt m10_l">后台显示名称必填</span></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="title30 f12 p20_l ht35  border_left border_right">
+                &nbsp;<button class="btn btn_ht26 btn_blue m10_l" type="button" id="addAttribute"><span class="icon icon_white icon_plus"></span><span class="m5_l">选择属性</span></button></div>
+        </div>
+
+        <input type="hidden" name="SysNo" value="@Model.SysNo" />
+        <input type="hidden" name="attributes" id="attributes" />
+        <input type="hidden" id="initattributes" />
+    </div>
+
+    <div class="boxs_listtabel m0_l">
+        <table width="100%" cellspacing="0" cellpadding="0" border="0" id="listAttribute">
+            <thead>
+                <tr>
+                    <th width=""class="border_bnone">属性名称</th>
+                    <th width="" class="border_bnone">后台显示名称</th>
+                    <th width="86px" class="border_bnone">排序</th>
+                    <th width="79px" class="border_rnone border_bnone">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    if (((List<PdAttribute>)ViewBag.ListAttribute).Count == 0)
+                    {
+                       <tr class="odd_color trhover">
+                        <td colspan="4" class="align_l p10_l bgr_eb">暂无数据</td>
+                      </tr>
+                    }
+                     foreach (var item in (List<PdAttribute>)ViewBag.ListAttribute)
+                     {
+                         <tr>
+                            <td width=""><input type="hidden" value="@item.SysNo" class="sysno"  />@item.AttributeName</td>
+                            <td width="">@item.BackEndName</td>
+                            <td>
+                                <button class="btn btn_ht26 btnUp m10_r" type="button"><span class="icon_arrow_up"></span></button><button class="btn btn_ht26 btnDown" type="button"><span class="icon_arrow_down"></span></button>
+                            </td>
+                            <td class="border_rnone">
+                                <button class="btn btn_ht26 btnDel" type="button"><span class="icon  icon_trash"></span><span class="m5_l">删除</span></button></td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        <table style="display: none;">
+            <tbody id="trTmp">
+                <tr>
+                    <td width=""><input type="hidden" value="$sysno" class="sysno" />$name</td>
+                    <td width="">$backname</td>
+                    <td>
+                        <button class="btn btn_ht26 btnUp m10_r" type="button"><span class="icon_arrow_up"></span></button><button class="btn btn_ht26 btnDown" type="button"><span class="icon_arrow_down"></span></button>
+                    </td>
+                    <td class="border_rnone">
+                        <button class="btn btn_ht26 btn_red btnDel" type="button"><span class="icon icon_white icon_trash"></span><span class="m5_l">删除</span></button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</form>
+</div>

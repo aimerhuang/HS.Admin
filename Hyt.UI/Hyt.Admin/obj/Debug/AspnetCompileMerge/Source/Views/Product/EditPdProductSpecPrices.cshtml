@@ -1,0 +1,209 @@
+﻿@section HeadJs
+{
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+}
+@using Hyt.Model.InventorySheet
+@model IList<PdProductSpecPrices>
+<div class="boxs_detail_dispay p10" id="div_productMainInof">
+    <div class="tit_con">
+        <div class="tit_dispay tit_dispay_2 m10_t" onclick="yc(this)" style="border-left: #c9c9c9 solid 1px; border-right: #c9c9c9 solid 1px; border-bottom: #c9c9c9 solid 1px; ">
+            <div class="more10r m5_t">
+                @*<span class="btn_arrow btn_tableup"></span>*@
+            </div>
+            <h5 class="accordingtitle">
+                <span class=""></span>
+                商品规格
+            </h5>
+        </div>
+
+
+
+        <div class="boxs_detail line25">
+            <table id="t_PdProductSpecPrices" width="100%" border="0" cellspacing="0" cellpadding="0" style="overflow: visible;  ">
+                <thead>
+                    <tr class="">
+                        <th align="center" width="150">规格</th>
+                        <th class="p10_lr" width="80">规格毛重(kg)</th>
+                        <th class="p10_lr" width="80">包装体积(m³)</th>
+                        <th class="p10_lr" width="150">商品单价/规格总价（元）</th>
+                        <th class="p10_lr" width="80">打包费（元）</th>
+                        <th class="p10_lr" width="120">折合单价／折合总价（元）</th>
+                        <th class="p10_lr" width="80">销售价</th>
+                    </tr>
+
+                </thead>
+                <tbody id="lbl_PdProductSpec">
+                    @{
+
+                        if (!string.IsNullOrEmpty(ViewBag.SpecModel))
+                        {
+                            string SpecModel = ViewBag.SpecModel;
+                            var SpecModelJson = Newtonsoft.Json.Linq.JObject.Parse(SpecModel);
+                            int count = SpecModelJson["PdProductSpecValues"].Count();
+                            for (int i = 0; i < count; i++)
+                            {
+                                <tr class="">
+                                    @{
+                                var list = Model.Where(p => p.SpecValueList.spec == SpecModelJson["PdProductSpecValues"][i]["spec"].ToString()).ToList();
+                                if (list.Count > 0)
+                                {
+                                    <td align="left" class="p20_l">
+                                        <input type="checkbox" checked />
+                                        <span>@(SpecModelJson["PdProductSpecValues"][i]["spec"])@(SpecModelJson["PdProductSpecValues"][i]["unit"])</span>
+                                        <input type="hidden" class="hi_unit" value="@(SpecModelJson["PdProductSpecValues"][i]["unit"])" />
+                                        <input type="hidden" class="hi_spec" value="@(SpecModelJson["PdProductSpecValues"][i]["spec"])" />
+                                        <input type="hidden" class="hi_price" value="@(SpecModelJson["PdProductSpecValues"][i]["price"])" />
+                                    </td>
+                                        <td class="center"><input type="text" class="txt_GrossWeight wd50" value="@(list[0].GrossWeight)"></td>
+                                        <td class="center"><input type="text" class="txt_Volume wd50" value="@(list[0].Volume)"></td>
+                                        <td class="center">
+                                            <input type="text" class="txt_Price wd50" value="@(list[0].Price)" oninput="blur_Price('@(SpecModelJson["PdProductSpecValues"][i]["spec"])',this)"> /
+                                            <input type="text" class="txt_TotalPrice wd50" value="@(list[0].TotalPrice)" oninput="blur_TotalPrice('@(SpecModelJson["PdProductSpecValues"][i]["spec"])', this)">
+                                        </td>
+                                        <td class="center"><input type="text" class="txt_PackingFee wd50" value="@(list[0].PackingFee)" oninput="blur_PackingFee('@(SpecModelJson["PdProductSpecValues"][i]["spec"])', this)"></td>
+                                        <td class="center">
+                                            <span class="txt_EquivalentTotalPrice">@(list[0].EquivalentTotalPrice)</span> /
+                                            <span class="txt_EquivalentPrice">@(list[0].EquivalentPrice)</span>
+                                        </td>
+                                        <td class="center"><input type="text" class="txt_SalesPrice wd50" value="@(list[0].SalesPrice)"></td>
+                                }
+                                else
+                                {
+                                    <td align="left" class="p20_l">
+                                        <input type="checkbox" />
+                                        <span>@(SpecModelJson["PdProductSpecValues"][i]["spec"])@(SpecModelJson["PdProductSpecValues"][i]["unit"])</span>
+                                        <input type="hidden" class="hi_unit" value="@(SpecModelJson["PdProductSpecValues"][i]["unit"])" />
+                                        <input type="hidden" class="hi_spec" value="@(SpecModelJson["PdProductSpecValues"][i]["spec"])" />
+                                        <input type="hidden" class="hi_price" value="@(SpecModelJson["PdProductSpecValues"][i]["price"])" />
+                                    </td>
+                                        <td class="center"><input type="text" class="txt_GrossWeight wd50" value="0.00"></td>
+                                        <td class="center"><input type="text" class="txt_Volume wd50" value="0.00"></td>
+                                        <td class="center">
+                                            <input type="text" class="txt_Price wd50" value="0.00" oninput="blur_Price('@(SpecModelJson["PdProductSpecValues"][i]["spec"])',this)"> /
+                                            <input type="text" class="txt_TotalPrice wd50" value="0.00" oninput="blur_TotalPrice('@(SpecModelJson["PdProductSpecValues"][i]["spec"])', this)">
+                                        </td>
+                                        <td class="center"><input type="text" class="txt_PackingFee wd50" value="0.00" oninput="blur_PackingFee('@(SpecModelJson["PdProductSpecValues"][i]["spec"])', this)"></td>
+                                        <td class="center">
+                                            <span class="txt_EquivalentTotalPrice">0.00</span> /
+                                            <span class="txt_EquivalentPrice">0.00</span>
+                                        </td>
+                                        <td class="center"><input type="text" class="txt_SalesPrice wd50" value="0.00"></td>
+                                }
+                                    }
+
+                                </tr>
+                            }
+                        }
+                    }
+                </tbody>
+            </table>
+
+        </div>
+
+    </div>
+</div>
+<!-- 商品主信息维护 END -->
+
+<script type="text/javascript">
+
+    $(function () {
+        initDialog();
+    });
+
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    var valTr = $("#lbl_PdProductSpec").children("tr");
+                    //if (valTr.length == 0) {
+                    //    UI.tips.tip_alert('tips_shrot tips_wrong', '请选择商品规格。');
+                    //    return false;
+                    //}
+                    var lstmodel = new Array();
+                    for (var i = 0; i < valTr.length; i++) {
+                        if (valTr.eq(i).children("td").eq(0).children("input[type='checkbox']").is(':checked')) {
+                            var json = '{';
+                            json += '"ProductSysNo":"@(ViewBag.PdProductSysNo)",';
+                            json += '"SpecValueList":{';
+                            json += '"unit":"' + valTr.eq(i).children("td").eq(0).children(".hi_unit").val() + '",';
+                            json += '"spec":"' + valTr.eq(i).children("td").eq(0).children(".hi_spec").val() + '",';
+                            json += '"price":"' + valTr.eq(i).children("td").eq(0).children(".hi_price").val() + '"';
+                            json += '},';
+                            json += '"WarehouseSysNo":"@(ViewBag.WarehouseSysNo)",';
+                            json += '"Unit":"' + valTr.eq(i).children("td").eq(0).children(".hi_unit").val() + '",';
+                            json += '"GrossWeight":"' + valTr.eq(i).children("td").eq(1).children(".txt_GrossWeight").val() + '",';
+                            json += '"Volume":"' + valTr.eq(i).children("td").eq(2).children(".txt_Volume").val() + '",';
+                            json += '"Price":"' + valTr.eq(i).children("td").eq(3).children(".txt_Price").val() + '",';
+                            json += '"TotalPrice":"' + valTr.eq(i).children("td").eq(3).children(".txt_TotalPrice").val() + '",';
+                            json += '"PackingFee":"' + valTr.eq(i).children("td").eq(4).children(".txt_PackingFee").val() + '",';
+                            json += '"EquivalentPrice":"' + valTr.eq(i).children("td").eq(5).children(".txt_EquivalentPrice").html() + '",';
+                            json += '"EquivalentTotalPrice":"' + valTr.eq(i).children("td").eq(5).children(".txt_EquivalentTotalPrice").html() + '",';
+                            json += '"SalesPrice":"' + valTr.eq(i).children("td").eq(6).children(".txt_SalesPrice").val() + '"';
+                            json += '}';
+                            lstmodel.push(JSON.parse(json));
+                        }
+                    }
+                    $.ajax({
+                        url: "/Product/EditPdProductSpecPrices",
+                        data: JSON.stringify(lstmodel),
+                        type: "POST",
+                        //async: false,
+                        contentType: 'application/json;charset=utf-8',
+                        success: function (data) {
+                            if (data.Status) {
+                                UI.tips.tip_alert(' tips_success', '保存成功！');
+                            } else {
+                                UI.tips.tip_alert(' tips_success', '保存失败！');
+                            }
+
+                        }
+                    });
+                    return false;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+    //单价失去焦点
+    function blur_Price(count, th) {
+
+        if ($(th).val() == "") {
+            $(th).val("0.00");
+        }
+
+        $(th).next().val((count * $(th).val()));  //获取总价
+        var EquivalentPrice = (parseFloat($(th).next().val()) + parseFloat($(th).parent("td").next().children(".txt_PackingFee").val())).toFixed(2);//折合总价
+        $(th).parent("td").next().next().children(".txt_EquivalentPrice").html(EquivalentPrice);
+        $(th).parent("td").next().next().children(".txt_EquivalentTotalPrice").html((parseFloat(EquivalentPrice) / parseFloat(count)).toFixed(2));
+    }
+
+    //总价失去焦点
+    function blur_TotalPrice(count, th) {
+        if ($(th).val() == "") {
+            $(th).val("0.00");
+        }
+        $(th).prev().val(($(th).val() / count).toFixed(2)); //获取单价
+        var EquivalentPrice = (parseFloat($(th).val()) + parseFloat($(th).parent("td").next().children(".txt_PackingFee").val())).toFixed(2);//折合总价
+        $(th).parent("td").next().next().children(".txt_EquivalentPrice").html(EquivalentPrice);
+        $(th).parent("td").next().next().children(".txt_EquivalentTotalPrice").html((parseFloat(EquivalentPrice) / parseFloat(count)).toFixed(2));
+    }
+
+    //打包费失去焦点
+    function blur_PackingFee(count, th) {
+        if ($(th).val() == "") {
+            $(th).val("0.00");
+        }
+        var EquivalentPrice = (parseFloat($(th).val()) + parseFloat($(th).parent("td").prev().children(".txt_TotalPrice").val())).toFixed(2);
+        $(th).parent("td").next().children(".txt_EquivalentPrice").html(EquivalentPrice);
+        $(th).parent("td").next().children(".txt_EquivalentTotalPrice").html((parseFloat($(th).parent("td").next().children(".txt_EquivalentPrice").html()) / parseFloat(count)).toFixed(2));
+    }
+</script>

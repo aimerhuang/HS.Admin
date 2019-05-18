@@ -1,0 +1,762 @@
+﻿@using Hyt.BLL.Product
+@using Hyt.BLL.Warehouse
+@using Hyt.Model
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.CBWhStockOut
+
+@{
+    ViewBag.Title = "扫描商品出库";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@section FooterJs
+{
+    <script type="text/javascript">
+        var invConfirmedSuc = false;
+
+        //是否需要判断EAS库存数量
+        var isNeedDetermine = true;// false;
+
+        $(document).ready(function () {
+            @{
+                if (ViewBag.Invoice != null)
+                {
+                    if (ViewBag.Issued)
+                    {
+                        @Html.Raw(@"$('#btnInvoicing').show();$('#btnShowInvoice').hide();")
+                    }
+                    else
+                    {
+                        @Html.Raw(@"$('#btnInvoicing').hide();$('#btnShowInvoice').show();invConfirmedSuc=true;")
+                    }
+                }
+                else
+                {
+                    @Html.Raw(@"$('#btnInvoicing').hide();$('#btnShowInvoice').hide();if(!$('#btnInvoicing').parent().find('select').length){$('#btnInvoicing').parent().parent().css('height','5px');}")
+                }
+            }
+            //表格加入隔行样式
+            DAO.InterlineStyle();
+
+            $("#chkAll").click(function () {
+                var all = $("#chkAll").attr("checked");
+
+                if (all == "checked") { // 全选
+                    $(":checkbox").attr("checked", true);
+
+                } else { // 取消全选
+                    $(":checkbox").attr("checked", false);
+                }
+            });
+            $("[name = chkDetail]").click(function () {
+                var checkedbox = $("input[name = 'chkDetail']:checked").length;
+                var itemscount = '@Model.Items.Count';
+
+                if (checkedbox == itemscount) {
+                    $("#chkAll").attr("checked", true);
+                } else {
+                    $("#chkAll").attr("checked", false);
+                }
+            });
+            //选中默认配送方式
+            $("#deliveryList").val(@Model.DeliveryTypeSysNo);
+
+            //默认全选所有商品
+            $(":checkbox").attr("checked", true);
+
+            $("#txtProductSysNo").keydown(function (e) {
+                var keycode = e.which;
+                if (keycode != 13) {
+                    return;
+                }
+
+                var input = $("#txtProductSysNo").val();
+                $("#txtProductSysNo").val("");
+
+                if (input.length == 0) {
+                    return;
+                }
+
+                var isfind = false;
+                var tr = 0;
+                $('#tr_list tr').each(function (trindex) {
+                    $('#tr_list td').each(function (tdindex) {
+                        var t = $("#tr_list tr:eq(" + trindex + ") td:eq(" + tdindex + ")").html();
+                        if (input == t) {
+                            isfind = true;
+                            tr = trindex;
+                            return false;
+                        }
+                        if (isfind) {
+                            return false;
+                        }
+                        return true;
+                    });
+                }); //each completed
+
+                if (!isfind) {
+                    UI.tips.tip_alert('tips_warning', '您输入的商品编号不属于本出库单。');
+                    return;
+                }
+
+                var orderQuantity = $("#tr_list tr:eq(" + tr + ") td:eq(4)").html();
+                var scanedQuantity = $("#tr_list tr:eq(" + tr + ") td:eq(5)").html();
+
+                if (eval(scanedQuantity) >= eval(orderQuantity)) {
+                    UI.tips.tip_alert('tips_warning', '您输入的商品数量已经与出库单匹配了。');
+                    return;
+                }
+
+                scanedQuantity++;
+                $("#tr_list tr:eq(" + tr + ") td:eq(5)").html(scanedQuantity);
+            });
+
+
+            var dd = document.getElementById('invoiceInput');
+            var code = $(dd).find("#txtInvoiceCode");
+            var codeSpan = $(dd).find("#for_txtInvoiceCode");
+            $(code).blur(function () {
+                invoiceCodeValidate(code, codeSpan);
+            });
+            var no = $(dd).find("#txtInvoiceNo");
+            var noSpan = $(dd).find("#for_txtInvoiceNo");
+            $(no).blur(function () {
+                invoiceNoValidate(no, noSpan);
+            });
+
+            @* code.val('@Model.InvoiceCode');
+            no.val('@Model.InvoiceNo');*@
+
+            var deliveryList = $("#deliveryList");
+            var deliverySpan = $("#for_deliveryList");
+            $(deliveryList).change(function () {
+                if (!($(deliveryList).val())) {
+                    deliverySpan.attr('class', 'error');
+                    $(deliveryList).attr('class', 'inputerror');
+                    deliverySpan.text('请选择一个配送方式');
+                } else {
+                    deliverySpan.attr('class', 'success');
+                    $(deliveryList).attr('class', 'm10_r');
+                    deliverySpan.text('');
+                }
+            });
+
+            GetInventory();
+            //GetPdProductStockList();
+        });
+        //#region 发票
+
+        function invoiceCodeValidate(code, codeSpan) {
+            if ($(code).val().length == 0) {
+                $(codeSpan).text('填写发票代码');
+            }
+            if ($(code).val().length > 20) {
+                $(codeSpan).text('最多500个字符');
+            }
+            if ($(code).val().length == 0 || $(code).val().length > 500) {
+                $(code).attr('class', 'inputerror m10_r');
+                $(codeSpan).attr('class', 'error');
+                return false;
+            } else {
+                $(code).attr('class', 'm10_r');
+                $(codeSpan).attr('class', 'success');
+                return true;
+            }
+        }
+
+        function invoiceNoValidate(no, noSpan) {
+            if ($(no).val().length == 0) {
+                $(noSpan).text('填写发票号码');
+            }
+            if ($(no).val().length > 20) {
+                $(noSpan).text('最多500个字符');
+            }
+            if ($(no).val().length == 0 || $(no).val().length > 500) {
+                $(no).attr('class', 'inputerror m10_r');
+                $(noSpan).attr('class', 'error');
+                return false;
+            } else {
+                $(no).attr('class', 'm10_r');
+                $(noSpan).attr('class', 'success');
+                return true;
+            }
+        }
+
+        function showDialogBox(msg) {
+            UI.Alert({
+                title: '提示',
+                content: msg,
+                button: [{ name: '确认' }],
+                cancel: false,
+                padding: '10px 20px'
+            });
+        }
+
+        //#endregion
+        //出库
+        var outStockStatus = true;//用于检测是否正在出库，防止重复提交
+        function DoOutStock() {
+            @if (ViewBag.Invoice != null)
+            {
+                @Html.Raw("if (!invConfirmedSuc) {UI.Alert({ content: '请先添加发票!' });return false;}")
+            }
+
+            if (isNeedDetermine) { //检测EAS库存是否为负数
+                var status = false;
+                var productNum;
+
+                $("#tr_list").find("input:checked").each(function () {
+                    var value = $(this).parent().nextAll("[name^='inventory_']").text();
+                    if (value <= 0 || isNaN(value)) {
+                        productNum = $(this).parent().next().text();
+                        status = true;
+                        return false;
+                    }
+                });
+
+                //if (status) {
+                //    showDialogBox('您所选的商品编号为:' + productNum + '的商品ERP库存数量存在异常，请取消此商品出库!');
+                //    return;
+                //}
+            }
+
+            var checkedValues = "";
+            $("#tr_list").find("input:checked").each(function () {
+                checkedValues += $(this).attr("stockOutItemSysNo") + "," + $(this).parents("tr").find("input[type='text']").val() + ";";
+            });
+
+            if (checkedValues.length == 0) {
+                UI.tips.tip_alert('tips_warning', '没有选择任何商品进行出库。');
+                return;
+            }
+            if ('@Model.IsThirdpartyExpress' == '1') {
+                var span = $("#for_deliveryList");
+                if (!($("#deliveryList").val())) {
+                    span.attr('class', 'error');
+                    $("#deliveryList").attr('class', 'inputerror');
+                    span.text('请选择一个配送方式');
+                    return;
+                }
+            }
+
+            //检查勾选出库的出库单中的商品是否扫描完毕
+            var allMatched = true;
+            var checkedCount = 0;
+            var inputcheck = true;
+
+            $('#tr_list tr').each(function (trindex) {
+                if ($("#tr_list tr:eq(" + trindex + ") :checkbox").attr("checked") == "checked") {
+                    checkedCount++;
+                    var itemSysNo = $(this).find("input[type='checkbox']").val();
+                    var orderQuantity = $("#tr_list tr:eq(" + trindex + ") td:eq(4)").html();
+                    var scanedQuantity = $("#tr_list tr:eq(" + trindex + ") input:eq(1)").val();
+                    var input = $("#tr_list tr:eq(" + trindex + ") input:eq(1)");
+                    if (isNaN(scanedQuantity)) {
+                        UI.tips.tip_alert('tips_warning', '商品编号:' + itemSysNo + '输入的商品数量只能为正整数。');
+                        $(input).val('');
+                        $(input).focus();
+                        inputcheck = false;
+                    }
+                    if (eval(scanedQuantity) < 0) {
+                        UI.tips.tip_alert('tips_warning', '商品编号:' + itemSysNo + '输入的商品数量不能小于0。');
+                        $(input).val('');
+                        $(input).focus();
+                        inputcheck = false;
+                    }
+                    if (eval(scanedQuantity) > eval(orderQuantity)) {
+                        UI.tips.tip_alert('tips_warning', '商品编号:' + itemSysNo + '输入的商品数量大于订单中的商品数量。');
+                        $(input).val('');
+                        $(input).focus();
+                        inputcheck = false;
+                    }
+
+                    if (scanedQuantity != orderQuantity) {
+                        allMatched = false;
+                    }
+                }
+            });
+            if (!inputcheck) {
+                return;
+            }
+            var deliveryType;
+            if ('@Model.IsThirdpartyExpress' == '1') {
+                deliveryType = $("#deliveryList").val();
+            } else {
+                deliveryType = '@Model.DeliveryTypeSysNo';
+            }
+            if (!outStockStatus) {
+                return;
+            }
+            outStockStatus = false;//已经提交，修改状态为false
+            if ($('#tr_list tr').length != checkedCount || !allMatched) {
+                UI.Confirm({
+                    content: '没有出库所有商品,是否要拆分出库单出库？',
+                    padding: '10px 20px',
+                    ok: function () {
+                        OutStock(checkedValues);
+                    },
+                    cache: false,
+                    success: function (ret) {
+                        if (ret.IsLogout) {
+                            DAO.LoginBox();
+                            return;
+                        }
+                        if (ret.StatusCode == 0) {
+
+                            UI.DialogOpener().outStockCallback(true, ret.Message, '@Model.SysNo', deliveryType);
+                            //UI.DialogOpener().submitForm(1);
+                            UI.CloseDialog();
+
+                        } else {
+                            //console.log(ret);
+                            showDialogBox(ret.Message);
+                        }
+                    },
+                    error: function () {
+                        showDialogBox('操作出错,请稍候再试!');
+                    }
+                });
+
+            } else {
+                OutStock(checkedValues);
+            }
+        }
+
+        function OutStock(checkedValues) {
+            var deliveryType;
+            //如果为第三方快递, 则不能更改配送方式, 否则可以自选具体的第三方快递公司
+            if ('@Model.IsThirdpartyExpress' == '1') {
+                deliveryType = $("#deliveryList").val();
+            } else {
+                deliveryType = '@Model.DeliveryTypeSysNo';
+            }
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("StockOut", "Warehouse")',
+                data: {
+                    sysno: '@Model.SysNo',
+                    checkedStockItemSysNo: checkedValues,
+                    deliveryTypeSysNo: deliveryType,
+                    isThirdpartyExpress: '@Model.IsThirdpartyExpress',
+                    stamp: document.getElementById("outstackStamp").value
+                },
+                cache: false,
+                success: function (ret) {
+                    outStockStatus = true;//提交完成，修改状态为true
+                    if (ret.IsLogout) {
+                        DAO.LoginBox();
+                        return;
+                    }
+                    if (ret.Status) {
+                        UI.DialogOpener().outStockCallback(true, ret.Message, '@Model.SysNo', deliveryType);
+                        UI.CloseDialog();
+                    } else {
+                        //UI.DialogOpener().submitForm();
+                        showDialogBox(ret.Message);
+                    }
+                },
+                error: function () {
+                    outStockStatus = true;//提交完成，修改状态为true
+                    showDialogBox('操作出错,请稍候再试!');
+                }
+            });
+        }
+
+        function PrintPackage() {
+            var url = '/Print/PrintPackage?sysno=' + '@Model.SysNo';
+            UI.DialogOpen(url, {
+                title: '打印装箱单',
+                time: 2,
+                init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        this.iframe.contentWindow.location.reload();
+                    }
+                }
+            }, false);
+            UI.tips.tip_alert('tips_success', '装箱单打印成功。');
+        }
+
+        //开发票
+
+        function InvoiceAction() {
+
+            var dd = document.getElementById('invoiceInput');
+            var code = $(dd).find("#txtInvoiceCode");
+            var codeSpan = $(dd).find("#for_txtInvoiceCode");
+            var no = $(dd).find("#txtInvoiceNo");
+            var noSpan = $(dd).find("#for_txtInvoiceNo");
+            var sysno = $(dd).find("#InvoiceSysNo");
+            var remarks = $(dd).find("#InvoiceRemarks");
+
+            UI.DialogBox({
+                content: dd,
+                title: '发票信息输入',
+                ok: function () {
+                    if (!invoiceCodeValidate(code, codeSpan) || !invoiceNoValidate(no, noSpan)) {
+                        return false;
+                    }
+                    var data = {
+                        invoiceSysNo: sysno.val(),
+                        invoiceCode: code.val(),
+                        invoiceNo: no.val(),
+                        stockOutSysNo: '@Model.SysNo',
+                        invoiceRemarks: remarks.val()
+                    };
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("InvoiceUpdate")',
+                        data: data,
+                        cache: false,
+                        success: function (ret) {
+                            if (ret.StatusCode == 0) {
+                                UI.tips.tip_alert('tips_success', ret.Message);
+                                invConfirmedSuc = true;
+                                $("#btnInvoicing").hide();
+                                $("#btnShowInvoice").show();
+                                window.location.reload();
+                            } else {
+                                UI.tips.tip_alert('tips_warning', ret.Message);
+                            }
+                        },
+                        error: function (err) {
+                            UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                        }
+                    });
+                    return true;
+                },
+                width: 480,
+                height: 110,
+                cancelVal: '关闭',
+                cancel: true,
+                footerClass: 'aui_none'
+            });
+        }
+
+        function showInvoice() {
+            var dd = document.getElementById('invoiceInput');
+            UI.DialogBox({
+                content: dd,
+                title: '发票信息查看',
+                width: 480,
+                height: 100,
+                cancelVal: '关闭',
+                cancel: true,
+                footerClass: 'aui_none'
+            });
+        }
+        function GetPdProductStockList() {
+
+            var productSysNos = [];
+
+            var tds = $("#tr_list input[type='checkbox']");
+
+            $(tds).each(function (index) {
+                productSysNos.push($(this).val());
+            });
+            var data = { warehouseSysNo: '@Model.WarehouseSysNo', productSysNos: convertArrayToObject(productSysNos) };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetPdProductStockList")',
+                data: data,
+                cache: false,
+                success: function (ret) {
+                    if (ret.Status) {
+                        var arrData = ret.Data;
+                        var i;
+                        for (i = 0; i < arrData.length; i++) {
+                            var sysno = arrData[i].PdProductSysNo;
+                            var quantity = arrData[i].StockQuantity;
+
+                            var td = $("#tr_list").find("td[name='inventory_" + sysno + "']").empty().text(quantity);
+                            if (quantity <= 0) {
+                                td.addClass('red1');
+                            } else {
+                                td.addClass('green');
+                            }
+                        }
+                        //#endregion
+
+                        $("#tr_list td[name^='inventory_']").each(function () {
+                            if (!$(this).text()) {
+                                $(this).text("查询失败").addClass('red1');
+                            }
+                        });
+                    } else {
+                        $("#tr_list td[name^='inventory_']").each(function () {
+                            $(this).empty().text("查询失败").addClass('red1');
+                        });
+                    }
+                },
+                error: function () {
+                    UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                }
+            });
+        }
+
+
+        function GetInventory() {
+
+            var productSysNos = [];
+
+            var tds = $("#tr_list input[type='checkbox']");
+
+            $(tds).each(function (index) {
+                //productSysNos[index] = $($(tds)[index]).text();
+                productSysNos.push($(this).val());
+            });
+            var data = { warehouseSysNo: '@Model.WarehouseSysNo', productSysNos: convertArrayToObject(productSysNos) };
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("GetInventory")',
+                data: data,
+                cache: false,
+                success: function (ret) {
+                    if (ret.Status) {
+
+                        //#region fixed an js error--huangwei
+                        var arrData = ret.Data;
+                        var i;
+                        for (i = 0; i < arrData.length; i++) {
+                            var sysno = arrData[i].productSysNo;
+                            var quantity = arrData[i].Quantity;
+
+                            var td = $("#tr_list").find("td[name='inventory_" + sysno + "']").empty().text(quantity);
+                            if (quantity <= 0) {
+                                td.addClass('red1');
+                            } else {
+                                td.addClass('green');
+                            }
+                        }
+                        //#endregion
+
+                        $("#tr_list td[name^='inventory_']").each(function () {
+                            if (!$(this).text()) {
+                                $(this).text("查询失败").addClass('red1');
+                            }
+                        });
+                    } else {
+                        $("#tr_list td[name^='inventory_']").each(function () {
+                            $(this).empty().text("查询失败").addClass('red1');
+                        });
+                    }
+                },
+                error: function () {
+                    UI.tips.tip_alert('tips_wrong', '操作出错,请稍候再试!');
+                }
+            });
+        }
+
+
+        // 转换数组为对象
+
+        function convertArrayToObject(/*待转换数组*/array) {
+            var convertObj = {};
+            var len = array.length;
+            for (var i = 0; i < len; i++) {
+                convertObj[i] = array[i];
+            }
+            return convertObj;
+        }
+
+        ;
+    </script>
+}
+
+
+<input type="hidden" value="@Model.Stamp.ToString()" id="outstackStamp" />
+<div class="boxs" style="width: 820px; overflow-y: auto; height: 490px;">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="head_detail border_bnone">
+                <h5>出库单信息</h5>
+            </div>
+            <div class="tit_con">
+                <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 15%;" class="nameright border_rnone">出库单号：</td>
+                            <td style="width: 35%" class="border_rnone">@Model.SysNo</td>
+                            <td style="width: 15%" class="nameright border_rnone">状态：</td>
+                            <td style="width: 35%">@((WarehouseStatus.出库单状态)Model.Status)</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">订单编号：</td>
+                            <td class="border_rnone">@Model.OrderSysNO</td>
+                            <td class="nameright border_rnone">收货人：</td>
+                            <td>@Model.ReceiverName</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">配送方式：</td>
+                            <td class="border_rnone">@Model.DeliveryTypeName</td>
+                            <td class="nameright border_rnone">运费：</td>
+                            <td class="red">@Model.FreightAmount.ToString("C")</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">配送前是否联系：</td>
+                            <td class="border_rnone">@(Model.ContactBeforeDelivery == 1 ? '是' : '否')</td>
+                            <td class="nameright border_rnone">配送时间段：</td>
+                            <td>@Model.DeliveryTime</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">支付方式：</td>
+                            <td colspan="3">@Model.PaymentName</td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">销售单对内备注：</td>
+                            <td colspan="3">@Model.SoInternalRemarks</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="boxs_tool boxs_toolbgnone">
+                <!--/工具条-->
+                <div>
+                    <button id="btnInvoicing" onclick="InvoiceAction()" type="button" class="fr btn btn_ht26 m5_l"><span class="icon_ok m5_r"></span><span>发票确认</span></button>
+                    <button id="btnShowInvoice" onclick="showInvoice()" type="button" class="fr btn btn_ht26 m5_l"><span class="icon_ok m5_r"></span><span>查看发票</span></button>
+                    <!--请扫描商品编号：<input id="txtProductSysNo" class="input_medium wd150" name="" type="text" />  -->
+                    @if ((int)ViewData["IsThirdpartyExpress"] == 1)
+                    {
+                        <span>请选择第三方快递 @Html.DropDownList("deliveryList")</span>
+                        <span id="for_deliveryList" class="hide"></span>
+                    }
+
+                    @*else
+                        {
+                            <span>配送方式：&nbsp;@Model.DeliveryTypeName</span>
+                        }*@
+
+                    @*<button onclick=" PrintPackage() " type="button" class="btn btn_ht26 m5_l"><span class="icon_print m5_r"></span><span>打印装箱单</span></button>*@
+                </div>
+
+            </div>
+
+            <div id="item_list" class="boxs_listtabel">
+                <div class="head_detail border_bnone">
+                    <h5>产品信息</h5>
+                </div>
+                <!--/表格列表区-->
+                <table style="width: 100%" border="0" cellspacing="0" cellpadding="0">
+                    <thead>
+                        <tr>
+                            <th style="width: 32px;display: none">
+                                <input name="" id="chkAll" type="checkbox" value="" />
+                            </th>
+                            <th width="116px">商品编号</th>
+                            <th class="align_l p10_lr">后台显示名称</th>
+                            <th class="wd100">价格</th>
+                            <th style="width: 71px;">商品数量</th>
+                            <th style="width: 71px;">实际库存</th>
+                            <th style="width: 71px;">ERP库存</th>
+                            <th style="width: 71px;">出库数量</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tr_list">
+                        @{
+                            foreach (var item in Model.Items)
+                            {
+                                var StockQuantity = Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetStockQuantity(item.ProductSysNo,Model.WarehouseSysNo);  
+                                var erpNo = Hyt.BLL.Product.PdProductBo.Instance.GetProductErpCode(item.ProductSysNo);
+                                <tr>
+                                    <td style="display: none">
+                                        <input name="chkDetail" type="checkbox" value="@item.ProductSysNo" stockoutitemsysno="@item.SysNo" />
+                                    </td>
+                                    <td name="ProductSysNo">
+                                        @erpNo
+                                    </td>
+                                    <td class="align_l p10_lr">@PdProductBo.Instance.GetProductEasName(item.ProductSysNo)</td>
+                                    <td class="red align_r p10_r">@item.OriginalPrice.ToString("C")</td>
+                                    <td>@item.ProductQuantity</td>
+                                    <td>@StockQuantity</td>
+                                    <td name="inventory_@item.ProductSysNo">
+                                        <!-- remove id attr,may have same id--huangwei 11.26.2013 -->
+                                        <img src="/theme/images/icons/loading.gif" /></td>
+                                    <td>
+                                        <input value="@item.ProductQuantity" type="text" style="width: 51px;" readonly="readonly" />
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@*用于发票确认弹出框*@
+<div id="invoiceInput" class="boxs" style="display: none;">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                @{
+                    var invoice = ViewBag.Invoice as FnInvoice;
+                    if (invoice != null)
+                    {
+                        <input id="InvoiceSysNo" type="hidden" value="@invoice.SysNo" />
+                        <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <tr>
+                                <td class="nameright border_rnone wd90">发票类型：</td>
+                                <td class="wd110 border_right1">
+                                    @{
+                        var invoiceType = FnInvoiceTypeBo.Instance.GetModel(invoice.InvoiceTypeSysNo);
+                        if (invoiceType != null)
+                        {
+                            @invoiceType.Name
+                        }
+                                    }
+                                </td>
+                                <td class="nameright border_rnone wd90">发票抬头：</td>
+                                <td class="wd110">@invoice.InvoiceTitle</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">应开发票金额：</td>
+                                <td colspan="3" class="red">@invoice.InvoiceAmount.ToString("C")</td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票代码：</td>
+                                <td colspan="3">
+                                    @if (ViewBag.Issued)
+                                    {
+                                        <input id="txtInvoiceCode" name="InvoiceCode" class="m10_r" type="text" value="@invoice.InvoiceCode" />
+                                        <span id="for_txtInvoiceCode" class="hide"></span>
+                                    }
+                                    else
+                                    {
+                                        @invoice.InvoiceCode
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票号码：</td>
+                                <td colspan="3">
+                                    @if (ViewBag.Issued)
+                                    {
+                                        <input id="txtInvoiceNo" name="InvoiceNo" class="m10_r" type="text" value="@invoice.InvoiceNo" />
+                                        <span id="for_txtInvoiceNo" class="hide"></span>
+                                    }
+                                    else
+                                    {
+                                        @invoice.InvoiceNo
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="nameright border_rnone">发票备注：</td>
+                                <td colspan="3" style="word-break: break-all;">
+                                    @if (ViewBag.Issued)
+                                    {
+                                        <textarea id="InvoiceRemarks" class="m10_r">@invoice.InvoiceRemarks</textarea>
+                                    }
+                                    else
+                                    {
+                                        @invoice.InvoiceRemarks
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>

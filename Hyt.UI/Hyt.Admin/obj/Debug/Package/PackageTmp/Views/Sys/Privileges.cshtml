@@ -1,0 +1,103 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "权限管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    
+    @*@Html.PrivilegeControl(PrivilegeCode.SY1005101, ".SY1005101")
+    @Html.PrivilegeControl(PrivilegeCode.SY1005201, ".SY1005201")
+    @Html.PrivilegeControl(PrivilegeCode.SY1005701, ".SY1005701")
+    @Html.PrivilegeControl(PrivilegeCode.SY1005401, ".SY1005401")*@
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+  <div class="boxs">
+  
+    <div class="boxs_tit head_m "><span class="ra10 c6"><button class="btn btn_ht26 m10_r " style="display:none"><span class="icon_share_alt"></span><span class="m5_l">返回</span></button></span>
+      <h3>权限管理</h3>
+    </div>
+    
+    <div class="boxs_con_c1">    
+    
+      <!--工具条开始-->
+      <div class="boxs_tool"> 
+          <!--功能按钮开始-->
+          <div class="right_tool clearfix">
+              <span class="fl">状态</span><select class="m10_l fl" searchItem="Status"><option value="">全部</option>@ViewBag.Status</select>
+              <span class="fl"></span>
+               <div class="search_btn m10_l fl wd270">
+                        <input name="" type="text" class="input_ht28 wd240" id="Keyword" value="请输入权限名称/权限代码关键词" title="请输入权限名称/权限代码关键词" maxlength="25" />
+                        <button class="btn btn_ht28 SY1005101" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+          </div>
+        <div class="left_tool">
+          <button class="btn btn_ht26 m10_r btn_blue SY1005201" id="addpurview" title="新增权限"><span class="icon_plus icon_white"></span><span class="m5_l">新增权限</span></button>
+        </div>
+        <!--功能按钮结束-->
+      </div>
+      <!--工具条结束-->
+      
+            <div class="paging" id="paging">
+            </div>
+      
+    </div>
+  </div>
+    
+</div>
+
+
+
+  
+
+<script type="text/javascript">
+
+    
+    $(document).ready(function () {
+        $("#Keyword").defaultValue("请输入权限名称/权限代码关键词");
+
+        $("[searchItem='Status']").change(function() {
+            doSearch(1);
+        });
+
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+
+        doSearch(1);
+    });
+
+    //查询列表
+    function doSearch(id) {
+        var keyword = $("#Keyword").val();
+        if (keyword == "请输入权限名称/权限代码关键词")
+            keyword = "";
+        
+        Ajax.get("/Sys/DoPrivilegeQuery/?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("id", id);
+            p.setParams("keyword", keyword);
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+    //新增弹出
+    $("#addpurview").bind("click", function() {
+        UI.DialogOpen('/Sys/Privilege/', {
+            width: 600,
+            height: 245,
+            title: '新增权限',
+            button: [{
+                    name: '保存',
+                    callback: function () {
+
+                    },
+                    focus: true
+                },
+                { name: '取消' }
+            ]
+        }, false);
+    });
+    
+</script>

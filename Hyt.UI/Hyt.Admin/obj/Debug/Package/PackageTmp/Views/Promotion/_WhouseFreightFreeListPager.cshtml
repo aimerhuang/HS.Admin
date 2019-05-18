@@ -1,0 +1,89 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.CBWhouseFreightFree>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="53"><input name="sysNo" id="checkall" type="checkbox" /></th>
+                <th width="150">仓库ERP编号</th>
+                <th width="150">前台仓库名称</th>
+                <th width="150">后台仓库名称</th>
+                <th width="110">免邮金额</th>
+                <th width="110">是否启用</th>
+                <th width="150">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.CBWhouseFreightFree>)Model.TData)
+                {
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td><input name="sysNo" @if (item.SysNo == 0)
+                                        { @Html.Raw("disabled=\"disabled\"")    } type="checkbox" class="checktd" value="@item.SysNo" /></td>
+                <td>@item.ErpCode</td>
+                <td>@item.WarehouseName</td>
+                <td>@item.BackWarehouseName</td>
+                if (item.SysNo != 0)
+                {       
+                <td><input name="txtFreightFreeAmount_@item.SysNo" value="@item.FreightFreeAmount" class="hide wd100 " type="text" style="width:100px;"><span>@item.FreightFreeAmount</span></td>
+                <td><input name="isUse_@item.SysNo" type="checkbox" @if (item.IsUse == 1) { @Html.Raw("checked=\"checked\"")   } class="hide" /><span> @if (item.IsUse == 1) { @Html.Raw("启用")} else{ @Html.Raw("未启用")}  </span></td>
+                <td>
+                    <button class="btn btn_blue btn_ht26" onclick="btnSave(@item.SysNo,@item.WhSysNo,this)" type="button"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button>
+                    <button class="btn btn_ht26 m10_l" style="display: none" id="btnCancel" onclick="cancel(@item.SysNo,this)" type="button"><span class="icon_cancelAudit"></span><span class="m5_l">取消</span></button>
+                </td>
+                }
+                else
+                {
+                <td><input name="txtFreightFreeAmount_@item.WhSysNo" value="@item.FreightFreeAmount" class="hide wd100 " type="text" style="width: 100px;"><span>@item.FreightFreeAmount</span></td>
+                <td><input name="isUse_@item.WhSysNo" type="checkbox" @if (item.IsUse == 1) { @Html.Raw("checked=\"checked\"")   } class="hide" /><span>@if (item.IsUse == 1){ @Html.Raw("启用")}else{ @Html.Raw("未启用")}</span></td>
+                <td>
+                    <button class="btn btn_blue btn_ht26" onclick="btnSave(@item.SysNo,@item.WhSysNo,this)" type="button"><span class="icon_pencil icon_white"></span><span class="m5_l">设置</span></button>
+                    <button class="btn btn_ht26 m10_l" style="display: none" id="btnCancelStock" onclick="cancelStock(this)" type="button"><span class="icon_cancelAudit"></span><span class="m5_l">取消</span></button>
+                </td>
+                }
+
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+    @{Html.RenderPartial("_UrlPaging", Model); }
+
+    <script type="text/javascript">
+        $(function () {
+            if(checkedsysnolist.length > 0)
+            {
+                var flag = true;
+                $("input.checktd").each(function () {
+                    var SysNo = $(this).val();
+                    if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                        $(this).attr("checked", true);
+                    } else {
+                        flag = false;
+                    }
+                });
+                if (flag) {
+                    $("input.checkall").attr("checked", true);
+                }
+            }
+        });
+    </script>

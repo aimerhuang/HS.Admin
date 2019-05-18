@@ -1,0 +1,180 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.Transfer.CBPdPriceHistory>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "分销商等级价格审核";
+    const int pending = (int)ProductStatus.产品价格变更状态.待审;
+    const int processed = (int)ProductStatus.产品价格变更状态.已审;
+    const int invalid = (int)ProductStatus.产品价格变更状态.作废;
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/Utils.yui.js"> </script>
+    <script type="text/javascript">
+        var searchNameTxt = "请输入商品编号或ERP编号...";
+        var pending = @pending;
+        var processed = @processed;
+        var invalid = @invalid;
+        $(function () {
+            $("#searchName").focus(function () {
+                if ($("#searchName").val() == searchNameTxt) {
+                    $("#searchName").val("");
+                }
+            });
+            $("#searchName").blur(function () {
+                if ($("#searchName").val() == "") {
+                    $("#searchName").val(searchNameTxt);
+                }
+            });
+            $("#searchName").keydown(function(e) {
+                var keycode = e.which;
+                if (keycode != 13) {
+                    return;
+                }
+                searchPriceHistory();
+            });
+            searchPriceHistory();
+        });
+
+        function audit(relationCode,status) {
+            var y, z;
+            if (status != pending) {
+                y = true;
+                z = true;
+            } else {
+                y = false;
+                z = false;
+            }
+            UI.DialogOpen("/Distribution/ProductPriceHistoryAudit/?relationCode=" + relationCode, {
+                title: "调价申请审批/查看",
+                width: 733,
+                height:500,
+                init: function () {
+                    this.button(
+                          {
+                              name: '拒绝',
+                              disabled:z,
+                              callback: function () {
+                                  var iframe = this.iframe.contentWindow;
+                       
+                                  if (!iframe.document.body) {
+                                      UI.Alert({
+                                          content: 'iframe还没加载完毕呢'
+                                      });
+                                      return false;
+                                  }
+                                  ;
+                                  UI.Confirm({
+                                      content: '确定要拒绝吗?',
+                                      ok: function () {
+                                          iframe.edit(invalid);
+                                      },
+                                      cancel: true
+                                  });
+                                  return false;
+                              }
+                          },
+                    {
+                        name: '通过',
+                        disabled:y,
+                        callback: function () {
+                            var iframe = this.iframe.contentWindow;
+                        
+                            UI.Confirm({
+                                content: '确定要通过吗?',
+                                ok: function () {
+                                    iframe.edit(processed);
+                                },
+                                cancel: true
+                            });
+                        
+                            return false;
+                        },focus:true
+                    },
+              
+                         {
+                             name: '取消'
+                         }
+             );
+                }
+            });
+        }
+        
+        function showTip(tip) {
+            UI.tips.tip_alert('tips_success', tip);
+            searchPriceHistory();
+        }
+
+        function searchPriceHistory() {
+            var searchName = $("#searchName").val();
+            var status=$("#searchStaus").val();
+            Ajax.get("/Distribution/ProductPriceHistory", "Search", function (p) {
+                if (!isNaN(searchName)) {
+                    p.setParams("sysno", searchName);
+                }
+                else if (searchName && searchName != "请输入商品编号或ERP编号...") {
+                    p.setParams("erpCode", searchName);
+                }
+                p.setParams("Status",status);
+                
+            }, function(data) {
+                $('#paging').html(data);
+            });
+        }
+    </script>
+}
+
+@section headcss{
+
+    <style type="text/css">
+        .search_btn {
+            width: 216px;
+        }
+    </style>
+}
+<form>
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>@ViewBag.Title</h3>
+            </div>
+
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="fl m3_t veralign_t">审批状态</span>
+                        <select class="fl m10_l" id="searchStaus" name="searchStaus" onchange="searchPriceHistory()">
+                            <option value="">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>)ViewBag.DictList)
+                                {
+                                    if (dict.Key == pending)
+                                    {
+                                <option value="@dict.Key" selected="selected">@dict.Value</option>
+                                    }
+                                    else
+                                    {
+                                <option value="@dict.Key">@dict.Value</option>
+                                    }
+
+                                }
+                            }
+                        </select>
+                        <div class="right_tool search_btn m10_l fl">
+                            <input class="input_ht28" name="searchName" id="searchName" style="width: 172px" maxlength="50" type="text" value="请输入商品编号或ERP编号..." />
+                            <button onclick="searchPriceHistory()" class="btn btn_ht28 wd28" title="搜索" type="button"><span class="icon_search"></span></button>
+                        </div>
+                    </div>
+                </div>
+                <!--/表格列表区-->
+                <div class="boxs_listtabel" id="paging">
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

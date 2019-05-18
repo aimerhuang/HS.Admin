@@ -1,0 +1,194 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "退款管理";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="/Theme/Plugins/Date/WdatePicker.js"></script>
+
+<div id="JS_search" class="search_box" style="right:-267px;">
+    <div class="search_title clearfix">
+        <span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">×</a>
+    </div>
+    <div class="search_body">
+        <table width="100%">
+            <tbody>
+                <tr>
+                    <td align="right">会员帐号</td>
+                    <td width="72%"><input type="text" value="" class="wd156" searchcomplex="CustomerAccount"></td>
+                </tr>
+                <tr>
+                    <td align="right">申请日期</td>
+                    <td>
+                        <div class="date_btn">
+                            <input type="text" value="" onclick="UI.Date({ el: 'd11',maxDate:'#F{$dp.$D(\'d12\',{d:0});}' })" id="d11" searchcomplex="BeginDate">
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d11',maxDate:'#F{$dp.$D(\'d12\',{d:0});}'})"><span class="icon_calendar"></span></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">&nbsp;</td>
+                    <td>
+                        <div class="date_btn">
+                            <input type="text" value="" class="input_ht26" onclick="UI.Date({ el: 'd12',minDate:'#F{$dp.$D(\'d11\',{d:0});}' })" id="d12" searchcomplex="EndDate">
+                            <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({el:'d12',minDate:'#F{$dp.$D(\'d11\',{d:0});}'})"><span class="icon_calendar"></span></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">退款单号</td>
+                    <td>
+                        <input type="text" value="" class="wd156" searchcomplex="RmaId">
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">订单号</td>
+                    <td>
+                        <input type="text" value="" class="wd156" searchcomplex="OrderSysNo">
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">退款状态</td>
+                    <td>
+                        <select class="wd170" id="RmaStatuses" name="RmaStatuses">
+                            <option>全部</option>
+                            @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.RmaStatus.退款状态>(null, null).ToString())
+                        </select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="search_foot">
+        <button title="开始查询" class="btn btn_blue btn_ht30 bold" id="btnComplexSearch">开始查询</button><button type="reset" title="清除条件" class="btn btn_ht30 bold m10_l" id="JS_delete">清除条件</button>
+    </div>
+</div>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>退换货单管理</h3>
+        </div>
+        <div class="boxs_con_c1 border_tnone">
+            <div class="boxs_tool">
+                <!--/工具条-->
+                <div class="right_tool clearfix">
+                    <span class="fl">状态</span>
+                    <select class="select_ht28 fl m10_l" id="RmaStatus">
+                        <option>全部</option>
+                        @MvcHtmlString.Create(Hyt.Admin.Controllers.MvcCreateHtml.EnumToString<Hyt.Model.WorkflowStatus.RmaStatus.退款状态>(i => i.Text == Hyt.Model.WorkflowStatus.RmaStatus.退款状态.待审核.ToString(), null).ToString())
+                        })
+                    </select>
+                    <div class="search_btn m10_l fl">
+                        <input type="text" value="退款单号..." class="input_ht28" id="txtRmaId">
+                        <button title="搜索" class="btn btn_ht28 wd28" id="searchBtn"><span class="icon_search"></span></button>
+                    </div><button class="btn btn_ht28 m10_l fl" title="高级搜索" id="outbtn2"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                </div>
+            </div>
+
+            <div id="paging">
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<input type="hidden" id="CustomerSysNo" value="@ViewBag.CustomerSysNo" search="CustomerSysNo" searchcomplex="CustomerSysNo" />
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        UI.searchbox($("#outbtn2"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+
+        doSearch();
+
+        //绑定按钮查询事件
+        $("#searchBtn").click(function () {
+            doSearch();
+        });
+
+        //绑定高级查询按钮事件
+        $("#btnComplexSearch").click(function () {
+            doComplexSearch();
+        });
+
+        //查询条件变化时执行
+        $("#RmaStatus").change(function () {
+            doSearch();
+        });
+
+        $("#txtRmaId").defaultValue("退款单号...");
+
+    });
+
+    //查询列表
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/RMA/DoRefundEditQuery/?r=" + Math.random(), "", function (p) {
+            if ($("#txtRmaId").val() != "退款单号...") {
+                p.setParams("SysNo", $("#txtRmaId").val());
+            }
+            var rmaStatus = $("#RmaStatus").val();
+            if (rmaStatus == null) rmaStatus = '@((int)Hyt.Model.WorkflowStatus.RmaStatus.退款状态.待审核)';
+            if (rmaStatus != '') {
+                p.setParams("Status", rmaStatus);
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    //高级查询
+    function doComplexSearch() {
+        Utils.MaskStart($('.case'));
+        Ajax.get("/RMA/DoRefundEditQuery/?r=" + Math.random(), "SearchComplex", function (p) {
+            if ($("#OrderSources").val() != "") {
+                p.setParams("OrderSysNo", $("#OrderSources").val());
+            }
+            if ($("#RmaStatuses").val() != "") {
+                p.setParams("Status", $("#RmaStatuses").val());
+            }
+        }, function (data) {
+            $("#JS_search_nav").click();
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    //打印
+    function Print(sysNo) {
+        var url = '/Print/BrowseReturnedBill/?reqSource=callcenter&rmaSysNo=' + sysNo;
+        UI.DialogOpen(url, { title: '退换货单打印:' + sysNo, width: 1024, height: 680, init: function() {
+            if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                this.iframe.contentWindow.location.reload();
+            }
+        } }, false);
+    }
+
+    //标签跳转
+    function navigateTo(rmaSysNo) {
+        var tabText = "退款";
+        UI.OpenCreatTab(tabText + rmaSysNo, '/rma/RefundDetail/?sysNo=' + rmaSysNo);
+    }
+
+    function OpenOrderView(id) {
+        UI.DialogOpen('/Order/OrderView?id=' + id + '&Dialog=true', { title: '订单详情', width: 950, height: 600 }, false);
+    }
+
+    //获取会员信息
+    function browseUserInfo(sysNo) {
+        UI.DialogOpen('/CRM/CrCustomerDetail?sysNo=' + sysNo, {
+            title: '会员信息',
+            width: '698px',
+            height: '489px',
+            init: function () {
+                this.button({
+                    name: '关闭'
+                });
+            }
+        }, false);
+    }
+</script>
+

@@ -1,0 +1,138 @@
+﻿@{
+    ViewBag.Title = "CopyProduct";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@model int
+@section headjs{
+    <script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function() {
+            var productSysNo = $("#productSysNo").val();
+            $("#pdCopyProductForm").validate({
+                rules: {
+                    ProductName: { required: true },
+                    EasName: { required: true },
+                    ErpCode: {
+                        remote: {
+                            url: "@Url.Action("CheckERPCode", "Product")",
+                            data: {
+                                erpCode: function() {
+                                    enableAjaxLoader = false;
+                                    return $("#ErpCode").val();
+                                },
+                                productSysNo: productSysNo
+                            },
+                            type: "GET",
+                            dataType: "json",
+                            cache: false,
+                            contentType: 'application/json; charset=utf-8'
+                        },
+                        required: true
+                    },
+                    QRCode: {
+                        remote: {
+                            url: "@Url.Action("CheckQRCode", "Product")",
+                            data: {
+                                qrCode: function() {
+                                    enableAjaxLoader = false;
+                                    return $("#QRCode").val();
+                                },
+                                productSysNo: productSysNo
+                            },
+                            type: "GET",
+                            dataType: "json",
+                            cache: false,
+                            contentType: 'application/json; charset=utf-8'
+                        }
+                    }
+                },
+                messages: {
+                    ProductName: {
+                        required: "商品名称必填"
+                    },
+                    EasName: { required: "商品后台显示名称必填" },
+                    ErpCode: {
+                        remote: "ERP编号已经被其他商品使用",
+                        required: "ERP编号必填"
+                    },
+                    QRCode: {
+                        remote: "二维码已经被其他商品使用"                       
+                    }
+                },
+                errorPlacement: function(error, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+                },
+                success: function(span, element) {
+                    jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+                }
+            });
+
+
+        });
+
+        function CallBack() {
+            if ($("#pdCopyProductForm").valid()) {
+
+                $.post('/Product/CloneProduct/', $("#pdCopyProductForm").serialize(), function(result) {
+
+                    if (!!result && result.Status) {
+                        window.top.ProductList_ShowMessage(result, "克隆成功！你是否要现在修改商品信息？！",true);
+                        UI.Dialog.close();
+                    } else {
+                        var message = "克隆商品失败";
+                        UI.tips.tip_alert("tips_wrong", message);
+                        parent && parent._ActiveCopyProductCallBack(result);
+                    }
+
+                });
+            }
+        }
+    </script>
+}
+<!--克隆开始-->
+<div class="caseout" id="copycommodity">
+    <div class="boxs_detail_dispay">
+        <div class="tit_con">
+            <form id="pdCopyProductForm" name="pdCopyProductForm" action="">
+                <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_lefte1 border_righte1">
+                    <tbody>
+                        <tr>
+                            <td width="27%" class="nameright"><span class="v_star">*</span>新商品名称</td>
+                            <td width="73%" colspan="3">
+                                <input class="wd180" name="ProductName" id="ProductName" type="text">
+                                <span id="forproductName" class="prompt m10_l">新商品名称必填</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="27%" class="nameright"><span class="v_star">*</span>新ERP编号</td>
+                            <td width="73%" colspan="3">
+                                <input class="wd180" name="ErpCode" id="ErpCode" type="text">
+                                <span id="forerpCode" class="prompt m10_l">新ERP编号必填，不能重复</span>
+                            </td>
+                        </tr> 
+                        <tr>
+                            <td width="27%" class="nameright"><span class="v_star">*</span>新后台显示名称</td>
+                            <td width="73%" colspan="3">
+                                <input class="wd180" name="EasName" id="EasName" type="text">
+                                <span id="forEasName" class="prompt m10_l">新后台显示名称必填</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="27%" class="nameright">新二维码</td>
+                            <td width="73%" colspan="3">
+                                <input class="wd180" name="QRCode" id="QRCode" type="text">
+                                <span id="forQRCode" class="prompt m10_l">新二维码不能重复</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <input type="hidden" name="SysNo" id="productSysNo" value="@Model" />
+            </form>
+        </div>
+    </div>
+</div>
+<!--克隆结束-->

@@ -1,0 +1,148 @@
+﻿@model Hyt.Model.DsMallExpressCode
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "修改经销商城快递代码";
+}
+@section HeadJs{
+    <script src="/Theme/scripts/jquery.validate.min.js"></script>
+}
+
+<div class="caseout">
+    <form id="form1">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con" style="display: block;">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        <tr>
+                            <td style="width: 23%" class="nameright border_rnone "><span class="v_star">*</span>商城名称</td>
+                            <td style="width: 73%" class="border_right1">
+                                <select id="mallTypeSysNo" name="mallTypeSysNo" class="wd170">
+                                    @{
+                                        var mallType = ViewBag.MallType as IList<Hyt.Model.DsMallType>;
+                                        if (mallType != null && mallType.Count > 0)
+                                        {
+                                            foreach (var item in mallType)
+                                            {
+                                                <option value="@item.SysNo">@item.MallName</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <span id="formallTypeSysNo" class="prompt m10_l">商城类型名称</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="width: 11%" class="nameright border_rnone "><span class="v_star">*</span>配送方式</td>
+                            <td style="width: 89%" class="border_right1">
+                                <select id="deliveryType" name="deliveryType" class="wd170">
+                                    @{
+                                        var deliveryType = ViewBag.DeliveryType as IList<Hyt.Model.LgDeliveryType>;
+                                        if (deliveryType != null && deliveryType.Count > 0)
+                                        {
+                                            var selectDeliveryType = deliveryType.Where(t => t.ParentSysNo == 3).AsEnumerable();
+                                            foreach (var item in selectDeliveryType)
+                                            {
+                                                <option value="@item.SysNo">@item.DeliveryTypeName</option>
+                                            }
+                                        }
+                                    }
+                                </select>
+                                <span id="fordeliveryType" class="prompt m10_l">配送方式</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>第三方快递代码</td>
+                            <td class="border_right1">
+                                <input type="text" id="expressCode" name="expressCode" value="@Model.ExpressCode" maxlength="20" class="wd156" autocomplete="off" />
+                                <span id="forexpressCode" class="prompt m10_l">长度1-20个字符</span>
+                                <input type="hidden" name="sysNo" id="sysNo" value="@Model.SysNo" />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </form>
+</div>
+@section FooterJs{
+    <script type="text/javascript">
+        //验证
+        $(function () {
+            $("#mallTypeSysNo").find("option[value=@Model.MallTypeSysNo]").attr("selected", "true");
+            $("#deliveryType").find("option[value=@Model.DeliveryType]").attr("selected", "true");
+            $("#form1").validate({
+                rules: {
+                    // 选择框
+                    mallTypeSysNo: {
+                        required: true,
+                    },
+                    deliveryType: {
+                        required: true,
+                    },
+                    //文本
+                    expressCode: {
+                        required: true,
+                        minlength: 1,
+                        maxlength: 20,
+                    },
+                },
+                submitHandler: function(form){
+                },
+                errorPlacement: function (error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function (label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                },
+            });
+        });
+    </script>
+    <script type="text/javascript">
+        (function () {
+            var opener = art.dialog.opener, // 父页面window对象
+                api = art.dialog.open.api; // 			art.dialog.open扩展方法
+
+            if (!api) return;
+
+            // 操作对话框
+            api.title('修改经销商城快递代码')
+                // 自定义按钮
+                .button(
+                    {
+                        name: '保存',
+                        callback: function (win) {
+                            if ($("#form1").valid()) {
+                                UI.Confirm({
+                                    content: "您确定要修改吗？",
+                                    ok: function () {
+                                        $.ajax({
+                                            url: "@Url.Action("DsMallExpressCodeUpdate", "Distribution")",
+                                            data: $("#form1").serialize(),
+                                            type: "post",
+                                            success: function (data) {
+                                                console.log(data.Status);
+                                                if (data.Status) {
+                                                    UI.DialogOpener().ExecSuccess("修改成功");
+                                                    UI.Dialog.close();
+                                                } else {
+                                                    UI.Alert({ content: data.Message });
+                                                }
+                                            },
+                                            error: function () {
+                                                UI.Alert({ content: "操作出错！" });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                            return false;
+                        },
+                        focus: true
+                    },
+                    {
+                        name: '关闭'
+                    }
+                );
+        })();
+    </script>
+}

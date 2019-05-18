@@ -1,0 +1,80 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBSyUser>
+
+<!--表格列开始-->
+<div class="boxs_listtabel">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+        <thead>
+            <tr>
+                <th width="100">用户编号</th>
+                <th width="100">用户账号</th>
+                <th width="105">真实姓名</th>
+                <th width="145">用户组</th>
+                <th width="105">手机号</th>
+                <th class="align_l p10_l">Email</th>
+                <th width="60">状态</th>
+                <th width="250">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                int i = 0;
+                var allGroup = Hyt.Admin.Controllers.SysController.GetAllSyUserGroup().Where(item => item.Status == (int)Hyt.Model.WorkflowStatus.SystemStatus.用户组状态.启用);
+                var mode = Model.TData as List<Hyt.Model.Transfer.CBSyUser>;
+                if (mode != null && mode.Count > 0)
+                {
+                    foreach (var item in (List<Hyt.Model.Transfer.CBSyUser>)Model.TData)
+                    {
+                        if (i % 2 == 0)
+                        {
+                            @Html.Raw("<tr>")
+                        }
+                        else
+                        {
+                            @Html.Raw("<tr class='stag_color'>")
+                        }
+                    <td>@item.SysNo</td>
+                    <td>@item.Account</td>
+                    <td>@item.UserName</td>
+                    <td>
+                        @if (item.GroupUsers != null)
+                        {
+                            foreach (var group in item.GroupUsers)
+                            {
+                                var g = allGroup.Where(j => j.SysNo == group.GroupSysNo);
+                                if (g.Count() > 0)
+                                {
+                                    <center>@g.First().GroupName</center>
+                                }
+                            }
+                        }
+                    </td>
+                    <td>@item.MobilePhoneNumber</td>
+                    <td class="align_l p10_l">@item.EmailAddress</td>
+                    <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.SystemStatus.系统用户状态), item.Status)</td>
+                    <td>
+                        @{
+                        var statusEnable = (int)Hyt.Model.WorkflowStatus.SystemStatus.系统用户状态.启用;
+                        var statusDisable = (int)Hyt.Model.WorkflowStatus.SystemStatus.系统用户状态.禁用;
+                        var statusEdit = item.Status == statusEnable ? statusDisable : statusEnable;
+                        var statusText = statusEdit == statusEnable ? "启用" : "禁用";
+                        var btncss = statusEdit == statusEnable ? "btn_blue" : "btn_red";
+                        var statusCss = statusEdit == statusEnable ? "icon_check" : "icon_ban_circle";
+                        }
+                        <button class="btn btn_ht26 SY1008701 @btncss" value="@item.SysNo" onclick="setStatus(@item.SysNo,@statusEdit,'@statusText',@Model.CurrentPageIndex)"><span class="icon_white @statusCss"></span><span class="m5_l">@statusText</span></button><button class="btn btn_ht26 m10_l btn_blue SY1008201" value="@item.SysNo" onclick="popUserInfo(this.value,@Model.CurrentPageIndex)"><span class="icon_pencil icon_white"></span><span class="m5_l">修改</span></button><button class="btn btn_ht26 m10_l SY1008201 btn_blue" onclick="resetPwd(@item.SysNo,'@item.Account')"><span class="icon_asterisk icon_white"></span><span class="m5_l">重置密码</span></button>
+                    </td>
+                    @Html.Raw("</tr>")
+                        i++;
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="7" class="align_l p10_l bgr_eb">暂无数据</td></tr>
+                }
+
+            }
+            </tbody>
+        </table>
+    </div>
+    <!--表格列结束-->
+    @{Html.RenderPartial("_UrlPaging", Model); }

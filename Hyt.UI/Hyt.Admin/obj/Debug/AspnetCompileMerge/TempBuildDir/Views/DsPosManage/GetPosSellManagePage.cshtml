@@ -1,0 +1,46 @@
+﻿@{
+    ViewBag.Title = "GetPosSellManagePage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="case">
+    <div class="boxs">
+
+        <div class="boxs_tit head_m">
+            <h3>Pos机销售列表</h3>
+        </div>
+
+        <div class="boxs_con_c1">
+
+            <!--工具条开始--> 
+            <div align="right" style="padding:5px;">
+                <button type="button" id="btnAdd" title="销售补单" class="btn btn_ht26 m10_r btn_blue" onclick="AddPosSellOrder()">
+                    <span class="icon_importing icon_white m5_r"></span>
+                    <span>销售补单</span>
+                </button>
+            </div>
+            <!--工具条结束-->
+            <!--表格列开始-->
+            <div class="boxs_listtabel" id="paging">
+
+            </div>
+            <!--表格列结束-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function AddPosSellOrder()
+    {
+        window.location.href = "/DsPosManage/AddOrUpdatePosSellManageData";
+    }
+    function doSearch() {
+        //Utils.MaskStart($('#paging'));
+        $.get('@Url.Action("GetPosSellManagePage", "DsPosManage")',
+            { id: 1, dsSysNo: "@ViewBag.dsSysNo" },
+            function (data) {
+               // Utils.MaskStop();
+                $('#paging').html(data);
+
+            });
+    }
+    doSearch();
+</script>

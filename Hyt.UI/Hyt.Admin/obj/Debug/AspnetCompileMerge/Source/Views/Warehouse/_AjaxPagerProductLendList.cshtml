@@ -1,0 +1,154 @@
+﻿@using Hyt.BLL.Authentication
+@using Hyt.BLL.Sys
+@using Hyt.BLL.Warehouse
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.WhProductLend>
+@{
+    @Html.PrivilegeControl(PrivilegeCode.WH0011, ".WH0011") 
+    @Html.PrivilegeControl(PrivilegeCode.WH1004103, ".WH1004103"); 
+}
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th class="wd75">借货单号</th>
+            <th class="align_l p10_lr">仓库</th>
+            <th width="70">借货人</th>
+            <th width="70">创建人</th>
+            <th width="120">创建时间</th>
+            <th width="70">出库人</th>
+            <th width="120">出库时间</th>
+            <th width="70">完结人</th>
+            <th width="120">完结时间</th>
+            <th class="wd100">借货金额</th>
+            <th width="70">状态</th>
+            @if (AdminAuthenticationBo.Instance.Current.PrivilegeList.HasPrivilege(PrivilegeCode.WH0011))
+            {
+                <th width="180">操作</th>
+            }
+            else
+            {
+                <th width="80">操作</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @if (null != Model.TData && Model.TData.Count > 0)
+        {
+            foreach (var item in Model.TData)
+            {
+            <tr>
+                <td class="blue"><a href="#" name="item_sysno" class="blue" title="查看借货单">@item.SysNo</a></td>
+                <td class="align_l p10_lr">@WhWarehouseBo.Instance.GetWarehouseName(item.WarehouseSysNo)</td>
+                <td>@SyUserBo.Instance.GetUserName(item.DeliveryUserSysNo)</td>
+                <td>@SyUserBo.Instance.GetUserName(item.CreatedBy)</td>
+                <td>@item.CreatedDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@SyUserBo.Instance.GetUserName(item.StockOutBy)</td>
+                <td>@item.StockOutDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@SyUserBo.Instance.GetUserName(item.LastUpdateBy)</td>
+                <td>@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>
+                <td class="red p10_r align_r">@item.Amount.ToString("C")</td>
+                <td>@((WarehouseStatus.借货单状态)item.Status)</td>
+                <td>
+                    @switch (item.Status)
+                    {
+                        case (int)WarehouseStatus.借货单状态.已完成:
+                        <button class="btn btn_ht26 btn_blue  WH1004103" title="打印" data-id="@item.SysNo" name="print" type="button"><span class="icon_print icon_white"></span><span class="m5_l">打印</span></button><button class="btn btn_ht26 disabled m10_l WH0011" title="强制完结" type="button"><span class="icon_wrench"></span><span class="m5_l">强制完结</span></button>
+                            break;
+                        case (int)WarehouseStatus.借货单状态.作废:
+                        <button class="btn btn_ht26 disabled WH1004103" title="打印" type="button"><span class="icon_print"></span><span class="m5_l">打印</span></button><button class="btn btn_ht26 disabled m10_l WH0011" title="强制完结" type="button"><span class="icon_wrench"></span><span class="m5_l">强制完结</span></button>
+                            break;
+                        default:
+                        <button class="btn btn_ht26 btn_blue  WH1004103" title="打印" data-id="@item.SysNo" name="print" type="button"><span class="icon_print icon_white"></span><span class="m5_l">打印</span></button><button class="btn btn_ht26 m10_l btn_red WH0011" title="强制完结" data-id="@item.SysNo" name="end" type="button"><span class="icon_wrench icon_white"></span><span class="m5_l">强制完结</span></button>
+                            break;
+                    }
+                </td>
+            </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="12" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        DAO.InterlineStyle();
+        //打印
+        $("#item_list").delegate("button[name='print']", 'click', function () {
+            var id = $(this).attr("data-id");
+            var url = '/Print/lend/' + id;
+            UI.DialogOpen(url, {
+                title: '借货单打印', width: 1024, height: 680, init: function () {
+                    if (navigator.userAgent.indexOf('Firefox') >= 0) {
+                        this.iframe.contentWindow.location.reload();
+                    }
+                }
+            }, false);
+        });
+        //点击借货单编号事件
+        $("#item_list").delegate("a[name='item_sysno']", "click", function () {
+            var url = '/Warehouse/ProductLendDetails/' + $(this).text();
+            UI.DialogOpen(url, {
+                title: '借货单明细',
+                width: 1000,
+                height: 500,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+        //查看事件
+        $("#item_list").delegate("button[name='show']", 'click', function () {
+            var id = $(this).attr("data-id");
+            var url = '/Warehouse/ProductLendDetails/' + id;
+            UI.DialogOpen(url, {
+                title: '借货单明细',
+                width: 1000,
+                height: 500,
+                init: function () {
+                    this.button({ name: "取消" });
+                }
+            }, false);
+        });
+        //强制完结
+        $("#item_list").delegate("button[name='end']", 'click', function () {
+            var id = $(this).attr("data-id");
+            UI.Confirm({
+                content: '您确定要强制完结这条借货单吗？', width: "220px",
+                ok: function () {
+                    if (id) {
+                        var mask = UI.Mask({ obj: $('body'), opacity: 0.2 });
+                        $.ajax({
+                            type: "POST",
+                            url: "/Warehouse/EndProductLend/" + id,
+                            chche: false,
+                            success: function (ret) {
+                                if (ret.StatusCode == 0) {
+                                    UI.Alert({
+                                        icon: 'succeed',
+                                        content: "借货单" + id + "已经强制完结!",
+                                        callback: function () {
+                                            doSearch();
+                                        }
+                                    });
+                                } else {
+                                    UI.Alert({ content: ret.Message });
+                                }
+                                mask.Remove();
+                            },
+                            error: function () {
+                                mask.Remove();
+                                UI.Alert({ content: '操作出错,请稍候重试!' });
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

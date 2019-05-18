@@ -1,0 +1,123 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model.Transfer
+@using Hyt.Util
+@model PagedList<Hyt.Model.Procurement.CBPmGoodsDelivery>
+
+<div id="paging">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <tr>					
+                <th width="120">包裹编号</th>
+                <th>物流公司</th>
+                <th>物流配送号</th>
+                <th>创建时间</th>
+                <th>状态</th>
+                <th width="200">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (Model.TData.Count > 0)
+                {
+                    var Index = 0;
+                    string cs = string.Empty;
+                    foreach (var item in Model.TData)
+                    {
+                        cs = Index % 2 == 0 ? string.Empty : "stag_color";
+                        <tr class="@cs">
+                            <td>@item.gd_PaketNumber</td>
+                            <td>@item.gd_DeliveryCompanyName</td>
+                            <td>@item.gd_DeliveryNumber</td>
+                            <td>@(item.gd_DeliveryTime)</td>
+                            <td>@(((Hyt.Model.WorkflowStatus.ProcurementStatus.商品配送状态)item.gd_Status))</td>
+                            @if (item.gd_Status == (int)Hyt.Model.WorkflowStatus.ProcurementStatus.商品配送状态.未配送
+                            ||
+                            item.gd_Status == (int)Hyt.Model.WorkflowStatus.ProcurementStatus.商品配送状态.配送中)
+                            {
+                                @Html.Raw("<td>   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"SetDeliveryInfo(" + item.SysNo + ",true)\"><span class=\"m5_l\">物流信息</span></button> ")
+                                @Html.Raw("   <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"SetDeliveryCompleteStatus(" + item.SysNo + ")\"><span class=\"m5_l\">完成配送</span></button> </td>")
+                            }
+                            else
+                            {
+                                @Html.Raw("<td></td>");
+                            }
+                        </tr>
+                        Index++;
+                    }
+                }
+                else
+                {
+                    <tr class="odd_color">
+                        <td class="align_l p10_l bgr_eb" colspan="6">暂无数据</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+    <!--分页开始-->
+    <div class="border_right border_left border_bottom">@{Html.RenderPartial("_UrlPaging", Model); }</div>
+    <!--分页结束-->
+</div>
+<script type="text/javascript">
+    function SetDeliveryInfo(dlSysNo,bipt)
+    {
+        var txt = "";
+        $.ajax({
+            url: '/Procurement/GetDeliveryInfoData',
+            type: 'post',
+            async: false,
+            data: {
+                SysNo: dlSysNo
+            },
+            dataType: 'json',
+            success: function (json) {
+                var txt = "";
+                txt += "<table>";
+                if (bipt) {
+                    txt += "<tr><td><input type=\"text\" id=\"txt_InputValue\" style=\"width:450px;\" value=\"@DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")  \" />  <button class=\"btn btn_blue btn_ht26 agree m10_r \" onclick=\"SaveDeliveryInfo($('#txt_InputValue').val()," + dlSysNo + ")\"  >保存物流信息</button></td></tr>";
+                }
+                txt += "<tr><td>" + json.gd_DeliveryInfo + "</td></tr>";
+                txt += "</table>";
+                art.dialog({ content: txt, title: "物流信息" });
+            }
+        });
+    }
+    function SetDeliveryCompleteStatus(sysNo)
+    {
+        UI.Confirm({
+            content: '确定货已收到了吗?',
+            ok: function () {
+                $.ajax({
+                    url: '/Procurement/SetDeliveryCompleteStatus',
+                    type: 'post',
+                    async: false,
+                    data: {
+                        SysNo: sysNo
+                    },
+                    dataType: 'json',
+                    success: function (json) {
+                        window.location.reload();
+                    }
+                });
+            }
+        });
+        
+    }
+    function SaveDeliveryInfo(txt, sysNo)
+    {
+        $.ajax({
+            url: '/Procurement/SaveDeliveryInfoData',
+            type: 'post',
+            async: false,
+            data: {
+                SysNo: sysNo,
+                txt: txt
+            },
+            dataType: 'json',
+            success: function (json) {
+                window.location.reload();
+            }
+        });
+    }
+</script>

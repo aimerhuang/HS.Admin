@@ -1,0 +1,71 @@
+﻿@{
+    ViewBag.Title = "商品商检备案管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>商品商检备案列表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="boxs_tool">
+                <div class="right_tool">
+                    <span class="fl">商检类型</span>
+                    <select class="select_ht28 fl wd150 m5_l  m10_r" id="IcpTypes" searchitem="IcpTypes">
+                        <option value="">全部</option>
+                        @ViewBag.IcpTypes
+                    </select>
+
+
+                    <div class="search_btn m10_l fl wd270">
+                        <input name="" type="text" class="input_ht28 wd240" id="Condition" value="搜索商品编号、商品名称..." title="搜索商品编号、商品名称..." maxlength="25" />
+                        <button class="btn btn_ht28" id="searchBtn" title="搜索"><span class="icon_search"></span></button>
+                    </div>
+                </div>
+            </div>
+            <div class="boxs_list" id="paging">
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#Condition").defaultValue("搜索商品编号、商品名称...");
+
+        $("[searchItem='Statuses']").change(function () {
+            doSearch(1);
+        });
+
+        $("#searchBtn").click(function () {
+            doSearch(1);
+        });
+        doSearch(1);
+    });
+    //查询
+    $("#searchBtn").click(function () {
+        doSearch(1);
+    });
+    $("#IcpTypes").live('change', function () {
+        doSearch(1);
+    });
+    function doSearch(id) {
+        Ajax.get("/Icp/DoIcpGoodsItemPaging/?r=" + Math.random(), "searchItem", function (p) {
+            p.setParams("id", id);
+            p.setParams("IcpType", $("#IcpTypes").val());
+            if ($("#Condition").val() != "搜索商品编号、商品名称...") {
+                p.setParams("Condition", $("#Condition").val().trim());
+            }
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+        });
+    }
+
+</script>

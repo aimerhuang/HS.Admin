@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "GetPaymentListDataPager";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>销售收款列表</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <!--搜索开始-->
+                    <div class="right_tool clearfix">
+
+                        <span class="veralign_t fl">库房</span>
+                        <div class="fl m10_l">
+                            <select id="sel_Warehouse">
+                                <option value="0">全部</option>
+                                @{
+                                    foreach (Hyt.Model.WhWarehouse mod in ViewBag.WarehouseList as List<Hyt.Model.WhWarehouse>)
+                                    {
+                                        <option value="@(mod.SysNo)">@(mod.WarehouseName)</option>
+                                    }
+                                }
+
+                            </select>
+                        </div>
+
+                        <span class="veralign_t fl">付款方式</span>
+                        <div class="fl m10_l">
+                            <select id="sel_Payment">
+                                <option value="0">全部</option>
+                                @{
+                                    foreach (Hyt.Model.Transfer.CBBsPaymentType mod in ViewBag.PaymentType as List<Hyt.Model.Transfer.CBBsPaymentType>)
+                                    {
+                                        <option value="@(mod.SysNo)">@(mod.PaymentName)</option>
+                                    }
+                                }
+
+                            </select>
+                        </div>
+
+                        <span class="veralign_t fl">统计时间段</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn">
+                                <input type="text" id="StartDate" name="StartDate" class="input_ht26" value="@(DateTime.Now.ToString("yyyy-MM"))-01" querypara="StartDate" onclick="UI.Date({ el: 'StartDate', dateFmt: 'yyyy-MM-dd' })" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'StartDate', dateFmt: 'yyyy-MM-dd' })">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <span class="veralign_t fl">-</span>
+                        <div class="fl m10_l">
+                            <div class="date_btn">
+                                <input type="text" id="EndDate" name="EndDate" class="input_ht26" value="@DateTime.Now.ToString("yyyy-MM-dd")" querypara="EndDate" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd' })" />
+                                <button type="button" title="日历" class="btn btn_ht26" onclick="UI.Date({ el: 'EndDate', dateFmt: 'yyyy-MM-dd' })">
+                                    <span class="icon_calendar"></span>
+                                </button>
+                            </div>
+                        </div>
+                        <button class="btn btn_ht28 m10_l fl" title="查询" id="JS_gaoji1" type="button" onclick="doSearch(1)"><span class="icon_search"></span><span class="m5_l">查询</span></button>
+
+
+                    </div>
+                    <!--搜索结束-->
+                    <!--/工具条-->
+                    <div class="left_tool">
+                        <button class="btn btn_blue btn_ht26 " id="createBtn" onclick="ExportExcelData()">
+                            <span class="m5_l">导出Excel</span>
+                        </button>
+                        <span id="span_ExprotSysNo"></span>
+                    </div>
+                </div>
+                <div class="boxs_listtabel" id="paging">
+                    <!--/表格列表区-->
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <iframe id="iframe_Path" src="" style="display:none;"></iframe>
+</div>
+<script type="text/javascript">
+    var exportSysNoDataList = "";
+
+    function UpdateProcurement(sysNo) {
+        window.location.href = "/Procurement/InsertOrUpdateFnPurchasePaymentOrder?SysNo=" + sysNo;
+    }
+    function CreateProcurement() {
+        window.location.href = "/Procurement/InsertOrUpdateFnPurchasePaymentOrder";
+    }
+    function doSearch(currentPage) {
+        Utils.MaskStart($('#paging'));
+        Ajax.get(
+            "/Procurement/GetPaymentListDataPager?warehouseSysNo=" + $("#sel_Warehouse").val() + "&paymentSysNo=" + $("#sel_Payment").val() + "&startTime=" + $("#StartDate").val() + "&endTime=" + $("#EndDate").val() + "&r=" + Math.random(),
+            "Search",
+            function (p) {
+
+            }, function (data) {
+                $('#paging').empty();
+                $('#paging').html(data);
+                Utils.MaskStop();
+            });
+    }
+    doSearch(1)
+    function ExportExcelData()
+    {
+        $("#iframe_Path").attr("src", "/Procurement/ExportSoOrder?warehouseSysNo=" +
+            $("#sel_Warehouse").val() + "&paymentSysNo=" +
+            $("#sel_Payment").val() + "&startTime=" +
+            $("#StartDate").val() + "&endTime=" +
+            $("#EndDate").val() + "&sysNoList="+
+            exportSysNoDataList)
+    }
+</script>

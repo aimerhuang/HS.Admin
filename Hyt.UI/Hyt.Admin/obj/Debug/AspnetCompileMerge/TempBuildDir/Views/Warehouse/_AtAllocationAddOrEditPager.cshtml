@@ -1,0 +1,86 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<AtAllocationItem>
+
+<table id="collocationASTable" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th style="text-align: left; text-indent: 10px;">序号</th>
+            <th>商品编码</th>
+            <th>商品名称</th>
+            <th>库存数量</th>
+            <th>调出数量</th>
+            <th>所属库位</th>
+            <th width="256">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.TotalItemCount > 0)
+        {
+            IList<CBWhProductWarehousePositionAssociation> postionList =new List<CBWhProductWarehousePositionAssociation>();
+            if(ViewBag.postionList !=null)
+            {
+                postionList = ViewBag.postionList as IList<CBWhProductWarehousePositionAssociation>;
+            }
+            var row = 1;
+            string cs = string.Empty;
+            foreach (var item in (List<AtAllocationItem>)Model.TData)
+            {
+                <tr @(row % 2 != 0 ? "class='stag_color'" : "")>
+                    @{
+                string productName = "";
+                int stockNum = 0;
+                if (ViewBag.OutWarehouseSysNo != null && ViewBag.OutWarehouseSysNo>0)
+                {
+                    var proStock = Hyt.BLL.Warehouse.PdProductStockBo.Instance.GetEntityByWP(ViewBag.OutWarehouseSysNo, item.ProductSysNo);
+                    if (proStock!=null)
+                    {
+                        stockNum = (int)proStock.StockQuantity;
+                    }
+                }
+                var product = Hyt.BLL.Product.PdProductBo.Instance.GetProduct(item.ProductSysNo);
+                productName = product.EasName;
+                    }
+                    <td class="nowrap">@(Model.TData.IndexOf(item)+1)</td>
+                    <td class="nowrap">@product.ErpCode</td>
+                    <td class="nowrap">@productName</td>
+                    <td class="nowrap">@stockNum</td>
+                    <td><input name="txtSysNo_@item.SysNo" value="@item.Quantity" class="wd100 number_input" type="number" style="width:100px;"></td>
+
+                    <td class="nowrap">
+                        @if (postionList.Count>0)
+                        {
+                            string str="";
+                            List<CBWhProductWarehousePositionAssociation> ipostionList = postionList.Where(p => p.PdProductSysNo == product.SysNo).ToList();
+                            foreach(var tmpPostion in ipostionList)
+                            {
+                                if (!string.IsNullOrEmpty(str))
+                                {
+                                    str += " , ";
+                                }
+                                str += (tmpPostion.WarehousePositionName);
+                            }
+                            @Html.Raw(str);
+                        }
+                    </td>
+                    <td class="nowrap">
+                        @if (ViewBag.isEdit == true)
+                        {
+                            <button onclick="DeleteDetail(@item.SysNo,@item.AllocationSysNo,this)" class="btn btn_ht26 btn_red"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+                        }
+                    </td>
+                </tr>
+                        row++;
+            }
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="5">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+@{Html.RenderPartial("_UrlPaging", Model); }

@@ -1,0 +1,57 @@
+﻿@using Hyt.Infrastructure.Pager
+@model PagedList<Hyt.Model.Transfer.CBMkWeixinConfig>
+
+
+<!--/表格列表区-->
+<table id="item_list" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone">
+    <thead>
+        <tr>
+            <th width="60">系统编号</th>
+            <th width="98">微信Token</th>   
+            <th width="120">AppId</th>
+            <th width="250">AppSecret</th>
+            <th width="72">关注回复文本</th>
+            <th width="124">消息回复文本</th>
+            <th width="124">分销商</th>
+            <th width="80">操作</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @if (Model.TData.Count > 0)
+        {
+
+            foreach (Hyt.Model.Transfer.CBMkWeixinConfig item in Model.TData)
+            {
+            <tr>
+                <td >@item.SysNo</td>
+                <td>@item.Token</td>
+                <td>@item.AppId</td>
+                <td>@item.AppSecret</td>
+                <td>@item.FollowText</td>
+                <td>@item.MessageText</td>
+                <td>@item.DealerName</td>
+                <td>
+                    <button class="btn btn_ht26 m10_l btn_blue UN1008103" onclick="Edit(@item.SysNo)" title="修改"><span class="icon icon_white icon_pencil"></span><span class="m5_l">修改</span></button>
+                </td>
+            </tr>                      
+                   
+            }
+
+
+        }
+        else
+        {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="10">暂无数据</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+
+<script>
+    //隔行样式
+    DAO.InterlineStyle();
+</script>

@@ -1,0 +1,145 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Model.SyPrivilege
+@{
+    ViewBag.Title = "权限表单";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    const string checkedStr1 = "checked=\"checked\"";
+    var checkedStr2 = "";
+    if (Model.SysNo !=0 && Model.Status == (int)SystemStatus.权限状态.禁用)
+    {
+        checkedStr2 = "checked=\"checked\"";
+    }
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+<form id="inputForm" name="inputForm" action="">
+    <div class="caseout">
+
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0" >
+                    <tbody>
+                        <tr>
+                            <td width="20%" class="nameright border_rnone"><span class="v_star">*</span>权限名称</td>
+                            <td width="80%">
+                                <input type="hidden" inputItem="SysNo" value="@Model.SysNo" />
+                                <input type="text" inputItem="Name" class="wd270" value="@Model.Name" id="Name" name="Name" maxlength="20" /><span class="prompt m10_l">权限名称</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone"><span class="v_star">*</span>权限代码</td>
+                            <td><input type="text" class="wd270" inputItem="Code" value="@Model.Code" id="Code" name="Code" maxlength="50"><span class="prompt m10_l">权限代码</span></td>
+                        </tr>
+                        <tr>
+                            <td valign="top" class="nameright border_rnone">备注</td>
+                            <td><textarea class="" style="width:270px; height:80px;" inputItem="Description" id="Description" name="Description" maxlength="200">@Model.Description</textarea><span id="c_Description" class="prompt m10_l">输入1-200个字符</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone" valign="top">状态</td>
+                            <td><input name="Status" type="radio" class="m10_r" value="@SystemStatus.权限状态.启用.GetHashCode()" @Html.Raw(checkedStr1) />启用&nbsp;&nbsp;<input name="Status" type="radio" class="m10_r m10_l"  value="@SystemStatus.权限状态.禁用.GetHashCode()" @Html.Raw(checkedStr2)  />禁用</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+  
+        </div>
+    </div>
+</form>
+
+
+<script type="text/javascript">
+
+    $(function () {
+        $("#inputForm").validate({
+            rules: {
+                Name: {
+                    required: true,
+                    maxlength: 20
+                },
+                Code: {
+                    required: true,
+                    maxlength: 50
+                }
+                //,
+                //txtAmount: {
+                //    required: true,
+                //    maxlength: 18,
+                //    number: true,
+                //    min: 0
+                //}
+            },
+            errorPlacement: function (error, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'error m10_l');
+            },
+            success: function (span, element) {
+                jQuery('#' + element.attr("id")).parent().find('span').attr('class', 'success m10_l');
+            }
+        });
+
+        initDialog();
+    });
+
+    function initDialog() {
+        var parent = art.dialog.parent,				// 父页面window对象
+            api = art.dialog.open.api;	// 			art.dialog.open扩展方法
+        if (!api) return;
+        // 自定义按钮
+        api.button(
+            {
+                name: '保存',
+                callback: function () {
+                    
+                    if ($("#inputForm").valid()) {
+                        Ajax.post("/Sys/SavePrivilege", "inputItem", function(p) {
+                            var status = $('input:radio[name="Status"]:checked').val();
+                            p.setParams("Status", status);
+                        }, function(data) {
+                            if (data.Status) {
+                                //UI.Alert({
+                                //    icon: "succeed",
+                                //    content: data.Message,
+                                //    callback: function() {
+                                //        UI.Dialog.opener.doSearch(UI.Dialog.opener.currentPage);
+                                //    },
+                                //    width: '200px'
+                                //});
+                                //UI.CloseDialog();
+                                Utils.alert("提交成功", function () {
+                                @{
+                                    if (Model.SysNo == 0)
+                                    {
+                                        @:inputForm.reset();
+                                    }
+                                    else
+                                    {
+                                        @:UI.CloseDialog();
+                                    }
+                                }
+                                    var origin = UI.DialogOpener();
+                                    origin.doSearch(1);
+                                }, "succeed");
+                            } else {
+                                UI.Alert({
+                                    content: '操作失败。' + data.Message,
+                                    callback: function() {
+                                    },
+                                    width: '200px'
+                                });
+                            }
+                        });
+                    }
+                    return false;
+                },
+                focus: true
+            },
+            {
+                name: '取消'
+            }
+        );
+    };
+
+    
+</script>

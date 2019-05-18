@@ -1,0 +1,275 @@
+﻿@using System.Collections
+@using Hyt.Model;
+@using Hyt.Model.SystemPredefined
+@model Hyt.Infrastructure.Pager.PagedList<CBLgDelivery>
+
+@{
+    ViewBag.Title = "创建结算单维护";
+   @Html.PrivilegeControl(PrivilegeCode.LG1005201,"#generate_settlement_btn")
+}
+
+@section headcss{
+    <link href="~/Theme/css/tips.css" rel="stylesheet" />
+}
+@section headjs{
+
+    <script type="text/javascript" src="/Theme/scripts/UI.yui.js"></script>
+    
+
+    <script type="text/javascript" src="~/Theme/scripts/tips.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript"  src="@Url.Content("~//Theme/scripts/Utils.yui.js")" ></script>
+    <script type="text/javascript">
+        $(function () {
+            
+            //表格全选checkbox事件
+            $("#select_all_checkbox").live('click', function () {
+                var checked = $(this).attr("checked") ? true : false;
+                $("#delivery_note_main_table").find("input[name='delivery_note_box']").attr("checked", checked);
+            });
+
+            $("a[name=delivery]").click(function (e) {
+
+                var sysno = $(this).text();
+                UI.OpenCreatTab('配送单详细信息', '/Logistics/DeliveryNoteDetails?id=' + sysno + '&source=settlement');//params source added by huangwei);
+            });
+            
+            //#region 初始化--选择仓库--文本框事件
+            $("#selWh").change(function () {
+
+                var val = $(this).val();
+                if (val === '-1') {
+                    $("#selDelUser").empty().html('<option value="-1">请先选择仓库</option>');
+                    $.ajax({
+                        url: '@Url.Action("SettlementDeliveryList")',
+                        
+                        success: function (data) {
+                            $('#paging').html(data);
+                        }
+                    });
+                    return;
+                }
+
+                var self = $(this);
+
+                //load deliveryman
+
+                $.ajax({
+                    url: '@Url.Action("GetDeliverymanByWarehouseSysNo")',
+                    type: "post",
+                    dataType: "json",
+                    data: { "warehouseSysNo": self.val() },
+                    success: function(result) {
+                        if (result) {
+                            if (result.Status) {
+                                var options = [];
+                                options.push("<option value='-1'>--选择配送人员--</option>");
+                                for (var i = 0; i < result.Data.length; i++) {
+                                    options.push("<option value='" + result.Data[i].SysNo + "'>" + result.Data[i].UserName + "</option>");
+                                }
+                                $("#selDelUser").empty().append(options.join(""));
+                                
+                                $.ajax({
+                                    url: '@Url.Action("SettlementDeliveryList")',
+                                     data: { warehouseSysNo: val },
+                                     success: function (data) {
+                                         $('#paging').html(data);
+                                     }
+                                 });
+
+                            } else {
+                                UI.tips.tip_alert('tips_wrong', result.Message);
+                            }
+                        }
+                    },
+                    error: function(a, b, c) {
+
+
+                    }
+                });
+            });
+            //#endregion
+
+            //#region 初始化--配送人员--下拉框事件
+            $("#selDelUser").change(function(e) {
+                //deliveryUserSysNo
+                var val = $(this).val();
+                $.ajax({
+                    url: '@Url.Action("SettlementDeliveryList")',
+                    data: { warehouseSysNo: $("#selWh").val(), deliveryUserSysNo: val },
+                    success: function(data) {
+                        $('#paging').html(data);
+                    }
+                });
+            });
+            //#endregion
+
+            //用于提交加载
+            var loading_img;
+
+
+            //update(1);
+            //loading_img = $("#loading_img").clone().show();
+
+
+            //绑定生成结算单按钮事件
+            //#region
+            $("#generate_settlement_btn").click(function(e) {
+
+                var self = $(this);
+                //保存选中的配送单系统编号
+                var deliverySysnos = [];
+
+                var lastdeliverySysno;
+                var lastwhSysNo;
+                var canCreate = true;
+                $("#delivery_note_main_table").find("input[type='checkbox']").each(function(i) {
+
+
+                    if ($(this).attr("checked")) {
+
+                        //同一配送员
+                        if (!lastdeliverySysno) {
+                            lastdeliverySysno = $(this).attr('usersysno');
+                            lastwhSysNo = $(this).attr('whsysno');
+                        } else {
+                            
+                                if ($(this).attr('usersysno') != lastdeliverySysno || $(this).attr('whsysno') != lastwhSysNo) {
+                                    
+                                    UI.tips.tip_alert('tips_wrong', '只能选择同一配送员同一仓库的配送单创建结算单');
+                                    canCreate = false;
+                                    return false;
+                                }
+                            
+                        }
+
+                        //是否是配送在途
+                        $.ajax({
+                            url: '@Url.Action("IsRightStatus")' + '?sysNo=' + $(this).val(),
+                            async: false,
+                            success: function(data) {
+                                if (!data) {
+                                    UI.tips.tip_alert('tips_wrong', '所选配送单状态已更新(非配送在途),不能进行结算!重新获取配送单中..');
+                                    $.ajax({
+                                        url: '@Url.Action("SettlementDeliveryList")',//无法部分刷新
+                                        success: function(rst) {
+                                            $('#paging').html(rst);
+                                        }
+                                    });
+                                    //setTimeout('location.reload()', '3000');
+                                    canCreate = false;
+                                    return false;
+                                }
+                                return true;
+
+                            }
+                        });
+
+
+                    }
+                    return true;
+
+                });
+                //不是相同配送员不能创建结算单
+                if (!canCreate)
+                    return;
+                $("#delivery_note_main_table").find("input[type='checkbox']").each(function(i) {
+                    if ($(this).attr("checked")) {
+                        deliverySysnos.push($(this).val());
+                    }
+                });
+                if (deliverySysnos.length == 0) {
+                    UI.tips.tip_alert('tips_wrong', '请选择要结算的配送单!');
+                } else {
+                    UI.OpenCreatTab('生成结算单', '@Url.Action("Createsettlement", "Logistics")?deliverySysNos=' + deliverySysnos.join("&deliverySysNos="));
+                    //window.location.href = "@Url.Action("LgSettlementDetails", "Logistics")?deliverySysno="+deliverySysnos.join(",");
+                    //console.log(deliverySysnos.join("&deliverySysNos="));
+                }
+
+            });
+
+        });
+        //#endregion
+
+        
+
+        function update(currentPage) {
+            $.get('@Url.Action("SettlementDeliveryList", "Logistics")',
+                { deliveryUserSysNo: $("#DeliveryUserSysNo").val() },
+                //{ deliveryUserSysNo: 0 },//调试数据
+                function(data) {
+                    $('#paging').empty().append(data).find("a[name='delivery']").click(function(e) {
+                        var self = $(e.target);
+                        var sysno = self.text();
+                        UI.OpenCreatTab('创建结算单', '/Logistics/DeliveryNoteDetails?id=' + sysno + '&source=settlement');//params source added by huangwei);
+                    });
+
+                    //表格全选checkbox事件
+                    $("#select_all_checkbox").live('click', function() {
+                        var checked = $(this).attr("checked") ? true : false;
+                        $("#delivery_note_main_table").find("input[name='delivery_note_box']").attr("checked", checked);
+                    });
+                });
+        }
+
+        //表格加载完成后执行
+
+        function tableOnload() {
+            AjaxStop();
+            $("#delivery_note_main_table").find("a[name='delivery']").click(function(e) {
+                var self = $(e.target);
+                var sysno = self.text();
+                UI.OpenCreatTab('创建结算单', '/Logistics/DeliveryNoteDetails?id=' + sysno + '&source=settlement');//params source added by huangwei
+            });
+        }
+    </script>
+}
+    <img src="~/Theme/images/icons/loading.gif" style="border: 0; display: none" id="loading_img" />
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>创建结算单</h3>
+            </div>
+            <div class="boxs_con_c1">
+                <div class="boxs_tool">
+                    <div class="right_tool" style="">
+                        <!--仓库 配送人员 huangwei -->      
+                        <span class="veralign_t fl">仓库</span>
+                        @*<input id="text_warehouse" type="text" sysno="" readonly="readonly" class="fl m10_r m10_l">*@
+                            <div class="fl m10_l m10_r">
+                                <select id="selWh" class="wd100 select_ht28">
+                                    <option value="-1">全部</option>
+                                    @foreach (var wh in ViewBag.WarehouseList)
+                                    {
+                                          <option value="@wh.SysNo">@wh.WarehouseName</option>
+                                    }
+                                </select>
+                            </div>
+                        <span class="veralign_t fl">配送人员</span>
+                        <select class="fl m10_r m10_l" style="width: 120px;" id="selDelUser">
+                            <option value="-1">请先选择仓库</option>
+                        </select>
+                        <!--end 仓库 配送人员 huangwei -->      
+                    </div>
+                
+                    <!--/工具条按钮-->
+                    <div class="left_tool" id="feature_area">
+                        <button class="btn btn_ht26 m10_r" type="button" title="生成结算单" id="generate_settlement_btn"><span class="icon icon_th_list "></span><span class="m5_l">生成结算单</span></button>
+                    </div>
+                </div>
+
+                <!--配送单信息列表-->
+                <div class="boxs_list" id="paging">
+                    @Html.Partial("_AjaxPagerDeliveryList", Model)
+                </div>
+
+            </div>
+
+        
+        </div>
+    </div>
+
+ 
+
+

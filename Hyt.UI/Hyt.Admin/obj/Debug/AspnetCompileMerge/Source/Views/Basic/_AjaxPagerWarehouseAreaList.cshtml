@@ -1,0 +1,115 @@
+﻿@using Hyt.BLL.Basic
+@using Hyt.BLL.Web
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBAreaWarehouse>
+@Html.PrivilegeControl(PrivilegeCode.WH1001101, ".WH1001101")
+@Html.PrivilegeControl(PrivilegeCode.WH1001301, ".WH1001301")
+<!--/表格列表区-->
+<table id="item_list" width="100%" class="border_rnone" border="0" cellspacing="0" cellpadding="0">
+    <thead>
+        <tr>
+            <th class="wd75">地区编号</th>
+            <th class="align_l p10_lr">地区名称</th>
+            <th class="align_l p10_lr">全称</th>
+            <th class="align_l p10_lr">所有仓库</th>
+            <th class="align_l p10_lr">默认仓库</th>
+            <th width="46">状态</th>
+            <th width="203">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (!Model.TData.Any())
+            {
+                <tr>
+                    <td colspan="6" class="align_l p10_l bgr_eb">暂无数据</td>
+                </tr>
+            }
+            foreach (var item in Model.TData)
+            {
+                <tr>
+                    <td>@item.AreaSysNo</td>
+                    <td class="align_l p10_lr">@item.AreaName</td>
+                    <td class="align_l p10_lr">@BasicAreaBo.Instance.GetAreaFullName(item.AreaSysNo) </td>
+                    <td class="align_l p10_lr">
+                        @{
+                if (!string.IsNullOrWhiteSpace(@item.AllWarehouseSysNo))
+                {
+                    var sysnos = item.AllWarehouseSysNo.Split(",".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+                    var warehouseNames = sysnos.Select(sysno => Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetWarehouseName(int.Parse(sysno))).ToList();
+                    @(string.Join(",", warehouseNames))
+                }
+                        }
+                    </td>
+                    <td class="align_l p10_lr">
+                        @(item.DefaultWarehouseSysNo > 0 ? Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetWarehouseName(item.DefaultWarehouseSysNo) : "")
+                </td>
+                <td id="status@(item.AreaSysNo)">@((BasicStatus.地区状态)item.Status)</td>
+                @{
+                var clsd = item.AllWarehouseSysNo == null ? "disabled" : "btn_blue";
+                var color = item.AllWarehouseSysNo == null ? "" : "icon_white";
+                }
+                <td>
+                    <button id="btnStatus@(item.AreaSysNo)" class="btn btn_blue btn_ht26 WH1001301" type="button" onclick="SetReverseStatus(@item.AreaSysNo) ">
+                        @if (item.Status == (int)Hyt.Model.WorkflowStatus.BasicStatus.地区状态.无效)
+                        {
+                            <span class="icon_check m5_r icon_white"></span><span>启用</span>
+                        }
+                        else
+                        {
+                            <span class="icon_ban_circle m5_r icon_white"></span><span>禁用</span>
+                        }
+                    </button><button id="btn@(item.AreaSysNo)" class="btn btn_ht26 m10_l @clsd WH1001301" onclick="setDefault(@item.AreaSysNo)" title="设置默认仓库">
+                        <span class="icon_pencil @color"></span><span class="m5_l">设置默认仓库</span>
+                    </button>
+
+
+
+                </td>
+            </tr>
+            }
+        }
+    </tbody>
+</table>
+@{ Html.RenderPartial("_UrlPaging", Model); }
+
+<script type="text/javascript">
+    $(function () {
+        //表格加入隔行样式
+        DAO.InterlineStyle();
+    });
+
+    function setDefault(sysno) {
+
+        if ($("#btn" + sysno).hasClass("disabled")) return;
+        var url = '@Url.Action("GetWarehouseForArea")' + '?areaSysNo=' + sysno;
+        UI.DialogOpen(url, {
+            title: '设置默认发货仓库',
+            width: 800,
+            height: 300,
+            resize: false,
+            init: function () {
+                this.button(
+                    //{
+                    //    name: "保存",
+                //    focus: true,
+                //    callback: function () {
+                //        var iframe = this.iframe.contentWindow;
+
+                //        if (!iframe.document.body) {
+                //            UI.Alert({
+                //                content: '数据加载中,请稍等.'
+                //            });
+                //            return false;
+                //        }
+
+                //        iframe.update(sysno);
+                //        return false;
+                //    }
+                //},
+                    { name: "关闭" });
+            }
+        }, false);
+    }
+</script>

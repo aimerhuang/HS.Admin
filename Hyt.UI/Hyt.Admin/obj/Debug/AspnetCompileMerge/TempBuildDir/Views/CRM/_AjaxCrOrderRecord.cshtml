@@ -1,0 +1,52 @@
+﻿@model IEnumerable<Hyt.Model.WhStockOut>
+@{
+    int row = 0;
+}
+
+<div class="boxs_listtabel m10_t">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_rnone border_bnone">
+        <thead>
+            <th width="10%">出库单号</th>
+
+            <th width="15%">仓库名</th>
+            <th width="10%">仓库电话</th>
+            <th align="left" class="p10_l">商品</th>
+            <th width="10%">状态</th>
+            <th width="15%">创建时间</th>
+        </thead>
+        <tbody>
+            @foreach (Hyt.Model.WhStockOut item in Model)
+            {
+                row++;
+                Hyt.Model.WhWarehouse w = Hyt.BLL.Warehouse.WhWarehouseBo.Instance.GetWarehouseEntity(item.WarehouseSysNo);
+                if (w != null)
+                {
+                <tr @{if (row % 2 == 0)
+                      {<text>class='stag_color'</text>}}>
+                    <td width="10%">@item.SysNo</td>
+
+                    <td width="15%">@w.WarehouseName</td>
+                    <td width="10%">@w.Phone</td>
+                    <td align="left" class="p10_l">
+
+                        @foreach (var p in item.Items)
+                        {
+                            @MvcHtmlString.Create(p.ProductName + "( 数量：" + p.ProductQuantity + " )<br/>")
+                        }
+                    </td>
+                    <td width="10%">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.WarehouseStatus.出库单状态), item.Status)</td>
+                    <td width="15%">@item.CreatedDate.ToString("yyyy-MM-dd HH:mm:ss")</td>
+
+                </tr>
+                }
+            }
+            @if (row < 1)
+            {
+                <tr>
+                    <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr>
+
+            }
+        </tbody>
+    </table>
+</div>

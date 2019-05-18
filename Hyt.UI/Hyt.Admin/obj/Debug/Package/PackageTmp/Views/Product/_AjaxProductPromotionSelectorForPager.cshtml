@@ -1,0 +1,336 @@
+﻿@using Hyt.BLL.CRM
+@using Hyt.BLL.Log
+@using Hyt.BLL.Product
+@using Hyt.BLL.Promotion
+@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.Parameter
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Util
+@using Hyt.Util.Extension
+@model PagedList<Hyt.Model.Parameter.ParaProductSearchFilter>
+@{
+    var platform = PromotionStatus.促销使用平台.PC商城;
+    if (Request.Params["isshop"] != null && Request.Params["isshop"].ToString() == "true")
+    {
+        platform = PromotionStatus.促销使用平台.门店;
+    }
+    int row = 0;
+    var dics = new Dictionary<int, string[]>();
+    dics.Add(20, new string[] { "<div class='tagfull fr m2_t'><div class='tagfull-inner group'>团</div></div>", "<button  id='togglebtn'  class='btn btn_ht26 btn_blue togglebtn'><span class='icon_down_arrow icon_white'></span><span class='m5_l'>展开</span></button>", "", "", "" });
+    dics.Add(30, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>秒杀</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>秒杀</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    dics.Add(40, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>抢购</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>抢购</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    dics.Add(50, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>拍卖</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>拍卖</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    dics.Add(60, new string[] { "<div class='tagfull fr m2_t'><div class='tagfull-inner group'>组</div></div>", "<button  id='togglebtn'  class='btn btn_ht26 btn_blue togglebtn'><span class='icon_down_arrow icon_white'></span><span class='m5_l'>展开</span></button>", "", "", "" });
+    dics.Add(100, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>满减</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>满减</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    dics.Add(110, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>满赠</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>满赠</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    dics.Add(120, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>满折</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>满折</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    dics.Add(200, new string[] { "<div class='tagfull fr'><div class='tooltip' style='display: none;'><div class='tooltip-inner'>其他</div><div class='tooltip-arrow'></div></div><div datatitle='{0}' class='tagfull-inner'>其他</div><div class='tagfull-arrow '></div></div>", "", "", "", "" });
+    int customerSysNo = ViewBag.CustomerSysNo;
+    int customerLevelSysNo = 1;
+    if (customerSysNo > 0)
+    {
+        var customer = CrCustomerBo.Instance.GetModel(customerSysNo);
+        customerLevelSysNo = customer.LevelSysNo;
+    }
+    var promotionProducts = new List<int>();
+    try
+    {
+        promotionProducts = PromotionBo.Instance.GetAllPromotionProduct();
+    }
+    catch (Exception ex)
+    {
+        SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "查询团购和组合以及促销规则中包含的所有商品错误:" + ex.Message,
+                                             LogStatus.系统日志目标类型.订单, 0, ex, null, 0);
+    }
+}
+@functions{
+    string GetClassText(int row)
+    {
+
+        if (row % 2 == 0)
+        {
+
+            return "class='stag_color'";
+        }
+        else
+        {
+            return string.Empty;
+        }
+
+    }
+
+}
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="53">&nbsp;
+            </th>
+            <th width="116px" class="p10_lr">商品编号</th>
+            <th class="p10_lr">后台显示名称</th>
+            <th width="68px" class="p10_lr">商品类型</th>
+            <th width="100px" class="p10_lr">商品分类</th>
+            <th width="68px" class="p10_lr">基础价格</th>
+             <th width="68px" class="p10_lr">会员价格</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var item in Model.TData)
+        {
+
+            IList<SpPromotionHint> promotionList = null;
+            //非团购或者组合的默认促销
+            SpPromotionHint defaultPromotion = null;
+            //团购促销
+            SpPromotionHint tuanPromotion = null;
+            //组合促销
+            SpPromotionHint comboPromotion = null;
+
+            //商品价格信息
+            var pdPriceDetail = new CBPdProductDetail();
+
+            //判断该商品是否为促销商品
+            if (promotionProducts.Contains(item.SysNo))
+            {
+
+                try
+                {
+                    promotionList = PdProductBo.Instance.GetProductPromotionHintsFromCache(new[] { platform }, item.SysNo);
+                }
+                catch (Exception ex)
+                {
+                    SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "获取商品支持的促销提示信息错误:" + ex.Message,
+                                             LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+                }
+                if (promotionList != null && promotionList.Any())
+                {
+                    //非团购或者组合的默认促销
+                    defaultPromotion = promotionList.FirstOrDefault(m => m.RuleType != (int)PromotionStatus.促销规则类型.团购 && m.RuleType != (int)PromotionStatus.促销规则类型.组合);
+                    //团购促销
+                    tuanPromotion = promotionList.FirstOrDefault(m => m.RuleType == (int)(int)PromotionStatus.促销规则类型.团购);
+                    //组合促销
+                    comboPromotion = promotionList.FirstOrDefault(m => m.RuleType == (int)(int)PromotionStatus.促销规则类型.组合);
+                }
+            }
+            try
+            {
+                var pdPrice = PdProductBo.Instance.SelectProductPrice(customerLevelSysNo, item.SysNo);
+                if (pdPrice != null)
+                {
+                    pdPriceDetail = pdPrice;
+                }
+            }
+            catch (Exception ex)
+            {
+                SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "获取商品会员等级价格错误:" + ex.Message,
+                                 LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+            }
+            row++;
+            <tr  @Html.Raw(GetClassText(row))>
+                <td>
+                    @if (defaultPromotion != null)
+                    {
+                        <input name="sysNo" class="p10_lr" type="checkbox" value="@item.SysNo" GroupSysNo="@defaultPromotion.SourceSysNo.ToString()" PromotionSysNo="@defaultPromotion.PromotionSysNo.ToString()"/>
+                    }
+                    else
+                    {
+                        <input name="sysNo" class="p10_lr" type="checkbox" value="@item.SysNo" GroupSysNo="" PromotionSysNo=""/>
+                    }
+                </td>
+                <td class="align_c p10_lr">@item.ErpCode</td>
+                <td class="align_l p10_lr @(item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.下架 ? "ft_lt red" : "")" title="状态：@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态), item.Status)">
+                    @if (item.CanFrontEndOrder == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品是否前台下单.否)
+                                                                                              { <span class="iconn_eye_close" title="不能前台下单"></span>
+                                                                                              }
+                    @if (defaultPromotion != null && dics.ContainsKey(defaultPromotion.RuleType))
+                    {
+                        @Html.Raw(string.Format(dics[defaultPromotion.RuleType][0], defaultPromotion.FrontText))
+                        @Html.Raw(item.EasName.HtmlEncode())
+                        @Html.Raw(dics[defaultPromotion.RuleType][1])
+                    }
+                    else
+                    { 
+                       @Html.Raw(item.EasName.HtmlEncode())
+                    }
+                </td>
+                <td class="align_c p10_lr" producttype="@item.ProductType">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), item.ProductType)</td>
+                <td class="align_c p10_lr" productcategory="@item.ProductCategorySysNo">@item.ProductCategoryName</td>
+                <td class="align_r p10_lr red">@item.BasicPrice.ToString("c")</td>
+                <td class="align_r p10_lr red">@item.Price.ToString("c")</td>
+            </tr> 
+                  <!-- 开始 团购-->
+                    if (tuanPromotion != null)
+                    {
+                        IList<GsGroupShopping> groupList = null;
+                        try
+                        {
+                            groupList = GroupShoppingBo.Instance.GetGroupShoppingByProductSysNo(item.SysNo).Where(m => m.Status == 20 && m.EndTime > DateTime.Now && m.StartTime < DateTime.Now && m.MaxQuantity > m.HaveQuantity).ToList();
+                        }
+                        catch (Exception ex)
+                        {
+                            SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "根据商品系统编号获取团购信息错误:" + ex.Message,
+                                 LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+                        }
+                        if (groupList != null)
+                        {
+                            foreach (var group in groupList)
+                            {
+                                row++;
+                                var groupItemList = new List<GsGroupShoppingItem>();
+                                try
+                                {
+                                    groupItemList = GroupShoppingBo.Instance.GetGroupShoppingItem(@group.SysNo).ToList();
+                                }
+                                catch (Exception ex)
+                                {
+                                    SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "获取团购商品列表错误:" + ex.Message,
+                                                             LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+                                }
+                                <tr   @Html.Raw(GetClassText(row))>
+                                    <td>
+                                        <input name="sysNo" class="p10_lr" type="checkbox" value="@item.SysNo" GroupSysNo="@(@group.SysNo)" PromotionSysNo="@(@group.PromotionSysNo)"/></td>
+                                    <td class="align_c p10_lr"></td>
+                                    <td class="align_l p10_lr @(item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.下架 ? "ft_lt red" : "")" title="状态：@(Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态), item.Status))">
+                                        @if (dics.ContainsKey(tuanPromotion.RuleType))
+                                        {
+                                            @Html.Raw(dics[tuanPromotion.RuleType][0])
+                                            @(@group.Title)
+                                            @Html.Raw(dics[tuanPromotion.RuleType][1])
+                                        }
+                                    </td>
+                                    <td class="align_c p10_lr" producttype="@item.ProductType">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), item.ProductType)</td>
+                                    <td class="align_c p10_lr" productcategory="@item.ProductCategorySysNo">@item.ProductCategoryName</td>
+                                    <td class="align_r p10_lr red">@(@group.GroupPrice.ToString("c"))</td>
+                                    <td class="align_r p10_lr red"></td>
+                                </tr> 
+                                @Html.Raw("</tbody>") 
+        
+                                <tbody class="Promotion_color" style="display: none">
+                                    @foreach (var gitem in groupItemList)
+                                    {
+                                        ParaProductSearchFilter product = null;
+                                        try
+                                        {
+                                            product = PdProductBo.Instance.GetPdProductBySysNo(gitem.ProductSysNo);
+                                        }
+                                        catch (Exception ex)
+                                        {
+                                            SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "获取商品详情包括商品类型错误:" + ex.Message,
+                                                                     LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+                                        }
+                                        if (product == null) { continue; }
+                                        <tr   @Html.Raw(GetClassText(row))>
+                                            <td style='background-color: #ebebeb'>&nbsp;</td>
+                                            <td class='align_c p10_lr'>@product.ErpCode</td>
+                                            <td class='align_l p10_lr'>@if (item.CanFrontEndOrder == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品是否前台下单.否)
+                                                                                              { <span class="iconn_eye_close" title="不能前台下单"></span>
+                                                                                              }@Html.Raw(product.EasName.HtmlEncode())</td>
+                                            <td class='align_c p10_lr'>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), product.ProductType)</td>
+                                            <td class='align_c p10_lr'>@product.ProductCategoryName</td>
+                                            <td class='align_c p10_lr'>@gitem.GroupShoppingPrice.ToString("c")</td>
+                                            <td class="align_r p10_lr red"></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                    row++;
+                                @Html.Raw("<tbody>")                 
+                            }
+                        }
+                    }
+                     <!-- 结束 团购-->
+                     <!-- 开始 组合-->
+                    if (comboPromotion != null)
+                    {
+                        List<SpCombo> comboList = null;
+                        try
+                        {
+                            comboList = SpComboBo.Instance.GetComboByMasterProductSysNo(item.SysNo).Where(m => m.Status == 20 && m.EndTime > DateTime.Now && m.StartTime < DateTime.Now && m.ComboQuantity > m.SaleQuantity).ToList();
+                        }
+                        catch (Exception ex)
+                        {
+                            SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "根据组主商品系统编号获取组合套餐信息错误:" + ex.Message,
+                                LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+                        }
+                        if (comboList != null)
+                        {
+                            foreach (var spCombo in comboList)
+                            {
+                                row++;
+                                List<SpComboItem> spComboItemList = null;
+                                try
+                                {
+                                    spComboItemList = SpComboBo.Instance.GetListByComboSysNo(spCombo.SysNo);
+                                }
+                                catch (Exception ex)
+                                {
+                                    SysLog.Instance.WriteLog(LogStatus.SysLogLevel.Error, LogStatus.系统日志来源.后台, "获取组合套餐明细列表错误:" + ex.Message,
+                                                             LogStatus.系统日志目标类型.订单, item.SysNo, ex, null, 0);
+                                }
+                                <tr   @Html.Raw(GetClassText(row))>
+                                    <td>
+                                        <input name="sysNo" class="p10_lr" type="checkbox" value="@item.SysNo" GroupSysNo="@spCombo.SysNo" PromotionSysNo="@spCombo.PromotionSysNo"/></td>
+                                    <td class="align_c p10_lr"></td>
+                                    <td class="align_l p10_lr @(item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.下架 ? "ft_lt red" : "")" title="状态：@(Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态), item.Status))">
+                                        @if (dics.ContainsKey(comboPromotion.RuleType))
+                                        {
+                                            @Html.Raw(dics[comboPromotion.RuleType][0])
+                                            @spCombo.Title
+                                            @Html.Raw(dics[comboPromotion.RuleType][1])
+                                        }
+                                    </td>
+                                    <td class="align_c p10_lr" producttype="@item.ProductType">@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), item.ProductType)</td>
+                                    <td class="align_c p10_lr" productcategory="@item.ProductCategorySysNo">@item.ProductCategoryName</td>
+                                    <td class="align_r p10_lr red"></td>
+                                    <td class="align_r p10_lr red"></td>
+                                </tr> 
+                                @Html.Raw("</tbody>")  
+                                        row++;           
+                                <tbody class="Promotion_color" style="display: none">
+                                    @if (spComboItemList != null)
+                                    {
+                                        foreach (var sitem in spComboItemList)
+                                        {
+                                            var product = PdProductBo.Instance.GetPdProductBySysNo(sitem.ProductSysNo);
+                                            if (product == null) { continue; }
+                                            <tr    @Html.Raw(GetClassText(row))>
+                                                <td style='background-color: #ebebeb'>&nbsp;</td>
+                                                <td class='align_c p10_lr'>@product.ErpCode</td>
+                                                <td class='align_l p10_lr'>@if (item.CanFrontEndOrder == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品是否前台下单.否)
+                                                                                              { <span class="iconn_eye_close" title="不能前台下单"></span>
+                                                                                              }@Html.Raw(product.EasName.HtmlEncode())</td>
+                                                <td class='align_c p10_lr'>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), product.ProductType)</td>
+                                                <td class='align_c p10_lr'>@product.ProductCategoryName</td>
+                                                <td class="align_r p10_lr red">@item.Price.ToString("c")</td>
+                                                <td class="align_r p10_lr red">@pdPriceDetail.BasicPrice.ToString("c")</td>
+                                            </tr>
+                                        }
+                                    }
+                                </tbody>
+                                @Html.Raw("<tbody>") 
+                            }
+                        }
+                    }
+                     <!-- 结束 组合-->
+        }
+          @if (row < 1)
+          { 
+                <tr>
+                    <td colspan="6" class="align_l p10_l bgr_eb">暂无数据。</td>
+                </tr> 
+          }
+
+    </tbody>
+</table>
+@if (Model.PageSize > 0)
+{
+    { Html.RenderPartial("_UrlPaging", Model); }
+}
+<script type="text/javascript">
+    $(function () {
+        //设置选中商品
+        // setSelectedChecked();
+        UI.Promotion_tip();
+        UI.Promotion_group();
+    });
+</script>

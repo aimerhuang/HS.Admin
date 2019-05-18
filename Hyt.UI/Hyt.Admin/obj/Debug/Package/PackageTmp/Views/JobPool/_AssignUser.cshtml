@@ -1,0 +1,20 @@
+﻿ <table width="100%" id="assignTb" class="border_tnone">
+     <tr>
+@{
+    int i = 0;
+    foreach (Hyt.Model.CBSyJobPoolUsers sysUser in ViewBag.SysUsers)
+    {
+        if (i > 0 && i % 6 == 0)
+        {
+            <tr></tr>
+        }
+    <td width="16%" align="center" class="c3 border_bnone">
+        <label><input type="radio" value="@sysUser.SysNo" name="UserSysNo"/>&nbsp;@sysUser.UserName<span @if (sysUser.TaskNum > 0)
+                                                                                                         {
+                                                                                                             @:style="color: red"
+                                                                                                         }>(@sysUser.TaskNum)</span></label></td>
+        i++;
+    }
+}
+ </tr>
+</table>

@@ -1,0 +1,84 @@
+﻿@using Hyt.Model.WorkflowStatus
+@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.ReportMarketDepartmentSale>
+
+@{
+    <style type="text/css">
+        td { word-break: break-all; }
+    </style>
+
+    <div id="paging"><!-- targetUpdateId -->
+        <!-- content to render -->
+        <table id="tableResult" width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+            <!-- width auto should be align-left -->
+            <thead>
+                <tr>
+                    <th width="85px">收件人</th>
+                    <th class="align_l p10_l">地址</th>
+                    <th width="98px">联系电话</th>
+                    <th width="114px">发货时间</th>
+                    <th class="wd75">订单号</th>
+                    <th class="align_l p10_l">产品名称</th>
+                    <th width="46px">数量</th>
+                    <th width="85px">物流类型</th>
+                    <th class="align_l p10_l" style="min-width: 46px">备注</th>
+
+                </tr>
+            </thead>
+            <tbody>
+    
+                @{
+                    if (Model.TData == null)
+                    {
+                        <tr>
+                            <td colspan="9" class="align_l">&nbsp;暂无数据.</td>
+                        </tr>
+                        return;
+                    }
+                    var count = 1;
+
+                    foreach (var m in Model.TData)
+                    {
+                        if (count%2 == 0)
+                        {
+                            @: <tr class="stag_color">
+                        }
+                        else
+                        {
+                            @: <tr>
+                        }
+
+                        <td >@m.收件人</td>
+                        <td class="align_l p10_l">@m.地址</td>
+                        <td >@m.联系电话</td>
+                        <td >
+                            @if (!@m.发货时间.Equals(default(DateTime)))
+                            {
+                                /*ToString("yyyy-MM-dd HH:mm")*/
+                                @m.发货时间.ToString("yyyy-MM-dd HH:mm")
+                            }
+                            
+                        </td>
+                        <td >@m.订单号</td>
+                        <td class="align_l p10_l">@m.产品名称</td>
+                        <td >@m.数量</td>
+                        <td >@m.物流类型</td>
+                        <td class="align_l p10_l">@m.备注</td>
+
+                        @:</tr>
+
+                        count++;
+                    }
+                }
+            
+            </tbody>
+        </table>
+        <!-- end content -->
+        
+        <!-- paging invoked 
+            render the page foot,need "jquery.unobtrusive-ajax.js"    
+            -->
+        @{ Html.RenderPartial("_UrlPaging", Model); }
+        <!-- end paging-->
+
+    </div>
+}

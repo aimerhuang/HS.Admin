@@ -1,0 +1,184 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<CBFeProductCommentReply>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "查看评论";
+    var commentModel = (CBFeProductComment)ViewBag.CommentModel;
+    const int audit = (int)ForeStatus.商品评论状态.已审;
+    const int invalid = (int)ForeStatus.商品评论状态.作废;
+    const int pending = (int)ForeStatus.商品评论状态.待审;
+    @Html.PrivilegeControl(PrivilegeCode.FE1001603, "button.FE1001603")
+    @Html.PrivilegeControl(PrivilegeCode.FE1001401, "button.FE1001401")
+   // @Html.JobPoolCheckControl((int)SystemStatus.任务对象类型.商品评论审核, commentModel.SysNo, "button.CommentAudit");
+}
+<style type="text/css">
+    .pagination {
+        margin-left: 0;
+    }
+</style>
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+
+    <script type="text/javascript">
+        var audit = @audit;
+        var invalid = @invalid;
+        var pending = @pending;
+        var commentSysNo = @commentModel.SysNo;
+        $(document).ready(function (e) {
+            $("#div1").Accordion();
+            $("#div2").Accordion();
+        });
+        
+        function setAudit(sysNo, status) {
+            var str;
+            if (status == invalid) {
+                str = "确定要作废该评论吗?";
+            }
+            else if (status == audit) {
+                str = "确定要审核通过吗?";
+            } else {
+                str = "确定要取消审核吗?";
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeProductCommentAudit", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            setClass(sysNo, status);
+                            UI.Dialog.opener.searchProductComment();
+                            //searchProductComment();
+                        } else {
+                            UI.Alert({
+                                content: data.Message
+                            });
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function setReplyAudit(sysNo, status) {
+            var str;
+            if (status == invalid) {
+                str = "确定要作废该评论回复吗?";
+            }
+            else if (status == audit) {
+                str = "确定要审核通过吗?";
+            } else {
+                str = "确定要取消审核吗?";
+            }
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeProductCommentReplyAudit", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchProductCommentReply();
+                        } else {
+                            UI.Alert({
+                                content: data.Message
+                            });
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function searchProductCommentReply() {
+            var id = 1;
+            $.get('/Front/FeProductCommentAudit/', { id: id ,commentSysNo:commentSysNo}, function (data) {
+                $('#paging').html(data);
+            });
+        }
+
+        function setClass(sysNo, status) {
+            if(status == invalid){
+                var htmlStr1 = "<button type=\"button\" class=\"btn btn_ht26 disabled m10_r CommentAudit FE1001603\" title=\"通过审核\"><span class=\"icon_audit\"></span><span class=\"m5_l\">通过审核</span></button>";
+                htmlStr1 += " <button type=\"button\" class=\"btn btn_ht26 disabled m5_r CommentAudit FE1001401\" title=\"作废\"><span class=\"icon_forbidden\"></span><span class=\"m5_l\">作废</span></button>";
+                $("#operating").empty().append(htmlStr1);
+            }
+            else if (status == audit) {
+                var htmlStr2 = "<button type=\"button\" class=\"btn btn_ht26 m10_r CommentAudit FE1001603\" title=\"取消审核\" onclick=\"setAudit("+sysNo+","+pending+")\"><span class=\"icon_audit\"></span><span class=\"m5_l\">取消审核</span></button>";
+                htmlStr2 += " <button type=\"button\" class=\"btn btn_ht26 disabled m5_r CommentAudit FE1001401\" title=\"作废\"><span class=\"icon_forbidden\"></span><span class=\"m5_l\">作废</span></button>";
+                $("#operating").empty().append(htmlStr2);
+            } else {
+                var htmlStr3 = "<button type=\"button\" class=\"btn btn_ht26 m10_r CommentAudit FE1001603\" title=\"通过审核\" onclick=\"setAudit("+sysNo+","+audit+")\"><span class=\"icon_audit\"></span><span class=\"m5_l\">通过审核</span></button>";
+                htmlStr3 += " <button type=\"button\" class=\"btn btn_ht26 m5_r CommentAudit FE1001401\" title=\"作废\" onclick=\"setAudit("+sysNo+","+invalid+")\"><span class=\"icon_forbidden\"></span><span class=\"m5_l\">作废</span></button>";
+                $("#operating").empty().append(htmlStr3);
+            }
+       }
+    </script>
+}
+<form id="feProductCommentAuditForm" name="feProductCommentAuditForm" action="">
+    <div class="caseout">
+
+        <div class="boxs_detail_dispay">
+            <div id="div1" title="评论详情">
+                <div class="tit_con">
+                    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <td width="55" class="nameright border_rnone">商品名称:</td>
+                            <td>@commentModel.ProductName
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="55" class="nameright border_rnone">商品编号:</td>
+                            <td>@commentModel.ErpCode
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="55" class="nameright border_rnone">评论标题:</td>
+                            <td>@commentModel.Title
+                            </td>
+                        </tr>
+                        <tr>
+                            <td width="55" class="nameright border_rnone">评论内容</td>
+                            <td>
+                                <textarea disabled="disabled" style="width: 910px; height: 150px;">@commentModel.Content</textarea>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: right;">
+                                <span id="operating">
+                                @{
+                                    if (commentModel.CommentStatus == pending)
+                                    {
+                                        <button type="button" class="btn btn_ht26 m10_r CommentAudit FE1001603" title="通过审核" onclick="setAudit(@commentModel.SysNo,@audit)"><span class="icon_audit"></span><span class="m5_l">通过审核</span></button><button type="button" class="btn btn_ht26 m5_r CommentAudit FE1001401" title="作废" onclick="setAudit(@commentModel.SysNo,@invalid)"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                                    }
+                                    else if (commentModel.CommentStatus == audit)
+                                    {
+                                        <button type="button" class="btn btn_ht26 m10_r CommentAudit FE1001603" title="取消审核" onclick="setAudit(@commentModel.SysNo,@pending)"><span class="icon_audit"></span><span class="m5_l">取消审核</span></button><button type="button" class="btn btn_ht26 disabled m5_r CommentAudit FE1001401" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn_ht26 disabled m10_r CommentAudit FE1001603" title="通过审核"><span class="icon_audit"></span><span class="m5_l">通过审核</span></button><button type="button" class="btn btn_ht26 disabled m5_r CommentAudit FE1001401" title="作废"><span class="icon_forbidden"></span><span class="m5_l">作废</span></button>
+                                    }
+                                }
+</span>
+                                <button type="button" class="btn btn_ht26" title="关闭" onclick="UI.Dialog.close()"><span class="icon_off"></span><span class="m5_l">关闭</span></button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+            <div id="div2" title="评论回复">
+                <div class="boxs_detail border_lnone" id="paging">
+                    @{Html.RenderPartial("_AjaxFeProductCommentReply", Model); }
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

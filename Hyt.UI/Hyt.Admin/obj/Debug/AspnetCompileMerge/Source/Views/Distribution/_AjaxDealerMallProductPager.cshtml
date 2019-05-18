@@ -1,0 +1,151 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model
+@using Hyt.Util.Extension
+@using Hyt.Util
+@model PagedList<Hyt.Model.CBPdProductDetail>
+
+@Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.PD1001601, ".PD1001601")
+<table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+        <tr>
+            <th width="53">
+                <input name="sysNo" id="checkall" type="checkbox" /></th>
+            <th width="150px" class="align_l p10_lr">商品编号</th>
+            <th width="" class="align_l p10_lr">后台显示名称</th>
+            <th width="120" class="align_l p10_lr">主分类</th>
+            <th width="90">商品类型</th>
+            <th width="90">基础价格</th>
+            <th width="90">会员价格</th>
+            @*<th width="120px">更新时间</th> *@
+            <th width="60">状态</th>
+            <th width="217">操作</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            if (Model.TData.Count == 0)
+            {
+            <tr class="odd_color trhover">
+                <td colspan="9" class="align_l p10_l bgr_eb">暂无数据</td>
+            </tr>
+                return;
+            }
+            int i = 0;
+            foreach (var item in Model.TData)
+            {
+                if (i % 2 == 0)
+                {
+            @Html.Raw("<tr>")
+                }
+                else
+                {
+            @Html.Raw("<tr class='stag_color'>")
+                }
+                i++;
+            <td>
+                <input name="sysNo"  @if (item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.上架)
+                                     { @Html.Raw("disabled=\"disabled\"") } type="checkbox" value="@item.SysNo" PASysNo ="@item.PAssociationSysNo" /></td>
+            <td class="align_l blue p10_lr"><a href="javascript:void(0);" class="showProduct">@item.ErpCode</a></td>
+            <td class="align_l blue p10_lr"><a href="javascript:void(0);" class="showProduct">@if (item.CanFrontEndOrder == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品是否前台下单.否)
+                                                                                              { <span class="iconn_eye_close" title="不能前台下单"></span>
+                                                                                              } @Html.Raw(item.EasName.HtmlEncode())</a></td>
+            <td class="align_l p10_lr">@item.ProductCategoryName</td>
+            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品类型), item.ProductType)</td>
+            <td align="right"><!--onmouseover=" GetPriceInfo('item.SysNo', this) "--><a href="javascript:;"><span class="red p10_r">@item.BasicPrice.ToString("C")</span></a></td>
+            <td align="right"><!--onmouseover=" GetPriceInfo('item.SysNo', this) "--><a href="javascript:;"><span class="red p10_r">@item.SalesPrice.ToString("C")</span></a></td>
+@*<td>@item.LastUpdateDate.ToString("yyyy-MM-dd HH:mm")</td>*@
+            <td>@Hyt.Util.EnumUtil.GetDescription(typeof(Hyt.Model.WorkflowStatus.ProductStatus.商品状态), item.Status)</td>
+            <td>
+                @if (item.Status == (int)Hyt.Model.WorkflowStatus.ProductStatus.商品状态.上架)
+                {<button class="btn btn_ht26 forbid m10_r PD1001601"><span class="icon icon_outtoStore"></span><span class="m5_l">下架</span></button>}
+                else
+                {<button class="btn btn_blue btn_ht26 agree m10_r PD1001601"><span class="icon icon_white icon_intoStore"></span><span class="m5_l">上架</span></button>}
+                <button class="btn btn_red btn_ht26 m10_l LG1001401" onclick="DeleteDealerMallProduct(@item.PAssociationSysNo)" title="删除"><span class="icon_trash icon_white"></span><span class="m5_l">删除</span></button>
+            </td>
+            @Html.Raw("</tr>")
+            }
+        }
+    </tbody>
+</table> 
+
+
+
+@{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    var forbid = "@Hyt.Model.WorkflowStatus.ProductStatus.商品状态.下架.GetHashCode()";
+    var agree = "@Hyt.Model.WorkflowStatus.ProductStatus.商品状态.上架.GetHashCode()";
+    function changeStatus(obj, status) {
+        var no = $(obj).closest("tr").find("input:checkbox").attr("PASysNo");
+        var jsonData = { Status: status, SysNo: no };
+        $.ajax({
+            url: "/Distribution/UpdateDealerMallProductStatus",
+            type: "post",
+            dataType: 'json',
+            data: jsonData,
+            success: function (result) {
+                if (result.Status) {
+                    UI.tips.tip_alert('tips_shrot tips_success', '操作成功！');
+                    if (currentSearchType == 2) {
+                        doComplexSearch(@Model.CurrentPageIndex);
+                    } else {
+                        doSearch(@Model.CurrentPageIndex);
+                    }
+                } else {
+                    var message = "操作失败";
+                    if (!!result && !!result.Message) {
+                        message = result.Message;
+                    }
+                    UI.Alert({ content: message });
+                }
+            }
+        });
+    }
+
+    $(".showDetail").click(function () {
+        var sysno = $(this).closest("tr").find("input:checkbox").val();
+        UI.OpenCreatTab('修改商品', "@Url.Action("EditProduct", "Product")" + "?sysNo=" + sysno);
+    });
+
+    $(".showProduct").click(function () {
+        var sysno = $(this).closest("tr").find("input:checkbox").val();
+        var productName = $(this).text();
+        UI.OpenCreatTab('商品详情', "@Url.Action("ViewProduct", "Product")" + "?sysNo=" + sysno);
+     });
+
+    $(".copy").click(function () {
+        var sysno = $(this).closest("tr").find("input:checkbox").val();
+        DAO.CopyProduct({
+            productSysno: sysno, callBack: function (data) {
+                if (!!data && data.Status)
+                {
+                    UI.OpenCreatTab('修改商品', "@Url.Action("EditProduct", "Product")" + "?sysNo=" + data.StatusCode);
+                }
+            }
+        });
+    });
+
+    $(".forbid, .agree").click(function () {
+        var status = $(this).hasClass("forbid") ? forbid : agree;
+        var obj = this;
+        if (status == forbid) {
+            UI.Confirm({
+                content: '您确定要下架吗?',
+                ok: function () {
+                    changeStatus(obj, status);
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+        } else {
+            UI.Confirm({
+                content: '您确定要上架吗?',
+                ok: function () {
+                    changeStatus(obj, status);
+                },
+                cancelVal: '取消',
+                cancel: true
+            });
+        }
+
+    });
+</script>

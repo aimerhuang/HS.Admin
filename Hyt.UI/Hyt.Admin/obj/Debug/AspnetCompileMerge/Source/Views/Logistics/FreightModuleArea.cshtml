@@ -1,0 +1,230 @@
+﻿@using Hyt.Model.SystemPredefined
+@{
+    ViewBag.Title = "地区信息管理";
+    @Html.PrivilegeControl(PrivilegeCode.BS1001101, ".BS1001101")
+    @Html.PrivilegeControl(PrivilegeCode.BS1001201, ".BS1001201")
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+    <style type="text/css">
+        .ztree li a.curSelectedNode {
+            width: 95%;
+            *width: 85%;
+            border: solid 1px #ffb951;
+            padding-top: 1px;
+            padding-bottom: 0;
+        }
+
+        #areaCatetoryTree a {
+            width: 95%;
+            border: solid 1px #fff;
+            height: 17px;
+            line-height: 17px;
+        }
+
+            #areaCatetoryTree a.curSelectedNode {
+                border: solid 1px #ffb951;
+            }
+
+        .ztree li a:hover {
+            background-color: #FFE6B0;
+            border: solid 1px #FFE6B0;
+        }
+
+        tr.selected {
+            background-color: #FFE6B0;
+        }
+
+        .ztree li span.button {
+            float: left;
+        }
+
+        #JS_outbox .prompt {
+            background-position: 0 -95px;
+            float: left;
+        }
+
+        #JS_outbox .success {
+            background-position: 0 -16px;
+            float: left;
+        }
+
+        #JS_outbox .error {
+            background-position: 0 -76px;
+            float: left;
+        }
+    </style>
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+
+    <script type="text/javascript">
+        var _id="@ViewData["id"]";
+      
+        var setting = {
+        check: { /**复选框**/
+            enable: true,
+            nocheckInherit: true
+        },
+        view: {
+            selectedMulti: false,
+            showTitle: false
+        },
+        data: {
+            simpleData: {
+                enable: true
+            }
+        }
+    };
+
+
+        //重置左右容器高度
+
+        function resizeCalBack() {
+            var height = $(document).height() - 64 - $("#treeTitle").height() - $("#treeControlPanel").height();
+            $("#treePanel").css("height", height);
+
+        }
+
+        var myZTree;
+
+        //初始化ZTree
+
+        function InitZTree() {
+            markObject = $(".sortmanage_fl");
+            $.ajax({
+                url: '@Url.Action("GetBsAreaZTreeList", "Basic")',
+                data: { all: false },
+                success: function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTree = $.fn.zTree.init($("#areaCatetoryTree"),
+                            setting,
+                            response);
+
+                        //默认为收起所以节点
+                        myZTree.ExpandAllStatus = false;
+
+                        var zTree = $.fn.zTree.getZTreeObj("areaCatetoryTree");
+                        var $parentDoc = $(window.parent.frames[$(window.parent.document).find("div#iframewrap").find("iframe.block").index()].document);
+                        
+                        //已选择地区
+                      
+                        var $as = $parentDoc.find("#" + _id).children("a");
+                        for (var i = 0; i < $as.length ; i++) {
+                            try {
+                                var node = zTree.getNodeByParam("id",$as.eq(i).attr("id"));
+                                zTree.checkNode(node, true, true);
+                            } catch (e) {}
+                        }
+                        
+                    }
+
+                },
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+            });
+        }
+
+        var markObject;
+        //AjaxLoader的mark对象
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //自举函数
+        $(document).ready(function () {
+
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+
+            //初始化树
+            InitZTree();
+
+            //页面大小改变是要从新计算布局，因为要在第一屏时左右两边都是自适应高度到最大化
+            $(window).resize(resizeCalBack);
+            resizeCalBack();
+
+        });
+
+        //调用页面进行回调
+        function CallBack() {
+            var method= GetCheckedAppendToCityPanel();
+            if ($.isFunction(parent._ActiveSelectAreaCallBack)) {
+                parent._ActiveSelectAreaCallBack(method);
+                UI.Dialog.close();
+            }
+        }
+
+        function GetCheckedAppendToCityPanel() {
+            var treeObj = $.fn.zTree.getZTreeObj("areaCatetoryTree"),
+            nodes = treeObj.getCheckedNodes(true);
+          
+            //获取父级iframe的Document对象
+            var $parentDoc = $(window.parent.frames[$(window.parent.document).find("div#iframewrap").find("iframe.block").index()].document);
+
+            for (var i = 0; i < nodes.length; i++) {
+                if (!nodes[i].isParent) {//判断是否为子节点
+                    var $tbody = $parentDoc.find("#" + _id).parent().parent().parent().parent();
+                    if ($tbody.find("#" + nodes[i].id).length <= 0) {  //只有没有添加过的城市才能追加                      
+                        $parentDoc.find("#" + _id).append(myTempl("#tmpCity", nodes[i]));                      
+                    }
+                }
+            }
+        }
+    </script>
+
+}
+
+<script type="text/template" id="tmpCity">
+    <a href="javascript:void();" id="{%=this.id%}" class="pro areacls">
+        {%=this.name%}
+        <span class="icon-btn-x"></span>
+    </a>
+</script>
+
+
+<div class="case commodity_sortmanage">
+    <!--sortmanage_fl-->
+    <div class="sortmanage_fl">
+        <div class="boxs">
+            <!--有导航条时-->
+            <div id="treeTitle" class="boxs_tit head_m">
+                <h3>地区列表</h3>
+            </div>
+            <div class="comp5" style="padding: 0;">
+                <div id="treePanel" class="zTreeDemoBackground left p5 BS1001101" style="overflow: auto;">
+                    <ul id="areaCatetoryTree" class="ztree"></ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+

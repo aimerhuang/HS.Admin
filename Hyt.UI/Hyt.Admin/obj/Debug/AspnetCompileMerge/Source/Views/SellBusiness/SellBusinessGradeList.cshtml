@@ -1,0 +1,112 @@
+﻿@{
+    ViewBag.Title = "分销商等级管理";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script type="text/javascript" src="/Theme/scripts/Utils.yui.js"></script>
+<script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+<div class="case">
+    <div class="boxs">
+        <div class="boxs_tit head_m">
+            <h3>分销商等级管理</h3>
+        </div>
+        <div class="boxs_con_c1">
+            <div class="list">
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="fl">分销商等级名称</span>
+                        <input id="Name" type="text" class="wd100 fl m10_l m10_r" value="">
+                        <button id="searchBtn" title="搜索" class="btn btn_ht28 fl" type="button"><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                    </div>
+                    <div class="left_tool">
+                        <button class="btn btn_ht26 btn_blue" id="createBtn"><span class="icon icon_white icon_plus"></span><span class="m5_l">添加</span></button>
+                    </div>
+                </div>
+                <div id="paging" class="boxs_list">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<input type="button" id="text"/>*@
+<script type="text/javascript">
+    $("#text").live('click', function () {
+        $.post('/Api/InboundUpdateOrderStata', {
+            "timestamp": "1442831204",
+            "appid": "rennibiwang",
+            "token": "AD090BC099CB56E83511125D9D19E340",
+            "Status": "2",
+            "Weight": 1.0,
+            "Volume": "",
+            "OverseaCarrier": "YDSD",
+            "OverseaTrackingNo": "20150921",
+            "CommodityList":[{"SKU": "20150916117", "UPC": "", "CommodityName": "美国直邮 进口GNC中老年50以上女性复合多种维生素矿物质片60粒*2瓶", "InboundQuantity": 1, "StockQuantity": 1},
+                { "SKU": "20150916119", "UPC": "", "CommodityName": "美国直邮L'il Critters小熊糖宝宝钙含维生素D儿童钙片200粒", "InboundQuantity": 1, "StockQuantity": 1 }]
+        }, function (r) {
+            alert(r.msg);
+        });
+    });
+
+
+    $(document).ready(function () {
+        doSearch();
+        $("#createBtn").click(function () {
+            var url = '/SellBusiness/CrSellBusinessGradeCreate';
+            UI.DialogOpen(url, {
+                title: '新增分销商等级',
+                width: '750px',
+                height: '270px'
+            }, false);
+        });
+    });
+
+    //开始查询
+    $("#searchBtn").click(function () {
+        doSearch();
+    });
+    //列表数据显示
+    function doSearch() {
+        Utils.MaskStart($('#paging'));
+        Ajax.get("/SellBusiness/DoCrSellBusinessGradeQuery/?r=" + Math.random(), "none", function (p) {
+            p.setParams("Name", $("#Name").val());
+        }, function (data) {
+            $('#paging').empty();
+            $('#paging').html(data);
+            Utils.MaskStop();
+        });
+    }
+
+    function SuccessTip() {
+        UI.Prompt.Success("操作成功");
+        doSearch();
+
+    }
+    function Edit(id) {
+        UI.DialogOpen('/SellBusiness/CrSellBusinessGradeCreate?id=' + id, {
+            width: '750px',
+            height: '270px',
+            title: '分销商等级编辑'
+        }, false);
+    }
+
+    function Delete(myid, btn) {
+        UI.Confirm({
+            content: "确认删除?",
+            ok: function () {
+                $.post('/SellBusiness/Delete', { id: myid }, function (r) {
+                    if (r.Status) {
+                        SuccessTip();
+                    }
+                    else {
+                        UI.Alert({
+                            content: r.Message
+                        });
+                    }
+
+                });
+            },
+            cancel: true
+        });
+    }
+</script>
+

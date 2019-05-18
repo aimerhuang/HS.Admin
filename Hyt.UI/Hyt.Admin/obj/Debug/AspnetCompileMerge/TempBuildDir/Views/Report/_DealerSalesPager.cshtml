@@ -1,0 +1,74 @@
+﻿@model Hyt.Infrastructure.Pager.PagedList<Hyt.Model.Transfer.CBRptDealerSales>
+
+<div class="boxs_listtabel">
+    <!--/表格列表区-->
+    <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_rnone">
+        <thead>
+            <tr>
+                <th width="25">
+                    <input name="sysNo" id="checkall" type="checkbox" />
+                </th>
+                <th width="110">经销商名称</th>
+                <th width="110">新增会员数</th>
+                <th width="110">新增会员营业额</th>
+                <th width="110">总营业额</th>
+            </tr>
+        </thead>
+        <tbody>
+            @{
+                if (!Model.TData.Any())
+                {
+                    <tr>
+                        <td colspan="7" class="align_l p10_l bgr_eb">暂无数据。</td>
+                    </tr>
+                }
+
+                int i = 0;
+                foreach (var item in (List<Hyt.Model.Transfer.CBRptDealerSales>)Model.TData)
+                {
+
+                    if (i % 2 == 0)
+                    {
+                        @Html.Raw("<tr>")
+                    }
+                    else
+                    {
+                        @Html.Raw("<tr class='stag_color'>")
+                    }
+                <td>
+                    <input name="sysNo" type="checkbox" value="@item.SysNo" />
+                </td>                    
+                <td>@item.DealerName</td>
+                <td>@(item.CustomerNums) / @(item.ACustomerNums)</td>
+                <td>@item.SumOrderAmount</td>
+                <td>@item.AllSumOrderAmount</td>
+                @Html.Raw("</tr>")
+                    i++;
+                }
+            }
+            </tbody>
+        </table>
+    </div>
+
+
+    @{Html.RenderPartial("_UrlPaging", Model); }
+<script type="text/javascript">
+    $(function () {
+        //查找已被选中项，checkedsysnolist(DealerSales.cshtml中全局变量) 王耀发 2016-2-04
+        if (checkedsysnolist.length > 0) {
+            var flag = true;
+            $("#paging input:checkbox").each(function () {
+                var SysNo = $(this).val();
+                if (checkedsysnolist.indexOf(SysNo) != '-1') {
+                    $(this).attr("checked", true);
+                } else {
+                    flag = false;
+                }
+            });
+            $("#checkall").attr("checked", flag);
+        }
+
+        doSearchMap(@Model.CurrentPageIndex);
+    });
+
+</script>

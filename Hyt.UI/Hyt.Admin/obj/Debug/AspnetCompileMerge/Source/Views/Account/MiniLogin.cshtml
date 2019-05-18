@@ -1,0 +1,128 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "MiniLogin";
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+}
+<form id="form" name="form" action="">
+<div class="bodynone p10">
+    <div class=" boxs_detail_dispay">
+        <div class="tit_con bgr_none">
+            <table width="100%" cellspacing="0" cellpadding="0" border="0" class="border_tnone border_bnone">
+            <tbody>
+                <tr>
+                    <td width="40" class="nameright border_bnone">账号</td>
+                    <td class="border_bnone"><input  type="text" id="txtAccount" name="txtAccount" class="wd150" value="@Hyt.Util.CookieUtil.Get(Hyt.Model.SystemPredefined.Constant.ADMIN_LOGINHISTORYUSERNAME_COOKIE)"" /><span id="fortxtAccount" class="prompt m10_l">账号,1-30字符</span></td>
+                </tr>
+                <tr>
+                    <td width="40" class="nameright border_bnone">密码</td>
+                    <td class="border_bnone"><input  type="password" id="txtPwd" name="txtPwd" class="wd150" /><span id="fortxtPwd" class="prompt m10_l">密码,1-50字符</span></td>
+                </tr>
+                <tr>
+                    <td width="40" class="nameright border_bnone">验证码</td>
+                    <td class="border_bnone"><input  type="text" id="txtVerifyCode" name="txtVerifyCode" style="width:62px;" /> <img id="verifyCode" style=" height: 28px; line-height: 28px; vertical-align:middle" src="/Security/verifycode" /> <span class="span45" style="cursor: pointer; width: 100px; font-size: 12px;" onclick="return refreshCode();">看不清？换一张</span><span id="fortxtVerifyCode" class="prompt m10_l">验证码</span></td>
+                </tr>
+            </tbody>
+            <table>
+        </div>
+    </div>
+</div>
+</form>
+@section FooterJs{
+    <script type="text/javascript">
+        var api;
+        $(document).ready(function () {
+            api = UI.Dialog.open.api; //对话框api,这里可以操作对话框
+            
+            api.button({
+                name: '登 录',
+                callback: function () {
+                    var $iframe = this.iframe.contentWindow;
+                    if ($iframe.Validate()) {
+                        MiniLogin();
+                    }
+                    return false;
+                },
+                focus: true
+            });
+            
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                case 13:
+                    MiniLogin();
+                    break;
+                }
+            });
+
+            function MiniLogin(parameters) {
+                if ($("#form").valid()) {
+                    $.ajax({
+                        url: "/Account/DoLogin/",
+                        data: JSON.stringify({ account: GetElVal("txtAccount"), password: GetElVal("txtPwd"), verifycode: GetElVal("txtVerifyCode") }),
+                        dataType: "json",
+                        type: "POST",
+                        cache: false,
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data.Status == true) {
+                                UI.tips.tip_alert('tips_shrot tips_success', '登录成功。');
+                                UI.Dialog.opener.location.reload();
+                            } else {
+                                UI.tips.tip_alert('tips_shrot tips_wrong', data.Message);
+                            }
+                        }
+                    });
+                }
+
+            }
+
+
+            $("#form").validate({
+                rules: {
+                    txtAccount: { required: true },
+                    txtPwd: { required: true },
+                    txtVerifyCode: { required: true }
+                },
+                errorPlacement: function(error, el) {
+                    $('#for' + el.attr('id')).attr('class', 'error m10_l');
+                },
+                success: function(label, el) {
+                    $('#for' + el.attr('id')).attr('class', 'success m10_l');
+                }
+            });
+
+            if ($.trim($('#txtAccount').val()) == '') {
+                $('#txtAccount').focus();
+            } else {
+                $('#txtPwd').focus();
+            }
+
+
+            //if (!api) return;
+            //TO DO:做你想做的
+        });
+        function refreshCode() {
+            $(".border_bnone img").attr('src', "/Security/verifycode?" + Math.random());
+        }
+        
+        function GetElVal(itemId) {
+            return $("#" + itemId).val();
+        }
+
+        //验证表单
+        function Validate() {
+            //console.log('.................');
+            if ($("#form").valid())
+                return true;
+            else
+                return false;
+            //通知对话框弹出页面
+            //需要在该页面定义相关函数
+            //if ($window._Notify) {
+            //    $window._Notify.success && $window._Notify.success.call(window);
+            //}
+            //UI.Dialog.close();
+        }
+    </script>
+}

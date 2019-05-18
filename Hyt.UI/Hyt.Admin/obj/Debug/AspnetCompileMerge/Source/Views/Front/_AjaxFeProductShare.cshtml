@@ -1,0 +1,63 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.WorkflowStatus
+@using Hyt.Model
+@using Hyt.Util
+@model PagedList<CBFeProductComment>
+
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" class="border_bnone border_rnone">
+    <thead>
+      <tr>
+          <th>晒单标题</th>
+          <th width="85">晒单人</th>
+          <th width="124">晒单时间</th>
+          <th width="46">精华</th>
+          <th width="46">置顶</th>
+          <th width="46">有用</th>
+          <th width="46">没用</th>
+          <th width="46">状态</th>
+          <th width="269">操作</th>
+      </tr>
+    </thead>
+    <tbody>
+    @{
+        const int isBest = (int)Hyt.Model.WorkflowStatus.ForeStatus.是否精华.是;
+        const int noBest = (int)Hyt.Model.WorkflowStatus.ForeStatus.是否精华.否;
+        const int isTop = (int) Hyt.Model.WorkflowStatus.ForeStatus.是否置顶.是;
+        const int noTop = (int) Hyt.Model.WorkflowStatus.ForeStatus.是否置顶.否;
+        if (Model.TotalItemCount > 0)
+        {
+            var row = 1;
+            var cs = string.Empty;
+            foreach (var item in Model.TData)
+            {
+                cs = row % 2 == 0 ? "stag_color" : string.Empty;
+                var status = item.IsBest == isBest ? noBest : isBest;
+                var statusIsTop = item.IsTop == isTop ? noTop : isTop;
+                var strIsBest = item.IsBest == isBest ? "取消精华" : "设为精华";
+                var strIsTop = item.IsTop == isTop ? "取消置顶" : "设为置顶";
+                <tr class="@cs">
+                    <td class="align_l p10_lr">@item.ShareTitle</td>
+                    <td>@item.Name</td>
+                    <td>@item.ShareTime.ToString("yyyy-MM-dd HH:mm")</td>
+                    <td>@EnumUtil.GetDescription(typeof(ForeStatus.是否精华), item.IsBest)</td>
+                    <td>@EnumUtil.GetDescription(typeof(ForeStatus.是否置顶), item.IsTop)</td>
+                    <td>@item.SupportCount</td>
+                    <td>@item.UnSupportCount</td>
+                    <td>@EnumUtil.GetDescription(typeof(ForeStatus.商品晒单状态), item.ShareStatus)</td>
+                    <td>
+                        <button type="button"  class="btn btn_ht26 btn_blue m10_r FE1002601"  title="@strIsBest" onclick="setStatus(@item.SysNo,@status)"><span class="icon_digest icon_white"></span><span class="m5_l">@strIsBest</span></button><button type="button" class="btn btn_ht26 btn_blue m10_r FE1002602" title="@strIsTop" onclick="setIsTop(@item.SysNo,@statusIsTop)"><span class="icon_toTop icon_white"></span><span class="m5_l">@strIsTop</span></button><button type="button" class="btn btn_ht26 FE1002002" title="查看" onclick="return audit(@item.SysNo);"><span class="icon_tosee"></span><span class="m5_l">查看</span></button>
+                    </td>
+                </tr>
+                row++;
+            }
+        }
+            else
+            {
+            <tr class="odd_color">
+                <td class="align_l p10_l bgr_eb" colspan="9">暂无数据</td>
+            </tr>
+            }
+    }
+    </tbody>
+    </table>
+    @{Html.RenderPartial("_UrlPaging", Model); }

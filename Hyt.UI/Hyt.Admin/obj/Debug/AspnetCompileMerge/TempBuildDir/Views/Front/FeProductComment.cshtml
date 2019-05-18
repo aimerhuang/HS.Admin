@@ -1,0 +1,350 @@
+﻿@using Hyt.Infrastructure.Pager
+@using Hyt.Model.SystemPredefined
+@using Hyt.Model.WorkflowStatus
+@model PagedList<Hyt.Model.CBFeProductComment>
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "商品评论";
+    const int isBest = (int)ForeStatus.是否精华.是;
+    const int isTop = (int)Hyt.Model.WorkflowStatus.ForeStatus.是否置顶.是;
+    const int pending = (int)ForeStatus.商品评论状态.待审;
+    @Html.PrivilegeControl(PrivilegeCode.FE1001601, "button.FE1001601")
+    @Html.PrivilegeControl(PrivilegeCode.FE1001602, "button.FE1001602")
+    @Html.PrivilegeControl(PrivilegeCode.FE1001002, "button.FE1001002")
+    @Html.PrivilegeControl(PrivilegeCode.FE1001003, "button.FE1001003")
+}
+@section headjs{
+    <script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+    <script type="text/javascript" src="~/Theme/Plugins/Date/WdatePicker.js"></script>
+    <script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript" src="/Theme/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        var searchCustomerTxt = "请输入会员名称...";
+        var searchProductSysNoTxt = "请输入商品编号...";
+        var isBest = @isBest;
+        var isTop = @isTop;
+        $(function () {
+            $("#searchCustomerName").focus(function () {
+                if ($("#searchCustomerName").val() == searchCustomerTxt) {
+                    $("#searchCustomerName").val("");
+                }
+            });
+            $("#searchCustomerName").blur(function () {
+                if ($("#searchCustomerName").val() == "") {
+                    $("#searchCustomerName").val(searchCustomerTxt);
+                }
+            });
+            $("#searchProductSysNo").focus(function () {
+                if ($("#searchProductSysNo").val() == searchProductSysNoTxt) {
+                    $("#searchProductSysNo").val("");
+                }
+            });
+            $("#searchProductSysNo").blur(function () {
+                if ($("#searchProductSysNo").val() == "") {
+                    $("#searchProductSysNo").val(searchProductSysNoTxt);
+                }
+            });
+
+            $("#searchCustomerGrade").focus(function () {
+                if ($("#searchCustomerGrade").val() == searchCustomerTxt) {
+                    $("#searchCustomerGrade").val("");
+                }
+            });
+            $("#searchCustomerGrade").blur(function () {
+                if ($("#searchCustomerGrade").val() == "") {
+                    $("#searchCustomerGrade").val(searchCustomerTxt);
+                }
+            });
+            $("#searchProductSysNoGrade").focus(function () {
+                if ($("#searchProductSysNoGrade").val() == searchProductSysNoTxt) {
+                    $("#searchProductSysNoGrade").val("");
+                }
+            });
+            $("#searchProductSysNoGrade").blur(function () {
+                if ($("#searchProductSysNoGrade").val() == "") {
+                    $("#searchProductSysNoGrade").val(searchProductSysNoTxt);
+                }
+            });
+            $("body").keydown(function (event) {
+                switch (event.keyCode) {
+                    case 13:
+                        searchProductComment();
+                        break;
+                }
+            });
+        });
+
+        function audit(sysNo) {
+            var url, title;
+
+            url = "/Front/FeProductCommentAudit/?commentSysNo="+sysNo;
+            title = "查看评论";
+
+            UI.DialogOpen(url, {
+                title: title,
+                width: '1072px',
+                height: '663px',
+                init: function () {
+
+                }
+            });
+        }
+        function reply() {
+            var url, title;
+
+            url = "/Front/FeProductCommentReply/";
+            title = "查看回复";
+
+            UI.DialogOpen(url, {
+                title: title,
+                width: '1073px',
+                height: '510px',
+                init: function () {
+
+                }
+            });
+        }
+        
+        function setStatus(sysNo, status) {
+            var str = status == isBest ? "确定要设置为精华吗?" : "确定要取消精华设置吗?";
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeProductCommentIsBest", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchProductComment();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+        
+        function setIsTop(sysNo, status) {
+            var str = status == isTop ? "确定要置顶吗?" : "确定要取消置顶吗?";
+            UI.Confirm({
+                content: str,
+                ok: function () {
+                    $.post('@Url.Action("FeProductCommentIsTop", "Front")', { sysNo: sysNo, status: status }, function (data) {
+                        if (data.IsLogout) {
+                            eval(data.Callback);
+                            return;
+                        }
+                        if (data.IsPass) {
+                            searchProductComment();
+                        } else {
+                            UI.tips.tip_alert('tips_wrong', data.Message);
+                        }
+                    });
+                },
+                cancel: true //为true等价于function(){}
+            });
+        }
+
+        function searchStausChange() {
+            searchChange();
+            searchProductComment();
+        }
+
+        function searchChange() {
+            $("#status").val($("#searchStaus").val());
+            var searchProductSysNo = $("#searchProductSysNo").val();
+            var searchCustomerName = $("#searchCustomerName").val();
+            if (searchProductSysNo!=""&&searchProductSysNo!=searchProductSysNoTxt) {
+                $("#searchProductSysNoGrade").val(searchProductSysNo);
+            }
+            if (searchCustomerName != "" && searchCustomerName != searchCustomerTxt) {
+                $("#searchCustomerGrade").val(searchCustomerName);
+            }
+            
+        }
+
+        function searchChangeTwo() {
+            $("#searchStaus").val($("#status").val());
+            var searchProductSysNoGrade = $("#searchProductSysNoGrade").val();
+            var searchCustomerGrade = $("#searchCustomerGrade").val();
+            if (searchProductSysNoGrade!=""&&searchProductSysNoGrade!=searchProductSysNoTxt) {
+                $("#searchProductSysNo").val(searchProductSysNoGrade);
+            }
+            if (searchCustomerGrade != "" && searchCustomerGrade != searchCustomerTxt) {
+                $("#searchCustomerName").val(searchCustomerGrade);
+            }
+            
+        }
+
+        function searchProductComment() {
+            AjaxStart();
+            var searchCustomerName = $("#searchCustomerName").val().trim();
+            var searchProductSysNo = $("#searchProductSysNo").val();
+            var searchStaus = $("#searchStaus").val();
+            var searchIsBest = $("#searchIsBest").val();
+            var searchIsTop = $("#searchIsTop").val();
+            var beginDate = $("#beginDate").val();
+            var endDate = $("#endDate").val();
+            var search = { id: 1, customerName: ($.trim(searchCustomerName) != "" && searchCustomerName != searchCustomerTxt) ? searchCustomerName : null,
+                productSysNo: ($.trim(searchProductSysNo) != "" && searchProductSysNo != searchProductSysNoTxt) ? searchProductSysNo : null,
+                status: searchStaus,isBest:searchIsBest,isTop:searchIsTop,
+                beginDate:beginDate!=""?beginDate:null,endDate:endDate!=""?endDate:null};
+
+            $.get('/Front/FeProductComment/', search, function (data) {
+                $('#paging').html(data);
+                AjaxStop();
+            });
+        }
+    </script>
+}
+@using (Html.BeginForm("FeProductComment", "Front", FormMethod.Get, new { id = "form", aa = "" }))
+{
+    <!--高级搜索-->
+    <div class="search_box" id="JS_search">
+        <div class="search_title clearfix"><span class="f14 bold cf fl">高级查询</span><a href="javascript:;" class="fr" id="JS_search_nav">&times;</a> </div>
+        <div class="search_body">
+            <table width="100%">
+                <tr>
+                    <td width="25%" align="right">商品编号</td>
+                    <td width="75">
+                        <input name="searchProductSysNoGrade" type="text" id="searchProductSysNoGrade" class="wd156" value="请输入商品编号..." onblur=" searchChangeTwo() "/>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">会员名称</td>
+                    <td width="75">
+                        <input name="searchCustomerGrade" type="text" id="searchCustomerGrade" class="wd156" value="请输入会员名称..." onblur=" searchChangeTwo() "/>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">评论状态</td>
+                    <td width="75">
+                        <select id="status" name="status" class="wd170" onchange=" searchChangeTwo() ">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>) ViewBag.DictList)
+                                {
+                                    if (dict.Key == pending)
+                                    {
+                                        <option value="@dict.Key" selected="selected">@dict.Value</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">是否精华</td>
+                    <td width="75">
+                        <select id="searchIsBest" name="searchIsBest" class="wd170">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>) ViewBag.DictIsBest)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td width="25%" align="right">是否置顶</td>
+                    <td width="75">
+                        <select id="searchIsTop" name="searchIsTop" class="wd170">
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>) ViewBag.DictIsTop)
+                                {
+                                    <option value="@dict.Key">@dict.Value</option>
+                                }
+                            }
+                        </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">评论时间</td>
+                    <td>
+                        <div class="date_btn">
+                            <input type="text" id="beginDate" name="beginDate" class="input_ht26" onfocus=" var EndDate = $dp.$('endDate');UI.Date({ onpicked: function() { endDate.focus(); }, maxDate: '#F{$dp.$D(\'endDate\')}' }) ">
+                            <button title="日历" class="btn btn_ht26" onclick=" UI.Date({ el: 'beginDate' }) " type="button"><span class="icon_calendar"></span></button>
+                        </div>
+                    </td>
+                </tr>
+                <tr>
+                    <td align="right">&nbsp;</td>
+                    <td>
+                        <div class="date_btn">
+                            <input type="text" id="endDate" name="endDate" class="input_ht26" onfocus=" UI.Date({ minDate: '#F{$dp.$D(\'beginDate\')}' }) ">
+                            <button title="日历" class="btn btn_ht26" onclick=" UI.Date({ el: 'endDate' }) " type="button"><span class="icon_calendar"></span></button>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="search_foot">
+            <button title="开始查询" type="button" class="btn btn_blue btn_ht30 bold m10_r" onclick=" searchProductComment() ">开始查询</button><button title="清除条件" type="reset" class="btn btn_ht30 bold" id="JS_delete">清除条件</button>
+        </div>
+    </div>
+    <div class="case">
+        <div class="boxs">
+            <div class="boxs_tit head_m">
+                <h3>商品评论</h3>
+            </div>
+
+            <div class="boxs_con_c1">
+                <!--搜索-->
+                <div class="boxs_tool">
+                    <div class="right_tool">
+                        <span class="select_ht28 fl m3_t veralign_t">评论状态</span>
+
+                        <select class="select_ht28 fl m10_l m10_r" id="searchStaus" name="searchStaus" onchange=" searchStausChange() " >
+                            <option value="-1">全部</option>
+                            @{
+                                foreach (var dict in (IDictionary<int, string>) ViewBag.DictList)
+                                {
+                                    if (dict.Key == pending)
+                                    {
+                                        <option value="@dict.Key" selected="selected">@dict.Value</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@dict.Key">@dict.Value</option>
+                                    }
+                                }
+                            }
+
+                        </select>
+                        <span class="fl m3_t veralign_t">会员名称</span>
+                        <input class="wd130 input_ht28 m10_l fl m10_r" name="searchCustomerName" id="searchCustomerName" maxlength="100" type="text" value="请输入会员名称..." onblur=" searchChange() "/>
+
+                        <span class="fl m3_t veralign_t">商品编号</span>
+                        <input class="wd130 input_ht28 m10_l fl m10_r" name="searchProductSysNo" id="searchProductSysNo" maxlength="100" type="text" value="请输入商品编号..." onblur=" searchChange() "/>
+
+                        <button type="button" class="btn btn_ht28 fl" title="搜索" onclick=" searchProductComment() "><span class="icon_search"></span><span class="m5_l">搜索</span></button>
+                        <button type="button" id="searchProduct" title="高级搜索" class="btn btn_ht28 m10_l fl"><span class="icon_search"></span><span class="m5_l">高级搜索</span></button>
+                    </div>
+
+                    <div>
+                        <button type="button" class="btn btn_ht26 btn_blue FE1001003" onclick=" reply() "><span class="icon_tosee icon_white"></span><span class="m5_l">查看全部回复</span></button>
+                    </div>
+                </div>
+
+                <div class="boxs_list">
+                    <!--/表格列表区-->
+                    <div class="boxs_listtabel" id="paging">
+                        @{ Html.RenderPartial("_AjaxFeProductComment", Model); }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    UI.searchbox($("#searchProduct"), "#JS_search", $("#JS_search_nav"), $("#JS_delete"));
+</script>

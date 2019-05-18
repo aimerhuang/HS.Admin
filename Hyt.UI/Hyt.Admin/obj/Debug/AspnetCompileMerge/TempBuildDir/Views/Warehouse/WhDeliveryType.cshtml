@@ -1,0 +1,623 @@
+﻿@{
+
+    ViewBag.Title = "仓库配送方式关联设置";
+    @Html.PrivilegeControl(Hyt.Model.SystemPredefined.PrivilegeCode.WH1007201, ".WH1007201")
+}
+
+@section HeadCss{
+    <link href="@Url.Content("~/Theme/Plugins/ZTree/skin.css")" rel="stylesheet" type="text/css" media="all" />
+
+}
+
+@section HeadJs{
+    <script type="text/javascript" src="@Url.Content("~/Theme/Plugins/ZTree/ZTree.yui.js")"></script>
+    <script type="text/javascript" src="@Url.Content("~/Theme/scripts/jquery.validate.min.js")"></script>
+    <script type="text/javascript">
+        <!--
+    var ppp = '@ViewBag.HighPower';
+        var highpower = false;
+        if (ppp == "True" || ppp == "true")
+            highpower = true;
+        //字符串转换true false
+        var settingWarehouse = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomWarehouse,
+                selectedMulti: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            callback: {
+                onClick: TreeNodeOnClickWarehouse
+            }
+        };
+        var settingDelivery = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomDelivery,
+                selectedMulti: true,
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                }
+            },
+            check: {
+                enable: true,
+            },
+            callback: {
+                onClick: TreeNodeOnClickDelivery,
+                onCheck: TreeOnCheckDelivery
+            }
+        };
+
+        var settingFreightModule = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomDelivery,
+                selectedMulti: false,
+            },
+            data: {
+                simpleData: {
+                    enable: true,
+                }
+            },
+            check: {
+                enable: true,
+                chkStyle: "radio",
+                radioType: "all"
+            },
+            callback: {
+                onCheck: TreeNodeOnClickFreightModule
+            }
+        };
+
+        var settingPickUp = {
+            view: {
+                //addDiyDom: OnAddDiyTreeNodeDomDelivery,
+                selectedMulti: true,
+            },
+            data: {
+                simpleData: {
+                    enable: true
+                }
+            },
+            check: {
+                enable: true,
+            },
+            callback: {
+
+
+                //onClick: TreeNodeOnClickDelivery
+            }
+        };
+
+        //选中运费模板
+        function TreeNodeOnClickFreightModule(event, treeId, treeNode) {
+            var zTreePDelivery = myZTreeDelivery.getSelectedNodes();//获取选中的快递方式
+            var warehouse = myZTreeWarehouse.getSelectedNodes();//获取选中的仓库
+
+         
+            if (zTreePDelivery.length > 0 && warehouse.length>0) {
+                //更新关联的运费模板
+                $.get('@Url.Action("UpdateWarehouseDeliveryTypeAssoFreightModule", "Warehouse")',
+                    { warehouseSysNo: warehouse[0].id, deliveryTypeSysNo: zTreePDelivery[0].id, freightModuleSysNo: treeNode.checked?treeNode.id:0 },
+                    function (data) {
+                        if (!data.Status) {
+                            myZTreeFreightModule.checkNode(treeNode, false);
+                            UI.Alert({ content: "请先保存选中的仓库和配送方式" });
+                        }
+                    });
+            } else {
+                myZTreeFreightModule.checkNode(treeNode, false);
+            }
+        }
+        //清除已选中的运费模板
+        function ClearFreightModule()
+        {
+            var nodes = myZTreeDelivery.getNodes();//后去所有配送方式
+            for (var i = 0; i < nodes.length; i++) {
+                myZTreeFreightModule.checkNode(nodes[i], true);
+            }
+        }
+        //取消选中树节点
+        function CancelSelectedNode(_zTree) {
+            _zTree.cancelSelectedNode();
+        }
+        //选中配送方式
+        function TreeOnCheckDelivery(event, treeId, treeNode)
+        {
+            var warehouse = myZTreeWarehouse.getSelectedNodes();
+            if (warehouse.length == 0)
+                return;
+            // alert(treeNode.freightModuleSysNo)
+
+        
+            //更新关联的运费模板
+            $.get('@Url.Action("GetWarehouseDeliveryType", "Warehouse")',
+                { warehouseSysNo: warehouse[0].id,deliveryTypeSysNo:treeNode.id },
+                function (data) {
+
+                    data = JSON.parse(data);
+
+                    if (data.length > 0) {
+                        var zTreeAll = myZTreeFreightModule.transformToArray(myZTreeFreightModule.getNodes());
+                        for (var i = 0; i < zTreeAll.length; i++) {
+                            if (data[0].FreightModuleSysNo== zTreeAll[i].id) {
+                                myZTreeFreightModule.checkNode(zTreeAll[i],treeNode.checked?false:true);
+                            } else {
+                                myZTreeFreightModule.checkNode(zTreeAll[i], false);
+                            }
+                        }
+                    }
+                });
+
+        }
+        //点击配送方式
+        function TreeNodeOnClickDelivery(event, treeId, treeNode) {
+
+            var warehouse = myZTreeWarehouse.getSelectedNodes();
+
+            //判断点击的是不是叶子节点。如果不是叶子节点将不做任何操作
+            if ((treeNode.children != null && treeNode.children.length != 0)||warehouse.length==0) {
+               // myZTreeDelivery.expandNode(treeNode, true, true, true);
+                return;
+            }
+
+            //2,获取结果，更新右边树的checkbox选中状态。
+            $.get('@Url.Action("GetWarehouseDeliveryType", "Warehouse")',
+                { warehouseSysNo:warehouse[0].id,deliveryTypeSysNo:treeNode.id },
+                function (data) { //传递的字符串(,1,2,3,4,5,)
+                    data = JSON.parse(data);
+                    var zTreeAll = myZTreeFreightModule.transformToArray(myZTreeFreightModule.getNodes());
+                    for (var i = 0; i < zTreeAll.length; i++) {
+                        myZTreeFreightModule.checkNode(zTreeAll[i], false);
+                    }
+
+                    if (data.length > 0) {
+                       
+                        for (var i = 0; i < zTreeAll.length; i++) {
+                            if (data[0].FreightModuleSysNo == zTreeAll[i].id) {
+                                myZTreeFreightModule.checkNode(zTreeAll[i], true);
+                            } else {
+                                myZTreeFreightModule.checkNode(zTreeAll[i], false);
+                            }
+                        }
+                     
+                    }
+                });
+        }
+
+        var curSelectId = -1;
+        var isSave = false;
+        //避免多余的保存操作
+        //点击节点事件
+
+        function TreeNodeOnClickWarehouse(event, treeId, treeNode) {
+            CancelSelectedNode(myZTreeDelivery);
+
+            CancelSelectedNode(myZTreeFreightModule);
+            //判断点击的是不是叶子节点。如果不是叶子节点将不做任何操作
+            if (treeNode.children != null && treeNode.children.length != 0) {
+                myZTreeDelivery.expandNode(treeNode, true, true, true);
+                return;
+            }
+            ClearFreightModule(); //清除已选中的运费模板
+
+            //1,和上个不是选择同一节点，先保存上个修改。
+            if (treeNode.id == curSelectId)//选择的是同一节点
+                return;
+
+            if (curSelectId != -1) {
+                if (!isSave) {
+                    SubSave(false);
+                }
+            }
+            curSelectId = treeNode.id;
+            isSave = false;
+            //2,获取结果，更新右边树的checkbox选中状态。
+            $.get('@Url.Action("GetDeliveryType", "Warehouse")',
+                { WareHouseSysNo: treeNode.id },
+                function (data) { //传递的字符串(,1,2,3,4,5,)
+
+                    Disabled(false);
+                    var zTreeAll = myZTreeDelivery.transformToArray(myZTreeDelivery.getNodes());
+                    for (var i = 0; i < zTreeAll.length; i++) {
+                      
+                        if (data.indexOf("," + zTreeAll[i].id + ",") != -1) {                          
+                            myZTreeDelivery.checkNode(zTreeAll[i], true);
+                        } else {
+                            myZTreeDelivery.checkNode(zTreeAll[i], false);
+                        }
+                    }
+                 
+                    Disabled(true);
+                });
+
+            $.get('@Url.Action("GetPickUpType", "Warehouse")',
+                { whSysNo: treeNode.id },
+                function (data) { //传递的字符串(,1,2,3,4,5,)
+
+                    Disabled(false);
+                    var zTreeAll = myZTreePickUp.transformToArray(myZTreePickUp.getNodes());
+                    for (var i = 0; i < zTreeAll.length; i++) {
+                        if (data.indexOf("," + zTreeAll[i].id + ",") != -1) {
+                            myZTreePickUp.checkNode(zTreeAll[i], true);
+                        } else {
+                            myZTreePickUp.checkNode(zTreeAll[i], false);
+                        }
+                    }
+                    Disabled(true);
+                });
+        }
+
+        //权限区分设置是否可check
+
+        function Disabled(isDisabled) {
+ 
+            //权限不够的才需要
+            if (highpower) return;
+            var zTreeAllPickUp = myZTreePickUp.getNodes();
+            var zTreeAllDelivery = myZTreeDelivery.getNodes();
+            if (isDisabled) {
+                //加上不可用
+                //取件方式
+                for (var i = 0; i < zTreeAllPickUp.length; i++) {
+                    myZTreePickUp.setChkDisabled(zTreeAllPickUp[i], true, false, true);
+                }
+                //配送方式，只设前两个父节点
+                for (var i = 0; i < zTreeAllDelivery.length - 1; i++) {
+                    myZTreeDelivery.setChkDisabled(zTreeAllDelivery[i], true, false, true);
+                }
+            } else {
+                //取消不可用
+                //取件方式
+                for (var i = 0; i < zTreeAllPickUp.length; i++) {
+                    myZTreePickUp.setChkDisabled(zTreeAllPickUp[i], false, false, true);
+                }
+                //配送方式，只设前两个父节点
+                for (var i = 0; i < zTreeAllDelivery.length - 1; i++) {
+                    myZTreeDelivery.setChkDisabled(zTreeAllDelivery[i], false, false, true);
+                }
+            }
+
+
+        }
+
+        //保存按钮事件
+
+        function Save() {
+            if (curSelectId != -1) {
+                SubSave(true);
+            }
+        }
+
+        //重置
+
+        function Reset() {
+
+            if (curSelectId != -1) {
+                ClearFreightModule();
+                CancelSelectedNode(myZTreeDelivery);
+                CancelSelectedNode(myZTreeFreightModule);
+                //2,获取结果，更新右边树的checkbox选中状态。
+                $.get('@Url.Action("GetDeliveryType", "Warehouse")',
+                    { WareHouseSysNo: curSelectId },
+                    function (data) { //传递的字符串(,1,2,3,4,5,)
+                        Disabled(false);
+                        var zTreeAll = myZTreeDelivery.transformToArray(myZTreeDelivery.getNodes());
+                        for (var i = 0; i < zTreeAll.length; i++) {
+                            if (data.indexOf("," + zTreeAll[i].id + ",") != -1) {
+                                myZTreeDelivery.checkNode(zTreeAll[i], true);
+                            } else {
+                                myZTreeDelivery.checkNode(zTreeAll[i], false);
+                            }
+                        }
+                        Disabled(true);
+                        UI.Alert({ content: "重置完成", icon: "succeed" });
+                    });
+
+                $.get('@Url.Action("GetPickUpType", "Warehouse")',
+                    { whSysNo: curSelectId },
+                    function (data) { //传递的字符串(,1,2,3,4,5,)
+
+                        Disabled(false);
+                        var zTreeAll = myZTreePickUp.transformToArray(myZTreePickUp.getNodes());
+                        for (var i = 0; i < zTreeAll.length; i++) {
+                            if (data.indexOf("," + zTreeAll[i].id + ",") != -1) {
+                                myZTreePickUp.checkNode(zTreeAll[i], true);
+                            } else {
+                                myZTreePickUp.checkNode(zTreeAll[i], false);
+                            }
+                        }
+                        Disabled(true);
+                    });
+            } else {
+                UI.Alert({ content: "您还没有选择仓库" });
+            }
+            isSave = false;
+
+        }
+
+        //保存
+
+        function SubSave(isAlert) {
+            Disabled(false);
+            var zTreePre = myZTreeDelivery.getCheckedNodes(true); //getChangeCheckedNodes
+            var selectedId = "";
+            for (var i = 0; i < zTreePre.length; i++) {
+                selectedId += zTreePre[i].id + ",";
+            }
+            selectedId = selectedId.substr(0, selectedId.length - 1);
+
+            //Disabled(true);理论该有，实际没必要，因为读取的时候会重设为可用,有提示加上
+            var zTreePrePickUp = myZTreePickUp.getCheckedNodes(true);
+            var selectedIdPickup = "";
+            for (var i = 0; i < zTreePrePickUp.length; i++) {
+                selectedIdPickup += zTreePrePickUp[i].id + ",";
+            }
+            selectedIdPickup = selectedIdPickup.substr(0, selectedIdPickup.length - 1);
+            var freightModules=myZTreeFreightModule.getCheckedNodes(true);
+            var freightModuleSysNo=0;
+            if (freightModules.length > 0)
+                freightModuleSysNo = freightModules[0].id;
+
+
+
+            //仓库配送+取件方式
+            $.get('@Url.Action("SetWhDeliveryAndPickUp", "Warehouse")',
+                { whSysNo: curSelectId, deliveryTypeSysNo: selectedId, pickUpTypeSysNo: selectedIdPickup, freightModuleSysNo: freightModuleSysNo },
+                function (data) {
+                    if (data.IsLogout) {
+                        eval(data.Callback);
+                        return;
+                    }
+                    if (isAlert) {
+                        Disabled(true); //提示加上
+                        if (data) {
+                            isSave = true;
+                            UI.Alert({
+                                content: "保存成功", icon: "succeed",
+                            });
+                        } else {
+                            UI.Alert({ content: "保存失败" });
+                        }
+                    }
+                });
+        }
+
+        var myZTreeWarehouse, myZTreeDelivery, myZTreePickUp, myZTreeFreightModule;
+
+        //初始化ZTree
+
+        function InitZTreeWarehouse() {
+            markObject = $("#divall");
+            $.ajax({
+                url: '@Url.Action("GetWarehouseZTreeList", "Warehouse")',
+                data: {
+                    all: true
+                },
+                success:
+                    function (response) {
+                        if (response != null) {
+
+                            //更具返回结果初始化zTree
+                            myZTreeWarehouse = $.fn.zTree.init($("#warehouseCatetoryTree"),
+                                settingWarehouse,
+                                response);
+
+                            //展开所有节点
+                            myZTreeWarehouse.expandAll(true);
+                        }
+
+                    },
+
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+
+            });
+
+            }
+
+            function InitZTreeDelivery() {
+                markObject = $("#divall");
+                $.ajax({
+                    url: '@Url.Action("GetDeliveryTypeZTreeList", "Warehouse")',
+                    data: { all: true },
+                    success: function (response) {
+                        if (response != null) {
+
+                            //更具返回结果初始化zTree
+                            myZTreeDelivery = $.fn.zTree.init($("#deliveryCatetoryTree"),
+                                settingDelivery,
+                                response);
+
+                            //展开所有节点
+                            myZTreeDelivery.expandAll(true);
+
+                        }
+
+                    },
+                    error:
+                        function (httpRequest, txtStatus, error) {
+                            //失败处理逻辑
+                            alert(error);
+                        }
+                });
+
+            }
+
+            function InitZTreeFreightModuleTree() {
+                markObject = $("#divall");
+                $.ajax({
+                    url: '@Url.Action("GetFreightModuleZTreeList", "Warehouse")',
+                    data: { all: true },
+                    success: function (response) {
+                        if (response != null) {
+
+                            //更具返回结果初始化zTree
+                            myZTreeFreightModule = $.fn.zTree.init($("#freightModuleTree"),
+                                settingFreightModule,
+                                response);
+
+                            //展开所有节点
+                            myZTreeFreightModule.expandAll(true);
+
+                        }
+
+                    },
+                    error:
+                        function (httpRequest, txtStatus, error) {
+                            //失败处理逻辑
+                            alert(error);
+                        }
+                });
+            }
+
+            function InitZTreePickUp() {
+                markObject = $("#divall");
+                $.ajax({
+                    url: '@Url.Action("GetPickUpTypeZTreeList", "Warehouse")',
+                data: { all: true },
+                success: function (response) {
+                    if (response != null) {
+
+                        //更具返回结果初始化zTree
+                        myZTreePickUp = $.fn.zTree.init($("#pickUpCatetoryTree"),
+                            settingPickUp,
+                            response);
+
+                        //展开所有节点
+                        myZTreePickUp.expandAll(true);
+
+                    }
+
+                },
+                error:
+                    function (httpRequest, txtStatus, error) {
+                        //失败处理逻辑
+                        alert(error);
+                    }
+            });
+        }
+
+        var markObject;
+        //AjaxLoader的mark对象
+
+        //设置AjaxLoader
+
+        function InitAjaxLoading() {
+
+            //AjaxLoader 设置遮罩层
+            var ajaxLoadingMask;
+            $(document).ajaxStart(function () {
+                ajaxLoadingMask = UI.Mask({
+                    obj: $(markObject),
+                    zindex: 1000
+                });
+            });
+
+            $(document).ajaxStop(function () {
+                if (ajaxLoadingMask != null && $.isFunction(ajaxLoadingMask.Remove)) {
+                    ajaxLoadingMask.Remove();
+                }
+            });
+        }
+
+        //自举函数
+        $(document).ready(function () {
+            $("#treePanelDelivery").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelWarehouse").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelPickUp").css("height", $(window.parent.document).height() - 286 + "px");
+            $("#treePanelFreightModule").css("height", $(window.parent.document).height() - 286 + "px");
+            //统一实现AjaxLoader
+            InitAjaxLoading();
+
+            //初始化树
+            InitZTreeWarehouse();
+            InitZTreeDelivery();
+            InitZTreeFreightModuleTree();
+            InitZTreePickUp();
+        });
+
+    </script>
+
+}
+
+
+
+<div class="case commodity_sortmanage" id="divall">
+    <!--divleft-->
+    <div class="clearfix" style="position: relative; padding-right: 660px; overflow: hidden;">
+
+        <div class="" id="divleft" style="float: left; width: 250px;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleWarehouse" class="boxs_tit head_m">
+                    <h3>仓库</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelWarehouse" class="left p5" style="overflow: auto;">
+                        <ul id="warehouseCatetoryTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!--divmid-->
+        <div class="m5_l" id="divmid" style="width: 250px; position: absolute; float: left; left: 250px; ">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleDelivery" class="boxs_tit head_m">
+                    <h3>配送方式</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelDelivery" class="left p5" style="overflow: auto;">
+                        <ul id="deliveryCatetoryTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="m5_l" id="divmid" style="float: left; width: 300px; position: absolute; left: 505px; ">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitleFreightModule" class="boxs_tit head_m">
+                    <h3>运费模板</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelFreightModule" class="left p5" style="overflow: auto;">
+                        <ul id="freightModuleTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!--divright-->
+        <div class="m5_l" id="divright" style="float: left; width: 100%; position: absolute; left: 811px;">
+            <div class="boxs">
+                <!--有导航条时-->
+                <div id="treeTitlePickUp" class="boxs_tit head_m">
+                    <h3>取件方式</h3>
+                </div>
+                <div class="comp5" style="padding: 0;">
+                    <div id="treePanelPickUp" class=" left p5" style="overflow: auto;">
+                        <ul id="pickUpCatetoryTree" class="ztree"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!--提交按钮-->
+    <div class="pagination align_c clearfix " id="btn_Panel" style="margin-top: 5px; border: 1px solid #C1C1C1;">
+        <button id="btn_Save" class="btn btn_blue btn_ht28 wd70 bold f14 m5_r WH1007201" onclick="Save()">保存</button>
+        <button id="btn_Reset" class="btn btn_blue btn_ht28 wd70 bold f14 m5_r WH1007201" onclick="Reset()">重置</button>
+    </div>
+    <!-- test end -->
+</div>
+

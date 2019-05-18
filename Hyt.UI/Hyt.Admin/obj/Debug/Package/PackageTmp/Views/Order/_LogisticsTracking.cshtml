@@ -1,0 +1,30 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@model Hyt.Model.Result<string>
+
+<link href='@Url.Content("~/Theme/css/tips.css")' rel="stylesheet" type="text/css" media="all" />
+
+<script type="text/javascript" src="~/Theme/scripts/UI.yui.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+<script src="/Theme/Plugins/Upload/jquery.uploadify.min.js"></script>
+<script src="~/Theme/scripts/Logistics.js"></script>
+@*<script type="text/javascript">
+    $(function () {
+        $("#tbody").html('@Html.Raw(Model.Data)');
+    });
+</script>*@
+
+<div class="caseout">
+    <div style="border:1px solid #C9C9C9;">
+        <div style="padding-left:5px;" id="cn_transfer_company"></div><div style="padding-left: 5px; border-bottom: 1px solid #C9C9C9;" id="cn_transfer_no"></div>
+        <table width="100%" cellspacing="0" cellpadding="5">
+            <tbody id="tbody"></tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+    _logistics.LogisticsLocusHtml('@Request["orderId"]',"#tbody",'@ViewBag.Logistics');
+</script>
+@*<input type="hidden" id="OutboundOrderNo" value="@ViewBag.OutboundOrderNo" />*@

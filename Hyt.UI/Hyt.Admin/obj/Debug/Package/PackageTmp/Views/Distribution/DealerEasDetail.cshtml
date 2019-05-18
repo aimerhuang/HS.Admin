@@ -1,0 +1,163 @@
+﻿@using Hyt.Admin.Controllers
+@using Hyt.Model.SystemPredefined
+@model Hyt.Model.DsEasAssociation
+@{
+    ViewBag.Title = "DealerEasDetail";
+    @Html.PrivilegeControl(PrivilegeCode.DS100902, ".DS100902")
+    @Html.PrivilegeControl(PrivilegeCode.DS100903, ".DS100903")
+}
+@helper LoadMallAll()
+{
+    var list = ViewBag.DsMallAll as List<SelectListItem>;
+    if (list != null && list.Count > 0)
+    {
+    @list.SelectItemListToString(i=>Model != null && i.Value == Model.DealerMallSysNo.ToString(), null)
+    }
+}
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/Utils.yui.js")"></script>
+
+<link href="~/Theme/css/tips.css" rel="stylesheet" type="text/css" media="all" />
+<!--这里是控制开发票点击后控制后面那两个的显示与隐藏-->
+<script type="text/javascript" src="~/Theme/scripts/search.js"></script>
+<script type="text/javascript" src="~/Theme/scripts/jquery.validate.min.js"></script>
+<script type="text/javascript" src="@Url.Content("~/Theme/scripts/tips.js")"></script>
+
+<form id="form1" method="post">
+    <div class="caseout">
+        <div class="boxs_detail_dispay">
+            <div class="tit_con">
+                <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                    <tbody>
+                        @if (Model != null)
+                        {
+                            <tr>
+                                <td  class="nameright border_rnone">系统编号</td>
+                                <td>
+                                    @Model.SysNo
+                                    <input type="hidden" id="SysNo" @if (Model != null)
+                                           {
+                                            @:value="@Model.SysNo"
+                                           }
+                                           else
+                                           {
+                                            @:value="0"
+                                           } />
+                                </td>
+                            </tr>
+                        }
+                        <tr>
+                            <td width="20%" class="nameright border_rnone">分销商商城</td>
+                            <td width="80%">
+                                @if (Model != null)
+                                {
+                                    <span>@ViewBag.DsMallName</span>
+                                    <input type="hidden" value="@Model.DealerMallSysNo" item="DealerMallSysNo" />
+                                }
+                                else
+                                {
+                                    <select item="DealerMallSysNo" id="DealerMallSysNo" name="address" class="c3 wd230 m5_r">
+                                        @LoadMallAll()
+                                    </select>
+                                    <span id="c_DealerMallSysNo" class="prompt m10_l">请选择分销商商城</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">卖家昵称</td>
+                            <td>
+                                @if (Model != null)
+                                {
+                                    <span>@Model.SellerNick</span>
+                                    <input type="hidden" value="@Model.SellerNick" item="SellerNick" />
+                                }
+                                else
+                                {
+                                    <input type="text" maxlength="50" class="wd120" id="SellerNick" name="SellerNick" item="SellerNick" value = "" />
+                                    <span id="c_SellerNick" class="prompt m10_l">请输入卖家昵称</span>
+                                }
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone">EAS编号</td>
+                            <td>
+                                <input maxlength="20" type="text" id="Code" name="Code" class="wd120" item="Code" @if (Model != null)
+                                                                                                                  {
+                                                                                                                      @:value = "@Model.Code"
+                                                                                                                  } />
+                                <span id="c_Code" class="prompt m10_l">请输入EAS编号</span></td>
+                        </tr>
+                        <tr>
+                            <td class="nameright border_rnone" valign="top">状态</td>
+                            <td>
+                                <input id="statusY" name="Status" type="radio" value="1" @if (Model == null || Model.Status == 1)
+                                                                                                       {   @:checked="checked"
+                                                                                                       }  />
+                                <label for="statusY" style="display:inline;font-size:12px;"> 启用</label>
+                                &nbsp;&nbsp;&nbsp;
+                                <input id="statusN" name="Status" type="radio" value="0" @if (Model != null && Model.Status == 0)
+                                                                                                       {@:checked="checked"
+                                                                                                       } />
+                                <label for="statusN" style="display:inline;font-size:12px;"> 禁用</label>
+                            </td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    var setting;
+    //表单验证配置对象
+    //加载验证规则
+    function LoadRule() {
+        setting = $("#form1").validate({
+            onclick: false,
+            onkeyup: false,
+            rules: {
+                DealerMallSysNo: { required: true },
+                SellerNick: { required: true },
+                Code: { required: true }
+            },
+            errorPlacement: function (error, el) {
+                $('#c_' + el.attr('id')).removeClass('success').addClass('error');
+            },
+            success: function (label, el) {
+                $('#c_' + el.attr('id')).removeClass('error').addClass('success');
+            }
+        });
+    }
+    $(document).ready(function () {
+        LoadRule();
+    });
+    //确认事件，名称不可变
+    function CallBack(from) {
+        if (!setting.form()) {
+            return false;
+        } else {
+            save(from);
+        }
+    }
+    
+    //保存
+    function save() {
+        Ajax.post("/Distribution/Save", "item", function(p) {
+            p.setParams("SysNo", $('#SysNo').val());
+            p.setParams("Status", $('input:radio[name="Status"]:checked').val());
+        }, function(data) {
+            if (!data.Status)
+                UI.Alert({ content: data.Message });
+            else {
+                Utils.alert("提交成功", function () {
+                   UI.Dialog.opener._EasCallBack();
+                   UI.CloseDialog();
+                }, "succeed");
+            }
+
+
+        });
+    }
+</script>
